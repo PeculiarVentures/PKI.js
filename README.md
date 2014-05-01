@@ -8,7 +8,7 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
 
 ## Numbers behind the library
 
-* More than 10 000 lines of code and comments;
+* More than 16 000 lines of code and comments ([PKIjs][] library + [ASN1js][] library);
 * More than 50 specialized pre-defined ASN.1 schemas;
 * More than 50 specialized "helpers" working with almost all internal data (for example "GeneralName" type, all X.509 certificate extensions types, "revoked certificates" type etc.);
 * All that you need to work with all four major parts of PKI: X.509 data, CMS data, OCSP data, Time-stamping data;
