@@ -8,24 +8,24 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
 
 ## Numbers behind the library
 
-* More than 16 000 lines of code and comments ([PKIjs][] library + [ASN1js][] library);
-* More than 50 specialized pre-defined ASN.1 schemas;
-* More than 50 specialized "helpers" working with almost all internal data (for example "GeneralName" type, all X.509 certificate extensions types, "revoked certificates" type, etc.);
-* Everything that you need to work with all five major parts of PKI: X.509, PKCS#10, CMS, OCSP, Time-stamping;
+* More than 16 000 lines of code and comments ([PKIjs][] library + [ASN1js][] library).
+* More than 50 specialized pre-defined ASN.1 schemas.
+* More than 50 specialized "helpers" working with almost all internal data (for example "GeneralName" type, all X.509 certificate extensions types, "revoked certificates" type, etc.).
+* Everything that you need to work with all five major parts of PKI: X.509, PKCS#10, CMS, OCSP, Time-stamping.
 
 ## Features of the library
 
-* Fully object-oriented library. Inhiritence is using everywhere inside the lib;
-* Working with HTML5 data objects (ArrayBuffer, Uint8Array, Promises, WebCrypto, etc.); 
+* Fully object-oriented library. Inhiritence is using everywhere inside the lib;.
+* Working with HTML5 data objects (ArrayBuffer, Uint8Array, Promises, WebCrypto, etc.).
 * Has a complete set of helpers for working with types like:
   * GeneralName;
   * RelativeDistinguishedName;
   * Time;
   * AlgorithmIdentifier;
   * All types of ASN.1 strings, including "international" like UniversalString, UTF8String and BMPString (with help from [ASN1js][]);
-  * All extension types of X.509 certificates (BasicConstraints, CertificatePolicies, AuthorityKeyIdentifier etc.);
+  * All extension types of X.509 certificates (BasicConstraints, CertificatePolicies, AuthorityKeyIdentifier etc.)
   * All "support types" for OCSP requests and responces;
-  * All "support types" for Time-Stamping Protocol (TSP) requests and responces;
+  * All "support types" for Time-Stamping Protocol (TSP) requests and responces.
 * Working with all major PKI-related types ("minor" types are not mentioned here but there are huge number of such "minor types"):
   * X.509 certificates:
     * Parsing internal values;
