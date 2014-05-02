@@ -27,41 +27,41 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
   * All "support types" for OCSP requests and responces;
   * All "support types" for Time-Stamping Protocol (TSP) requests and responces;
 * Working with all major PKI-related types ("minor" types are not mentioned here but there are huge number of such "minor types"):
-  * X.509 certificates;
+  * X.509 certificates:
     * Parsing internal values;
     * Getting/setting any internal values;
     * Creatiion of a new X.509 certificate "from scratch";
-    * Internal certificate chain validation engine;
-  * X.509 "certificate revocation lists" (CRLs);
+    * Internal certificate chain validation engine.
+  * X.509 "certificate revocation lists" (CRLs):
     * Parsing internal values;
     * Getting/setting any internal values;
     * Creation of a new CRL "from scratch";
     * Validation of CRL signature;
-    * Search inside CRL for specific revoked certificate;
-  * PKCS#10 certificate request;
+    * Search inside CRL for specific revoked certificate.
+  * PKCS#10 certificate request:
     * Parsing internal values;
     * Getting/setting any internal values;
     * Creation of a new PKCS#10 certificate request "from scratch";
     * Validation of PKCS#10 signature;
-  * OCSP request;
+  * OCSP request:
     * Parsing internal values;
     * Getting/setting any internal values;
-    * Creation of a new OCSP request "from scratch";
-  * OCSP response;
+    * Creation of a new OCSP request "from scratch".
+  * OCSP response:
     * Parsing internal values;
     * Getting/setting any internal values;
     * Creation of a new OCSP response "from scratch";
-    * Validation of OCSP response signature;
-  * Time-stamping request;
+    * Validation of OCSP response signature.
+  * Time-stamping request:
     * Parsing internal values;
     * Getting/setting any internal values;
     * Creation of a new Time-stamping request "from scratch";
-    * Validation of Time-stamping request signature;
-  * Time-stamping response;
+    * Validation of Time-stamping request signature.
+  * Time-stamping response:
     * Parsing internal values;
     * Getting/setting any internal values;
     * Creation of a new Time-stamping response "from scratch";
-    * Validation of Time-stamping response signature;
+    * Validation of Time-stamping response signature.
 
 ## Examples
 
