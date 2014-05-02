@@ -1,23 +1,23 @@
 # PKI.js
 
-Public Key Infrastructure (PKI) is the basis of how identity and key management is performed on the web today. PKI.js is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto (and PolyCrypt at this time) and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins.
+Public Key Infrastructure (PKI) is the basis of how identity and key management is performed on the web today. PKI.js is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins.
 
 ## Introduction
 
-[PKIjs][] library made in order to help people deal with (sometimes) complecated world of PKI-related data. For the moment it is quite easy to create a simple signature but hard to create PKCS#7 output file. Easy to read X.509 certificate from disc but hard to get internal certificate values. [PKIjs][] library will help everyone in all above case and in many-many others. [PKIjs][] has a layered internal structure and could be easily extended by a user. There are many examples of using [PKIjs][] and amount of examples will grow.
+[PKIjs][] library made in order to help people deal with (sometimes) complecated world of PKI-related data. For the moment it is quite easy to create a simple signature but hard to create PKCS#7 encoded signature. Easy to read a X.509 certificate but hard to parse values within it. [PKIjs][] library will help all web applications (and chrome plug-ins) acomplish these and many other things. [PKIjs][] was designed in such a way to make it easy to extended by users through a use of layered internal structures. There are many examples of using [PKIjs][] and the number of examples will grow.
 
 ## Numbers behind the library
 
 * More than 16 000 lines of code and comments ([PKIjs][] library + [ASN1js][] library);
 * More than 50 specialized pre-defined ASN.1 schemas;
-* More than 50 specialized "helpers" working with almost all internal data (for example "GeneralName" type, all X.509 certificate extensions types, "revoked certificates" type etc.);
-* All that you need to work with all four major parts of PKI: X.509 data, CMS data, OCSP data, Time-stamping data;
+* More than 50 specialized "helpers" working with almost all internal data (for example "GeneralName" type, all X.509 certificate extensions types, "revoked certificates" type, etc.);
+* Everything that you need to work with all five major parts of PKI: X.509, PKCS#10, CMS, OCSP, Time-stamping;
 
 ## Features of the library
 
 * Fully object-oriented library. Inhiritence is using everywhere inside the lib;
-* Working with HTML5 data objects (ArrayBuffer, Uint8Array, Promises, WebCrypto etc.); 
-* Has a greate helpers for all neccessary types like:
+* Working with HTML5 data objects (ArrayBuffer, Uint8Array, Promises, WebCrypto, etc.); 
+* Has a complete set of helpers for working with types like:
   * GeneralName;
   * RelativeDistinguishedName;
   * Time;
@@ -165,8 +165,9 @@ More examples could be found in "examples" folder.
 
 ## Limitations
 
-* Currently (April 2014) there is no support for PKCS#12 data, coming soon;
-* Currently (April 2014) there is no full support for CMS Enveloped Data. The data type can be parsed and encoded back to binary data, but there is no functions working with key agreement and encryption. Coming soon;
+* Does not work with Internet Explorer's implementation of WebCrypto it is based on a old draft and also does not support all needed capabilities.
+* Does not work with PolyCrypt it is based on a old version of WebCrypto and is buggy.
+* Basically at this time it only works on Chrome developer channel builds
 
 ## Suitability
 At this time this library should be considered suitable for research and experimentation, futher code and security review is needed before utilization in a production application.
