@@ -168,6 +168,9 @@ More examples could be found in "examples" folder.
 * Currently (April 2014) there is no support for PKCS#12 data, coming soon;
 * Currently (April 2014) there is no full support for CMS Enveloped Data. The data type can be parsed and encoded back to binary data, but there is no functions working with key agreement and encryption. Coming soon;
 
+## Suitability
+At this time this library should be considered suitable for research and experimentation, futher code and security review is needed before utilization in a production application.
+
 ## License
 
 Copyright (c) 2014, [GMO GlobalSign](http://www.globalsign.com/)
