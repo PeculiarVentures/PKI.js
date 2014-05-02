@@ -167,7 +167,7 @@ More examples could be found in "examples" folder.
 
 * Does not work with Internet Explorer's implementation of WebCrypto it is based on a old draft and also does not support all needed capabilities.
 * Does not work with PolyCrypt it is based on a old version of WebCrypto and is buggy.
-* Basically at this time it only works on Chrome developer channel builds
+* Basically at this time it only works on Chrome developer channel builds.
 
 ## Suitability
 At this time this library should be considered suitable for research and experimentation, futher code and security review is needed before utilization in a production application.
