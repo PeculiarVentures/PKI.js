@@ -4,11 +4,11 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
 
 ## Introduction
 
-[PKIjs][] library made in order to help people deal with (sometimes) complecated world of PKI-related data. For the moment it is quite easy to create a simple signature but hard to create PKCS#7 encoded signature. Easy to read a X.509 certificate but hard to parse values within it. [PKIjs][] library will help all web applications (and chrome plug-ins) acomplish these and many other things. [PKIjs][] was designed in such a way to make it easy to extended by users through a use of layered internal structures. There are many examples of using [PKIjs][] and the number of examples will grow.
+[PKI.js][] library made in order to help people deal with (sometimes) complecated world of PKI-related data. For the moment it is quite easy to create a simple signature but hard to create PKCS#7 encoded signature. Easy to read a X.509 certificate but hard to parse values within it. [PKI.js][] library will help all web applications (and chrome plug-ins) acomplish these and many other things. [PKI.js][] was designed in such a way to make it easy to extended by users through a use of layered internal structures. There are many examples of using [PKI.js][] and the number of examples will grow.
 
 ## Numbers behind the library
 
-* More than 16 000 lines of code and comments ([PKIjs][] library + [ASN1js][] library);
+* More than 16 000 lines of code and comments ([PKI.js][] library + [ASN1.js][] library);
 * More than 50 specialized pre-defined ASN.1 schemas;
 * More than 50 specialized "helpers" working with almost all internal data (for example "GeneralName" type, all X.509 certificate extensions types, "revoked certificates" type, etc.);
 * Everything that you need to work with all five major parts of PKI: X.509, PKCS#10, CMS, OCSP, Time-stamping;
