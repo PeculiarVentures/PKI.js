@@ -172,6 +172,12 @@ More examples could be found in "examples" folder.
 ## Suitability
 At this time this library should be considered suitable for research and experimentation, futher code and security review is needed before utilization in a production application.
 
+## Related source code
+
+* [ASN1js project](https://github.com/GlobalSign/ASN1.js) - in fact [PKIjs][] will not work without [ASN1js][], it's neccessary part of the [PKIjs][] project;
+* [C++ ASN1:2008 BER coder/decoder](https://github.com/YuryStrozhevsky/C-plus-plus-ASN.1-2008-coder-decoder) - the "father" of [ASN1js][] project;
+* [Freely available ASN.1:2008 test suite](https://github.com/YuryStrozhevsky/ASN1-2008-free-test-suite) - the suite which can help you to validate (and better understand) any ASN.1 coder/decoder;
+
 ## License
 
 Copyright (c) 2014, [GMO GlobalSign](http://www.globalsign.com/)
