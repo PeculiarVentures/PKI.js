@@ -26,6 +26,7 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
   * All extension types of X.509 certificates (BasicConstraints, CertificatePolicies, AuthorityKeyIdentifier etc.)
   * All "support types" for OCSP requests and responces;
   * All "support types" for Time-Stamping Protocol (TSP) requests and responces.
+* Has own certification chain verification engine, purelly made on JavaScript with help from Promises and WebCrypto latest standard implementation;
 * Working with all major PKI-related types ("minor" types are not mentioned here but there are huge number of such "minor types"):
   * X.509 certificates:
     * Parsing internal values;
