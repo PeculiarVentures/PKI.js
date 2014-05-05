@@ -66,14 +66,14 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
 
 ## Examples
 
-```
+```javascript
             // #region Parsing raw data as a X.509 certificate object
             var asn1 = org.pkijs.fromBER(buffer);
             var cert_simpl = new org.pkijs.simpl.CERT({ schema: asn1.result });
             // #endregion
 ```
 
-```
+```javascript
             // #region Creation of a new X.509 certificate
             cert_simpl.serialNumber = new org.pkijs.asn1.INTEGER({ value: 1 });
             cert_simpl.issuer.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
@@ -134,7 +134,7 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
             // #endregion 
 ```
 
-```
+```javascript
         // #region Creation of a new CMS Signed Data 
         cms_signed_simpl = new org.pkijs.simpl.CMS_SIGNED_DATA({
             digestAlgorithms: [
