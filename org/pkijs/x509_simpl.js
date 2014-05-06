@@ -4123,7 +4123,7 @@ function(in_window)
                         {
                             if(_this.trusted_certs.length !== 0)
                             {
-                                certs.concat(_this.trusted_certs);
+                                certs = _this.trusted_certs.splice(0);
                                 current_certificate = certs[0];
                                 return outer();
                             }
