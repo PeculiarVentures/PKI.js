@@ -3763,15 +3763,20 @@ function(in_window)
     function()
     {
         // #region Internal properties of the object 
-        this.certs = new Array(); // Array of "simpl.CERT"
-        this.crls = new Array(); // Array of "simpl.CRL"
+        /// <field name="trusted_certs" type="Array" elementType="in_window.org.pkijs.simpl.CERT">Array of pre-defined trusted (by user) certificates</field>
+        this.trusted_certs = new Array();
+        /// <field name="certs" type="Array" elementType="in_window.org.pkijs.simpl.CERT">Array with certificate chain. Could be only one end-user certificate in there!</field>
+        this.certs = new Array(); 
+        /// <field name="crls" type="Array" elementType="in_window.org.pkijs.simpl.CRL">Array of all CRLs for all certificates from certificate chain</field>
+        this.crls = new Array(); 
         // #endregion 
 
         // #region Initialize internal properties by input values
         if(arguments[0] instanceof Object)
         {
-            this.certs = arguments[0].certs || new Array(); // Array of "simpl.CERT"
-            this.crls = arguments[0].crls || new Array(); // Array of "simpl.CRL"
+            this.trusted_certs = arguments[0].trusted_certs || new Array();
+            this.certs = arguments[0].certs || new Array();
+            this.crls = arguments[0].crls || new Array();
         }
         // #endregion 
     }
@@ -3782,16 +3787,18 @@ function(in_window)
         // #region Initial variables 
         /// <var type="Array" elementType="in_window.org.pkijs.simpl.CERT">Array of sorted certificates</var>
         var sorted_certs = new Array();
+
         /// <var type="Array" elementType="in_window.org.pkijs.simpl.CERT">Initial array of certificates</var>
-        var certs = this.certs;
-        /// <var type="Array" elementType="in_window.org.pkijs.simpl.CRL">Array of CRLs for all certificates</var>
-        var crls = this.crls;
+        var certs = this.certs.slice(0); // Explicity copy "this.certs"
+
         /// <var type="Date">Date for checking certificate validity period</var>
         var check_date = new Date();
+
+        var _this = this;
         // #endregion 
 
         // #region Initial checks 
-        if((certs.length === 0) || (crls.length === 0))
+        if((certs.length === 0) || (_this.crls.length === 0))
             return new Promise(function(resolve, reject)
             {
                 reject({
@@ -3959,16 +3966,16 @@ function(in_window)
             // #region Find correct CRL for "issuer_certificate" 
             function find_crl(index)
             {
-                return crls[index].verify({ issuerCertificate: issuer_certificate }).then(
+                return _this.crls[index].verify({ issuerCertificate: issuer_certificate }).then(
                     function(result)
                     {
                         if(result === true)
-                            return new Promise(function(resolve, reject) { resolve(crls[index]); });
+                            return new Promise(function(resolve, reject) { resolve(_this.crls[index]); });
                         else
                         {
                             index++;
 
-                            if(index < crls.length)
+                            if(index < _this.crls.length)
                                 return find_crl(index);
                             else
                                 return new Promise(function(resolve, reject)
@@ -4040,59 +4047,103 @@ function(in_window)
                     if(certs.length > 0)
                         return outer();
                     else
-                        return (current_certificate.verify()).then( // Verifing last, self-signed certificate
-                            function(result)
+                    {
+                        if(current_certificate.issuer.isEqual(current_certificate.subject) === true)
+                        {
+                            // #region Check that the "self-signed" certificate there is in "trusted_certs" array 
+                            var found = (_this.trusted_certs.length === 0) ? true : false; // If user did not set "trusted_certs" then we have an option to trust any self-signed certificate as root
+
+                            for(var i = 0; i < _this.trusted_certs.length; i++)
                             {
-                                if(result === true)
-                                    return basic(current_certificate, current_certificate).then(
-                                        function()
-                                        {
-                                            return new Promise(function(resolve, reject) { resolve(sorted_certs); });
-                                        },
-                                        function(error)
-                                        {
-                                            return new Promise(function(resolve, reject)
-                                            {
-                                                reject({
-                                                    result: false,
-                                                    result_code: 12,
-                                                    result_message: error
-                                                });
-                                            });
-                                        }
-                                        );
-                                else
-                                    return new Promise(function(resolve, reject)
-                                    {
-                                        reject({
-                                            result: false,
-                                            result_code: 13,
-                                            result_message: "Unable to build certificate chain"
-                                        });
-                                    });
-                            },
-                            function(error)
-                            {
+                                if((current_certificate.issuer.isEqual(_this.trusted_certs[i].issuer) === true) &&
+                                   (current_certificate.subject.isEqual(_this.trusted_certs[i].subject) === true) &&
+                                   (current_certificate.serialNumber.isEqual(_this.trusted_certs[i].serialNumber) === true))
+                                {
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if(found === false)
                                 return new Promise(function(resolve, reject)
                                 {
                                     reject({
                                         result: false,
-                                        result_code: 14,
-                                        result_message: error
+                                        result_code: 22,
+                                        result_message: "Self-signed root certificate not in \"trusted certificates\" array"
                                     });
                                 });
+                            // #endregion 
+
+                            return (current_certificate.verify()).then( // Verifing last, self-signed certificate
+                                function(result)
+                                {
+                                    if(result === true)
+                                        return basic(current_certificate, current_certificate).then(
+                                            function()
+                                            {
+                                                return new Promise(function(resolve, reject) { resolve(sorted_certs); });
+                                            },
+                                            function(error)
+                                            {
+                                                return new Promise(function(resolve, reject)
+                                                {
+                                                    reject({
+                                                        result: false,
+                                                        result_code: 12,
+                                                        result_message: error
+                                                    });
+                                                });
+                                            }
+                                            );
+                                    else
+                                        return new Promise(function(resolve, reject)
+                                        {
+                                            reject({
+                                                result: false,
+                                                result_code: 13,
+                                                result_message: "Unable to build certificate chain"
+                                            });
+                                        });
+                                },
+                                function(error)
+                                {
+                                    return new Promise(function(resolve, reject)
+                                    {
+                                        reject({
+                                            result: false,
+                                            result_code: 14,
+                                            result_message: error
+                                        });
+                                    });
+                                }
+                                );
+                        }
+                        else // In case if self-signed cert for the chain in the "trusted_certs" array
+                        {
+                            if(_this.trusted_certs.length !== 0)
+                            {
+                                certs.concat(_this.trusted_certs);
+                                current_certificate = certs[0];
+                                return outer();
                             }
-                            );
+                            else
+                                return new Promise(function(resolve, reject)
+                                {
+                                    reject({
+                                        result: false,
+                                        result_code: 23,
+                                        result_message: "No self-signed certificate found"
+                                    });
+                                });
+                        }
+                    }
                 },
                 function(error)
                 {
                     return new Promise(function(resolve, reject)
                     {
-                        reject({
-                            result: false,
-                            result_code: 15,
-                            result_message: error
-                        });
+                        reject(error);
                     });
                 }
                 );
