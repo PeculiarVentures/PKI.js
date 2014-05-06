@@ -4630,17 +4630,17 @@ function(in_window)
                             if(_this.certs[i].extensions[j].extnID === "2.5.29.30")
                             {
                                 if("permittedSubtrees" in _this.certs[i].extensions[j].parsedValue)
-                                    cert_permitted_subtrees.concat(_this.certs[i].extensions[j].parsedValue.permittedSubtrees);
+                                    cert_permitted_subtrees = cert_permitted_subtrees.concat(_this.certs[i].extensions[j].parsedValue.permittedSubtrees);
 
                                 if("excludedSubtrees" in _this.certs[i].extensions[j].parsedValue)
-                                    cert_excluded_subtrees.concat(_this.certs[i].extensions[j].parsedValue.excluded_subtrees);
+                                    cert_excluded_subtrees = cert_excluded_subtrees.concat(_this.certs[i].extensions[j].parsedValue.excluded_subtrees);
                             }
                             // #endregion   
 
                             // #region SubjectAltName 
                             if(_this.certs[i].extensions[j].extnID === "2.5.29.17")
                             {
-                                subject_alt_names.concat(_this.certs[i].extensions[j].parsedValue.altNames);
+                                subject_alt_names = subject_alt_names.concat(_this.certs[i].extensions[j].parsedValue.altNames);
                             }
                             // #endregion 
                         }
@@ -4697,8 +4697,8 @@ function(in_window)
                     // #endregion 
 
                     // #region Append "cert_..._subtrees" to "..._subtrees" 
-                    permitted_subtrees.concat(cert_permitted_subtrees);
-                    excluded_subtrees.concat(cert_excluded_subtrees);
+                    permitted_subtrees = permitted_subtrees.concat(cert_permitted_subtrees);
+                    excluded_subtrees = excluded_subtrees.concat(cert_excluded_subtrees);
                     // #endregion   
                 }
                 // #endregion 
