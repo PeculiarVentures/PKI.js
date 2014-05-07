@@ -960,7 +960,10 @@ function(in_window)
                     var value1 = this.types_and_values[i].value.value_block.value;
                     var value2 = arguments[0].types_and_values[i].value.value_block.value;
 
-                    if(value1.replace(/\s/g, "").toLowerCase().localeCompare(value2.replace(/\s/g, "").toLowerCase()) !== 0)
+                    value1 = value1.replace(/^\s+|\s+$/g, "");
+                    value2 = value2.replace(/^\s+|\s+$/g, "");
+
+                    if(value1.replace(/\s+/g, " ").toLowerCase().localeCompare(value2.replace(/\s+/g, " ").toLowerCase()) !== 0)
                         return false;
                 }
                 else // Comparing as two ArrayBuffers
