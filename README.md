@@ -57,12 +57,22 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
     * Parsing internal values;
     * Getting/setting any internal values;
     * Creation of a new Time-stamping request "from scratch";
-    * Validation of Time-stamping request signature.
+    * Validation of Time-stamping request signature;
   * Time-stamping response:
     * Parsing internal values;
     * Getting/setting any internal values;
     * Creation of a new Time-stamping response "from scratch";
-    * Validation of Time-stamping response signature.
+    * Validation of Time-stamping response signature
+  * CMS Signed Data:
+    * Parsing internal values;
+    * Getting/setting any internal values;
+    * Creation of a new CMS Signed Data "from scratch";
+    * Validation of CMS Signed Data signature;
+  * CMS Enveloped Data:
+    * Parsing internal values;
+    * Getting/setting any internal values;
+    * Creation of CMS Enveloped Data and key exchange management comming soon;
+
 
 ## Examples
 
