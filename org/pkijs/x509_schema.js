@@ -1523,5 +1523,53 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region ASN.1 schema definition for "AccessDescription" type
+    //**************************************************************************************
+    in_window.org.pkijs.schema.x509.AccessDescription =
+    function()
+    {
+        //AccessDescription  ::=  SEQUENCE {
+        //    accessMethod          OBJECT IDENTIFIER,
+        //    accessLocation        GeneralName  }
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                new in_window.org.pkijs.asn1.OID({ name: (names.accessMethod || "") }),
+                in_window.org.pkijs.schema.GENERAL_NAME(names.accessLocation || "")
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
+    // #region ASN.1 schema definition for "AuthorityInfoAccess" and "SubjectInfoAccess" types of extension 
+    //**************************************************************************************
+    in_window.org.pkijs.schema.x509.InfoAccess =
+    function()
+    {
+        // AuthorityInfoAccess OID ::= 1.3.6.1.5.5.7.1.1
+        // SubjectInfoAccess OID ::= 1.3.6.1.5.5.7.1.11
+        //
+        //AuthorityInfoAccessSyntax  ::=
+        //SEQUENCE SIZE (1..MAX) OF AccessDescription
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                new in_window.org.pkijs.asn1.REPEATED({
+                    name: (names.accessDescriptions || ""),
+                    value: in_window.org.pkijs.schema.x509.AccessDescription()
+                }),
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
 }
 )(typeof exports !== "undefined" ? exports : window);

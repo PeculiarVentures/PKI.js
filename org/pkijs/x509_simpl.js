@@ -2341,6 +2341,143 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region Simplified structure for "AccessDescription" type
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.AccessDescription =
+    function()
+    {
+        // #region Internal properties of the object 
+        this.accessMethod = "";
+        this.accessLocation = new in_window.org.pkijs.simpl.GENERAL_NAME();
+        // #endregion 
+
+        // #region If input argument array contains "schema" for this object 
+        if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
+            in_window.org.pkijs.simpl.x509.AccessDescription.prototype.fromSchema.call(this, arguments[0].schema);
+        // #endregion 
+        // #region If input argument array contains "native" values for internal properties 
+        else
+        {
+            if(arguments[0] instanceof Object)
+            {
+                this.accessMethod = arguments[0].accessMethod || "";
+                this.accessLocation = arguments[0].accessLocation || new in_window.org.pkijs.simpl.GENERAL_NAME();
+            }
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.AccessDescription.prototype.fromSchema =
+    function(schema)
+    {
+        // #region Check the schema is valid 
+        var asn1 = in_window.org.pkijs.compareSchema(schema,
+            schema,
+            in_window.org.pkijs.schema.x509.AccessDescription({
+                names: {
+                    accessMethod: "accessMethod",
+                    accessLocation: {
+                        names: {
+                            block_name: "accessLocation"
+                        }
+                    }
+                }
+            })
+            );
+
+        if(asn1.verified === false)
+            throw new Error("Object's schema was not verified against input data for AccessDescription");
+        // #endregion 
+
+        // #region Get internal properties from parsed schema 
+        this.accessMethod = asn1.result["accessMethod"].value_block.toString();
+        this.accessLocation = new in_window.org.pkijs.simpl.GENERAL_NAME({ schema: asn1.result["accessLocation"] });
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.AccessDescription.prototype.toSchema =
+    function()
+    {
+        // #region Construct and return new ASN.1 schema for this object 
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            value: [
+                new in_window.org.pkijs.asn1.OID({ value: this.accessMethod }),
+                this.accessLocation.toSchema()
+            ]
+        }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
+    // #region Simplified structure for "AuthorityInfoAccess" and "SubjectInfoAccess" types of extension
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.InfoAccess =
+    function()
+    {
+        // #region Internal properties of the object 
+        this.accessDescriptions = new Array(); // Array of "simpl.x509.AccessDescription"
+        // #endregion 
+
+        // #region If input argument array contains "schema" for this object 
+        if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
+            in_window.org.pkijs.simpl.x509.InfoAccess.prototype.fromSchema.call(this, arguments[0].schema);
+        // #endregion 
+        // #region If input argument array contains "native" values for internal properties 
+        else
+        {
+            if(arguments[0] instanceof Object)
+            {
+                this.accessDescriptions = arguments[0].accessDescriptions || new Array(); // Array of "simpl.x509.DistributionPoint"
+            }
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.InfoAccess.prototype.fromSchema =
+    function(schema)
+    {
+        // #region Check the schema is valid 
+        var asn1 = in_window.org.pkijs.compareSchema(schema,
+            schema,
+            in_window.org.pkijs.schema.x509.InfoAccess({
+                names: {
+                    accessDescriptions: "accessDescriptions"
+                }
+            })
+            );
+
+        if(asn1.verified === false)
+            throw new Error("Object's schema was not verified against input data for InfoAccess");
+        // #endregion 
+
+        // #region Get internal properties from parsed schema 
+        var descriptions = asn1.result["accessDescriptions"];
+
+        for(var i = 0; i < descriptions.length; i++)
+            this.accessDescriptions.push(new in_window.org.pkijs.simpl.x509.AccessDescription({ schema: descriptions[i] }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.InfoAccess.prototype.toSchema =
+    function()
+    {
+        // #region Create array for output sequence 
+        var output_array = new Array();
+
+        for(var i = 0; i < this.accessDescriptions.length; i++)
+            output_array.push(this.accessDescriptions[i].toSchema());
+        // #endregion 
+
+        // #region Construct and return new ASN.1 schema for this object 
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            value: output_array
+        }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region Simplified structure for "Extension" type
     //**************************************************************************************
     in_window.org.pkijs.simpl.EXTENSION =
@@ -2448,6 +2585,10 @@ function(in_window)
                 break;
             case "2.5.29.54": // InhibitAnyPolicy
                 this.parsedValue = asn1.result; // Should be just a simple INTEGER
+                break;
+            case "1.3.6.1.5.5.7.1.1": // AuthorityInfoAccess
+            case "1.3.6.1.5.5.7.1.11": // SubjectInfoAccess
+                this.parsedValue = new in_window.org.pkijs.simpl.x509.InfoAccess({ schema: asn1.result });
                 break;
             default:;
         }
