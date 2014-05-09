@@ -3566,7 +3566,7 @@ function(in_window)
     function()
     {
         // #region Internal properties of the object 
-        this.type = new in_window.org.pkijs.asn1.OID();
+        this.type = "";
         this.values = new Array();
         // #endregion 
 
@@ -3579,7 +3579,7 @@ function(in_window)
         {
             if(arguments[0] instanceof Object)
             {
-                this.type = arguments[0].type || new in_window.org.pkijs.asn1.OID();
+                this.type = arguments[0].type || "";
                 this.values = arguments[0].values || new Array();
             }
         }
@@ -3605,7 +3605,7 @@ function(in_window)
         // #endregion 
 
         // #region Get internal properties from parsed schema 
-        this.type = asn1.result["type"];
+        this.type = asn1.result["type"].value_block.toString();
         this.values = asn1.result["values"];
         // #endregion 
     }
@@ -3616,7 +3616,7 @@ function(in_window)
         // #region Construct and return new ASN.1 schema for this object 
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             value: [
-                this.type,
+                new in_window.org.pkijs.asn1.OID({ value: this.type }),
                 new in_window.org.pkijs.asn1.SET({
                     values: this.values
                 })
@@ -3896,6 +3896,113 @@ function(in_window)
                 return new Promise(function(resolve, reject) { reject("Signing error: " + error); });
             }
             );
+        // #endregion 
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
+    // #region Simplified structure for PKCS#8 private key bag
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.PKCS8 =
+    function()
+    {
+        // #region Internal properties of the object 
+        this.version = 0;
+        this.privateKeyAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
+        this.privateKey = new in_window.org.pkijs.asn1.OCTETSTRING();
+        // OPTIONAL this.attributes // Array of "in_window.org.pkijs.simpl.ATTRIBUTE"
+        // #endregion 
+
+        // #region If input argument array contains "schema" for this object 
+        if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
+            in_window.org.pkijs.simpl.PKCS8.prototype.fromSchema.call(this, arguments[0].schema);
+        // #endregion 
+        // #region If input argument array contains "native" values for internal properties 
+        else
+        {
+            if(arguments[0] instanceof Object)
+            {
+                this.version = arguments[0].version || 0;
+                this.privateKeyAlgorithm = arguments[0].privateKeyAlgorithm || new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
+                this.privateKey = arguments[0].privateKey || new in_window.org.pkijs.asn1.OCTETSTRING();
+
+                if("attributes" in arguments[0])
+                    this.attributes = arguments[0].attributes;
+            }
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.PKCS8.prototype.fromSchema =
+    function(schema)
+    {
+        // #region Check the schema is valid 
+        var asn1 = in_window.org.pkijs.compareSchema(schema,
+            schema,
+            in_window.org.pkijs.schema.PKCS8({
+                names: {
+                    version: "version",
+                    privateKeyAlgorithm: {
+                        names: {
+                            block_name: "privateKeyAlgorithm"
+                        }
+                    },
+                    privateKey: "privateKey",
+                    attributes: "attributes"
+                }
+            })
+            );
+
+        if(asn1.verified === false)
+            throw new Error("Object's schema was not verified against input data for PKCS8");
+        // #endregion 
+
+        // #region Get internal properties from parsed schema 
+        this.version = asn1.result["version"].value_block.value_dec;
+        this.privateKeyAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["privateKeyAlgorithm"] });
+        this.privateKey = asn1.result["privateKey"];
+
+        if("attributes" in asn1.result)
+        {
+            this.attributes = new Array();
+            var attrs = asn1.result["attributes"];
+
+            for(var i = 0; i < attrs.length; i++)
+                this.attributes.push(new in_window.org.pkijs.simpl.ATTRIBUTE({ schema: attrs[i] }));
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.PKCS8.prototype.toSchema =
+    function()
+    {
+        // #region Create array for output sequence 
+        var output_array = new Array();
+
+        output_array.push(new in_window.org.pkijs.asn1.INTEGER({ value: this.version }));
+        output_array.push(this.privateKeyAlgorithm.toSchema());
+        output_array.push(this.privateKey);
+
+        if("attributes" in this)
+        {
+            var attrs = new Array();
+
+            for(var i = 0; i < this.attributes.length; i++)
+                attrs.push(this.attributes[i].toSchema());
+
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                optional: true,
+                id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                id_block_tag_number: 0, // [0]
+                value: attrs
+            }));
+        }
+        // #endregion 
+
+        // #region Construct and return new ASN.1 schema for this object 
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            value: output_array
+        }));
         // #endregion 
     }
     //**************************************************************************************

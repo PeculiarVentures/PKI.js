@@ -412,6 +412,47 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region ASN.1 schema definition for PKCS#8 private key bag
+    //**************************************************************************************
+    in_window.org.pkijs.schema.PKCS8 =
+    function()
+    {
+        //PrivateKeyInfo ::= SEQUENCE {
+        //    version Version,
+        //    privateKeyAlgorithm AlgorithmIdentifier {{PrivateKeyAlgorithms}},
+        //    privateKey PrivateKey,
+        //    attributes [0] Attributes OPTIONAL }
+        //
+        //Version ::= INTEGER {v1(0)} (v1,...)
+        //
+        //PrivateKey ::= OCTET STRING
+        //
+        //Attributes ::= SET OF Attribute
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            value: [
+                new in_window.org.pkijs.asn1.INTEGER({ name: (names.version || "") }),
+                in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.privateKeyAlgorithm || ""),
+                new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.privateKey || "") }),
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    optional: true,
+                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                    id_block_tag_number: 0, // [0]
+                    value: [
+                        new in_window.org.pkijs.asn1.REPEATED({
+                            name: (names.attributes || ""),
+                            value: in_window.org.pkijs.schema.ATTRIBUTE()
+                        })
+                    ]
+                })
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region ASN.1 schema definition for "GeneralName" type 
     //**************************************************************************************
     local.BuiltInStandardAttributes =
