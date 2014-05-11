@@ -326,6 +326,75 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region Simplified structure for "GeneralNames" type 
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.GENERAL_NAMES =
+    function()
+    {
+        // #region Internal properties of the object 
+        this.names = new Array(); // Array of "org.pkijs.simpl.GENERAL_NAME"
+        // #endregion 
+
+        // #region If input argument array contains "schema" for this object 
+        if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
+            in_window.org.pkijs.simpl.GENERAL_NAMES.prototype.fromSchema.call(this, arguments[0].schema);
+        // #endregion 
+        // #region If input argument array contains "native" values for internal properties 
+        else
+        {
+            if(arguments[0] instanceof Object)
+            {
+                this.names = arguments[0].names || new Array(); // Array of "org.pkijs.simpl.GENERAL_NAME"
+            }
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.GENERAL_NAMES.prototype.fromSchema =
+    function(schema)
+    {
+        // #region Check the schema is valid 
+        var asn1 = in_window.org.pkijs.compareSchema(schema,
+            schema,
+            new in_window.org.pkijs.asn1.SEQUENCE({
+                value: [
+                    in_window.org.pkijs.asn1.REPEATED({
+                        name: "names",
+                        value: n_window.org.pkijs.schema.GENERAL_NAME()
+                    })
+                ]
+            })
+            );
+
+        if(asn1.verified === false)
+            throw new Error("Object's schema was not verified against input data for GENERAL_NAMES");
+        // #endregion 
+
+        // #region Get internal properties from parsed schema
+        var n = asn1.result["names"];
+
+        for(var i = 0; i < n.length; i++)
+            this.names.push(new in_window.org.pkijs.simpl.GENERAL_NAME({ schema: n[i] }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.GENERAL_NAMES.prototype.toSchema =
+    function(schema)
+    {
+        // #region Construct and return new ASN.1 schema for this object
+        var output_array = new Array();
+
+        for(var i = 0; i < this.names.length; i++)
+            output_array.push(this.names[i].toSchema());
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            value: output_array
+        }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region Simplified structure for "AlgorithmIdentifier" type 
     //**************************************************************************************
     in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER =
@@ -2217,8 +2286,6 @@ function(in_window)
             if(this.distributionPoint instanceof Array)
             {
                 value = new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    name: (names.distributionPoint || ""),
-                    optional: true,
                     id_block_tag_class: 3, // CONTEXT-SPECIFIC
                     id_block_tag_number: 0 // [0]
                 });
@@ -2478,6 +2545,247 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region Simplified structure for "IssuingDistributionPoint" type of extension
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.IssuingDistributionPoint =
+    function()
+    {
+        // #region Internal properties of the object 
+        // OPTIONAL this.distributionPoint // Array of "simpl.GENERAL_NAME" or a value of "simpl.RDN" type
+        // OPTIONAL this.onlyContainsUserCerts // BOOLEAN flag
+        // OPTIONAL this.onlyContainsCACerts // BOOLEAN flag
+        // OPTIONAL this.onlySomeReasons // BITSTRING
+        // OPTIONAL this.indirectCRL // BOOLEAN flag
+        // OPTIONAL this.onlyContainsAttributeCerts // BOOLEAN flag
+        // #endregion 
+
+        // #region If input argument array contains "schema" for this object 
+        if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
+            in_window.org.pkijs.simpl.x509.IssuingDistributionPoint.prototype.fromSchema.call(this, arguments[0].schema);
+        // #endregion 
+        // #region If input argument array contains "native" values for internal properties 
+        else
+        {
+            if(arguments[0] instanceof Object)
+            {
+                if("distributionPoint" in arguments[0])
+                    this.distributionPoint = arguments[0].distributionPoint;
+
+                if("onlyContainsUserCerts" in arguments[0])
+                    this.onlyContainsUserCerts = arguments[0].onlyContainsUserCerts;
+
+                if("onlyContainsCACerts" in arguments[0])
+                    this.onlyContainsCACerts = arguments[0].onlyContainsCACerts;
+
+                if("onlySomeReasons" in arguments[0])
+                    this.onlySomeReasons = arguments[0].onlySomeReasons;
+
+                if("indirectCRL" in arguments[0])
+                    this.indirectCRL = arguments[0].indirectCRL;
+
+                if("onlyContainsAttributeCerts" in arguments[0])
+                    this.onlyContainsAttributeCerts = arguments[0].onlyContainsAttributeCerts;
+            }
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.IssuingDistributionPoint.prototype.fromSchema =
+    function(schema)
+    {
+        // #region Check the schema is valid 
+        var asn1 = in_window.org.pkijs.compareSchema(schema,
+            schema,
+            in_window.org.pkijs.schema.x509.IssuingDistributionPoint({
+                names: {
+                    distributionPoint: "distributionPoint",
+                    onlyContainsUserCerts: "onlyContainsUserCerts",
+                    onlyContainsCACerts: "onlyContainsCACerts",
+                    onlySomeReasons: "onlySomeReasons",
+                    indirectCRL: "indirectCRL",
+                    onlyContainsAttributeCerts: "onlyContainsAttributeCerts"
+                }
+            })
+            );
+
+        if(asn1.verified === false)
+            throw new Error("Object's schema was not verified against input data for IssuingDistributionPoint");
+        // #endregion 
+
+        // #region Get internal properties from parsed schema 
+        if("distributionPoint" in asn1.result)
+        {
+            if(asn1.result["distributionPoint"].id_block.tag_number == 0) // GENERAL_NAMES variant
+            {
+                this.distributionPoint = new Array();
+                var names = asn1.result["distributionPoint_names"];
+
+                for(var i = 0; i < names.length; i++)
+                    this.distributionPoint.push(new in_window.org.pkijs.simpl.GENERAL_NAME({ schema: names[i] }));
+            }
+
+            if(asn1.result["distributionPoint"].id_block.tag_number == 1) // RDN variant
+            {
+                asn1.result["distributionPoint"].id_block.tag_class = 1; // UNIVERSAL
+                asn1.result["distributionPoint"].id_block.tag_number = 16; // SEQUENCE
+
+                this.distributionPoint = new in_window.org.pkijs.simpl.RDN({ schema: asn1.result["distributionPoint"] });
+            }
+        }
+
+        if("onlyContainsUserCerts" in asn1.result)
+        {
+            var view = new Uint8Array(asn1.result["onlyContainsUserCerts"].value_block.value_hex);
+            this.onlyContainsUserCerts = (view[0] === 0x00) ? false : true;
+        }
+
+        if("onlyContainsCACerts" in asn1.result)
+        {
+            var view = new Uint8Array(asn1.result["onlyContainsCACerts"].value_block.value_hex);
+            this.onlyContainsCACerts = (view[0] === 0x00) ? false : true;
+        }
+
+        if("onlySomeReasons" in asn1.result)
+        {
+            var view = new Uint8Array(asn1.result["onlySomeReasons"].value_block.value_hex);
+            this.onlySomeReasons = view[0];
+        }
+
+        if("indirectCRL" in asn1.result)
+        {
+            var view = new Uint8Array(asn1.result["indirectCRL"].value_block.value_hex);
+            this.indirectCRL = (view[0] === 0x00) ? false : true;
+        }
+
+        if("onlyContainsAttributeCerts" in asn1.result)
+        {
+            var view = new Uint8Array(asn1.result["onlyContainsAttributeCerts"].value_block.value_hex);
+            this.onlyContainsAttributeCerts = (view[0] === 0x00) ? false : true;
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.IssuingDistributionPoint.prototype.toSchema =
+    function()
+    {
+        // #region Create array for output sequence 
+        var output_array = new Array();
+
+        if("distributionPoint" in this)
+        {
+            var value;
+
+            if(this.distributionPoint instanceof Array)
+            {
+                value = new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                    id_block_tag_number: 0 // [0]
+                });
+
+                for(var i = 0; i < this.distributionPoint.length; i++)
+                    value.value_block.value.push(this.distributionPoint[i].toSchema());
+            }
+            else
+            {
+                value = this.distributionPoint.toSchema();
+
+                value.id_block.tag_class = 3; // CONTEXT - SPECIFIC
+                value.id_block.tag_number = 1; // [1]
+            }
+
+            output_array.push(value);
+        }
+
+        if("onlyContainsUserCerts" in this)
+        {
+            var buffer = new ArrayBuffer(1);
+            var view = new Uint8Array(buffer);
+
+            view[0] = (this.onlyContainsUserCerts === false) ? 0x00 : 0xFF;
+
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                name: (names.onlyContainsUserCerts || ""),
+                optional: true,
+                id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                id_block_tag_number: 1, // [1]
+                value_hex: buffer
+            }));
+        }
+
+        if("onlyContainsCACerts" in this)
+        {
+            var buffer = new ArrayBuffer(1);
+            var view = new Uint8Array(buffer);
+
+            view[0] = (this.onlyContainsCACerts === false) ? 0x00 : 0xFF;
+
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                name: (names.onlyContainsUserCerts || ""),
+                optional: true,
+                id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                id_block_tag_number: 2, // [2]
+                value_hex: buffer
+            }));
+        }
+
+        if("onlySomeReasons" in this)
+        {
+            var buffer = new ArrayBuffer(1);
+            var view = new Uint8Array(buffer);
+
+            view[0] = this.onlySomeReasons;
+
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                name: (names.onlyContainsUserCerts || ""),
+                optional: true,
+                id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                id_block_tag_number: 3, // [3]
+                value_hex: buffer
+            }));
+        }
+
+        if("indirectCRL" in this)
+        {
+            var buffer = new ArrayBuffer(1);
+            var view = new Uint8Array(buffer);
+
+            view[0] = (this.indirectCRL === false) ? 0x00 : 0xFF;
+
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                name: (names.onlyContainsUserCerts || ""),
+                optional: true,
+                id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                id_block_tag_number: 4, // [4]
+                value_hex: buffer
+            }));
+        }
+
+        if("onlyContainsAttributeCerts" in this)
+        {
+            var buffer = new ArrayBuffer(1);
+            var view = new Uint8Array(buffer);
+
+            view[0] = (this.onlyContainsAttributeCerts === false) ? 0x00 : 0xFF;
+
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                name: (names.onlyContainsUserCerts || ""),
+                optional: true,
+                id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                id_block_tag_number: 5, // [5]
+                value_hex: buffer
+            }));
+        }
+        // #endregion 
+
+        // #region Construct and return new ASN.1 schema for this object 
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            value: output_array
+        }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region Simplified structure for "Extension" type
     //**************************************************************************************
     in_window.org.pkijs.simpl.EXTENSION =
@@ -2562,10 +2870,27 @@ function(in_window)
             case "2.5.29.19": // BasicConstraints
                 this.parsedValue = new in_window.org.pkijs.simpl.x509.BasicConstraints({ schema: asn1.result });
                 break;
+            case "2.5.29.20": // CRLNumber
+            case "2.5.29.27": // BaseCRLNumber (delta CRL indicator)
+                this.parsedValue = asn1.result; // Should be just a simple INTEGER
+                break;
+            case "2.5.29.21": // CRLReason
+                this.parsedValue = asn1.result; // Should be just a simple ENUMERATED
+                break;
+            case "2.5.29.24": // InvalidityDate
+                this.parsedValue = asn1.result; // Should be just a simple GeneralizedTime
+                break;
+            case "2.5.29.28": // IssuingDistributionPoint
+                this.parsedValue = new in_window.org.pkijs.simpl.x509.IssuingDistributionPoint({ schema: asn1.result });
+                break;
+            case "2.5.29.29": // CertificateIssuer
+                this.parsedValue = new in_window.org.pkijs.simpl.GENERAL_NAMES({ schema: asn1.result }); // Should be just a simple 
+                break;
             case "2.5.29.30": // NameConstraints
                 this.parsedValue = new in_window.org.pkijs.simpl.x509.NameConstraints({ schema: asn1.result });
                 break;
             case "2.5.29.31": // CRLDistributionPoints
+            case "2.5.29.46": // FreshestCRL
                 this.parsedValue = new in_window.org.pkijs.simpl.x509.CRLDistributionPoints({ schema: asn1.result });
                 break;
             case "2.5.29.32": // CertificatePolicies

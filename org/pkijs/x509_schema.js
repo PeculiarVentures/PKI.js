@@ -1612,5 +1612,100 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region ASN.1 schema definition for "IssuingDistributionPoint" type of extension 
+    //**************************************************************************************
+    in_window.org.pkijs.schema.x509.IssuingDistributionPoint =
+    function()
+    {
+        // IssuingDistributionPoint OID ::= 2.5.29.28
+        //
+        //IssuingDistributionPoint ::= SEQUENCE {
+        //    distributionPoint          [0] DistributionPointName OPTIONAL,
+        //    onlyContainsUserCerts      [1] BOOLEAN DEFAULT FALSE,
+        //    onlyContainsCACerts        [2] BOOLEAN DEFAULT FALSE,
+        //    onlySomeReasons            [3] ReasonFlags OPTIONAL,
+        //    indirectCRL                [4] BOOLEAN DEFAULT FALSE,
+        //    onlyContainsAttributeCerts [5] BOOLEAN DEFAULT FALSE }
+        //
+        //ReasonFlags ::= BIT STRING {
+        //    unused                  (0),
+        //    keyCompromise           (1),
+        //    cACompromise            (2),
+        //    affiliationChanged      (3),
+        //    superseded              (4),
+        //    cessationOfOperation    (5),
+        //    certificateHold         (6),
+        //    privilegeWithdrawn      (7),
+        //    aACompromise            (8) }
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    optional: true,
+                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                    id_block_tag_number: 0, // [0]
+                    value: [
+                        new in_window.org.pkijs.asn1.CHOICE({
+                            value: [
+                                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                                    name: (names.distributionPoint || ""),
+                                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                                    id_block_tag_number: 0, // [0]
+                                    value: [
+                                        new in_window.org.pkijs.asn1.REPEATED({
+                                            name: (names.distributionPoint_names || ""),
+                                            value: in_window.org.pkijs.schema.GENERAL_NAME()
+                                        })
+                                    ]
+                                }),
+                                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                                    name: (names.distributionPoint || ""),
+                                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                                    id_block_tag_number: 1, // [1]
+                                    value: in_window.org.pkijs.schema.RDN().value_block.value
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                    name: (names.onlyContainsUserCerts || ""),
+                    optional: true,
+                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                    id_block_tag_number: 1, // [1]
+                }), // IMPLICIT boolean value
+                new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                    name: (names.onlyContainsCACerts || ""),
+                    optional: true,
+                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                    id_block_tag_number: 2, // [2]
+                }), // IMPLICIT boolean value
+                new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                    name: (names.onlySomeReasons || ""),
+                    optional: true,
+                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                    id_block_tag_number: 3, // [3]
+                }), // IMPLICIT bitstring value
+                new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                    name: (names.indirectCRL || ""),
+                    optional: true,
+                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                    id_block_tag_number: 4, // [4]
+                }), // IMPLICIT boolean value
+                new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                    name: (names.onlyContainsAttributeCerts || ""),
+                    optional: true,
+                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                    id_block_tag_number: 5, // [5]
+                }) // IMPLICIT boolean value
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
 }
 )(typeof exports !== "undefined" ? exports : window);
