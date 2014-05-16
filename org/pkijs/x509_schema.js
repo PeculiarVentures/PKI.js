@@ -1170,7 +1170,7 @@ function(in_window)
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             name: (names.block_name || ""),
             value: [
-                in_window.org.pkijs.schema.GENERAL_NAME({ name: (names.base || "") }),
+                in_window.org.pkijs.schema.GENERAL_NAME(names.base || ""),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
                     id_block_tag_class: 3, // CONTEXT-SPECIFIC

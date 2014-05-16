@@ -919,6 +919,45 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.ATTR_TYPE_AND_VALUE.prototype.isEqual =
+    function()
+    {
+        if(arguments[0] instanceof in_window.org.pkijs.simpl.ATTR_TYPE_AND_VALUE)
+        {
+            if(this.type !== arguments[0].type)
+                return false;
+
+            if(((this.value instanceof in_window.org.pkijs.asn1.UTF8STRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.UTF8STRING)) ||
+               ((this.value instanceof in_window.org.pkijs.asn1.BMPSTRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.BMPSTRING)) ||
+               ((this.value instanceof in_window.org.pkijs.asn1.UNIVERSALSTRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.UNIVERSALSTRING)) ||
+               ((this.value instanceof in_window.org.pkijs.asn1.NUMERICSTRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.NUMERICSTRING)) ||
+               ((this.value instanceof in_window.org.pkijs.asn1.PRINTABLESTRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.PRINTABLESTRING)) ||
+               ((this.value instanceof in_window.org.pkijs.asn1.TELETEXSTRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.TELETEXSTRING)) ||
+               ((this.value instanceof in_window.org.pkijs.asn1.VIDEOTEXSTRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.VIDEOTEXSTRING)) ||
+               ((this.value instanceof in_window.org.pkijs.asn1.IA5STRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.IA5STRING)) ||
+               ((this.value instanceof in_window.org.pkijs.asn1.GRAPHICSTRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.GRAPHICSTRING)) ||
+               ((this.value instanceof in_window.org.pkijs.asn1.VISIBLESTRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.VISIBLESTRING)) ||
+               ((this.value instanceof in_window.org.pkijs.asn1.GENERALSTRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.GENERALSTRING)) ||
+               ((this.value instanceof in_window.org.pkijs.asn1.CHARACTERSTRING) && (arguments[0].value instanceof in_window.org.pkijs.asn1.CHARACTERSTRING)))
+            {
+                var value1 = in_window.org.pkijs.stringPrep(this.value.value_block.value);
+                var value2 = in_window.org.pkijs.stringPrep(arguments[0].value.value_block.value);
+
+                if(value1.localeCompare(value2) !== 0)
+                    return false;
+            }
+            else // Comparing as two ArrayBuffers
+            {
+                if(in_window.org.pkijs.isEqual_buffer(this.value.value_before_decode, arguments[0].value.value_before_decode) === false)
+                    return false;
+            }
+
+            return true;
+        }
+        else
+            return false;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "RelativeDistinguishedName" type
@@ -927,8 +966,10 @@ function(in_window)
     function()
     {
         // #region Internal properties of the object 
+        /// <field name="types_and_values" type="Array" elementType="in_window.org.pkijs.simpl.ATTR_TYPE_AND_VALUE">Array of "type and value" objects</field>
         this.types_and_values = new Array();
-        this.value_before_decode = new ArrayBuffer(0); // Since standard allows ambiguous RDN encoding sometimes we need initial encoded array for value
+        /// <field name="value_before_decode" type="ArrayBuffer">Value of the RDN before decoding from schema</field>
+        this.value_before_decode = new ArrayBuffer(0);
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -966,9 +1007,12 @@ function(in_window)
         // #endregion 
 
         // #region Get internal properties from parsed schema 
-        var types_and_values_array = asn1.result.types_and_values;
-        for(var i = 0; i < types_and_values_array.length; i++)
-            this.types_and_values.push(new in_window.org.pkijs.simpl.ATTR_TYPE_AND_VALUE({ schema: types_and_values_array[i] }));
+        if("types_and_values" in asn1.result) // Could be a case when there is no "types and values"
+        {
+            var types_and_values_array = asn1.result.types_and_values;
+            for(var i = 0; i < types_and_values_array.length; i++)
+                this.types_and_values.push(new in_window.org.pkijs.simpl.ATTR_TYPE_AND_VALUE({ schema: types_and_values_array[i] }));
+        }
 
         this.value_before_decode = asn1.result.RDN.value_before_decode;
         // #endregion 
@@ -1010,36 +1054,8 @@ function(in_window)
 
             for(var i = 0; i < this.types_and_values.length; i++)
             {
-                if(this.types_and_values[i].type !== arguments[0].types_and_values[i].type)
+                if(this.types_and_values[i].isEqual(arguments[0].types_and_values[i]) === false)
                     return false;
-
-                if(((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.UTF8STRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.UTF8STRING)) ||
-                   ((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.BMPSTRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.BMPSTRING)) ||
-                   ((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.UNIVERSALSTRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.UNIVERSALSTRING)) ||
-                   ((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.NUMERICSTRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.NUMERICSTRING)) ||
-                   ((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.PRINTABLESTRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.PRINTABLESTRING)) ||
-                   ((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.TELETEXSTRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.TELETEXSTRING)) ||
-                   ((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.VIDEOTEXSTRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.VIDEOTEXSTRING)) ||
-                   ((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.IA5STRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.IA5STRING)) ||
-                   ((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.GRAPHICSTRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.GRAPHICSTRING)) ||
-                   ((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.VISIBLESTRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.VISIBLESTRING)) ||
-                   ((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.GENERALSTRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.GENERALSTRING)) ||
-                   ((this.types_and_values[i].value instanceof in_window.org.pkijs.asn1.CHARACTERSTRING) && (arguments[0].types_and_values[i].value instanceof in_window.org.pkijs.asn1.CHARACTERSTRING)))
-                {
-                    var value1 = this.types_and_values[i].value.value_block.value;
-                    var value2 = arguments[0].types_and_values[i].value.value_block.value;
-
-                    value1 = value1.replace(/^\s+|\s+$/g, "");
-                    value2 = value2.replace(/^\s+|\s+$/g, "");
-
-                    if(value1.replace(/\s+/g, " ").toLowerCase().localeCompare(value2.replace(/\s+/g, " ").toLowerCase()) !== 0)
-                        return false;
-                }
-                else // Comparing as two ArrayBuffers
-                {
-                    if(in_window.org.pkijs.isEqual_buffer(this.types_and_values[i].value.value_before_decode, arguments[0].types_and_values[i].value.value_before_decode) === false)
-                        return false;
-                }
             }
 
             return true;
@@ -1519,7 +1535,11 @@ function(in_window)
             schema,
             in_window.org.pkijs.schema.x509.GeneralSubtree({
                 names: {
-                    base: "base",
+                    base: {
+                        names: {
+                            block_name: "base"
+                        }
+                    },
                     minimum: "minimum",
                     maximum: "maximum"
                 }
@@ -4603,6 +4623,11 @@ function(in_window)
                         });
                     else
                         return new Promise(function(resolve, reject) { resolve(); });
+                },
+                function(error)
+                {
+                    /// <summary>Not for all certificates we have a CRL. So, this "stub" is for handling such situation - assiming we have a valid, non-revoked certificate</summary>
+                    return new Promise(function(resolve, reject) { resolve(); });
                 }
                 );
             // #endregion 
@@ -4620,82 +4645,82 @@ function(in_window)
 
                     certs.splice(index, 1);
 
-                    if(certs.length > 0)
-                        return outer();
-                    else
+                    if(current_certificate.issuer.isEqual(current_certificate.subject) === true)
                     {
-                        if(current_certificate.issuer.isEqual(current_certificate.subject) === true)
+                        // #region Check that the "self-signed" certificate there is in "trusted_certs" array 
+                        var found = (_this.trusted_certs.length === 0) ? true : false; // If user did not set "trusted_certs" then we have an option to trust any self-signed certificate as root
+
+                        for(var i = 0; i < _this.trusted_certs.length; i++)
                         {
-                            // #region Check that the "self-signed" certificate there is in "trusted_certs" array 
-                            var found = (_this.trusted_certs.length === 0) ? true : false; // If user did not set "trusted_certs" then we have an option to trust any self-signed certificate as root
-
-                            for(var i = 0; i < _this.trusted_certs.length; i++)
+                            if((current_certificate.issuer.isEqual(_this.trusted_certs[i].issuer) === true) &&
+                                (current_certificate.subject.isEqual(_this.trusted_certs[i].subject) === true) &&
+                                (current_certificate.serialNumber.isEqual(_this.trusted_certs[i].serialNumber) === true))
                             {
-                                if((current_certificate.issuer.isEqual(_this.trusted_certs[i].issuer) === true) &&
-                                   (current_certificate.subject.isEqual(_this.trusted_certs[i].subject) === true) &&
-                                   (current_certificate.serialNumber.isEqual(_this.trusted_certs[i].serialNumber) === true))
-                                {
-                                    found = true;
-                                    break;
-                                }
+                                found = true;
+                                break;
                             }
+                        }
 
-                            if(found === false)
-                                return new Promise(function(resolve, reject)
-                                {
-                                    reject({
-                                        result: false,
-                                        result_code: 22,
-                                        result_message: "Self-signed root certificate not in \"trusted certificates\" array"
-                                    });
+                        if(found === false)
+                            return new Promise(function(resolve, reject)
+                            {
+                                reject({
+                                    result: false,
+                                    result_code: 22,
+                                    result_message: "Self-signed root certificate not in \"trusted certificates\" array"
                                 });
-                            // #endregion 
+                            });
+                        // #endregion 
 
-                            return (current_certificate.verify()).then( // Verifing last, self-signed certificate
-                                function(result)
-                                {
-                                    if(result === true)
-                                        return basic(current_certificate, current_certificate).then(
-                                            function()
-                                            {
-                                                return new Promise(function(resolve, reject) { resolve(sorted_certs); });
-                                            },
-                                            function(error)
-                                            {
-                                                return new Promise(function(resolve, reject)
-                                                {
-                                                    reject({
-                                                        result: false,
-                                                        result_code: 12,
-                                                        result_message: error
-                                                    });
-                                                });
-                                            }
-                                            );
-                                    else
-                                        return new Promise(function(resolve, reject)
+                        return (current_certificate.verify()).then( // Verifing last, self-signed certificate
+                            function(result)
+                            {
+                                if(result === true)
+                                    return basic(current_certificate, current_certificate).then(
+                                        function()
                                         {
-                                            reject({
-                                                result: false,
-                                                result_code: 13,
-                                                result_message: "Unable to build certificate chain"
+                                            return new Promise(function(resolve, reject) { resolve(sorted_certs); });
+                                        },
+                                        function(error)
+                                        {
+                                            return new Promise(function(resolve, reject)
+                                            {
+                                                reject({
+                                                    result: false,
+                                                    result_code: 12,
+                                                    result_message: error
+                                                });
                                             });
-                                        });
-                                },
-                                function(error)
-                                {
+                                        }
+                                        );
+                                else
                                     return new Promise(function(resolve, reject)
                                     {
                                         reject({
                                             result: false,
-                                            result_code: 14,
-                                            result_message: error
+                                            result_code: 13,
+                                            result_message: "Unable to build certificate chain - signature of root certificate is invalid"
                                         });
                                     });
-                                }
-                                );
-                        }
-                        else // In case if self-signed cert for the chain in the "trusted_certs" array
+                            },
+                            function(error)
+                            {
+                                return new Promise(function(resolve, reject)
+                                {
+                                    reject({
+                                        result: false,
+                                        result_code: 14,
+                                        result_message: error
+                                    });
+                                });
+                            }
+                            );
+                    }
+                    else // In case if self-signed cert for the chain in the "trusted_certs" array
+                    {
+                        if(certs.length > 0)
+                            return outer();
+                        else
                         {
                             if(_this.trusted_certs.length !== 0)
                             {
@@ -5181,6 +5206,272 @@ function(in_window)
         sequence = sequence.then(
             function(policy_result)
             {
+                // #region Auxiliary functions for name constraints checking
+                function compare_dNSName(name, constraint)
+                {
+                    /// <summary>Compare two dNSName values</summary>
+                    /// <param name="name" type="String">DNS from name</param>
+                    /// <param name="constraint" type="String">Constraint for DNS from name</param>
+                    /// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+
+                    // #region Make a "string preparation" for both name and constrain 
+                    var name_prepared = in_window.org.pkijs.stringPrep(name);
+                    var constraint_prepared = in_window.org.pkijs.stringPrep(constraint);
+                    // #endregion 
+
+                    // #region Make a "splitted" versions of "constraint" and "name" 
+                    var name_splitted = name_prepared.split(".");
+                    var constraint_splitted = constraint_prepared.split(".");
+                    // #endregion 
+
+                    // #region Length calculation and additional check 
+                    var name_len = name_splitted.length;
+                    var constr_len = constraint_splitted.length;
+
+                    if((name_len === 0) || (constr_len === 0) || (name_len < constr_len))
+                        return false;
+                    // #endregion 
+
+                    // #region Check that no part of "name" has zero length 
+                    for(var i = 0; i < name_len; i++)
+                    {
+                        if(name_splitted[i].length === 0)
+                            return false;
+                    }
+                    // #endregion 
+
+                    // #region Check that no part of "constraint" has zero length
+                    for(var i = 0; i < constr_len; i++)
+                    {
+                        if(constraint_splitted[i].length === 0)
+                        {
+                            if(i === 0)
+                            {
+                                if(constr_len === 1)
+                                    return false;
+                                else
+                                    continue;
+                            }
+
+                            return false;
+                        }
+                    }
+                    // #endregion 
+
+                    // #region Check that "name" has a tail as "constraint" 
+
+                    for(var i = 0; i < constr_len; i++)
+                    {
+                        if(constraint_splitted[constr_len - 1 - i].length === 0)
+                            continue;
+
+                        if(name_splitted[name_len - 1 - i].localeCompare(constraint_splitted[constr_len - 1 - i]) !== 0)
+                            return false;
+                    }
+                    // #endregion 
+
+                    return true;
+                }
+
+                function compare_rfc822Name(name, constraint)
+                {
+                    /// <summary>Compare two rfc822Name values</summary>
+                    /// <param name="name" type="String">E-mail address from name</param>
+                    /// <param name="constraint" type="String">Constraint for e-mail address from name</param>
+                    /// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+
+                    // #region Make a "string preparation" for both name and constrain 
+                    var name_prepared = in_window.org.pkijs.stringPrep(name);
+                    var constraint_prepared = in_window.org.pkijs.stringPrep(constraint);
+                    // #endregion 
+
+                    // #region Make a "splitted" versions of "constraint" and "name" 
+                    var name_splitted = name_prepared.split("@");
+                    var constraint_splitted = constraint_prepared.split("@");
+                    // #endregion 
+
+                    // #region Splitted array length checking 
+                    if((name_splitted.length === 0) || (constraint_splitted.length === 0) || (name_splitted.length < constraint_splitted.length))
+                        return false;
+                    // #endregion 
+
+                    if(constraint_splitted.length === 1)
+                    {
+                        var result = compare_dNSName(name_splitted[1], constraint_splitted[0]);
+
+                        if(result)
+                        {
+                            // #region Make a "splitted" versions of domain name from "constraint" and "name" 
+                            var ns = name_splitted[1].split(".");
+                            var cs = constraint_splitted[0].split(".");
+                            // #endregion 
+
+                            if(cs[0].length === 0)
+                                return true;
+
+                            if(ns.length !== cs.length)
+                                return false;
+                            else
+                                return true;
+                        }
+                        else
+                            return false;
+                    }
+                    else
+                        return (name_prepared.localeCompare(constraint_prepared) === 0) ? true : false;
+
+                    return false;
+                }
+
+                function compare_uniformResourceIdentifier(name, constraint)
+                {
+                    /// <summary>Compare two uniformResourceIdentifier values</summary>
+                    /// <param name="name" type="String">uniformResourceIdentifier from name</param>
+                    /// <param name="constraint" type="String">Constraint for uniformResourceIdentifier from name</param>
+                    /// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+
+                    // #region Make a "string preparation" for both name and constrain 
+                    var name_prepared = in_window.org.pkijs.stringPrep(name);
+                    var constraint_prepared = in_window.org.pkijs.stringPrep(constraint);
+                    // #endregion 
+
+                    // #region Find out a major URI part to compare with
+                    var ns = name_prepared.split("/");
+                    var cs = constraint_prepared.split("/");
+
+                    if(cs.length > 1) // Malformed constraint
+                        return false;
+
+                    if(ns.length > 1) // Full URI string
+                    {
+                        for(var i = 0; i < ns.length; i++)
+                        {
+                            if((ns[i].length > 0) && (ns[i].charAt(ns[i].length - 1) !== ':'))
+                            {
+                                var ns_port = ns[i].split(":");
+                                name_prepared = ns_port[0];
+                                break;
+                            }
+                        }
+                    }
+                    // #endregion 
+
+                    var result = compare_dNSName(name_prepared, constraint_prepared);
+
+                    if(result)
+                    {
+                        // #region Make a "splitted" versions of "constraint" and "name" 
+                        var name_splitted = name_prepared.split(".");
+                        var constraint_splitted = constraint_prepared.split(".");
+                        // #endregion 
+
+                        if(constraint_splitted[0].length === 0)
+                            return true;
+
+                        if(name_splitted.length !== constraint_splitted.length)
+                            return false;
+                        else
+                            return true;
+                    }
+                    else
+                        return false;
+
+                    return false;
+                }
+
+                function compare_iPAddress(name, constraint)
+                {
+                    /// <summary>Compare two iPAddress values</summary>
+                    /// <param name="name" type="in_window.org.pkijs.asn1.OCTETSTRING">iPAddress from name</param>
+                    /// <param name="constraint" type="in_window.org.pkijs.asn1.OCTETSTRING">Constraint for iPAddress from name</param>
+                    /// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+
+                    // #region Common variables 
+                    var name_view = new Uint8Array(name.value_block.value_hex);
+                    var constraint_view = new Uint8Array(constraint.value_block.value_hex);
+                    // #endregion 
+
+                    // #region Work with IPv4 addresses 
+                    if((name_view.length === 4) && (constraint_view.length === 8))
+                    {
+                        for(var i = 0; i < 4; i++)
+                        {
+                            if((name_view[i] ^ constraint_view[i]) & constraint_view[i + 4])
+                                return false;
+                        }
+
+                        return true;
+                    }
+                    // #endregion 
+
+                    // #region Work with IPv6 addresses 
+                    if((name_view.length === 16) && (constraint_view.length === 32))
+                    {
+                        for(var i = 0; i < 16; i++)
+                        {
+                            if((name_view[i] ^ constraint_view[i]) & constraint_view[i + 16])
+                                return false;
+                        }
+
+                        return true;
+                    }
+                    // #endregion 
+
+                    return false;
+                }
+
+                function compare_directoryName(name, constraint)
+                {
+                    /// <summary>Compare two directoryName values</summary>
+                    /// <param name="name" type="in_window.org.pkijs.simpl.RDN">directoryName from name</param>
+                    /// <param name="constraint" type="in_window.org.pkijs.simpl.RDN">Constraint for directoryName from name</param>
+                    /// <param name="any" type="Boolean">Boolean flag - should be comparision interrupted after first match or we need to match all "constraints" parts</param>
+                    /// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+
+                    // #region Initial check 
+                    if((name.types_and_values.length === 0) || (constraint.types_and_values.length === 0))
+                        return true;
+
+                    if(name.types_and_values.length < constraint.types_and_values.length)
+                        return false;
+                    // #endregion 
+
+                    // #region Initial variables 
+                    var result = true;
+                    var name_start = 0;
+                    // #endregion 
+
+                    for(var i = 0; i < constraint.types_and_values.length; i++)
+                    {
+                        var local_result = false;
+
+                        for(var j = name_start; j < name.types_and_values.length; j++)
+                        {
+                            local_result = name.types_and_values[j].isEqual(constraint.types_and_values[i]);
+
+                            if(name.types_and_values[j].type === constraint.types_and_values[i].type)
+                                result = result && local_result;
+
+                            if(local_result === true)
+                            {
+                                if((name_start === 0) || (name_start === j))
+                                {
+                                    name_start = j + 1;
+                                    break;
+                                }
+                                else // Structure of "name" must be the same with "constraint"
+                                    return false;
+                            }
+                        }
+
+                        if(local_result === false)
+                            return false;
+                    }
+
+                    return (name_start === 0) ? false : result;
+                }
+                // #endregion 
+
                 // #region Check a result from "policy checking" part  
                 if(policy_result.result === false)
                     return policy_result;
@@ -5209,15 +5500,18 @@ function(in_window)
                                     cert_permitted_subtrees = cert_permitted_subtrees.concat(_this.certs[i].extensions[j].parsedValue.permittedSubtrees);
 
                                 if("excludedSubtrees" in _this.certs[i].extensions[j].parsedValue)
-                                    cert_excluded_subtrees = cert_excluded_subtrees.concat(_this.certs[i].extensions[j].parsedValue.excluded_subtrees);
+                                    cert_excluded_subtrees = cert_excluded_subtrees.concat(_this.certs[i].extensions[j].parsedValue.excludedSubtrees);
                             }
                             // #endregion   
 
                             // #region SubjectAltName 
                             if(_this.certs[i].extensions[j].extnID === "2.5.29.17")
-                            {
                                 subject_alt_names = subject_alt_names.concat(_this.certs[i].extensions[j].parsedValue.altNames);
-                            }
+                            // #endregion 
+
+                            // #region PKCS#9 e-mail address 
+                            if(_this.certs[i].extensions[j].extnID === "1.2.840.113549.1.9.1")
+                                email_addresses.push(_this.certs[i].extensions[j].parsedValue.value);
                             // #endregion 
                         }
                     }
@@ -5267,9 +5561,239 @@ function(in_window)
                     // #endregion 
 
                     // #region Checking for "permited sub-trees" 
+                    // #region Make groups for all types of constraints 
+                    var constr_groups = new Array(); // Array of array for groupped constraints
+                    constr_groups[0] = new Array(); // rfc822Name
+                    constr_groups[1] = new Array(); // dNSName
+                    constr_groups[2] = new Array(); // directoryName
+                    constr_groups[3] = new Array(); // uniformResourceIdentifier
+                    constr_groups[4] = new Array(); // iPAddress
+
+                    for(var j = 0; j < permitted_subtrees.length; j++)
+                    {
+                        switch(permitted_subtrees[j].base.NameType)
+                        {
+                            // #region rfc822Name 
+                            case 1:
+                                constr_groups[0].push(permitted_subtrees[j]);
+                                break;
+                            // #endregion 
+                            // #region dNSName 
+                            case 2:
+                                constr_groups[1].push(permitted_subtrees[j]);
+                                break;
+                            // #endregion 
+                            // #region directoryName 
+                            case 4:
+                                constr_groups[2].push(permitted_subtrees[j]);
+                                break;
+                            // #endregion 
+                            // #region uniformResourceIdentifier 
+                            case 6:
+                                constr_groups[3].push(permitted_subtrees[j]);
+                                break;
+                            // #endregion 
+                            // #region iPAddress 
+                            case 7:
+                                constr_groups[4].push(permitted_subtrees[j]);
+                                break;
+                            // #endregion 
+                            // #region default 
+                            default:;
+                            // #endregion 
+                        }
+                    }
+                    // #endregion   
+
+                    // #region Check name constraints groupped by type, one-by-one 
+                    for(var p = 0; p < 5; p++)
+                    {
+                        var group_permitted = false;
+                        var group = constr_groups[p];
+
+                        for(var j = 0; j < group.length; j++)
+                        {
+                            switch(p)
+                            {
+                                // #region rfc822Name 
+                                case 0:
+                                    if(subject_alt_names.length >= 0)
+                                    {
+                                        for(var k = 0; k < subject_alt_names.length; k++)
+                                        {
+                                            if(subject_alt_names[k].NameType === 1) // rfc822Name
+                                                group_permitted = group_permitted || compare_rfc822Name(subject_alt_names[k].Name, group[j].base.Name);
+                                        }
+                                    }
+                                    else // Try to find out "emailAddress" inside "subject"
+                                    {
+                                        for(var k = 0; k < _this.certs[i].subject.types_and_values.length; k++)
+                                        {
+                                            if((_this.certs[i].subject.types_and_values[k].type === "1.2.840.113549.1.9.1") ||    // PKCS#9 e-mail address
+                                               (_this.certs[i].subject.types_and_values[k].type === "0.9.2342.19200300.100.1.3")) // RFC1274 "rfc822Mailbox" e-mail address
+                                            {
+                                                group_permitted = group_permitted || compare_rfc822Name(_this.certs[i].subject.types_and_values[k].value.value_block.value, group[j].base.Name);
+                                            }
+                                        }
+                                    }
+                                    break;
+                                // #endregion 
+                                // #region dNSName 
+                                case 1:
+                                    if(subject_alt_names.length > 0)
+                                    {
+                                        for(var k = 0; k < subject_alt_names.length; k++)
+                                        {
+                                            if(subject_alt_names[k].NameType === 2) // dNSName
+                                                group_permitted = group_permitted || compare_dNSName(subject_alt_names[k].Name, group[j].base.Name);
+                                        }
+                                    }
+                                    break;
+                                // #endregion 
+                                // #region directoryName 
+                                case 2:
+                                    group_permitted = compare_directoryName(_this.certs[i].subject, group[j].base.Name);
+                                    break;
+                                // #endregion 
+                                // #region uniformResourceIdentifier 
+                                case 3:
+                                    if(subject_alt_names.length > 0)
+                                    {
+                                        for(var k = 0; k < subject_alt_names.length; k++)
+                                        {
+                                            if(subject_alt_names[k].NameType === 6) // uniformResourceIdentifier
+                                                group_permitted = group_permitted || compare_uniformResourceIdentifier(subject_alt_names[k].Name, group[j].base.Name);
+                                        }
+                                    }
+                                    break;
+                                // #endregion 
+                                // #region iPAddress 
+                                case 4:
+                                    if(subject_alt_names.length > 0)
+                                    {
+                                        for(var k = 0; k < subject_alt_names.length; k++)
+                                        {
+                                            if(subject_alt_names[k].NameType === 7) // iPAddress
+                                                group_permitted = group_permitted || compare_iPAddress(subject_alt_names[k].Name, group[j].base.Name);
+                                        }
+                                    }
+                                    break;
+                                // #endregion 
+                                // #region default 
+                                default:;
+                                // #endregion 
+                            }
+
+                            if(group_permitted)
+                                break;
+                        }
+
+                        if((group_permitted === false) && (group.length > 0))
+                        {
+                            policy_result.result = false;
+                            policy_result.result_code = 41;
+                            policy_result.result_message = "Failed to meet \"permitted sub-trees\" name constraint";
+
+                            return new Promise(function(resolve, reject)
+                            {
+                                reject(policy_result);
+                            });
+                        }
+                    }
+                    // #endregion 
                     // #endregion 
 
                     // #region Checking for "excluded sub-trees" 
+                    var excluded = false;
+
+                    for(var j = 0; j < excluded_subtrees.length; j++)
+                    {
+                        switch(excluded_subtrees[j].base.NameType)
+                        {
+                            // #region rfc822Name 
+                            case 1:
+                                if(subject_alt_names.length >= 0)
+                                {
+                                    for(var k = 0; k < subject_alt_names.length; k++)
+                                    {
+                                        if(subject_alt_names[k].NameType === 1) // rfc822Name
+                                            excluded = excluded || compare_rfc822Name(subject_alt_names[k].Name, excluded_subtrees[j].base.Name);
+                                    }
+                                }
+                                else // Try to find out "emailAddress" inside "subject"
+                                {
+                                    for(var k = 0; k < _this.subject.types_and_values.length; k++)
+                                    {
+                                        if((_this.subject.types_and_values[k].type === "1.2.840.113549.1.9.1") ||    // PKCS#9 e-mail address
+                                           (_this.subject.types_and_values[k].type === "0.9.2342.19200300.100.1.3")) // RFC1274 "rfc822Mailbox" e-mail address
+                                        {
+                                            excluded = excluded || compare_rfc822Name(_this.subject.types_and_values[k].value.value_block.value, excluded_subtrees[j].base.Name);
+                                        }
+                                    }
+                                }
+                                break;
+                            // #endregion 
+                            // #region dNSName 
+                            case 2:
+                                if(subject_alt_names.length > 0)
+                                {
+                                    for(var k = 0; k < subject_alt_names.length; k++)
+                                    {
+                                        if(subject_alt_names[k].NameType === 2) // dNSName
+                                            excluded = excluded || compare_dNSName(subject_alt_names[k].Name, excluded_subtrees[j].base.Name);
+                                    }
+                                }
+                                break;
+                            // #endregion 
+                            // #region directoryName 
+                            case 4:
+                                excluded = excluded || compare_directoryName(_this.certs[i].subject, excluded_subtrees[j].base.Name);
+                                break;
+                            // #endregion 
+                            // #region uniformResourceIdentifier 
+                            case 6:
+                                if(subject_alt_names.length > 0)
+                                {
+                                    for(var k = 0; k < subject_alt_names.length; k++)
+                                    {
+                                        if(subject_alt_names[k].NameType === 6) // uniformResourceIdentifier
+                                            excluded = excluded || compare_uniformResourceIdentifier(subject_alt_names[k].Name, excluded_subtrees[j].base.Name);
+                                    }
+                                }
+                                break;
+                            // #endregion 
+                            // #region iPAddress 
+                            case 7:
+                                if(subject_alt_names.length > 0)
+                                {
+                                    for(var k = 0; k < subject_alt_names.length; k++)
+                                    {
+                                        if(subject_alt_names[k].NameType === 7) // iPAddress
+                                            excluded = excluded || compare_iPAddress(subject_alt_names[k].Name, excluded_subtrees[j].base.Name);
+                                    }
+                                }
+                                break;
+                            // #endregion 
+                            // #region default 
+                            default:; // No action, but probably here we need to create a warning for "malformed constraint"
+                            // #endregion 
+                        }
+
+                        if(excluded)
+                            break;
+                    }
+
+                    if(excluded === true)
+                    {
+                        policy_result.result = false;
+                        policy_result.result_code = 42;
+                        policy_result.result_message = "Failed to meet \"excluded sub-trees\" name constraint";
+
+                        return new Promise(function(resolve, reject)
+                        {
+                            reject(policy_result);
+                        });
+                    }
                     // #endregion 
 
                     // #region Append "cert_..._subtrees" to "..._subtrees" 

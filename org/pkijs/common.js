@@ -156,6 +156,20 @@ function(in_window)
         return crypto_temp;
     }
     //**************************************************************************************
+    in_window.org.pkijs.stringPrep =
+    function(input_string)
+    {
+        /// <summary>String preparation function. In a future here will be realization of algorithm from RFC4518.</summary>
+        /// <param name="input_string" type="String">JavaScript string. As soon as for each ASN.1 string type we have a specific transformation function here we will work with pure JavaScript string</param>
+        /// <returns type="String">Formated string</returns>
+
+        var result = input_string.replace(/^\s+|\s+$/g, ""); // Trim input string
+        result = result.replace(/\s+/g, " "); // Change all sequence of SPACE down to SPACE char
+        result = result.toLowerCase();
+
+        return result;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
 }
