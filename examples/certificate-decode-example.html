@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>How to decode a X.509 certificate</title>
+    <script type="text/javascript" src="org/pkijs/common.js"></script>
+    <script type="text/javascript" src="org/pkijs/asn1.js"></script>
+    <script type="text/javascript" src="org/pkijs/x509_schema.js"></script>
+    <script type="text/javascript" src="org/pkijs/x509_simpl.js"></script>
+
+    <style type="text/css">
+        body{background:#EFEFEF;font:normal 14px/16px Helvetica, Arial, sans-serif;}
+        .wrapper{
+            width:600px;
+            margin:50px auto;
+            padding:50px;
+            border:solid 2px #CCC;
+            border-radius:10px;
+            -webkit-border-radius:10px;
+            box-shadow:0 0 12px 3px #CDCDCD;
+            -webkit-box-shadow:0 0 12px 3px #CDCDCD;
+            background:#FFF;
+        }
+        #add-cert-block label{
+            display:block;
+            font:bold 18px/22px Helvetica, Arial, sans-serif;
+            margin:0 0 8px;
+        }
+        #pem-text-block{
+            width:500px;
+            border:solid 1px #999;
+            border-radius:5px;
+            -webkit-border-radius:5px;
+            height:340px;
+            font:normal 12px/15px monospace;
+            display:block;
+            margin:0 0 12px;
+            box-shadow:0 0 5px 5px #EFEFEF inset;
+            -webkit-box-shadow:0 0 5px 5px #EFEFEF inset;
+            padding:20px;
+        }
+        #add-cert-block a{
+            display:inline-block;
+            padding:5px 15px;
+            background:#ACD0EC;
+            border:solid 1px #4C6181;
+            color:#000;
+            font:normal 14px/16px Helvetica, Arial, sans-serif;
+        }
+        #add-cert-block a:hover{
+            background:#DAEBF8;
+            cursor:pointer;
+        }
+        #cert-data-block{
+            display:none;
+            border:solid 2px #999;
+            border-radius:5px;
+            -webkit-border-radius:5px;
+            margin:50px 0 0;
+            padding:20px 30px;
+            background:#F0F4FF;
+        }
+        #cert-data-block h2{
+            margin:0 0 16px;
+            font:bold 22px/24px Helvetica, Arial, sans-serif;
+        }
+        #cert-data-block p{
+            margin:0 0 12px;
+        }
+        #cert-data-block p .type{
+            font-weight:bold;
+            display:inline-block;
+            width:176px;
+        }
+        #cert-data-block .two-col{
+            overflow:hidden;
+            margin:0 0 16px;
+        }
+        #cert-data-block .two-col .subject{
+            width:180px;
+            font-weight:bold;
+            margin:0 0 12px;
+            float:left;
+        }
+        #cert-data-block .two-col #cert-subject{
+            margin:0;
+            padding:0;
+            float:left;
+            list-style:none;
+        }
+        #cert-data-block .two-col #cert-subject li p{
+            margin:0;
+        }
+        #cert-data-block .two-col #cert-subject li p span{
+            width:40px;
+            display:inline-block;
+            margin:0 0 5px;
+        }
+        #cert-data-block .two-col #cert-exten{
+            overflow:hidden;
+            padding:0 0 0 17px;
+            margin:0;
+            list-style-type:square;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function getCertificateData()
+        {
+            // function to convert certificate serial from buffer array if needed
+            function toHexCodes(input_buffer)
+            {
+                var result = "";
+                var int_buffer = new Uint8Array(input_buffer);
+
+                for(var i = 0; i < int_buffer.length; i++)
+                {
+                    var str = int_buffer[i].toString(16).toUpperCase();
+                    result = result + ((str.length === 1) ? " 0" : " ") + str;
+                }
+                return result;
+            };
+
+            // function to convert string to ArrayBuffer
+            function str2ab(str)
+            {
+                var buf = new ArrayBuffer(str.length);
+                var bufView = new Uint8Array(buf);
+
+                for(var i = 0, strLen = str.length; i < strLen; i++)
+                    bufView[i] = str.charCodeAt(i);
+
+                return buf;
+            };
+
+            // strip certificate header/footer from PEM
+            var CertPEM = document.getElementById("pem-text-block").value.replace(/(-----(BEGIN|END) CERTIFICATE-----|\n)/g, ''),
+                CertBuf = str2ab(window.atob(CertPEM)),     // convert stripped PEM to ArrayBuffer
+                algomap = {
+                    "1.2.840.113549.2.1": "MD2",
+                    "1.2.840.113549.1.1.2": "MD2 with RSA",
+                    "1.2.840.113549.2.5": "MD5",
+                    "1.2.840.113549.1.1.4": "MD5 with RSA",
+                    "1.3.14.3.2.26": "SHA1",
+                    "1.2.840.10040.4.3": "SHA1 with DSA",
+                    "1.2.840.10045.4.1": "SHA1 with ECDSA",
+                    "1.2.840.113549.1.1.5": "SHA1 with RSA",
+                    "2.16.840.1.101.3.4.2.4": "SHA224",
+                    "1.2.840.113549.1.1.14": "SHA224 with RSA",
+                    "2.16.840.1.101.3.4.2.1": "SHA256",
+                    "1.2.840.113549.1.1.11": "SHA256 with RSA",
+                    "2.16.840.1.101.3.4.2.2": "SHA384",
+                    "1.2.840.113549.1.1.12": "SHA384 with RSA",
+                    "2.16.840.1.101.3.4.2.3": "SHA512",
+                    "1.2.840.113549.1.1.13": "SHA512 with RSA"
+                };       // array mapping of common algorithm OIDs and corresponding types
+
+            // calls to convert b64 PEM cert to an array in the variable 'cert_simpl'
+            var asn1 = org.pkijs.fromBER(CertBuf);
+            var cert_simpl = new org.pkijs.simpl.CERT({ schema: asn1.result });
+
+            // checks if serial is hex or not, converts value if it is hex
+            if(cert_simpl.serialNumber.value_block.is_hex_only == true)
+                document.getElementById("serial").innerHTML = toHexCodes(cert_simpl.serialNumber.value_block.value_hex);
+            else
+                document.getElementById("serial").innerHTML = cert_simpl.serialNumber.value_block.value_dec;
+
+            document.getElementById("cert-subject").innerHTML = "";
+
+            // loop to get the subject key and values
+            for(var i = 0; i < cert_simpl.subject.types_and_values.length; i++)
+            {
+                // OID map
+                var typemap = {
+                        "2.5.4.6": "C",
+                        "2.5.4.10": "OU",
+                        "2.5.4.11": "O",
+                        "2.5.4.3": "CN",
+                        "2.5.4.7": "L",
+                        "2.5.4.8": "S",
+                        "2.5.4.12": "T",
+                        "2.5.4.42": "GN",
+                        "2.5.4.43": "I",
+                        "2.5.4.4": "SN"
+                    },
+                    typeval = typemap[cert_simpl.subject.types_and_values[i].type],
+                    subjval = cert_simpl.subject.types_and_values[i].value.value_block.value,
+                    ulrow = "<li><p><span>"+typeval+"</span> "+subjval+"</p></li>";
+
+                document.getElementById("cert-subject").innerHTML = document.getElementById("cert-subject").innerHTML + ulrow;
+                if(typeval == "CN")
+                    document.getElementById("cert-subject-cn").innerHTML = subjval;
+            };
+
+            document.getElementById("cert-exten").innerHTML = "";
+
+            // loop to get extensions
+            for(var i = 0; i < cert_simpl.extensions.length; i++)
+            {
+                // OID map
+                var extenmap = {
+                        "2.5.29.1": "old Authority Key Identifier",
+                        "2.5.29.2": "old Primary Key Attributes",
+                        "2.5.29.3": "Certificate Policies",
+                        "2.5.29.4": "Primary Key Usage Restriction",
+                        "2.5.29.9": "Subject Directory Attributes",
+                        "2.5.29.14": "Subject Key Identifier",
+                        "2.5.29.15": "Key Usage",
+                        "2.5.29.16": "Private Key Usage Period",
+                        "2.5.29.17": "Subject Alternative Name",
+                        "2.5.29.18": "Issuer Alternative Name",
+                        "2.5.29.19": "Basic Constraints",
+                        "2.5.29.28": "Issuing Distribution Point",
+                        "2.5.29.29": "Certificate Issuer",
+                        "2.5.29.30": "Name Constraints",
+                        "2.5.29.31": "CRL Distribution Points",
+                        "2.5.29.32": "Certificate Policies",
+                        "2.5.29.33": "Policy Mappings",
+                        "2.5.29.35": "Authority Key Identifier",
+                        "2.5.29.36": "Policy Constraints",
+                        "2.5.29.37": "Extended key usage",
+                        "2.5.29.54": "X.509 version 3 certificate extension Inhibit Any-policy"
+                    },
+                    extenval = extenmap[cert_simpl.extensions[i].extnID],
+                    extenrow = "<li><p>"+extenval+"</p></li>";
+
+                document.getElementById("cert-exten").innerHTML = document.getElementById("cert-exten").innerHTML + extenrow;
+            };
+
+            var asn1_publicKey = org.pkijs.fromBER(cert_simpl.subjectPublicKeyInfo.subjectPublicKey.value_block.value_hex),
+                rsa_publicKey_simple = new org.pkijs.simpl.x509.RSAPublicKey({ schema: asn1_publicKey.result }),
+                modulus_view = new Uint8Array(rsa_publicKey_simple.modulus.value_block.value_hex),
+                modulus_bit_length = 0;
+
+            if(modulus_view[0] === 0x00)
+                modulus_bit_length = (rsa_publicKey_simple.modulus.value_block.value_hex.byteLength - 1) * 8;
+            else
+                modulus_bit_length = rsa_publicKey_simple.modulus.value_block.value_hex.byteLength * 8;
+
+            var publicExponent_bit_length = rsa_publicKey_simple.publicExponent.value_block.value_hex.byteLength * 8;
+
+            document.getElementById("keysize").innerHTML = modulus_bit_length;
+
+            // get issuance date
+            document.getElementById("issued").innerHTML = cert_simpl.notBefore.value.toUTCString();
+
+            // get expiration date
+            document.getElementById("expire").innerHTML = cert_simpl.notAfter.value.toUTCString();
+
+            // get signature algorithm
+            document.getElementById("sig-algo").innerHTML = algomap[cert_simpl.signatureAlgorithm.algorithm_id];
+            document.getElementById("cert-data-block").style.display = "block";
+        }
+    </script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div id="add-cert-block">
+            <label for="pem-text-block" style="font-weight:bold">Paste in Certificate PEM:</label>
+            <textarea id="pem-text-block" onClick="select();">-----BEGIN CERTIFICATE-----
+MIIDdTCCAl2gAwIBAgILBAAAAAABFUtaw5QwDQYJKoZIhvcNAQEFBQAwVzELMAkG
+A1UEBhMCQkUxGTAXBgNVBAoTEEdsb2JhbFNpZ24gbnYtc2ExEDAOBgNVBAsTB1Jv
+b3QgQ0ExGzAZBgNVBAMTEkdsb2JhbFNpZ24gUm9vdCBDQTAeFw05ODA5MDExMjAw
+MDBaFw0yODAxMjgxMjAwMDBaMFcxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9i
+YWxTaWduIG52LXNhMRAwDgYDVQQLEwdSb290IENBMRswGQYDVQQDExJHbG9iYWxT
+aWduIFJvb3QgQ0EwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDaDuaZ
+jc6j40+Kfvvxi4Mla+pIH/EqsLmVEQS98GPR4mdmzxzdzxtIK+6NiY6arymAZavp
+xy0Sy6scTHAHoT0KMM0VjU/43dSMUBUc71DuxC73/OlS8pF94G3VNTCOXkNz8kHp
+1Wrjsok6Vjk4bwY8iGlbKk3Fp1S4bInMm/k8yuX9ifUSPJJ4ltbcdG6TRGHRjcdG
+snUOhugZitVtbNV4FpWi6cgKOOvyJBNPc1STE4U6G7weNLWLBYy5d4ux2x8gkasJ
+U26Qzns3dLlwR5EiUWMWea6xrkEmCMgZK9FGqkjWZCrXgzT/LCrBbBlDSgeF59N8
+9iFo7+ryUp9/k5DPAgMBAAGjQjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8E
+BTADAQH/MB0GA1UdDgQWBBRge2YaRQ2XyolQL30EzTSo//z9SzANBgkqhkiG9w0B
+AQUFAAOCAQEA1nPnfE920I2/7LqivjTFKDK1fPxsnCwrvQmeU79rXqoRSLblCKOz
+yj1hTdNGCbM+w6DjY1Ub8rrvrTnhQ7k4o+YviiY776BQVvnGCv04zcQLcFGUl5gE
+38NflNUVyRRBnMRddWQVDf9VMOyGj/8N7yy5Y0b2qvzfvGn9LhJIZJrglfCm7ymP
+AbEVtQwdpf5pLGkkeB6zpxxxYu7KyJesF12KwvhHhm4qxFYxldBniYUr+WymXUad
+DKqC5JlR3XC321Y9YeRq4VzW9v493kHMB65jUr9TU/Qr6cf9tveCX4XSQRjbgbME
+HMUfpIBvFSDJ3gyICh3WZlXi/EjJKSZp4A==
+-----END CERTIFICATE-----</textarea>
+            <a onClick="getCertificateData();">Decode</a>
+        </div>
+        <div id="cert-data-block" style="display:none;">
+            <h2 id="cert-subject-cn"></h2>
+            <div class="two-col">
+                <p class="subject">Subject:</p>
+                <ul id="cert-subject"></ul>
+            </div>
+            <p><span class="type">Issuance Date:</span> <span id="issued">expire date</span></p>
+            <p><span class="type">Expiration Date:</span> <span id="expire">expire date</span></p>
+            <p><span class="type">Public Key Size (Bits):</span> <span id="keysize">key size</span></p>
+            <p><span class="type">Signature Algorithm:</span> <span id="sig-algo">signature algorithm</span></p>
+            <p><span class="type">Serial Number:</span> <span id="serial">serial</span></p>
+            <div class="two-col">
+                <p class="subject">Extensions:</p>
+                <ul id="cert-exten"></ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
