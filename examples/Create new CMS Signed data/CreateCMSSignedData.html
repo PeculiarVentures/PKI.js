@@ -1,35 +1,4 @@
-﻿<!--
- Copyright (c) 2014, GMO GlobalSign
- All rights reserved.
-
- Author 2014, Yury Strozhevsky <www.strozhevsky.com>.
-
- Redistribution and use in source and binary forms, with or without modification, 
- are permitted provided that the following conditions are met:
-
- 1. Redistributions of source code must retain the above copyright notice, 
-    this list of conditions and the following disclaimer.
-
- 2. Redistributions in binary form must reproduce the above copyright notice, 
-    this list of conditions and the following disclaimer in the documentation 
-    and/or other materials provided with the distribution.
-
- 3. Neither the name of the copyright holder nor the names of its contributors 
-    may be used to endorse or promote products derived from this software without 
-    specific prior written permission.
-
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
- IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
- INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
- NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
- PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
- OF SUCH DAMAGE. 
- -->
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -116,6 +85,36 @@ div#output_div
 
             var publicKey;
             var privateKey;
+
+            var hash_algorithm = "sha-1";
+            var hash_algorithm_oid = "1.3.14.3.2.26";
+            var signature_algorithm = "1.2.840.113549.1.1.5";
+
+            var hash_option = document.getElementById("hash_alg").value;
+            switch(hash_option)
+            {
+                case "alg_SHA1":
+                    hash_algorithm = "sha-1";
+                    hash_algorithm_oid = "1.3.14.3.2.26";
+                    signature_algorithm = "1.2.840.113549.1.1.5";
+                    break;
+                case "alg_SHA256":
+                    hash_algorithm = "sha-256";
+                    hash_algorithm_oid = "2.16.840.1.101.3.4.2.1";
+                    signature_algorithm = "1.2.840.113549.1.1.11";
+                    break;
+                case "alg_SHA384":
+                    hash_algorithm = "sha-384";
+                    hash_algorithm_oid = "2.16.840.1.101.3.4.2.2";
+                    signature_algorithm = "1.2.840.113549.1.1.12";
+                    break;
+                case "alg_SHA512":
+                    hash_algorithm = "sha-512";
+                    hash_algorithm_oid = "2.16.840.1.101.3.4.2.3";
+                    signature_algorithm = "1.2.840.113549.1.1.13";
+                    break;
+                default:;
+            }
             // #endregion 
 
             // #region Get a "crypto" extension 
@@ -128,6 +127,7 @@ div#output_div
             // #endregion 
 
             // #region Put a static values 
+            cert_simpl.version = 2;
             cert_simpl.serialNumber = new org.pkijs.asn1.INTEGER({ value: 1 });
             cert_simpl.issuer.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
                 type: "2.5.4.6", // Country name
@@ -182,7 +182,7 @@ div#output_div
             }));
             // #endregion 
 
-            cert_simpl.signatureAlgorithm.algorithm_id = "1.2.840.113549.1.1.5"; // RSA + SHA-1
+            cert_simpl.signatureAlgorithm.algorithm_id = signature_algorithm;
             cert_simpl.signature.algorithm_id = cert_simpl.signatureAlgorithm.algorithm_id; // Must be the same value
             // #endregion 
 
@@ -190,7 +190,7 @@ div#output_div
             sequence = sequence.then(
                 function()
                 {
-                    return crypto.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: "sha-1" } }, true, ["encrypt", "decrypt", "sign", "verify"]);
+                    return crypto.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: hash_algorithm } }, true, ["encrypt", "decrypt", "sign", "verify"]);
                 }
                 );
             // #endregion 
@@ -286,14 +286,61 @@ div#output_div
                 );
             // #endregion 
 
+            if(document.getElementById("add_ext").checked)
+            {
+                // #region Create a message digest 
+                sequence = sequence.then(
+                    function()
+                    {
+                        return crypto.digest({ name: hash_algorithm }, new Uint8Array(buffer));
+                    }
+                    );
+                // #endregion 
+
+                // #region Combine all signed extensions 
+                sequence = sequence.then(
+                    function(result)
+                    {
+                        var signed_attr = new Array();
+
+                        signed_attr.push(new org.pkijs.simpl.cms.Attribute({
+                            attrType: "1.2.840.113549.1.9.3",
+                            attrValues: [
+                                new org.pkijs.asn1.OID({ value: "1.2.840.113549.1.7.1" })
+                            ]
+                        })); // contentType
+
+                        signed_attr.push(new org.pkijs.simpl.cms.Attribute({
+                            attrType: "1.2.840.113549.1.9.5",
+                            attrValues: [
+                                new org.pkijs.asn1.UTCTIME({ value_date: new Date() })
+                            ]
+                        })); // signingTime
+
+                        signed_attr.push(new org.pkijs.simpl.cms.Attribute({
+                            attrType: "1.2.840.113549.1.9.4",
+                            attrValues: [
+                                new org.pkijs.asn1.OCTETSTRING({ value_hex: result })
+                            ]
+                        })); // messageDigest
+
+                        return signed_attr;
+                    }
+                    );
+                // #endregion 
+            }
+
             // #region Initialize CMS Signed Data structures and sign it
             sequence = sequence.then(
-                function()
+                function(result)
                 {
                     cms_signed_simpl = new org.pkijs.simpl.CMS_SIGNED_DATA({
                         version: 1,
                         digestAlgorithms: [
-                            new org.pkijs.simpl.ALGORITHM_IDENTIFIER({ algorithm_id: "1.3.14.3.2.26" }) // SHA-1
+                            new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                                algorithm_id: hash_algorithm_oid,
+                                algorithm_params: new org.pkijs.asn1.NULL()
+                            }) // SHA-1
                         ],
                         encapContentInfo: new org.pkijs.simpl.cms.EncapsulatedContentInfo({
                             eContentType: "1.2.840.113549.1.7.1", // "data" content type
@@ -306,12 +353,26 @@ div#output_div
                                     issuer: cert_simpl.issuer,
                                     serialNumber: cert_simpl.serialNumber
                                 }),
-                                digestAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({ algorithm_id: "1.3.14.3.2.26" }), // SHA-1
-                                signatureAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({ algorithm_id: "1.2.840.113549.1.1.5" }), // RSA + SHA-1
+                                digestAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                                    algorithm_id: hash_algorithm_oid,
+                                    algorithm_params: new org.pkijs.asn1.NULL()
+                                }), // SHA-1
+                                signatureAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                                    algorithm_id: "1.2.840.113549.1.1.1",
+                                    algorithm_params: new org.pkijs.asn1.NULL()
+                                }), // RSA (PKCS #1 v1.5) key transport algorithm 
                             })
                         ],
                         certificates: [cert_simpl]
                     });
+
+                    if(document.getElementById("add_ext").checked)
+                    {
+                        cms_signed_simpl.signerInfos[0].signedAttrs = new org.pkijs.simpl.cms.SignedUnsignedAttributes({
+                            type: 0,
+                            attributes: result
+                        });
+                    }
 
                     return cms_signed_simpl.sign(privateKey, 0);
                 }
@@ -328,17 +389,38 @@ div#output_div
                         content: cms_signed_schema
                     });
 
-                    var cms_signed_encoded = cms_content_simp.toSchema(true).toBER(false);
+                    var cms_signed_schema = cms_content_simp.toSchema(true);
 
-                    var signed_data_string = String.fromCharCode.apply(null, new Uint8Array(cms_signed_encoded));
+                    // #region Make length of some elements in "indefinite form" 
+                    cms_signed_schema.len_block.is_indefinite_form = true;
+
+                    var block1 = cms_signed_schema.value_block.value[1];
+                    block1.len_block.is_indefinite_form = true;
+
+                    var block2 = block1.value_block.value[0];
+                    block2.len_block.is_indefinite_form = true;
+
+                    var block3 = block2.value_block.value[2];
+                    block3.len_block.is_indefinite_form = true;
+                    block3.value_block.value[1].len_block.is_indefinite_form = true;
+                    block3.value_block.value[1].value_block.value[0].len_block.is_indefinite_form = true;
+                    // #endregion 
+
+                    var cms_signed_encoded = cms_signed_schema.toBER(false);
+
+                    // #region Convert ArrayBuffer to String 
+                    var signed_data_string = "";
+                    var view = new Uint8Array(cms_signed_encoded);
+                    
+                    for(var i = 0; i < view.length; i++)
+                        signed_data_string = signed_data_string + String.fromCharCode(view[i]);
+                    // #endregion 
 
                     var result_string = document.getElementById("new_signed_data").innerHTML;
 
-                    result_string = result_string + "\r\n-----BEGIN PKCS7 SIGNED-----\r\n";
+                    result_string = result_string + "\r\n-----BEGIN CMS-----\r\n";
                     result_string = result_string + formatPEM(window.btoa(signed_data_string));
-                    result_string = result_string + "\r\n----- END PKCS7 SIGNED -----\r\n\r\n";
-
-                    result_string = result_string + formatPEM(hex_coded);
+                    result_string = result_string + "\r\n-----END CMS-----\r\n\r\n";
 
                     document.getElementById("new_signed_data").innerHTML = result_string;
 
@@ -374,6 +456,19 @@ div#output_div
         <p>
             <label for="input_file" style="font-weight:bold">Select a file to make signature for:</label>
             <input type="file" id="input_file" title="Input file" />
+        </p>
+        <p>
+            <label for="add_ext" style="font-weight:bold">Add signed extensions in SignerInfo:</label>
+            <input type="checkbox" id="add_ext" value="0" />
+        </p>
+        <p>
+            <label for="hash_alg" style="font-weight:bold">Hashing algorithm:</label>
+            <select id="hash_alg">
+                <option value="alg_SHA1">SHA-1</option>
+                <option value="alg_SHA256">SHA-256</option>
+                <option value="alg_SHA384">SHA-384</option>
+                <option value="alg_SHA512">SHA-512</option>
+            </select>
         </p>
         <label for="new_signed_data" style="font-weight:bold">CMS Signed Data + BASE-64 encoded new certificate + PKCS#8 private key:</label>
         <textarea id="new_signed_data">&lt;  New CSM signed data + new encoded certificate + PKCS#8 exported private key will be stored here &gt;</textarea>

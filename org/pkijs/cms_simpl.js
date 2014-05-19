@@ -617,7 +617,7 @@ function(in_window)
         var attributes_array = new Array();
 
         for(var i = 0; i < this.attributes.length; i++)
-            attributes_array.push(this.attributes.toSchema());
+            attributes_array.push(this.attributes[i].toSchema());
         // #endregion 
 
         // #region Construct and return new ASN.1 schema for this object 
@@ -1217,18 +1217,18 @@ function(in_window)
         // #endregion 
 
         // #region Find a correct hashing algorithm 
-        switch(_this.signerInfos[signerIndex].signatureAlgorithm.algorithm_id)
+        switch(_this.signerInfos[signerIndex].digestAlgorithm.algorithm_id)
         {
-            case "1.2.840.113549.1.1.5":
+            case "1.3.14.3.2.26":
                 sha_algorithm = "sha-1";
                 break;
-            case "1.2.840.113549.1.1.11":
+            case "2.16.840.1.101.3.4.2.1":
                 sha_algorithm = "sha-256";
                 break;
-            case "1.2.840.113549.1.1.12":
+            case "2.16.840.1.101.3.4.2.2":
                 sha_algorithm = "sha-384";
                 break;
-            case "1.2.840.113549.1.1.13":
+            case "2.16.840.1.101.3.4.2.3":
                 sha_algorithm = "sha-512";
                 break;
             default:
