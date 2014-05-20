@@ -174,7 +174,7 @@ function(in_window)
     {
         // #region Internal properties of the object 
         this.reqCert = new in_window.org.pkijs.simpl.ocsp.CertID();
-        // OPTIONAL this.singleRequestExtensions = new in_window.org.pkijs.simpl.EXTENSIONS();
+        // OPTIONAL this.singleRequestExtensions = new Array(); // Array of in_window.org.pkijs.simpl.EXTENSION();
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -222,8 +222,15 @@ function(in_window)
 
         // #region Get internal properties from parsed schema 
         this.reqCert = new in_window.org.pkijs.simpl.ocsp.CertID({ schema: asn1.result["reqCert"] });
+
         if("singleRequestExtensions" in asn1.result)
-            this.singleRequestExtensions = new in_window.org.pkijs.simpl.EXTENSIONS({ schema: asn1.result["singleRequestExtensions"] });
+        {
+            this.singleRequestExtensions = new Array();
+            var exts = asn1.result["singleRequestExtensions"];
+
+            for(var i = 0; i < exts.length; i++)
+                this.singleRequestExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
+        }
         // #endregion 
     }
     //**************************************************************************************
@@ -234,13 +241,25 @@ function(in_window)
         var output_array = new Array();
 
         output_array.push(this.reqCert.toSchema());
+
         if("singleRequestExtensions" in this)
+        {
+            var extensions = new Array();
+
+            for(var j = 0; j < this.singleRequestExtensions.length; j++)
+                extensions.push(this.singleRequestExtensions[j].toSchema());
+
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
                 id_block_tag_class: 3, // CONTEXT-SPECIFIC
                 id_block_tag_number: 0, // [0]
-                value: [this.singleRequestExtensions.toSchema()]
+                value: [
+                    new in_window.org.pkijs.asn1.SEQUENCE({
+                        value: extensions
+                    })
+                ]
             }));
+        }
         // #endregion 
 
         // #region Construct and return new ASN.1 schema for this object 
@@ -263,7 +282,7 @@ function(in_window)
         // OPTIONAL this.version = 0;
         // OPTIONAL this.requestorName = new in_window.org.pkijs.simpl.GENERAL_NAME();
         this.requestList = new Array(); // Array of "Request" objects
-        // OPTIONAL this.requestExtensions = new in_window.org.pkijs.simpl.EXTENSIONS();
+        // OPTIONAL this.requestExtensions = new Array(); // Array of in_window.org.pkijs.simpl.EXTENSION();
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -315,7 +334,13 @@ function(in_window)
             this.requestList.push(new in_window.org.pkijs.simpl.ocsp.Request({ schema: requests[i] }));
 
         if("TBSRequest.requestExtensions" in asn1.result)
-            this.requestExtensions = new in_window.org.pkijs.simpl.EXTENSIONS({ schema: asn1.result["TBSRequest.requestExtensions"] });
+        {
+            this.requestExtensions = new Array();
+            var exts = asn1.result["TBSRequest.requestExtensions"];
+
+            for(var i = 0; i < exts.length; i++)
+                this.requestExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
+        }
         // #endregion 
     }
     //**************************************************************************************
@@ -371,12 +396,23 @@ function(in_window)
             }));
 
             if("requestExtensions" in this)
+            {
+                var extensions = new Array();
+
+                for(var j = 0; j < this.requestExtensions.length; j++)
+                    extensions.push(this.requestExtensions[j].toSchema());
+
                 output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
                     id_block_tag_class: 3, // CONTEXT-SPECIFIC
                     id_block_tag_number: 2, // [2]
-                    value: [this.requestExtensions.toSchema()]
+                    value: [
+                        new in_window.org.pkijs.asn1.SEQUENCE({
+                            value: extensions
+                        })
+                    ]
                 }));
+            }
 
             tbs_schema = new in_window.org.pkijs.asn1.SEQUENCE({
                 value: output_array
@@ -502,7 +538,11 @@ function(in_window)
     function()
     {
         // #region Internal properties of the object 
-        this.tbsRequest = new in_window.org.pkijs.simpl.ocsp.TBSRequest();
+        // OPTIONAL this.version = 0;
+        // OPTIONAL this.requestorName = new in_window.org.pkijs.simpl.GENERAL_NAME();
+        this.requestList = new Array(); // Array of "Request" objects
+        // OPTIONAL this.requestExtensions = new Array(); // Array of in_window.org.pkijs.simpl.EXTENSION();
+
         // OPTIONAL this.optionalSignature = new in_window.org.pkijs.simpl.ocsp.Signature();
         // #endregion 
 
@@ -537,7 +577,23 @@ function(in_window)
         // #endregion 
 
         // #region Get internal properties from parsed schema 
-        this.tbsRequest = new in_window.org.pkijs.simpl.ocsp.TBSRequest({ schema: asn1.result["tbsRequest"] });
+        if("TBSRequest.version" in asn1.result)
+            this.version = asn1.result["TBSRequest.version"].value_block.value_dec;
+        if("TBSRequest.requestorName" in asn1.result)
+            this.requestorName = new in_window.org.pkijs.simpl.GENERAL_NAME({ schema: asn1.result["TBSRequest.requestorName"] });
+
+        var requests = asn1.result["TBSRequest.requests"];
+        for(var i = 0; i < requests.length; i++)
+            this.requestList.push(new in_window.org.pkijs.simpl.ocsp.Request({ schema: requests[i] }));
+
+        if("TBSRequest.requestExtensions" in asn1.result)
+        {
+            this.requestExtensions = new Array();
+            var exts = asn1.result["TBSRequest.requestExtensions"];
+
+            for(var i = 0; i < exts.length; i++)
+                this.requestExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
+        }
         if("optionalSignature" in asn1.result)
             this.optionalSignature = new in_window.org.pkijs.simpl.ocsp.Signature({ schema: asn1.result["optionalSignature"] });
         // #endregion 
@@ -549,7 +605,56 @@ function(in_window)
         // #region Create array for output sequence 
         var output_array = new Array();
 
-        output_array.push(this.tbsRequest.toSchema());
+        // #region Create TBSRequest 
+        var tbs_array = new Arra();
+
+        if("version" in this)
+            tbs_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                optional: true,
+                id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                id_block_tag_number: 0, // [0]
+                value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.version })]
+            }));
+
+        if("requestorName" in this)
+            tbs_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                optional: true,
+                id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                id_block_tag_number: 1, // [1]
+                value: [this.requestorName.toSchema()]
+            }));
+
+        var requests = new Array();
+
+        for(var i = 0; i < this.requestList.length; i++)
+            requests.push(this.requestList[i].toSchema());
+
+        tbs_array.push(new in_window.org.pkijs.asn1.SEQUENCE({
+            value: requests
+        }));
+
+        if("requestExtensions" in this)
+        {
+            var extensions = new Array();
+
+            for(var j = 0; j < this.requestExtensions.length; j++)
+                extensions.push(this.requestExtensions[j].toSchema());
+
+            tbs_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                optional: true,
+                id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                id_block_tag_number: 2, // [2]
+                value: [
+                    new in_window.org.pkijs.asn1.SEQUENCE({
+                        value: extensions
+                    })
+                ]
+            }));
+        }
+
+        output_array.push(new in_window.org.pkijs.asn1.SEQUENCE({ value: tbs_array }));
+        // #endregion   
+
         if("optionalSignature" in this)
             output_array.push(this.optionalSignature.toSchema());
         // #endregion   
@@ -818,7 +923,7 @@ function(in_window)
         }); // Fiction value
         this.thisUpdate = new Date(0, 0, 0);
         // OPTIONAL this.nextUpdate = new Date(0, 0, 0);
-        // OPTIONAL this.singleExtensions = new in_window.org.pkijs.simpl.EXTENSIONS();
+        // OPTIONAL this.singleExtensions = new Array(); // Array of in_window.org.pkijs.simpl.EXTENSION();
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -877,8 +982,15 @@ function(in_window)
         this.thisUpdate = asn1.result["thisUpdate"].toDate();
         if("nextUpdate" in asn1.result)
             this.nextUpdate = asn1.result["nextUpdate"].toDate();
+
         if("singleExtensions" in asn1.result)
-            this.singleExtensions = new in_window.org.pkijs.simpl.EXTENSIONS({ schema: asn1.result["singleExtensions"] });
+        {
+            this.singleExtensions = new Array();
+            var exts = asn1.result["singleExtensions"];
+
+            for(var i = 0; i < exts.length; i++)
+                this.singleExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
+        }
         // #endregion 
     }
     //**************************************************************************************
@@ -893,8 +1005,18 @@ function(in_window)
         output_array.push(new in_window.org.pkijs.asn1.GENERALIZEDTIME({ value_date: this.thisUpdate }));
         if("nextUpdate" in this)
             output_array.push(new in_window.org.pkijs.asn1.GENERALIZEDTIME({ value_date: this.nextUpdate }));
+
         if("singleExtensions" in this)
-            output_array.push(this.singleExtensions.toSchema());
+        {
+            var extensions = new Array();
+
+            for(var j = 0; j < this.singleExtensions.length; j++)
+                extensions.push(this.singleExtensions[j].toSchema());
+
+            output_array.push(new in_window.org.pkijs.asn1.SEQUENCE({
+                value: extensions
+            }));
+        }
         // #endregion 
 
         // #region Construct and return new ASN.1 schema for this object 
@@ -918,7 +1040,7 @@ function(in_window)
         this.responderID = new in_window.org.pkijs.simpl.RDN(); // Fake value
         this.producedAt = new Date(0, 0, 0);
         this.responses = new Array(); // Array of "SingleResponse" objects
-        // OPTIONAL this.responseExtensions = new in_window.org.pkijs.simpl.EXTENSIONS();
+        // OPTIONAL this.responseExtensions = new Array(); // Array of in_window.org.pkijs.simpl.EXTENSION();
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -976,8 +1098,14 @@ function(in_window)
         for(var i = 0; i < responses_array.length; i++)
             this.responses.push(new in_window.org.pkijs.simpl.ocsp.SingleResponse({ schema: responses_array[i] }));
 
-        if("ResponseData.responseExtensions" in asn1.result) 
-            this.responseExtensions = new in_window.org.pkijs.simpl.EXTENSIONS({ schema: asn1.result["ResponseData.responseExtensions"] });
+        if("ResponseData.responseExtensions" in asn1.result)
+        {
+            this.responseExtensions = new Array();
+            var exts = asn1.result["ResponseData.responseExtensions"];
+
+            for(var i = 0; i < exts.length; i++)
+                this.responseExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
+        }
         // #endregion 
     }
     //**************************************************************************************
@@ -1039,7 +1167,16 @@ function(in_window)
             }));
 
             if("responseExtensions" in this)
-                output_array.push(this.responseExtensions.toSchema());
+            {
+                var extensions = new Array();
+
+                for(var j = 0; j < this.responseExtensions.length; j++)
+                    extensions.push(this.responseExtensions[j].toSchema());
+
+                output_array.push(new in_window.org.pkijs.asn1.SEQUENCE({
+                    value: extensions
+                }));
+            }
 
             tbs_schema = new in_window.org.pkijs.asn1.SEQUENCE({
                 value: output_array

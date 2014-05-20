@@ -3449,7 +3449,7 @@ function(in_window)
         // #region Internal properties of the object 
         this.userCertificate = new in_window.org.pkijs.asn1.INTEGER();
         this.revocationDate = new in_window.org.pkijs.simpl.TIME();
-        this.crlEntryExtensions = new in_window.org.pkijs.simpl.EXTENSIONS();
+        // OPTIONAL this.crlEntryExtensions = new Array(); // Array of "in_window.org.pkijs.simpl.EXTENSION");
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -3463,7 +3463,8 @@ function(in_window)
             {
                 this.userCertificate = arguments[0].userCertificate || new in_window.org.pkijs.asn1.INTEGER();
                 this.revocationDate = arguments[0].revocationDate || new in_window.org.pkijs.simpl.TIME();
-                this.crlEntryExtensions = arguments[0].crlEntryExtensions || new in_window.org.pkijs.simpl.EXTENSIONS();
+                if("crlEntryExtensions" in arguments[0])
+                    this.crlEntryExtensions = arguments[0].crlEntryExtensions;
             }
         }
         // #endregion 
@@ -3500,8 +3501,15 @@ function(in_window)
         // #region Get internal properties from parsed schema 
         this.userCertificate = asn1.result["userCertificate"];
         this.revocationDate = new in_window.org.pkijs.simpl.TIME({ schema: asn1.result["revocationDate"] });
+
         if("crlEntryExtensions" in asn1.result)
-            this.crlEntryExtensions = new in_window.org.pkijs.simpl.EXTENSIONS({ schema: asn1.result["crlEntryExtensions"] });
+        {
+            this.crlEntryExtensions = new Array();
+            var exts = asn1.result["crlEntryExtensions"];
+
+            for(var i = 0; i < exts.length; i++)
+                this.crlEntryExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
+        }
         // #endregion 
     }
     //**************************************************************************************
@@ -3512,8 +3520,16 @@ function(in_window)
         var sequence_array = new Array();
         sequence_array.push(this.userCertificate);
         sequence_array.push(this.revocationDate.toSchema());
-        if(this.crlEntryExtensions.extensions_array.length > 0)
-            sequence_array.push(this.crlEntryExtensions.toSchema());
+
+        if("crlEntryExtensions" in this)
+        {
+            var exts = new Array();
+
+            for(var i = 0; i < this.crlEntryExtensions; i++)
+                exts.push(this.crlEntryExtensions[i].toSchema());
+
+            sequence_array.push(new in_window.org.pkijs.asn1.SEQUENCE({ value: exts }));
+        }
         // #endregion 
 
         // #region Construct and return new ASN.1 schema for this object 
@@ -3540,7 +3556,7 @@ function(in_window)
         this.thisUpdate = new in_window.org.pkijs.simpl.TIME();
         // OPTIONAL this.nextUpdate = new in_window.org.pkijs.simpl.TIME();
         // OPTIONAL this.revokedCertificates = new Array(); // Array of REV_CERT objects
-        // OPTIONAL this.crlExtensions = new in_window.org.pkijs.simpl.EXTENSIONS();
+        // OPTIONAL this.crlExtensions = new Array(); // Array of in_window.org.pkijs.simpl.EXTENSION();
         // #endregion 
 
         // #region Properties from CRL major part 
@@ -3571,7 +3587,7 @@ function(in_window)
                 if("revokedCertificates" in arguments[0])
                     this.revokedCertificates = arguments[0].revokedCertificates;
                 if("crlExtensions" in arguments[0])
-                    this.crlExtensions = arguments[0].crlExtensions || new in_window.org.pkijs.simpl.EXTENSIONS();
+                    this.crlExtensions = arguments[0].crlExtensions;
                 // #endregion 
 
                 // #region Properties from CRL major part 
@@ -3615,7 +3631,13 @@ function(in_window)
                 this.revokedCertificates.push(new in_window.org.pkijs.simpl.REV_CERT({ schema: rev_certs[i] }));
         }
         if("tbsCertList.extensions" in asn1.result)
-            this.crlExtensions = new in_window.org.pkijs.simpl.EXTENSIONS({ schema: asn1.result["tbsCertList.extensions"] });
+        {
+            this.crlExtensions = new Array();
+            var exts = asn1.result["tbsCertList.extensions"];
+
+            for(var i = 0; i < exts.length; i++)
+                this.crlExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
+        }
 
         this.signatureAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["signatureAlgorithm"] });
         this.signatureValue = asn1.result["signatureValue"];

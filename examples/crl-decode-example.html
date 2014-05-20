@@ -223,7 +223,7 @@
             else
             {
                 // loop to get extensions
-                for(var i = 0; i < crl_simpl.crlExtensions.extensions_array.length; i++)
+                for(var i = 0; i < crl_simpl.crlExtensions.length; i++)
                 {
                     // OID map
                     var extenmap = {
@@ -244,7 +244,7 @@
                             "1.3.6.1.4.1.311.21.1": "Microsoft CA Version",
                             "1.3.6.1.4.1.311.21.4": "CRL Next Publish Date"
                         },
-                        extenval = extenmap[crl_simpl.crlExtensions.extensions_array[i].extnID],
+                        extenval = extenmap[crl_simpl.crlExtensions[i].extnID],
                         extenrow = "<li><p>"+extenval+"</p></li>";
 
                     document.getElementById("crl-exten").innerHTML = document.getElementById("crl-exten").innerHTML + extenrow;
@@ -274,11 +274,11 @@
                     // #endregion 
 
                     // #region Find a reason why the specific certificate was revoked 
-                    for(var j = 0; j < crl_simpl.revokedCertificates[i].crlEntryExtensions.extensions_array.length; j++)
+                    for(var j = 0; j < crl_simpl.revokedCertificates[i].crlEntryExtensions.length; j++)
                     {
-                        if(crl_simpl.revokedCertificates[i].crlEntryExtensions.extensions_array[j].extnID === "2.5.29.21")
+                        if(crl_simpl.revokedCertificates[i].crlEntryExtensions[j].extnID === "2.5.29.21")
                         {
-                            switch(crl_simpl.revokedCertificates[i].crlEntryExtensions.extensions_array[j].parsedValue.value_block.value_dec)
+                            switch(crl_simpl.revokedCertificates[i].crlEntryExtensions[j].parsedValue.value_block.value_dec)
                             {
                                 case 0:
                                     revokedReason = "unused";
