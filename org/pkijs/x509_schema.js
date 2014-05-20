@@ -128,9 +128,11 @@ function(in_window)
             name: (names.block_name || "tbsCertificate"),
             value: [
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                    optional: true,
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                 value: [
                     new in_window.org.pkijs.asn1.INTEGER({ name: (names.tbsCertificate_version || "tbsCertificate.version") }) // EXPLICIT integer value
                 ]
@@ -176,19 +178,25 @@ function(in_window)
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.tbsCertificate_issuerUniqueID ||"tbsCertificate.issuerUniqueID"),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                 }), // IMPLICIT bistring value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.tbsCertificate_subjectUniqueID ||"tbsCertificate.subjectUniqueID"),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 2, // [2]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
                 }), // IMPLICIT bistring value
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 3, // [3]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 3 // [3]
+                    },
                     value: [in_window.org.pkijs.schema.EXTENSIONS(names.extensions || {
                         names: {
                             block_name: "tbsCertificate.extensions"
@@ -296,8 +304,10 @@ function(in_window)
                         }),
                         new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                             optional: true,
-                            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                            id_block_tag_number: 0, // [0]
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 0 // [0]
+                            },
                             value: [in_window.org.pkijs.schema.EXTENSIONS(names.crlExtensions || {
                                 names: {
                                     block_name: "tbsCertList.extensions"
@@ -364,8 +374,10 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
                             optional: true, // Because OpenSSL makes wrong "attributes" field
@@ -438,8 +450,10 @@ function(in_window)
                 new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.privateKey || "") }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
                             name: (names.attributes || ""),
@@ -479,8 +493,10 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 2, // APPLICATION
-                    id_block_tag_number: 1, // [APPLICATION 1]
+                    id_block: {
+                        tag_class: 2, // APPLICATION-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     name: (names.country_name || ""),
                     value: [
                         new in_window.org.pkijs.asn1.CHOICE({
@@ -493,8 +509,10 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 2, // APPLICATION
-                    id_block_tag_number: 2, // [APPLICATION 2]
+                    id_block: {
+                        tag_class: 2, // APPLICATION-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
                     name: (names.administration_domain_name || ""),
                     value: [
                         new in_window.org.pkijs.asn1.CHOICE({
@@ -507,22 +525,28 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     name: (names.network_address || ""),
                     is_hex_only: true
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     name: (names.terminal_identifier || ""),
                     is_hex_only: true
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 2, // [2]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
                     name: (names.private_domain_name || ""),
                     value: [
                         new in_window.org.pkijs.asn1.CHOICE({
@@ -535,45 +559,59 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 3, // [3]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 3 // [3]
+                    },
                     name: (names.organization_name || ""),
                     is_hex_only: true
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     optional: true,
                     name: (names.numeric_user_identifier || ""),
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 4, // [4]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 4 // [4]
+                    },
                     is_hex_only: true
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
                     name: (names.personal_name || ""),
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 5, // [5]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 5 // [5]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
-                            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                            id_block_tag_number: 0, // [0]
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 0 // [0]
+                            },
                             is_hex_only: true
                         }),
                         new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                             optional: true,
-                            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                            id_block_tag_number: 1, // [1]
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 1 // [1]
+                            },
                             is_hex_only: true
                         }),
                         new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                             optional: true,
-                            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                            id_block_tag_number: 2, // [2]
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 2 // [2]
+                            },
                             is_hex_only: true
                         }),
                         new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                             optional: true,
-                            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                            id_block_tag_number: 3, // [3]
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 3 // [3]
+                            },
                             is_hex_only: true
                         })
                     ]
@@ -581,8 +619,10 @@ function(in_window)
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
                     name: (names.organizational_unit_names || ""),
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 6, // [6]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 6 // [6]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
                             value: new in_window.org.pkijs.asn1.PRINTABLESTRING()
@@ -619,14 +659,18 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     is_hex_only: true
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [new in_window.org.pkijs.asn1.ANY()]
                 }),
             ]
@@ -654,8 +698,10 @@ function(in_window)
         return (new in_window.org.pkijs.asn1.CHOICE({
             value: [
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     name: (names.block_name || ""),
                     value: [
                         new in_window.org.pkijs.asn1.SEQUENCE({
@@ -663,9 +709,11 @@ function(in_window)
                             value: [
                                 new in_window.org.pkijs.asn1.OID(),
                                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                                    id_block_tag_number: 0, // [0]
-                                    value: [ new in_window.org.pkijs.asn1.ANY() ]
+                                    id_block: {
+                                        tag_class: 3, // CONTEXT-SPECIFIC
+                                        tag_number: 0 // [0]
+                                    },
+                                    value: [new in_window.org.pkijs.asn1.ANY()]
                                 })
                             ]
                         })
@@ -673,17 +721,23 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.block_name || ""),
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1 // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.block_name || ""),
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 2 // [2]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 3, // [3]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 3 // [3]
+                    },
                     name: (names.block_name || ""),
                     value: [
                         new in_window.org.pkijs.asn1.SEQUENCE({
@@ -697,14 +751,18 @@ function(in_window)
                     ]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 4, // [4]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 4 // [4]
+                    },
                     name: (names.block_name || ""),
                     value: [in_window.org.pkijs.schema.RDN(names.directoryName || {})]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 5, // [5]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 5 // [5]
+                    },
                     name: (names.block_name || ""),
                     value: [
                         new in_window.org.pkijs.asn1.SEQUENCE({
@@ -712,8 +770,10 @@ function(in_window)
                             value: [
                                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                                     optional: true,
-                                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                                    id_block_tag_number: 0, // [0]
+                                    id_block: {
+                                        tag_class: 3, // CONTEXT-SPECIFIC
+                                        tag_number: 0 // [0]
+                                    },
                                     value: [
                                         new in_window.org.pkijs.asn1.CHOICE({
                                             value: [
@@ -727,8 +787,10 @@ function(in_window)
                                     ]
                                 }),
                                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                                    id_block_tag_number: 1, // [1]
+                                    id_block: {
+                                        tag_class: 3, // CONTEXT-SPECIFIC
+                                        tag_number: 1 // [1]
+                                    },
                                     value: [
                                         new in_window.org.pkijs.asn1.CHOICE({
                                             value: [
@@ -747,18 +809,24 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.block_name || ""),
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 6 // [6]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 6 // [6]
+                    },
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.block_name || ""),
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 7 // [7]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 7 // [7]
+                    },
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.block_name || ""),
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 8 // [8]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 8 // [8]
+                    },
                 }),
             ]
         }));
@@ -1067,13 +1135,17 @@ function(in_window)
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.keyIdentifier || ""),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0 // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [
                             new in_window.org.pkijs.asn1.REPEATED({
                                 name: (names.authorityCertIssuer || ""),
@@ -1084,8 +1156,10 @@ function(in_window)
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.authorityCertSerialNumber || ""),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 2, // [2]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
                 }),
             ]
         }));
@@ -1112,14 +1186,18 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [in_window.org.pkijs.asn1.GENERALIZEDTIME({ name: (names.notBefore || "") })]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [in_window.org.pkijs.asn1.GENERALIZEDTIME({ name: (names.notAfter || "") })]
                 })
             ]
@@ -1173,14 +1251,18 @@ function(in_window)
                 in_window.org.pkijs.schema.GENERAL_NAME(names.base || ""),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [new in_window.org.pkijs.asn1.INTEGER({ name: (names.minimum || "") })]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [new in_window.org.pkijs.asn1.INTEGER({ name: (names.maximum || "") })]
                 })
             ]
@@ -1207,8 +1289,10 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
                             name: (names.permittedSubtrees || ""),
@@ -1218,8 +1302,10 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
                             name: (names.excludedSubtrees || ""),
@@ -1415,14 +1501,18 @@ function(in_window)
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.requireExplicitPolicy || ""),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                 }), // IMPLICIT integer value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.inhibitPolicyMapping || ""),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                 }), // IMPLICIT integer value
             ]
         }));
@@ -1488,16 +1578,20 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.CHOICE({
                             value: [
                                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                                     name: (names.distributionPoint || ""),
                                     optional: true,
-                                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                                    id_block_tag_number: 0, // [0]
+                                    id_block: {
+                                        tag_class: 3, // CONTEXT-SPECIFIC
+                                        tag_number: 0 // [0]
+                                    },
                                     value: [
                                         new in_window.org.pkijs.asn1.REPEATED({
                                             name: (names.distributionPoint_names || ""),
@@ -1508,8 +1602,10 @@ function(in_window)
                                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                                     name: (names.distributionPoint || ""),
                                     optional: true,
-                                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                                    id_block_tag_number: 1, // [1]
+                                    id_block: {
+                                        tag_class: 3, // CONTEXT-SPECIFIC
+                                        tag_number: 1 // [1]
+                                    },
                                     value: in_window.org.pkijs.schema.RDN().value_block.value
                                 })
                             ]
@@ -1519,14 +1615,18 @@ function(in_window)
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.reasons || ""),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                 }), // IMPLICIT bitstring value
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     name: (names.cRLIssuer || ""),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 2, // [2]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
                             name: (names.cRLIssuer_names || ""),
@@ -1645,15 +1745,19 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.CHOICE({
                             value: [
                                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                                     name: (names.distributionPoint || ""),
-                                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                                    id_block_tag_number: 0, // [0]
+                                    id_block: {
+                                        tag_class: 3, // CONTEXT-SPECIFIC
+                                        tag_number: 0 // [0]
+                                    },
                                     value: [
                                         new in_window.org.pkijs.asn1.REPEATED({
                                             name: (names.distributionPoint_names || ""),
@@ -1663,8 +1767,10 @@ function(in_window)
                                 }),
                                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                                     name: (names.distributionPoint || ""),
-                                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                                    id_block_tag_number: 1, // [1]
+                                    id_block: {
+                                        tag_class: 3, // CONTEXT-SPECIFIC
+                                        tag_number: 1 // [1]
+                                    },
                                     value: in_window.org.pkijs.schema.RDN().value_block.value
                                 })
                             ]
@@ -1674,32 +1780,42 @@ function(in_window)
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.onlyContainsUserCerts || ""),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                 }), // IMPLICIT boolean value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.onlyContainsCACerts || ""),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 2, // [2]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
                 }), // IMPLICIT boolean value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.onlySomeReasons || ""),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 3, // [3]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 3 // [3]
+                    },
                 }), // IMPLICIT bitstring value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.indirectCRL || ""),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 4, // [4]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 4 // [4]
+                    },
                 }), // IMPLICIT boolean value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.onlyContainsAttributeCerts || ""),
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 5, // [5]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 5 // [5]
+                    },
                 }) // IMPLICIT boolean value
             ]
         }));

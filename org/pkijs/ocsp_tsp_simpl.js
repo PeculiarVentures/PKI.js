@@ -251,8 +251,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [
                     new in_window.org.pkijs.asn1.SEQUENCE({
                         value: extensions
@@ -373,16 +375,20 @@ function(in_window)
             if("version" in this)
                 output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.version })]
                 }));
 
             if("requestorName" in this)
                 output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [this.requestorName.toSchema()]
                 }));
 
@@ -404,8 +410,10 @@ function(in_window)
 
                 output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 2, // [2]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.SEQUENCE({
                             value: extensions
@@ -512,8 +520,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [
                     new in_window.org.pkijs.asn1.SEQUENCE({
                         value: cert_array
@@ -611,16 +621,20 @@ function(in_window)
         if("version" in this)
             tbs_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.version })]
             }));
 
         if("requestorName" in this)
             tbs_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value: [this.requestorName.toSchema()]
             }));
 
@@ -642,8 +656,10 @@ function(in_window)
 
             tbs_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 2, // [2]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 2 // [2]
+                },
                 value: [
                     new in_window.org.pkijs.asn1.SEQUENCE({
                         value: extensions
@@ -917,8 +933,10 @@ function(in_window)
         // #region Internal properties of the object 
         this.certID = new in_window.org.pkijs.simpl.ocsp.CertID();
         this.certStatus = new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-            id_block_tag_number: 3, // [3]
+            id_block: {
+                tag_class: 3, // CONTEXT-SPECIFIC
+                tag_number: 3 // [3]
+            },
             value: []
         }); // Fiction value
         this.thisUpdate = new Date(0, 0, 0);
@@ -937,8 +955,10 @@ function(in_window)
             {
                 this.certID = arguments[0].certID || new in_window.org.pkijs.simpl.ocsp.CertID();
                 this.certStatus = arguments[0].certStatus || new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 3, // [3]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 3 // [3]
+                    },
                     value: []
                 }); // Fiction value
                 this.thisUpdate = arguments[0].thisUpdate || new Date(0, 0, 0);
@@ -1055,8 +1075,10 @@ function(in_window)
                 if("version" in arguments[0])
                     this.version = arguments[0].version;
                 this.responderID = arguments[0].responderID || new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 10, // [10]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 10 // [10]
+                    },
                     value: []
                 }); // Fake value
                 this.producedAt = arguments[0].producedAt || new Date(0, 0, 0);
@@ -1137,21 +1159,27 @@ function(in_window)
 
             if("version" in this)
                 output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.version })]
                 }));
 
             if(this.responderID instanceof in_window.org.pkijs.simpl.RDN)
                 output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [this.responderID.toSchema()]
                 }));
             else
                 output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 2, // [2]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
                     value: [this.responderID]
                 }));
 
@@ -1272,8 +1300,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [
                     new in_window.org.pkijs.asn1.SEQUENCE({
                         value: certs_array
@@ -1663,8 +1693,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: extensions_array
             }));
         }
@@ -1751,15 +1783,19 @@ function(in_window)
         if("millis" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.millis })]
             }));
         if("micros" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.micros })]
             }));
         // #endregion 
@@ -1877,8 +1913,10 @@ function(in_window)
         if("tsa" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [this.tsa.toSchema()]
             }));
 
@@ -1892,8 +1930,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value: extensions_array
             }));
         }

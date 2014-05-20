@@ -135,8 +135,10 @@ function(in_window)
                 in_window.org.pkijs.schema.ocsp.CertID(names.reqCert || {}),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [in_window.org.pkijs.schema.EXTENSIONS(names.extensions || {
                         names: {
                             block_name: (names.singleRequestExtensions || "")
@@ -163,14 +165,18 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [new in_window.org.pkijs.asn1.INTEGER({ name: (names.TBSRequest_version || "TBSRequest.version") })]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [in_window.org.pkijs.schema.GENERAL_NAME(names.requestorName || {
                         names: {
                             block_name: "TBSRequest.requestorName"
@@ -188,8 +194,10 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 2, // [2]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [in_window.org.pkijs.schema.EXTENSIONS(names.extensions || {
                         names: {
                             block_name: (names.requestExtensions || "TBSRequest.requestExtensions")
@@ -217,8 +225,10 @@ function(in_window)
                 new in_window.org.pkijs.asn1.BITSTRING({ name: (names.signature || "") }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.SEQUENCE({
                             value: [new in_window.org.pkijs.asn1.REPEATED({
@@ -251,8 +261,10 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [
                         in_window.org.pkijs.schema.ocsp.Signature(names.optionalSignature || {
                             names: {
@@ -312,8 +324,10 @@ function(in_window)
                 new in_window.org.pkijs.asn1.ENUMERATED({ name: (names.responseStatus || "responseStatus") }), 
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [
                         in_window.org.pkijs.schema.ocsp.ResponseBytes(names.responseBytes || {
                             names: {
@@ -357,43 +371,55 @@ function(in_window)
                     value: [
                         new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                             name: (names.certStatus || ""),
-                            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                            id_block_tag_number: 0, // [0]
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 0 // [0]
+                            },
                             len_block_length: 1 // The length contains one byte 0x00
                         }), // IMPLICIT NULL (no "value_block")
                         new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                             name: (names.certStatus || ""),
-                            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                            id_block_tag_number: 1, // [1]
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 1 // [1]
+                            },
                             value: [
                                 new in_window.org.pkijs.asn1.GENERALIZEDTIME(),
                                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                                     optional: true,
-                                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                                    id_block_tag_number: 0, // [0]
+                                    id_block: {
+                                        tag_class: 3, // CONTEXT-SPECIFIC
+                                        tag_number: 0 // [0]
+                                    },
                                     value: [new in_window.org.pkijs.asn1.ENUMERATED()]
                                 })
                             ]
                         }),
                         new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                             name: (names.certStatus || ""),
-                            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                            id_block_tag_number: 2, // [2]
-                            len_block_length: 1 // The length contains one byte 0x00
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 2 // [2]
+                            },
+                            len_block: { length: 1 }
                         }) // IMPLICIT NULL (no "value_block")
                     ]
                 }),
                 new in_window.org.pkijs.asn1.GENERALIZEDTIME({ name: (names.thisUpdate || "") }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [new in_window.org.pkijs.asn1.GENERALIZEDTIME({ name: (names.nextUpdate || "") })]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [in_window.org.pkijs.schema.EXTENSIONS(names.singleExtensions || {})]
                 }) // EXPLICIT SEQUENCE value
             ]
@@ -417,16 +443,20 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [new in_window.org.pkijs.asn1.INTEGER({ name: (names.version || "ResponseData.version") })]
                 }),
                 new in_window.org.pkijs.asn1.CHOICE({
                     value: [
                         new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                             name: (names.responderID || "ResponseData.responderID"),
-                            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                            id_block_tag_number: 1, // [1]
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 1 // [1]
+                            },
                             value: [in_window.org.pkijs.schema.RDN(names.ResponseData_byName || {
                                 names: {
                                     block_name: "ResponseData.byName"
@@ -435,8 +465,10 @@ function(in_window)
                         }),
                         new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                             name: (names.responderID || "ResponseData.responderID"),
-                            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                            id_block_tag_number: 2, // [2]
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 2 // [2]
+                            },
                             value: [new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.ResponseData_byKey || "ResponseData.byKey") })]
                         })
                     ]
@@ -452,8 +484,10 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [in_window.org.pkijs.schema.EXTENSIONS(names.extensions || {
                         names: {
                             block_name: "ResponseData.responseExtensions"
@@ -491,8 +525,10 @@ function(in_window)
                 new in_window.org.pkijs.asn1.BITSTRING({ name: (names.signature || "BasicOCSPResponse.signature") }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.SEQUENCE({
                             value: [new in_window.org.pkijs.asn1.REPEATED({
@@ -566,8 +602,10 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [new in_window.org.pkijs.asn1.REPEATED({
                         name: (names.extensions || "TimeStampReq.extensions"),
                         value: in_window.org.pkijs.schema.EXTENSION()
@@ -598,14 +636,18 @@ function(in_window)
                 new in_window.org.pkijs.asn1.INTEGER({ name: (names.seconds || "") }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [new in_window.org.pkijs.asn1.INTEGER({ name: (names.millis || "") })]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [new in_window.org.pkijs.asn1.INTEGER({ name: (names.micros || "") })]
                 })
             ]
@@ -656,8 +698,10 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [in_window.org.pkijs.schema.GENERAL_NAME(names.tsa || {
                         names: {
                             block_name: "TSTInfo.tsa"
@@ -666,8 +710,10 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
                             name: (names.extensions || "TSTInfo.extensions"),

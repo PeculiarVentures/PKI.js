@@ -274,8 +274,10 @@ function(in_window)
             case 3:
             case 5:
                 return new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: this.NameType,
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: this.NameType
+                    },
                     name: (names.block_name || ""),
                     value: [
                         this.Name
@@ -1178,8 +1180,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value: [new in_window.org.pkijs.asn1.SEQUENCE({
                     value: issuer_array
                 })]
@@ -1271,16 +1275,20 @@ function(in_window)
         if("notBefore" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [in_window.org.pkijs.asn1.GENERALIZEDTIME({ value_date: this.notBefore })]
             }));
 
         if("notAfter" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value: [in_window.org.pkijs.asn1.GENERALIZEDTIME({ value_date: this.notAfter })]
             }));
         // #endregion 
@@ -1590,8 +1598,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [value_minimum]
             }));
         }
@@ -1607,8 +1617,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value: [value_maximum]
             }));
         }
@@ -1706,8 +1718,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [new in_window.org.pkijs.asn1.SEQUENCE({
                     value: permited_array
                 })]
@@ -1723,8 +1737,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value: [new in_window.org.pkijs.asn1.SEQUENCE({
                     value: excluded_array
                 })]
@@ -2306,8 +2322,10 @@ function(in_window)
             if(this.distributionPoint instanceof Array)
             {
                 value = new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0 // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                 });
 
                 for(var i = 0; i < this.distributionPoint.length; i++)
@@ -2329,8 +2347,10 @@ function(in_window)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 name: (names.reasons || ""),
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value_hex: this.reasons.value_block.value_hex
             }));
         }
@@ -2340,8 +2360,10 @@ function(in_window)
             var value = new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 name: (names.cRLIssuer || ""),
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 2 // [2]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 2 // [2]
+                },
             });
 
             for(var i = 0; i < this.cRLIssuer.length; i++)
@@ -2698,8 +2720,10 @@ function(in_window)
             if(this.distributionPoint instanceof Array)
             {
                 value = new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0 // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                 });
 
                 for(var i = 0; i < this.distributionPoint.length; i++)
@@ -2726,8 +2750,10 @@ function(in_window)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 name: (names.onlyContainsUserCerts || ""),
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value_hex: buffer
             }));
         }
@@ -2742,8 +2768,10 @@ function(in_window)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 name: (names.onlyContainsUserCerts || ""),
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 2, // [2]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 2 // [2]
+                },
                 value_hex: buffer
             }));
         }
@@ -2758,8 +2786,10 @@ function(in_window)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 name: (names.onlyContainsUserCerts || ""),
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 3, // [3]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 3 // [3]
+                },
                 value_hex: buffer
             }));
         }
@@ -2774,8 +2804,10 @@ function(in_window)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 name: (names.onlyContainsUserCerts || ""),
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 4, // [4]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 4 // [4]
+                },
                 value_hex: buffer
             }));
         }
@@ -2790,8 +2822,10 @@ function(in_window)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 name: (names.onlyContainsUserCerts || ""),
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 5, // [5]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 5 // [5]
+                },
                 value_hex: buffer
             }));
         }
@@ -3152,8 +3186,10 @@ function(in_window)
         if("version" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [
                     new in_window.org.pkijs.asn1.INTEGER({ value: this.version }) // EXPLICIT integer value
                 ]
@@ -3176,23 +3212,29 @@ function(in_window)
         if("issuerUniqueID" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value_hex: this.issuerUniqueID
             }));
         if("subjectUniqueID" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 2, // [2]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 2 // [2]
+                },
                 value_hex: this.subjectUniqueID
             }));
 
         if("subjectUniqueID" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 3, // [3]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 3 // [3]
+                },
                 value: [this.extensions.toSchema()]
             }));
 
@@ -3205,8 +3247,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 3, // [3]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 3 // [3]
+                },
                 value: [new in_window.org.pkijs.asn1.SEQUENCE({
                     value: extensions
                 })]
@@ -3685,8 +3729,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [
                     new in_window.org.pkijs.asn1.SEQUENCE({
                         value: extensions
@@ -4087,8 +4133,10 @@ function(in_window)
                 attributes.push(this.attributes[i].toSchema());
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: attributes
             }));
         }
@@ -4359,8 +4407,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: attrs
             }));
         }

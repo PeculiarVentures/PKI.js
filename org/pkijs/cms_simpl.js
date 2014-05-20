@@ -135,8 +135,10 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.OID({ value: this.contentType }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [this.content] // EXPLICIT ANY value
                 })
             ]
@@ -623,8 +625,10 @@ function(in_window)
         // #region Construct and return new ASN.1 schema for this object 
         return (new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
             optional: true,
-            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-            id_block_tag_number: this.type, // "SignedAttributes" = 0, "UnsignedAttributes" = 1
+            id_block: {
+                tag_class: 3, // CONTEXT-SPECIFIC
+                tag_number: this.type, // "SignedAttributes" = 0, "UnsignedAttributes" = 1
+            },
             value: attributes_array
         }));
         // #endregion 
@@ -831,8 +835,10 @@ function(in_window)
         if("eContent" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [this.eContent]
             }));
         // #endregion 
@@ -972,8 +978,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: current_certificates
             }));
         }
@@ -987,8 +995,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value: current_crls
             }));
         }
@@ -1372,8 +1382,10 @@ function(in_window)
                 break;
             case 2:
                 return new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [this.value]
                 });
                 break;
@@ -1470,8 +1482,10 @@ function(in_window)
             output_array.push(this.rid.toSchema());
         else
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [this.rid]
             }));
 
@@ -1635,15 +1649,19 @@ function(in_window)
                 break;
             case 2:
                 return new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [this.value]
                 });
                 break;
             case 3:
                 return new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [this.value.toSchema()]
                 })
                 break;
@@ -1896,8 +1914,10 @@ function(in_window)
                 break;
             case 2:
                 return new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: this.value.toSchema().value_block.value
                 });
                 break;
@@ -2128,14 +2148,18 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.INTEGER({ value: this.version }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: [this.originator.toSchema()]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: [this.ukm]
                 }),
                 this.keyEncryptionAlgorithm.toSchema(),
@@ -2559,8 +2583,10 @@ function(in_window)
                 break;
             case 2:
                 return new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: (this.variant - 1),
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: (this.variant - 1)
+                    },
                     value: [this.value.toSchema()]
                 });
                 break;
@@ -2639,14 +2665,18 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 0, // [0]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
                     value: this.certs.toSchema().value_block.value
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
-                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                    id_block_tag_number: 1, // [1]
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
                     value: this.crls.toSchema().value_block.value
                 })
             ]
@@ -2729,8 +2759,10 @@ function(in_window)
 
         if("encryptedContent" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: [this.encryptedContent]
             }));
         // #endregion 
@@ -2846,8 +2878,10 @@ function(in_window)
         if("originatorInfo" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 0, // [0]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
                 value: this.originatorInfo.toSchema().value_block.value
             }));
 
@@ -2871,8 +2905,10 @@ function(in_window)
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
-                id_block_tag_class: 3, // CONTEXT-SPECIFIC
-                id_block_tag_number: 1, // [1]
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
                 value: attributes
             }));
         }
