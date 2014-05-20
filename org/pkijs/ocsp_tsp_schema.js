@@ -175,7 +175,7 @@ function(in_window)
                     optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
-                        tag_number: 0 // [0]
+                        tag_number: 1 // [1]
                     },
                     value: [in_window.org.pkijs.schema.GENERAL_NAME(names.requestorName || {
                         names: {
@@ -196,7 +196,7 @@ function(in_window)
                     optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
-                        tag_number: 0 // [0]
+                        tag_number: 2 // [2]
                     },
                     value: [in_window.org.pkijs.schema.EXTENSIONS(names.extensions || {
                         names: {
