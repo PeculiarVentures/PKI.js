@@ -915,11 +915,7 @@ function(in_window)
         this.tbs = new ArrayBuffer(0);
 
         // OPTIONAL this.version = 0;
-        this.responderID = new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-            id_block_tag_class: 3, // CONTEXT-SPECIFIC
-            id_block_tag_number: 10, // [10]
-            value: []
-        }); // Fake value
+        this.responderID = new in_window.org.pkijs.simpl.RDN(); // Fake value
         this.producedAt = new Date(0, 0, 0);
         this.responses = new Array(); // Array of "SingleResponse" objects
         // OPTIONAL this.responseExtensions = new in_window.org.pkijs.simpl.EXTENSIONS();
@@ -968,7 +964,12 @@ function(in_window)
 
         if("ResponseData.version" in asn1.result)
             this.version = asn1.result["ResponseData.version"].value_block.value_dec;
-        this.responderID = asn1.result["ResponseData.responderID"];
+
+        if(asn1.result["ResponseData.responderID"].id_block.tag_number === 1)
+            this.responderID = new in_window.org.pkijs.simpl.RDN({ schema: asn1.result["ResponseData.responderID"].value_block.value[0] });
+        else
+            this.responderID = asn1.result["ResponseData.responderID"].value_block.value[0]; // OCTETSTRING
+
         this.producedAt = asn1.result["ResponseData.producedAt"].toDate();
 
         var responses_array = asn1.result["ResponseData.responses"];
@@ -1013,7 +1014,19 @@ function(in_window)
                     value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.version })]
                 }));
 
-            output_array.push(this.responderID);
+            if(this.responderID instanceof in_window.org.pkijs.simpl.RDN)
+                output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                    id_block_tag_number: 1, // [1]
+                    value: [this.responderID.toSchema()]
+                }));
+            else
+                output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block_tag_class: 3, // CONTEXT-SPECIFIC
+                    id_block_tag_number: 2, // [2]
+                    value: [this.responderID]
+                }));
+
             output_array.push(new in_window.org.pkijs.asn1.GENERALIZEDTIME({ value_date: this.producedAt }));
 
             var responses = new Array();
