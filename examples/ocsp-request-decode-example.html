@@ -207,7 +207,7 @@
             var ocsp_req_simpl = new org.pkijs.simpl.OCSP_REQUEST({ schema: asn1.result });
 
             // Enumerate through request list
-            if (("tbsRequest" in ocsp_req_simpl) === false)
+            if(ocsp_req_simpl.requestList.length === 0)
                 document.getElementById("ocsp-statusRequests").innerHTML = "None";
             else {
                 // loop to get revoked certificates
@@ -215,8 +215,7 @@
                 var status_table = document.getElementById("ocsp-statusRequests").getElementsByTagName("tbody")[0];
 
 
-                for(var i = 0; i <
-                        ocsp_req_simpl.tbsRequest.requestList.length; i++)
+                for(var i = 0; i < ocsp_req_simpl.requestList.length; i++)
                 {
                     // #region Initial variables
                     var hashAlgorithm;
@@ -229,22 +228,22 @@
                     // #endregion 
 
                     // #region Get the Hash Algorithm
-                    hashAlgorithm = algomap[ocsp_req_simpl.tbsRequest.requestList[i].reqCert.hashAlgorithm.algorithm_id];
+                    hashAlgorithm = algomap[ocsp_req_simpl.requestList[i].reqCert.hashAlgorithm.algorithm_id];
                     // #endregion
 
                     // #region Get the Issuer Name Hash
-                    issuerNameHash = toHexCodes(ocsp_req_simpl.tbsRequest.requestList[i].reqCert.issuerNameHash.value_block.value_hex);
+                    issuerNameHash = toHexCodes(ocsp_req_simpl.requestList[i].reqCert.issuerNameHash.value_block.value_hex);
                     // #endregion
 
                     // #region Get the Issuer Key Hash
-                    issuerKeyHash = toHexCodes(ocsp_req_simpl.tbsRequest.requestList[i].reqCert.issuerKeyHash.value_block.value_hex);
+                    issuerKeyHash = toHexCodes(ocsp_req_simpl.requestList[i].reqCert.issuerKeyHash.value_block.value_hex);
                     // #endregion
 
                     // #region Get the Subject Serial Number
-                    if(ocsp_req_simpl.tbsRequest.requestList[i].reqCert.serialNumber.value_block.is_hex_only == true)
-                        subjectSerial = toHexCodes(ocsp_req_simpl.tbsRequest.requestList[i].reqCert.serialNumber.value_block.value_hex);
+                    if(ocsp_req_simpl.requestList[i].reqCert.serialNumber.value_block.is_hex_only == true)
+                        subjectSerial = toHexCodes(ocsp_req_simpl.requestList[i].reqCert.serialNumber.value_block.value_hex);
                     else
-                        subjectSerial = ocsp_req_simpl.tbsRequest.requestList[i].reqCert.serialNumber.value_block.value_dec;
+                        subjectSerial = ocsp_req_simpl.requestList[i].reqCert.serialNumber.value_block.value_dec;
                     // #endregion 
 
                     var row = status_table.insertRow(status_table.rows.length);
@@ -259,15 +258,15 @@
 
                     // #region Find any Single Requests Extensions
                     var cell5 = row.insertCell(4);
-                    if (("singleRequestExtensions" in ocsp_req_simpl.tbsRequest.requestList[i]) === false)
+                    if (("singleRequestExtensions" in ocsp_req_simpl.requestList[i]) === false)
                     {
                         var node = document.createElement("LI");
                         var textnode = document.createTextNode("None");
                         node.appendChild(textnode);
                         cell5.appendChild(node);
                     } else {
-                        for (var j = 0; j < ocsp_req_simpl.tbsRequest.requestList[i].singleRequestExtensions.length; j++) {
-                            singleRequestExtensionValue = ocsp_req_simpl.tbsRequest.requestList[i].singleRequestExtensions[f].extnID;
+                        for (var j = 0; j < ocsp_req_simpl.requestList[i].singleRequestExtensions.length; j++) {
+                            singleRequestExtensionValue = ocsp_req_simpl.requestList[i].singleRequestExtensions[f].extnID;
 
                             var node = document.createElement("LI");
                             var textnode = document.createTextNode(singleRequestExtensionValue);
@@ -279,7 +278,7 @@
                 };
             }
             // Enumerate through request extensions
-            if (("requestExtensions" in ocsp_req_simpl.tbsRequest) === false) {
+            if (("requestExtensions" in ocsp_req_simpl) === false) {
                 var node = document.createElement("LI");
                 var textnode = document.createTextNode("None");
                 node.appendChild(textnode);
@@ -287,7 +286,7 @@
             }
             else{
                 for(var i
-                        = 0; i < ocsp_req_simpl.tbsRequest.requestExtensions.length; i++)
+                        = 0; i < ocsp_req_simpl.requestExtensions.length; i++)
                 {
                     // OID map
                     var extenmap = {
@@ -303,7 +302,7 @@
                                 "2.5.29.29": "Certificate Issuer",
                                 "1.3.6.1.4.1.311.21.4": "Next Update"
                             },
-                            extensionValue = extenmap[ocsp_req_simpl.tbsRequest.requestExtensions[i].extnID];
+                            extensionValue = extenmap[ocsp_req_simpl.requestExtensions[i].extnID];
 
                     var node = document.createElement("LI");
                     var textnode = document.createTextNode(extensionValue);

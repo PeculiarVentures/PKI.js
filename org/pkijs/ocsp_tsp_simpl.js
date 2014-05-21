@@ -226,7 +226,7 @@ function(in_window)
         if("singleRequestExtensions" in asn1.result)
         {
             this.singleRequestExtensions = new Array();
-            var exts = asn1.result["singleRequestExtensions"];
+            var exts = asn1.result["singleRequestExtensions"].value_block.value;
 
             for(var i = 0; i < exts.length; i++)
                 this.singleRequestExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
@@ -338,7 +338,7 @@ function(in_window)
         if("TBSRequest.requestExtensions" in asn1.result)
         {
             this.requestExtensions = new Array();
-            var exts = asn1.result["TBSRequest.requestExtensions"];
+            var exts = asn1.result["TBSRequest.requestExtensions"].value_block.value;
 
             for(var i = 0; i < exts.length; i++)
                 this.requestExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
@@ -599,7 +599,7 @@ function(in_window)
         if("TBSRequest.requestExtensions" in asn1.result)
         {
             this.requestExtensions = new Array();
-            var exts = asn1.result["TBSRequest.requestExtensions"];
+            var exts = asn1.result["TBSRequest.requestExtensions"].value_block.value;
 
             for(var i = 0; i < exts.length; i++)
                 this.requestExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
@@ -1006,7 +1006,7 @@ function(in_window)
         if("singleExtensions" in asn1.result)
         {
             this.singleExtensions = new Array();
-            var exts = asn1.result["singleExtensions"];
+            var exts = asn1.result["singleExtensions"].value_block.value;
 
             for(var i = 0; i < exts.length; i++)
                 this.singleExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
@@ -1123,7 +1123,7 @@ function(in_window)
         if("ResponseData.responseExtensions" in asn1.result)
         {
             this.responseExtensions = new Array();
-            var exts = asn1.result["ResponseData.responseExtensions"];
+            var exts = asn1.result["ResponseData.responseExtensions"].value_block.value;
 
             for(var i = 0; i < exts.length; i++)
                 this.responseExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));

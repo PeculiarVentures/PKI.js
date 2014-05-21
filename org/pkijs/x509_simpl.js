@@ -3549,7 +3549,7 @@ function(in_window)
         if("crlEntryExtensions" in asn1.result)
         {
             this.crlEntryExtensions = new Array();
-            var exts = asn1.result["crlEntryExtensions"];
+            var exts = asn1.result["crlEntryExtensions"].value_block.value;
 
             for(var i = 0; i < exts.length; i++)
                 this.crlEntryExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
@@ -3677,7 +3677,7 @@ function(in_window)
         if("tbsCertList.extensions" in asn1.result)
         {
             this.crlExtensions = new Array();
-            var exts = asn1.result["tbsCertList.extensions"];
+            var exts = asn1.result["tbsCertList.extensions"].value_block.value;
 
             for(var i = 0; i < exts.length; i++)
                 this.crlExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
