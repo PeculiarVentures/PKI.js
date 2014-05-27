@@ -1231,6 +1231,30 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region ASN.1 schema definition for "SubjectDirectoryAttributes" type of extension 
+    //**************************************************************************************
+    in_window.org.pkijs.schema.x509.SubjectDirectoryAttributes =
+    function()
+    {
+        // SubjectDirectoryAttributes OID ::= 2.5.29.9
+        //
+        //SubjectDirectoryAttributes ::= SEQUENCE SIZE (1..MAX) OF Attribute
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                new in_window.org.pkijs.asn1.REPEATED({
+                    name: (names.attributes || ""),
+                    value: in_window.org.pkijs.schema.ATTRIBUTE()
+                })
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region ASN.1 schema definition for "GeneralSubtree" type 
     //**************************************************************************************
     in_window.org.pkijs.schema.x509.GeneralSubtree =

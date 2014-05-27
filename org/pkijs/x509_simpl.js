@@ -1370,6 +1370,74 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region Simplified structure for "SubjectDirectoryAttributes" type of extension
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.SubjectDirectoryAttributes =
+    function()
+    {
+        // #region Internal properties of the object 
+        this.attributes = new Array(); // Array of "simpl.ATTRIBUTE"
+        // #endregion 
+
+        // #region If input argument array contains "schema" for this object 
+        if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
+            in_window.org.pkijs.simpl.x509.SubjectDirectoryAttributes.prototype.fromSchema.call(this, arguments[0].schema);
+        // #endregion 
+        // #region If input argument array contains "native" values for internal properties 
+        else
+        {
+            if(arguments[0] instanceof Object)
+            {
+                this.attributes = arguments[0].attributes || new Array(); // Array of "simpl.ATTRIBUTE"
+            }
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.SubjectDirectoryAttributes.prototype.fromSchema =
+    function(schema)
+    {
+        // #region Check the schema is valid 
+        var asn1 = in_window.org.pkijs.compareSchema(schema,
+            schema,
+            in_window.org.pkijs.schema.x509.SubjectDirectoryAttributes({
+                names: {
+                    attributes: "attributes"
+                }
+            })
+            );
+
+        if(asn1.verified === false)
+            throw new Error("Object's schema was not verified against input data for SubjectDirectoryAttributes");
+        // #endregion 
+
+        // #region Get internal properties from parsed schema
+        var attrs = asn1.result["attributes"];
+
+        for(var i = 0; i < attrs.length; i++)
+            this.attributes.push(new in_window.org.pkijs.simpl.ATTRIBUTE({ schema: attrs[i] }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.SubjectDirectoryAttributes.prototype.toSchema =
+    function()
+    {
+        // #region Create array for output sequence 
+        var output_array = new Array();
+
+        for(var i = 0; i < this.attributes.length; i++)
+            output_array.push(this.attributes[i].toSchema());
+        // #endregion 
+
+        // #region Construct and return new ASN.1 schema for this object 
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            value: output_array
+        }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region Simplified structure for "PolicyMapping" type
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyMapping =
@@ -2908,6 +2976,9 @@ function(in_window)
 
         switch(this.extnID)
         {
+            case "2.5.29.9": // SubjectDirectoryAttributes
+                this.parsedValue = new in_window.org.pkijs.simpl.x509.SubjectDirectoryAttributes({ schema: asn1.result });
+                break;
             case "2.5.29.14": // SubjectKeyIdentifier
                 this.parsedValue = asn1.result; // Should be just a simple OCTETSTRING
                 break;
