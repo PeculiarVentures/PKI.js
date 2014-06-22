@@ -634,21 +634,21 @@ function(in_window)
             optional: true,
             value: [
                 new in_window.org.pkijs.asn1.INTEGER({ name: (names.seconds || "") }),
-                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                    name: (names.millis || ""),
                     optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
-                    },
-                    value: [new in_window.org.pkijs.asn1.INTEGER({ name: (names.millis || "") })]
+                    }
                 }),
-                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                    name: (names.micros || ""),
                     optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
-                    },
-                    value: [new in_window.org.pkijs.asn1.INTEGER({ name: (names.micros || "") })]
+                    }
                 })
             ]
         }));

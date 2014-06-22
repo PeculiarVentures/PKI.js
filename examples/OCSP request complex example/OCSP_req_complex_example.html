@@ -1,0 +1,480 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>OCSP request complex example</title>
+
+    <script type="text/javascript" src="org/pkijs/common.js"></script>
+    <script type="text/javascript" src="org/pkijs/asn1.js"></script>
+    <script type="text/javascript" src="org/pkijs/x509_schema.js"></script>
+    <script type="text/javascript" src="org/pkijs/x509_simpl.js"></script>
+    <script type="text/javascript" src="org/pkijs/cms_schema.js"></script>
+    <script type="text/javascript" src="org/pkijs/cms_simpl.js"></script>
+    <script type="text/javascript" src="org/pkijs/ocsp_tsp_schema.js"></script>
+    <script type="text/javascript" src="org/pkijs/ocsp_tsp_simpl.js"></script>
+
+    <style type="text/css">
+        body{background:#EFEFEF;font:normal 14px/16px Helvetica, Arial, sans-serif;}
+        .wrapper{
+            width:600px;
+            margin:50px auto;
+            padding:50px;
+            border:solid 2px #CCC;
+            border-radius:10px;
+            -webkit-border-radius:10px;
+            box-shadow:0 0 12px 3px #CDCDCD;
+            -webkit-box-shadow:0 0 12px 3px #CDCDCD;
+            background:#FFF;
+        }
+        label{
+            font:bold 16px/20px Helvetica, Arial, sans-serif;
+            margin:0 0 8px;
+        }
+        textarea{
+            width:500px;
+            border:solid 1px #999;
+            border-radius:5px;
+            -webkit-border-radius:5px;
+            height:340px;
+            font:normal 12px/15px monospace;
+            display:block;
+            margin:0 0 12px;
+            box-shadow:0 0 5px 5px #EFEFEF inset;
+            -webkit-box-shadow:0 0 5px 5px #EFEFEF inset;
+            padding:20px;
+           resize: none;
+        }
+        a{
+            display:inline-block;
+            padding:5px 15px;
+            background:#ACD0EC;
+            border:solid 1px #4C6181;
+            color:#000;
+            font:normal 14px/16px Helvetica, Arial, sans-serif;
+        }
+        a:hover{
+            background:#DAEBF8;
+            cursor:pointer;
+        }
+        .header-block {
+            margin-top:30px;
+            font:bold 16px/20px Helvetica, Arial, sans-serif;
+        }
+        .border-block{
+            border:solid 2px #999;
+            border-radius:5px;
+            -webkit-border-radius:5px;
+            margin:10px 0 0;
+            padding:20px 30px;
+            background:#F0F4FF;
+        }
+        .border-block h2{
+            margin:0 0 16px;
+            font:bold 22px/24px Helvetica, Arial, sans-serif;
+        }
+        .border-block p{
+            margin:0 0 12px;
+        }
+        .border-block p .type{
+            font-weight:bold;
+            display:inline-block;
+            width:176px;
+        }
+        .border-block .two-col{
+            overflow:hidden;
+            margin:0 0 16px;
+        }
+        .border-block .two-col .subject{
+            width:180px;
+            font-weight:bold;
+            margin:0 0 12px;
+            float:left;
+        }
+        .border-block .two-col #ocsp-req-attributes{
+            margin:0;
+            padding:0;
+            float:left;
+            list-style:none;
+        }
+        .border-block .two-col #ocsp-req-attributes li p{
+            margin:0;
+        }
+        .border-block .two-col #ocsp-req-attributes li p span{
+            width:40px;
+            display:inline-block;
+            margin:0 0 5px;
+        }
+        .border-block .two-col #ocsp-req-exten{
+            overflow:hidden;
+            padding:0 0 0 17px;
+            margin:0;
+            list-style-type:square;
+        }
+        table {
+            border:solid;
+            border-collapse:collapse;
+            border-color:black;
+        }
+       th { 
+        text-align:center;
+        background: #ccc;
+        padding: 5px;
+        border: 1px solid black;
+       }
+       td { 
+        padding: 5px;
+        border: 1px solid black; 
+       }
+    </style>
+
+    <script>
+        //*********************************************************************************
+        var ocspReqBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created OCSP request 
+        var issuerCertificate = null;
+        var issuerPublicKey = null;
+        //*********************************************************************************
+        // #region Auxiliary functions 
+        //*********************************************************************************
+        function formatPEM(pem_string)
+        {
+            /// <summary>Format string in order to have each line with length equal to 63</summary>
+            /// <param name="pem_string" type="String">String to format</param>
+
+            var string_length = pem_string.length;
+            var result_string = "";
+
+            for(var i = 0, count = 0; i < string_length; i++, count++)
+            {
+                if(count > 63)
+                {
+                    result_string = result_string + "\r\n";
+                    count = 0;
+                }
+
+                result_string = result_string + pem_string[i];
+            }
+
+            return result_string;
+        }
+        //*********************************************************************************
+        function arrayBufferToString(buffer)
+        {
+            /// <summary>Create a string from ArrayBuffer</summary>
+            /// <param name="buffer" type="ArrayBuffer">ArrayBuffer to create a string from</param>
+
+            var result_string = "";
+            var view = new Uint8Array(buffer);
+
+            for(var i = 0; i < view.length; i++)
+                result_string = result_string + String.fromCharCode(view[i]);
+
+            return result_string;
+        }
+        //*********************************************************************************
+        function stringToArrayBuffer(str)
+        {
+            /// <summary>Create an ArrayBuffer from string</summary>
+            /// <param name="str" type="String">String to create ArrayBuffer from</param>
+
+            var stringLength = str.length;
+
+            var resultBuffer = new ArrayBuffer(stringLength);
+            var resultView = new Uint8Array(resultBuffer);
+
+            for(var i = 0; i < stringLength; i++)
+                resultView[i] = str.charCodeAt(i);
+
+            return resultBuffer;
+        }
+        //*********************************************************************************
+        function handleFileBrowse(evt)
+        {
+            var temp_reader = new FileReader();
+
+            var current_files = evt.target.files;
+
+            temp_reader.onload =
+            function(event)
+            {
+                ocspReqBuffer = event.target.result;
+                parse_OCSP_req();
+            };
+
+            temp_reader.readAsArrayBuffer(current_files[0]);
+        }
+        //*********************************************************************************
+        function handleIssuerCert(evt)
+        {
+            var temp_reader = new FileReader();
+
+            var current_files = evt.target.files;
+
+            temp_reader.onload =
+            function(event)
+            {
+                try
+                {
+                    issuerPublicKey = null;
+
+                    var asn1 = org.pkijs.fromBER(event.target.result);
+                    issuerCertificate = new org.pkijs.simpl.CERT({ schema: asn1.result });
+                }
+                catch(ex) { }
+            };
+
+            temp_reader.readAsArrayBuffer(current_files[0]);
+        }
+        //*********************************************************************************
+        // #endregion 
+        //*********************************************************************************
+        // #region Create OCSP request  
+        //*********************************************************************************
+        function create_OCSP_req(buffer)
+        {
+            // #region Initial variables 
+            var sequence = Promise.resolve();
+
+            var ocsp_req_simpl = new org.pkijs.simpl.OCSP_REQUEST();
+            // #endregion 
+
+            // #region Put static variables 
+            ocsp_req_simpl.requestorName = new org.pkijs.simpl.GENERAL_NAME({
+                NameType: 4,
+                Name: new org.pkijs.simpl.RDN({
+                    types_and_values: [
+                        new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+                            type: "2.5.4.6", // Country name
+                            value: new org.pkijs.asn1.PRINTABLESTRING({ value: "RU" })
+                        }),
+                        new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+                            type: "2.5.4.3", // Common name
+                            value: new org.pkijs.asn1.BMPSTRING({ value: "Test" })
+                        })
+                    ]
+                })
+            });
+
+            var fictionBuffer = new ArrayBuffer(4);
+            var fictionView = new Uint8Array(fictionBuffer);
+            fictionView[0] = 0x7F;
+            fictionView[1] = 0x01;
+            fictionView[2] = 0x02;
+            fictionView[3] = 0x03;
+
+            ocsp_req_simpl.requestList = [new org.pkijs.simpl.ocsp.Request({
+                reqCert: new org.pkijs.simpl.ocsp.CertID({
+                    hashAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        algorithm_id: "1.3.14.3.2.26"
+                    }),
+                    issuerNameHash: new org.pkijs.asn1.OCTETSTRING({ value_hex: fictionBuffer }),
+                    issuerKeyHash: new org.pkijs.asn1.OCTETSTRING({ value_hex: fictionBuffer }),
+                    serialNumber: new org.pkijs.asn1.INTEGER({ value_hex: fictionBuffer })
+                })
+            })];
+
+            ocsp_req_simpl.requestExtensions = [
+                new org.pkijs.simpl.EXTENSION({
+                    extnID: "1.3.6.1.5.5.7.48.1.2", // ocspNonce
+                    extnValue: (new org.pkijs.asn1.OCTETSTRING({ value_hex: fictionBuffer })).toBER(false)
+                })
+            ];
+            // #endregion 
+
+            // #region Encode OCSP request and put on the Web page 
+
+            // #region Convert ArrayBuffer to String 
+            var signed_data_string = "";
+
+            var ocsp_req_schema = ocsp_req_simpl.toSchema();
+            ocspReqBuffer = ocsp_req_schema.toBER(false);
+
+            var view = new Uint8Array(ocspReqBuffer);
+
+            for(var i = 0; i < view.length; i++)
+                signed_data_string = signed_data_string + String.fromCharCode(view[i]);
+            // #endregion 
+
+            var result_string = "";
+
+            result_string = result_string + "\r\n-----BEGIN OCSP REQUEST-----\r\n";
+            result_string = result_string + formatPEM(window.btoa(signed_data_string));
+            result_string = result_string + "\r\n-----END OCSP REQUEST-----\r\n\r\n";
+
+            document.getElementById("new_signed_data").innerHTML = result_string;
+
+            parse_OCSP_req();
+
+            alert("OCSP request has created successfully!");
+            // #endregion   
+        }
+        //*********************************************************************************
+        // #endregion 
+        //*********************************************************************************
+        // #region Parse existing OCSP request  
+        //*********************************************************************************
+        function parse_OCSP_req()
+        {
+            // #region Initial check 
+            if(ocspReqBuffer.byteLength === 0)
+            {
+                alert("Nothing to parse!");
+                return;
+            }
+            // #endregion 
+
+            // #region Initial activities 
+            document.getElementById("ocsp-req-extn-div").style.display = "none";
+
+            var requestsTable = document.getElementById("ocsp-req-requests");
+            while(requestsTable.rows.length > 1)
+            {
+                requestsTable.deleteRow(requestsTable.rows.length - 1);
+            }
+
+            var extensionTable = document.getElementById("ocsp-req-extn-table");
+            while(extensionTable.rows.length > 1)
+            {
+                extensionTable.deleteRow(extensionTable.rows.length - 1);
+            }
+
+            var requestorTable = document.getElementById("ocsp-req-name");
+            while(requestorTable.rows.length > 1)
+            {
+                requestorTable.deleteRow(requestorTable.rows.length - 1);
+            }
+            // #endregion 
+
+            // #region Decode existing OCSP request
+            var asn1 = org.pkijs.fromBER(ocspReqBuffer);
+            var ocsp_req_simpl = new org.pkijs.simpl.OCSP_REQUEST({ schema: asn1.result });
+            // #endregion 
+
+            // #region Put information about OCSP request requestor 
+            if("requestorName" in ocsp_req_simpl)
+            {
+                switch(ocsp_req_simpl.requestorName.NameType)
+                {
+                    case 1: // rfc822Name
+                    case 2: // dNSName
+                    case 6: // uniformResourceIdentifier
+                        document.getElementById("ocsp-req-name-simpl").innerHTML = ocsp_req_simpl.requestorName.Name.value_block.value;
+                        document.getElementById("ocsp-req-nm-simpl").style.display = "block";
+                        break;
+                    case 7: // iPAddress
+                        {
+                            var view = new Uint8Array(ocsp_req_simpl.requestorName.Name.value_block.value_hex);
+
+                            document.getElementById("ocsp-req-name-simpl").innerHTML = view[0].toString() + "." + view[1].toString() + "." + view[2].toString() + "." + view[3].toString();
+                            document.getElementById("ocsp-req-nm-simpl").style.display = "block";
+                        }
+                        break;
+                    case 3: // x400Address
+                    case 5: // ediPartyName
+                        document.getElementById("ocsp-req-name-simpl").innerHTML = (ocsp_req_simpl.requestorName.NameType === 3) ? "<type \"x400Address\">" : "<type \"ediPartyName\">";
+                        document.getElementById("ocsp-req-nm-simpl").style.display = "block";
+                        break;
+                    case 4: // directoryName
+                        {
+                            var rdnmap = {
+                                "2.5.4.6": "C",
+                                "2.5.4.10": "OU",
+                                "2.5.4.11": "O",
+                                "2.5.4.3": "CN",
+                                "2.5.4.7": "L",
+                                "2.5.4.8": "S",
+                                "2.5.4.12": "T",
+                                "2.5.4.42": "GN",
+                                "2.5.4.43": "I",
+                                "2.5.4.4": "SN",
+                                "1.2.840.113549.1.9.1": "E-mail"
+                            };
+
+                            for(var i = 0; i < ocsp_req_simpl.requestorName.Name.types_and_values.length; i++)
+                            {
+                                var typeval = rdnmap[ocsp_req_simpl.requestorName.Name.types_and_values[i].type];
+                                if(typeof typeval === "undefined")
+                                    typeval = ocsp_req_simpl.requestorName.Name.types_and_values[i].type;
+
+                                var subjval = ocsp_req_simpl.requestorName.Name.types_and_values[i].value.value_block.value;
+
+                                var row = requestorTable.insertRow(requestorTable.rows.length);
+                                var cell0 = row.insertCell(0);
+                                cell0.innerHTML = typeval;
+                                var cell1 = row.insertCell(1);
+                                cell1.innerHTML = subjval;
+                            }
+
+                            document.getElementById("ocsp-req-name-div").style.display = "block";
+                        }
+                        break;
+                }
+            }
+            // #endregion 
+
+            // #region Put information about requests 
+            for(var i = 0; i < ocsp_req_simpl.requestList.length; i++)
+            {
+                var row = requestsTable.insertRow(requestsTable.rows.length);
+                var cell0 = row.insertCell(0);
+                cell0.innerHTML = org.pkijs.bufferToHexCodes(ocsp_req_simpl.requestList[i].reqCert.serialNumber.value_block.value_hex);
+            }
+            // #endregion 
+
+            // #region Put information about request extensions 
+            if("requestExtensions" in ocsp_req_simpl)
+            {
+                for(var i = 0; i < ocsp_req_simpl.requestExtensions.length; i++)
+                {
+                    var row = extensionTable.insertRow(extensionTable.rows.length);
+                    var cell0 = row.insertCell(0);
+                    cell0.innerHTML = ocsp_req_simpl.requestExtensions[i].extnID;
+                }
+
+                document.getElementById("ocsp-req-extn-div").style.display = "block";
+            }
+            // #endregion 
+        }
+        //*********************************************************************************
+        // #endregion 
+        //*********************************************************************************
+    </script>
+</head>
+
+<body>
+    <div class="wrapper">
+
+        <p class="header-block">Create new OCSP request</p>
+        <div id="output_div" class="border-block">
+            <label for="new_signed_data" style="font-weight:bold;float:left;">BASE-64 encoded new OCSP request:</label>
+            <textarea id="new_signed_data">&lt;  New encoded OCSP request will be stored here &gt;</textarea>
+            <a onclick="create_OCSP_req();">Create</a>
+        </div>
+
+        <p class="header-block">Parse loaded/created OCSP request</p>
+        <div id="ocsp-req-data-block" class="border-block">
+            <p>
+                <label for="ocsp-req-file">Select OCSP request file:</label>
+                <input type="file" id="ocsp-req-file" title="OCSP request" />
+            </p>
+            <div id="ocsp-req-requests-div" class="two-col">
+                <p class="subject">Requests:</p>
+                <table id="ocsp-req-requests"><tr><th>Cert. serial number</th></tr></table>
+            </div>
+            <div id="ocsp-req-name-div" class="two-col" style="display:none;">
+                <p class="subject">Requestor name:</p>
+                <table id="ocsp-req-name"><tr><th>OID</th><th>Value</th></tr></table>
+            </div>
+            <p id="ocsp-req-nm-simpl" style="display:none;"><span class="type">Requestor name:</span> <span id="ocsp-req-name-simpl"></span></p>
+            <div id="ocsp-req-extn-div" class="two-col" style="display:none;">
+                <p class="subject">Extensions:</p>
+                <table id="ocsp-req-extn-table"><tr><th>OID</th></tr></table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('ocsp-req-file').addEventListener('change', handleFileBrowse, false);
+    </script>
+</body>
+</html>

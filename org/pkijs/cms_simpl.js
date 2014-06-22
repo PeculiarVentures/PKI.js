@@ -118,7 +118,7 @@ function(in_window)
             );
 
         if(asn1.verified === false)
-            throw new Error("Object's schema was not verified against input data for " + getObjectClass(this));
+            throw new Error("Object's schema was not verified against input data for CMS_CONTENT_INFO");
         // #endregion 
 
         // #region Get internal properties from parsed schema 
@@ -605,6 +605,14 @@ function(in_window)
         encoded_view[0] = 0x31;
         // #endregion 
 
+        if(("attributes" in asn1.result) === false)
+        {
+            if(this.type === 0)
+                throw new Error("Wrong structure of SignedUnsignedAttributes");
+            else
+                return; // Not so important in case of "UnsignedAttributes"
+        }
+
         var attributes_array = asn1.result["attributes"];
 
         for(var i = 0; i < attributes_array.length; i++)
@@ -702,7 +710,11 @@ function(in_window)
         this.signatureAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["SignerInfo.signatureAlgorithm"] });
         this.signature = asn1.result["SignerInfo.signature"];
         if("SignerInfo.unsignedAttrs" in asn1.result)
-            this.unsignedAttrs = new in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes({ schema: asn1.result["SignerInfo.unsignedAttrs"] });
+        {
+            this.unsignedAttrs = new in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes();
+            this.unsignedAttrs.type = 1; // Unsigned attributes
+            this.unsignedAttrs.fromSchema(asn1.result["SignerInfo.unsignedAttrs"]);
+        }
         // #endregion 
     }
     //**************************************************************************************
@@ -768,7 +780,7 @@ function(in_window)
                         if(this.eContent.id_block.is_constructed === false)
                         {
                             var constr_string = new in_window.org.pkijs.asn1.OCTETSTRING({
-                                id_block_is_constructed: true,
+                                id_block: { is_constructed: true },
                                 is_constructed: true
                             });
 
@@ -1039,6 +1051,10 @@ function(in_window)
         var signerIndex = -1;
         var cert_index = -1;
         var signer_cert = {};
+
+        var trusted_certs = new Array();
+
+        var _this = this;
         // #endregion 
 
         // #region Get a "crypto" extension 
@@ -1055,6 +1071,9 @@ function(in_window)
 
             if("data" in arguments[0]) // Detached data
                 data = arguments[0].data;
+
+            if("trusted_certs" in arguments[0])
+                trusted_certs = arguments[0].trusted_certs;
         }
 
         if(signerIndex === (-1))
@@ -1118,6 +1137,86 @@ function(in_window)
                 }
                 );
         }
+        // #endregion 
+
+        // #region Make additional verification for signer's certificate 
+        function checkCA(cert)
+        {
+            /// <param name="cert" type="in_window.org.pkijs.simpl.CERT">Certificate to find CA flag for</param>
+
+            // #region Do not include signer's certificate 
+            if((cert.issuer.isEqual(signer_cert.issuer) === true) && (cert.serialNumber.isEqual(signer_cert.serialNumber) === true))
+                return null;
+            // #endregion 
+
+            var isCA = false;
+
+            for(var i = 0; i < cert.extensions.length; i++)
+            {
+                if(cert.extensions[i].extnID === "2.5.29.19") // BasicConstraints
+                {
+                    if("cA" in cert.extensions[i].parsedValue)
+                    {
+                        if(cert.extensions[i].parsedValue.cA === true)
+                            isCA = true;
+                    }
+                }
+            }
+
+            if(isCA)
+                return cert;
+            else
+                return null;
+        }
+
+        var checkCA_promises = new Array();
+
+        for(var i = 0; i < this.certificates.length; i++)
+            checkCA_promises.push(checkCA(this.certificates[i]));
+
+        sequence = sequence.then(
+            function(result)
+            {
+                return Promise.all(checkCA_promises).then(
+                    function(promiseResults)
+                    {
+                        var additional_certs = new Array();
+                        additional_certs.push(signer_cert);
+
+                        for(var i = 0; i < promiseResults.length; i++)
+                        {
+                            if(promiseResults[i] !== null)
+                                additional_certs.push(promiseResults[i]);
+                        }
+
+                        var cert_chain_simpl = new org.pkijs.simpl.CERT_CHAIN({
+                            certs: additional_certs,
+                            trusted_certs: trusted_certs
+                        });
+                        if("crls" in _this)
+                            cert_chain_simpl.crls = _this.crls;
+
+                        return cert_chain_simpl.verify().then(
+                            function(result)
+                            {
+                                if(result.result === true)
+                                    return new Promise(function(resolve, reject) { resolve(); });
+                                else
+                                    return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed"); });
+                            },
+                            function(error)
+                            {
+                                return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed with error: " + ((error instanceof Object) ? error.result_message : error)); });
+                            }
+                            );
+                    },
+                    function(promiseError)
+                    {
+                        return new Promise(function(resolve, reject) { reject("Error during checking certificates for CA flag: " + promiseError); });
+                    }
+                    );
+            }
+            );
         // #endregion 
 
         // #region Find signer's hashing algorithm 
@@ -1189,7 +1288,7 @@ function(in_window)
                 var publicKeyInfo_buffer = publicKeyInfo_schema.toBER(false);
                 var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
 
-                return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["sign", "verify"]);
+                return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["verify"]);
             }
             );
         // #endregion 

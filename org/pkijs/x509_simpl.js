@@ -219,7 +219,7 @@ function(in_window)
         switch(this.NameType)
         {
             case 0: // otherName
-                this.Name = asn1.result["otherName"];
+                this.Name = asn1.result["block_name"];
                 break;
             case 1: // rfc822Name + dNSName + uniformResourceIdentifier
             case 2:
@@ -236,7 +236,7 @@ function(in_window)
                 }
                 break;
             case 3: // x400Address
-                this.Name = asn1.result["x400Address"];
+                this.Name = asn1.result["block_name"];
                 break;
             case 4: // directoryName
                 this.Name = new in_window.org.pkijs.simpl.RDN({ schema: asn1.result["directoryName"] });
@@ -278,7 +278,6 @@ function(in_window)
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: this.NameType
                     },
-                    name: (names.block_name || ""),
                     value: [
                         this.Name
                     ]
@@ -298,7 +297,13 @@ function(in_window)
                 }
                 break;
             case 4:
-                return this.Name.toSchema();
+                return new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 4
+                    },
+                    value: [this.Name.toSchema()]
+                });
                 break;
             case 7:
                 {
@@ -1259,10 +1264,18 @@ function(in_window)
 
         // #region Get internal properties from parsed schema 
         if("notBefore" in asn1.result)
-            this.notBefore = asn1.result["notBefore"].toDate();
+        {
+            var localNotBefore = new in_window.org.pkijs.asn1.GENERALIZEDTIME();
+            localNotBefore.fromBuffer(asn1.result["notBefore"].value_block.value_hex);
+            this.notBefore = localNotBefore.toDate();
+        }
 
         if("notAfter" in asn1.result)
-            this.notAfter = asn1.result["notAfter"].toDate();
+        {
+            var localNotAfter = new in_window.org.pkijs.asn1.GENERALIZEDTIME({ value_hex: asn1.result["notAfter"].value_block.value_hex });
+            localNotAfter.fromBuffer(asn1.result["notAfter"].value_block.value_hex);
+            this.notAfter = localNotAfter.toDate();
+        }
         // #endregion 
     }
     //**************************************************************************************
@@ -1273,23 +1286,21 @@ function(in_window)
         var output_array = new Array();
 
         if("notBefore" in this)
-            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 0 // [0]
                 },
-                value: [in_window.org.pkijs.asn1.GENERALIZEDTIME({ value_date: this.notBefore })]
+                value_hex: (new in_window.org.pkijs.asn1.GENERALIZEDTIME({ value_date: this.notBefore })).value_block.value_hex
             }));
 
         if("notAfter" in this)
-            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 1 // [1]
                 },
-                value: [in_window.org.pkijs.asn1.GENERALIZEDTIME({ value_date: this.notAfter })]
+                value_hex: (new in_window.org.pkijs.asn1.GENERALIZEDTIME({ value_date: this.notAfter })).value_block.value_hex
             }));
         // #endregion 
 
@@ -2413,8 +2424,6 @@ function(in_window)
         if("reasons" in this)
         {
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
-                name: (names.reasons || ""),
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 1 // [1]
@@ -3386,6 +3395,8 @@ function(in_window)
 
         var signature = this.signatureValue;
         var tbs = this.tbs;
+
+        var _this = this;
         // #endregion 
 
         // #region Set correct "subjectPublicKeyInfo" value 
@@ -3428,7 +3439,7 @@ function(in_window)
                 sha_algorithm = "sha-512";
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signatureAlgorithm.algorithm_id); });
+                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
         };
         // #endregion 
 
@@ -3440,7 +3451,7 @@ function(in_window)
                 var publicKeyInfo_buffer = publicKeyInfo_schema.toBER(false);
                 var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
 
-                return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["sign", "verify"]);
+                return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["verify"]);
             }
             );
         // #endregion 
@@ -3537,7 +3548,7 @@ function(in_window)
         var publicKeyInfo_buffer = publicKeyInfo_schema.toBER(false);
         var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
 
-        return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["sign", "verify"]);
+        return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["verify"]);
     }
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT.prototype.getKeyHash =
@@ -3640,7 +3651,7 @@ function(in_window)
         {
             var exts = new Array();
 
-            for(var i = 0; i < this.crlEntryExtensions; i++)
+            for(var i = 0; i < this.crlEntryExtensions.length; i++)
                 exts.push(this.crlEntryExtensions[i].toSchema());
 
             sequence_array.push(new in_window.org.pkijs.asn1.SEQUENCE({ value: exts }));
@@ -3783,11 +3794,7 @@ function(in_window)
                 rev_certificates.push(this.revokedCertificates[i].toSchema());
 
             output_array.push(new in_window.org.pkijs.asn1.SEQUENCE({
-                value: [
-                    new in_window.org.pkijs.asn1.SEQUENCE({
-                        value: rev_certificates
-                    })
-                ]
+                value: rev_certificates
             }));
         }
 
@@ -3875,6 +3882,11 @@ function(in_window)
         {
             if("issuerCertificate" in arguments[0]) // "issuerCertificate" must be of type "simpl.CERT"
                 subjectPublicKeyInfo = arguments[0].issuerCertificate.subjectPublicKeyInfo;
+
+            // #region In case if there is only public key during verification 
+            if("publicKeyInfo" in arguments[0])
+                subjectPublicKeyInfo = arguments[0].publicKeyInfo; // Must be of type "org.pkijs.simpl.PUBLIC_KEY_INFO"
+            // #endregion 
         }
 
         if((subjectPublicKeyInfo instanceof in_window.org.pkijs.simpl.PUBLIC_KEY_INFO) === false)
@@ -3921,7 +3933,7 @@ function(in_window)
                     publicKeyInfo_view,
                     { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } },
                     true,
-                    ["sign", "verify"]);
+                    ["verify"]);
             }
             );
         // #endregion 
@@ -4303,7 +4315,7 @@ function(in_window)
                 var publicKeyInfo_buffer = publicKeyInfo_schema.toBER(false);
                 var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
 
-                return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["sign", "verify"]);
+                return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["verify"]);
             }
             );
         // #endregion 
@@ -4537,13 +4549,13 @@ function(in_window)
         // #endregion 
 
         // #region Initial checks 
-        if((certs.length === 0) || (_this.crls.length === 0))
+        if(certs.length === 0)
             return new Promise(function(resolve, reject)
             {
                 reject({
                     result: false,
                     result_code: 2,
-                    result_message: "Certificates and CRLs array can not be empty"
+                    result_message: "Certificate's array can not be empty"
                 });
             });
         // #endregion 
@@ -4632,24 +4644,18 @@ function(in_window)
 
             if(isCA === false)
             {
-                if(certs[i].issuer.isEqual(certs[i].subject) === true)
-                    isCA = true; // Not an "end-user certificate", for sure
-
-                if(isCA === false)
-                {
-                    if(sorted_certs.length !== 0)
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject({
-                                result: false,
-                                result_code: 7,
-                                result_message: "Unable to build certificate chain - more than one possible end-user certificate"
-                            });
+                if(sorted_certs.length !== 0)
+                    return new Promise(function(resolve, reject)
+                    {
+                        reject({
+                            result: false,
+                            result_code: 7,
+                            result_message: "Unable to build certificate chain - more than one possible end-user certificate"
                         });
+                    });
 
-                    sorted_certs.push(certs[i]);
-                    end_user_index = i;
-                }
+                sorted_certs.push(certs[i]);
+                end_user_index = i;
             }
         }
 
@@ -4657,15 +4663,20 @@ function(in_window)
         // #endregion 
 
         // #region Check that end-user certificate was found 
-        if((sorted_certs.length === 0) || (certs.length === 0))
+        if(sorted_certs.length === 0)
             return new Promise(function(resolve, reject)
             {
                 reject({
                     result: false,
                     result_code: 1,
-                    result_message: "Unable to build certificate chain"
+                    result_message: "Can't find end-user certificate"
                 });
             });
+        // #endregion 
+
+        // #region Return if there is only one certificate in certificate's array 
+        if(certs.length === 0)
+            return new Promise(function(resolve, reject) { resolve(sorted_certs); });
         // #endregion 
 
         /// <var type="in_window.org.pkijs.simpl.CERT">Current certificate (to find issuer for)</var>
@@ -4700,6 +4711,16 @@ function(in_window)
                     }
                 }
                 );
+            // #endregion 
+
+            // #region Give ability to not provide CRLs (all certificates assume to be valid) 
+            if(_this.crls.length === 0)
+                return sequence.then(
+                    function()
+                    {
+                        return new Promise(function(resolve, reject) { resolve(); });
+                    }
+                    );
             // #endregion 
 
             // #region Find correct CRL for "issuer_certificate" 
@@ -4868,7 +4889,6 @@ function(in_window)
                             if(_this.trusted_certs.length !== 0)
                             {
                                 certs = _this.trusted_certs.splice(0);
-                                current_certificate = certs[0];
                                 return outer();
                             }
                             else
@@ -4877,7 +4897,7 @@ function(in_window)
                                     reject({
                                         result: false,
                                         result_code: 23,
-                                        result_message: "No self-signed certificate found"
+                                        result_message: "Root certificate not found"
                                     });
                                 });
                         }
@@ -4976,9 +4996,6 @@ function(in_window)
         // #region Initial checks 
         if(this.certs.length === 0)
             return new Promise(function(resolve, reject) { reject("Empty certificate array"); });
-
-        if(this.crls.length === 0)
-            return new Promise(function(resolve, reject) { reject("Empty CRL's array"); });
         // #endregion 
 
         // #region Initial variables 

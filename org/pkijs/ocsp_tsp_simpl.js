@@ -616,7 +616,7 @@ function(in_window)
         var output_array = new Array();
 
         // #region Create TBSRequest 
-        var tbs_array = new Arra();
+        var tbs_array = new Array();
 
         if("version" in this)
             tbs_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
@@ -871,7 +871,13 @@ function(in_window)
 
         output_array.push(this.responseStatus);
         if("responseBytes" in this)
-            output_array.push(this.responseBytes.toSchema());
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
+                value: [this.responseBytes.toSchema()]
+            }));
         // #endregion 
 
         // #region Construct and return new ASN.1 schema for this object 
@@ -1228,7 +1234,7 @@ function(in_window)
         this.tbsResponseData = new in_window.org.pkijs.simpl.ocsp.ResponseData();
         this.signatureAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
         this.signature = new in_window.org.pkijs.asn1.BITSTRING();
-        // OPTIONAL this.certs = new Array();
+        // OPTIONAL this.certs = new Array(); // Array of in_window.org.pkijs.simpl.CERT
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -1374,18 +1380,17 @@ function(in_window)
         var responder_type = 0;
         var responder_id = {};
 
-        if(this.tbsResponseData.responderID.id_block.tag_number === 1) // [1] Name
+        if(this.tbsResponseData.responderID instanceof in_window.org.pkijs.simpl.RDN) // [1] Name
         {
-            var asn1 = org.pkijs.fromBER(this.tbsResponseData.responderID.value_block.value_hex);
-            responder_id = new in_window.org.pkijs.simpl.RDN({ schema: asn1.result });
+            responder_type = 0;
+            responder_id = this.tbsResponseData.responderID;
         }
         else
         {
-            if(this.tbsResponseData.responderID.id_block.tag_number === 2) // [2] KeyHash
+            if(this.tbsResponseData.responderID instanceof in_window.org.pkijs.asn1.OCTETSTRING) // [2] KeyHash
             {
                 responder_type = 1;
-
-                responder_id = this.tbsResponseData.responderID.value_block.value[0];
+                responder_id = this.tbsResponseData.responderID;
             }
             else
                 return new Promise(function(resolve, reject) { reject("Wrong value for responderID"); });
@@ -1445,7 +1450,7 @@ function(in_window)
                 var publicKeyInfo_buffer = publicKeyInfo_schema.toBER(false);
                 var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
 
-                return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["sign", "verify"]);
+                return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["verify"]);
             }
             );
         // #endregion 
@@ -1766,9 +1771,15 @@ function(in_window)
         if("seconds" in asn1.result)
             this.seconds = asn1.result["seconds"].value_block.value_dec;
         if("millis" in asn1.result)
-            this.millis = asn1.result["millis"].value_block.value_dec;
+        {
+            var intMillis = new in_window.org.pkijs.asn1.INTEGER({ value_hex: asn1.result["millis"].value_block.value_hex });
+            this.millis = intMillis.value_block.value_dec;
+        }
         if("micros" in asn1.result)
-            this.micros = asn1.result["micros"].value_block.value_dec;
+        {
+            var intMicros = new in_window.org.pkijs.asn1.INTEGER({ value_hex: asn1.result["micros"].value_block.value_hex });
+            this.micros = intMicros.value_block.value_dec;
+        }
         // #endregion 
     }
     //**************************************************************************************
@@ -1779,25 +1790,31 @@ function(in_window)
         var output_array = new Array();
 
         if("seconds" in this)
-            output_array.push(this.seconds);
+            output_array.push(new in_window.org.pkijs.asn1.INTEGER({ value: this.seconds }));
         if("millis" in this)
-            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
+        {
+            var intMillis = new in_window.org.pkijs.asn1.INTEGER({ value: this.millis });
+
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 0 // [0]
                 },
-                value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.millis })]
+                value_hex: intMillis.value_block.value_hex
             }));
+        }
         if("micros" in this)
-            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
+        {
+            var intMicros = new in_window.org.pkijs.asn1.INTEGER({ value: this.micros });
+
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 1 // [1]
                 },
-                value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.micros })]
+                value_hex: intMicros.value_block.value_hex
             }));
+        }
         // #endregion 
 
         // #region Construct and return new ASN.1 schema for this object 
@@ -1955,7 +1972,7 @@ function(in_window)
     function()
     {
         // #region Internal properties of the object 
-        this.status = new in_window.org.pkijs.asn1.INTEGER();
+        this.status = 2; // rejection
         // OPTIONAL this.statusStrings = new Array(); // Array of UTF8STRING
         // OPTIONAL this.failInfo = new in_window.org.pkijs.asn1.BITSTRING();
         // #endregion 
@@ -1969,7 +1986,7 @@ function(in_window)
         {
             if(arguments[0] instanceof Object)
             {
-                this.status = arguments[0].status || new in_window.org.pkijs.asn1.INTEGER();
+                this.status = in_window.org.pkijs.getValue(arguments[0], "status", 2);
                 if("statusStrings" in arguments[0])
                     this.statusStrings = arguments[0].statusStrings; // Array of UTF8STRING
                 if("failInfo" in arguments[0])
@@ -1999,7 +2016,17 @@ function(in_window)
         // #endregion 
 
         // #region Get internal properties from parsed schema 
-        this.status = asn1.result["status"];
+        var _status = asn1.result["status"];
+
+        if((_status.value_block.is_hex_only === true) ||
+           (_status.value_block.value_dec < 0) || 
+           (_status.value_block.value_dec > 5))
+        {
+            throw new Error("PKIStatusInfo \"status\" has invalid value");
+        }
+
+        this.status = _status.value_block.value_dec;
+
         if("statusStrings" in asn1.result)
             this.statusStrings = asn1.result["statusStrings"];
         if("failInfo" in asn1.result)
@@ -2013,7 +2040,7 @@ function(in_window)
         // #region Create array of output sequence 
         var output_array = new Array();
 
-        output_array.push(this.status);
+        output_array.push(new in_window.org.pkijs.asn1.INTEGER({ value: this.status }));
         if("statusStrings" in this)
             output_array.push(new in_window.org.pkijs.asn1.SEQUENCE({
                 optional: true,
@@ -2108,6 +2135,16 @@ function(in_window)
             return new Promise(function(resolve, reject) { reject("timeStampToken is absent in TSP response"); });
         // #endregion 
 
+        // #region Get "trusted_certs" array 
+        var trusted_certs = new Array();
+
+        if(arguments[0] instanceof Object)
+        {
+            if("trusted_certs" in arguments[0])
+                trusted_certs = arguments[0].trusted_certs;
+        }
+        // #endregion 
+
         // #region Check that "timeStampToken" has a right internal format 
         if(this.timeStampToken.contentType !== "1.2.840.113549.1.7.2") // Must be a CMS signed data
             return new Promise(function(resolve, reject) { reject("Wrong format of timeStampToken: " + this.timeStampToken.contentType); });
@@ -2116,7 +2153,7 @@ function(in_window)
         // #region Verify internal signed data value 
         var signed_simp = new in_window.org.pkijs.simpl.CMS_SIGNED_DATA({ schema: this.timeStampToken.content });
 
-        return signed_simp.verify({ signer: 0 });
+        return signed_simp.verify({ signer: 0, trusted_certs: trusted_certs });
         // #endregion 
     }
     //**************************************************************************************

@@ -381,14 +381,8 @@ function(in_window)
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
                             optional: true, // Because OpenSSL makes wrong "attributes" field
-                            value: new in_window.org.pkijs.asn1.SET({
-                                value: [
-                                    new in_window.org.pkijs.asn1.REPEATED({
-                                        name: (names.CertificationRequestInfo_attributes || "CertificationRequestInfo.attributes"),
-                                        value: in_window.org.pkijs.schema.ATTRIBUTE(names.attributes || {})
-                                    })
-                                ]
-                            })
+                            name: (names.CertificationRequestInfo_attributes || "CertificationRequestInfo.attributes"),
+                            value: in_window.org.pkijs.schema.ATTRIBUTE(names.attributes || {})
                         })
                     ]
                 })
@@ -704,19 +698,14 @@ function(in_window)
                     },
                     name: (names.block_name || ""),
                     value: [
-                        new in_window.org.pkijs.asn1.SEQUENCE({
-                            name: (names.otherName || ""),
-                            value: [
-                                new in_window.org.pkijs.asn1.OID(),
-                                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                                    id_block: {
-                                        tag_class: 3, // CONTEXT-SPECIFIC
-                                        tag_number: 0 // [0]
-                                    },
-                                    value: [new in_window.org.pkijs.asn1.ANY()]
-                                })
-                            ]
-                        })
+                            new in_window.org.pkijs.asn1.OID(),
+                            new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                                id_block: {
+                                    tag_class: 3, // CONTEXT-SPECIFIC
+                                    tag_number: 0 // [0]
+                                },
+                                value: [new in_window.org.pkijs.asn1.ANY()]
+                            })
                     ]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
@@ -740,14 +729,9 @@ function(in_window)
                     },
                     name: (names.block_name || ""),
                     value: [
-                        new in_window.org.pkijs.asn1.SEQUENCE({
-                            name: (names.x400Address || ""),
-                            value: [
-                                local.BuiltInStandardAttributes(false),
-                                local.BuiltInDomainDefinedAttributes(true),
-                                local.ExtensionAttributes(true),
-                            ]
-                        })
+                            local.BuiltInStandardAttributes(false),
+                            local.BuiltInDomainDefinedAttributes(true),
+                            local.ExtensionAttributes(true),
                     ]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
@@ -765,46 +749,41 @@ function(in_window)
                     },
                     name: (names.block_name || ""),
                     value: [
-                        new in_window.org.pkijs.asn1.SEQUENCE({
-                            name: (names.ediPartyName || ""),
-                            value: [
-                                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                                    optional: true,
-                                    id_block: {
-                                        tag_class: 3, // CONTEXT-SPECIFIC
-                                        tag_number: 0 // [0]
-                                    },
-                                    value: [
-                                        new in_window.org.pkijs.asn1.CHOICE({
-                                            value: [
-                                                new in_window.org.pkijs.asn1.TELETEXSTRING(),
-                                                new in_window.org.pkijs.asn1.PRINTABLESTRING(),
-                                                new in_window.org.pkijs.asn1.UNIVERSALSTRING(),
-                                                new in_window.org.pkijs.asn1.UTF8STRING(),
-                                                new in_window.org.pkijs.asn1.BMPSTRING()
-                                            ]
-                                        })
-                                    ]
-                                }),
-                                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                                    id_block: {
-                                        tag_class: 3, // CONTEXT-SPECIFIC
-                                        tag_number: 1 // [1]
-                                    },
-                                    value: [
-                                        new in_window.org.pkijs.asn1.CHOICE({
-                                            value: [
-                                                new in_window.org.pkijs.asn1.TELETEXSTRING(),
-                                                new in_window.org.pkijs.asn1.PRINTABLESTRING(),
-                                                new in_window.org.pkijs.asn1.UNIVERSALSTRING(),
-                                                new in_window.org.pkijs.asn1.UTF8STRING(),
-                                                new in_window.org.pkijs.asn1.BMPSTRING()
-                                            ]
-                                        })
-                                    ]
-                                }),
-                            ]
-                        })
+                            new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                                optional: true,
+                                id_block: {
+                                    tag_class: 3, // CONTEXT-SPECIFIC
+                                    tag_number: 0 // [0]
+                                },
+                                value: [
+                                    new in_window.org.pkijs.asn1.CHOICE({
+                                        value: [
+                                            new in_window.org.pkijs.asn1.TELETEXSTRING(),
+                                            new in_window.org.pkijs.asn1.PRINTABLESTRING(),
+                                            new in_window.org.pkijs.asn1.UNIVERSALSTRING(),
+                                            new in_window.org.pkijs.asn1.UTF8STRING(),
+                                            new in_window.org.pkijs.asn1.BMPSTRING()
+                                        ]
+                                    })
+                                ]
+                            }),
+                            new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                                id_block: {
+                                    tag_class: 3, // CONTEXT-SPECIFIC
+                                    tag_number: 1 // [1]
+                                },
+                                value: [
+                                    new in_window.org.pkijs.asn1.CHOICE({
+                                        value: [
+                                            new in_window.org.pkijs.asn1.TELETEXSTRING(),
+                                            new in_window.org.pkijs.asn1.PRINTABLESTRING(),
+                                            new in_window.org.pkijs.asn1.UNIVERSALSTRING(),
+                                            new in_window.org.pkijs.asn1.UTF8STRING(),
+                                            new in_window.org.pkijs.asn1.BMPSTRING()
+                                        ]
+                                    })
+                                ]
+                            }),
                     ]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
@@ -1184,21 +1163,21 @@ function(in_window)
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             name: (names.block_name || ""),
             value: [
-                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                    name: (names.notBefore || ""),
                     optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
                     },
-                    value: [in_window.org.pkijs.asn1.GENERALIZEDTIME({ name: (names.notBefore || "") })]
                 }),
-                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                    name: (names.notAfter || ""),
                     optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
                     },
-                    value: [in_window.org.pkijs.asn1.GENERALIZEDTIME({ name: (names.notAfter || "") })]
                 })
             ]
         }));
