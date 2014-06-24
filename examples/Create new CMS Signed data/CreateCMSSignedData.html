@@ -190,7 +190,7 @@ div#output_div
             sequence = sequence.then(
                 function()
                 {
-                    return crypto.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: hash_algorithm } }, true, ["encrypt", "decrypt", "sign", "verify"]);
+                    return crypto.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: hash_algorithm } }, true, ["sign", "verify"]);
                 }
                 );
             // #endregion 
