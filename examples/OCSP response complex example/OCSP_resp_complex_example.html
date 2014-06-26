@@ -27,12 +27,11 @@
             -webkit-box-shadow:0 0 12px 3px #CDCDCD;
             background:#FFF;
         }
-        #add-ocsp-resp-block label{
-            display:block;
-            font:bold 18px/22px Helvetica, Arial, sans-serif;
+        label{
+            font:bold 16px/20px Helvetica, Arial, sans-serif;
             margin:0 0 8px;
         }
-        #pem-text-block{
+        textarea{
             width:500px;
             border:solid 1px #999;
             border-radius:5px;
@@ -44,8 +43,9 @@
             box-shadow:0 0 5px 5px #EFEFEF inset;
             -webkit-box-shadow:0 0 5px 5px #EFEFEF inset;
             padding:20px;
+           resize: none;
         }
-        #add-ocsp-resp-block a,input{
+        a{
             display:inline-block;
             padding:5px 15px;
             background:#ACD0EC;
@@ -53,69 +53,85 @@
             color:#000;
             font:normal 14px/16px Helvetica, Arial, sans-serif;
         }
-        #add-ocsp-resp-block a:hover{
+        a:hover{
             background:#DAEBF8;
             cursor:pointer;
         }
-        #ocsp-resp-data-block{
-            display:none;
+        .header-block {
+            margin-top:30px;
+            font:bold 16px/20px Helvetica, Arial, sans-serif;
+        }
+        .border-block{
             border:solid 2px #999;
             border-radius:5px;
             -webkit-border-radius:5px;
-            margin:50px 0 0;
+            margin:10px 0 0;
             padding:20px 30px;
             background:#F0F4FF;
         }
-        #ocsp-resp-data-block h2{
+        .border-block h2{
             margin:0 0 16px;
             font:bold 22px/24px Helvetica, Arial, sans-serif;
         }
-        #ocsp-resp-data-block p{
+        .border-block p{
             margin:0 0 12px;
         }
-        #ocsp-resp-data-block p .type{
+        .border-block p .type{
             font-weight:bold;
             display:inline-block;
             width:176px;
         }
-        #ocsp-resp-data-block .two-col{
+        .border-block .two-col{
             overflow:hidden;
             margin:0 0 16px;
         }
-        #ocsp-resp-data-block .two-col .subject{
+        .border-block .two-col .subject{
             width:180px;
             font-weight:bold;
             margin:0 0 12px;
             float:left;
         }
-        #ocsp-resp-data-block .two-col #ocsp-resp-attributes{
+        .border-block .two-col #cms-signed-attributes{
             margin:0;
             padding:0;
             float:left;
             list-style:none;
         }
-        #ocsp-resp-data-block .two-col #ocsp-resp-attributes li p{
+        .border-block .two-col #cms-signed-attributes li p{
             margin:0;
         }
-        #ocsp-resp-data-block .two-col #ocsp-resp-attributes li p span{
+        .border-block .two-col #cms-signed-attributes li p span{
             width:40px;
             display:inline-block;
             margin:0 0 5px;
         }
-        #ocsp-resp-data-block .two-col #ocsp-resp-exten{
+        .border-block .two-col #cms-signed-exten{
             overflow:hidden;
             padding:0 0 0 17px;
             margin:0;
             list-style-type:square;
         }
-        textarea {
-           resize: none;
+        table {
+            border:solid;
+            border-collapse:collapse;
+            border-color:black;
         }
+       th { 
+        text-align:center;
+        background: #ccc;
+        padding: 5px;
+        border: 1px solid black;
+       }
+       td { 
+        padding: 5px;
+        border: 1px solid black; 
+       }
     </style>
 
     <script>
         //*********************************************************************************
         var ocspResponseBuffer; // ArrayBuffer with loaded or created OCSP response
+        var trustedCertificates = new Array(); // Array of root certificates from "CA Bundle"
         //*********************************************************************************
         // #region Auxiliary functions 
         //*********************************************************************************
@@ -188,6 +204,21 @@
             temp_reader.readAsArrayBuffer(current_files[0]);
         }
         //*********************************************************************************
+        function handleCABundle(evt)
+        {
+            var temp_reader = new FileReader();
+
+            var current_files = evt.target.files;
+
+            temp_reader.onload =
+            function(event)
+            {
+                parseCAbundle(event.target.result);
+            };
+
+            temp_reader.readAsArrayBuffer(current_files[0]);
+        }
+        //*********************************************************************************
         // #endregion 
         //*********************************************************************************
         // #region Create OCSP response 
@@ -200,8 +231,41 @@
             var ocsp_resp_simpl = new org.pkijs.simpl.OCSP_RESPONSE();
             var ocsp_basic_resp = new org.pkijs.simpl.OCSP_BASIC_RESPONSE();
 
+            var cert_simpl = new org.pkijs.simpl.CERT();
+            var cms_signed_simpl;
+
             var publicKey;
             var privateKey;
+
+            var hash_algorithm = "sha-1";
+            var hash_algorithm_oid = "1.3.14.3.2.26";
+            var signature_algorithm = "1.2.840.113549.1.1.5";
+
+            var hash_option = document.getElementById("hash_alg").value;
+            switch(hash_option)
+            {
+                case "alg_SHA1":
+                    hash_algorithm = "sha-1";
+                    hash_algorithm_oid = "1.3.14.3.2.26";
+                    signature_algorithm = "1.2.840.113549.1.1.5";
+                    break;
+                case "alg_SHA256":
+                    hash_algorithm = "sha-256";
+                    hash_algorithm_oid = "2.16.840.1.101.3.4.2.1";
+                    signature_algorithm = "1.2.840.113549.1.1.11";
+                    break;
+                case "alg_SHA384":
+                    hash_algorithm = "sha-384";
+                    hash_algorithm_oid = "2.16.840.1.101.3.4.2.2";
+                    signature_algorithm = "1.2.840.113549.1.1.12";
+                    break;
+                case "alg_SHA512":
+                    hash_algorithm = "sha-512";
+                    hash_algorithm_oid = "2.16.840.1.101.3.4.2.3";
+                    signature_algorithm = "1.2.840.113549.1.1.13";
+                    break;
+                default:;
+            }
             // #endregion 
 
             // #region Get a "crypto" extension 
@@ -214,42 +278,70 @@
             // #endregion 
 
             // #region Put a static values 
-            ocsp_resp_simpl.responseStatus.value_block.value_dec = 0; // success
-            ocsp_resp_simpl.responseBytes = new org.pkijs.simpl.ocsp.ResponseBytes();
-            ocsp_resp_simpl.responseBytes.responseType = "1.3.6.1.5.5.7.48.1.1"
+            cert_simpl.version = 2;
+            cert_simpl.serialNumber = new org.pkijs.asn1.INTEGER({ value: 1 });
+            cert_simpl.issuer.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+                type: "2.5.4.6", // Country name
+                value: new org.pkijs.asn1.PRINTABLESTRING({ value: "RU" })
+            }));
+            cert_simpl.issuer.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+                type: "2.5.4.3", // Common name
+                value: new org.pkijs.asn1.BMPSTRING({ value: "Test" })
+            }));
+            cert_simpl.subject.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+                type: "2.5.4.6", // Country name
+                value: new org.pkijs.asn1.PRINTABLESTRING({ value: "RU" })
+            }));
+            cert_simpl.subject.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+                type: "2.5.4.3", // Common name
+                value: new org.pkijs.asn1.BMPSTRING({ value: "Test" })
+            }));
 
-            var responderIDBuffer = new ArrayBuffer(1);
-            var responderIDView = new Uint8Array(responderIDBuffer);
-            responderIDView[0] = 0x01;
-            
-            ocsp_basic_resp.tbsResponseData.responderID = new org.pkijs.asn1.OCTETSTRING({ value_hex: responderIDBuffer });
-            ocsp_basic_resp.tbsResponseData.producedAt = new Date();
+            cert_simpl.notBefore.value = new Date(2013, 01, 01);
+            cert_simpl.notAfter.value = new Date(2016, 01, 01);
 
-            var response = new org.pkijs.simpl.ocsp.SingleResponse();
-            response.certID.hashAlgorithm.algorithm_id = "1.3.14.3.2.26"; // SHA-1
-            response.certID.issuerNameHash.value_block.value_hex = responderIDBuffer; // Fiction hash
-            response.certID.issuerKeyHash.value_block.value_hex = responderIDBuffer; // Fiction hash
-            response.certID.serialNumber.value_block.value_dec = 1; // Fiction serial number
-            response.certStatus = new org.pkijs.asn1.ASN1_PRIMITIVE({
-                id_block: {
-                    tag_class: 3, // CONTEXT-SPECIFIC
-                    tag_number: 0 // [0]
-                },
-                len_block_length: 1 // The length contains one byte 0x00
-            }); // status - success
-            response.thisUpdate = new Date();
+            cert_simpl.extensions = new Array(); // Extensions are not a part of certificate by default, it's an optional array
 
-            ocsp_basic_resp.tbsResponseData.responses.push(response);
+            // #region "BasicConstraints" extension
+            //var basic_constr = new org.pkijs.simpl.x509.BasicConstraints({
+            //    cA: true,
+            //    pathLenConstraint: 3
+            //});
 
-            ocsp_basic_resp.signatureAlgorithm.algorithm_id = "1.2.840.113549.1.1.5"; // RSA + SHA-1
+            //cert_simpl.extensions.push(new org.pkijs.simpl.EXTENSION({
+            //    extnID: "2.5.29.19",
+            //    critical: false,
+            //    extnValue: basic_constr.toSchema().toBER(false),
+            //    parsedValue: basic_constr // Parsed value for well-known extensions
+            //}));
+            // #endregion 
+
+            // #region "KeyUsage" extension 
+            var bit_array = new ArrayBuffer(1);
+            var bit_view = new Uint8Array(bit_array);
+
+            bit_view[0] = bit_view[0] | 0x02; // Key usage "cRLSign" flag
+            //bit_view[0] = bit_view[0] | 0x04; // Key usage "keyCertSign" flag
+
+            var key_usage = new org.pkijs.asn1.BITSTRING({ value_hex: bit_array });
+
+            cert_simpl.extensions.push(new org.pkijs.simpl.EXTENSION({
+                extnID: "2.5.29.15",
+                critical: false,
+                extnValue: key_usage.toBER(false),
+                parsedValue: key_usage // Parsed value for well-known extensions
+            }));
+            // #endregion 
+
+            cert_simpl.signatureAlgorithm.algorithm_id = signature_algorithm;
+            cert_simpl.signature.algorithm_id = cert_simpl.signatureAlgorithm.algorithm_id; // Must be the same value
             // #endregion 
 
             // #region Create a new key pair 
             sequence = sequence.then(
                 function()
                 {
-                    return crypto.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: "sha-1" } }, true, ["sign", "verify"]);
-
+                    return crypto.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: hash_algorithm } }, true, ["sign", "verify"]);
                 }
                 );
             // #endregion 
@@ -268,11 +360,20 @@
                 );
             // #endregion 
 
-            // #region Signing final OCSP response request 
+            // #region Exporting public key into "subjectPublicKeyInfo" value of certificate 
             sequence = sequence.then(
                 function()
                 {
-                    return ocsp_basic_resp.sign(privateKey);
+                    return cert_simpl.subjectPublicKeyInfo.importKey(publicKey);
+                }
+                );
+            // #endregion 
+
+            // #region Signing final certificate 
+            sequence = sequence.then(
+                function()
+                {
+                    return cert_simpl.sign(privateKey);
                 },
                 function(error)
                 {
@@ -281,6 +382,117 @@
                 );
             // #endregion 
 
+            // #region Encode and store certificate 
+            sequence = sequence.then(
+                function()
+                {
+                    var cert_simpl_encoded = cert_simpl.toSchema(true).toBER(false);
+
+                    var cert_simpl_string = String.fromCharCode.apply(null, new Uint8Array(cert_simpl_encoded));
+
+                    var result_string = "-----BEGIN CERTIFICATE-----\r\n";
+                    result_string = result_string + formatPEM(window.btoa(cert_simpl_string));
+                    result_string = result_string + "\r\n-----END CERTIFICATE-----\r\n";
+
+                    document.getElementById("new_signed_data").innerHTML = result_string;
+
+                    alert("Certificate created successfully!");
+                },
+                function(error)
+                {
+                    alert("Error during signing: " + error);
+                }
+                );
+            // #endregion 
+
+            // #region Exporting private key 
+            sequence = sequence.then(
+                function()
+                {
+                    return crypto.exportKey("pkcs8", privateKey);
+                }
+                );
+            // #endregion 
+
+            // #region Store exported key on Web page 
+            sequence = sequence.then(
+                function(result)
+                {
+                    var private_key_string = String.fromCharCode.apply(null, new Uint8Array(result));
+
+                    var result_string = document.getElementById("new_signed_data").innerHTML;
+
+                    result_string = result_string + "\r\n-----BEGIN PRIVATE KEY-----\r\n";
+                    result_string = result_string + formatPEM(window.btoa(private_key_string));
+                    result_string = result_string + "\r\n-----END PRIVATE KEY-----\r\n";
+
+                    document.getElementById("new_signed_data").innerHTML = result_string;
+
+                    alert("Private key exported successfully!");
+                },
+                function(error)
+                {
+                    alert("Error during exporting of private key: " + error);
+                }
+                );
+            // #endregion 
+
+            // #region Create specific TST info structure to sign 
+            sequence = sequence.then(
+                function()
+                {
+                    ocsp_resp_simpl.responseStatus.value_block.value_dec = 0; // success
+                    ocsp_resp_simpl.responseBytes = new org.pkijs.simpl.ocsp.ResponseBytes();
+                    ocsp_resp_simpl.responseBytes.responseType = "1.3.6.1.5.5.7.48.1.1"
+
+                    var responderIDBuffer = new ArrayBuffer(1);
+                    var responderIDView = new Uint8Array(responderIDBuffer);
+                    responderIDView[0] = 0x01;
+
+                    ocsp_basic_resp.tbsResponseData.responderID = cert_simpl.issuer;
+                    ocsp_basic_resp.tbsResponseData.producedAt = new Date();
+
+                    var response = new org.pkijs.simpl.ocsp.SingleResponse();
+                    response.certID.hashAlgorithm.algorithm_id = "1.3.14.3.2.26"; // SHA-1
+                    response.certID.issuerNameHash.value_block.value_hex = responderIDBuffer; // Fiction hash
+                    response.certID.issuerKeyHash.value_block.value_hex = responderIDBuffer; // Fiction hash
+                    response.certID.serialNumber.value_block.value_dec = 1; // Fiction serial number
+                    response.certStatus = new org.pkijs.asn1.ASN1_PRIMITIVE({
+                        id_block: {
+                            tag_class: 3, // CONTEXT-SPECIFIC
+                            tag_number: 0 // [0]
+                        },
+                        len_block_length: 1 // The length contains one byte 0x00
+                    }); // status - success
+                    response.thisUpdate = new Date();
+
+                    ocsp_basic_resp.tbsResponseData.responses.push(response);
+
+                    ocsp_basic_resp.signatureAlgorithm.algorithm_id = "1.2.840.113549.1.1.5"; // RSA + SHA-1
+                    ocsp_basic_resp.certs = [cert_simpl];
+
+                    return ocsp_basic_resp.sign(privateKey);
+                }
+                );
+            // #endregion 
+
+            sequence = sequence.then(
+                function(result)
+                {
+                    var encodedOCSPBasicResp = ocsp_basic_resp.toSchema().toBER(false);
+
+                    var asn1_basic = org.pkijs.fromBER(encodedOCSPBasicResp);
+                    var decodedResponse = new org.pkijs.simpl.OCSP_BASIC_RESPONSE({ schema: asn1_basic.result });
+
+                    var schema = ocsp_basic_resp.tbsResponseData.toSchema();
+                    var encodedBMP = ocsp_basic_resp.tbsResponseData.toSchema().toBER(false);
+                    var asn1_mp = org.pkijs.fromBER(encodedBMP);
+
+                    return decodedResponse.verify();
+                }
+                );
+
+            // #region Finally create completed OCSP response structure
             sequence.then(
                 function(result)
                 {
@@ -289,15 +501,29 @@
 
                     ocspResponseBuffer = ocsp_resp_simpl.toSchema().toBER(false);
 
+                    // #region Convert ArrayBuffer to String 
+                    var signed_data_string = "";
+
+                    var view = new Uint8Array(ocspResponseBuffer);
+
+                    for(var i = 0; i < view.length; i++)
+                        signed_data_string = signed_data_string + String.fromCharCode(view[i]);
+                    // #endregion 
+
+                    var result_string = document.getElementById("new_signed_data").innerHTML;
+
+                    result_string = result_string + "\r\n-----BEGIN OCSP RESPONSE-----\r\n";
+                    result_string = result_string + formatPEM(window.btoa(signed_data_string));
+                    result_string = result_string + "\r\n-----END OCSP RESPONSE-----\r\n\r\n";
+
+                    document.getElementById("new_signed_data").innerHTML = result_string;
+
                     parse_OCSP_resp();
 
-                    alert("OCSP response successfully created!");
-                },
-                function(error)
-                {
-                    alert("Error signing OCSP response: " + error);
+                    alert("OCSP response has created successfully!");
                 }
                 );
+            // #endregion 
         }
         //*********************************************************************************
         // #endregion 
@@ -307,11 +533,27 @@
         function parse_OCSP_resp()
         {
             // #region Initial activities 
-            document.getElementById("ocsp-resp-resp").innerHTML = "";
-            document.getElementById("ocsp-resp-exten").innerHTML = "";
-
-            document.getElementById("ocsp-resp-data-block").style.display = "none";
             document.getElementById("ocsp-resp-extensions").style.display = "none";
+            document.getElementById("ocsp-resp-rspid-rdn").style.display = "none";
+            document.getElementById("ocsp-resp-rspid-simpl").style.display = "none";
+
+            var respIDTable = document.getElementById("ocsp-resp-respid-rdn");
+            while(respIDTable.rows.length > 1)
+            {
+                respIDTable.deleteRow(respIDTable.rows.length - 1);
+            }
+
+            var extensionTable = document.getElementById("ocsp-resp-extensions-table");
+            while(extensionTable.rows.length > 1)
+            {
+                extensionTable.deleteRow(extensionTable.rows.length - 1);
+            }
+
+            var responsesTable = document.getElementById("ocsp-resp-attr-table");
+            while(extensionTable.rows.length > 1)
+            {
+                extensionTable.deleteRow(extensionTable.rows.length - 1);
+            }
             // #endregion 
 
             // #region Decode existing OCSP response 
@@ -376,7 +618,13 @@
                 "1.2.840.113549.1.1.13": "SHA512 with RSA"
             };
 
-            document.getElementById("sig-algo").innerHTML = algomap[ocsp_basic_resp.signatureAlgorithm.algorithm_id];
+            var signatureAlgorithm = algomap[ocsp_basic_resp.signatureAlgorithm.algorithm_id];
+            if(typeof signatureAlgorithm === "undefined")
+                signatureAlgorithm = ocsp_basic_resp.signatureAlgorithm.algorithm_id;
+            else
+                signatureAlgorithm = signatureAlgorithm + " (" + ocsp_basic_resp.signatureAlgorithm.algorithm_id + ")";
+
+            document.getElementById("sig-algo").innerHTML = signatureAlgorithm;
             // #endregion 
 
             // #region Put information about "Responder ID" 
@@ -403,16 +651,22 @@
                         typeval = ocsp_basic_resp.tbsResponseData.responderID.types_and_values[i].type;
 
                     var subjval = ocsp_basic_resp.tbsResponseData.responderID.types_and_values[i].value.value_block.value;
-                    var ulrow = "<li><p><span>" + typeval + "</span> " + subjval + "</p></li>";
 
-                    document.getElementById("resp-id").innerHTML = document.getElementById("resp-id").innerHTML + ulrow;
+                    var row = respIDTable.insertRow(respIDTable.rows.length);
+                    var cell0 = row.insertCell(0);
+                    cell0.innerHTML = typeval;
+                    var cell1 = row.insertCell(1);
+                    cell1.innerHTML = subjval;
                 }
+
+                document.getElementById("ocsp-resp-rspid-rdn").style.display = "block";
             }
             else
             {
                 if(ocsp_basic_resp.tbsResponseData.responderID instanceof org.pkijs.asn1.OCTETSTRING)
                 {
-                    document.getElementById("resp-id").innerHTML = org.pkijs.bufferToHexCodes(ocsp_basic_resp.tbsResponseData.responderID.value_block.value_hex, 0, ocsp_basic_resp.tbsResponseData.responderID.value_block.value_hex.byteLength);
+                    document.getElementById("ocsp-resp-respid-simpl").innerHTML = org.pkijs.bufferToHexCodes(ocsp_basic_resp.tbsResponseData.responderID.value_block.value_hex, 0, ocsp_basic_resp.tbsResponseData.responderID.value_block.value_hex.byteLength);
+                    document.getElementById("ocsp-resp-rspid-simpl").style.display = "block";
                 }
                 else
                 {
@@ -449,9 +703,9 @@
                     if(typeof typeval === "undefined")
                         typeval = ocsp_basic_resp.responseExtensions[i].extnID;
 
-                    var ulrow = "<li><p><span>" + typeval + "</span></p></li>";
-
-                    document.getElementById("ocsp-resp-exten").innerHTML = document.getElementById("ocsp-resp-exten").innerHTML + ulrow;
+                    var row = extensionTable.insertRow(extensionTable.rows.length);
+                    var cell0 = row.insertCell(0);
+                    cell0.innerHTML = typeval;
                 }
 
                 document.getElementById("ocsp-resp-extensions").style.display = "block";
@@ -477,9 +731,11 @@
                         subjval = "unknown";
                 }
 
-                var ulrow = "<li><p>Cert #: <span>" + typeval + "</span>, status: <span>" + subjval + "</span></p></li>";
-
-                document.getElementById("ocsp-resp-resp").innerHTML = document.getElementById("ocsp-resp-resp").innerHTML + ulrow;
+                var row = responsesTable.insertRow(responsesTable.rows.length);
+                var cell0 = row.insertCell(0);
+                cell0.innerHTML = typeval;
+                var cell1 = row.insertCell(1);
+                cell1.innerHTML = subjval;
             }
             // #endregion 
 
@@ -501,7 +757,7 @@
             // #endregion 
 
             // #region Verify OCSP response 
-            ocsp_basic_resp.verify().
+            ocsp_basic_resp.verify({ trusted_certs: trustedCertificates }).
             then(
             function(result)
             {
@@ -517,37 +773,181 @@
         //*********************************************************************************
         // #endregion 
         //*********************************************************************************
+        // #region Parse "CA Bundle" file 
+        //*********************************************************************************
+        function parseCAbundle(buffer)
+        {
+            // #region Initial variables 
+            var base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+            var startChars = "-----BEGIN CERTIFICATE-----";
+            var endChars = "-----END CERTIFICATE-----";
+            var endLineChars = "\r\n";
+
+            var view = new Uint8Array(buffer);
+
+            var waitForStart = false;
+            var middleStage = true;
+            var waitForEnd = false;
+            var waitForEndLine = false;
+            var started = false;
+
+            var certBodyEncoded = "";
+            // #endregion 
+
+            for(var i = 0; i < view.length; i++)
+            {
+                if(started === true)
+                {
+                    if(base64Chars.indexOf(String.fromCharCode(view[i])) !== (-1))
+                        certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+                    else
+                    {
+                        if(String.fromCharCode(view[i]) === '-')
+                        {
+                            // #region Decoded trustedCertificates 
+                            var asn1 = org.pkijs.fromBER(stringToArrayBuffer(window.atob(certBodyEncoded)));
+                            try
+                            {
+                                trustedCertificates.push(new org.pkijs.simpl.CERT({ schema: asn1.result }));
+                            }
+                            catch(ex)
+                            {
+                                alert("Wrong certificate format");
+                                return;
+                            }
+                            // #endregion 
+
+                            // #region Set all "flag variables" 
+                            certBodyEncoded = "";
+
+                            started = false;
+                            waitForEnd = true;
+                            // #endregion 
+                        }
+                    }
+                }
+                else
+                {
+                    if(waitForEndLine === true)
+                    {
+                        if(endLineChars.indexOf(String.fromCharCode(view[i])) === (-1))
+                        {
+                            waitForEndLine = false;
+
+                            if(waitForEnd === true)
+                            {
+                                waitForEnd = false;
+                                middleStage = true;
+                            }
+                            else
+                            {
+                                if(waitForStart === true)
+                                {
+                                    waitForStart = false;
+                                    started = true;
+
+                                    certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+                                }
+                                else
+                                    middleStage = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(middleStage === true)
+                        {
+                            if(String.fromCharCode(view[i]) === "-")
+                            {
+                                if((i === 0) ||
+                                   ((String.fromCharCode(view[i - 1]) === "\r") ||
+                                    (String.fromCharCode(view[i - 1]) === "\n")))
+                                {
+                                    middleStage = false;
+                                    waitForStart = true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if(waitForStart === true)
+                            {
+                                if(startChars.indexOf(String.fromCharCode(view[i])) === (-1))
+                                    waitForEndLine = true;
+                            }
+                            else
+                            {
+                                if(waitForEnd === true)
+                                {
+                                    if(endChars.indexOf(String.fromCharCode(view[i])) === (-1))
+                                        waitForEndLine = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        //*********************************************************************************
+        // #endregion 
+        //*********************************************************************************
     </script>
 </head>
 
 <body>
     <div class="wrapper">
-        <div id="add-ocsp-resp-block">
+        <p class="header-block">Create new OCSP response</p>
+        <div id="add-tsp-resp-block" class="border-block">
             <p>
-                <label for="temp_file">Select OCSP response file:</label>
+                <label for="hash_alg" style="font-weight:bold">Hashing algorithm:</label>
+                <select id="hash_alg">
+                    <option value="alg_SHA1">SHA-1</option>
+                    <option value="alg_SHA256">SHA-256</option>
+                    <option value="alg_SHA384">SHA-384</option>
+                    <option value="alg_SHA512">SHA-512</option>
+                </select>
+            </p>
+            <label for="new_signed_data" style="font-weight:bold;float:left;">OCSP resp data + BASE-64 encoded new certificate + PKCS#8 private key:</label>
+            <textarea id="new_signed_data">&lt; New OCSP response data + new encoded certificate + PKCS#8 exported private key will be stored here &gt;</textarea>
+            <a onclick="create_OCSP_resp();">Create</a>
+        </div>
+        <p class="header-block">Parse loaded/created TSP response</p>
+        <div id="ocsp-resp-data-block"  class="border-block">
+            <p>
+                <label for="temp_file">Select OCSP response file (DER):</label>
                 <input type="file" id="temp_file" title="OCSP response" />
             </p>
-            <a onclick="create_OCSP_resp();">Create</a>
-            <a onclick="verify_OCSP_resp();">Verify</a>
-        </div>
-        <div id="ocsp-resp-data-block" style="display:none;">
             <p><span class="type">Response status:</span> <span id="resp-status"></span></p>
-            <p><span class="type">Signature Algorithm:</span> <span id="sig-algo">signature algorithm</span></p>
-            <p><span class="type">Responder ID:</span> <span id="resp-id"></span></p>
+            <p><span class="type">Signature Algorithm:</span> <span id="sig-algo"></span></p>
+            <div id="ocsp-resp-rspid-rdn" class="two-col" style="display:none;">
+                <p class="subject">Responder ID:</p>
+                <table id="ocsp-resp-respid-rdn"><tr><th>RDN OID</th><th>RDN value</th></tr></table>
+            </div>
+            <p id="ocsp-resp-rspid-simpl" style="display:none;"><span class="type">Responder ID:</span> <span id="ocsp-resp-respid-simpl"></span></p>
             <p><span class="type">Produced at:</span> <span id="prod-at"></span></p>
             <div id="ocsp-resp-attributes" class="two-col">
                 <p class="subject">Responses:</p>
-                <ul id="ocsp-resp-resp"></ul>
+                <table id="ocsp-resp-attr-table"><tr><th>Cert num.</th><th>Status</th></tr></table>
             </div>
             <div id="ocsp-resp-extensions" class="two-col" style="display:none;">
                 <p class="subject">Extensions:</p>
-                <ul id="ocsp-resp-exten"></ul>
+                <table id="ocsp-resp-extensions-table"><tr><th>Extension OID</th></tr></table>
             </div>
+        </div>
+        <p class="header-block">Verify loaded/created OCSP response</p>
+        <div class="border-block">
+            <p>
+                <label for="ca_bundle">Load "CA bundle":</label>
+                <input type="file" id="ca_bundle" title="Input file" />
+            </p>
+            <a onclick="verify_OCSP_resp();">Verify</a>
         </div>
     </div>
 
     <script>
         document.getElementById('temp_file').addEventListener('change', handleFileBrowse, false);
+        document.getElementById('ca_bundle').addEventListener('change', handleCABundle, false);
     </script>
 </body>
 </html>

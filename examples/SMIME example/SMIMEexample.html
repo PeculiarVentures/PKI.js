@@ -445,6 +445,21 @@
             temp_reader.readAsArrayBuffer(current_files[0]);
         }
         //*********************************************************************************
+        function handleMIMEFile(evt)
+        {
+            var temp_reader = new FileReader();
+
+            var current_files = evt.target.files;
+
+            temp_reader.onload =
+            function(event)
+            {
+                document.getElementById("smime_message").value = String.fromCharCode.apply(null, new Uint8Array(event.target.result));
+            };
+
+            temp_reader.readAsArrayBuffer(current_files[0]);
+        }
+        //*********************************************************************************
     </script>
 </head>
 
@@ -454,13 +469,23 @@
             <label for="ca_bundle">Select CA bundle file:</label>
             <input type="file" id="ca_bundle" title="Trusted certs" />
         </p>
-        <label for="smime_message" style="font-weight:bold">Put S/MIME signed message here:</label>
-        <textarea id="smime_message"></textarea>
-        <input type="button" value="Verify" onclick="verifySMIME()" />
+        <div class="border-block">
+            <p>
+                <label for="mime_file">Select S/MIME message file:</label>
+                <input type="file" id="mime_file" title="S/MIME message" />
+            </p>
+            <p>OR</p>
+            <p>
+                <label for="smime_message" style="font-weight:bold">Put S/MIME signed message here:</label>
+                <textarea id="smime_message"></textarea>
+            </p>
+            <input type="button" value="Verify" onclick="verifySMIME()" />
+        </div>
     </div>
 
     <script>
         document.getElementById('ca_bundle').addEventListener('change', handleCABundle, false);
+        document.getElementById('mime_file').addEventListener('change', handleMIMEFile, false);
     </script>
 </body>
 </html>
