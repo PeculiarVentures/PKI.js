@@ -4676,7 +4676,29 @@ function(in_window)
 
         // #region Return if there is only one certificate in certificate's array 
         if(certs.length === 0)
-            return new Promise(function(resolve, reject) { resolve(sorted_certs); });
+        {
+            if(sorted_certs[0].issuer.isEqual(sorted_certs[0].subject) === true)
+                return new Promise(function(resolve, reject) { resolve(sorted_certs); });
+            else
+            {
+                if(this.trusted_certs.length === 0)
+                {
+                    return new Promise(function(resolve, reject)
+                    {
+                        reject({
+                            result: false,
+                            result_code: 70,
+                            result_message: "Can't find root certificate"
+                        });
+                    });
+                }
+                else
+                {
+                    certs = _this.trusted_certs.splice(0);
+                }
+            }
+
+        }
         // #endregion 
 
         /// <var type="in_window.org.pkijs.simpl.CERT">Current certificate (to find issuer for)</var>
@@ -4817,8 +4839,8 @@ function(in_window)
                         for(var i = 0; i < _this.trusted_certs.length; i++)
                         {
                             if((current_certificate.issuer.isEqual(_this.trusted_certs[i].issuer) === true) &&
-                                (current_certificate.subject.isEqual(_this.trusted_certs[i].subject) === true) &&
-                                (current_certificate.serialNumber.isEqual(_this.trusted_certs[i].serialNumber) === true))
+                               (current_certificate.subject.isEqual(_this.trusted_certs[i].subject) === true) &&
+                               (current_certificate.serialNumber.isEqual(_this.trusted_certs[i].serialNumber) === true))
                             {
                                 found = true;
                                 break;

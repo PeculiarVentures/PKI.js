@@ -1339,6 +1339,10 @@ function(in_window)
         // #endregion 
 
         // #region Global variables (used in "promises") 
+        var _this = this;
+
+        var signer_cert = null;
+
         var certs = this.certs;
         var signature_view = new Uint8Array(this.signature.value_block.value_hex);
         var tbs_view = new Uint8Array(this.tbsResponseData.tbs);
@@ -1348,6 +1352,16 @@ function(in_window)
         var sequence = Promise.resolve();
 
         var sha_algorithm = "";
+
+        var trusted_certs = new Array();
+        // #endregion 
+
+        // #region Get input values 
+        if(arguments[0] instanceof Object)
+        {
+            if("trusted_certs" in arguments[0])
+                trusted_certs = arguments[0].trusted_certs;
+        }
         // #endregion 
 
         // #region Get a "crypto" extension 
@@ -1440,6 +1454,91 @@ function(in_window)
                 }
                 );
         }
+        // #endregion 
+
+        // #region Make additional verification for signer's certificate 
+        function checkCA(cert)
+        {
+            /// <param name="cert" type="in_window.org.pkijs.simpl.CERT">Certificate to find CA flag for</param>
+
+            // #region Do not include signer's certificate 
+            if((cert.issuer.isEqual(signer_cert.issuer) === true) && (cert.serialNumber.isEqual(signer_cert.serialNumber) === true))
+                return null;
+            // #endregion 
+
+            var isCA = false;
+
+            for(var i = 0; i < cert.extensions.length; i++)
+            {
+                if(cert.extensions[i].extnID === "2.5.29.19") // BasicConstraints
+                {
+                    if("cA" in cert.extensions[i].parsedValue)
+                    {
+                        if(cert.extensions[i].parsedValue.cA === true)
+                            isCA = true;
+                    }
+                }
+            }
+
+            if(isCA)
+                return cert;
+            else
+                return null;
+        }
+
+        var checkCA_promises = new Array();
+
+        sequence = sequence.then(
+            function(result)
+            {
+                if(cert_index === (-1))
+                    return new Promise(function(resolve, reject) { reject("Correct certificate was not found in OCSP response"); });
+
+                signer_cert = certs[cert_index];
+
+                for(var i = 0; i < _this.certs.length; i++)
+                    checkCA_promises.push(checkCA(_this.certs[i]));
+
+                return Promise.all(checkCA_promises).then(
+                    function(promiseResults)
+                    {
+                        var additional_certs = new Array();
+                        additional_certs.push(signer_cert);
+
+                        for(var i = 0; i < promiseResults.length; i++)
+                        {
+                            if(promiseResults[i] !== null)
+                                additional_certs.push(promiseResults[i]);
+                        }
+
+                        var cert_chain_simpl = new org.pkijs.simpl.CERT_CHAIN({
+                            certs: additional_certs,
+                            trusted_certs: trusted_certs
+                        });
+                        if("crls" in _this)
+                            cert_chain_simpl.crls = _this.crls;
+
+                        return cert_chain_simpl.verify().then(
+                            function(result)
+                            {
+                                if(result.result === true)
+                                    return new Promise(function(resolve, reject) { resolve(); });
+                                else
+                                    return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed"); });
+                            },
+                            function(error)
+                            {
+                                return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed with error: " + ((error instanceof Object) ? error.result_message : error)); });
+                            }
+                            );
+                    },
+                    function(promiseError)
+                    {
+                        return new Promise(function(resolve, reject) { reject("Error during checking certificates for CA flag: " + promiseError); });
+                    }
+                    );
+            }
+            );
         // #endregion 
 
         // #region Import public key from responder certificate

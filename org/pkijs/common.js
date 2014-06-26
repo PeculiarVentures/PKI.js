@@ -143,6 +143,20 @@ function(in_window)
         return ret_buf;
     }
     //**************************************************************************************
+    in_window.org.pkijs.copyBuffer =
+    function(input_buffer)
+    {
+        var result = new ArrayBuffer(input_buffer.byteLength);
+
+        var resultView = new Uint8Array(result);
+        var inputView = new Uint8Array(input_buffer);
+
+        for(var i = 0; i < inputView.length; i++)
+            resultView[i] = inputView[i];
+
+        return result;
+    }
+    //**************************************************************************************
     in_window.org.pkijs.getCrypto =
     function()
     {
