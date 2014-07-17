@@ -1355,10 +1355,13 @@ function(in_window)
         // #endregion 
 
         // #region Get internal properties from parsed schema 
-        var altNames_array = asn1.result["altNames"];
+        if("altNames" in asn1.result)
+        {
+            var altNames_array = asn1.result["altNames"];
 
-        for(var i = 0; i < altNames_array.length; i++)
-            this.altNames.push(new in_window.org.pkijs.simpl.GENERAL_NAME({ schema: altNames_array[i] }));
+            for(var i = 0; i < altNames_array.length; i++)
+                this.altNames.push(new in_window.org.pkijs.simpl.GENERAL_NAME({ schema: altNames_array[i] }));
+        }
         // #endregion 
     }
     //**************************************************************************************
@@ -2143,8 +2146,8 @@ function(in_window)
     function()
     {
         // #region Internal properties of the object 
-        this.requireExplicitPolicy = 0;
-        this.inhibitPolicyMapping = 0;
+        // OPTIONAL this.requireExplicitPolicy = 0;
+        // OPTIONAL this.inhibitPolicyMapping = 0;
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -2182,25 +2185,31 @@ function(in_window)
         // #endregion 
 
         // #region Get internal properties from parsed schema
-        var field1 = asn1.result["requireExplicitPolicy"];
+        if("requireExplicitPolicy" in asn1.result)
+        {
+            var field1 = asn1.result["requireExplicitPolicy"];
 
-        field1.id_block.tag_class = 1; // UNIVERSAL
-        field1.id_block.tag_number = 2; // INTEGER
+            field1.id_block.tag_class = 1; // UNIVERSAL
+            field1.id_block.tag_number = 2; // INTEGER
 
-        var ber1 = field1.toBER(false);
-        var int1 = in_window.org.pkijs.fromBER(ber1);
+            var ber1 = field1.toBER(false);
+            var int1 = in_window.org.pkijs.fromBER(ber1);
 
-        this.requireExplicitPolicy = int1.result.value_block.value_dec;
+            this.requireExplicitPolicy = int1.result.value_block.value_dec;
+        }
 
-        var field2 = asn1.result["inhibitPolicyMapping"];
+        if("inhibitPolicyMapping" in asn1.result)
+        {
+            var field2 = asn1.result["inhibitPolicyMapping"];
 
-        field2.id_block.tag_class = 1; // UNIVERSAL
-        field2.id_block.tag_number = 2; // INTEGER
+            field2.id_block.tag_class = 1; // UNIVERSAL
+            field2.id_block.tag_number = 2; // INTEGER
 
-        var ber2 = field2.toBER(false);
-        var int2 = in_window.org.pkijs.fromBER(ber2);
+            var ber2 = field2.toBER(false);
+            var int2 = in_window.org.pkijs.fromBER(ber2);
 
-        this.inhibitPolicyMapping = int2.result.value_block.value_dec;
+            this.inhibitPolicyMapping = int2.result.value_block.value_dec;
+        }
         // #endregion 
     }
     //**************************************************************************************
@@ -2208,23 +2217,32 @@ function(in_window)
     function()
     {
         // #region Create correct values for output sequence 
-        var int1 = new in_window.org.pkijs.asn1.INTEGER({ value: this.requireExplicitPolicy });
+        var output_array = new Array();
 
-        int1.id_block.tag_class = 3; // CONTEXT-SPECIFIC
-        int1.id_block.tag_number = 0; // [0]
+        if("requireExplicitPolicy" in this)
+        {
+            var int1 = new in_window.org.pkijs.asn1.INTEGER({ value: this.requireExplicitPolicy });
 
-        var int2 = new in_window.org.pkijs.asn1.INTEGER({ value: this.inhibitPolicyMapping });
+            int1.id_block.tag_class = 3; // CONTEXT-SPECIFIC
+            int1.id_block.tag_number = 0; // [0]
 
-        int1.id_block.tag_class = 3; // CONTEXT-SPECIFIC
-        int1.id_block.tag_number = 1; // [1]
+            output_array.push(int1);
+        }
+
+        if("inhibitPolicyMapping" in this)
+        {
+            var int2 = new in_window.org.pkijs.asn1.INTEGER({ value: this.inhibitPolicyMapping });
+
+            int1.id_block.tag_class = 3; // CONTEXT-SPECIFIC
+            int1.id_block.tag_number = 1; // [1]
+
+            output_array.push(int2);
+        }
         // #endregion 
 
         // #region Construct and return new ASN.1 schema for this object 
         return (new in_window.org.pkijs.asn1.SEQUENCE({
-            value: [
-                int1,
-                int2
-            ]
+            value: output_array
         }));
         // #endregion 
     }
