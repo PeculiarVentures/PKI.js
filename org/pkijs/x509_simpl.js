@@ -2979,7 +2979,7 @@ function(in_window)
         this.extnValue = asn1.result.extnValue;
 
         // #region Get "parsedValue" for well-known extensions 
-        var asn1 = org.pkijs.fromBER(this.extnValue.value_block.value_hex);
+        var asn1 = in_window.org.pkijs.fromBER(this.extnValue.value_block.value_hex);
         if(asn1.offset === (-1))
             return;
 
