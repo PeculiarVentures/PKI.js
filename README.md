@@ -4,7 +4,7 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
 
 ## Introduction
 
-[PKIjs][] is a library made in order to help people deal with (sometimes) complecated world of PKI-related data. For the moment it is quite easy to create a simple signature but hard to create PKCS#7 encoded signature. Easy to read a X.509 certificate but hard to parse values within it. [PKIjs][] library will help all web applications (and chrome plug-ins) acomplish these and many other things. [PKIjs][] was designed in such a way to make it easy to extended by users through a use of layered internal structures. There are many examples of using [PKIjs][] and the number of examples will grow.
+[PKIjs][] is a library made in order to help people deal with (sometimes) complicated world of PKI-related data. For the moment it is quite easy to create a simple signature but hard to create PKCS#7 encoded signature. Easy to read a X.509 certificate but hard to parse values within it. [PKIjs][] library will help all web applications (and chrome plug-ins) acomplish these and many other things. [PKIjs][] was designed in such a way to make it easy to extended by users through a use of layered internal structures. There are many examples of using [PKIjs][] and the number of examples will grow.
 
 ## Numbers behind the library
 
