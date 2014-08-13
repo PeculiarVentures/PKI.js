@@ -2422,7 +2422,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
-                    },
+                    }
                 });
 
                 for(var i = 0; i < this.distributionPoint.length; i++)
@@ -2458,7 +2458,7 @@ function(in_window)
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 2 // [2]
-                },
+                }
             });
 
             for(var i = 0; i < this.cRLIssuer.length; i++)
@@ -2818,7 +2818,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
-                    },
+                    }
                 });
 
                 for(var i = 0; i < this.distributionPoint.length; i++)
@@ -3458,7 +3458,7 @@ function(in_window)
                 break;
             default:
                 return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
-        };
+        }
         // #endregion 
 
         // #region Importing public key 
@@ -3521,8 +3521,8 @@ function(in_window)
                 sha_algorithm = "sha-512";
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signature.signatureAlgorithm.algorithm_id); });
-        };
+                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signature.signatureAlgorithm.algorithm_id); });
+        }
         // #endregion 
 
         // #region Create TBS data for signing 
@@ -3633,7 +3633,7 @@ function(in_window)
                         names: {
                             block_name: "crlEntryExtensions"
                         }
-                    }, true),
+                    }, true)
                 ]
             })
             );
@@ -3893,6 +3893,8 @@ function(in_window)
         var tbs = this.tbs;
 
         var subjectPublicKeyInfo = -1;
+
+        var _this = this;
         // #endregion 
 
         // #region Get information about CRL issuer certificate 
@@ -3935,8 +3937,8 @@ function(in_window)
                 sha_algorithm = "sha-512";
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signatureAlgorithm.algorithm_id); });
-        };
+                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+        }
         // #endregion 
 
         // #region Import public key 
@@ -4003,8 +4005,8 @@ function(in_window)
                 sha_algorithm = "sha-512";
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signature.signatureAlgorithm.algorithm_id); });
-        };
+                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signature.signatureAlgorithm.algorithm_id); });
+        }
         // #endregion 
 
         // #region Create TBS data for signing 
@@ -4322,7 +4324,7 @@ function(in_window)
                 break;
             default:
                 return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signature.signatureAlgorithm.algorithm_id); });
-        };
+        }
         // #endregion 
 
         // #region Importing public key 
@@ -4386,7 +4388,7 @@ function(in_window)
                 break;
             default:
                 return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signature.signatureAlgorithm.algorithm_id); });
-        };
+        }
         // #endregion 
 
         // #region Create TBS data for signing 
@@ -5120,13 +5122,6 @@ function(in_window)
                 all_policies.push("2.5.29.32.0"); // Put "anyPolicy" at first place
 
                 var policies_and_certs = new Array(); // In fact "array of array" where rows are for each specific policy, column for each certificate and value is "true/false"
-                // Длина массива сертификатов заранее известна.
-                // Следовательно, объективно проще добавлять новый элемент 
-                // в "policies_and_certs" только в случае новой политики.
-                //
-                // При этом собственно "true" будет устанавливаться только для
-                // текущего сертификата, для всех остальных сертификатов тип значения
-                // будет "undefined"
 
                 var any_policy_array = new Array(_this.certs.length - 1); // Minus "trusted anchor"
                 for(var ii = 0; ii < (_this.certs.length - 1); ii++)

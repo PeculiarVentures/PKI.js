@@ -181,7 +181,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
-                    },
+                    }
                 }), // IMPLICIT bistring value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.tbsCertificate_subjectUniqueID ||"tbsCertificate.subjectUniqueID"),
@@ -189,7 +189,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 2 // [2]
-                    },
+                    }
                 }), // IMPLICIT bistring value
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
@@ -296,7 +296,7 @@ function(in_window)
                                         value: [
                                             new in_window.org.pkijs.asn1.INTEGER(),
                                             in_window.org.pkijs.schema.TIME(),
-                                            in_window.org.pkijs.schema.EXTENSIONS({}, true),
+                                            in_window.org.pkijs.schema.EXTENSIONS({}, true)
                                         ]
                                     })
                                 })
@@ -478,7 +478,7 @@ function(in_window)
         //    organizational-unit-names [6] IMPLICIT OrganizationalUnitNames OPTIONAL }
 
         if(typeof optional_flag === "undefined")
-            otional_flag = false;
+            optional_flag = false;
 
         var names = in_window.org.pkijs.getNames(arguments[0]);
 
@@ -622,7 +622,7 @@ function(in_window)
                             value: new in_window.org.pkijs.asn1.PRINTABLESTRING()
                         })
                     ]
-                }),
+                })
             ]
         }));
     }
@@ -631,13 +631,13 @@ function(in_window)
     function(optional_flag)
     {
         if(typeof optional_flag === "undefined")
-            otional_flag = false;
+            optional_flag = false;
 
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             optional: optional_flag,
             value: [
                 new in_window.org.pkijs.asn1.PRINTABLESTRING(),
-                new in_window.org.pkijs.asn1.PRINTABLESTRING(),
+                new in_window.org.pkijs.asn1.PRINTABLESTRING()
             ]
         }));
     }
@@ -646,7 +646,7 @@ function(in_window)
     function(optional_flag)
     {
         if(typeof optional_flag === "undefined")
-            otional_flag = false;
+            optional_flag = false;
 
         return (new in_window.org.pkijs.asn1.SET({
             optional: optional_flag,
@@ -666,7 +666,7 @@ function(in_window)
                         tag_number: 1 // [1]
                     },
                     value: [new in_window.org.pkijs.asn1.ANY()]
-                }),
+                })
             ]
         }));
     }
@@ -713,14 +713,14 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
-                    },
+                    }
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.block_name || ""),
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 2 // [2]
-                    },
+                    }
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     id_block: {
@@ -731,7 +731,7 @@ function(in_window)
                     value: [
                             local.BuiltInStandardAttributes(false),
                             local.BuiltInDomainDefinedAttributes(true),
-                            local.ExtensionAttributes(true),
+                            local.ExtensionAttributes(true)
                     ]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
@@ -783,7 +783,7 @@ function(in_window)
                                         ]
                                     })
                                 ]
-                            }),
+                            })
                     ]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
@@ -791,22 +791,22 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 6 // [6]
-                    },
+                    }
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.block_name || ""),
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 7 // [7]
-                    },
+                    }
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.block_name || ""),
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 8 // [8]
-                    },
-                }),
+                    }
+                })
             ]
         }));
     }
@@ -1117,7 +1117,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
-                    },
+                    }
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,
@@ -1138,8 +1138,8 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 2 // [2]
-                    },
-                }),
+                    }
+                })
             ]
         }));
     }
@@ -1169,7 +1169,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
-                    },
+                    }
                 }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.notAfter || ""),
@@ -1177,7 +1177,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
-                    },
+                    }
                 })
             ]
         }));
@@ -1315,7 +1315,7 @@ function(in_window)
                             value: in_window.org.pkijs.schema.x509.GeneralSubtree()
                         })
                     ]
-                }),
+                })
             ]
         }));
     }
@@ -1507,7 +1507,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
-                    },
+                    }
                 }), // IMPLICIT integer value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.inhibitPolicyMapping || ""),
@@ -1515,8 +1515,8 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
-                    },
-                }), // IMPLICIT integer value
+                    }
+                }) // IMPLICIT integer value
             ]
         }));
     }
@@ -1542,7 +1542,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.REPEATED({
                     name: (names.keyPurposes || ""),
                     value: new in_window.org.pkijs.asn1.OID()
-                }),
+                })
             ]
         }));
     }
@@ -1621,7 +1621,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
-                    },
+                    }
                 }), // IMPLICIT bitstring value
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     name: (names.cRLIssuer || ""),
@@ -1636,7 +1636,7 @@ function(in_window)
                             value: in_window.org.pkijs.schema.GENERAL_NAME()
                         })
                     ]
-                }), // IMPLICIT bitstring value
+                }) // IMPLICIT bitstring value
             ]
         }));
     }
@@ -1660,7 +1660,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.REPEATED({
                     name: (names.distributionPoints || ""),
                     value: in_window.org.pkijs.schema.x509.DistributionPoint()
-                }),
+                })
             ]
         }));
     }
@@ -1708,7 +1708,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.REPEATED({
                     name: (names.accessDescriptions || ""),
                     value: in_window.org.pkijs.schema.x509.AccessDescription()
-                }),
+                })
             ]
         }));
     }
@@ -1786,7 +1786,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
-                    },
+                    }
                 }), // IMPLICIT boolean value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.onlyContainsCACerts || ""),
@@ -1794,7 +1794,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 2 // [2]
-                    },
+                    }
                 }), // IMPLICIT boolean value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.onlySomeReasons || ""),
@@ -1802,7 +1802,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 3 // [3]
-                    },
+                    }
                 }), // IMPLICIT bitstring value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.indirectCRL || ""),
@@ -1810,7 +1810,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 4 // [4]
-                    },
+                    }
                 }), // IMPLICIT boolean value
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.onlyContainsAttributeCerts || ""),
@@ -1818,7 +1818,7 @@ function(in_window)
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 5 // [5]
-                    },
+                    }
                 }) // IMPLICIT boolean value
             ]
         }));

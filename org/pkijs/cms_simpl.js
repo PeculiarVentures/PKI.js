@@ -635,7 +635,7 @@ function(in_window)
             optional: true,
             id_block: {
                 tag_class: 3, // CONTEXT-SPECIFIC
-                tag_number: this.type, // "SignedAttributes" = 0, "UnsignedAttributes" = 1
+                tag_number: this.type // "SignedAttributes" = 0, "UnsignedAttributes" = 1
             },
             value: attributes_array
         }));
@@ -1238,8 +1238,8 @@ function(in_window)
                         sha_algorithm = "sha-512";
                         break;
                     default:
-                        return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signerInfos[signerIndex].digestAlgorithm.algorithm_id); });
-                };
+                        return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signerInfos[signerIndex].digestAlgorithm.algorithm_id); });
+                }
 
                 return new Promise(function(resolve, reject) { resolve(); });
             }
@@ -1342,7 +1342,7 @@ function(in_window)
                 break;
             default:
                 return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signature.signatureAlgorithm.algorithm_id); });
-        };
+        }
         // #endregion 
 
         // #region Create TBS data for signing 
@@ -2663,7 +2663,7 @@ function(in_window)
                     this.value = new in_window.org.pkijs.simpl.cms.OtherRecipientInfo({ schema: asn1.result["block_name"].value_block.value[0] });
                     break;
                 default:;
-            };
+            }
 
             this.variant = 2;
             this.value = asn1.result["block_name"].value_block.value[0];

@@ -383,7 +383,7 @@ function(in_window)
                         names: {
                             block_name: "SignerInfo.unsignedAttrs"
                         }
-                    }, 1),
+                    }, 1)
                 ]
             })
             );
@@ -490,7 +490,7 @@ function(in_window)
                             value: in_window.org.pkijs.schema.CMS_SIGNER_INFO()
                         })
                     ]
-                }),
+                })
             ]
         }));
     }
@@ -902,7 +902,7 @@ function(in_window)
                         tag_number: 4 // [4]
                     },
                     value: [in_window.org.pkijs.schema.cms.OtherRecipientInfo()]
-                }),
+                })
             ]
         }));
     }
@@ -1022,7 +1022,7 @@ function(in_window)
                             value: in_window.org.pkijs.schema.ATTRIBUTE()
                         })
                     ]
-                }),
+                })
             ]
         }));
     }

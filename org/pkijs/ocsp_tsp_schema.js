@@ -115,7 +115,7 @@ function(in_window)
                 }),
                 new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.issuerNameHash || "") }),
                 new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.issuerKeyHash || "") }),
-                new in_window.org.pkijs.asn1.INTEGER({ name: (names.serialNumber || "") }),
+                new in_window.org.pkijs.asn1.INTEGER({ name: (names.serialNumber || "") })
             ]
         }));
     }
@@ -144,7 +144,7 @@ function(in_window)
                             block_name: (names.singleRequestExtensions || "")
                         }
                     })]
-                }),
+                })
             ]
         }));
     }
@@ -203,7 +203,7 @@ function(in_window)
                             block_name: (names.requestExtensions || "TBSRequest.requestExtensions")
                         }
                     })]
-                }),
+                })
             ]
         }));
     }

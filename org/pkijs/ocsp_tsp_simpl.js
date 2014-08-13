@@ -146,7 +146,7 @@ function(in_window)
         this.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["hashAlgorithm"] });
         this.issuerNameHash = asn1.result["issuerNameHash"];
         this.issuerKeyHash = asn1.result["issuerKeyHash"];
-        this.serialNumber = asn1.result["serialNumber"];;
+        this.serialNumber = asn1.result["serialNumber"];
         // #endregion 
     }
     //**************************************************************************************
@@ -720,7 +720,7 @@ function(in_window)
                 break;
             default:
                 return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signature.signatureAlgorithm.algorithm_id); });
-        };
+        }
         // #endregion 
 
         // #region Create TBS data for signing 
@@ -893,6 +893,8 @@ function(in_window)
         /// <summary>!!! Works well in Chrome dev versions only (April 2014th) !!!</summary>
         /// <returns type="Promise">Returns a new Promise object (in case of error), or a result of "crypto.subtle.veryfy" function</returns>
 
+        var _this = this;
+
         // #region Check that ResponseBytes exists in the object 
         if(("responseBytes" in this) === false)
             return new Promise(function(resolve, reject) { reject("Empty ResponseBytes field"); });
@@ -907,7 +909,7 @@ function(in_window)
             return basic_resp_simpl.verify();
         }
         else
-            return new Promise(function(resolve, reject) { reject("Unknown ResponseBytes type: " + this.responseBytes.responseType); });
+            return new Promise(function(resolve, reject) { reject("Unknown ResponseBytes type: " + _this.responseBytes.responseType); });
         // #endregion 
     }
     //**************************************************************************************
@@ -915,6 +917,8 @@ function(in_window)
     function(privateKey)
     {
         /// <param name="privateKey" type="Key">Private key for "subjectPublicKeyInfo" structure</param>
+
+        var _this = this;
 
         // #region Check that ResponceData has type BasicOCSPResponse and verify it 
         if(this.responseBytes.responseType === "1.3.6.1.5.5.7.48.1.1")
@@ -925,7 +929,7 @@ function(in_window)
             return basic_resp_simpl.sign(privateKey);
         }
         else
-            return new Promise(function(resolve, reject) { reject("Unknown ResponseBytes type: " + this.responseBytes.responseType); });
+            return new Promise(function(resolve, reject) { reject("Unknown ResponseBytes type: " + _this.responseBytes.responseType); });
         // #endregion 
     }
     //**************************************************************************************
@@ -1386,8 +1390,8 @@ function(in_window)
                 sha_algorithm = "sha-512";
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signature.signatureAlgorithm.algorithm_id); });
-        };
+                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signature.signatureAlgorithm.algorithm_id); });
+        }
         // #endregion 
 
         // #region Find correct value for "responderID" 
@@ -1599,8 +1603,8 @@ function(in_window)
                 sha_algorithm = "sha-512";
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signature.signatureAlgorithm.algorithm_id); });
-        };
+                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signature.signatureAlgorithm.algorithm_id); });
+        }
         // #endregion 
 
         // #region Create TBS data for signing 
@@ -2229,6 +2233,8 @@ function(in_window)
         /// <summary>!!! Works well in Chrome dev versions only (April 2014th) !!!</summary>
         /// <returns type="Promise">Returns a new Promise object (in case of error), or a result of "crypto.subtle.veryfy" function</returns>
 
+        var _this = this;
+
         // #region Check that "timeStampToken" exists
         if(("timeStampToken" in this) === false)
             return new Promise(function(resolve, reject) { reject("timeStampToken is absent in TSP response"); });
@@ -2246,7 +2252,7 @@ function(in_window)
 
         // #region Check that "timeStampToken" has a right internal format 
         if(this.timeStampToken.contentType !== "1.2.840.113549.1.7.2") // Must be a CMS signed data
-            return new Promise(function(resolve, reject) { reject("Wrong format of timeStampToken: " + this.timeStampToken.contentType); });
+            return new Promise(function(resolve, reject) { reject("Wrong format of timeStampToken: " + _this.timeStampToken.contentType); });
         // #endregion 
 
         // #region Verify internal signed data value 
@@ -2261,6 +2267,8 @@ function(in_window)
     {
         /// <param name="privateKey" type="Key">Private key for "subjectPublicKeyInfo" structure</param>
 
+        var _this = this;
+
         // #region Check that "timeStampToken" exists
         if(("timeStampToken" in this) === false)
             return new Promise(function(resolve, reject) { reject("timeStampToken is absent in TSP response"); });
@@ -2268,7 +2276,7 @@ function(in_window)
 
         // #region Check that "timeStampToken" has a right internal format 
         if(this.timeStampToken.contentType !== "1.2.840.113549.1.7.2") // Must be a CMS signed data
-            return new Promise(function(resolve, reject) { reject("Wrong format of timeStampToken: " + this.timeStampToken.contentType); });
+            return new Promise(function(resolve, reject) { reject("Wrong format of timeStampToken: " + _this.timeStampToken.contentType); });
         // #endregion 
 
         // #region Sign internal signed data value 
