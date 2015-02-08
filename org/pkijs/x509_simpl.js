@@ -155,6 +155,15 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.TIME.prototype.toJSON =
+    function()
+    {
+        return {
+            type: this.type,
+            value: this.value
+        };
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "GeneralName" type 
@@ -245,7 +254,7 @@ function(in_window)
                 this.Name = asn1.result["ediPartyName"];
                 break;
             case 7: // iPAddress
-                this.Name = in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: asn1.result["block_name"].value_block.value_hex });
+                this.Name = new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: asn1.result["block_name"].value_block.value_hex });
                 break;
             case 8: // registeredID
                 {
@@ -331,6 +340,21 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.GENERAL_NAME.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            NameType: this.NameType
+        };
+
+        if((typeof this.Name) === "string")
+            _object.Name = this.Name;
+        else
+            _object.Name = this.Name.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "GeneralNames" type 
@@ -365,7 +389,7 @@ function(in_window)
             schema,
             new in_window.org.pkijs.asn1.SEQUENCE({
                 value: [
-                    in_window.org.pkijs.asn1.REPEATED({
+                    new in_window.org.pkijs.asn1.REPEATED({
                         name: "names",
                         value: n_window.org.pkijs.schema.GENERAL_NAME()
                     })
@@ -398,6 +422,19 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.GENERAL_NAMES.prototype.toJSON =
+    function()
+    {
+        var _names = new Array();
+
+        for(var i = 0; i < this.names.length; i++)
+            _names.push(this.names[i].toJSON());
+
+        return {
+            names: _names
+        };
     }
     //**************************************************************************************
     // #endregion 
@@ -477,6 +514,19 @@ function(in_window)
     {
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            algorithm_id: this.algorithm_id
+        };
+
+        if("algorithm_params" in this)
+            _object.algorithm_params = this.algorithm_params.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "RSAPublicKey" type (RFC3447)
@@ -540,6 +590,15 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.RSAPublicKey.prototype.toJSON =
+    function()
+    {
+        return {
+            modulus: this.modulus.toJSON(),
+            publicExponent: this.publicExponent.toJSON()
+        };
     }
     //**************************************************************************************
     // #endregion 
@@ -612,6 +671,16 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.OtherPrimeInfo.prototype.toJSON =
+    function()
+    {
+        return {
+            prime: this.prime.toJSON(),
+            exponent: this.exponent.toJSON(),
+            coefficient: this.coefficient.toJSON()
+        };
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "RSAPrivateKey" type (RFC3447)
@@ -635,8 +704,8 @@ function(in_window)
         // #region If input argument array contains "schema" for this object 
         if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
             in_window.org.pkijs.simpl.x509.RSAPrivateKey.prototype.fromSchema.call(this, arguments[0].schema);
-            // #endregion 
-            // #region If input argument array contains "native" values for internal properties 
+        // #endregion 
+        // #region If input argument array contains "native" values for internal properties 
         else
         {
             if(arguments[0] instanceof Object)
@@ -736,6 +805,32 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.RSAPrivateKey.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            version: this.version,
+            modulus: this.modulus.toJSON(),
+            publicExponent: this.publicExponent.toJSON(),
+            privateExponent: this.privateExponent.toJSON(),
+            prime1: this.prime1.toJSON(),
+            prime2: this.prime2.toJSON(),
+            exponent1: this.exponent1.toJSON(),
+            exponent2: this.exponent2.toJSON(),
+            coefficient: this.coefficient.toJSON(),
+        };
+
+        if("otherPrimeInfos" in this)
+        {
+            _object.otherPrimeInfos = new Array();
+
+            for(var i = 0; i < this.otherPrimeInfos.length; i++)
+                _object.otherPrimeInfos.push(this.otherPrimeInfos[i].toJSON());
+        }
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -861,6 +956,15 @@ function(in_window)
         return sequence;
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.PUBLIC_KEY_INFO.prototype.toJSON =
+    function()
+    {
+        return {
+            algorithm: this.algorithm.toJSON(),
+            subjectPublicKey: this.subjectPublicKey.toJSON()
+        };
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "AttributeTypeAndValue" type (part of RelativeDistinguishedName)
@@ -870,7 +974,7 @@ function(in_window)
     {
         // #region Internal properties of the object 
         this.type = "";
-        this.value = {};
+        this.value = {}; // ANY -- DEFINED BY AttributeType
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -963,6 +1067,21 @@ function(in_window)
         }
         else
             return false;
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.ATTR_TYPE_AND_VALUE.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            type: this.type
+        };
+
+        if(Object.keys(this.value).length !== 0)
+            _object.value = this.value.toJSON();
+        else
+            _object.value = this.value;
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -1076,6 +1195,19 @@ function(in_window)
         }
 
         return false;
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.RDN.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            types_and_values: new Array()
+        };
+
+        for(var i = 0; i < this.types_and_values.length; i++)
+            _object.types_and_values.push(this.types_and_values[i].toJSON());
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -1213,6 +1345,28 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.AuthorityKeyIdentifier.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("keyIdentifier" in this)
+            _object.keyIdentifier = this.keyIdentifier.toJSON();
+
+        if("authorityCertIssuer" in this)
+        {
+            _object.authorityCertIssuer = new Array();
+
+            for(var i = 0; i < this.authorityCertIssuer.length; i++)
+                _object.authorityCertIssuer.push(this.authorityCertIssuer[i].toJSON());
+        }
+
+        if("authorityCertSerialNumber" in this)
+            _object.authorityCertSerialNumber = this.authorityCertSerialNumber.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "PrivateKeyUsagePeriod" type of extension
@@ -1311,6 +1465,20 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.PrivateKeyUsagePeriod.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("notBefore" in this)
+            _object.notBefore = this.notBefore;
+
+        if("notAfter" in this)
+            _object.notAfter = this.notAfter;
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "IssuerAltName" and "SubjectAltName" types of extension
@@ -1382,6 +1550,19 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.AltName.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            altNames: new Array()
+        };
+
+        for(var i = 0; i < this.altNames.length; i++)
+            _object.altNames.push(this.altNames[i].toJSON());
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "SubjectDirectoryAttributes" type of extension
@@ -1450,6 +1631,19 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.SubjectDirectoryAttributes.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            attributes: new Array()
+        };
+
+        for(var i = 0; i < this.attributes.length; i++)
+            _object.attributes.push(this.attributes[i].toJSON());
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "PolicyMapping" type
@@ -1513,6 +1707,15 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.PolicyMapping.prototype.toJSON =
+    function()
+    {
+        return {
+            issuerDomainPolicy: this.issuerDomainPolicy,
+            subjectDomainPolicy: this.subjectDomainPolicy
+        };
     }
     //**************************************************************************************
     // #endregion 
@@ -1583,6 +1786,19 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.PolicyMappings.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            mappings: new Array()
+        };
+
+        for(var i = 0; i < this.mappings.length; i++)
+            _object.mappings.push(this.mappings[i].toJSON());
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "GeneralSubtree" type
@@ -1592,8 +1808,8 @@ function(in_window)
     {
         // #region Internal properties of the object 
         this.base = new in_window.org.pkijs.simpl.GENERAL_NAME();
-        // OPTIONAL this.minimum
-        // OPTIONAL this.maximum
+        // OPTIONAL this.minimum // in_window.org.pkijs.asn1.INTEGER
+        // OPTIONAL this.maximum // in_window.org.pkijs.asn1.INTEGER
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -1673,7 +1889,7 @@ function(in_window)
         {
             var value_minimum = 0;
 
-            if(this.minimum instanceof new in_window.org.pkijs.asn1.INTEGER)
+            if(this.minimum instanceof in_window.org.pkijs.asn1.INTEGER)
                 value_minimum = this.minimum;
             else
                 value_minimum = new in_window.org.pkijs.asn1.INTEGER({ value: this.minimum });
@@ -1692,7 +1908,7 @@ function(in_window)
         {
             var value_maximum = 0;
 
-            if(this.maximum instanceof new in_window.org.pkijs.asn1.INTEGER)
+            if(this.maximum instanceof in_window.org.pkijs.asn1.INTEGER)
                 value_maximum = this.maximum;
             else
                 value_maximum = new in_window.org.pkijs.asn1.INTEGER({ value: this.maximum });
@@ -1713,6 +1929,32 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.GeneralSubtree.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            base: this.base.toJSON()
+        };
+
+        if("minimum" in this)
+        {
+            if((typeof this.minimum) === "number")
+                _object.minimum = this.minimum;
+            else
+                _object.minimum = this.minimum.toJSON();
+        }
+
+        if("maximum" in this)
+        {
+            if((typeof this.maximum) === "number")
+                _object.maximum = this.maximum;
+            else
+                _object.maximum = this.maximum.toJSON();
+        }
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -1837,6 +2079,30 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.NameConstraints.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("permittedSubtrees" in this)
+        {
+            _object.permittedSubtrees = new Array();
+
+            for(var i = 0; i < this.permittedSubtrees.length; i++)
+                _object.permittedSubtrees.push(this.permittedSubtrees[i].toJSON());
+        }
+
+        if("excludedSubtrees" in this)
+        {
+            _object.excludedSubtrees = new Array();
+
+            for(var i = 0; i < this.excludedSubtrees.length; i++)
+                _object.excludedSubtrees.push(this.excludedSubtrees[i].toJSON());
+        }
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "BasicConstraints" type of extension
@@ -1915,6 +2181,20 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.BasicConstraints.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("cA" in this)
+            _object.cA = this.cA;
+
+        if("pathLenConstraint" in this)
+            _object.pathLenConstraint = this.pathLenConstraint;
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "PolicyQualifierInfo" type
@@ -1980,6 +2260,15 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.PolicyQualifierInfo.prototype.toJSON =
+    function()
+    {
+        return {
+            policyQualifierId: this.policyQualifierId,
+            qualifier: this.qualifier.toJSON()
+        };
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "PolicyInformation" type
@@ -1989,7 +2278,7 @@ function(in_window)
     {
         // #region Internal properties of the object 
         this.policyIdentifier = "";
-        //this.policyQualifiers = new Array(); // Array of "simpl.x509.PolicyQualifierInfo"
+        // OPTIONAL this.policyQualifiers = new Array(); // Array of "simpl.x509.PolicyQualifierInfo"
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -2070,6 +2359,24 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.PolicyInformation.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            policyIdentifier: this.policyIdentifier
+        };
+
+        if("policyQualifiers" in this)
+        {
+            _object.policyQualifiers = new Array();
+
+            for(var i = 0; i < this.policyQualifiers.length; i++)
+                _object.policyQualifiers.push(this.policyQualifiers[i].toJSON());
+        }
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "CertificatePolicies" type of extension
@@ -2136,6 +2443,19 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.CertificatePolicies.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            certificatePolicies: new Array()
+        };
+
+        for(var i = 0; i < this.certificatePolicies.length; i++)
+            _object.certificatePolicies.push(this.certificatePolicies[i].toJSON());
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -2247,6 +2567,20 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.PolicyConstraints.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("requireExplicitPolicy" in this)
+            _object.requireExplicitPolicy = this.requireExplicitPolicy;
+
+        if("inhibitPolicyMapping" in this)
+            _object.inhibitPolicyMapping = this.inhibitPolicyMapping;
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "ExtKeyUsage" type of extension
@@ -2313,6 +2647,19 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.ExtKeyUsage.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            keyPurposes: new Array()
+        };
+
+        for(var i = 0; i < this.keyPurposes.length; i++)
+            _object.keyPurposes.push(this.keyPurposes[i]);
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -2393,7 +2740,7 @@ function(in_window)
         }
 
         if("reasons" in asn1.result)
-            this.reasons = in_window.org.pkijs.asn1.BITSTRING({ value_hex: asn1.result["reasons"].value_block.value_hex });
+            this.reasons = new in_window.org.pkijs.asn1.BITSTRING({ value_hex: asn1.result["reasons"].value_block.value_hex });
 
         if("cRLIssuer" in asn1.result)
         {
@@ -2475,6 +2822,38 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.DistributionPoint.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("distributionPoint" in this)
+        {
+            if(this.distributionPoint instanceof Array)
+            {
+                _object.distributionPoint = new Array();
+
+                for(var i = 0; i < this.distributionPoint.length; i++)
+                    _object.distributionPoint.push(this.distributionPoint[i].toJSON());
+            }
+            else
+                _object.distributionPoint = this.distributionPoint.toJSON();
+        }
+
+        if("reasons" in this)
+            _object.reasons = this.reasons.toJSON();
+
+        if("cRLIssuer" in this)
+        {
+            _object.cRLIssuer = new Array();
+
+            for(var i = 0; i < this.cRLIssuer.length; i++)
+                _object.cRLIssuer.push(this.cRLIssuer[i].toJSON());
+        }
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "CRLDistributionPoints" type of extension
@@ -2541,6 +2920,19 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.CRLDistributionPoints.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            distributionPoints: new Array()
+        };
+
+        for(var i = 0; i < this.distributionPoints.length; i++)
+            _object.distributionPoints.push(this.distributionPoints[i].toJSON());
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -2612,6 +3004,15 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.AccessDescription.prototype.toJSON =
+    function()
+    {
+        return {
+            accessMethod: this.accessMethod,
+            accessLocation: this.accessLocation.toJSON()
+        };
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "AuthorityInfoAccess" and "SubjectInfoAccess" types of extension
@@ -2678,6 +3079,19 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.InfoAccess.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            accessDescriptions: new Array()
+        };
+
+        for(var i = 0; i < this.accessDescriptions.length; i++)
+            _object.accessDescriptions.push(this.accessDescriptions[i].toJSON());
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -2933,6 +3347,42 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.IssuingDistributionPoint.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("distributionPoint" in this)
+        {
+            if(this.distributionPoint instanceof Array)
+            {
+                _object.distributionPoint = new Array();
+
+                for(var i = 0; i < this.distributionPoint.length; i++)
+                    _object.distributionPoint.push(this.distributionPoint[i].toJSON());
+            }
+            else
+                _object.distributionPoint = this.distributionPoint.toJSON();
+        }
+
+        if("onlyContainsUserCerts" in this)
+            _object.onlyContainsUserCerts = this.onlyContainsUserCerts;
+
+        if("onlyContainsCACerts" in this)
+            _object.onlyContainsCACerts = this.onlyContainsCACerts;
+
+        if("onlySomeReasons" in this)
+            _object.onlySomeReasons = this.onlySomeReasons.toJSON();
+
+        if("indirectCRL" in this)
+            _object.indirectCRL = this.indirectCRL;
+
+        if("onlyContainsAttributeCerts" in this)
+            _object.onlyContainsAttributeCerts = this.onlyContainsAttributeCerts;
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "Extension" type
@@ -3087,6 +3537,21 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.EXTENSION.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            extnID: this.extnID,
+            critical: this.critical,
+            extnValue: this.extnValue.toJSON()
+        };
+
+        if("parsedValue" in this)
+            _object.parsedValue = this.parsedValue.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "Extensions" type (sequence of many Extension)
@@ -3147,6 +3612,19 @@ function(in_window)
             value: extension_schemas
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.EXTENSIONS.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            extensions_array: new Array()
+        };
+
+        for(var i = 0; i < this.extensions_array.length; i++)
+            _object.extensions_array.push(this.extensions_array[i].toJSON());
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -3583,6 +4061,42 @@ function(in_window)
         return crypto.digest({ name: "sha-1" }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.value_block.value_hex));
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.CERT.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            tbs: in_window.org.pkijs.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
+            serialNumber: this.serialNumber.toJSON(),
+            signature: this.signature.toJSON(),
+            issuer: this.issuer.toJSON(),
+            notBefore: this.notBefore.toJSON(),
+            notAfter: this.notAfter.toJSON(),
+            subject: this.subject.toJSON(),
+            subjectPublicKeyInfo: this.subjectPublicKeyInfo.toJSON(),
+            signatureAlgorithm: this.signatureAlgorithm.toJSON(),
+            signatureValue: this.signatureValue.toJSON()
+        };
+
+        if("version" in this)
+            _object.version = this.version;
+
+        if("issuerUniqueID" in this)
+            _object.issuerUniqueID = in_window.org.pkijs.bufferToHexCodes(this.issuerUniqueID, 0, this.issuerUniqueID.byteLength);
+
+        if("subjectUniqueID" in this)
+            _object.subjectUniqueID = in_window.org.pkijs.bufferToHexCodes(this.subjectUniqueID, 0, this.subjectUniqueID.byteLength);
+
+        if("extensions" in this)
+        {
+            _object.extensions = new Array();
+
+            for(var i = 0; i < this.extensions.length; i++)
+                _object.extensions.push(this.extensions[i].toJSON());
+        }
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "revoked certificate" type (to use in CRL)
@@ -3681,6 +4195,25 @@ function(in_window)
             value: sequence_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.REV_CERT.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            userCertificate: this.userCertificate.toJSON(),
+            revocationDate: this.revocationDate.toJSON
+        };
+
+        if("crlEntryExtensions" in this)
+        {
+            _object.crlEntryExtensions = new Array();
+
+            for(var i = 0; i < this.crlEntryExtensions.length; i++)
+                _object.crlEntryExtensions.push(this.crlEntryExtensions[i].toJSON());
+        }
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -4074,6 +4607,43 @@ function(in_window)
         return false;
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.CRL.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            tbs: in_window.org.pkijs.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
+            signature: this.signature.toJSON(),
+            issuer: this.issuer.toJSON(),
+            thisUpdate: this.thisUpdate.toJSON(),
+            signatureAlgorithm: this.signatureAlgorithm.toJSON(),
+            signatureValue: this.signatureValue.toJSON()
+        };
+
+        if("version" in this)
+            _object.version = this.version;
+
+        if("nextUpdate" in this)
+            _object.nextUpdate = this.nextUpdate.toJSON();
+
+        if("revokedCertificates" in this)
+        {
+            _object.revokedCertificates = new Array();
+
+            for(var i = 0; i < this.revokedCertificates.length; i++)
+                _object.revokedCertificates.push(this.revokedCertificates[i].toJSON());
+        }
+
+        if("crlExtensions" in this)
+        {
+            _object.crlExtensions = new Array();
+
+            for(var i = 0; i < this.crlExtensions.length; i++)
+                _object.crlExtensions.push(this.crlExtensions[i].toJSON());
+        }
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "Attribute" type
@@ -4139,6 +4709,20 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.ATTRIBUTE.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            type: this.type,
+            values: new Array()
+        };
+
+        for(var i = 0; i < this.values.length; i++)
+            _object.values.push(this.values[i].toJSON());
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -4417,6 +5001,29 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.PKCS10.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            tbs: in_window.org.pkijs.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
+            version: this.version,
+            subject: this.subject.toJSON(),
+            subjectPublicKeyInfo: this.subjectPublicKeyInfo.toJSON(),
+            signatureAlgorithm: this.signatureAlgorithm.toJSON(),
+            signatureValue: this.signatureValue.toJSON()
+        };
+
+        if("attributes" in this)
+        {
+            _object.attributes = new Array();
+
+            for(var i = 0; i < this.attributes.length; i++)
+                _object.attributes.push(this.attributes[i].toJSON());
+        }
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for PKCS#8 private key bag
@@ -4524,6 +5131,26 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.PKCS8.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            version: this.version,
+            privateKeyAlgorithm: this.privateKeyAlgorithm.toJSON(),
+            privateKey: this.privateKey.toJSON()
+        };
+
+        if("attributes" in this)
+        {
+            _object.attributes = new Array();
+
+            for(var i = 0; i < this.attributes.length; i++)
+                _object.attributes.push(this.attributes[i].toJSON());
+        }
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 

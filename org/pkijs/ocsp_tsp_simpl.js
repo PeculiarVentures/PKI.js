@@ -165,6 +165,17 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.ocsp.CertID.prototype.toJSON =
+    function()
+    {
+        return {
+            hashAlgorithm: this.hashAlgorithm.toJSON(),
+            issuerNameHash: this.issuerNameHash.toJSON(),
+            issuerKeyHash: this.issuerKeyHash.toJSON(),
+            serialNumber: this.serialNumber.toJSON()
+        };
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "Request" type
@@ -269,6 +280,24 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.ocsp.Request.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            reqCert: this.reqCert.toJSON()
+        };
+
+        if("singleRequestExtensions" in this)
+        {
+            _object.singleRequestExtensions = new Array();
+
+            for(var i = 0; i < this.singleRequestExtensions.length; i++)
+                _object.singleRequestExtensions.push(this.singleRequestExtensions[i].toJSON());
+        }
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -433,6 +462,33 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.ocsp.TBSRequest.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+        
+        if("version" in this)
+            _object.version = this.version;
+
+        if("requestorName" in this)
+            _object.requestorName = this.requestorName.toJSON();
+
+        _object.requestList = new Array();
+
+        for(var i = 0; i < this.requestList.length; i++)
+            _object.requestList.push(this.requestList[i].toJSON());
+
+        if("requestExtensions" in this)
+        {
+            _object.requestExtensions = new Array();
+
+            for(var i = 0; i < this.requestExtensions.length; i++)
+                _object.requestExtensions.push(this.requestExtensions[i].toJSON());
+        }
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "Signature" type
@@ -514,7 +570,7 @@ function(in_window)
             // #region Create certificate array 
             var cert_array = new Array();
 
-            for(var i = 0; i < this.certs; i++)
+            for(var i = 0; i < this.certs.length; i++)
                 cert_array.push(this.certs[i].toSchema());
             // #endregion 
 
@@ -538,6 +594,25 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.ocsp.Signature.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            signatureAlgorithm: this.signatureAlgorithm.toJSON(),
+            signature: this.signature.toJSON(),
+        };
+
+        if("certs" in this)
+        {
+            _object.certs = new Array();
+
+            for(var i = 0; i < this.certs.length; i++)
+                _object.certs.push(this.certs[i].toJSON());
+        }
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -749,6 +824,36 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.OCSP_REQUEST.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("version" in this)
+            _object.version = this.version;
+
+        if("requestorName" in this)
+            _object.requestorName = this.requestorName.toJSON();
+
+        _object.requestList = new Array();
+
+        for(var i = 0; i < this.requestList.length; i++)
+            _object.requestList.push(this.requestList[i].toJSON());
+
+        if("requestExtensions" in this)
+        {
+            _object.requestExtensions = new Array();
+
+            for(var i = 0; i < this.requestExtensions.length; i++)
+                _object.requestExtensions.push(this.requestExtensions[i].toJSON());
+        }
+
+        if("optionalSignature" in this)
+            _object.optionalSignature = this.optionalSignature.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "ResponseBytes" type
@@ -812,6 +917,15 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.ocsp.ResponseBytes.prototype.toJSON =
+    function()
+    {
+        return {
+            responseType: this.responseType,
+            response: this.response.toJSON()
+        };
     }
     //**************************************************************************************
     // #endregion 
@@ -931,6 +1045,19 @@ function(in_window)
         else
             return new Promise(function(resolve, reject) { reject("Unknown ResponseBytes type: " + _this.responseBytes.responseType); });
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.OCSP_RESPONSE.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            responseStatus: this.responseStatus.toJSON()
+        };
+
+        if("responseBytes" in this)
+            _object.responseBytes = this.responseBytes.toJSON()
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -1054,6 +1181,29 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.ocsp.SingleResponse.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            certID: this.certID.toJSON(),
+            certStatus: this.certStatus.toJSON(),
+            thisUpdate: this.thisUpdate
+        };
+
+        if("nextUpdate" in this)
+            _object.nextUpdate = this.nextUpdate;
+
+        if("singleExtensions" in this)
+        {
+            _object.singleExtensions = new Array();
+
+            for(var i = 0; i < this.singleExtensions.length; i++)
+                _object.singleExtensions.push(this.singleExtensions[i].toJSON());
+        }
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -1225,6 +1375,39 @@ function(in_window)
         // #region Construct and return new ASN.1 schema for this object 
         return tbs_schema;
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.ocsp.ResponseData.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("version" in this)
+            _object.version = this.version;
+
+        if("responderID" in this)
+            _object.responderID = this.responderID;
+
+        if("producedAt" in this)
+            _object.producedAt = this.producedAt;
+
+        if("responses" in this)
+        {
+            _object.responses = new Array();
+
+            for(var i = 0; i < this.responses.length; i++)
+                _object.responses.push(this.responses[i].toJSON());
+        }
+
+        if("responseExtensions" in this)
+        {
+            _object.responseExtensions = new Array();
+
+            for(var i = 0; i < this.responseExtensions.length; i++)
+                _object.responseExtensions.push(this.responseExtensions[i].toJSON());
+        }
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -1633,6 +1816,26 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            tbsResponseData: this.tbsResponseData.toJSON(),
+            signatureAlgorithm: this.signatureAlgorithm.toJSON(),
+            signature: this.signature.toJSON(),
+        };
+
+        if("certs" in this)
+        {
+            _object.certs = new Array();
+
+            for(var i = 0; i < this.certs.length; i++)
+                _object.certs.push(this.certs[i].toJSON());
+        }
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "MessageImprint" type
@@ -1700,6 +1903,15 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.tsp.MessageImprint.prototype.toJSON =
+    function()
+    {
+        return {
+            hashAlgorithm: this.hashAlgorithm.toJSON(),
+            hashedMessage: this.hashedMessage.toJSON()
+        };
     }
     //**************************************************************************************
     // #endregion 
@@ -1796,7 +2008,7 @@ function(in_window)
         {
             var extensions_array = new Array();
 
-            for(var i = 0; i < this.extensions; i++)
+            for(var i = 0; i < this.extensions.length; i++)
                 extensions_array.push(this.extensions[i].toSchema());
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
@@ -1816,6 +2028,34 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.TSP_REQUEST.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            version: this.version,
+            messageImprint: this.messageImprint.toJSON()
+        };
+
+        if("reqPolicy" in this)
+            _object.reqPolicy = this.reqPolicy;
+
+        if("nonce" in this)
+            _object.nonce = this.nonce.toJSON();
+
+        if("certReq" in this)
+            _object.certReq = this.certReq;
+
+        if("extensions" in this)
+        {
+            _object.extensions = new Array();
+
+            for(var i = 0; i < this.extensions.length; i++)
+                _object.extensions.push(this.extensions[i].toJSON());
+        }
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -1925,6 +2165,23 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.tsp.Accuracy.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("seconds" in this)
+            _object.seconds = this.seconds;
+
+        if("millis" in this)
+            _object.millis = this.millis;
+
+        if("micros" in this)
+            _object.micros = this.micros;
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -2045,7 +2302,7 @@ function(in_window)
         {
             var extensions_array = new Array();
 
-            for(var i = 0; i < this.extensions; i++)
+            for(var i = 0; i < this.extensions.length; i++)
                 extensions_array.push(this.extensions[i].toSchema());
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
@@ -2065,6 +2322,40 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.TST_INFO.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            version: this.version,
+            policy: this.policy,
+            messageImprint: this.messageImprint.toJSON(),
+            serialNumber: this.serialNumber.toJSON(),
+            genTime: this.genTime
+        };
+
+        if("accuracy" in this)
+            _object.accuracy = this.accuracy.toJSON();
+
+        if("ordering" in this)
+            _object.ordering = this.ordering;
+
+        if("nonce" in this)
+            _object.nonce = this.nonce.toJSON();
+
+        if("tsa" in this)
+            _object.tsa = this.tsa.toJSON();
+
+        if("extensions" in this)
+        {
+            _object.extensions = new Array();
+
+            for(var i = 0; i < this.extensions.length; i++)
+                _object.extensions.push(this.extensions[i].toJSON());
+        }
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -2158,6 +2449,27 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.tsp.PKIStatusInfo.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            status: this.status
+        };
+
+        if("statusStrings" in this)
+        {
+            _object.statusStrings = new Array();
+
+            for(var i = 0; i < this.statusStrings.length; i++)
+                _object.statusStrings.push(this.statusStrings[i].toJSON());
+        }
+
+        if("failInfo" in this)
+            _object.failInfo = this.failInfo.toJSON();
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -2284,6 +2596,19 @@ function(in_window)
 
         return signed_simp.sign(privateKey, 0);
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.TSP_RESPONSE.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            status: this.status
+        };
+
+        if("timeStampToken" in this)
+            _object.timeStampToken = this.timeStampToken.toJSON();
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 

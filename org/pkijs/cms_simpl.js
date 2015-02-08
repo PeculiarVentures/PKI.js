@@ -146,6 +146,19 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_CONTENT_INFO.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            contentType: this.contentType
+        };
+
+        if(!(this.content instanceof in_window.org.pkijs.asn1.ANY))
+            _object.content = this.content.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "OtherCertificateFormat" type
@@ -204,6 +217,19 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.OtherCertificateFormat.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            otherCertFormat: this.otherCertFormat
+        };
+
+        if(!(this.otherCert instanceof in_window.org.pkijs.asn1.ANY))
+            _object.otherCert = this.otherCert.toJSON();
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -266,6 +292,19 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.OtherRevocationInfoFormat.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            otherRevInfoFormat: this.otherRevInfoFormat
+        };
+
+        if(!(this.otherRevInfo instanceof in_window.org.pkijs.asn1.ANY))
+            _object.otherRevInfo = this.otherRevInfo.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "CMS_CERTIFICATE_SET" type
@@ -324,7 +363,7 @@ function(in_window)
         // #region Create array for output set
         var output_array = new Array();
 
-        for(var i = 0; i < this.certificates; i++)
+        for(var i = 0; i < this.certificates.length; i++)
         {
             if(this.certificates[i] instanceof in_window.org.pkijs.simpl.CERT)
                 output_array.push(this.certificates[i].toSchema());
@@ -338,6 +377,18 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_CERTIFICATE_SET.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        _object.certificates = new Array();
+        for(var i = 0; i < this.certificates.length; i++)
+            _object.certificates.push(this.certificates[i].toJSON());
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -398,7 +449,7 @@ function(in_window)
         // #region Create array for output set
         var output_array = new Array();
 
-        for(var i = 0; i < this.crls; i++)
+        for(var i = 0; i < this.crls.length; i++)
         {
             if(this.crls[i] instanceof in_window.org.pkijs.simpl.CRL)
                 output_array.push(this.crls[i].toSchema());
@@ -412,6 +463,18 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        _object.crls = new Array();
+        for(var i = 0; i < this.crls.length; i++)
+            _object.crls.push(this.crls[i].toJSON());
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -483,6 +546,15 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.IssuerAndSerialNumber.prototype.toJSON =
+    function()
+    {
+        return {
+            issuer: this.issuer.toJSON(),
+            serialNumber: this.serialNumber.toJSON()
+        };
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "Attribute" type
@@ -548,6 +620,20 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.Attribute.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            attrType: this.attrType
+        };
+
+        _object.attrValues = new Array();
+        for(var i = 0; i < this.attrValues.length; i++)
+            _object.attrValues.push(this.attrValues[i].toJSON());
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -640,6 +726,20 @@ function(in_window)
             value: attributes_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            type: this.type
+        };
+
+        _object.attributes = new Array();
+        for(var i = 0; i < this.attributes.length; i++)
+            _object.attributes.push(this.attributes[i].toJSON());
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -745,6 +845,30 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_SIGNER_INFO.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            version: this.version
+        };
+
+        if(!(this.sid instanceof in_window.org.pkijs.asn1.ANY))
+            _object.sid = this.sid.toJSON();
+
+        _object.digestAlgorithm = this.digestAlgorithm.toJSON();
+
+        if("signedAttrs" in this)
+            _object.signedAttrs = this.signedAttrs.toJSON();
+
+        _object.signatureAlgorithm = this.signatureAlgorithm.toJSON();
+        _object.signature = this.signature.toJSON();
+
+        if("unsignedAttrs" in this)
+            _object.unsignedAttrs = this.unsignedAttrs.toJSON();
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -860,6 +984,19 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.EncapsulatedContentInfo.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            eContentType: this.eContentType
+        };
+
+        if("eContent" in this)
+            _object.eContent = this.eContent.toJSON();
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -1409,6 +1546,44 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            version: this.version
+        };
+
+        _object.digestAlgorithms = new Array();
+
+        for(var i = 0; i < this.digestAlgorithms.length; i++)
+            _object.digestAlgorithms.push(this.digestAlgorithms[i].toJSON());
+
+        _object.encapContentInfo = this.encapContentInfo.toJSON();
+
+        if("certificates" in this)
+        {
+            _object.certificates = new Array();
+
+            for(var i = 0; i < this.certificates.length; i++)
+                _object.certificates.push(this.certificates[i].toJSON());
+        }
+
+        if("crls" in this)
+        {
+            _object.crls = new Array();
+
+            for(var i = 0; i < this.crls.length; i++)
+                _object.crls.push(this.crls[i].toJSON());
+        }
+
+        _object.signerInfos = new Array();
+
+        for(var i = 0; i < this.signerInfos.length; i++)
+            _object.signerInfos.push(this.signerInfos[i].toJSON());
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "RecipientIdentifier" type
@@ -1496,6 +1671,19 @@ function(in_window)
         return new in_window.org.pkijs.asn1.ANY();
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.RecipientIdentifier.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            variant: this.variant
+        };
+
+        if((this.variant == 1) || (this.variant === 2))
+            _object.value = this.value.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "KeyTransRecipientInfo" type
@@ -1505,7 +1693,12 @@ function(in_window)
     {
         // #region Internal properties of the object 
         this.version = -1;
-        this.rid = {};
+        this.rid = {
+            toJSON: function()
+            {
+                return {};
+            }
+        };
         this.keyEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
         this.encryptedKey = new in_window.org.pkijs.asn1.OCTETSTRING();
         // #endregion 
@@ -1599,6 +1792,17 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.KeyTransRecipientInfo.prototype.toJSON =
+    function()
+    {
+        return {
+            version: this.version,
+            rid: this.rid.toJSON(),
+            keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
+            encryptedKey: this.encryptedKey.toJSON()
+        };
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "OriginatorPublicKey" type
@@ -1666,6 +1870,15 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.OriginatorPublicKey.prototype.toJSON =
+    function()
+    {
+        return {
+            algorithm: this.algorithm.toJSON(),
+            publicKey: this.publicKey.toJSON()
+        };
     }
     //**************************************************************************************
     // #endregion 
@@ -1772,6 +1985,19 @@ function(in_window)
         return new in_window.org.pkijs.asn1.ANY();
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.OriginatorIdentifierOrKey.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            variant: this.variant
+        };
+
+        if((this.variant == 1) || (this.variant === 2) || (this.variant === 3))
+            _object.value = this.value.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "OtherKeyAttribute" type
@@ -1834,10 +2060,10 @@ function(in_window)
         // #region Create array for output sequence 
         var output_array = new Array();
 
-        output_array.push(this.keyAttrId);
+        output_array.push(new in_window.org.pkijs.asn1.OID({ value: this.keyAttrId }));
 
         if("keyAttr" in this)
-            output_array.push(new in_window.org.pkijs.asn1.OID({ value: this.keyAttr }));
+            output_array.push(this.keyAttr.toSchema());
         // #endregion 
 
         // #region Construct and return new ASN.1 schema for this object 
@@ -1845,6 +2071,19 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.OtherKeyAttribute.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            keyAttrId: this.keyAttrId
+        };
+
+        if("keyAttr" in this)
+            _object.keyAttr = this.keyAttr.toJSON();
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -1935,6 +2174,22 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.RecipientKeyIdentifier.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            subjectKeyIdentifier: this.subjectKeyIdentifier.toJSON()
+        };
+
+        if("date" in this)
+            _object.date = this.date;
+
+        if("other" in this)
+            _object.other = this.other.toJSON();
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -2028,6 +2283,19 @@ function(in_window)
         return new in_window.org.pkijs.asn1.ANY();
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.KeyAgreeRecipientIdentifier.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            variant: this.variant
+        };
+
+        if((this.variant == 1) || (this.variant === 2))
+            _object.value = this.value.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "RecipientEncryptedKey" type
@@ -2093,6 +2361,15 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.RecipientEncryptedKey.prototype.toJSON =
+    function()
+    {
+        return {
+            rid: this.rid.toJSON(),
+            encryptedKey: this.encryptedKey.toJSON()
+        };
     }
     //**************************************************************************************
     // #endregion 
@@ -2161,6 +2438,19 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.RecipientEncryptedKeys.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        _object.encryptedKeys = new Array();
+
+        for(var i = 0; i < this.encryptedKeys.length; i++)
+            _object.encryptedKeys.push(this.encryptedKeys[i].toJSON());
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -2268,6 +2558,18 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.KeyAgreeRecipientInfo.prototype.toJSON =
+    function()
+    {
+        return {
+            version: this.version,
+            originator: this.originator.toJSON(),
+            ukm: this.ukm.toJSON(),
+            keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
+            recipientEncryptedKeys: this.recipientEncryptedKeys.toJSON()
+        };
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "KEKIdentifier" type
@@ -2358,6 +2660,22 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.KEKIdentifier.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            keyIdentifier: this.keyIdentifier.toJSON()
+        };
+
+        if("date" in this)
+            _object.date = this.date;
+
+        if("other" in this)
+            _object.other = this.other.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "KEKRecipientInfo" type
@@ -2439,6 +2757,17 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.KEKRecipientInfo.prototype.toJSON =
+    function()
+    {
+        return {
+            version: this.version,
+            kekid: this.originator.toJSON(),
+            keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
+            encryptedKey: this.encryptedKey.toJSON()
+        };
     }
     //**************************************************************************************
     // #endregion 
@@ -2524,6 +2853,17 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.PasswordRecipientinfo.prototype.toJSON =
+    function()
+    {
+        return {
+            version: this.version,
+            keyDerivationAlgorithm: this.keyDerivationAlgorithm.toJSON(),
+            keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
+            encryptedKey: this.encryptedKey.toJSON()
+        };
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "OtherRecipientInfo" type
@@ -2587,6 +2927,19 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.OtherRecipientInfo.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            oriType: this.oriType
+        };
+
+        if(!(this.oriValue instanceof in_window.org.pkijs.asn1.ANY))
+            _object.oriValue = this.oriValue.toJSON();
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -2697,6 +3050,19 @@ function(in_window)
         return new in_window.org.pkijs.asn1.ANY();
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_RECIPIENT_INFO.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            variant: this.variant
+        };
+
+        if((this.variant == 1) || (this.variant === 2))
+            _object.value = this.value.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "OriginatorInfo" type
@@ -2781,6 +3147,15 @@ function(in_window)
             ]
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.OriginatorInfo.prototype.toJSON =
+    function()
+    {
+        return {
+            certs: this.certs.toJSON(),
+            crls: this.crls.toJSON()
+        };
     }
     //**************************************************************************************
     // #endregion 
@@ -2871,6 +3246,20 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.EncryptedContentInfo.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            contentType: this.contentType,
+            contentEncryptionAlgorithm: this.contentEncryptionAlgorithm.toJSON()
+        };
+
+        if("encryptedContent" in this)
+            _object.encryptedContent = this.encryptedContent.toJSON();
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 
@@ -3018,6 +3407,34 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            version: this.version
+        };
+
+        if("originatorInfo" in this)
+            _object.originatorInfo = this.originatorInfo.toJSON();
+
+        _object.recipientInfos = new Array();
+
+        for(var i = 0; i < this.recipientInfos.length; i++)
+            _object.recipientInfos.push(this.recipientInfos[i].toJSON());
+
+        _object.encryptedContentInfo = this.encryptedContentInfo.toJSON();
+
+        if("unprotectedAttrs" in this)
+        {
+            _object.unprotectedAttrs = new Array();
+
+            for(var i = 0; i < this.unprotectedAttrs.length; i++)
+                _object.unprotectedAttrs.push(this.unprotectedAttrs[i].toJSON());
+        }
+
+        return _object;
     }
     //**************************************************************************************
     // #endregion 

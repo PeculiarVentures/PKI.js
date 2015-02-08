@@ -194,7 +194,7 @@ function(in_window)
         for(var i = 0; i < int_buffer.length; i++)
         {
             var str = int_buffer[i].toString(16).toUpperCase();
-            result = result + ((str.length === 1) ? " 0" : " ") + str;
+            result = result + ((str.length === 1) ? "0" : "") + str;
         }
 
         return result;
