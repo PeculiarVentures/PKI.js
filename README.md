@@ -178,7 +178,7 @@ More examples could be found in "examples" folder.
 
 * Does not work with Internet Explorer's implementation of WebCrypto it is based on a old draft and also does not support all needed capabilities.
 * Does not work with PolyCrypt it is based on a old version of WebCrypto and is buggy.
-* You can use it in almost all browsers. Please check [this page](http://caniuse.com/#feat=cryptography) for information about WebCrypto browser support.
+* You can use [PKIjs][] in almost all browsers. Please check [this page](http://caniuse.com/#feat=cryptography) for information about WebCrypto browser support.
 
 ## Suitability
 At this time this library should be considered suitable for research and experimentation, futher code and security review is needed before utilization in a production application.
