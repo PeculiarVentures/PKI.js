@@ -229,7 +229,6 @@ After that you will ba able to use ASN1js and PKIjs via common way:
         // #endregion 
 ```
 
-
 ## License
 
 Copyright (c) 2014, [GMO GlobalSign](http://www.globalsign.com/)
