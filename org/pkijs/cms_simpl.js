@@ -638,6 +638,142 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region Simplified structure for "RSAES_OAEP_params" type (RFC3447)
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.RSAES_OAEP_params =
+    function()
+    {
+        // #region Internal properties of the object 
+        // OPTIONAL this.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
+        // OPTIONAL this.maskGenAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
+        // OPTIONAL this.pSourceAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
+        // #endregion 
+
+        // #region If input argument array contains "schema" for this object 
+        if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
+            in_window.org.pkijs.simpl.x509.RSAES_OAEP_params.prototype.fromSchema.call(this, arguments[0].schema);
+            // #endregion 
+            // #region If input argument array contains "native" values for internal properties 
+        else
+        {
+            if(arguments[0] instanceof Object)
+            {
+                if("hashAlgorithm" in arguments[0])
+                    this.hashAlgorithm = arguments[0].hashAlgorithm;
+
+                if("maskGenAlgorithm" in arguments[0])
+                    this.maskGenAlgorithm = arguments[0].maskGenAlgorithm;
+
+                if("pSourceAlgorithm" in arguments[0])
+                    this.pSourceAlgorithm = arguments[0].pSourceAlgorithm;
+            }
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.RSAES_OAEP_params.prototype.fromSchema =
+    function(schema)
+    {
+        // #region Check the schema is valid 
+        var asn1 = in_window.org.pkijs.compareSchema(schema,
+            schema,
+            in_window.org.pkijs.schema.x509.RSAES_OAEP_params({
+                names: {
+                    hashAlgorithm: {
+                        names: {
+                            block_name: "hashAlgorithm"
+                        }
+                    },
+                    maskGenAlgorithm: {
+                        names: {
+                            block_name: "maskGenAlgorithm"
+                        }
+                    },
+                    pSourceAlgorithm: {
+                        names: {
+                            block_name: "pSourceAlgorithm"
+                        }
+                    }
+                }
+            })
+            );
+
+        if(asn1.verified === false)
+            throw new Error("Object's schema was not verified against input data for RSAES_OAEP_params");
+        // #endregion 
+
+        // #region Get internal properties from parsed schema 
+        if("hashAlgorithm" in asn1.result)
+            this.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["hashAlgorithm"] });
+
+        if("maskGenAlgorithm" in asn1.result)
+            this.maskGenAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["maskGenAlgorithm"] });
+
+        if("pSourceAlgorithm" in asn1.result)
+            this.pSourceAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["pSourceAlgorithm"] });
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.RSAES_OAEP_params.prototype.toSchema =
+    function()
+    {
+        // #region Create array for output sequence 
+        var output_array = new Array();
+
+        if("hashAlgorithm" in this)
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
+                value: [this.hashAlgorithm.toSchema()]
+            }));
+
+        if("maskGenAlgorithm" in this)
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
+                value: [this.maskGenAlgorithm.toSchema()]
+            }));
+
+        if("pSourceAlgorithm" in this)
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 2 // [2]
+                },
+                value: [this.pSourceAlgorithm.toSchema()]
+            }));
+        // #endregion 
+
+        // #region Construct and return new ASN.1 schema for this object 
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            value: output_array
+        }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.RSAES_OAEP_params.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("hashAlgorithm" in this)
+            _object.hashAlgorithm = this.hashAlgorithm.toJSON();
+
+        if("maskGenAlgorithm" in this)
+            _object.maskGenAlgorithm = this.maskGenAlgorithm.toJSON();
+
+        if("pSourceAlgorithm" in this)
+            _object.pSourceAlgorithm = this.pSourceAlgorithm.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region Simplified structure for "SignedUnsignedAttributes" type
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes =
@@ -1360,23 +1496,9 @@ function(in_window)
         sequence = sequence.then(
             function()
             {
-                switch(signerInfos[signerIndex].digestAlgorithm.algorithm_id)
-                {
-                    case "1.3.14.3.2.26":
-                        sha_algorithm = "sha-1";
-                        break;
-                    case "2.16.840.1.101.3.4.2.1":
-                        sha_algorithm = "sha-256";
-                        break;
-                    case "2.16.840.1.101.3.4.2.2":
-                        sha_algorithm = "sha-384";
-                        break;
-                    case "2.16.840.1.101.3.4.2.3":
-                        sha_algorithm = "sha-512";
-                        break;
-                    default:
-                        return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signerInfos[signerIndex].digestAlgorithm.algorithm_id); });
-                }
+                sha_algorithm = in_window.org.pkijs.getHashAlgorithmByOID(signerInfos[signerIndex].digestAlgorithm.algorithm_id);
+                if(sha_algorithm === "")
+                    return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signerInfos[signerIndex].digestAlgorithm.algorithm_id); });
 
                 return new Promise(function(resolve, reject) { resolve(); });
             }
@@ -1421,11 +1543,21 @@ function(in_window)
         sequence = sequence.then(
             function()
             {
+                // #region Get information about public key algorithm and default parameters for import
+                var algorithm_name = in_window.org.pkijs.getAlgorithmNameBySignature(signer_cert.signatureAlgorithm.algorithm_id);
+                if(algorithm_name === "")
+                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + signer_cert.signatureAlgorithm.algorithm_id); });
+
+                var algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
+                if("hash" in algorithm.algorithm)
+                    algorithm.algorithm.hash.name = sha_algorithm;
+                // #endregion 
+
                 var publicKeyInfo_schema = signer_cert.subjectPublicKeyInfo.toSchema();
                 var publicKeyInfo_buffer = publicKeyInfo_schema.toBER(false);
                 var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
 
-                return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["verify"]);
+                return crypto.importKey("spki", publicKeyInfo_view, algorithm.algorithm, true, algorithm.usages);
             }
             );
         // #endregion 
@@ -1434,10 +1566,62 @@ function(in_window)
         sequence = sequence.then(
             function(publicKey)
             {
-                return crypto.verify({ name: publicKey.algorithm.name, hash: { name: sha_algorithm } },
+                // #region Get default algorithm parameters for verification 
+                var algorithm = in_window.org.pkijs.getAlgorithmParameters(publicKey.algorithm.name, "verify");
+                if("hash" in algorithm.algorithm)
+                    algorithm.algorithm.hash.name = sha_algorithm;
+                // #endregion 
+
+                // #region Special case for ECDSA signatures 
+                var signature_value = signerInfos[signerIndex].signature.value_block.value_hex;
+
+                if(publicKey.algorithm.name === "ECDSA")
+                {
+                    var asn1 = in_window.org.pkijs.fromBER(signature_value);
+                    signature_value = in_window.org.pkijs.createECDSASignatureFromCMS(asn1.result);
+                }
+                // #endregion 
+
+                // #region Special case for RSA-PSS 
+                if(publicKey.algorithm.name === "RSA-PSS")
+                {
+                    var pssParameters;
+
+                    try
+                    {
+                        pssParameters = new in_window.org.pkijs.simpl.x509.RSASSA_PSS_params({ schema: signerInfos[signerIndex].signatureAlgorithm.algorithm_params });
+                    }
+                    catch(ex)
+                    {
+                        return new Promise(function(resolve, reject) { reject(ex); });
+                    }
+
+                    if("saltLength" in pssParameters)
+                        algorithm.algorithm.saltLength = pssParameters.saltLength;
+                    else
+                        algorithm.algorithm.saltLength = 20;
+
+                    var hash_algo = "SHA-1";
+
+                    if("hashAlgorithm" in pssParameters)
+                    {
+                        hash_algo = in_window.org.pkijs.getHashAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
+                        if(hash_algo === "")
+                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                    }
+
+                    algorithm.algorithm.hash.name = hash_algo;
+                }
+                // #endregion 
+
+                return crypto.verify(algorithm.algorithm,
                     publicKey,
-                    new Uint8Array(signerInfos[signerIndex].signature.value_block.value_hex),
+                    new Uint8Array(signature_value),
                     new Uint8Array(data));
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
             }
             );
         // #endregion 
@@ -1446,15 +1630,16 @@ function(in_window)
     }
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.sign =
-    function(privateKey, signerIndex)
+    function(privateKey, signerIndex, hashAlgorithm)
     {
         /// <param name="privateKey" type="Key">Private key for "subjectPublicKeyInfo" structure</param>
         /// <param name="signerIndex" type="Number">Index number (starting from 0) of signer index to make signature for</param>
+        /// <param name="hashAlgorithm" type="String" optional="true">Hashing algorithm. Default SHA-1</param>
 
         // #region Initial variables 
         var _this = this;
         var data = new ArrayBuffer(0);
-        var sha_algorithm = "";
+        var hashAlgorithmOID = "";
         // #endregion 
 
         // #region Get a private key from function parameter 
@@ -1462,23 +1647,109 @@ function(in_window)
             return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
         // #endregion 
 
-        // #region Find a correct hashing algorithm 
-        switch(_this.signerInfos[signerIndex].digestAlgorithm.algorithm_id)
+        // #region Get hashing algorithm 
+        if(typeof hashAlgorithm === "undefined")
+            hashAlgorithm = "SHA-1";
+
+        // #region Simple check for supported algorithm 
+        hashAlgorithmOID = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+        if(hashAlgorithmOID === "")
+            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+        // #endregion 
+        // #endregion 
+
+        // #region Append information about hash algorithm  
+        var found = false;
+
+        for(var i = 0; i < _this.digestAlgorithms.length; i++)
         {
-            case "1.3.14.3.2.26":
-                sha_algorithm = "sha-1";
+            if(_this.digestAlgorithms[i].algorithm_id === hashAlgorithmOID)
+            {
+                found = true;
                 break;
-            case "2.16.840.1.101.3.4.2.1":
-                sha_algorithm = "sha-256";
+            }
+        }
+
+        if(found === false)
+        {
+            _this.digestAlgorithms.push(new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                algorithm_id: hashAlgorithmOID,
+                algorithm_params: new org.pkijs.asn1.NULL()
+            }));
+        }
+
+        _this.signerInfos[signerIndex].digestAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+            algorithm_id: hashAlgorithmOID,
+            algorithm_params: new org.pkijs.asn1.NULL()
+        });
+        // #endregion 
+
+        // #region Get a "default parameters" for current algorithm 
+        var defParams = in_window.org.pkijs.getAlgorithmParameters(privateKey.algorithm.name, "sign");
+        defParams.algorithm.hash.name = hashAlgorithm;
+        // #endregion 
+
+        // #region Fill internal structures base on "privateKey" and "hashAlgorithm" 
+        switch(privateKey.algorithm.name.toUpperCase())
+        {
+            case "RSASSA-PKCS1-V1_5":
+            case "ECDSA":
+                _this.signerInfos[signerIndex].signatureAlgorithm.algorithm_id = in_window.org.pkijs.getSignatureAlgorithm(defParams.algorithm);
                 break;
-            case "2.16.840.1.101.3.4.2.2":
-                sha_algorithm = "sha-384";
-                break;
-            case "2.16.840.1.101.3.4.2.3":
-                sha_algorithm = "sha-512";
+            case "RSA-PSS":
+                {
+                    // #region Set "saltLength" as a length (in octets) of hash function result 
+                    switch(hashAlgorithm.toUpperCase())
+                    {
+                        case "SHA-256":
+                            defParams.algorithm.saltLength = 32;
+                            break;
+                        case "SHA-384":
+                            defParams.algorithm.saltLength = 48;
+                            break;
+                        case "SHA-512":
+                            defParams.algorithm.saltLength = 64;
+                            break;
+                        default:;
+                    }
+                    // #endregion 
+
+                    // #region Fill "RSASSA_PSS_params" object 
+                    var paramsObject = {};
+
+                    if(hashAlgorithm.toUpperCase() !== "SHA-1")
+                    {
+                        hashAlgorithmOID = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+                        if(hashAlgorithmOID === "")
+                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+
+                        paramsObject.hashAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                            algorithm_id: hashAlgorithmOID,
+                            algorithm_params: new org.pkijs.asn1.NULL()
+                        });
+
+                        paramsObject.maskGenAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                            algorithm_id: "1.2.840.113549.1.1.8", // MGF1
+                            algorithm_params: paramsObject.hashAlgorithm.toSchema()
+                        })
+                    }
+
+                    if(defParams.algorithm.saltLength !== 20)
+                        paramsObject.saltLength = defParams.algorithm.saltLength;
+
+                    var pssParameters = new in_window.org.pkijs.simpl.x509.RSASSA_PSS_params(paramsObject);
+                    // #endregion   
+
+                    // #region Automatically set signature algorithm 
+                    _this.signerInfos[signerIndex].signatureAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        algorithm_id: "1.2.840.113549.1.1.10",
+                        algorithm_params: pssParameters.toSchema()
+                    });
+                    // #endregion 
+                }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signature.signatureAlgorithm.algorithm_id); });
+                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
         }
         // #endregion 
 
@@ -1530,11 +1801,16 @@ function(in_window)
         // #endregion 
 
         // #region Signing TBS data on provided private key 
-        return crypto.sign({ name: privateKey.algorithm.name, hash: { name: sha_algorithm } },
+        return crypto.sign(defParams.algorithm,
             privateKey,
             new Uint8Array(data)).then(
             function(result)
             {
+                // #region Special case for ECDSA algorithm 
+                if(defParams.algorithm.name === "ECDSA")
+                    result = in_window.org.pkijs.createCMSECDSASignature(result);
+                // #endregion 
+
                 _this.signerInfos[signerIndex].signature = new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: result });
                 return new Promise(function(resolve, reject) { resolve(result); });
             },
@@ -1693,12 +1969,7 @@ function(in_window)
     {
         // #region Internal properties of the object 
         this.version = -1;
-        this.rid = {
-            toJSON: function()
-            {
-                return {};
-            }
-        };
+        this.rid = new in_window.org.pkijs.emptyObject();
         this.keyEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
         this.encryptedKey = new in_window.org.pkijs.asn1.OCTETSTRING();
         // #endregion 
@@ -1713,7 +1984,7 @@ function(in_window)
             if(arguments[0] instanceof Object)
             {
                 this.version = arguments[0].version || -1;
-                this.rid = arguments[0].rid || {};
+                this.rid = arguments[0].rid || new in_window.org.pkijs.emptyObject();
                 this.keyEncryptionAlgorithm = arguments[0].keyEncryptionAlgorithm || new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
                 this.encryptedKey = arguments[0].encryptedKey || new in_window.org.pkijs.asn1.OCTETSTRING();
             }
@@ -3168,7 +3439,7 @@ function(in_window)
         // #region Internal properties of the object 
         this.contentType = "";
         this.contentEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
-        // OPTIONAL this.encryptedContent
+        // OPTIONAL this.encryptedContent // new in_window.org.pkijs.asn1.OCTETSTRING - (!!!) could be contructive or primitive value (!!!)
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -3184,7 +3455,43 @@ function(in_window)
                 this.contentEncryptionAlgorithm = arguments[0].contentEncryptionAlgorithm || new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
 
                 if("encryptedContent" in arguments[0])
+                {
                     this.encryptedContent = arguments[0].encryptedContent;
+
+                    if((this.encryptedContent.id_block.tag_class === 1) &&
+                       (this.encryptedContent.id_block.tag_number === 4))
+                    {
+                        // #region Divide OCTETSTRING value down to small pieces 
+                        if(this.encryptedContent.id_block.is_constructed === false)
+                        {
+                            var constr_string = new in_window.org.pkijs.asn1.OCTETSTRING({
+                                id_block: { is_constructed: true },
+                                is_constructed: true
+                            });
+
+                            var offset = 0;
+                            var length = this.encryptedContent.value_block.value_hex.byteLength;
+
+                            while(length > 0)
+                            {
+                                var piece_view = new Uint8Array(this.encryptedContent.value_block.value_hex, offset, ((offset + 65536) > this.encryptedContent.value_block.value_hex.byteLength) ? (this.encryptedContent.value_block.value_hex.byteLength - offset) : 65536);
+                                var _array = new ArrayBuffer(piece_view.length);
+                                var _view = new Uint8Array(_array);
+
+                                for(var i = 0; i < _view.length; i++)
+                                    _view[i] = piece_view[i];
+
+                                constr_string.value_block.value.push(new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: _array }));
+
+                                length -= piece_view.length;
+                                offset += piece_view.length;
+                            }
+
+                            this.encryptedContent = constr_string;
+                        }
+                        // #endregion   
+                    }
+                }
             }
         }
         // #endregion 
@@ -3218,7 +3525,12 @@ function(in_window)
         this.contentEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["contentEncryptionAlgorithm"] });
 
         if("encryptedContent" in asn1.result)
-            this.encryptedContent = asn1.result["encryptedContent"].value_block.value[0];
+        {
+            this.encryptedContent = asn1.result["encryptedContent"];
+
+            this.encryptedContent.id_block.tag_class = 1; // UNIVERSAL
+            this.encryptedContent.id_block.tag_number = 4; // OCTETSTRING (!!!) The value still has instance of "in_window.org.pkijs.asn1.ASN1_CONSTRUCTED / ASN1_PRIMITIVE"
+        }
         // #endregion 
     }
     //**************************************************************************************
@@ -3232,13 +3544,14 @@ function(in_window)
         output_array.push(this.contentEncryptionAlgorithm.toSchema());
 
         if("encryptedContent" in this)
-            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                id_block: {
-                    tag_class: 3, // CONTEXT-SPECIFIC
-                    tag_number: 0 // [0]
-                },
-                value: [this.encryptedContent]
-            }));
+        {
+            var encryptedValue = this.encryptedContent;
+
+            encryptedValue.id_block.tag_class = 3; // CONTEXT-SPECIFIC
+            encryptedValue.id_block.tag_number = 0; // [0]
+
+            output_array.push(encryptedValue);
+        }
         // #endregion 
 
         // #region Construct and return new ASN.1 schema for this object 
@@ -3435,6 +3748,48 @@ function(in_window)
         }
 
         return _object;
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.encrypt =
+    function()
+    {
+        /// <summary>Create a new CMS Enveloped Data content with encrypted data</summary>
+
+        // #region Initial variables 
+        var type; // 0 - KeyTransRecipientInfo, 1 - KeyAgreeRecipientInfo, 2 - KEKRecipientInfo, 3 - PasswordRecipientinfo
+        var typeInfo;
+
+        // Input variables:
+        // =================
+        // 1. Certificate for receiver;
+        // 2. Symmetric encryption algorithm;
+        // 3. "Key transport" algorithm;
+        // #endregion 
+
+        // #region Get input variable values 
+        if(arguments[0] instanceof Object)
+        {
+            if("type" in arguments[0])
+            {
+                type = arguments[0].type;
+
+                if("typeInfo" in arguments[0])
+                    typeInfo = arguments[0].typeInfo;
+                else
+                    return new Promise(function(resolve, reject) { reject("No \"typeInfo\" parameter provided to \"CMS_ENVELOPED_DATA.encrypt\" method"); });
+            }
+            else
+                return new Promise(function(resolve, reject) { reject("No \"type\" parameter provided to \"CMS_ENVELOPED_DATA.encrypt\" method"); });
+        }
+        else
+            return new Promise(function(resolve, reject) { reject("No input data provided to \"CMS_ENVELOPED_DATA.encrypt\" method"); });
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.decrypt =
+    function()
+    {
+        /// <summary>Decrypt existing CMS Enveloped Data content</summary>
     }
     //**************************************************************************************
     // #endregion 

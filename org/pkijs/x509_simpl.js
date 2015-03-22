@@ -835,6 +835,158 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region Simplified structure for "RSASSA_PSS_params" type (RFC3447)
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.RSASSA_PSS_params =
+    function()
+    {
+        // #region Internal properties of the object 
+        // OPTIONAL this.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
+        // OPTIONAL this.maskGenAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
+        // OPTIONAL this.saltLength = 20; // new in_window.org.pkijs.asn1.INTEGER();
+        // OPTIONAL this.trailerField = 1; // new in_window.org.pkijs.asn1.INTEGER();
+        // #endregion 
+
+        // #region If input argument array contains "schema" for this object 
+        if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
+            in_window.org.pkijs.simpl.x509.RSASSA_PSS_params.prototype.fromSchema.call(this, arguments[0].schema);
+        // #endregion 
+        // #region If input argument array contains "native" values for internal properties 
+        else
+        {
+            if(arguments[0] instanceof Object)
+            {
+                if("hashAlgorithm" in arguments[0])
+                    this.hashAlgorithm = arguments[0].hashAlgorithm;
+
+                if("maskGenAlgorithm" in arguments[0])
+                    this.maskGenAlgorithm = arguments[0].maskGenAlgorithm;
+
+                if("saltLength" in arguments[0])
+                    this.saltLength = arguments[0].saltLength;
+
+                if("trailerField" in arguments[0])
+                    this.trailerField = arguments[0].trailerField;
+            }
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.RSASSA_PSS_params.prototype.fromSchema =
+    function(schema)
+    {
+        // #region Check the schema is valid 
+        var asn1 = in_window.org.pkijs.compareSchema(schema,
+            schema,
+            in_window.org.pkijs.schema.x509.RSASSA_PSS_params({
+                names: {
+                    hashAlgorithm: {
+                        names: {
+                            block_name: "hashAlgorithm"
+                        }
+                    },
+                    maskGenAlgorithm: {
+                        names: {
+                            block_name: "maskGenAlgorithm"
+                        }
+                    },
+                    saltLength: "saltLength",
+                    trailerField: "trailerField"
+                }
+            })
+            );
+
+        if(asn1.verified === false)
+            throw new Error("Object's schema was not verified against input data for RSASSA_PSS_params");
+        // #endregion 
+
+        // #region Get internal properties from parsed schema 
+        if("hashAlgorithm" in asn1.result)
+            this.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["hashAlgorithm"] });
+
+        if("maskGenAlgorithm" in asn1.result)
+            this.maskGenAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["maskGenAlgorithm"] });
+
+        if("saltLength" in asn1.result)
+            this.saltLength = asn1.result["saltLength"].value_block.value_dec;
+
+        if("trailerField" in asn1.result)
+            this.trailerField = asn1.result["trailerField"].value_block.value_dec;
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.RSASSA_PSS_params.prototype.toSchema =
+    function()
+    {
+        // #region Create array for output sequence 
+        var output_array = new Array();
+
+        if("hashAlgorithm" in this)
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
+                value: [this.hashAlgorithm.toSchema()]
+            }));
+
+        if("maskGenAlgorithm" in this)
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
+                value: [this.maskGenAlgorithm.toSchema()]
+            }));
+
+        if("saltLength" in this)
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 2 // [2]
+                },
+                value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.saltLength })]
+            }));
+
+        if("trailerField" in this)
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 3 // [3]
+                },
+                value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.trailerField })]
+            }));
+        // #endregion 
+
+        // #region Construct and return new ASN.1 schema for this object 
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            value: output_array
+        }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.x509.RSASSA_PSS_params.prototype.toJSON =
+    function()
+    {
+        var _object = {};
+
+        if("hashAlgorithm" in this)
+            _object.hashAlgorithm = this.hashAlgorithm.toJSON();
+
+        if("maskGenAlgorithm" in this)
+            _object.maskGenAlgorithm = this.maskGenAlgorithm.toJSON();
+
+        if("saltLength" in this)
+            _object.saltLength = this.saltLength.toJSON();
+
+        if("trailerField" in this)
+            _object.trailerField = this.trailerField.toJSON();
+
+        return _object;
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region Simplified structure for "SubjectPublicKeyInfo" type 
     //**************************************************************************************
     in_window.org.pkijs.simpl.PUBLIC_KEY_INFO =
@@ -3395,7 +3547,7 @@ function(in_window)
         this.critical = false;
         this.extnValue = new in_window.org.pkijs.asn1.OCTETSTRING();
 
-        // this.parsedValue - Parsed "extnValue" in case of well-known "extnID"
+        // OPTIONAL this.parsedValue - Parsed "extnValue" in case of well-known "extnID"
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -3526,14 +3678,28 @@ function(in_window)
     in_window.org.pkijs.simpl.EXTENSION.prototype.toSchema =
     function()
     {
+        // #region Create array for output sequence 
+        var output_array = new Array();
+
+        output_array.push(new in_window.org.pkijs.asn1.OID({ value: this.extnID }));
+
+        if(this.critical)
+            output_array.push(new in_window.org.pkijs.asn1.BOOLEAN({ value: this.critical }));
+
+        output_array.push(this.extnValue);
+        // #endregion 
+
         // #region Construct and return new ASN.1 schema for this object 
         return (new in_window.org.pkijs.asn1.SEQUENCE({
-            value: [
-                new in_window.org.pkijs.asn1.OID({ value: this.extnID }),
-                new in_window.org.pkijs.asn1.BOOLEAN({ value: this.critical }),
-                this.extnValue
-            ]
+            value: output_array
         }));
+        //return (new in_window.org.pkijs.asn1.SEQUENCE({
+        //    value: [
+        //        new in_window.org.pkijs.asn1.OID({ value: this.extnID }),
+        //        new in_window.org.pkijs.asn1.BOOLEAN({ value: this.critical }),
+        //        this.extnValue
+        //    ]
+        //}));
         // #endregion 
     }
     //**************************************************************************************
@@ -3918,36 +4084,30 @@ function(in_window)
         // #endregion 
 
         // #region Find signer's hashing algorithm 
-        var sha_algorithm = "";
-
-        switch(this.signatureAlgorithm.algorithm_id)
-        {
-            case "1.2.840.113549.1.1.5":
-                sha_algorithm = "sha-1";
-                break;
-            case "1.2.840.113549.1.1.11":
-                sha_algorithm = "sha-256";
-                break;
-            case "1.2.840.113549.1.1.12":
-                sha_algorithm = "sha-384";
-                break;
-            case "1.2.840.113549.1.1.13":
-                sha_algorithm = "sha-512";
-                break;
-            default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
-        }
+        var sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
+        if(sha_algorithm === "")
+            return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
         // #endregion 
 
         // #region Importing public key 
         sequence = sequence.then(
             function()
             {
+                // #region Get information about public key algorithm and default parameters for import
+                var algorithm_name = in_window.org.pkijs.getAlgorithmNameBySignature(_this.signatureAlgorithm.algorithm_id);
+                if(algorithm_name === "")
+                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+
+                var algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
+                if("hash" in algorithm.algorithm)
+                    algorithm.algorithm.hash.name = sha_algorithm;
+                // #endregion 
+
                 var publicKeyInfo_schema = subjectPublicKeyInfo.toSchema();
                 var publicKeyInfo_buffer = publicKeyInfo_schema.toBER(false);
                 var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
 
-                return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["verify"]);
+                return crypto.importKey("spki", publicKeyInfo_view, algorithm.algorithm, true, algorithm.usages);
             }
             );
         // #endregion 
@@ -3956,9 +4116,57 @@ function(in_window)
         sequence = sequence.then(
             function(publicKey)
             {
-                return crypto.verify({ name: publicKey.algorithm.name, hash: { name: sha_algorithm } },
+                // #region Get default algorithm parameters for verification 
+                var algorithm = in_window.org.pkijs.getAlgorithmParameters(publicKey.algorithm.name, "verify");
+                if("hash" in algorithm.algorithm)
+                    algorithm.algorithm.hash.name = sha_algorithm;
+                // #endregion 
+
+                // #region Special case for ECDSA signatures 
+                var signature_value = signature.value_block.value_hex;
+
+                if(publicKey.algorithm.name === "ECDSA")
+                {
+                    var asn1 = in_window.org.pkijs.fromBER(signature_value);
+                    signature_value = in_window.org.pkijs.createECDSASignatureFromCMS(asn1.result);
+                }
+                // #endregion 
+
+                // #region Special case for RSA-PSS 
+                if(publicKey.algorithm.name === "RSA-PSS")
+                {
+                    var pssParameters;
+
+                    try
+                    {
+                        pssParameters = new in_window.org.pkijs.simpl.x509.RSASSA_PSS_params({ schema: _this.signatureAlgorithm.algorithm_params });
+                    }
+                    catch(ex)
+                    {
+                        return new Promise(function(resolve, reject) { reject(ex); });
+                    }
+
+                    if("saltLength" in pssParameters)
+                        algorithm.algorithm.saltLength = pssParameters.saltLength;
+                    else
+                        algorithm.algorithm.saltLength = 20;
+
+                    var hash_algo = "SHA-1";
+
+                    if("hashAlgorithm" in pssParameters)
+                    {
+                        hash_algo = in_window.org.pkijs.getHashAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
+                        if(hash_algo === "")
+                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                    }
+
+                    algorithm.algorithm.hash.name = hash_algo;
+                }
+                // #endregion 
+
+                return crypto.verify(algorithm.algorithm,
                     publicKey,
-                    new Uint8Array(signature.value_block.value_hex),
+                    new Uint8Array(signature_value),
                     new Uint8Array(tbs));
             }
             );
@@ -3968,9 +4176,10 @@ function(in_window)
     }
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT.prototype.sign =
-    function(privateKey)
+    function(privateKey, hashAlgorithm)
     {
-        /// <param name="privateKey" type="Key">Private key for "subjectPublicKeyInfo" structure</param>
+        /// <param name="privateKey" type="CryptoKey">Private key for "subjectPublicKeyInfo" structure</param>
+        /// <param name="hashAlgorithm" type="String" optional="true">Hashing algorithm. Default SHA-1</param>
 
         // #region Initial variables 
         var _this = this;
@@ -3981,25 +4190,87 @@ function(in_window)
             return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
         // #endregion 
 
-        // #region Find a correct hashing algorithm 
-        var sha_algorithm = "";
-
-        switch(this.signatureAlgorithm.algorithm_id)
+        // #region Get hashing algorithm 
+        if(typeof hashAlgorithm === "undefined")
+            hashAlgorithm = "SHA-1";
+        else
         {
-            case "1.2.840.113549.1.1.5":
-                sha_algorithm = "sha-1";
+            // #region Simple check for supported algorithm 
+            var oid = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+            if(oid === "")
+                return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+            // #endregion 
+        }
+        // #endregion 
+
+        // #region Get a "default parameters" for current algorithm 
+        var defParams = in_window.org.pkijs.getAlgorithmParameters(privateKey.algorithm.name, "sign");
+        defParams.algorithm.hash.name = hashAlgorithm;
+        // #endregion 
+
+        // #region Fill internal structures base on "privateKey" and "hashAlgorithm" 
+        switch(privateKey.algorithm.name.toUpperCase())
+        {
+            case "RSASSA-PKCS1-V1_5":
+            case "ECDSA":
+                _this.signature.algorithm_id = in_window.org.pkijs.getSignatureAlgorithm(defParams.algorithm);
+                _this.signatureAlgorithm.algorithm_id = _this.signature.algorithm_id;
                 break;
-            case "1.2.840.113549.1.1.11":
-                sha_algorithm = "sha-256";
-                break;
-            case "1.2.840.113549.1.1.12":
-                sha_algorithm = "sha-384";
-                break;
-            case "1.2.840.113549.1.1.13":
-                sha_algorithm = "sha-512";
+            case "RSA-PSS":
+                {
+                    // #region Set "saltLength" as a length (in octets) of hash function result 
+                    switch(hashAlgorithm.toUpperCase())
+                    {
+                        case "SHA-256":
+                            defParams.algorithm.saltLength = 32;
+                            break;
+                        case "SHA-384":
+                            defParams.algorithm.saltLength = 48;
+                            break;
+                        case "SHA-512":
+                            defParams.algorithm.saltLength = 64;
+                            break;
+                        default:;
+                    }
+                    // #endregion 
+
+                    // #region Fill "RSASSA_PSS_params" object 
+                    var paramsObject = {};
+
+                    if(hashAlgorithm.toUpperCase() !== "SHA-1")
+                    {
+                        var hashAlgorithmOID = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+                        if(hashAlgorithmOID === "")
+                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+
+                        paramsObject.hashAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                            algorithm_id: hashAlgorithmOID,
+                            algorithm_params: new org.pkijs.asn1.NULL()
+                        });
+
+                        paramsObject.maskGenAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                            algorithm_id: "1.2.840.113549.1.1.8", // MGF1
+                            algorithm_params: paramsObject.hashAlgorithm.toSchema()
+                        })
+                    }
+
+                    if(defParams.algorithm.saltLength !== 20)
+                        paramsObject.saltLength = defParams.algorithm.saltLength;
+
+                    var pssParameters = new in_window.org.pkijs.simpl.x509.RSASSA_PSS_params(paramsObject);
+                    // #endregion   
+
+                    // #region Automatically set signature algorithm 
+                    _this.signature = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        algorithm_id: "1.2.840.113549.1.1.10",
+                        algorithm_params: pssParameters.toSchema()
+                    });
+                    _this.signatureAlgorithm = _this.signature; // Must be the same
+                    // #endregion 
+                }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signature.signatureAlgorithm.algorithm_id); });
+                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
         }
         // #endregion 
 
@@ -4014,11 +4285,16 @@ function(in_window)
         // #endregion 
 
         // #region Signing TBS data on provided private key 
-        return crypto.sign({ name: privateKey.algorithm.name, hash: { name: sha_algorithm } },
+        return crypto.sign(defParams.algorithm,
             privateKey,
             new Uint8Array(_this.tbs)).then(
             function(result)
             {
+                // #region Special case for ECDSA algorithm 
+                if(defParams.algorithm.name === "ECDSA")
+                    result = in_window.org.pkijs.createCMSECDSASignature(result);
+                // #endregion 
+
                 _this.signatureValue = new in_window.org.pkijs.asn1.BITSTRING({ value_hex: result });
             },
             function(error)
@@ -4034,17 +4310,49 @@ function(in_window)
     {
         /// <summary>Importing public key for current certificate</summary>
 
+        // #region Initial variables 
+        var algorithm;
+        // #endregion 
+
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
             return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
         // #endregion 
 
+        if(arguments[0] instanceof Object)
+        {
+            if("algorithm" in arguments[0])
+                algorithm = arguments[0].algorithm;
+            else
+                return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"algorithm\""); });
+        }
+        else
+        {
+            // #region Find signer's hashing algorithm 
+            var sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
+            if(sha_algorithm === "")
+                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signatureAlgorithm.algorithm_id); });
+            // #endregion   
+
+            // #region Get information about public key algorithm and default parameters for import
+            var algorithm_name = in_window.org.pkijs.getAlgorithmNameBySignature(this.signatureAlgorithm.algorithm_id);
+            if(algorithm_name === "")
+                return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + this.signatureAlgorithm.algorithm_id); });
+
+            algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
+            if("hash" in algorithm.algorithm)
+                algorithm.algorithm.hash.name = sha_algorithm;
+            // #endregion 
+        }
+
+        // #region Get neccessary values from internal fields for current certificate 
         var publicKeyInfo_schema = this.subjectPublicKeyInfo.toSchema();
         var publicKeyInfo_buffer = publicKeyInfo_schema.toBER(false);
         var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
+        // #endregion 
 
-        return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["verify"]);
+        return crypto.importKey("spki", publicKeyInfo_view, algorithm.algorithm, true, algorithm.usages);
     }
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT.prototype.getKeyHash =
@@ -4453,40 +4761,34 @@ function(in_window)
         // #endregion 
 
         // #region Find signer's hashing algorithm 
-        var sha_algorithm = "";
-
-        switch(this.signatureAlgorithm.algorithm_id)
-        {
-            case "1.2.840.113549.1.1.5":
-                sha_algorithm = "sha-1";
-                break;
-            case "1.2.840.113549.1.1.11":
-                sha_algorithm = "sha-256";
-                break;
-            case "1.2.840.113549.1.1.12":
-                sha_algorithm = "sha-384";
-                break;
-            case "1.2.840.113549.1.1.13":
-                sha_algorithm = "sha-512";
-                break;
-            default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
-        }
+        var sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
+        if(sha_algorithm === "")
+            return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
         // #endregion 
 
         // #region Import public key 
         sequence = sequence.then(
             function()
             {
+                // #region Get information about public key algorithm and default parameters for import
+                var algorithm_name = in_window.org.pkijs.getAlgorithmNameBySignature(this.signature.algorithm_id);
+                if(algorithm_name === "")
+                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + _this.signature.algorithm_id); });
+
+                var algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
+                if("hash" in algorithm.algorithm)
+                    algorithm.algorithm.hash.name = sha_algorithm;
+                // #endregion 
+
                 var publicKeyInfo_schema = subjectPublicKeyInfo.toSchema();
                 var publicKeyInfo_buffer = publicKeyInfo_schema.toBER(false);
                 var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
 
                 return crypto.importKey("spki",
                     publicKeyInfo_view,
-                    { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } },
+                    algorithm.algorithm,
                     true,
-                    ["verify"]);
+                    algorithm.usages);
             }
             );
         // #endregion 
@@ -4495,9 +4797,57 @@ function(in_window)
         sequence = sequence.then(
             function(publicKey)
             {
-                return crypto.verify({ name: publicKey.algorithm.name, hash: { name: sha_algorithm } },
+                // #region Get default algorithm parameters for verification 
+                var algorithm = in_window.org.pkijs.getAlgorithmParameters(publicKey.algorithm.name, "verify");
+                if("hash" in algorithm.algorithm)
+                    algorithm.algorithm.hash.name = sha_algorithm;
+                // #endregion 
+
+                // #region Special case for ECDSA signatures 
+                var signature_value = signature.value_block.value_hex;
+
+                if(publicKey.algorithm.name === "ECDSA")
+                {
+                    var asn1 = in_window.org.pkijs.fromBER(signature_value);
+                    signature_value = in_window.org.pkijs.createECDSASignatureFromCMS(asn1.result);
+                }
+                // #endregion 
+
+                // #region Special case for RSA-PSS 
+                if(publicKey.algorithm.name === "RSA-PSS")
+                {
+                    var pssParameters;
+
+                    try
+                    {
+                        pssParameters = new in_window.org.pkijs.simpl.x509.RSASSA_PSS_params({ schema: _this.signatureAlgorithm.algorithm_params });
+                    }
+                    catch(ex)
+                    {
+                        return new Promise(function(resolve, reject) { reject(ex); });
+                    }
+
+                    if("saltLength" in pssParameters)
+                        algorithm.algorithm.saltLength = pssParameters.saltLength;
+                    else
+                        algorithm.algorithm.saltLength = 20;
+
+                    var hash_algo = "SHA-1";
+
+                    if("hashAlgorithm" in pssParameters)
+                    {
+                        hash_algo = in_window.org.pkijs.getHashAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
+                        if(hash_algo === "")
+                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                    }
+
+                    algorithm.algorithm.hash.name = hash_algo;
+                }
+                // #endregion 
+
+                return crypto.verify(algorithm.algorithm,
                     publicKey,
-                    new Uint8Array(signature.value_block.value_hex),
+                    new Uint8Array(signature_value),
                     new Uint8Array(tbs));
             }
             );
@@ -4507,9 +4857,10 @@ function(in_window)
     }
     //**************************************************************************************
     in_window.org.pkijs.simpl.CRL.prototype.sign =
-    function(privateKey)
+    function(privateKey, hashAlgorithm)
     {
         /// <param name="privateKey" type="Key">Private key for "subjectPublicKeyInfo" structure</param>
+        /// <param name="hashAlgorithm" type="String" optional="true">Hashing algorithm. Default SHA-1</param>
 
         // #region Initial variables 
         var _this = this;
@@ -4520,25 +4871,87 @@ function(in_window)
             return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
         // #endregion 
 
-        // #region Find a correct hashing algorithm 
-        var sha_algorithm = "";
-
-        switch(this.signatureAlgorithm.algorithm_id)
+        // #region Get hashing algorithm 
+        if(typeof hashAlgorithm === "undefined")
+            hashAlgorithm = "SHA-1";
+        else
         {
-            case "1.2.840.113549.1.1.5":
-                sha_algorithm = "sha-1";
+            // #region Simple check for supported algorithm 
+            var oid = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+            if(oid === "")
+                return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+            // #endregion 
+        }
+        // #endregion 
+
+        // #region Get a "default parameters" for current algorithm 
+        var defParams = in_window.org.pkijs.getAlgorithmParameters(privateKey.algorithm.name, "sign");
+        defParams.algorithm.hash.name = hashAlgorithm;
+        // #endregion 
+
+        // #region Fill internal structures base on "privateKey" and "hashAlgorithm" 
+        switch(privateKey.algorithm.name.toUpperCase())
+        {
+            case "RSASSA-PKCS1-V1_5":
+            case "ECDSA":
+                _this.signature.algorithm_id = in_window.org.pkijs.getSignatureAlgorithm(defParams.algorithm);
+                _this.signatureAlgorithm.algorithm_id = _this.signature.algorithm_id;
                 break;
-            case "1.2.840.113549.1.1.11":
-                sha_algorithm = "sha-256";
-                break;
-            case "1.2.840.113549.1.1.12":
-                sha_algorithm = "sha-384";
-                break;
-            case "1.2.840.113549.1.1.13":
-                sha_algorithm = "sha-512";
+            case "RSA-PSS":
+                {
+                    // #region Set "saltLength" as a length (in octets) of hash function result 
+                    switch(hashAlgorithm.toUpperCase())
+                    {
+                        case "SHA-256":
+                            defParams.algorithm.saltLength = 32;
+                            break;
+                        case "SHA-384":
+                            defParams.algorithm.saltLength = 48;
+                            break;
+                        case "SHA-512":
+                            defParams.algorithm.saltLength = 64;
+                            break;
+                        default:;
+                    }
+                    // #endregion 
+
+                    // #region Fill "RSASSA_PSS_params" object 
+                    var paramsObject = {};
+
+                    if(hashAlgorithm.toUpperCase() !== "SHA-1")
+                    {
+                        var hashAlgorithmOID = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+                        if(hashAlgorithmOID === "")
+                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+
+                        paramsObject.hashAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                            algorithm_id: hashAlgorithmOID,
+                            algorithm_params: new org.pkijs.asn1.NULL()
+                        });
+
+                        paramsObject.maskGenAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                            algorithm_id: "1.2.840.113549.1.1.8", // MGF1
+                            algorithm_params: paramsObject.hashAlgorithm.toSchema()
+                        })
+                    }
+
+                    if(defParams.algorithm.saltLength !== 20)
+                        paramsObject.saltLength = defParams.algorithm.saltLength;
+
+                    var pssParameters = new in_window.org.pkijs.simpl.x509.RSASSA_PSS_params(paramsObject);
+                    // #endregion   
+
+                    // #region Automatically set signature algorithm 
+                    _this.signature = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        algorithm_id: "1.2.840.113549.1.1.10",
+                        algorithm_params: pssParameters.toSchema()
+                    });
+                    _this.signatureAlgorithm = _this.signature; // Must be the same
+                    // #endregion 
+                }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signature.signatureAlgorithm.algorithm_id); });
+                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
         }
         // #endregion 
 
@@ -4554,12 +4967,17 @@ function(in_window)
 
         // #region Signing TBS data on provided private key 
         return crypto.sign(
-            { name: privateKey.algorithm.name, hash: { name: sha_algorithm } },
+            defParams.algorithm,
             privateKey,
             new Uint8Array(_this.tbs)).
             then(
             function(result)
             {
+                // #region Special case for ECDSA algorithm 
+                if(defParams.algorithm.name === "ECDSA")
+                    result = in_window.org.pkijs.createCMSECDSASignature(result);
+                // #endregion 
+
                 _this.signatureValue = new in_window.org.pkijs.asn1.BITSTRING({ value_hex: result });
             },
             function(error)
@@ -4876,6 +5294,7 @@ function(in_window)
         /// <returns type="Promise">Returns a new Promise object (in case of error), or a result of "crypto.subtle.veryfy" function</returns>
 
         // #region Global variables 
+        var _this = this;
         var sha_algorithm = "";
 
         var sequence = Promise.resolve();
@@ -4892,34 +5311,30 @@ function(in_window)
         // #endregion 
 
         // #region Find a correct hashing algorithm 
-        switch(this.signatureAlgorithm.algorithm_id)
-        {
-            case "1.2.840.113549.1.1.5":
-                sha_algorithm = "sha-1";
-                break;
-            case "1.2.840.113549.1.1.11":
-                sha_algorithm = "sha-256";
-                break;
-            case "1.2.840.113549.1.1.12":
-                sha_algorithm = "sha-384";
-                break;
-            case "1.2.840.113549.1.1.13":
-                sha_algorithm = "sha-512";
-                break;
-            default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signature.signatureAlgorithm.algorithm_id); });
-        }
+        sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
+        if(sha_algorithm === "")
+            return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
         // #endregion 
 
         // #region Importing public key 
         sequence = sequence.then(
             function()
             {
+                // #region Get information about public key algorithm and default parameters for import
+                var algorithm_name = in_window.org.pkijs.getAlgorithmNameBySignature(_this.signatureAlgorithm.algorithm_id);
+                if(algorithm_name === "")
+                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+
+                var algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
+                if("hash" in algorithm.algorithm)
+                    algorithm.algorithm.hash.name = sha_algorithm;
+                // #endregion 
+
                 var publicKeyInfo_schema = subjectPublicKeyInfo.toSchema();
                 var publicKeyInfo_buffer = publicKeyInfo_schema.toBER(false);
                 var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
 
-                return crypto.importKey("spki", publicKeyInfo_view, { name: "RSASSA-PKCS1-v1_5", hash: { name: sha_algorithm } }, true, ["verify"]);
+                return crypto.importKey("spki", publicKeyInfo_view, algorithm.algorithm, true, algorithm.usages);
             }
             );
         // #endregion 
@@ -4928,9 +5343,57 @@ function(in_window)
         sequence = sequence.then(
             function(publicKey)
             {
-                return crypto.verify({ name: publicKey.algorithm.name, hash: { name: sha_algorithm } },
+                // #region Get default algorithm parameters for verification 
+                var algorithm = in_window.org.pkijs.getAlgorithmParameters(publicKey.algorithm.name, "verify");
+                if("hash" in algorithm.algorithm)
+                    algorithm.algorithm.hash.name = sha_algorithm;
+                // #endregion 
+
+                // #region Special case for ECDSA signatures 
+                var signature_value = signature.value_block.value_hex;
+
+                if(publicKey.algorithm.name === "ECDSA")
+                {
+                    var asn1 = in_window.org.pkijs.fromBER(signature_value);
+                    signature_value = in_window.org.pkijs.createECDSASignatureFromCMS(asn1.result);
+                }
+                // #endregion 
+
+                // #region Special case for RSA-PSS 
+                if(publicKey.algorithm.name === "RSA-PSS")
+                {
+                    var pssParameters;
+
+                    try
+                    {
+                        pssParameters = new in_window.org.pkijs.simpl.x509.RSASSA_PSS_params({ schema: _this.signatureAlgorithm.algorithm_params });
+                    }
+                    catch(ex)
+                    {
+                        return new Promise(function(resolve, reject) { reject(ex); });
+                    }
+
+                    if("saltLength" in pssParameters)
+                        algorithm.algorithm.saltLength = pssParameters.saltLength;
+                    else
+                        algorithm.algorithm.saltLength = 20;
+
+                    var hash_algo = "SHA-1";
+
+                    if("hashAlgorithm" in pssParameters)
+                    {
+                        hash_algo = in_window.org.pkijs.getHashAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
+                        if(hash_algo === "")
+                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                    }
+
+                    algorithm.algorithm.hash.name = hash_algo;
+                }
+                // #endregion 
+
+                return crypto.verify(algorithm.algorithm,
                     publicKey,
-                    new Uint8Array(signature.value_block.value_hex),
+                    new Uint8Array(signature_value),
                     new Uint8Array(tbs));
             }
             );
@@ -4940,9 +5403,10 @@ function(in_window)
     }
     //**************************************************************************************
     in_window.org.pkijs.simpl.PKCS10.prototype.sign =
-    function(privateKey)
+    function(privateKey, hashAlgorithm)
     {
         /// <param name="privateKey" type="Key">Private key for "subjectPublicKeyInfo" structure</param>
+        /// <param name="hashAlgorithm" type="String" optional="true">Hashing algorithm. Default SHA-1</param>
 
         // #region Initial variables 
         var _this = this;
@@ -4953,25 +5417,85 @@ function(in_window)
             return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
         // #endregion 
 
-        // #region Find a correct hashing algorithm 
-        var sha_algorithm = "";
-
-        switch(this.signatureAlgorithm.algorithm_id)
+        // #region Get hashing algorithm 
+        if(typeof hashAlgorithm === "undefined")
+            hashAlgorithm = "SHA-1";
+        else
         {
-            case "1.2.840.113549.1.1.5":
-                sha_algorithm = "sha-1";
+            // #region Simple check for supported algorithm 
+            var oid = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+            if(oid === "")
+                return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+            // #endregion 
+        }
+        // #endregion 
+
+        // #region Get a "default parameters" for current algorithm 
+        var defParams = in_window.org.pkijs.getAlgorithmParameters(privateKey.algorithm.name, "sign");
+        defParams.algorithm.hash.name = hashAlgorithm;
+        // #endregion 
+
+        // #region Fill internal structures base on "privateKey" and "hashAlgorithm" 
+        switch(privateKey.algorithm.name.toUpperCase())
+        {
+            case "RSASSA-PKCS1-V1_5":
+            case "ECDSA":
+                _this.signatureAlgorithm.algorithm_id = in_window.org.pkijs.getSignatureAlgorithm(defParams.algorithm);
                 break;
-            case "1.2.840.113549.1.1.11":
-                sha_algorithm = "sha-256";
-                break;
-            case "1.2.840.113549.1.1.12":
-                sha_algorithm = "sha-384";
-                break;
-            case "1.2.840.113549.1.1.13":
-                sha_algorithm = "sha-512";
+            case "RSA-PSS":
+                {
+                    // #region Set "saltLength" as a length (in octets) of hash function result 
+                    switch(hashAlgorithm.toUpperCase())
+                    {
+                        case "SHA-256":
+                            defParams.algorithm.saltLength = 32;
+                            break;
+                        case "SHA-384":
+                            defParams.algorithm.saltLength = 48;
+                            break;
+                        case "SHA-512":
+                            defParams.algorithm.saltLength = 64;
+                            break;
+                        default:;
+                    }
+                    // #endregion 
+
+                    // #region Fill "RSASSA_PSS_params" object 
+                    var paramsObject = {};
+
+                    if(hashAlgorithm.toUpperCase() !== "SHA-1")
+                    {
+                        var hashAlgorithmOID = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+                        if(hashAlgorithmOID === "")
+                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+
+                        paramsObject.hashAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                            algorithm_id: hashAlgorithmOID,
+                            algorithm_params: new org.pkijs.asn1.NULL()
+                        });
+
+                        paramsObject.maskGenAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                            algorithm_id: "1.2.840.113549.1.1.8", // MGF1
+                            algorithm_params: paramsObject.hashAlgorithm.toSchema()
+                        })
+                    }
+
+                    if(defParams.algorithm.saltLength !== 20)
+                        paramsObject.saltLength = defParams.algorithm.saltLength;
+
+                    var pssParameters = new in_window.org.pkijs.simpl.x509.RSASSA_PSS_params(paramsObject);
+                    // #endregion   
+
+                    // #region Automatically set signature algorithm 
+                    _this.signatureAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        algorithm_id: "1.2.840.113549.1.1.10",
+                        algorithm_params: pssParameters.toSchema()
+                    });
+                    // #endregion 
+                }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signature.signatureAlgorithm.algorithm_id); });
+                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
         }
         // #endregion 
 
@@ -4986,11 +5510,16 @@ function(in_window)
         // #endregion 
 
         // #region Signing TBS data on provided private key 
-        return crypto.sign({ name: privateKey.algorithm.name, hash: { name: sha_algorithm } },
+        return crypto.sign(defParams.algorithm,
             privateKey,
             new Uint8Array(_this.tbs)).then(
             function(result)
             {
+                // #region Special case for ECDSA algorithm 
+                if(defParams.algorithm.name === "ECDSA")
+                    result = in_window.org.pkijs.createCMSECDSASignature(result);
+                // #endregion 
+
                 _this.signatureValue = new in_window.org.pkijs.asn1.BITSTRING({ value_hex: result });
             },
             function(error)

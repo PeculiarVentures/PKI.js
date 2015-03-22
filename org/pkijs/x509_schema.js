@@ -826,6 +826,7 @@ function(in_window)
 
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             name: (names.block_name || ""),
+            optional: (names.optional || false),
             value: [
                 new in_window.org.pkijs.asn1.OID({ name: (names.algorithmIdentifier || "") }),
                 new in_window.org.pkijs.asn1.ANY({ name: (names.algorithmParams || ""), optional: true })
@@ -926,6 +927,60 @@ function(in_window)
                         })
                     ]
                 })
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
+    // #region ASN.1 schema definition for "RSASSA-PSS-params" type (RFC3447)
+    //**************************************************************************************
+    in_window.org.pkijs.schema.x509.RSASSA_PSS_params =
+    function()
+    {
+        //RSASSA-PSS-params  ::=  SEQUENCE  {
+        //    hashAlgorithm      [0] HashAlgorithm DEFAULT sha1Identifier,
+        //    maskGenAlgorithm   [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
+        //    saltLength         [2] INTEGER DEFAULT 20,
+        //    trailerField       [3] INTEGER DEFAULT 1  }
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
+                    optional: true,
+                    value: [in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.hashAlgorithm || {})]
+                }),
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
+                    optional: true,
+                    value: [in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.maskGenAlgorithm || {})]
+                }),
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
+                    optional: true,
+                    value: [new in_window.org.pkijs.asn1.INTEGER({ name: (names.saltLength || "") })]
+                }),
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 3 // [3]
+                    },
+                    optional: true,
+                    value: [new in_window.org.pkijs.asn1.INTEGER({ name: (names.trailerField || "") })]
+                }),
             ]
         }));
     }
@@ -1060,7 +1115,10 @@ function(in_window)
             name: (names.block_name || ""),
             value: [
                 new in_window.org.pkijs.asn1.OID({ name: (names.extnID || "") }),
-                new in_window.org.pkijs.asn1.BOOLEAN({ name: (names.critical || ""), optional: true }),
+                new in_window.org.pkijs.asn1.BOOLEAN({
+                    name: (names.critical || ""),
+                    optional: true
+                }),
                 new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.extnValue || "") })
             ]
         }));

@@ -279,6 +279,47 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region ASN.1 schema definition for "ResponderID" type
+    //**************************************************************************************
+    in_window.org.pkijs.schema.ocsp.ResponderID =
+    function()
+    {
+        // KeyHash ::= OCTET STRING
+        //
+        // ResponderID ::= CHOICE {
+        //    byName               [1] Name,
+        //    byKey                [2] KeyHash }
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.CHOICE({
+            value: [
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.block_name || ""),
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
+                    value: [in_window.org.pkijs.schema.RDN(names.byName || {
+                        names: {
+                            block_name: ""
+                        }
+                    })]
+                }),
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.block_name || ""),
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
+                    value: [new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.byKey || "") })]
+                })
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region ASN.1 schema definition for OCSP response (RFC6960) 
     //**************************************************************************************
     in_window.org.pkijs.schema.ocsp.ResponseBytes =

@@ -58,9 +58,9 @@ function test_web_crypto()
     var crypto = window.crypto.subtle;
     // #endregion 
 
-    crypto.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: "sha-1" }},
+    crypto.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: "sha-1" } },
                         true,
-                        ["encrypt", "decrypt", "sign", "verify"]).
+                        ["sign", "verify"]).
     then(
     function(result) // result of generating key pair
     {
@@ -68,11 +68,20 @@ function test_web_crypto()
         privateKey = result.privateKey;
 
         return crypto.exportKey("spki", publicKey);
-    }).
+    },
+    function(error)
+    {
+        console.log("ERROR #1: " + error);
+    }
+    ).
     then(
     function(result) // result of exporting public key
     {
-        return crypto.importKey("spki", new Uint8Array(result), { name: "RSASSA-PKCS1-v1_5", hash: { name: "sha-1" } }, true, ["sign", "verify"]);
+        return crypto.importKey("spki", new Uint8Array(result), { name: "RSASSA-PKCS1-v1_5", hash: { name: "sha-1" } }, true, ["verify"]);
+    },
+    function(error)
+    {
+        console.log("ERROR #2: " + error);
     }
     ).
     then(
@@ -80,12 +89,20 @@ function test_web_crypto()
     {
         publicKey = result;
         return crypto.exportKey("pkcs8", privateKey);
+    },
+    function(error)
+    {
+        console.log("ERROR #3: " + error);
     }
     ).
     then(
     function(result) // result of exporting private key
     {
-        return crypto.importKey("pkcs8", new Uint8Array(result), { name: "RSASSA-PKCS1-v1_5", hash: { name: "sha-1" } }, true, ["sign", "verify"]);
+        return crypto.importKey("pkcs8", new Uint8Array(result), { name: "RSASSA-PKCS1-v1_5", hash: { name: "sha-1" } }, true, ["sign"]);
+    },
+    function(error)
+    {
+        console.log("ERROR #4: " + error);
     }
     ).
     then(
@@ -93,18 +110,30 @@ function test_web_crypto()
     {
         privateKey = result;
         return crypto.sign({ name: "RSASSA-PKCS1-v1_5", hash: { name: "sha-512" } }, result, value_hex_view);
+    },
+    function(error)
+    {
+        console.log("ERROR #5: " + error);
     }
     ).
     then(
     function(result) // result of signing test data
     {
         return crypto.verify({ name: "RSASSA-PKCS1-v1_5", hash: { name: "sha-512" } }, publicKey, new Uint8Array(result), value_hex_view);
+    },
+    function(error)
+    {
+        console.log("ERROR #6: " + error);
     }
     ).
     then(
     function(result) // result of verifying test signature
     {
         alert("Message verified: " + result);
+    },
+    function(error)
+    {
+        console.log("ERROR #7: " + error);
     }
     );
 }

@@ -86,32 +86,37 @@ div#output_div
             var publicKey;
             var privateKey;
 
-            var hash_algorithm = "sha-1";
-            var hash_algorithm_oid = "1.3.14.3.2.26";
-            var signature_algorithm = "1.2.840.113549.1.1.5";
-
+            var hash_algorithm;
             var hash_option = document.getElementById("hash_alg").value;
             switch(hash_option)
             {
                 case "alg_SHA1":
                     hash_algorithm = "sha-1";
-                    hash_algorithm_oid = "1.3.14.3.2.26";
-                    signature_algorithm = "1.2.840.113549.1.1.5";
                     break;
                 case "alg_SHA256":
                     hash_algorithm = "sha-256";
-                    hash_algorithm_oid = "2.16.840.1.101.3.4.2.1";
-                    signature_algorithm = "1.2.840.113549.1.1.11";
                     break;
                 case "alg_SHA384":
                     hash_algorithm = "sha-384";
-                    hash_algorithm_oid = "2.16.840.1.101.3.4.2.2";
-                    signature_algorithm = "1.2.840.113549.1.1.12";
                     break;
                 case "alg_SHA512":
                     hash_algorithm = "sha-512";
-                    hash_algorithm_oid = "2.16.840.1.101.3.4.2.3";
-                    signature_algorithm = "1.2.840.113549.1.1.13";
+                    break;
+                default:;
+            }
+
+            var signature_algorithm_name;
+            var sign_option = document.getElementById("sign_alg").value;
+            switch(sign_option)
+            {
+                case "alg_RSA15":
+                    signature_algorithm_name = "RSASSA-PKCS1-V1_5";
+                    break;
+                case "alg_RSA2":
+                    signature_algorithm_name = "RSA-PSS";
+                    break;
+                case "alg_ECDSA":
+                    signature_algorithm_name = "ECDSA";
                     break;
                 default:;
             }
@@ -126,7 +131,7 @@ div#output_div
             }
             // #endregion 
 
-            // #region Put a static values 
+            // #region Put a static values into certificate "helper" object
             cert_simpl.version = 2;
             cert_simpl.serialNumber = new org.pkijs.asn1.INTEGER({ value: 1 });
             cert_simpl.issuer.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
@@ -151,26 +156,11 @@ div#output_div
 
             cert_simpl.extensions = new Array(); // Extensions are not a part of certificate by default, it's an optional array
 
-            // #region "BasicConstraints" extension
-            var basic_constr = new org.pkijs.simpl.x509.BasicConstraints({
-                cA: true,
-                pathLenConstraint: 3
-            });
-
-            cert_simpl.extensions.push(new org.pkijs.simpl.EXTENSION({
-                extnID: "2.5.29.19",
-                critical: false,
-                extnValue: basic_constr.toSchema().toBER(false),
-                parsedValue: basic_constr // Parsed value for well-known extensions
-            }));
-            // #endregion 
-
             // #region "KeyUsage" extension 
             var bit_array = new ArrayBuffer(1);
             var bit_view = new Uint8Array(bit_array);
 
             bit_view[0] = bit_view[0] | 0x02; // Key usage "cRLSign" flag
-            bit_view[0] = bit_view[0] | 0x04; // Key usage "keyCertSign" flag
 
             var key_usage = new org.pkijs.asn1.BITSTRING({ value_hex: bit_array });
 
@@ -181,16 +171,19 @@ div#output_div
                 parsedValue: key_usage // Parsed value for well-known extensions
             }));
             // #endregion 
-
-            cert_simpl.signatureAlgorithm.algorithm_id = signature_algorithm;
-            cert_simpl.signature.algorithm_id = cert_simpl.signatureAlgorithm.algorithm_id; // Must be the same value
             // #endregion 
 
             // #region Create a new key pair 
             sequence = sequence.then(
                 function()
                 {
-                    return crypto.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: hash_algorithm } }, true, ["sign", "verify"]);
+                    // #region Get default algorithm parameters for key generation 
+                    var algorithm = org.pkijs.getAlgorithmParameters(signature_algorithm_name, "generatekey");
+                    if("hash" in algorithm.algorithm)
+                        algorithm.algorithm.hash.name = hash_algorithm;
+                    // #endregion 
+
+                    return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
                 }
                 );
             // #endregion 
@@ -222,7 +215,7 @@ div#output_div
             sequence = sequence.then(
                 function()
                 {
-                    return cert_simpl.sign(privateKey);
+                    return cert_simpl.sign(privateKey, hash_algorithm);
                 },
                 function(error)
                 {
@@ -336,12 +329,6 @@ div#output_div
                 {
                     cms_signed_simpl = new org.pkijs.simpl.CMS_SIGNED_DATA({
                         version: 1,
-                        digestAlgorithms: [
-                            new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
-                                algorithm_id: hash_algorithm_oid,
-                                algorithm_params: new org.pkijs.asn1.NULL()
-                            }) // SHA-1
-                        ],
                         encapContentInfo: new org.pkijs.simpl.cms.EncapsulatedContentInfo({
                             eContentType: "1.2.840.113549.1.7.1", // "data" content type
                             eContent: new org.pkijs.asn1.OCTETSTRING({ value_hex: buffer })
@@ -352,15 +339,7 @@ div#output_div
                                 sid: new org.pkijs.simpl.cms.IssuerAndSerialNumber({
                                     issuer: cert_simpl.issuer,
                                     serialNumber: cert_simpl.serialNumber
-                                }),
-                                digestAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
-                                    algorithm_id: hash_algorithm_oid,
-                                    algorithm_params: new org.pkijs.asn1.NULL()
-                                }), // SHA-1
-                                signatureAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
-                                    algorithm_id: "1.2.840.113549.1.1.1",
-                                    algorithm_params: new org.pkijs.asn1.NULL()
-                                }), // RSA (PKCS #1 v1.5) key transport algorithm 
+                                })
                             })
                         ],
                         certificates: [cert_simpl]
@@ -374,7 +353,7 @@ div#output_div
                         });
                     }
 
-                    return cms_signed_simpl.sign(privateKey, 0);
+                    return cms_signed_simpl.sign(privateKey, 0, hash_algorithm);
                 }
                 );
             // #endregion 
@@ -385,7 +364,7 @@ div#output_div
                     var cms_signed_schema = cms_signed_simpl.toSchema(true);
 
                     var cms_content_simp = new org.pkijs.simpl.CMS_CONTENT_INFO({
-                        contentType: "1.2.840.113549.1.7.2",
+                        contentType: "1.2.840.113549.1.7.2", // CMS Signed Data
                         content: cms_signed_schema
                     });
 
@@ -468,6 +447,14 @@ div#output_div
                 <option value="alg_SHA256">SHA-256</option>
                 <option value="alg_SHA384">SHA-384</option>
                 <option value="alg_SHA512">SHA-512</option>
+            </select>
+        </p>
+        <p>
+            <label for="sign_alg" style="font-weight:bold">Signature algorithm:</label>
+            <select id="sign_alg">
+                <option value="alg_RSA15">RSASSA-PKCS1-v1_5</option>
+                <option value="alg_RSA2">RSA-PSS</option>
+                <option value="alg_ECDSA">ECDSA</option>
             </select>
         </p>
         <label for="new_signed_data" style="font-weight:bold">CMS Signed Data + BASE-64 encoded new certificate + PKCS#8 private key:</label>

@@ -286,6 +286,52 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region ASN.1 schema definition for "RSAES-OAEP-params" type (RFC3447)
+    //**************************************************************************************
+    in_window.org.pkijs.schema.x509.RSAES_OAEP_params =
+    function()
+    {
+        //RSAES-OAEP-params ::= SEQUENCE {
+        //    hashAlgorithm     [0] HashAlgorithm    DEFAULT sha1,
+        //    maskGenAlgorithm  [1] MaskGenAlgorithm DEFAULT mgf1SHA1,
+        //    pSourceAlgorithm  [2] PSourceAlgorithm DEFAULT pSpecifiedEmpty
+        //}
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
+                    optional: true,
+                    value: [in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.hashAlgorithm || {})]
+                }),
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
+                    optional: true,
+                    value: [in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.maskGenAlgorithm || {})]
+                }),
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
+                    optional: true,
+                    value: [in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.pSourceAlgorithm || {})]
+                })
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region ASN.1 schema for CMS "SignedAttributes" and "UnsignedAttributes" types
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.SignedUnsignedAttributes =
@@ -964,13 +1010,30 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.OID({ name: (names.contentType || "") }),
                 in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.contentEncryptionAlgorithm || {}),
-                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    name: (names.encryptedContent || ""),
-                    id_block: {
-                        tag_class: 3, // CONTEXT-SPECIFIC
-                        tag_number: 0 // [0]
-                    },
-                    value: [new in_window.org.pkijs.asn1.OCTETSTRING()]
+                // The CHOICE we need because "EncryptedContent" could have either "constructive"
+                // or "primitive" form of encoding and we need to handle both variants
+                new in_window.org.pkijs.asn1.CHOICE({
+                    value: [
+                        new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                            name: (names.encryptedContent || ""),
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 0 // [0]
+                            },
+                            value: [
+                                new in_window.org.pkijs.asn1.REPEATED({
+                                    value: new in_window.org.pkijs.asn1.OCTETSTRING()
+                                })
+                            ]
+                        }),
+                        new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
+                            name: (names.encryptedContent || ""),
+                            id_block: {
+                                tag_class: 3, // CONTEXT-SPECIFIC
+                                tag_number: 0 // [0]
+                            }
+                        })
+                    ]
                 })
             ]
         }));
