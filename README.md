@@ -163,7 +163,7 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
             certificates: [cert_simpl]
         });
 
-        return cms_signed_simpl.sign(privateKey, 0);
+        return cms_signed_simpl.sign(privateKey, 0, hashAlgorithm);
         // #endregion 
 
 ```
