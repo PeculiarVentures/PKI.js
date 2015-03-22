@@ -142,18 +142,12 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
                 parsedValue: key_usage // Parsed value for well-known extensions
             }));
             // #endregion 
-
-            cert_simpl.signatureAlgorithm.algorithm_id = "1.2.840.113549.1.1.5"; // RSA + SHA-1
-            cert_simpl.signature.algorithm_id = cert_simpl.signatureAlgorithm.algorithm_id; // Must be the same value
             // #endregion 
 ```
 
 ```javascript
         // #region Creation of a new CMS Signed Data 
         cms_signed_simpl = new org.pkijs.simpl.CMS_SIGNED_DATA({
-            digestAlgorithms: [
-                new org.pkijs.simpl.ALGORITHM_IDENTIFIER({ algorithm_id: "1.3.14.3.2.26" }) // SHA-1
-            ],
             encapContentInfo: new org.pkijs.simpl.cms.EncapsulatedContentInfo({
                 eContentType: "1.2.840.113549.1.7.1", // "data" content type
                 eContent: new org.pkijs.asn1.OCTETSTRING({ value_hex: buffer })
@@ -163,9 +157,7 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
                     sid: new org.pkijs.simpl.cms.IssuerAndSerialNumber({
                         issuer: cert_simpl.issuer,
                         serialNumber: cert_simpl.serialNumber
-                    }),
-                    digestAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({ algorithm_id: "1.3.14.3.2.26" }), // SHA-1
-                    signatureAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({ algorithm_id: "1.2.840.113549.1.1.5" }), // RSA + SHA-1
+                    })
                 })
             ],
             certificates: [cert_simpl]
