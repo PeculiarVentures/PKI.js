@@ -168,7 +168,7 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
 
 ```
 
-More examples could be found in "examples" folder.
+More examples could be found in [**"examples" folder**](https://github.com/GlobalSign/PKI.js/tree/master/examples).
 
 ## Limitations
 
