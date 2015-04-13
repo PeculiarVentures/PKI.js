@@ -1,8 +1,9 @@
 ﻿/*
  * Copyright (c) 2014, GMO GlobalSign
+ * Copyright (c) 2015, Peculiar Ventures
  * All rights reserved.
  *
- * Author 2014, Yury Strozhevsky <www.strozhevsky.com>.
+ * Author 2014-2015, Yury Strozhevsky <www.strozhevsky.com>.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
@@ -543,6 +544,86 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region ASN.1 schema for CMS "ECC-CMS-SharedInfo" type (RFC5753)
+    //**************************************************************************************
+    in_window.org.pkijs.schema.cms.ECC_CMS_SharedInfo =
+    function()
+    {
+        //ECC-CMS-SharedInfo  ::=  SEQUENCE {
+        //    keyInfo      AlgorithmIdentifier,
+        //    entityUInfo  [0] EXPLICIT OCTET STRING OPTIONAL,
+        //    suppPubInfo  [2] EXPLICIT OCTET STRING }
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.keyInfo || {}),
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.entityUInfo || ""),
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 0 // [0]
+                    },
+                    optional: true,
+                    value: [new in_window.org.pkijs.asn1.OCTETSTRING()]
+                }),
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.suppPubInfo || ""),
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
+                    value: [new in_window.org.pkijs.asn1.OCTETSTRING()]
+                })
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
+    // #region ASN.1 schema for CMS "PBKDF2-params" type (RFC2898)
+    //**************************************************************************************
+    in_window.org.pkijs.schema.cms.PBKDF2_params =
+    function()
+    {
+        //PBKDF2-params ::= SEQUENCE {
+        //    salt CHOICE {
+        //        specified OCTET STRING,
+        //        otherSource AlgorithmIdentifier },
+        //  iterationCount INTEGER (1..MAX),
+        //  keyLength INTEGER (1..MAX) OPTIONAL,
+        //  prf AlgorithmIdentifier
+        //    DEFAULT { algorithm hMAC-SHA1, parameters NULL } }
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                new in_window.org.pkijs.asn1.CHOICE({
+                    value: [
+                        new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.salt_primitive || "") }),
+                        in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.salt_constructed || {})
+                    ]
+                }),
+                new in_window.org.pkijs.asn1.INTEGER({ name: (names.iterationCount || "") }),
+                new in_window.org.pkijs.asn1.INTEGER({
+                    name: (names.keyLength || ""),
+                    optional: true
+                }),
+                in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.prf || {
+                    names: {
+                        optional: true
+                    }
+                })
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region ASN.1 schema definition for "RecipientInfo" type (RFC5652) 
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.RecipientIdentifier =
@@ -632,13 +713,12 @@ function(in_window)
                         block_name: (names.block_name || "")
                     }
                 }),
-                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
                     },
-                    name: (names.block_name || ""),
-                    value: [new in_window.org.pkijs.asn1.OCTETSTRING()]
+                    name: (names.block_name || "")
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     id_block: {
@@ -646,7 +726,7 @@ function(in_window)
                         tag_number: 1 // [1]
                     },
                     name: (names.block_name || ""),
-                    value: [in_window.org.pkijs.schema.cms.OriginatorPublicKey()]
+                    value: in_window.org.pkijs.schema.cms.OriginatorPublicKey().value_block.value
                 })
             ]
         }));
@@ -867,12 +947,13 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.INTEGER({ name: (names.version || "") }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.keyDerivationAlgorithm || ""),
                     optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
                     },
-                    value: [in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.keyDerivationAlgorithm || {})]
+                    value: in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER().value_block.value
                 }),
                 in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.keyEncryptionAlgorithm || {}),
                 new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.encryptedKey || "") })
@@ -923,7 +1004,7 @@ function(in_window)
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
                     },
-                    value: [in_window.org.pkijs.schema.cms.KeyAgreeRecipientInfo()]
+                    value: in_window.org.pkijs.schema.cms.KeyAgreeRecipientInfo().value_block.value
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     name: (names.block_name || ""),
@@ -931,7 +1012,7 @@ function(in_window)
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 2 // [2]
                     },
-                    value: [in_window.org.pkijs.schema.cms.KEKRecipientInfo()]
+                    value: in_window.org.pkijs.schema.cms.KEKRecipientInfo().value_block.value
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     name: (names.block_name || ""),
@@ -939,7 +1020,7 @@ function(in_window)
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 3 // [3]
                     },
-                    value: [in_window.org.pkijs.schema.cms.PasswordRecipientinfo()]
+                    value: in_window.org.pkijs.schema.cms.PasswordRecipientinfo().value_block.value
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     name: (names.block_name || ""),
@@ -947,7 +1028,7 @@ function(in_window)
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 4 // [4]
                     },
-                    value: [in_window.org.pkijs.schema.cms.OtherRecipientInfo()]
+                    value: in_window.org.pkijs.schema.cms.OtherRecipientInfo().value_block.value
                 })
             ]
         }));

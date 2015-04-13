@@ -1,22 +1,24 @@
 # PKIjs
 
-Public Key Infrastructure (PKI) is the basis of how identity and key management is performed on the web today. PKIjs is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins.
+Public Key Infrastructure (PKI) is the basis of how identity and key management is performed on the web today. PKIjs is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto ([Web Cryptography API][http://www.w3.org/TR/WebCryptoAPI/]) and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins.
 
 ## Introduction
 
-[PKIjs][] is a library made in order to help people deal with (sometimes) complicated world of PKI-related data. For the moment it is quite easy to create a simple signature but hard to create PKCS#7 encoded signature. Easy to read a X.509 certificate but hard to parse values within it. [PKIjs][] library will help all web applications (and chrome plug-ins) acomplish these and many other things. [PKIjs][] was designed in such a way to make it easy to extended by users through a use of layered internal structures. There are many examples of using [PKIjs][] and the number of examples will grow.
+[PKIjs][] is a library made in order to help people deal with (sometimes) complicated world of PKI-related data. For the moment it is quite easy to create a simple signature but hard to create PKCS#7 encoded signature. Easy to read a X.509 certificate but hard to parse values within it. [PKIjs][] library will help all web applications (and chrome plug-ins) acomplish these and many other things. [PKIjs][] was designed in such a way to make it easy to extended by users through a use of layered internal structures. There are [**many examples**](https://github.com/GlobalSign/PKI.js/tree/master/examples) of using [PKIjs][] and the number of examples will grow.
 
 ## Numbers behind the library
 
-* More than 16 000 lines of code and comments ([PKIjs][] library + [ASN1js][] library).
+* More than 25 000 lines of code and comments ([PKIjs][] library + [ASN1js][] library).
 * More than 50 specialized pre-defined ASN.1 schemas.
 * More than 50 specialized "helpers" working with almost all internal data (for example "GeneralName" type, all X.509 certificate extensions types, "revoked certificates" type, etc.).
 * Everything that you need to work with all five major parts of PKI: X.509, PKCS#10, CMS, OCSP, Time-stamping.
 
 ## Features of the library
 
+* First and **ONLY** (April 2015) open-source JS library with full support for all "Suite B" algorithms in CMS messages;
+* First library with support for CMS Enveloped data (encrypt/decrypt) in pure JavaScript + Web Cryptography API;
 * Fully object-oriented library. Inhiritence is using everywhere inside the lib;
-* Working with HTML5 data objects (ArrayBuffer, Uint8Array, Promises, WebCrypto, etc.);
+* Working with HTML5 data objects (ArrayBuffer, Uint8Array, Promises, Web Cryptography API, etc.);
 * Has a complete set of helpers for working with types like:
   * GeneralName;
   * RelativeDistinguishedName;
@@ -26,11 +28,16 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
   * All extension types of X.509 certificates (BasicConstraints, CertificatePolicies, AuthorityKeyIdentifier etc.);
   * All "support types" for OCSP requests and responces;
   * All "support types" for Time-Stamping Protocol (TSP) requests and responces;
-* **Has own certification chain verification engine, purelly made on JavaScript with help from Promises and WebCrypto latest standard implementation;**
-* Working with **all** WebCrypto signature algorithms:
+* **Has own certification chain verification engine, purelly made on JavaScript with help from Promises and Web Cryptography API latest standard implementation;**
+* Working with **all** Web Cryptography API signature algorithms:
   * RSASSA-PKCS1-v1_5;
   * RSA-PSS;
   * ECDSA;
+* Working with **all** "Suite B" (and more) encryption algorithms and schemas:
+  * RSASSA-OAEP + AES-KW + AES-CBC/GCM;
+  * ECDH + KDF on SHA-1/256/384/512 + AES-KW + AES-CBC/GCM;
+  * Pre-defined "key encryption key" + AES-KW + AES-CBC/GCM;
+  * Password-based encryption for CMS with PBKDF2 on HMAC on SHA-1/256/384/512 + AES-KW + AES-CBC/GCM;
 * Working with all major PKI-related types ("minor" types are not mentioned here but there are huge number of such "minor types"):
   * X.509 certificates:
     * Parsing internal values;
@@ -75,93 +82,94 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
   * CMS Enveloped Data:
     * Parsing internal values;
     * Getting/setting any internal values;
-    * Creation of CMS Enveloped Data and key exchange management comming soon;
+    * Creation (encryption) with full support for "Suite B" algorithms and more;
+    * Decryption with full support for "Suite B" algorithms and more;
 
 
 ## Examples
 
 ```javascript
-            // #region Parsing raw data as a X.509 certificate object
-            var asn1 = org.pkijs.fromBER(buffer);
-            var cert_simpl = new org.pkijs.simpl.CERT({ schema: asn1.result });
-            // #endregion
+    // #region Parsing raw data as a X.509 certificate object
+    var asn1 = org.pkijs.fromBER(buffer);
+    var cert_simpl = new org.pkijs.simpl.CERT({ schema: asn1.result });
+    // #endregion
 ```
 
 ```javascript
-            // #region Creation of a new X.509 certificate
-            cert_simpl.serialNumber = new org.pkijs.asn1.INTEGER({ value: 1 });
-            cert_simpl.issuer.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
-                type: "2.5.4.6", // Country name
-                value: new org.pkijs.asn1.PRINTABLESTRING({ value: "RU" })
-            }));
-            cert_simpl.issuer.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
-                type: "2.5.4.3", // Common name
-                value: new org.pkijs.asn1.PRINTABLESTRING({ value: "Test" })
-            }));
-            cert_simpl.subject.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
-                type: "2.5.4.6", // Country name
-                value: new org.pkijs.asn1.PRINTABLESTRING({ value: "RU" })
-            }));
-            cert_simpl.subject.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
-                type: "2.5.4.3", // Common name
-                value: new org.pkijs.asn1.PRINTABLESTRING({ value: "Test" })
-            }));
+    // #region Creation of a new X.509 certificate
+    cert_simpl.serialNumber = new org.pkijs.asn1.INTEGER({ value: 1 });
+    cert_simpl.issuer.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+        type: "2.5.4.6", // Country name
+        value: new org.pkijs.asn1.PRINTABLESTRING({ value: "RU" })
+    }));
+    cert_simpl.issuer.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+        type: "2.5.4.3", // Common name
+        value: new org.pkijs.asn1.PRINTABLESTRING({ value: "Test" })
+    }));
+    cert_simpl.subject.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+        type: "2.5.4.6", // Country name
+        value: new org.pkijs.asn1.PRINTABLESTRING({ value: "RU" })
+    }));
+    cert_simpl.subject.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+        type: "2.5.4.3", // Common name
+        value: new org.pkijs.asn1.PRINTABLESTRING({ value: "Test" })
+    }));
 
-            cert_simpl.notBefore.value = new Date(2013, 01, 01);
-            cert_simpl.notAfter.value = new Date(2016, 01, 01);
+    cert_simpl.notBefore.value = new Date(2013, 01, 01);
+    cert_simpl.notAfter.value = new Date(2016, 01, 01);
 
-            cert_simpl.extensions = new Array(); // Extensions are not a part of certificate by default, it's an optional array
+    cert_simpl.extensions = new Array(); // Extensions are not a part of certificate by default, it's an optional array
 
-            // #region "BasicConstraints" extension
-            var basic_constr = new org.pkijs.simpl.x509.BasicConstraints({
-                cA: true,
-                pathLenConstraint: 3
-            });
+    // #region "BasicConstraints" extension
+    var basic_constr = new org.pkijs.simpl.x509.BasicConstraints({
+        cA: true,
+        pathLenConstraint: 3
+    });
 
-            cert_simpl.extensions.push(new org.pkijs.simpl.EXTENSION({
-                extnID: "2.5.29.19",
-                critical: false,
-                extnValue: basic_constr.toSchema().toBER(false),
-                parsedValue: basic_constr // Parsed value for well-known extensions
-            }));
-            // #endregion 
+    cert_simpl.extensions.push(new org.pkijs.simpl.EXTENSION({
+        extnID: "2.5.29.19",
+        critical: false,
+        extnValue: basic_constr.toSchema().toBER(false),
+        parsedValue: basic_constr // Parsed value for well-known extensions
+    }));
+    // #endregion 
 
-            // #region "KeyUsage" extension 
-            var bit_array = new ArrayBuffer(1);
-            var bit_view = new Uint8Array(bit_array);
+    // #region "KeyUsage" extension 
+    var bit_array = new ArrayBuffer(1);
+    var bit_view = new Uint8Array(bit_array);
 
-            bit_view[0] = bit_view[0] | 0x02; // Key usage "cRLSign" flag
-            bit_view[0] = bit_view[0] | 0x04; // Key usage "keyCertSign" flag
+    bit_view[0] = bit_view[0] | 0x02; // Key usage "cRLSign" flag
+    bit_view[0] = bit_view[0] | 0x04; // Key usage "keyCertSign" flag
 
-            var key_usage = new org.pkijs.asn1.BITSTRING({ value_hex: bit_array });
+    var key_usage = new org.pkijs.asn1.BITSTRING({ value_hex: bit_array });
 
-            cert_simpl.extensions.push(new org.pkijs.simpl.EXTENSION({
-                extnID: "2.5.29.15",
-                critical: false,
-                extnValue: key_usage.toBER(false),
-                parsedValue: key_usage // Parsed value for well-known extensions
-            }));
-            // #endregion 
-            // #endregion 
+    cert_simpl.extensions.push(new org.pkijs.simpl.EXTENSION({
+        extnID: "2.5.29.15",
+        critical: false,
+        extnValue: key_usage.toBER(false),
+        parsedValue: key_usage // Parsed value for well-known extensions
+    }));
+    // #endregion 
+    // #endregion 
 ```
 
 ```javascript
-        // #region Creation of a new CMS Signed Data 
-        cms_signed_simpl = new org.pkijs.simpl.CMS_SIGNED_DATA({
-            encapContentInfo: new org.pkijs.simpl.cms.EncapsulatedContentInfo({
-                eContentType: "1.2.840.113549.1.7.1", // "data" content type
-                eContent: new org.pkijs.asn1.OCTETSTRING({ value_hex: buffer })
-            }),
-            signerInfos: [
-                new org.pkijs.simpl.CMS_SIGNER_INFO({
-                    sid: new org.pkijs.simpl.cms.IssuerAndSerialNumber({
-                        issuer: cert_simpl.issuer,
-                        serialNumber: cert_simpl.serialNumber
-                    })
+    // #region Creation of a new CMS Signed Data 
+    cms_signed_simpl = new org.pkijs.simpl.CMS_SIGNED_DATA({
+        encapContentInfo: new org.pkijs.simpl.cms.EncapsulatedContentInfo({
+            eContentType: "1.2.840.113549.1.7.1", // "data" content type
+            eContent: new org.pkijs.asn1.OCTETSTRING({ value_hex: buffer })
+        }),
+        signerInfos: [
+            new org.pkijs.simpl.CMS_SIGNER_INFO({
+                sid: new org.pkijs.simpl.cms.IssuerAndSerialNumber({
+                    issuer: cert_simpl.issuer,
+                    serialNumber: cert_simpl.serialNumber
                 })
-            ],
-            certificates: [cert_simpl]
-        });
+            })
+        ],
+        certificates: [cert_simpl]
+    });
 
         return cms_signed_simpl.sign(privateKey, 0, hashAlgorithm);
         // #endregion 
@@ -172,9 +180,9 @@ More examples could be found in [**"examples" folder**](https://github.com/Globa
 
 ## Limitations
 
-* Does not work with Internet Explorer's implementation of WebCrypto it is based on a old draft and also does not support all needed capabilities.
-* Does not work with PolyCrypt it is based on a old version of WebCrypto and is buggy.
-* You can use [PKIjs][] in almost all browsers. Please check [this page](http://caniuse.com/#feat=cryptography) for information about WebCrypto browser support.
+* Does not work with Internet Explorer's implementation of Web Cryptography API it is based on a old draft and also does not support all needed capabilities.
+* Does not work with PolyCrypt it is based on a old version of Web Cryptography API and is buggy.
+* You can use [PKIjs][] in almost all browsers. Please check [this page](http://caniuse.com/#feat=cryptography) for information about Web Cryptography API browser support.
 
 ## Suitability
 At this time this library should be considered suitable for research and experimentation, futher code and security review is needed before utilization in a production application.
@@ -187,8 +195,8 @@ At this time this library should be considered suitable for research and experim
 
 ## How to use PKIjs with Node.js
 
-!!! WARNING !!! 
-Currently there is no "polyfill" of WebCrypto in Node.js. Thus you will not be able to use signature / verification features of PKIjs in Node.js programs.
+**!!! WARNING !!!**
+**Currently there is no "polyfill" of Web Cryptography API in Node.js. Thus you will not be able to use signature / verification features of PKIjs in Node.js programs.**
 
 In order to use PKIjs you will also need [ASN1js][] plus [node.extend](https://www.npmjs.com/package/node.extend) package.
 ```javascript
@@ -211,26 +219,27 @@ In order to use PKIjs you will also need [ASN1js][] plus [node.extend](https://w
 
 After that you will ba able to use ASN1js and PKIjs via common way:
 ```javascript
-        // #region Decode and parse X.509 cert 
-        var asn1 = pkijs.org.pkijs.fromBER(certBuffer);
-        var cert;
-        try
-        {
-            cert = new pkijs.org.pkijs.simpl.CERT({ schema: asn1.result });
-        }
-        catch(ex)
-        {
-            return;
-        }
-        // #endregion 
+    // #region Decode and parse X.509 cert 
+    var asn1 = pkijs.org.pkijs.fromBER(certBuffer);
+    var cert;
+    try
+    {
+        cert = new pkijs.org.pkijs.simpl.CERT({ schema: asn1.result });
+    }
+    catch(ex)
+    {
+        return;
+    }
+    // #endregion 
 ```
 
 ## License
 
 Copyright (c) 2014, [GMO GlobalSign](http://www.globalsign.com/)
+Copyright (c) 2015, [Peculiar Ventures](http://peculiarventures.com/)
 All rights reserved.
 
-Author 2014, [Yury Strozhevsky](http://www.strozhevsky.com/).
+Author 2014-2015, [Yury Strozhevsky](http://www.strozhevsky.com/).
 
 Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:

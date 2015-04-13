@@ -1,8 +1,9 @@
 ﻿/*
  * Copyright (c) 2014, GMO GlobalSign
+ * Copyright (c) 2015, Peculiar Ventures
  * All rights reserved.
  *
- * Author 2014, Yury Strozhevsky <www.strozhevsky.com>.
+ * Author 2014-2015, Yury Strozhevsky <www.strozhevsky.com>.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
@@ -778,7 +779,7 @@ function(in_window)
         else
         {
             // #region Simple check for supported algorithm 
-            var oid = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+            var oid = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
             if(oid === "")
                 return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
             // #endregion 
@@ -800,7 +801,7 @@ function(in_window)
         {
             case "RSASSA-PKCS1-V1_5":
             case "ECDSA":
-                _this.optionalSignature.signatureAlgorithm.algorithm_id = in_window.org.pkijs.getSignatureAlgorithm(defParams.algorithm);
+                _this.optionalSignature.signatureAlgorithm.algorithm_id = in_window.org.pkijs.getOIDByAlgorithm(defParams.algorithm);
                 break;
             case "RSA-PSS":
                 {
@@ -825,7 +826,7 @@ function(in_window)
 
                     if(hashAlgorithm.toUpperCase() !== "SHA-1")
                     {
-                        var hashAlgorithmOID = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+                        var hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
                         if(hashAlgorithmOID === "")
                             return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
 
@@ -1786,9 +1787,11 @@ function(in_window)
             function()
             {
                 // #region Get information about public key algorithm and default parameters for import
-                var algorithm_name = in_window.org.pkijs.getAlgorithmNameBySignature(certs[cert_index].signatureAlgorithm.algorithm_id);
-                if(algorithm_name === "")
+                var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(certs[cert_index].signatureAlgorithm.algorithm_id);
+                if(("name" in algorithmObject) === false)
                     return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + certs[cert_index].signatureAlgorithm.algorithm_id); });
+
+                var algorithm_name = algorithmObject.name;
 
                 var algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
                 if("hash" in algorithm.algorithm)
@@ -1847,9 +1850,11 @@ function(in_window)
 
                     if("hashAlgorithm" in pssParameters)
                     {
-                        hash_algo = in_window.org.pkijs.getHashAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
-                        if(hash_algo === "")
+                        var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
+                        if(("name" in hashAlgorithm) === false)
                             return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+
+                        hash_algo = hashAlgorithm.name;
                     }
 
                     algorithm.algorithm.hash.name = hash_algo;
@@ -1888,7 +1893,7 @@ function(in_window)
         else
         {
             // #region Simple check for supported algorithm 
-            var oid = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+            var oid = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
             if(oid === "")
                 return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
             // #endregion 
@@ -1905,7 +1910,7 @@ function(in_window)
         {
             case "RSASSA-PKCS1-V1_5":
             case "ECDSA":
-                _this.signatureAlgorithm.algorithm_id = in_window.org.pkijs.getSignatureAlgorithm(defParams.algorithm);
+                _this.signatureAlgorithm.algorithm_id = in_window.org.pkijs.getOIDByAlgorithm(defParams.algorithm);
                 break;
             case "RSA-PSS":
                 {
@@ -1930,7 +1935,7 @@ function(in_window)
 
                     if(hashAlgorithm.toUpperCase() !== "SHA-1")
                     {
-                        var hashAlgorithmOID = in_window.org.pkijs.getHashAlgorithmOID(hashAlgorithm);
+                        var hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
                         if(hashAlgorithmOID === "")
                             return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
 

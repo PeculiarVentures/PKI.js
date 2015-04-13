@@ -1,8 +1,9 @@
 ﻿/*
  * Copyright (c) 2014, GMO GlobalSign
+ * Copyright (c) 2015, Peculiar Ventures
  * All rights reserved.
  *
- * Author 2014, Yury Strozhevsky <www.strozhevsky.com>.
+ * Author 2014-2015, Yury Strozhevsky <www.strozhevsky.com>.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
@@ -173,12 +174,17 @@ function(in_window)
     in_window.org.pkijs.getCrypto =
     function()
     {
-        var crypto_temp = {};
-        //crypto_temp = window.msCrypto;
-        //if(typeof crypto_temp === "undefined")
-        //crypto_temp = window.polycrypt;
-        //else
-        crypto_temp = window.crypto.subtle;
+        var crypto_temp;
+
+        if("crypto" in in_window)
+        {
+            // Apple Safari support
+            if("webkitSubtle" in in_window.crypto)
+                crypto_temp = in_window.crypto.webkitSubtle;
+
+            if("subtle" in in_window.crypto)
+                crypto_temp = in_window.crypto.subtle;
+        }
 
         return crypto_temp;
     }
@@ -218,14 +224,10 @@ function(in_window)
     {
         /// <param name="view" type="Uint8Array">New array which gives a length for random value</param>
 
-        var crypto_temp = {};
-        //crypto_temp = window.msCrypto;
-        //if(typeof crypto_temp === "undefined")
-        //crypto_temp = window.polycrypt;
-        //else
-        crypto_temp = window.crypto;
-
-        return crypto_temp.getRandomValues(view);
+        if("crypto" in in_window)
+            return in_window.crypto.getRandomValues(view);
+        else
+            throw new Error("No support for Web Cryptography API");
     }
     //**************************************************************************************
     in_window.org.pkijs.getAlgorithmParameters =
@@ -663,43 +665,161 @@ function(in_window)
         return result;
     }
     //**************************************************************************************
-    in_window.org.pkijs.getHashAlgorithmByOID =
-    function(oid)
+    in_window.org.pkijs.getOIDByAlgorithm =
+    function(algorithm)
     {
-        /// <param name="oid" type="String">OID of hash algorithm</param>
+        /// <summary>Get OID for each specific WebCrypto algorithm</summary>
+        /// <param name="algorithm" type="Object">WebCrypto algorithm</param>
 
         var result = "";
 
-        switch(oid)
+        switch(algorithm.name.toUpperCase())
         {
-            case "1.3.14.3.2.26":
-                result = "sha-1";
+            case "RSASSA-PKCS1-V1_5":
+                switch(algorithm.hash.name.toUpperCase())
+                {
+                    case "SHA-1":
+                        result = "1.2.840.113549.1.1.5";
+                        break;
+                    case "SHA-256":
+                        result = "1.2.840.113549.1.1.11";
+                        break;
+                    case "SHA-384":
+                        result = "1.2.840.113549.1.1.12";
+                        break;
+                    case "SHA-512":
+                        result = "1.2.840.113549.1.1.13";
+                        break;
+                    default:;
+                }
                 break;
-            case "2.16.840.1.101.3.4.2.1":
-                result = "sha-256";
+            case "RSA-PSS":
+                result = "1.2.840.113549.1.1.10";
                 break;
-            case "2.16.840.1.101.3.4.2.2":
-                result = "sha-384";
+            case "RSA-OAEP":
+                result = "1.2.840.113549.1.1.7";
                 break;
-            case "2.16.840.1.101.3.4.2.3":
-                result = "sha-512";
+            case "ECDSA":
+                switch(algorithm.hash.name.toUpperCase())
+                {
+                    case "SHA-1":
+                        result = "1.2.840.10045.4.1";
+                        break;
+                    case "SHA-256":
+                        result = "1.2.840.10045.4.3.2";
+                        break;
+                    case "SHA-384":
+                        result = "1.2.840.10045.4.3.3";
+                        break;
+                    case "SHA-512":
+                        result = "1.2.840.10045.4.3.4";
+                        break;
+                    default:;
+                }
                 break;
-            default:
-        }
-
-        return result;
-    }
-    //**************************************************************************************
-    in_window.org.pkijs.getHashAlgorithmOID =
-    function(name)
-    {
-        /// <summary>Get hash algorithm OID by name</summary>
-        /// <param name="name" type="String">Common name of hash algorithm</param>
-
-        var result = "";
-
-        switch(name.toUpperCase())
-        {
+            case "ECDH":
+                switch(algorithm.kdf.toUpperCase()) // Non-standard addition - hash algorithm of KDF function
+                {
+                    case "SHA-1":
+                        result = "1.3.133.16.840.63.0.2"; // dhSinglePass-stdDH-sha1kdf-scheme
+                        break;
+                    case "SHA-256":
+                        result = "1.3.132.1.11.1"; // dhSinglePass-stdDH-sha256kdf-scheme 
+                        break;
+                    case "SHA-384":
+                        result = "1.3.132.1.11.2"; // dhSinglePass-stdDH-sha384kdf-scheme
+                        break;
+                    case "SHA-512":
+                        result = "1.3.132.1.11.3"; // dhSinglePass-stdDH-sha512kdf-scheme
+                        break;
+                    default:;
+                }
+                break;
+            case "AES-CTR":
+                break;
+            case "AES-CBC":
+                switch(algorithm.length)
+                {
+                    case 128:
+                        result = "2.16.840.1.101.3.4.1.2";
+                        break;
+                    case 192:
+                        result = "2.16.840.1.101.3.4.1.22";
+                        break;
+                    case 256:
+                        result = "2.16.840.1.101.3.4.1.42";
+                        break;
+                    default:;
+                }
+                break;
+            case "AES-CMAC":
+                break;
+            case "AES-GCM":
+                switch(algorithm.length)
+                {
+                    case 128:
+                        result = "2.16.840.1.101.3.4.1.6";
+                        break;
+                    case 192:
+                        result = "2.16.840.1.101.3.4.1.26";
+                        break;
+                    case 256:
+                        result = "2.16.840.1.101.3.4.1.46";
+                        break;
+                    default:;
+                }
+                break;
+            case "AES-CFB":
+                switch(algorithm.length)
+                {
+                    case 128:
+                        result = "2.16.840.1.101.3.4.1.4";
+                        break;
+                    case 192:
+                        result = "2.16.840.1.101.3.4.1.24";
+                        break;
+                    case 256:
+                        result = "2.16.840.1.101.3.4.1.44";
+                        break;
+                    default:;
+                }
+                break;
+            case "AES-KW":
+                switch(algorithm.length)
+                {
+                    case 128:
+                        result = "2.16.840.1.101.3.4.1.5";
+                        break;
+                    case 192:
+                        result = "2.16.840.1.101.3.4.1.25";
+                        break;
+                    case 256:
+                        result = "2.16.840.1.101.3.4.1.45";
+                        break;
+                    default:;
+                }
+                break;
+            case "HMAC":
+                switch(algorithm.hash.name.toUpperCase())
+                {
+                    case "SHA-1":
+                        result = "1.2.840.113549.2.7";
+                        break;
+                    case "SHA-256":
+                        result = "1.2.840.113549.2.9";
+                        break;
+                    case "SHA-384":
+                        result = "1.2.840.113549.2.10";
+                        break;
+                    case "SHA-512":
+                        result = "1.2.840.113549.2.11";
+                        break;
+                    default:;
+                }
+                break;
+            case "DH":
+                result = "1.2.840.113549.1.9.16.3.5";
+                break;
             case "SHA-1":
                 result = "1.3.14.3.2.26";
                 break;
@@ -712,6 +832,289 @@ function(in_window)
             case "SHA-512":
                 result = "2.16.840.1.101.3.4.2.3";
                 break;
+            case "CONCAT":
+                break;
+            case "HKDF":
+                break;
+            case "PBKDF2":
+                result = "1.2.840.113549.1.5.12";
+                break;
+            // #region Special case - OIDs for ECC curves 
+            case "P-256":
+                result = "1.2.840.10045.3.1.7";
+                break;
+            case "P-384":
+                result = "1.3.132.0.34";
+                break;
+            case "P-521":
+                result = "1.3.132.0.35";
+                break;
+            // #endregion 
+            default:;
+        }
+
+        return result;
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.getAlgorithmByOID =
+    function(oid)
+    {
+        /// <summary>Get WebCrypto algorithm by wel-known OID</summary>
+        /// <param name="oid" type="String">Wel-known OID to search for</param>
+
+        var result = {};
+
+        switch(oid)
+        {
+            case "1.2.840.113549.1.1.5":
+                result = {
+                    name: "RSASSA-PKCS1-v1_5",
+                    hash: {
+                        name: "SHA-1"
+                    }
+                };
+                break;
+            case "1.2.840.113549.1.1.11":
+                result = {
+                    name: "RSASSA-PKCS1-v1_5",
+                    hash: {
+                        name: "SHA-256"
+                    }
+                };
+                break;
+            case "1.2.840.113549.1.1.12":
+                result = {
+                    name: "RSASSA-PKCS1-v1_5",
+                    hash: {
+                        name: "SHA-384"
+                    }
+                };
+                break;
+            case "1.2.840.113549.1.1.13":
+                result = {
+                    name: "RSASSA-PKCS1-v1_5",
+                    hash: {
+                        name: "SHA-512"
+                    }
+                };
+                break;
+            case "1.2.840.113549.1.1.10":
+                result = {
+                    name: "RSA-PSS"
+                };
+                break;
+            case "1.2.840.113549.1.1.7":
+                result = {
+                    name: "RSA-OAEP"
+                };
+                break;
+            case "1.2.840.10045.4.1":
+                result = {
+                    name: "ECDSA",
+                    hash: {
+                        name: "SHA-1"
+                    }
+                };
+                break;
+            case "1.2.840.10045.4.3.2":
+                result = {
+                    name: "ECDSA",
+                    hash: {
+                        name: "SHA-256"
+                    }
+                };
+                break;
+            case "1.2.840.10045.4.3.3":
+                result = {
+                    name: "ECDSA",
+                    hash: {
+                        name: "SHA-384"
+                    }
+                };
+                break;
+            case "1.2.840.10045.4.3.4":
+                result = {
+                    name: "ECDSA",
+                    hash: {
+                        name: "SHA-512"
+                    }
+                };
+                break;
+            case "1.3.133.16.840.63.0.2":
+                result = {
+                    name: "ECDH",
+                    kdf: "SHA-1"
+                };
+                break;
+            case "1.3.132.1.11.1":
+                result = {
+                    name: "ECDH",
+                    kdf: "SHA-256"
+                };
+                break;
+            case "1.3.132.1.11.2":
+                result = {
+                    name: "ECDH",
+                    kdf: "SHA-384"
+                };
+                break;
+            case "1.3.132.1.11.3":
+                result = {
+                    name: "ECDH",
+                    kdf: "SHA-512"
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.2":
+                result = {
+                    name: "AES-CBC",
+                    length: 128
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.22":
+                result = {
+                    name: "AES-CBC",
+                    length: 192
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.42":
+                result = {
+                    name: "AES-CBC",
+                    length: 256
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.6":
+                result = {
+                    name: "AES-GCM",
+                    length: 128
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.26":
+                result = {
+                    name: "AES-GCM",
+                    length: 192
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.46":
+                result = {
+                    name: "AES-GCM",
+                    length: 256
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.4":
+                result = {
+                    name: "AES-CFB",
+                    length: 128
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.24":
+                result = {
+                    name: "AES-CFB",
+                    length: 192
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.44":
+                result = {
+                    name: "AES-CFB",
+                    length: 256
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.5":
+                result = {
+                    name: "AES-KW",
+                    length: 128
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.25":
+                result = {
+                    name: "AES-KW",
+                    length: 192
+                };
+                break;
+            case "2.16.840.1.101.3.4.1.45":
+                result = {
+                    name: "AES-KW",
+                    length: 256
+                };
+                break;
+            case "1.2.840.113549.2.7":
+                result = {
+                    name: "HMAC",
+                    hash: {
+                        name: "SHA-1"
+                    }
+                };
+                break;
+            case "1.2.840.113549.2.9":
+                result = {
+                    name: "HMAC",
+                    hash: {
+                        name: "SHA-256"
+                    }
+                };
+                break;
+            case "1.2.840.113549.2.10":
+                result = {
+                    name: "HMAC",
+                    hash: {
+                        name: "SHA-384"
+                    }
+                };
+                break;
+            case "1.2.840.113549.2.11":
+                result = {
+                    name: "HMAC",
+                    hash: {
+                        name: "SHA-512"
+                    }
+                };
+                break;
+            case "1.2.840.113549.1.9.16.3.5":
+                result = {
+                    name: "DH"
+                };
+                break;
+            case "1.3.14.3.2.26":
+                result = {
+                    name: "SHA-1"
+                };
+                break;
+            case "2.16.840.1.101.3.4.2.1":
+                result = {
+                    name: "SHA-256"
+                };
+                break;
+            case "2.16.840.1.101.3.4.2.2":
+                result = {
+                    name: "SHA-384"
+                };
+                break;
+            case "2.16.840.1.101.3.4.2.3":
+                result = {
+                    name: "SHA-512"
+                };
+                break;
+            case "1.2.840.113549.1.5.12":
+                result = {
+                    name: "PBKDF2"
+                };
+                break;
+            // #region Special case - OIDs for ECC curves 
+            case "1.2.840.10045.3.1.7":
+                result = {
+                    name: "P-256"
+                };
+                break;
+            case "1.3.132.0.34":
+                result = {
+                    name: "P-384"
+                };
+                break;
+            case "1.3.132.0.35":
+                result = {
+                    name: "P-521"
+                };
+                break;
+            // #endregion 
             default:;
         }
 
@@ -752,7 +1155,13 @@ function(in_window)
                     {
                         params = new in_window.org.pkijs.simpl.x509.RSASSA_PSS_params({ schema: signatureAlgorithm.algorithm_params });
                         if("hashAlgorithm" in params)
-                            result = in_window.org.pkijs.getHashAlgorithmByOID(params.hashAlgorithm.algorithm_id);
+                        {
+                            var algorithm = in_window.org.pkijs.getAlgorithmByOID(params.hashAlgorithm.algorithm_id);
+                            if(("name" in algorithm) === false)
+                                return "";
+
+                            result = algorithm.name;
+                        }
                         else
                             result = "SHA-1";
                     }
@@ -760,92 +1169,6 @@ function(in_window)
                     {
                     }
                 }
-                break;
-            default:;
-        }
-
-        return result;
-    }
-    //**************************************************************************************
-    in_window.org.pkijs.getSignatureAlgorithm =
-    function(algorithm)
-    {
-        /// <summary>Get signature algorithm OID by algorithm name</summary>
-        /// <param name="algorithm" type="WebCryptoAlgorithm">WebCrypto algorithm object</param>
-
-        var result = "";
-
-        switch(algorithm.name.toUpperCase())
-        {
-            case "RSASSA-PKCS1-V1_5":
-                switch(algorithm.hash.name.toUpperCase())
-                {
-                    case "SHA-1":
-                        result = "1.2.840.113549.1.1.5";
-                        break;
-                    case "SHA-256":
-                        result = "1.2.840.113549.1.1.11";
-                        break;
-                    case "SHA-384":
-                        result = "1.2.840.113549.1.1.12";
-                        break;
-                    case "SHA-512":
-                        result = "1.2.840.113549.1.1.13";
-                        break;
-                    default:;
-                }
-                break;
-            case "RSA-PSS":
-                result = "1.2.840.113549.1.1.10";
-                break;
-            case "ECDSA":
-                switch(algorithm.hash.name.toUpperCase())
-                {
-                    case "SHA-1":
-                        result = "1.2.840.10045.4.1";
-                        break;
-                    case "SHA-256":
-                        result = "1.2.840.10045.4.3.2";
-                        break;
-                    case "SHA-384":
-                        result = "1.2.840.10045.4.3.3";
-                        break;
-                    case "SHA-512":
-                        result = "1.2.840.10045.4.3.4";
-                        break;
-                    default:;
-                }
-                break;
-            default:;
-        }
-
-        return result;
-    }
-    //**************************************************************************************
-    in_window.org.pkijs.getAlgorithmNameBySignature =
-    function(oid)
-    {
-        /// <summary>Get WebCrypto algorithm name by signature algorithm OID</summary>
-        /// <param name="oid" type="String">OID string of signature algorithm</param>
-
-        var result = "";
-
-        switch(oid)
-        {
-            case "1.2.840.113549.1.1.5":
-            case "1.2.840.113549.1.1.11":
-            case "1.2.840.113549.1.1.12":
-            case "1.2.840.113549.1.1.13":
-                result = "RSASSA-PKCS1-v1_5";
-                break;
-            case "1.2.840.113549.1.1.10":
-                result = "RSA-PSS";
-                break;
-            case "1.2.840.10045.4.1":
-            case "1.2.840.10045.4.3.2":
-            case "1.2.840.10045.4.3.3":
-            case "1.2.840.10045.4.3.4":
-                result = "ECDSA";
                 break;
             default:;
         }
