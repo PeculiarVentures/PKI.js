@@ -23,7 +23,7 @@ Parameters for **addRecipientByCertificate**:
 
 **addRecipientByPreDefinedData** is used when encrypting to pre-defined keys (**KEKRecipientInfo**) and passwords (**PasswordRecipientInfo**). 
 
->**WARNING*** Working with **PasswordRecipientInfo** currently (as for April 2015) possible only from [latest development versions of Google Chrome](https://www.google.com/intl/en/chrome/browser/desktop/index.html?extra=devchannel#eula)
+>**WARNING** Working with **PasswordRecipientInfo** currently (as for April 2015) possible only from [latest development versions of Google Chrome](https://www.google.com/intl/en/chrome/browser/desktop/index.html?extra=devchannel#eula)
 
 Parameters for **addRecipientByPreDefinedData**:
 * **preDefinedData**. Type - **ArrayBuffer**. The key or password to be used to encrypt the message. 

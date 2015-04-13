@@ -4779,6 +4779,10 @@ function(in_window)
                     }
 
                     return recipientCurve;
+                },
+                function(error)
+                {
+                    return new Promise(function(resolve, reject) { reject(error); });
                 }
                 );
             // #endregion 
@@ -5594,6 +5598,10 @@ function(in_window)
                         true,
                         ["decrypt"]
                         );
+                },
+                function(error)
+                {
+                    return new Promise(function(resolve, reject) { reject(error); });
                 }
                 );
             // #endregion 
