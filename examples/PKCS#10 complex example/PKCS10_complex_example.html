@@ -280,8 +280,16 @@
                 function(result)
                 {
                     pkcs10_simpl.attributes.push(new org.pkijs.simpl.ATTRIBUTE({
-                        type: "2.5.29.14",
-                        values: [new org.pkijs.asn1.OCTETSTRING({ value_hex: result })]
+                        type: "1.2.840.113549.1.9.14", // pkcs-9-at-extensionRequest
+                        values: [(new org.pkijs.simpl.EXTENSIONS({
+                            extensions_array: [
+                                new org.pkijs.simpl.EXTENSION({
+                                    extnID: "2.5.29.14",
+                                    critical: false,
+                                    extnValue: (new org.pkijs.asn1.OCTETSTRING({ value_hex: result })).toBER(false)
+                                })
+                            ]
+                        })).toSchema()]
                     }));
                 }
                 );
