@@ -228,6 +228,8 @@
             pkcs10_simpl.version = 0;
             pkcs10_simpl.subject.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({ type: "2.5.4.6", value: new org.pkijs.asn1.PRINTABLESTRING({ value: "RU" }) }));
             pkcs10_simpl.subject.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({ type: "2.5.4.3", value: new org.pkijs.asn1.UTF8STRING({ value: "Simple test (простой тест)" }) }));
+
+            pkcs10_simpl.attributes = new Array();
             // #endregion 
 
             // #region Create a new key pair 
@@ -264,6 +266,23 @@
                 function()
                 {
                     return pkcs10_simpl.subjectPublicKeyInfo.importKey(publicKey);
+                }
+                );
+            // #endregion 
+
+            // #region SubjectKeyIdentifier 
+            sequence = sequence.then(
+                function(result)
+                {
+                    return crypto.digest({ name: "SHA-1" }, pkcs10_simpl.subjectPublicKeyInfo.subjectPublicKey.value_block.value_hex);
+                }
+                ).then(
+                function(result)
+                {
+                    pkcs10_simpl.attributes.push(new org.pkijs.simpl.ATTRIBUTE({
+                        type: "2.5.29.14",
+                        values: [new org.pkijs.asn1.OCTETSTRING({ value_hex: result })]
+                    }));
                 }
                 );
             // #endregion 
