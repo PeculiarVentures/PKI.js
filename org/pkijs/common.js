@@ -91,6 +91,28 @@ function(in_window)
         return names;
     }
     //**************************************************************************************
+    in_window.org.pkijs.inheriteObjectFields =
+    function(from)
+    {
+        for(i in from.prototype)
+        {
+            if(typeof from.prototype[i] === "function")
+                continue;
+
+            this[i] = from.prototype[i];
+        }
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.getUTCDate =
+    function(date)
+    {
+        /// <summary>Making UTC date from local date</summary>
+        /// <param name="date" type="Date">Date to convert from</param>
+
+        var current_date = date;
+        return new Date(current_date.getTime() + (current_date.getTimezoneOffset() * 60000));
+    }
+    //**************************************************************************************
     in_window.org.pkijs.getValue =
     function(args, item, default_value)
     {
@@ -217,6 +239,65 @@ function(in_window)
         }
 
         return result;
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.bufferFromHexCodes =
+    function(hexString)
+    {
+        /// <summary>Create an ArrayBuffer from string having hexdecimal codes</summary>
+        /// <param name="hexString" type="String">String to create ArrayBuffer from</param>
+
+        // #region Initial variables 
+        var stringLength = hexString.length;
+
+        var resultBuffer = new ArrayBuffer(stringLength >> 1);
+        var resultView = new Uint8Array(resultBuffer);
+
+        var hex_map = {};
+
+        hex_map['0'] = 0x00;
+        hex_map['1'] = 0x01;
+        hex_map['2'] = 0x02;
+        hex_map['3'] = 0x03;
+        hex_map['4'] = 0x04;
+        hex_map['5'] = 0x05;
+        hex_map['6'] = 0x06;
+        hex_map['7'] = 0x07;
+        hex_map['8'] = 0x08;
+        hex_map['9'] = 0x09;
+        hex_map['A'] = 0x0A;
+        hex_map['a'] = 0x0A;
+        hex_map['B'] = 0x0B;
+        hex_map['b'] = 0x0B;
+        hex_map['C'] = 0x0C;
+        hex_map['c'] = 0x0C;
+        hex_map['D'] = 0x0D;
+        hex_map['d'] = 0x0D;
+        hex_map['E'] = 0x0E;
+        hex_map['e'] = 0x0E;
+        hex_map['F'] = 0x0F;
+        hex_map['f'] = 0x0F;
+
+        var j = 0;
+        var temp = 0x00;
+        // #endregion 
+
+        // #region Convert char-by-char 
+        for(var i = 0; i < stringLength; i++)
+        {
+            if(!(i % 2))
+                temp = hex_map[hexString.charAt(i)] << 4;
+            else
+            {
+                temp |= hex_map[hexString.charAt(i)];
+
+                resultView[j] = temp;
+                j++;
+            }
+        }
+        // #endregion 
+
+        return resultBuffer;
     }
     //**************************************************************************************
     in_window.org.pkijs.getRandomValues =
