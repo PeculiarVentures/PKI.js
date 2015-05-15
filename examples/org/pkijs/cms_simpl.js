@@ -450,8 +450,8 @@ function(in_window)
         {
             if(arguments[0] instanceof Object)
             {
-                this.otherRevInfoFormat = arguments[0].contentType || "";
-                this.otherRevInfo = arguments[0].content || new in_window.org.pkijs.asn1.ANY(); // Just to make a stub
+                this.otherRevInfoFormat = arguments[0].otherRevInfoFormat || "";
+                this.otherRevInfo = arguments[0].otherRevInfo || new in_window.org.pkijs.asn1.ANY(); // Just to make a stub
             }
         }
         // #endregion 
@@ -762,6 +762,8 @@ function(in_window)
         // #region Internal properties of the object 
         this.attrType = "";
         this.attrValues = new Array(); // Array of any attribute values
+
+        // OPTIONAL this.parsedValue - Parsed "attrValues" in case of well-known "attrType"
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -801,6 +803,37 @@ function(in_window)
         // #region Get internal properties from parsed schema 
         this.attrType = asn1.result["attrType"].value_block.toString();
         this.attrValues = asn1.result["attrValues"];
+
+        // #region Get "parsedValue" for well-known attributes
+        switch(this.attrType)
+        {
+            case "0.4.0.1733.2.5": // ATSHashIndex
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.ATSHashIndex({ schema: this.attrValues[0] });
+                break;
+            case "0.4.0.1733.2.4": // archive-time-stamp-v3
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.archive_time_stamp_v3({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.14": // signature-time-stamp
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.signature_time_stamp({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.21": // complete-certificate-references
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.complete_certificate_references({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.22": // complete-revocation-references
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.complete_revocation_references({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.25": // CAdES-C-Timestamp
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.CAdES_C_Timestamp({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.23": // certificate-values
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.certificate_values({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.24": // revocation-values
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.revocation_values({ schema: this.attrValues[0] });
+                break;
+            default:;
+        }
+        // #endregion   
         // #endregion 
     }
     //**************************************************************************************
@@ -1520,7 +1553,14 @@ function(in_window)
                 if(current_certificates[k].id_block.tag_class === 1)
                     this.certificates.push(new in_window.org.pkijs.simpl.CERT({ schema: current_certificates[k] }));
                 else
+                {
+                    // #region Create SEQUENCE from [3] 
+                    current_certificates[k].id_block.tag_class = 1; // UNIVERSAL
+                    current_certificates[k].id_block.tag_number = 16; // SEQUENCE
+                    // #endregion 
+
                     this.certificates.push(new in_window.org.pkijs.simpl.cms.OtherCertificateFormat({ schema: current_certificates[k] }));
+                }
             }
         }
 
@@ -1534,7 +1574,14 @@ function(in_window)
                 if(current_crls[l].id_block.tag_class === 1)
                     this.crls.push(new in_window.org.pkijs.simpl.CRL({ schema: current_crls[l] }));
                 else
+                {
+                    // #region Create SEQUENCE from [1] 
+                    current_crls[l].id_block.tag_class = 1; // UNIVERSAL
+                    current_crls[l].id_block.tag_number = 16; // SEQUENCE
+                    // #endregion 
+
                     this.crls.push(new in_window.org.pkijs.simpl.cms.OtherRevocationInfoFormat({ schema: current_crls[l] }));
+                }
             }
         }
 
@@ -1574,7 +1621,19 @@ function(in_window)
             var current_certificates = new Array();
 
             for(var j = 0; j < this.certificates.length; j++)
-                current_certificates.push(this.certificates[j].toSchema(encodeFlag));
+            {
+                if(this.certificates[j] instanceof in_window.org.pkijs.simpl.cms.OtherCertificateFormat)
+                {
+                    var certificateSchema = this.certificates[j].toSchema(encodeFlag);
+
+                    certificateSchema.id_block.tag_class = 3;
+                    certificateSchema.id_block.tag_number = 3;
+
+                    current_certificates.push(certificateSchema);
+                }
+                else
+                    current_certificates.push(this.certificates[j].toSchema(encodeFlag));
+            }
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
@@ -1591,7 +1650,19 @@ function(in_window)
             var current_crls = new Array();
 
             for(var k = 0; k < this.crls.length; k++)
-                current_crls.push(this.crls[k].toSchema(encodeFlag));
+            {
+                if(this.crls[k] instanceof in_window.org.pkijs.simpl.cms.OtherRevocationInfoFormat)
+                {
+                    var crlSchema = this.crls[k].toSchema(encodeFlag);
+
+                    crlSchema.id_block.tag_class = 3;
+                    crlSchema.id_block.tag_number = 1;
+
+                    current_crls.push(crlSchema);
+                }
+                else
+                    current_crls.push(this.crls[k].toSchema(encodeFlag));
+            }
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 optional: true,
@@ -1951,15 +2022,16 @@ function(in_window)
     }
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.sign =
-    function(privateKey, signerIndex, hashAlgorithm)
+    function(privateKey, signerIndex, hashAlgorithm, data)
     {
         /// <param name="privateKey" type="Key">Private key for "subjectPublicKeyInfo" structure</param>
         /// <param name="signerIndex" type="Number">Index number (starting from 0) of signer index to make signature for</param>
         /// <param name="hashAlgorithm" type="String" optional="true">Hashing algorithm. Default SHA-1</param>
+        /// <param name="data" type="ArrayBuffer" optional="true">Detached data</param>
 
         // #region Initial variables 
         var _this = this;
-        var data = new ArrayBuffer(0);
+        data = data || new ArrayBuffer(0);
         var hashAlgorithmOID = "";
         // #endregion 
 

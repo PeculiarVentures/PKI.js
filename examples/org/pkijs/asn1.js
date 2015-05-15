@@ -2918,7 +2918,11 @@ function(in_window)
                         return false; // ???
                 }
 
-                sid_block.value_dec = parseInt(sid, 10) + plus;
+                var parsedSID = parseInt(sid, 10);
+                if(Number.isNaN(parsedSID))
+                    return true;
+
+                sid_block.value_dec = parsedSID + plus;
 
                 flag = false;
             }
@@ -2926,6 +2930,8 @@ function(in_window)
             {
                 var sid_block = new local.SID_value_block();
                 sid_block.value_dec = parseInt(sid, 10);
+                if(Number.isNaN(sid_block.value_dec))
+                    return true;
 
                 if(this.value.length === 0)
                 {

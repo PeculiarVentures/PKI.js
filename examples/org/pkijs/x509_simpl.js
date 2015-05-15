@@ -392,7 +392,7 @@ function(in_window)
                 value: [
                     new in_window.org.pkijs.asn1.REPEATED({
                         name: "names",
-                        value: n_window.org.pkijs.schema.GENERAL_NAME()
+                        value: in_window.org.pkijs.schema.GENERAL_NAME()
                     })
                 ]
             })
@@ -2914,29 +2914,41 @@ function(in_window)
 
         if("distributionPoint" in this)
         {
-            var value;
+            var internalValue;
 
             if(this.distributionPoint instanceof Array)
             {
-                value = new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                var namesArray = new Array();
+
+                for(var i = 0; i < this.distributionPoint.length; i++)
+                    namesArray.push(this.distributionPoint[i].toSchema());
+
+                internalValue = new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
-                    }
+                    },
+                    value: namesArray
                 });
-
-                for(var i = 0; i < this.distributionPoint.length; i++)
-                    value.value_block.value.push(this.distributionPoint[i].toSchema());
             }
             else
             {
-                value = this.distributionPoint.toSchema();
-
-                value.id_block.tag_class = 3; // CONTEXT - SPECIFIC
-                value.id_block.tag_number = 1; // [1]
+                internalValue = new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
+                    value: [this.distributionPoint.toSchema()]
+                });
             }
 
-            output_array.push(value);
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 0 // [0]
+                },
+                value: [internalValue]
+            }));
         }
 
         if("reasons" in this)
@@ -5128,7 +5140,7 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.OID({ value: this.type }),
                 new in_window.org.pkijs.asn1.SET({
-                    values: this.values
+                    value: this.values
                 })
             ]
         }));

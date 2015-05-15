@@ -624,11 +624,7 @@ function(in_window)
     function()
     {
         // #region Internal properties of the object 
-        // OPTIONAL this.version = 0;
-        // OPTIONAL this.requestorName = new in_window.org.pkijs.simpl.GENERAL_NAME();
-        this.requestList = new Array(); // Array of "Request" objects
-        // OPTIONAL this.requestExtensions = new Array(); // Array of in_window.org.pkijs.simpl.EXTENSION();
-
+        this.tbsRequest = new in_window.org.pkijs.simpl.ocsp.TBSRequest();
         // OPTIONAL this.optionalSignature = new in_window.org.pkijs.simpl.ocsp.Signature();
         // #endregion 
 
@@ -663,90 +659,26 @@ function(in_window)
         // #endregion 
 
         // #region Get internal properties from parsed schema 
-        if("TBSRequest.version" in asn1.result)
-            this.version = asn1.result["TBSRequest.version"].value_block.value_dec;
-        if("TBSRequest.requestorName" in asn1.result)
-            this.requestorName = new in_window.org.pkijs.simpl.GENERAL_NAME({ schema: asn1.result["TBSRequest.requestorName"] });
-
-        var requests = asn1.result["TBSRequest.requests"];
-        for(var i = 0; i < requests.length; i++)
-            this.requestList.push(new in_window.org.pkijs.simpl.ocsp.Request({ schema: requests[i] }));
-
-        if("TBSRequest.requestExtensions" in asn1.result)
-        {
-            this.requestExtensions = new Array();
-            var exts = asn1.result["TBSRequest.requestExtensions"].value_block.value;
-
-            for(var i = 0; i < exts.length; i++)
-                this.requestExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
-        }
+        this.tbsRequest = new in_window.org.pkijs.simpl.ocsp.TBSRequest({ schema: asn1.result["tbsRequest"] });
         if("optionalSignature" in asn1.result)
             this.optionalSignature = new in_window.org.pkijs.simpl.ocsp.Signature({ schema: asn1.result["optionalSignature"] });
         // #endregion 
     }
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_REQUEST.prototype.toSchema =
-    function()
+    function(encodeFlag)
     {
+        /// <param name="encodeFlag" type="Boolean">If param equal to false then create TBS schema via decoding stored value. In othe case create TBS schema via assembling from TBS parts.</param>
+
+        // #region Check "encodeFlag" 
+        if(typeof encodeFlag === "undefined")
+            encodeFlag = false;
+        // #endregion 
+
         // #region Create array for output sequence 
         var output_array = new Array();
 
-        // #region Create TBSRequest 
-        var tbs_array = new Array();
-
-        if("version" in this)
-            tbs_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
-                id_block: {
-                    tag_class: 3, // CONTEXT-SPECIFIC
-                    tag_number: 0 // [0]
-                },
-                value: [new in_window.org.pkijs.asn1.INTEGER({ value: this.version })]
-            }));
-
-        if("requestorName" in this)
-            tbs_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
-                id_block: {
-                    tag_class: 3, // CONTEXT-SPECIFIC
-                    tag_number: 1 // [1]
-                },
-                value: [this.requestorName.toSchema()]
-            }));
-
-        var requests = new Array();
-
-        for(var i = 0; i < this.requestList.length; i++)
-            requests.push(this.requestList[i].toSchema());
-
-        tbs_array.push(new in_window.org.pkijs.asn1.SEQUENCE({
-            value: requests
-        }));
-
-        if("requestExtensions" in this)
-        {
-            var extensions = new Array();
-
-            for(var j = 0; j < this.requestExtensions.length; j++)
-                extensions.push(this.requestExtensions[j].toSchema());
-
-            tbs_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
-                id_block: {
-                    tag_class: 3, // CONTEXT-SPECIFIC
-                    tag_number: 2 // [2]
-                },
-                value: [
-                    new in_window.org.pkijs.asn1.SEQUENCE({
-                        value: extensions
-                    })
-                ]
-            }));
-        }
-
-        output_array.push(new in_window.org.pkijs.asn1.SEQUENCE({ value: tbs_array }));
-        // #endregion   
-
+        output_array.push(this.tbsRequest.toSchema(encodeFlag));
         if("optionalSignature" in this)
             output_array.push(this.optionalSignature.toSchema());
         // #endregion   
@@ -919,6 +851,112 @@ function(in_window)
             _object.optionalSignature = this.optionalSignature.toJSON();
 
         return _object;
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.OCSP_REQUEST.prototype.createForCertificate =
+    function(certificate, parameters)
+    {
+        /// <summary>Making OCSP Request for specific certificate</summary>
+        /// <param name="certificate" type="in_window.org.pkijs.simpl.CERT">Certificate making OCSP Request for</param>
+        /// <param name="parameters" type="Object">Additional parameters</param>
+
+        // #region Initial variables 
+        var _this = this;
+        var sequence = Promise.resolve();
+
+        var hashAlgorithm;
+        var hashOID;
+
+        var issuerNameHash;
+        var issuerKeyHash;
+
+        var issuerCertificate;
+        // #endregion 
+
+        // #region Get a "crypto" extension 
+        var crypto = in_window.org.pkijs.getCrypto();
+        if(typeof crypto == "undefined")
+            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+        // #endregion 
+
+        // #region Check input parameters 
+        if("hashAlgorithm" in parameters)
+            hashAlgorithm = parameters.hashAlgorithm;
+        else
+            return new Promise(function(resolve, reject) { reject("Parameter \"hashAlgorithm\" is mandatory for \"OCSP_REQUEST.createForCertificate\""); });
+
+        hashOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
+        if(hashOID === "")
+            return new Promise(function(resolve, reject) { reject("Incorrect \"hashAlgorithm\": " + hashAlgorithm); });
+
+        if("issuerCertificate" in parameters)
+            issuerCertificate = parameters.issuerCertificate;
+        else
+            return new Promise(function(resolve, reject) { reject("Parameter \"issuerCertificate\" is mandatory for \"OCSP_REQUEST.createForCertificate\""); });
+        // #endregion 
+
+        // #region Create "issuerNameHash" 
+        sequence = sequence.then(
+            function(result)
+            {
+                var issuerNameBuffer = issuerCertificate.subject.toSchema().toBER(false);
+
+                return crypto.digest({ name: hashAlgorithm }, issuerNameBuffer);
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion 
+
+        // #region Create "issuerKeyHash" 
+        sequence = sequence.then(
+            function(result)
+            {
+                issuerNameHash = result;
+
+                var issuerKeyBuffer = issuerCertificate.subjectPublicKeyInfo.subjectPublicKey.value_block.value_hex;
+
+                return crypto.digest({ name: hashAlgorithm }, issuerKeyBuffer);
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion 
+
+        // #region Make final request data 
+        sequence = sequence.then(
+            function(result)
+            {
+                issuerKeyHash = result;
+
+                _this.tbsRequest = new in_window.org.pkijs.simpl.ocsp.TBSRequest({
+                    requestList: [
+                        new in_window.org.pkijs.simpl.ocsp.Request({
+                            reqCert: new in_window.org.pkijs.simpl.ocsp.CertID({
+                                hashAlgorithm: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                                    algorithm_id: hashOID,
+                                    algorithm_params: new in_window.org.pkijs.asn1.NULL()
+                                }),
+                                issuerNameHash: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: issuerNameHash }),
+                                issuerKeyHash: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: issuerKeyHash }),
+                                serialNumber: certificate.serialNumber
+                            })
+                        })
+                    ]
+                })
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion 
+
+        return sequence;
     }
     //**************************************************************************************
     // #endregion 

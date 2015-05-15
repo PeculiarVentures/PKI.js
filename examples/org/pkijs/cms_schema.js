@@ -529,7 +529,7 @@ function(in_window)
                             crls: "SignedData.crls"
                         }
                     }).value_block.value
-                }), // IMPLICIT CertificateSet
+                }), // IMPLICIT RevocationInfoChoices
                 new in_window.org.pkijs.asn1.SET({
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
