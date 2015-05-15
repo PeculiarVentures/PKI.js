@@ -1,7 +1,7 @@
-﻿{
+{
     "author": "Yury Strozhevsky <yury@strozhevsky.com>",
     "contributors": [
-      "Ryan Hurst <rmh@unmitigatedrisk.com>"
+        "Ryan Hurst <rmh@unmitigatedrisk.com>"
     ],
     "name": "pkijs",
     "description": "Public Key Infrastructure (PKI) is the basis of how identity and key management is performed on the web today. PKIjs is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins",
@@ -10,8 +10,8 @@
         "type": "git",
         "url": "git://github.com/GlobalSign/PKI.js.git"
     },
-  "main": "org/pkijs/x509_simpl.js",
-  "dependencies": {},
-  "devDependencies": {},
-  "scripts": {}
+    "main": "org/pkijs/x509_simpl.js",
+    "dependencies": {},
+    "devDependencies": {},
+    "scripts": {}
 }
