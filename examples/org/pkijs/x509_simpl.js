@@ -3778,7 +3778,7 @@ function(in_window)
         var extension_schemas = new Array();
 
         for(var i = 0; i < this.extensions_array.length; i++)
-            extension_schemas.push(this.extensions_array.toSchema());
+            extension_schemas.push(this.extensions_array[i].toSchema());
 
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             value: extension_schemas
