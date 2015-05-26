@@ -1472,5 +1472,29 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+
+    in_window.org.pkijs.getInfoTypeByOID =
+    function(oid)
+    {
+        // see https://tools.ietf.org/html/rfc4210#appendix-F
+
+        var result = {};
+
+        switch(oid)
+        {
+            case "1.3.6.1.5.5.7.4.1":
+                result = {
+                    name: "caProtEncCert"
+                };
+                break;
+
+            case "1.3.6.1.5.5.7.4.2":
+                result = {
+                    name: "signKeyPairTypes"
+                };
+                break;
+        }
+        return result;
+    }
 }
 )(typeof exports !== "undefined" ? exports : window);
