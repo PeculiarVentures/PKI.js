@@ -25,18 +25,18 @@ function(in_window)
             throw new Error("Name org.pkijs.schema already exists and it's not an object" + " but " + (typeof in_window.org.pkijs.schema));
     }
 
-    if(typeof in_window.org.pkijs.schema.pkiMessage === "undefined")
-        in_window.org.pkijs.schema.pkiMessage = {};
+    if(typeof in_window.org.pkijs.schema.cmp === "undefined")
+        in_window.org.pkijs.schema.cmp = {};
     else
     {
-        if(typeof in_window.org.pkijs.schema.pkiMessage !== "object")
-            throw new Error("Name org.pkijs.schema.pkiMessage already exists and it's not an object" + " but " + (typeof in_window.org.pkijs.schema.pkiMessage));
+        if(typeof in_window.org.pkijs.schema.cmp !== "object")
+            throw new Error("Name org.pkijs.schema.cmp already exists and it's not an object" + " but " + (typeof in_window.org.pkijs.schema.cmp));
     }
 
     var local = {};
 
 
-    in_window.org.pkijs.schema.pkiMessage.InfoTypeAndValue =
+    in_window.org.pkijs.schema.cmp.InfoTypeAndValue =
     function(input_names, input_optional)
     {
         // InfoTypeAndValue ::= SEQUENCE {
@@ -59,7 +59,7 @@ function(in_window)
         }));
     };
 
-    in_window.org.pkijs.schema.pkiMessage.GenMsgContent =
+    in_window.org.pkijs.schema.cmp.GenMsgContent =
     function(input_names, input_optional)
     {
         // GenMsgContent ::= SEQUENCE OF InfoTypeAndValue
@@ -73,13 +73,13 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.REPEATED({
                     name: (names.infoTypes || ""),
-                    value: in_window.org.pkijs.schema.pkiMessage.InfoTypeAndValue(names.infoValues || {})
+                    value: in_window.org.pkijs.schema.cmp.InfoTypeAndValue(names.infoValues || {})
                 })
             ]
         }));
     };
 
-    in_window.org.pkijs.schema.pkiMessage.GenRepContent =
+    in_window.org.pkijs.schema.cmp.GenRepContent =
     function(input_names, input_optional)
     {
         // GenRepContent ::= SEQUENCE OF InfoTypeAndValue
@@ -93,13 +93,13 @@ function(in_window)
             value: [
                 new in_window.org.pkijs.asn1.REPEATED({
                     name: (names.infoTypes || ""),
-                    value: in_window.org.pkijs.schema.pkiMessage.InfoTypeAndValue(names.infoValues || {})
+                    value: in_window.org.pkijs.schema.cmp.InfoTypeAndValue(names.infoValues || {})
                 })
             ]
         }));
     };
 
-    in_window.org.pkijs.schema.pkiMessage.ProofOfPossession =
+    in_window.org.pkijs.schema.cmp.ProofOfPossession =
     function(input_names, input_optional)
     {
         // ProofOfPossession ::= CHOICE {
@@ -154,7 +154,7 @@ function(in_window)
         }));
     }
 
-    in_window.org.pkijs.schema.pkiMessage.CertTemplate =
+    in_window.org.pkijs.schema.cmp.CertTemplate =
     function(input_names, input_optional)
     {
         // CertTemplate ::= SEQUENCE {
@@ -191,7 +191,7 @@ function(in_window)
         }));
     }
 
-    in_window.org.pkijs.schema.pkiMessage.CertRequest =
+    in_window.org.pkijs.schema.cmp.CertRequest =
     function(input_names, input_optional)
     {
         // CertRequest ::= SEQUENCE {
@@ -212,17 +212,17 @@ function(in_window)
             name: (names.block_name || ""),
             value: [
                 new in_window.org.pkijs.asn1.INTEGER({ name: (names.certReqId || "certReqId") }),
-                new in_window.org.pkijs.schema.pkiMessage.CertTemplate({ name: (names.certTemplate || "certTemplate") }),
+                new in_window.org.pkijs.schema.cmp.CertTemplate({ name: (names.certTemplate || "certTemplate") }),
                 new in_window.org.pkijs.asn1.REPEATED({
                     optional: true,
                     name: (names.controls || "controls"),
-                    value: [ new in_window.org.pkijs.schema.ATTRIBUTE() ]
+                    value: [ new in_window.org.pkijs.schema.ATTRIBUTE(names.attributes || {}) ]
                 })
             ]
         }));
     };
 
-    in_window.org.pkijs.schema.pkiMessage.CertReqMessage =
+    in_window.org.pkijs.schema.cmp.CertReqMessage =
     function(input_names, input_optional)
     {
         // CertReqMsg ::= SEQUENCE {
@@ -239,11 +239,12 @@ function(in_window)
             name: (names.block_name || ""),
             optional: optional,
             value: [
-                new in_window.org.pkijs.schema.pkiMessage.CertRequest({ name: (names.certRequest || "certReq") }),
-                new in_window.org.pkijs.schema.pkiMessage.ProofOfPossession({
+                new in_window.org.pkijs.schema.cmp.CertRequest({ name: (names.certRequest || "certReq") }),
+                new in_window.org.pkijs.schema.cmp.ProofOfPossession({
                     optional: true,
                     name: (names.proofOfPossession || "popo") }),
                 new in_window.org.pkijs.asn1.REPEATED({
+                    optional: true,
                     name: (names.regInfo || "regInfo"),
                     value: [ new in_window.org.pkijs.schema.ATTRIBUTE() ]
                 })
@@ -251,7 +252,7 @@ function(in_window)
         }));
     };
 
-    in_window.org.pkijs.schema.pkiMessage.PKIHeader =
+    in_window.org.pkijs.schema.cmp.PKIHeader =
     function(input_names, input_optional)
     {
         // PKIHeader ::= SEQUENCE {
@@ -278,8 +279,8 @@ function(in_window)
             name: (names.block_name || "PKIHeader"),
             value: [
                 new in_window.org.pkijs.asn1.INTEGER({ name: (names.PKIHeader_pvno || "PKIHeader.pvno") }),
-                new in_window.org.pkijs.schema.GENERAL_NAME({ name: (names.PKIHeader_sender || "PKIHeader.sender") }),
-                new in_window.org.pkijs.schema.GENERAL_NAME({ name: (names.PKIHeader_recipient || "PKIHeader.recipient") }),
+                new in_window.org.pkijs.schema.GENERAL_NAME({ names: { block_name: (names.PKIHeader_sender || "PKIHeader.sender") }}),
+                new in_window.org.pkijs.schema.GENERAL_NAME({ names: { block_name: (names.PKIHeader_recipient || "PKIHeader.recipient") }}),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     name: (names.block_name || ""),
                     optional: true,
@@ -296,7 +297,7 @@ function(in_window)
                     ]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    name: (names.block_name || "PKIHeader.transcationID"),
+                    name: (names.block_name || "PKIHeader.transactionID"),
                     optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
@@ -355,7 +356,7 @@ function(in_window)
                         new in_window.org.pkijs.asn1.REPEATED({
                             name: (names.generalInfo || ""),
                             value: [
-                                new in_window.org.pkijs.schema.pkiMessage.InfoTypeAndValue(names.infoValues || {})
+                                new in_window.org.pkijs.schema.cmp.InfoTypeAndValue(names.infoValues || {})
                             ]
                         })
                     ]
@@ -365,7 +366,7 @@ function(in_window)
     }
 
 
-    in_window.org.pkijs.schema.pkiMessage.PKIBody =
+    in_window.org.pkijs.schema.cmp.PKIBody =
     function(input_names, input_optional)
     {
         // PKIBody ::= CHOICE {
@@ -414,7 +415,7 @@ function(in_window)
                             names: {
                                 block_name: "PKIBody.ir"
                             },
-                            value: [ new in_window.org.pkijs.schema.pkiMessage.CertReqMessage()]
+                            value: [ new in_window.org.pkijs.schema.cmp.CertReqMessage()]
                         })
                     ]
                 }),
@@ -426,7 +427,7 @@ function(in_window)
                         tag_number: 1 // [1]
                     },
                     value: [
-                        new in_window.org.pkijs.schema.pkiMessage.CertRepMessage({
+                        new in_window.org.pkijs.schema.cmp.CertRepMessage({
                             names: {
                                 block_name: "PKIBody.ip"
                             }
@@ -445,7 +446,7 @@ function(in_window)
                             names: {
                                 block_name: "PKIBody.cr"
                             },
-                            value: [ new in_window.org.pkijs.schema.pkiMessage.CertReqMessage()]
+                            value: [ new in_window.org.pkijs.schema.cmp.CertReqMessage()]
                         })
                     ]
                 }),
@@ -456,7 +457,7 @@ function(in_window)
                         tag_number: 3 // [3]
                     },
                     value: [
-                        new in_window.org.pkijs.schema.pkiMessage.CertReqMessage({
+                        new in_window.org.pkijs.schema.cmp.CertReqMessage({
                             names: {
                                 block_name: "PKIBody.cp"
                             }
@@ -487,7 +488,7 @@ function(in_window)
                         tag_number: 21 // [21]
                     },
                     value: [
-                        new in_window.org.pkijs.schema.pkiMessage.GenMsgContent(names.genMessage || {
+                        new in_window.org.pkijs.schema.cmp.GenMsgContent(names.genMessage || {
                         names: {
                             block_name: "PKIBody.genm"
                         }
@@ -500,7 +501,7 @@ function(in_window)
                         tag_number: 22 // [22]
                     },
                     value: [
-                        new in_window.org.pkijs.schema.pkiMessage.GenRepContent(names.genRepMessage || {
+                        new in_window.org.pkijs.schema.cmp.GenRepContent(names.genRepMessage || {
                         names: {
                             block_name: "PKIBody.genp"
                         }
@@ -510,7 +511,7 @@ function(in_window)
         }));
     }
 
-    in_window.org.pkijs.schema.pkiMessage.PKIMessage =
+    in_window.org.pkijs.schema.cmp.PKIMessage =
     function(input_names, input_optional)
     {
         // PKIMessage ::= SEQUENCE {
@@ -527,10 +528,10 @@ function(in_window)
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             name: (names.block_name || "PKIMessage"),
             value: [
-                new in_window.org.pkijs.schema.pkiMessage.PKIHeader({ name: (names.PKIMessage_header || "PKIMessage.header") }),
-                new in_window.org.pkijs.schema.pkiMessage.PKIBody({ name: (names.PKIMessage_body || "PKIMessage.body") }),
+                new in_window.org.pkijs.schema.cmp.PKIHeader({ name: (names.PKIMessage_header || "PKIMessage.header") }),
+                new in_window.org.pkijs.schema.cmp.PKIBody({ name: (names.PKIMessage_body || "PKIMessage.body") }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    name: (names.block_name || "protection"),
+                    name: (names.block_name || "PKIMessage.protection"),
                     optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
