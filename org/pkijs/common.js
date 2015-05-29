@@ -1118,6 +1118,7 @@ function(in_window)
                 };
                 break;
             case "1.2.840.113549.2.7":
+            case "1.3.6.1.5.5.8.1.2":
                 result = {
                     name: "HMAC",
                     hash: {
@@ -1491,6 +1492,12 @@ function(in_window)
             case "1.3.6.1.5.5.7.4.2":
                 result = {
                     name: "signKeyPairTypes"
+                };
+                break;
+
+            case "1.3.6.1.5.5.7.4.12":
+                result = {
+                    name: "revPassphrase"
                 };
                 break;
         }
