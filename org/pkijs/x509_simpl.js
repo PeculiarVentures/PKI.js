@@ -4054,7 +4054,7 @@ function(in_window)
     function()
     {
         /// <summary>!!! Works well in Chrome dev versions only (April 2014th) !!!</summary>
-        /// <returns type="Promise">Returns a new Promise object (in case of error), or a result of "crypto.subtle.veryfy" function</returns>
+        /// <returns type="Promise">Returns a new Promise object (in case of error), or a result of "crypto.subtle.verify" function</returns>
 
         // #region Global variables 
         var sequence = Promise.resolve();
