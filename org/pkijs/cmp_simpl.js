@@ -35,6 +35,87 @@ function(in_window)
 
     var local = {};
 
+    in_window.org.pkijs.simpl.cmp.getOIDByAlgorithm =
+    function(algorithm)
+    {
+        var result = "";
+
+        switch(algorithm.name.toUpperCase())
+        {
+            case "PASSWORDBASEDMAC":
+                result = "1.2.840.113533.7.66.13";
+                break;
+            default:;
+        }
+
+        return result;
+    }
+
+    in_window.org.pkijs.simpl.cmp.getAlgorithmByOID =
+    function(oid)
+    {
+        var result = {};
+
+        switch(oid)
+        {
+            case "1.2.840.113533.7.66.13":
+                result = {
+                    name: "passwordBasedMac"
+                };
+                break;
+        }
+
+        return result;
+    }
+
+    in_window.org.pkijs.simpl.cmp.getInfoTypeByOID =
+    function(oid)
+    {
+        // see https://tools.ietf.org/html/rfc4210#appendix-F
+
+        var result = "";
+
+        switch(oid)
+        {
+            case "1.3.6.1.5.5.7.4.1":
+                result = "caProtEncCert";
+                break;
+
+            case "1.3.6.1.5.5.7.4.2":
+                result = "signKeyPairTypes";
+                break;
+
+            case "1.3.6.1.5.5.7.4.12":
+                result = "revPassphrase";
+                break;
+        }
+        return result;
+    }
+
+    in_window.org.pkijs.simpl.cmp.getOIDByInfoType =
+    function(infoType)
+    {
+        // see https://tools.ietf.org/html/rfc4210#appendix-F
+
+        var result = "";
+
+        switch(infoType)
+        {
+            case "caProtEncCert":
+                result = "1.3.6.1.5.5.7.4.1";
+                break;
+
+            case "signKeyPairTypes":
+                result =  "1.3.6.1.5.5.7.4.2";
+                break;
+
+            case "revPassphrase":
+                result = "1.3.6.1.5.5.7.4.12";
+                break;
+        }
+        return result;
+    }
+
     /**
      * Common PKI message header
      *

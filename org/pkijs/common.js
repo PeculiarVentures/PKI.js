@@ -930,9 +930,6 @@ function(in_window)
             case "P-521":
                 result = "1.3.132.0.35";
                 break;
-            case "PASSWORDBASEDMAC":
-                result = "1.2.840.113533.7.66.13";
-                break;
             // #endregion 
             default:;
         }
@@ -1121,7 +1118,6 @@ function(in_window)
                 };
                 break;
             case "1.2.840.113549.2.7":
-            case "1.3.6.1.5.5.8.1.2":
                 result = {
                     name: "HMAC",
                     hash: {
@@ -1197,11 +1193,6 @@ function(in_window)
             case "1.3.132.0.35":
                 result = {
                     name: "P-521"
-                };
-                break;
-            case "1.2.840.113533.7.66.13":
-                result = {
-                    name: "passwordBasedMac"
                 };
                 break;
             // #endregion 
@@ -1481,35 +1472,5 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
-
-    in_window.org.pkijs.getInfoTypeByOID =
-    function(oid)
-    {
-        // see https://tools.ietf.org/html/rfc4210#appendix-F
-
-        var result = {};
-
-        switch(oid)
-        {
-            case "1.3.6.1.5.5.7.4.1":
-                result = {
-                    name: "caProtEncCert"
-                };
-                break;
-
-            case "1.3.6.1.5.5.7.4.2":
-                result = {
-                    name: "signKeyPairTypes"
-                };
-                break;
-
-            case "1.3.6.1.5.5.7.4.12":
-                result = {
-                    name: "revPassphrase"
-                };
-                break;
-        }
-        return result;
-    }
 }
 )(typeof exports !== "undefined" ? exports : window);
