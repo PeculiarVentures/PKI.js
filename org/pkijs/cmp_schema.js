@@ -1,3 +1,7 @@
+/**
+ * CMP schemas from rfc 4210
+ * See http://tools.ietf.org/html/rfc4210
+ **/
 (
 function(in_window)
 {
@@ -99,6 +103,92 @@ function(in_window)
         }));
     };
 
+    in_window.org.pkijs.schema.cmp.POPOSigningKeyInput =
+    function(input_names, input_optional)
+    {
+        // POPOSigningKeyInput ::= SEQUENCE {
+        //    authInfo            CHOICE {
+        //       sender              [0] GeneralName,
+        //       publicKeyMAC        [1] PKMACValue
+        //    },
+        //    publicKey           SubjectPublicKeyInfo    -- from CertTemplate
+        // }
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+        var optional = (input_optional || false);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                // authInfo
+                new in_window.org.pkijs.asn1.CHOICE({
+                    value: [
+                        new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                            id_block: {
+                                tag_class: 3,
+                                tag_number: 0
+                            },
+                            value: [
+                                new in_window.org.pkijs.schema.GENERAL_NAME({
+                                    name: (names.sender || "sender"),
+                                })
+                            ]
+                        }),
+                        new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                            id_block: {
+                                tag_class: 3,
+                                tag_number: 1
+                            },
+                            value: [
+                                new in_window.org.pkijs.asn1.SEQUENCE({
+                                    name: (names.publicKeyMAC || "publicKeyMAC"),
+                                    value: [
+                                        new in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.algorithmIdentifier || {}),
+                                        new in_window.org.pkijs.asn1.BITSTRING({ name: (names.signature || "") })
+                                    ]
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                // publicKey
+                in_window.org.pkijs.schema.PUBLIC_KEY_INFO(names.subjectPublicKeyInfo || {
+                    names: {
+                        block_name: "tbsCertificate.subjectPublicKeyInfo"
+                    }
+                })
+            ]
+        }));
+    };
+
+    in_window.org.pkijs.schema.cmp.POPOSigningKey =
+    function(input_names, input_optional)
+    {
+        // POPOSigningKey ::= SEQUENCE {
+        //    poposkInput         [0] POPOSigningKeyInput OPTIONAL,
+        //    algorithmIdentifier     AlgorithmIdentifier,
+        //    signature               BIT STRING }
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+        var optional = (input_optional || false);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    optional: true,
+                    id_block: {
+                        tag_class: 3,
+                        tag_number: 0
+                    },
+                    value: [ new in_window.org.pkijs.schema.cmp.POPOSigningKeyInput() ]
+                }),
+                new in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.algorithmIdentifier || {}),
+                new in_window.org.pkijs.asn1.BITSTRING({ name: (names.signature || "") })
+            ]
+        }));
+    };
+
     in_window.org.pkijs.schema.cmp.ProofOfPossession =
     function(input_names, input_optional)
     {
@@ -124,15 +214,17 @@ function(in_window)
                     },
                     value: [ new in_window.org.pkijs.asn1.NULL() ]
                 }),
-                /* TODO
-                new in_window.org.pkijs.asn1.CONSTRUCTED({
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     name: (name.POP_signature || "signature"),
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [2]
-                    }
-                    value: [ ]
+                    },
+                    value: [
+                        new in_window.org.pkijs.schema.cmp.POPOSigningKey()
+                    ]
                 }),
+                /* TODO
                 new in_window.org.pkijs.asn1.CONSTRUCTED({
                     name: (name.POP_keyEncipherment || "keyEncipherment"),
                     id_block: {
@@ -176,6 +268,7 @@ function(in_window)
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             name: (names.block_name || ""),
             value: [
+                // version
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     name: (names.block_name || ""),
                     optional: true,
@@ -186,7 +279,72 @@ function(in_window)
                     value: [
                         new in_window.org.pkijs.asn1.INTEGER({ name: (names.certTemplate_version || "certTemplate.version") }),
                     ]
+                }),
+                // serialNumber
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.block_name || ""),
+                    optional: true,
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
+                    value: [
+                        new in_window.org.pkijs.asn1.INTEGER({ name: (names.certTemplate_serialNumber || "certTemplate.serialNumber") }),
+                    ]
+                }),
+                // signingAlg
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.block_name || ""),
+                    optional: true,
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 2 // [2]
+                    },
+                    value: [
+                        new in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(name.certTemplate_signingAlg || {}),
+                    ]
+                }),
+                // issuer
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.block_name || ""),
+                    optional: true,
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 3 // [3]
+                    },
+                    value: [
+                        new in_window.org.pkijs.schema.GENERAL_NAME(name.certTemplate_issuer || "")
+                    ]
+                }),
+
+                // TODO validity
+
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.block_name || ""),
+                    optional: true,
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 5 // [5]
+                    },
+                    value: [
+                        new in_window.org.pkijs.schema.GENERAL_NAME(name.certTemplate_subject || "")
+                    ]
+                }),
+                // publicKey
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.block_name || ""),
+                    optional: true,
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 6 // [6]
+                    },
+                    value: [
+                        new in_window.org.pkijs.schema.PUBLIC_KEY_INFO(name.certTemplate_publicKey || {})
+                    ]
                 })
+                // TODO issuerUID
+                // TODO subjectUID
+                // TODO extensions
             ]
         }));
     }
@@ -216,13 +374,31 @@ function(in_window)
                 new in_window.org.pkijs.asn1.REPEATED({
                     optional: true,
                     name: (names.controls || "controls"),
-                    value: [ new in_window.org.pkijs.schema.ATTRIBUTE(names.attributes || {}) ]
+                    value: new in_window.org.pkijs.schema.ATTRIBUTE(names.attributes || {})
                 })
             ]
         }));
     };
 
-    in_window.org.pkijs.schema.cmp.CertReqMessage =
+    in_window.org.pkijs.schema.cmp.GenRepContent =
+    function(input_names, input_optional)
+    {
+        // GenRepContent ::= SEQUENCE OF InfoTypeAndValue
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+        var optional = (input_optional || false);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || "GenRepContent"),
+            value: [
+                new in_window.org.pkijs.asn1.REPEATED({
+                    value: in_window.org.pkijs.schema.cmp.InfoTypeAndValue()
+                })
+            ]
+        }));
+    };
+
+    in_window.org.pkijs.schema.cmp.CertReqMsg =
     function(input_names, input_optional)
     {
         // CertReqMsg ::= SEQUENCE {
@@ -243,17 +419,19 @@ function(in_window)
                 new in_window.org.pkijs.schema.cmp.ProofOfPossession({
                     optional: true,
                     name: (names.proofOfPossession || "popo") }),
+                    /*
                 new in_window.org.pkijs.asn1.REPEATED({
                     optional: true,
                     name: (names.regInfo || "regInfo"),
-                    value: [ new in_window.org.pkijs.schema.ATTRIBUTE() ]
+                    value: new in_window.org.pkijs.schema.ATTRIBUTE()
                 })
+                */
             ]
         }));
     };
 
     in_window.org.pkijs.schema.cmp.PKIHeader =
-    function(input_names, input_optional)
+   function(input_names, input_optional)
     {
         // PKIHeader ::= SEQUENCE {
         //    pvno                INTEGER     { cmp1999(1), cmp2000(2) },
@@ -297,6 +475,22 @@ function(in_window)
                     ]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.block_name || ""),
+                    optional: true,
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
+                    value: [new in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.protectionAlg || {
+                        names: {
+                            block_name: "PKIHeader.protectionAlg"
+                        }
+                    })]
+                }),
+
+                // TODO tags 2 and 3
+
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     name: (names.block_name || "PKIHeader.transactionID"),
                     optional: true,
                     id_block: {
@@ -339,9 +533,7 @@ function(in_window)
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
                             name: (names.freeText || ""),
-                            value: [
-                                new in_window.org.pkijs.asn1.UTF8STRING() 
-                            ]
+                            value: new in_window.org.pkijs.asn1.UTF8STRING()
                         })
                     ]
                 }),
@@ -355,9 +547,7 @@ function(in_window)
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
                             name: (names.generalInfo || ""),
-                            value: [
-                                new in_window.org.pkijs.schema.cmp.InfoTypeAndValue(names.infoValues || {})
-                            ]
+                            value: new in_window.org.pkijs.schema.cmp.InfoTypeAndValue(names.infoValues || {})
                         })
                     ]
                 })
@@ -405,17 +595,15 @@ function(in_window)
             name: (names.PKIMessage_body || "PKIBody"),
             value: [
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    name: (names.block_name || ""),
+                    name: (names.block_name || "PKIBody.ir"),
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
                     },
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
-                            names: {
-                                block_name: "PKIBody.ir"
-                            },
-                            value: [ new in_window.org.pkijs.schema.cmp.CertReqMessage()]
+                            name: (names.PKIBody_certRequestMessage || "certRequestMessages"),
+                            value: new in_window.org.pkijs.schema.cmp.CertReqMsg()
                         })
                     ]
                 }),
@@ -436,77 +624,61 @@ function(in_window)
                 }),
                 */
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    name: (names.block_name || ""),
+                    name: (names.block_name || "PKIBody.cr"),
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 2 // [2]
                     },
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
-                            names: {
-                                block_name: "PKIBody.cr"
-                            },
-                            value: [ new in_window.org.pkijs.schema.cmp.CertReqMessage()]
+                            name: (names.PKIBody_certRequestMessage || "certRequestMessages"),
+                            value: new in_window.org.pkijs.schema.cmp.CertReqMsg()
                         })
                     ]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    name: (names.block_name || ""),
+                    name: (names.block_name || "PKIBody.cp"),
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 3 // [3]
                     },
                     value: [
-                        new in_window.org.pkijs.schema.cmp.CertReqMessage({
-                            names: {
-                                block_name: "PKIBody.cp"
-                            }
-                        })
+                        new in_window.org.pkijs.schema.cmp.CertReqMsg()
                     ]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    name: (names.block_name || ""),
+                    name: (names.block_name || "PKIBody.p10cr"),
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 4 // [4]
                     },
                     value: [
-                        new in_window.org.pkijs.schema.PKCS10({
-                            names: {
-                                block_name: "PKIBody.p10cr"
-                            }
-                        })
+                        new in_window.org.pkijs.schema.PKCS10()
                     ]
                 }),
 
                 // TODO choices 5 - 20
 
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    name: (names.block_name || ""),
+                    name: (names.block_name || "PKIBody.genm"),
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 21 // [21]
                     },
                     value: [
-                        new in_window.org.pkijs.schema.cmp.GenMsgContent(names.genMessage || {
-                        names: {
-                            block_name: "PKIBody.genm"
-                        }
-                    })]
+                        new in_window.org.pkijs.schema.cmp.GenMsgContent()
+                    ]
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    name: (names.block_name || ""),
+                    name: (names.block_name || "PKIBody.genp"),
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 22 // [22]
                     },
                     value: [
-                        new in_window.org.pkijs.schema.cmp.GenRepContent(names.genRepMessage || {
-                        names: {
-                            block_name: "PKIBody.genp"
-                        }
-                    })]
-                }),
+                        new in_window.org.pkijs.schema.cmp.GenRepContent()
+                    ]
+                })
             ]
         }));
     }
@@ -540,8 +712,23 @@ function(in_window)
                     value: [
                         new in_window.org.pkijs.asn1.BITSTRING({ name: (names.protection || "") })
                     ]
+                /** TODO
                 }),
-
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    name: (names.block_name || "PKIMessage.extraCerts"),
+                    optional: true,
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
+                    value: [
+                        new in_window.org.pkijs.asn1.REPEATED({
+                            name: (names.extraCerts || ""),
+                            value: in_window.org.pkijs.cmp.CMPCertificate()
+                        })
+                    ]
+                */
+                })
             ]
         }));
     };

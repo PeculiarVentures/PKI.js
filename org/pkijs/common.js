@@ -930,6 +930,9 @@ function(in_window)
             case "P-521":
                 result = "1.3.132.0.35";
                 break;
+            case "PASSWORDBASEDMAC":
+                result = "1.2.840.113533.7.66.13";
+                break;
             // #endregion 
             default:;
         }
@@ -1194,6 +1197,11 @@ function(in_window)
             case "1.3.132.0.35":
                 result = {
                     name: "P-521"
+                };
+                break;
+            case "1.2.840.113533.7.66.13":
+                result = {
+                    name: "passwordBasedMac"
                 };
                 break;
             // #endregion 
