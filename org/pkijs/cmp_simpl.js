@@ -308,9 +308,9 @@ function(in_window)
     {
         var out = [];
 
-        out.push(this.infoType.toSchema());
+        out.push(this.infoType);
         if ('infoValue' in this)
-            out.push(this.infoValue.toSchema());
+            out.push(this.infoValue);
 
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             value: out

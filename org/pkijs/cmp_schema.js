@@ -547,7 +547,11 @@ function(in_window)
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
                             name: (names.generalInfo || ""),
-                            value: new in_window.org.pkijs.schema.cmp.InfoTypeAndValue(names.infoValues || {})
+                            value: new in_window.org.pkijs.asn1.SEQUENCE({
+                                value: [
+                                    new in_window.org.pkijs.schema.cmp.InfoTypeAndValue(names.infoValues || {})
+                                ]
+                            })
                         })
                     ]
                 })
