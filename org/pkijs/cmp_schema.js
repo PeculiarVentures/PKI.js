@@ -430,6 +430,23 @@ function(in_window)
         }));
     };
 
+    in_window.org.pkijs.schema.cmp.CertReqMsgs =
+    function(input_names, input_optional)
+    {
+        // CertReqMessages ::= SEQUENCE SIZE (1..MAX) OF CertReqMsg
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.CertReqMsgs || "CertReqMsgs"),
+            value: [
+                new in_window.org.pkijs.asn1.REPEATED({
+                    value: new in_window.org.pkijs.schema.cmp.CertReqMsg()
+                })
+            ]
+        }));
+    };
+
     in_window.org.pkijs.schema.cmp.PKIHeader =
    function(input_names, input_optional)
     {
@@ -605,10 +622,7 @@ function(in_window)
                         tag_number: 0 // [0]
                     },
                     value: [
-                        new in_window.org.pkijs.asn1.REPEATED({
-                            name: (names.PKIBody_certRequestMessage || "certRequestMessages"),
-                            value: new in_window.org.pkijs.schema.cmp.CertReqMsg()
-                        })
+                        new in_window.org.pkijs.schema.cmp.CertReqMsgs()
                     ]
                 }),
                 /* TODO
@@ -716,10 +730,8 @@ function(in_window)
                     value: [
                         new in_window.org.pkijs.asn1.BITSTRING({ name: (names.protection || "") })
                     ]
-                /** TODO
                 }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    name: (names.block_name || "PKIMessage.extraCerts"),
                     optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
@@ -727,11 +739,10 @@ function(in_window)
                     },
                     value: [
                         new in_window.org.pkijs.asn1.REPEATED({
-                            name: (names.extraCerts || ""),
-                            value: in_window.org.pkijs.cmp.CMPCertificate()
+                            name: (names.PKIMessage_extraCerts || "PKIMessage.extraCerts"),
+                            value: in_window.org.pkijs.schema.CERT()
                         })
                     ]
-                */
                 })
             ]
         }));
