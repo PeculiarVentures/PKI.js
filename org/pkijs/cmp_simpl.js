@@ -505,31 +505,31 @@ function(in_window)
         if ('signingAlg' in this.certTemplate) {
             tmpl.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 id_block: { tag_class: 3, tag_number: 2 },
-                value: [ this.certTemplate.signingAlg.toSchema() ]
+                value: [ this.certTemplate.signingAlg ]
             }));
         }
         if ('issuer' in this.certTemplate) {
             tmpl.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 id_block: { tag_class: 3, tag_number: 3 },
-                value: [ this.certTemplate.issuer.toSchema() ]
+                value: [ this.certTemplate.issuer ]
             }));
         }
         if ('validity' in this.certTemplate) {
             tmpl.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 id_block: { tag_class: 3, tag_number: 4 },
-                value: [ this.certTemplate.validity.toSchema() ]
+                value: [ this.certTemplate.validity ]
             }));
         }
         if ('subject' in this.certTemplate) {
             tmpl.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 id_block: { tag_class: 3, tag_number: 5 },
-                value: [ this.certTemplate.subject.toSchema() ]
+                value: [ this.certTemplate.subject ]
             }));
         }
         if ('publicKey' in this.certTemplate) {
             tmpl.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 id_block: { tag_class: 3, tag_number: 6 },
-                value: [ this.certTemplate.publicKey.toSchema() ]
+                value: [ this.certTemplate.publicKey ]
             }));
         }
         // TODO
@@ -537,18 +537,18 @@ function(in_window)
         // subjectUID
         // extensions
 
-        var certTemplate = new in_window.org.pkijs.asn1.SEQUENCE({
+        var certTmpl = new in_window.org.pkijs.asn1.SEQUENCE({
             value: tmpl
         });
         var verifyCertTemplate = in_window.org.pkijs.compareSchema(
-            certTemplate, certTemplate,
+            certTmpl, certTmpl,
             in_window.org.pkijs.schema.cmp.CertTemplate()
         );
         if (!verifyCertTemplate.verified)
             throw new Error('Unable to verify CertTemplate schema');
 
         // Add template to parent
-        request.push(certTemplate);
+        request.push(certTmpl);
 
         // TODO controls
         /**
@@ -703,7 +703,7 @@ function(in_window)
                         }));
                     }
                     // MUST be equal to cert request template's
-                    poposkInput.push(this.proof.publicKey.toSchema());
+                    poposkInput.push(this.proof.publicKey);
                 }
 
                 if (poposkInput.length) {
