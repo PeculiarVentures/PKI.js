@@ -113,6 +113,21 @@ function(in_window)
         return new Date(current_date.getTime() + (current_date.getTimezoneOffset() * 60000));
     }
     //**************************************************************************************
+    in_window.org.pkijs.padNumber =
+    function(input_number, full_length)
+    {
+        var str = input_number.toString(10);
+        var dif = full_length - str.length;
+
+        var padding = new Array(dif);
+        for(var i = 0; i < dif; i++)
+            padding[i] = '0';
+
+        var padding_string = padding.join('');
+
+        return padding_string.concat(str);
+    }
+    //**************************************************************************************
     in_window.org.pkijs.getValue =
     function(args, item, default_value)
     {
