@@ -77,6 +77,16 @@ function(in_window)
     }
     // #endregion 
 
+    // #region "org.pkijs.schema.x509" namespace 
+    if (typeof in_window.org.pkijs.schema.x509 === "undefined")
+        in_window.org.pkijs.schema.x509 = {};
+    else
+    {
+        if (typeof in_window.org.pkijs.schema.x509 !== "object")
+            throw new Error("Name org.pkijs.schema.x509 already exists and it's not an object" + " but " + (typeof in_window.org.pkijs.schema.x509));
+    }
+    // #endregion 
+
     // #region "local" namespace 
     var local = {};
     // #endregion   

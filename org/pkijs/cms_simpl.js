@@ -77,6 +77,16 @@ function(in_window)
     }
     // #endregion 
 
+    // #region "org.pkijs.simpl.x509" namespace 
+    if (typeof in_window.org.pkijs.simpl.x509 === "undefined")
+        in_window.org.pkijs.simpl.x509 = {};
+    else
+    {
+        if (typeof in_window.org.pkijs.simpl.x509 !== "object")
+            throw new Error("Name org.pkijs.simpl.x509 already exists and it's not an object" + " but " + (typeof in_window.org.pkijs.simpl.x509));
+    }
+    // #endregion 
+
     // #region "local" namespace 
     var local = {};
     // #endregion   
@@ -1848,7 +1858,7 @@ function(in_window)
                                 additional_certs.push(promiseResults[i]);
                         }
 
-                        var cert_chain_simpl = new org.pkijs.simpl.CERT_CHAIN({
+                        var cert_chain_simpl = new in_window.org.pkijs.simpl.CERT_CHAIN({
                             certs: additional_certs,
                             trusted_certs: trusted_certs
                         });
@@ -2065,15 +2075,15 @@ function(in_window)
 
         if(found === false)
         {
-            _this.digestAlgorithms.push(new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+            _this.digestAlgorithms.push(new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                 algorithm_id: hashAlgorithmOID,
-                algorithm_params: new org.pkijs.asn1.NULL()
+                algorithm_params: new in_window.org.pkijs.asn1.NULL()
             }));
         }
 
-        _this.signerInfos[signerIndex].digestAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+        _this.signerInfos[signerIndex].digestAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
             algorithm_id: hashAlgorithmOID,
-            algorithm_params: new org.pkijs.asn1.NULL()
+            algorithm_params: new in_window.org.pkijs.asn1.NULL()
         });
         // #endregion 
 
@@ -2116,12 +2126,12 @@ function(in_window)
                         if(hashAlgorithmOID === "")
                             return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
 
-                        paramsObject.hashAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
-                            algorithm_params: new org.pkijs.asn1.NULL()
+                            algorithm_params: new in_window.org.pkijs.asn1.NULL()
                         });
 
-                        paramsObject.maskGenAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        paramsObject.maskGenAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: "1.2.840.113549.1.1.8", // MGF1
                             algorithm_params: paramsObject.hashAlgorithm.toSchema()
                         })
@@ -2134,7 +2144,7 @@ function(in_window)
                     // #endregion   
 
                     // #region Automatically set signature algorithm 
-                    _this.signerInfos[signerIndex].signatureAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                    _this.signerInfos[signerIndex].signatureAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                         algorithm_id: "1.2.840.113549.1.1.10",
                         algorithm_params: pssParameters.toSchema()
                     });
@@ -4497,15 +4507,15 @@ function(in_window)
                     var ukmView = new Uint8Array(ukmBuffer);
                     in_window.org.pkijs.getRandomValues(ukmView); // Generate random values in 64 bytes long buffer
 
-                    var keyInfo = new org.pkijs.simpl.cms.KeyAgreeRecipientInfo({
+                    var keyInfo = new in_window.org.pkijs.simpl.cms.KeyAgreeRecipientInfo({
                         version: 3,
                         // "originator" will be calculated in "encrypt" function because ephemeral key would be generated there
-                        ukm: new org.pkijs.asn1.OCTETSTRING({ value_hex: ukmBuffer }),
-                        keyEncryptionAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        ukm: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: ukmBuffer }),
+                        keyEncryptionAlgorithm: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: ecdhOID, 
                             algorithm_params: aesKW.toSchema()
                         }),
-                        recipientEncryptedKeys: new org.pkijs.simpl.cms.RecipientEncryptedKeys({
+                        recipientEncryptedKeys: new in_window.org.pkijs.simpl.cms.RecipientEncryptedKeys({
                             encryptedKeys: [encryptedKey]
                         }),
                         recipientCertificate: certificate
@@ -4794,9 +4804,9 @@ function(in_window)
                     contentType: "1.2.840.113549.1.7.1", // "data"
                     contentEncryptionAlgorithm: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                         algorithm_id: contentEncryptionOID,
-                        algorithm_params: new org.pkijs.asn1.OCTETSTRING({ value_hex: ivBuffer })
+                        algorithm_params: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: ivBuffer })
                     }),
-                    encryptedContent: new org.pkijs.asn1.OCTETSTRING({ value_hex: encryptedContent })
+                    encryptedContent: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: encryptedContent })
                 });
             },
             function(error)
@@ -4955,18 +4965,18 @@ function(in_window)
                     // #endregion 
 
                     // #region Create and encode "ECC-CMS-SharedInfo" structure 
-                    var eccInfo = new org.pkijs.simpl.cms.ECC_CMS_SharedInfo({
-                        keyInfo: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                    var eccInfo = new in_window.org.pkijs.simpl.cms.ECC_CMS_SharedInfo({
+                        keyInfo: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: aesKWAlgorithm.algorithm_id,
                             /*
                              Initially RFC5753 says that AES algorithms have absent parameters.
                              But since early implementations all put NULL here. Thus, in order to be
                              "backward compatible", index also put NULL here.
                             */
-                            algorithm_params: new org.pkijs.asn1.NULL()
+                            algorithm_params: new in_window.org.pkijs.asn1.NULL()
                         }),
                         entityUInfo: _this.recipientInfos[index].value.ukm,
-                        suppPubInfo: new org.pkijs.asn1.OCTETSTRING({ value_hex: kwLengthBuffer })
+                        suppPubInfo: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: kwLengthBuffer })
                     });
 
                     var encodedInfo = eccInfo.toSchema().toBER(false);
@@ -5017,9 +5027,9 @@ function(in_window)
                     // #region OriginatorIdentifierOrKey 
                     var asn1 = org.pkijs.fromBER(exportedECDHPublicKey);
 
-                    var originator = new org.pkijs.simpl.cms.OriginatorIdentifierOrKey();
+                    var originator = new in_window.org.pkijs.simpl.cms.OriginatorIdentifierOrKey();
                     originator.variant = 3;
-                    originator.value = new org.pkijs.simpl.cms.OriginatorPublicKey({ schema: asn1.result });
+                    originator.value = new in_window.org.pkijs.simpl.cms.OriginatorPublicKey({ schema: asn1.result });
                     // There is option when we can stay with ECParameters, but here index prefer to avoid the params 
                     if("algorithm_params" in originator.value.algorithm)
                         delete originator.value.algorithm.algorithm_params;
@@ -5523,18 +5533,18 @@ function(in_window)
                     // #endregion 
 
                     // #region Create and encode "ECC-CMS-SharedInfo" structure 
-                    var eccInfo = new org.pkijs.simpl.cms.ECC_CMS_SharedInfo({
-                        keyInfo: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                    var eccInfo = new in_window.org.pkijs.simpl.cms.ECC_CMS_SharedInfo({
+                        keyInfo: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: aesKWAlgorithm.algorithm_id,
                             /*
                              Initially RFC5753 says that AES algorithms have absent parameters.
                              But since early implementations all put NULL here. Thus, in order to be
                              "backward compatible", index also put NULL here.
                             */
-                            algorithm_params: new org.pkijs.asn1.NULL()
+                            algorithm_params: new in_window.org.pkijs.asn1.NULL()
                         }),
                         entityUInfo: _this.recipientInfos[index].value.ukm,
-                        suppPubInfo: new org.pkijs.asn1.OCTETSTRING({ value_hex: kwLengthBuffer })
+                        suppPubInfo: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: kwLengthBuffer })
                     });
 
                     var encodedInfo = eccInfo.toSchema().toBER(false);

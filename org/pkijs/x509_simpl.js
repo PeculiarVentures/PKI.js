@@ -4253,12 +4253,12 @@ function(in_window)
                         if(hashAlgorithmOID === "")
                             return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
 
-                        paramsObject.hashAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
-                            algorithm_params: new org.pkijs.asn1.NULL()
+                            algorithm_params: new in_window.org.pkijs.asn1.NULL()
                         });
 
-                        paramsObject.maskGenAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        paramsObject.maskGenAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: "1.2.840.113549.1.1.8", // MGF1
                             algorithm_params: paramsObject.hashAlgorithm.toSchema()
                         })
@@ -4271,7 +4271,7 @@ function(in_window)
                     // #endregion   
 
                     // #region Automatically set signature algorithm 
-                    _this.signature = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                    _this.signature = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                         algorithm_id: "1.2.840.113549.1.1.10",
                         algorithm_params: pssParameters.toSchema()
                     });
@@ -4942,12 +4942,12 @@ function(in_window)
                         if(hashAlgorithmOID === "")
                             return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
 
-                        paramsObject.hashAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
-                            algorithm_params: new org.pkijs.asn1.NULL()
+                            algorithm_params: new in_window.org.pkijs.asn1.NULL()
                         });
 
-                        paramsObject.maskGenAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        paramsObject.maskGenAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: "1.2.840.113549.1.1.8", // MGF1
                             algorithm_params: paramsObject.hashAlgorithm.toSchema()
                         })
@@ -4960,7 +4960,7 @@ function(in_window)
                     // #endregion   
 
                     // #region Automatically set signature algorithm 
-                    _this.signature = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                    _this.signature = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                         algorithm_id: "1.2.840.113549.1.1.10",
                         algorithm_params: pssParameters.toSchema()
                     });
@@ -5491,12 +5491,12 @@ function(in_window)
                         if(hashAlgorithmOID === "")
                             return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
 
-                        paramsObject.hashAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
-                            algorithm_params: new org.pkijs.asn1.NULL()
+                            algorithm_params: new in_window.org.pkijs.asn1.NULL()
                         });
 
-                        paramsObject.maskGenAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        paramsObject.maskGenAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: "1.2.840.113549.1.1.8", // MGF1
                             algorithm_params: paramsObject.hashAlgorithm.toSchema()
                         })
@@ -5509,7 +5509,7 @@ function(in_window)
                     // #endregion   
 
                     // #region Automatically set signature algorithm 
-                    _this.signatureAlgorithm = new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                    _this.signatureAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                         algorithm_id: "1.2.840.113549.1.1.10",
                         algorithm_params: pssParameters.toSchema()
                     });
