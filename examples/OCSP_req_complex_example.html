@@ -262,7 +262,7 @@
             fictionView[2] = 0x02;
             fictionView[3] = 0x03;
 
-            ocsp_req_simpl.requestList = [new org.pkijs.simpl.ocsp.Request({
+            ocsp_req_simpl.tbsRequest.requestList = [new org.pkijs.simpl.ocsp.Request({
                 reqCert: new org.pkijs.simpl.ocsp.CertID({
                     hashAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                         algorithm_id: "1.3.14.3.2.26"
@@ -273,7 +273,7 @@
                 })
             })];
 
-            ocsp_req_simpl.requestExtensions = [
+            ocsp_req_simpl.tbsRequest.requestExtensions = [
                 new org.pkijs.simpl.EXTENSION({
                     extnID: "1.3.6.1.5.5.7.48.1.2", // ocspNonce
                     extnValue: (new org.pkijs.asn1.OCTETSTRING({ value_hex: fictionBuffer })).toBER(false)
@@ -286,7 +286,7 @@
             // #region Convert ArrayBuffer to String 
             var signed_data_string = "";
 
-            var ocsp_req_schema = ocsp_req_simpl.toSchema();
+            var ocsp_req_schema = ocsp_req_simpl.toSchema(true);
             ocspReqBuffer = ocsp_req_schema.toBER(false);
 
             var view = new Uint8Array(ocspReqBuffer);
@@ -413,22 +413,22 @@
             // #endregion 
 
             // #region Put information about requests 
-            for(var i = 0; i < ocsp_req_simpl.requestList.length; i++)
+            for(var i = 0; i < ocsp_req_simpl.tbsRequest.requestList.length; i++)
             {
                 var row = requestsTable.insertRow(requestsTable.rows.length);
                 var cell0 = row.insertCell(0);
-                cell0.innerHTML = org.pkijs.bufferToHexCodes(ocsp_req_simpl.requestList[i].reqCert.serialNumber.value_block.value_hex);
+                cell0.innerHTML = org.pkijs.bufferToHexCodes(ocsp_req_simpl.tbsRequest.requestList[i].reqCert.serialNumber.value_block.value_hex);
             }
             // #endregion 
 
             // #region Put information about request extensions 
-            if("requestExtensions" in ocsp_req_simpl)
+            if("requestExtensions" in ocsp_req_simpl.tbsRequest)
             {
-                for(var i = 0; i < ocsp_req_simpl.requestExtensions.length; i++)
+                for(var i = 0; i < ocsp_req_simpl.tbsRequest.requestExtensions.length; i++)
                 {
                     var row = extensionTable.insertRow(extensionTable.rows.length);
                     var cell0 = row.insertCell(0);
-                    cell0.innerHTML = ocsp_req_simpl.requestExtensions[i].extnID;
+                    cell0.innerHTML = ocsp_req_simpl.tbsRequest.requestExtensions[i].extnID;
                 }
 
                 document.getElementById("ocsp-req-extn-div").style.display = "block";
