@@ -507,8 +507,7 @@
                     cms_signed_simpl = new org.pkijs.simpl.CMS_SIGNED_DATA({
                         version: 1,
                         encapContentInfo: new org.pkijs.simpl.cms.EncapsulatedContentInfo({
-                            eContentType: "1.2.840.113549.1.7.1", // "data" content type
-                            eContent: new org.pkijs.asn1.OCTETSTRING({ value_hex: buffer })
+                            eContentType: "1.2.840.113549.1.7.1" // "data" content type
                         }),
                         signerInfos: [
                             new org.pkijs.simpl.CMS_SIGNER_INFO({
@@ -530,7 +529,20 @@
                         });
                     }
 
-                    return cms_signed_simpl.sign(privateKey, 0, hash_algorithm);
+                    if(document.getElementById("detached_signature").checked == false)
+                    {
+                        var contentInfo = new org.pkijs.simpl.cms.EncapsulatedContentInfo({
+                            eContent: new org.pkijs.asn1.OCTETSTRING({ value_hex: buffer })
+                        });
+
+                        cms_signed_simpl.encapContentInfo.eContent = contentInfo.eContent;
+
+                        return cms_signed_simpl.sign(privateKey, 0, hash_algorithm);
+                    }
+                    else
+                    {
+                        return cms_signed_simpl.sign(privateKey, 0, hash_algorithm, buffer);
+                    }
                 }
                 );
             // #endregion 
@@ -556,10 +568,15 @@
                     var block2 = block1.value_block.value[0];
                     block2.len_block.is_indefinite_form = true;
 
-                    var block3 = block2.value_block.value[2];
-                    block3.len_block.is_indefinite_form = true;
-                    block3.value_block.value[1].len_block.is_indefinite_form = true;
-                    block3.value_block.value[1].value_block.value[0].len_block.is_indefinite_form = true;
+                    var block3;
+
+                    if(document.getElementById("detached_signature").checked == false)
+                    {
+                        block3 = block2.value_block.value[2];
+                        block3.len_block.is_indefinite_form = true;
+                        block3.value_block.value[1].len_block.is_indefinite_form = true;
+                        block3.value_block.value[1].value_block.value[0].len_block.is_indefinite_form = true;
+                    }
                     // #endregion 
 
                     cmsSignedBuffer = cms_signed_schema.toBER(false);
@@ -916,6 +933,10 @@
             <p>
                 <label for="add_ext" style="font-weight:bold">Add signed extensions in SignerInfo:</label>
                 <input type="checkbox" id="add_ext" value="0" />
+            </p>
+            <p>
+                <label for="detached_signature" style="font-weight:bold">Make CMS signature with detached data:</label>
+                <input type="checkbox" id="detached_signature" value="0" />
             </p>
             <p>
                 <label for="hash_alg" style="font-weight:bold">Hashing algorithm:</label>
