@@ -344,20 +344,6 @@ function(in_window)
         return result;
     }
     //**************************************************************************************
-    function pad_number(input_number, full_length)
-    {
-        var str = input_number.toString(10);
-        var dif = full_length - str.length;
-
-        var padding = new Array(dif);
-        for(var i = 0; i < dif; i++)
-            padding[i] = '0';
-
-        var padding_string = padding.join('');
-
-        return padding_string.concat(str);
-    }
-    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Declaration of base block class 
@@ -2119,13 +2105,21 @@ function(in_window)
         /// <param name="input_offset" type="Number">Offset in ASN.1 BER encoded array where decoding should be started</param>
         /// <param name="input_length" type="Number">Maximum length of array of bytes which can be using in this function</param>
 
-        // #region Ability to encode empty OCTET STRING 
-        if(input_length == 0)
-            return input_offset;
-        // #endregion 
-
         this.value_block.is_constructed = this.id_block.is_constructed;
         this.value_block.is_indefinite_form = this.len_block.is_indefinite_form;
+
+        // #region Ability to encode empty OCTET STRING 
+        if(input_length == 0)
+        {
+            if(this.id_block.error.length == 0)
+                this.block_length += this.id_block.block_length;
+
+            if(this.len_block.error.length == 0)
+                this.block_length += this.len_block.block_length;
+
+            return input_offset;
+        }
+        // #endregion 
 
         return in_window.org.pkijs.asn1.ASN1_block.prototype.fromBER.call(this, input_buffer, input_offset, input_length);
     }
@@ -4029,12 +4023,12 @@ function(in_window)
     {
         var output_array = new Array(7);
 
-        output_array[0] = pad_number(((this.year < 2000) ? (this.year - 1900) : (this.year - 2000)), 2);
-        output_array[1] = pad_number(this.month, 2);
-        output_array[2] = pad_number(this.day, 2);
-        output_array[3] = pad_number(this.hour, 2);
-        output_array[4] = pad_number(this.minute, 2);
-        output_array[5] = pad_number(this.second, 2);
+        output_array[0] = in_window.org.pkijs.padNumber(((this.year < 2000) ? (this.year - 1900) : (this.year - 2000)), 2);
+        output_array[1] = in_window.org.pkijs.padNumber(this.month, 2);
+        output_array[2] = in_window.org.pkijs.padNumber(this.day, 2);
+        output_array[3] = in_window.org.pkijs.padNumber(this.hour, 2);
+        output_array[4] = in_window.org.pkijs.padNumber(this.minute, 2);
+        output_array[5] = in_window.org.pkijs.padNumber(this.second, 2);
         output_array[6] = "Z";
 
         return output_array.join('');
@@ -4199,12 +4193,12 @@ function(in_window)
     {
         var output_array = new Array(7);
 
-        output_array[0] = pad_number(this.year, 4);
-        output_array[1] = pad_number(this.month, 2);
-        output_array[2] = pad_number(this.day, 2);
-        output_array[3] = pad_number(this.hour, 2);
-        output_array[4] = pad_number(this.minute, 2);
-        output_array[5] = pad_number(this.second, 2);
+        output_array[0] = in_window.org.pkijs.padNumber(this.year, 4);
+        output_array[1] = in_window.org.pkijs.padNumber(this.month, 2);
+        output_array[2] = in_window.org.pkijs.padNumber(this.day, 2);
+        output_array[3] = in_window.org.pkijs.padNumber(this.hour, 2);
+        output_array[4] = in_window.org.pkijs.padNumber(this.minute, 2);
+        output_array[5] = in_window.org.pkijs.padNumber(this.second, 2);
         output_array[6] = "Z";
 
         return output_array.join('');
