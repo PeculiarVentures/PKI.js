@@ -539,6 +539,10 @@
         //*********************************************************************************
         function parse_OCSP_resp()
         {
+            // #region Initial variables 
+            var ocsp_basic_resp;
+            // #endregion 
+
             // #region Initial activities 
             document.getElementById("ocsp-resp-extensions").style.display = "none";
             document.getElementById("ocsp-resp-rspid-rdn").style.display = "none";
@@ -566,9 +570,6 @@
             // #region Decode existing OCSP response 
             var asn1 = org.pkijs.fromBER(ocspResponseBuffer);
             var ocsp_resp_simpl = new org.pkijs.simpl.OCSP_RESPONSE({ schema: asn1.result });
-
-            var asn1_basic = org.pkijs.fromBER(ocsp_resp_simpl.responseBytes.response.value_block.value_hex);
-            var ocsp_basic_resp = new org.pkijs.simpl.OCSP_BASIC_RESPONSE({ schema: asn1_basic.result });
             // #endregion 
 
             // #region Put information about overall response status 
@@ -603,6 +604,16 @@
             }
 
             document.getElementById("resp-status").innerHTML = status;
+            // #endregion 
+
+            // #region Check that we do have "responseBytes" 
+            if("responseBytes" in ocsp_resp_simpl)
+            {
+                var asn1_basic = org.pkijs.fromBER(ocsp_resp_simpl.responseBytes.response.value_block.value_hex);
+                ocsp_basic_resp = new org.pkijs.simpl.OCSP_BASIC_RESPONSE({ schema: asn1_basic.result });
+            }
+            else
+                return; // Nothing else to display - only status information exists
             // #endregion 
 
             // #region Put information about signature algorithm 
@@ -755,12 +766,24 @@
         //*********************************************************************************
         function verify_OCSP_resp()
         {
+            // #region Initial variables 
+            var ocsp_basic_resp;
+            // #endregion 
+
             // #region Decode existing OCSP response 
             var asn1 = org.pkijs.fromBER(ocspResponseBuffer);
             var ocsp_resp_simpl = new org.pkijs.simpl.OCSP_RESPONSE({ schema: asn1.result });
 
-            var asn1_basic = org.pkijs.fromBER(ocsp_resp_simpl.responseBytes.response.value_block.value_hex);
-            var ocsp_basic_resp = new org.pkijs.simpl.OCSP_BASIC_RESPONSE({ schema: asn1_basic.result });
+            if("responseBytes" in ocsp_resp_simpl)
+            {
+                var asn1_basic = org.pkijs.fromBER(ocsp_resp_simpl.responseBytes.response.value_block.value_hex);
+                ocsp_basic_resp = new org.pkijs.simpl.OCSP_BASIC_RESPONSE({ schema: asn1_basic.result });
+            }
+            else
+            {
+                alert("No \"ResponseBytes\" in the OCSP Response - nothing to verify");
+                return;
+            }
             // #endregion 
 
             // #region Verify OCSP response 
