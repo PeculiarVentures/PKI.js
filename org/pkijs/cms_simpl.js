@@ -1132,6 +1132,88 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region Simplified structure for "PBES2_params" type (RFC2898)
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.PBES2_params =
+    function()
+    {
+        // #region Internal properties of the object 
+        this.keyDerivationFunc = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
+        this.encryptionScheme = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
+        // #endregion 
+
+        // #region If input argument array contains "schema" for this object 
+        if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
+            in_window.org.pkijs.simpl.cms.PBES2_params.prototype.fromSchema.call(this, arguments[0].schema);
+        // #endregion 
+        // #region If input argument array contains "native" values for internal properties 
+        else
+        {
+            if(arguments[0] instanceof Object)
+            {
+                this.keyDerivationFunc = arguments[0].keyDerivationFunc || new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
+                this.encryptionScheme = arguments[0].encryptionScheme || new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
+            }
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.PBES2_params.prototype.fromSchema =
+    function(schema)
+    {
+        // #region Check the schema is valid 
+        var asn1 = in_window.org.pkijs.compareSchema(schema,
+            schema,
+            in_window.org.pkijs.schema.cms.PBES2_params({
+                names: {
+                    keyDerivationFunc: {
+                        names: {
+                            block_name: "keyDerivationFunc"
+                        }
+                    },
+                    encryptionScheme: {
+                        names: {
+                            block_name: "encryptionScheme"
+                        }
+                    }
+                }
+            })
+            );
+
+        if(asn1.verified === false)
+            throw new Error("Object's schema was not verified against input data for PBES2_params");
+        // #endregion 
+
+        // #region Get internal properties from parsed schema 
+        this.keyDerivationFunc = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["keyDerivationFunc"] });
+        this.encryptionScheme = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["encryptionScheme"] });
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.PBES2_params.prototype.toSchema =
+    function()
+    {
+        // #region Construct and return new ASN.1 schema for this object 
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            value: [
+                this.keyDerivationFunc.toSchema(),
+                this.encryptionScheme.toSchema()
+            ]
+        }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.cms.PBES2_params.prototype.toJSON =
+    function()
+    {
+        return {
+            keyDerivationFunc: this.keyDerivationFunc.toJSON(),
+            encryptionScheme: this.encryptionScheme.toJSON()
+        };
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region Simplified structure for "SignedUnsignedAttributes" type
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes =
@@ -1714,6 +1796,10 @@ function(in_window)
         var encapContentInfo = this.encapContentInfo;
 
         var data = new ArrayBuffer(0);
+        var messageDigestValue = new ArrayBuffer(0);
+
+        var publicKey;
+        var algorithm;
 
         var sha_algorithm = "";
 
@@ -1722,6 +1808,10 @@ function(in_window)
         var signer_cert = {};
 
         var trusted_certs = new Array();
+
+        var checkDate = new Date();
+
+        var checkChain = true;
 
         var _this = this;
         // #endregion 
@@ -1743,6 +1833,12 @@ function(in_window)
 
             if("trusted_certs" in arguments[0])
                 trusted_certs = arguments[0].trusted_certs;
+
+            if("checkDate" in arguments[0])
+                checkDate = arguments[0].checkDate;
+
+            if("checkChain" in arguments[0])
+                checkChain = arguments[0].checkChain;
         }
 
         if(signerIndex === (-1))
@@ -1762,6 +1858,9 @@ function(in_window)
                 {
                     for(var i = 0; certificates.length; i++)
                     {
+                        if((certificates[i] instanceof in_window.org.pkijs.simpl.CERT) == false)
+                            continue;
+
                         if((certificates[i].issuer.isEqual(signerInfos[signerIndex].sid.issuer)) &&
                            (certificates[i].serialNumber.isEqual(signerInfos[signerIndex].sid.serialNumber)))
                         {
@@ -1782,13 +1881,21 @@ function(in_window)
                     var digest_promises = new Array();
 
                     for(var i = 0; i < certificates.length; i++)
+                    {
+                        if((certificates[i] instanceof in_window.org.pkijs.simpl.CERT) == false)
+                            continue;
+
                         digest_promises.push(crypto.digest({ name: "sha-1" }, new Uint8Array(certificates[i].subjectPublicKeyInfo.subjectPublicKey.value_block.value_hex)));
+                    }
 
                     return Promise.all(digest_promises).then(
                         function(results)
                         {
                             for(var i = 0; i < certificates.length; i++)
                             {
+                                if((certificates[i] instanceof in_window.org.pkijs.simpl.CERT) == false)
+                                    continue;
+
                                 if(in_window.org.pkijs.isEqual_buffer(results[i], signerInfos[signerIndex].sid.value_block.value_hex))
                                 {
                                     signer_cert = certificates[i];
@@ -1841,51 +1948,72 @@ function(in_window)
         var checkCA_promises = new Array();
 
         for(var i = 0; i < this.certificates.length; i++)
+        {
+            if((this.certificates[i] instanceof in_window.org.pkijs.simpl.CERT) == false)
+                continue;
+
             checkCA_promises.push(checkCA(this.certificates[i]));
+        }
 
-        sequence = sequence.then(
-            function(result)
-            {
-                return Promise.all(checkCA_promises).then(
-                    function(promiseResults)
-                    {
-                        var additional_certs = new Array();
-                        additional_certs.push(signer_cert);
-
-                        for(var i = 0; i < promiseResults.length; i++)
+        if(checkChain)
+        {
+            sequence = sequence.then(
+                function(result)
+                {
+                    return Promise.all(checkCA_promises).then(
+                        function(promiseResults)
                         {
-                            if(promiseResults[i] !== null)
-                                additional_certs.push(promiseResults[i]);
-                        }
+                            var additional_certs = new Array();
 
-                        var cert_chain_simpl = new in_window.org.pkijs.simpl.CERT_CHAIN({
-                            certs: additional_certs,
-                            trusted_certs: trusted_certs
-                        });
-                        if("crls" in _this)
-                            cert_chain_simpl.crls = _this.crls;
-
-                        return cert_chain_simpl.verify().then(
-                            function(result)
+                            for(var i = 0; i < promiseResults.length; i++)
                             {
-                                if(result.result === true)
-                                    return new Promise(function(resolve, reject) { resolve(); });
-                                else
-                                    return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed"); });
-                            },
-                            function(error)
-                            {
-                                return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed with error: " + ((error instanceof Object) ? error.result_message : error)); });
+                                if(promiseResults[i] !== null)
+                                    additional_certs.push(promiseResults[i]);
                             }
-                            );
-                    },
-                    function(promiseError)
-                    {
-                        return new Promise(function(resolve, reject) { reject("Error during checking certificates for CA flag: " + promiseError); });
-                    }
-                    );
-            }
-            );
+
+                            additional_certs.push(signer_cert);
+
+                            var cert_chain_simpl = new in_window.org.pkijs.simpl.CERT_CHAIN({
+                                checkDate: checkDate,
+                                certs: additional_certs,
+                                trusted_certs: trusted_certs
+                            });
+                            if("crls" in _this)
+                            {
+                                for(var i = 0; i < _this.crls.length; i++)
+                                {
+                                    if(_this.crls[i] instanceof in_window.org.pkijs.simpl.CRL)
+                                        cert_chain_simpl.crls.push(_this.crls[i]);
+                                    else // Assumed "revocation value" has "OtherRevocationInfoFormat"
+                                    {
+                                        if(_this.crls[i].otherRevInfoFormat == "1.3.6.1.5.5.7.48.1.1") // Basic OCSP response
+                                            cert_chain_simpl.ocsps.push(new in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE({ schema: _this.crls[i].otherRevInfo }));
+                                    }
+                                }
+                            }
+
+                            return cert_chain_simpl.verify().then(
+                                function(result)
+                                {
+                                    if(result.result === true)
+                                        return new Promise(function(resolve, reject) { resolve(); });
+                                    else
+                                        return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed"); });
+                                },
+                                function(error)
+                                {
+                                    return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed with error: " + ((error instanceof Object) ? error.result_message : error)); });
+                                }
+                                );
+                        },
+                        function(promiseError)
+                        {
+                            return new Promise(function(resolve, reject) { reject("Error during checking certificates for CA flag: " + promiseError); });
+                        }
+                        );
+                }
+                );
+        }
         // #endregion 
 
         // #region Find signer's hashing algorithm 
@@ -1897,50 +2025,130 @@ function(in_window)
                     return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signerInfos[signerIndex].digestAlgorithm.algorithm_id); });
 
                 sha_algorithm = shaAlgorithm.name;
+            }
+            );
+        // #endregion 
 
-                return new Promise(function(resolve, reject) { resolve(); });
+        // #region Verify internal digest in case of "tSTInfo" content type 
+        sequence = sequence.then(
+            function()
+            {
+                if(encapContentInfo.eContentType == "1.2.840.113549.1.9.16.1.4")
+                {
+                    // #region Check "eContent" precense
+                    if(("eContent" in encapContentInfo) == false)
+                        return false;
+                    // #endregion 
+
+                    // #region Initialize TST_INFO value
+                    var asn1 = in_window.org.pkijs.fromBER(encapContentInfo.eContent.value_block.value_hex);
+                    var tstInfo;
+
+                    try
+                    {
+                        tstInfo = new in_window.org.pkijs.simpl.TST_INFO({ schema: asn1.result });
+                    }
+                    catch(ex)
+                    {
+                        return false;
+                    }
+                    // #endregion 
+
+                    // #region Check that we do have detached data content 
+                    if(data.byteLength === 0)
+                        return new Promise(function(resolve, reject) { reject("Missed detached data input array"); });
+                    // #endregion 
+
+                    return tstInfo.verify({ data: data });
+                }
+                else
+                {
+                    return true;
+                }
             }
             );
         // #endregion 
 
         // #region Create correct data block for verification 
         sequence = sequence.then(
-            function()
+            function(result)
             {
-                if("signedAttrs" in signerInfos[signerIndex])
-                    data = signerInfos[signerIndex].signedAttrs.encoded_value;
-                else
+                // #region Veify result of previous operation 
+                if(result == false)
+                    return false;
+                // #endregion 
+
+                if("eContent" in encapContentInfo) // Attached data
                 {
-                    if("eContent" in encapContentInfo) // Attached data
+                    if((encapContentInfo.eContent.id_block.tag_class === 1) &&
+                       (encapContentInfo.eContent.id_block.tag_number === 4))
                     {
-                        if((encapContentInfo.eContent.id_block.tag_class === 1) &&
-                           (encapContentInfo.eContent.id_block.tag_number === 4))
-                        {
-                            if(encapContentInfo.eContent.id_block.is_constructed === false)
-                                data = encapContentInfo.eContent.value_block.value_hex;
-                            else
-                            {
-                                for(var i = 0; i < encapContentInfo.eContent.value_block.value.length; i++)
-                                    data = in_window.org.pkijs.concat_buffers(data, encapContentInfo.eContent.value_block.value[i].value_block.value_hex);
-                            }
-                        }
-                        else
+                        if(encapContentInfo.eContent.id_block.is_constructed === false)
                             data = encapContentInfo.eContent.value_block.value_hex;
+                        else
+                        {
+                            for(var i = 0; i < encapContentInfo.eContent.value_block.value.length; i++)
+                                data = in_window.org.pkijs.concat_buffers(data, encapContentInfo.eContent.value_block.value[i].value_block.value_hex);
+                        }
                     }
-                    else // Detached data
-                    {
-                        if(data.byteLength === 0) // Check that "data" already provided by function parameter
-                            return new Promise(function(resolve, reject) { reject("Missed detached data input array"); });
-                    }
+                    else
+                        data = encapContentInfo.eContent.value_block.value_hex;
                 }
+                else // Detached data
+                {
+                    if(data.byteLength === 0) // Check that "data" already provided by function parameter
+                        return new Promise(function(resolve, reject) { reject("Missed detached data input array"); });
+                }
+
+                if("signedAttrs" in signerInfos[signerIndex])
+                {
+                    // #region Check mandatory attributes 
+                    var foundContentType = false;
+                    var foundMessageDigest = false;
+
+                    for(var i = 0; i < signerInfos[signerIndex].signedAttrs.attributes.length; i++)
+                    {
+                        // #region Check that "content-type" attribute exists 
+                        if(signerInfos[signerIndex].signedAttrs.attributes[i].attrType == "1.2.840.113549.1.9.3")
+                            foundContentType = true;
+                        // #endregion 
+
+                        // #region Check that "message-digest" attribute exists 
+                        if(signerInfos[signerIndex].signedAttrs.attributes[i].attrType == "1.2.840.113549.1.9.4")
+                        {
+                            foundMessageDigest = true;
+                            messageDigestValue = signerInfos[signerIndex].signedAttrs.attributes[i].attrValues[0].value_block.value_hex;
+                        }
+                        // #endregion 
+
+                        // #region Speed-up searching 
+                        if(foundContentType && foundMessageDigest)
+                            break;
+                        // #endregion 
+                    }
+
+                    if(foundContentType == false)
+                        return new Promise(function(resolve, reject) { reject("Attribute \"content-type\" is a mandatory attribute for \"signed attributes\""); });
+
+                    if(foundMessageDigest == false)
+                        return new Promise(function(resolve, reject) { reject("Attribute \"message-digest\" is a mandatory attribute for \"signed attributes\""); });
+                    // #endregion 
+                }
+
+                return true;
             }
             );
         // #endregion 
 
         // #region Import public key from signer's certificate 
         sequence = sequence.then(
-            function()
+            function(result)
             {
+                // #region Veify result of previous operation 
+                if(result == false)
+                    return false;
+                // #endregion 
+
                 // #region Get information about public key algorithm and default parameters for import
                 var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(signer_cert.signatureAlgorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
@@ -1964,22 +2172,56 @@ function(in_window)
 
         // #region Verify signer's signature 
         sequence = sequence.then(
-            function(publicKey)
+            function(result)
             {
-                // #region Get default algorithm parameters for verification 
-                var algorithm = in_window.org.pkijs.getAlgorithmParameters(publicKey.algorithm.name, "verify");
-                if("hash" in algorithm.algorithm)
-                    algorithm.algorithm.hash.name = sha_algorithm;
+                // #region Veify result of previous operation 
+                if(typeof result == "boolean")
+                    return false;
                 // #endregion 
 
-                // #region Special case for ECDSA signatures 
-                var signature_value = signerInfos[signerIndex].signature.value_block.value_hex;
+                publicKey = result;
 
-                if(publicKey.algorithm.name === "ECDSA")
+                // #region Verify "message-digest" attribute in case of "signedAttrs" 
+                if("signedAttrs" in signerInfos[signerIndex])
                 {
-                    var asn1 = in_window.org.pkijs.fromBER(signature_value);
-                    signature_value = in_window.org.pkijs.createECDSASignatureFromCMS(asn1.result);
+                    return crypto.digest(sha_algorithm, new Uint8Array(data));
                 }
+                else
+                    return true;
+                // #endregion 
+            }
+            ).then(
+            function(result)
+            {
+                if("signedAttrs" in signerInfos[signerIndex])
+                {
+                    if(in_window.org.pkijs.isEqual_buffer(result, messageDigestValue))
+                    {
+                        data = signerInfos[signerIndex].signedAttrs.encoded_value;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            ).then(
+            function(result)
+            {
+                // #region Check result of previous operation
+                if(result == false)
+                    return false;
+                // #endregion 
+
+                // #region Get default algorithm parameters for verification 
+                algorithm = in_window.org.pkijs.getAlgorithmParameters(publicKey.algorithm.name, "verify");
+                if("hash" in algorithm.algorithm)
+                    algorithm.algorithm.hash.name = sha_algorithm;
                 // #endregion 
 
                 // #region Special case for RSA-PSS 
@@ -2013,6 +2255,16 @@ function(in_window)
                     }
 
                     algorithm.algorithm.hash.name = hash_algo;
+                }
+                // #endregion 
+
+                // #region Special case for ECDSA signatures 
+                var signature_value = signerInfos[signerIndex].signature.value_block.value_hex;
+
+                if(publicKey.algorithm.name === "ECDSA")
+                {
+                    var asn1 = in_window.org.pkijs.fromBER(signature_value);
+                    signature_value = in_window.org.pkijs.createECDSASignatureFromCMS(asn1.result);
                 }
                 // #endregion 
 
@@ -2562,11 +2814,18 @@ function(in_window)
         // #region Create array for output sequence 
         var output_array = new Array();
 
-        output_array.push(new in_window.org.pkijs.asn1.INTEGER({ value: this.version }));
-
         if(this.rid instanceof in_window.org.pkijs.simpl.cms.IssuerAndSerialNumber)
+        {
+            this.version = 0;
+
+            output_array.push(new in_window.org.pkijs.asn1.INTEGER({ value: this.version }));
             output_array.push(this.rid.toSchema());
+        }
         else
+        {
+            this.version = 2;
+
+            output_array.push(new in_window.org.pkijs.asn1.INTEGER({ value: this.version }));
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
@@ -2574,6 +2833,7 @@ function(in_window)
                 },
                 value: [this.rid]
             }));
+        }
 
         output_array.push(this.keyEncryptionAlgorithm.toSchema());
         output_array.push(this.encryptedKey);
@@ -4680,7 +4940,7 @@ function(in_window)
                         keyEncryptionAlgorithm: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: kekOID,
                             /*
-                             For AES-KW params are NULL, but for other algorithm could another situation.
+                             For AES-KW params are NULL, but for other algorithm could be another situation.
                             */
                             algorithm_params: encryptionParameters.keyEncryptionAlgorithmParams
                         }),
@@ -5189,7 +5449,7 @@ function(in_window)
             var kekAlgorithm;
             // #endregion 
 
-            // #region Check that we have encoded "keyDerivationAlgorithm" plus "PBKDF2_params" inthere 
+            // #region Check that we have encoded "keyDerivationAlgorithm" plus "PBKDF2_params" in there 
             currentSequence = currentSequence.then(
                 function(result)
                 {
@@ -5922,6 +6182,450 @@ function(in_window)
                 var ivView = new Uint8Array(ivBuffer);
                 // #endregion 
 
+                // #region Create correct data block for decryption
+                var dataBuffer = new ArrayBuffer(0);
+
+                if(_this.encryptedContentInfo.encryptedContent.id_block.is_constructed === false)
+                    dataBuffer = _this.encryptedContentInfo.encryptedContent.value_block.value_hex;
+                else
+                {
+                    for(var i = 0; i < _this.encryptedContentInfo.encryptedContent.value_block.value.length; i++)
+                        dataBuffer = in_window.org.pkijs.concat_buffers(dataBuffer, _this.encryptedContentInfo.encryptedContent.value_block.value[i].value_block.value_hex);
+                }
+                // #endregion 
+
+                return crypto.decrypt({
+                    name: contentEncryptionAlgorithm.name,
+                    iv: ivView
+                },
+                result,
+                dataBuffer);
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion 
+
+        return sequence;
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
+    // #region Simplified structure for "CMS_ENCRYPTED_DATA" type
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA =
+    function()
+    {
+        // #region Internal properties of the object 
+        this.version = 0;
+        this.encryptedContentInfo = new in_window.org.pkijs.simpl.cms.EncryptedContentInfo();
+        // OPTIONAL this.unprotectedAttrs
+        // #endregion 
+
+        // #region If input argument array contains "schema" for this object 
+        if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
+            in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.fromSchema.call(this, arguments[0].schema);
+        // #endregion 
+        // #region If input argument array contains "native" values for internal properties 
+        else
+        {
+            if(arguments[0] instanceof Object)
+            {
+                this.version = arguments[0].version || 0;
+                this.encryptedContentInfo = arguments[0].encryptedContentInfo || new in_window.org.pkijs.simpl.cms.EncryptedContentInfo();
+
+                if("unprotectedAttrs" in arguments[0])
+                {
+                    this.unprotectedAttrs = arguments[0].unprotectedAttrs;
+                    this.version = 2;
+                }
+            }
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.fromSchema =
+    function(schema)
+    {
+        // #region Check the schema is valid 
+        var asn1 = in_window.org.pkijs.compareSchema(schema,
+            schema,
+            in_window.org.pkijs.schema.CMS_ENCRYPTED_DATA({
+                names: {
+                    version: "version",
+                    encryptedContentInfo: {
+                        names: {
+                            block_name: "encryptedContentInfo"
+                        }
+                    },
+                    unprotectedAttrs: "unprotectedAttrs"
+                }
+            })
+            );
+
+        if(asn1.verified === false)
+            throw new Error("Object's schema was not verified against input data for CMS_ENCRYPTED_DATA");
+        // #endregion 
+
+        // #region Get internal properties from parsed schema 
+        this.version = asn1.result["version"].value_block.value_dec;
+        this.encryptedContentInfo = new in_window.org.pkijs.simpl.cms.EncryptedContentInfo({ schema: asn1.result["encryptedContentInfo"] });
+
+        if("unprotectedAttrs" in asn1.result)
+        {
+            this.unprotectedAttrs = new Array();
+            var attributes_array = asn1.result["unprotectedAttrs"];
+
+            for(var j = 0; j < attributes_array.length; j++)
+                this.unprotectedAttrs.push(new in_window.org.pkijs.simpl.ATTRIBUTE({ schema: attributes_array[j] }));
+        }
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.toSchema =
+    function()
+    {
+        // #region Create array for output sequence 
+        var output_array = new Array();
+
+        output_array.push(new in_window.org.pkijs.asn1.INTEGER({ value: this.version }));
+        output_array.push(this.encryptedContentInfo.toSchema());
+
+        if("unprotectedAttrs" in this)
+        {
+            var attributes = new Array();
+
+            for(var j = 0; j < this.unprotectedAttrs.length; j++)
+                attributes.push(this.unprotectedAttrs[j].toSchema());
+
+            output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                optional: true,
+                id_block: {
+                    tag_class: 3, // CONTEXT-SPECIFIC
+                    tag_number: 1 // [1]
+                },
+                value: attributes
+            }));
+        }
+        // #endregion 
+
+        // #region Construct and return new ASN.1 schema for this object 
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            value: output_array
+        }));
+        // #endregion 
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.toJSON =
+    function()
+    {
+        var _object = {
+            version: this.version
+        };
+
+        _object.encryptedContentInfo = this.encryptedContentInfo.toJSON();
+
+        if("unprotectedAttrs" in this)
+        {
+            _object.unprotectedAttrs = new Array();
+
+            for(var i = 0; i < this.unprotectedAttrs.length; i++)
+                _object.unprotectedAttrs.push(this.unprotectedAttrs[i].toJSON());
+        }
+
+        return _object;
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.encrypt =
+    function(parameters)
+    {
+        /// <summary>Create a new CMS Encrypted Data content</summary>
+        /// <param name="parameters" type="ArrayBuffer">Parameters neccessary for encryption</param>
+
+        // #region Check for input parameters 
+        if((parameters instanceof Object) == false)
+            return new Promise(function(resolve, reject) { reject("Parameters must have type \"Object\""); });
+
+        if(("password" in parameters) == false)
+            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\""); });
+
+        if(("contentEncryptionAlgorithm" in parameters) == false)
+            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"contentEncryptionAlgorithm\""); });
+
+        if(("hmacHashAlgorithm" in parameters) == false)
+            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"hmacHashAlgorithm\""); });
+
+        if(("iterationCount" in parameters) == false)
+            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"iterationCount\""); });
+
+        if(("contentToEncrypt" in parameters) == false)
+            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"contentToEncrypt\""); });
+
+        var contentEncryptionOID = in_window.org.pkijs.getOIDByAlgorithm(parameters.contentEncryptionAlgorithm);
+        if(contentEncryptionOID === "")
+            return new Promise(function(resolve, reject) { reject("Wrong \"contentEncryptionAlgorithm\" value"); });
+
+        var pbkdf2OID = in_window.org.pkijs.getOIDByAlgorithm({
+            name: "PBKDF2"
+        });
+        if(pbkdf2OID === "")
+            return new Promise(function(resolve, reject) { reject("Can not find OID for PBKDF2"); });
+
+        var hmacOID = in_window.org.pkijs.getOIDByAlgorithm({
+            name: "HMAC",
+            hash: {
+                name: parameters.hmacHashAlgorithm
+            }
+        });
+        if(hmacOID === "")
+            return new Promise(function(resolve, reject) { reject("Incorrect value for \"hmacHashAlgorithm\": " + parameters.hmacHashAlgorithm); });
+        // #endregion 
+
+        // #region Get a "crypto" extension 
+        var crypto = in_window.org.pkijs.getCrypto();
+        if(typeof crypto == "undefined")
+            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+        // #endregion 
+
+        // #region Initial variables 
+        var _this = this;
+        var sequence = Promise.resolve();
+
+        var ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
+        var ivView = new Uint8Array(ivBuffer);
+        in_window.org.pkijs.getRandomValues(ivView);
+
+        var saltBuffer = new ArrayBuffer(64);
+        var saltView = new Uint8Array(saltBuffer);
+        in_window.org.pkijs.getRandomValues(saltView);
+
+        var contentView = new Uint8Array(parameters.contentToEncrypt);
+
+        var pbkdf2Params = new in_window.org.pkijs.simpl.cms.PBKDF2_params({
+            salt: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: saltBuffer }),
+            iterationCount: parameters.iterationCount,
+            prf: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                algorithm_id: hmacOID,
+                algorithm_params: new in_window.org.pkijs.asn1.NULL()
+            })
+        });
+        // #endregion 
+
+        // #region Derive PBKDF2 key from "password" buffer 
+        sequence = sequence.then(
+            function(result)
+            {
+                var passwordView = new Uint8Array(parameters.password);
+
+                return crypto.importKey("raw",
+                    passwordView,
+                    "PBKDF2",
+                    true,
+                    ['deriveKey']);
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion 
+
+        // #region Derive key for "contentEncryptionAlgorithm" 
+        sequence = sequence.then(
+            function(result)
+            {
+                return crypto.deriveKey({
+                    name: "PBKDF2",
+                    hash: {
+                        name: parameters.hmacHashAlgorithm
+                    },
+                    salt: saltView,
+                    iterations: parameters.iterationCount
+                },
+                result,
+                parameters.contentEncryptionAlgorithm,
+                true,
+                ['encrypt']);
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion   
+
+        // #region Encrypt content 
+        sequence = sequence.then(
+            function(result)
+            {
+                return crypto.encrypt({
+                    name: parameters.contentEncryptionAlgorithm.name,
+                    iv: ivView
+                },
+                result,
+                contentView);
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion   
+
+        // #region Store all parameters in CMS_ENCRYPTED_DATA 
+        sequence = sequence.then(
+            function(result)
+            {
+                var pbes2Parameters = new in_window.org.pkijs.simpl.cms.PBES2_params({
+                    keyDerivationFunc: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        algorithm_id: pbkdf2OID,
+                        algorithm_params: pbkdf2Params.toSchema()
+                    }),
+                    encryptionScheme: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        algorithm_id: contentEncryptionOID,
+                        algorithm_params: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: ivBuffer })
+                    })
+                });
+
+                _this.encryptedContentInfo = new in_window.org.pkijs.simpl.cms.EncryptedContentInfo({
+                    contentType: "1.2.840.113549.1.7.1", // "data"
+                    contentEncryptionAlgorithm: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
+                        algorithm_id: "1.2.840.113549.1.5.13", // pkcs5PBES2
+                        algorithm_params: pbes2Parameters.toSchema()
+                    }),
+                    encryptedContent: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: result })
+                });
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion 
+
+        return sequence;
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.decrypt =
+    function(parameters)
+    {
+        /// <summary>Create a new CMS Encrypted Data content</summary>
+        /// <param name="parameters" type="ArrayBuffer">Parameters neccessary for encryption</param>
+
+        // #region Check for input parameters 
+        if((parameters instanceof Object) == false)
+            return new Promise(function(resolve, reject) { reject("Parameters must have type \"Object\""); });
+
+        if(("password" in parameters) == false)
+            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\""); });
+
+        if(this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id !== "1.2.840.113549.1.5.13") // pkcs5PBES2
+            return new Promise(function(resolve, reject) { reject("Unknown \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+        // #endregion 
+
+        // #region Get a "crypto" extension 
+        var crypto = in_window.org.pkijs.getCrypto();
+        if(typeof crypto == "undefined")
+            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+        // #endregion 
+
+        // #region Initial variables 
+        var _this = this;
+        var sequence = Promise.resolve();
+
+        var pbes2Parameters;
+
+        try
+        {
+            pbes2Parameters = new in_window.org.pkijs.simpl.cms.PBES2_params({ schema: _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_params });
+        }
+        catch(ex)
+        {
+            return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"pbes2Parameters\""); });
+        }
+
+        var pbkdf2Params;
+
+        try
+        {
+            pbkdf2Params = new in_window.org.pkijs.simpl.cms.PBKDF2_params({ schema: pbes2Parameters.keyDerivationFunc.algorithm_params });
+        }
+        catch(ex)
+        {
+            return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"pbkdf2Params\""); });
+        }
+
+        var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithm_id);
+        if(("name" in contentEncryptionAlgorithm) == false)
+            return new Promise(function(resolve, reject) { reject("Incorrect OID for \"contentEncryptionAlgorithm\": " + pbes2Parameters.encryptionScheme.algorithm_id); });
+
+        var ivBuffer = pbes2Parameters.encryptionScheme.algorithm_params.value_block.value_hex;
+        var ivView = new Uint8Array(ivBuffer);
+
+        var saltBuffer = pbkdf2Params.salt.value_block.value_hex;
+        var saltView = new Uint8Array(saltBuffer);
+
+        var iterationCount = pbkdf2Params.iterationCount;
+
+        var hmacHashAlgorithm = "SHA-1";
+
+        if("prf" in pbkdf2Params)
+        {
+            var algorithm = in_window.org.pkijs.getAlgorithmByOID(pbkdf2Params.prf.algorithm_id);
+            if(("name" in algorithm) === false)
+                return new Promise(function(resolve, reject) { reject("Incorrect OID for HMAC hash algorithm"); });
+
+            hmacHashAlgorithm = algorithm.hash.name;
+        }
+        // #endregion 
+
+        // #region Derive PBKDF2 key from "password" buffer 
+        sequence = sequence.then(
+            function(result)
+            {
+                return crypto.importKey("raw",
+                    parameters.password,
+                    "PBKDF2",
+                    true,
+                    ["deriveKey"]);
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion 
+
+        // #region Derive key for "contentEncryptionAlgorithm" 
+        sequence = sequence.then(
+            function(result)
+            {
+                return crypto.deriveKey({
+                    name: "PBKDF2",
+                    hash: {
+                        name: hmacHashAlgorithm
+                    },
+                    salt: saltView,
+                    iterations: iterationCount
+                },
+                result,
+                contentEncryptionAlgorithm,
+                true,
+                ['decrypt']);
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion 
+
+        // #region Decrypt internal content using derived key 
+        sequence = sequence.then(
+            function(result)
+            {
                 // #region Create correct data block for decryption
                 var dataBuffer = new ArrayBuffer(0);
 

@@ -177,6 +177,124 @@ function(in_window)
         };
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.ocsp.CertID.prototype.isEqual =
+    function(certificateID)
+    {
+        /// <summary>Check that two "CertIDs" are equal</summary>
+        /// <param name="certificateID" type="in_window.org.pkijs.simpl.ocsp.CertID">Identifier of the certificate to be checked</param>
+
+        // #region Check "hashAlgorithm" 
+        if(!this.hashAlgorithm.isEqual(certificateID.hashAlgorithm))
+            return false;
+        // #endregion   
+
+        // #region Check "issuerNameHash" 
+        if(!this.issuerNameHash.isEqual(certificateID.issuerNameHash))
+            return false;
+        // #endregion 
+
+        // #region Check "issuerKeyHash" 
+        if(!this.issuerKeyHash.isEqual(certificateID.issuerKeyHash))
+            return false;
+        // #endregion 
+
+        // #region Check "serialNumber" 
+        if(!this.serialNumber.isEqual(certificateID.serialNumber))
+            return false;
+        // #endregion 
+
+        return true;
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.ocsp.CertID.prototype.createForCertificate =
+    function(certificate, parameters)
+    {
+        /// <summary>Making OCSP certificate identifier for specific certificate</summary>
+        /// <param name="certificate" type="in_window.org.pkijs.simpl.CERT">Certificate making OCSP Request for</param>
+        /// <param name="parameters" type="Object">Additional parameters</param>
+
+        // #region Initial variables 
+        var _this = this;
+        var sequence = Promise.resolve();
+
+        var issuerCertificate;
+
+        var hashOID;
+
+        var issuerNameHash;
+        var issuerKeyHash;
+        // #endregion 
+
+        // #region Get a "crypto" extension 
+        var crypto = in_window.org.pkijs.getCrypto();
+        if(typeof crypto == "undefined")
+            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+        // #endregion 
+
+        // #region Check input parameters 
+        if("hashAlgorithm" in parameters)
+            this.hashAlgorithm = parameters.hashAlgorithm;
+        else
+            return new Promise(function(resolve, reject) { reject("Parameter \"hashAlgorithm\" is mandatory for \"OCSP_REQUEST.createForCertificate\""); });
+
+        hashOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
+        if(hashOID === "")
+            return new Promise(function(resolve, reject) { reject("Incorrect \"hashAlgorithm\": " + hashAlgorithm); });
+
+        if("issuerCertificate" in parameters)
+            issuerCertificate = parameters.issuerCertificate;
+        else
+            return new Promise(function(resolve, reject) { reject("Parameter \"issuerCertificate\" is mandatory for \"OCSP_REQUEST.createForCertificate\""); });
+        // #endregion 
+
+        // #region Initialize "serialNumber" field
+        this.serialNumber = certificate.serialNumber;
+        // #endregion 
+
+        // #region Create "issuerNameHash" 
+        sequence = sequence.then(
+            function(result)
+            {
+                var issuerNameBuffer = issuerCertificate.subject.toSchema().toBER(false);
+
+                return crypto.digest({ name: _this.hashAlgorithm }, issuerNameBuffer);
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion 
+
+        // #region Create "issuerKeyHash" 
+        sequence = sequence.then(
+            function(result)
+            {
+                _this.issuerNameHash = result;
+
+                var issuerKeyBuffer = issuerCertificate.subjectPublicKeyInfo.subjectPublicKey.value_block.value_hex;
+
+                return crypto.digest({ name: _this.hashAlgorithm }, issuerKeyBuffer);
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            ).then(
+            function(result)
+            {
+                _this.issuerKeyHash = result;
+            },
+            function(error)
+            {
+                return new Promise(function(resolve, reject) { reject(error); });
+            }
+            );
+        // #endregion 
+
+        return sequence;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "Request" type
@@ -864,87 +982,26 @@ function(in_window)
         var _this = this;
         var sequence = Promise.resolve();
 
-        var hashAlgorithm;
-        var hashOID;
-
-        var issuerNameHash;
-        var issuerKeyHash;
-
-        var issuerCertificate;
+        var certID = new in_window.org.pkijs.simpl.ocsp.CertID();
         // #endregion 
 
-        // #region Get a "crypto" extension 
-        var crypto = in_window.org.pkijs.getCrypto();
-        if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
-        // #endregion 
-
-        // #region Check input parameters 
-        if("hashAlgorithm" in parameters)
-            hashAlgorithm = parameters.hashAlgorithm;
-        else
-            return new Promise(function(resolve, reject) { reject("Parameter \"hashAlgorithm\" is mandatory for \"OCSP_REQUEST.createForCertificate\""); });
-
-        hashOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
-        if(hashOID === "")
-            return new Promise(function(resolve, reject) { reject("Incorrect \"hashAlgorithm\": " + hashAlgorithm); });
-
-        if("issuerCertificate" in parameters)
-            issuerCertificate = parameters.issuerCertificate;
-        else
-            return new Promise(function(resolve, reject) { reject("Parameter \"issuerCertificate\" is mandatory for \"OCSP_REQUEST.createForCertificate\""); });
-        // #endregion 
-
-        // #region Create "issuerNameHash" 
+        // #region Create OCSP certificate identifier for the certificate 
         sequence = sequence.then(
             function(result)
             {
-                var issuerNameBuffer = issuerCertificate.subject.toSchema().toBER(false);
-
-                return crypto.digest({ name: hashAlgorithm }, issuerNameBuffer);
-            },
-            function(error)
-            {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return certID.createForCertificate(certificate, parameters);
             }
             );
-        // #endregion 
-
-        // #region Create "issuerKeyHash" 
-        sequence = sequence.then(
-            function(result)
-            {
-                issuerNameHash = result;
-
-                var issuerKeyBuffer = issuerCertificate.subjectPublicKeyInfo.subjectPublicKey.value_block.value_hex;
-
-                return crypto.digest({ name: hashAlgorithm }, issuerKeyBuffer);
-            },
-            function(error)
-            {
-                return new Promise(function(resolve, reject) { reject(error); });
-            }
-            );
-        // #endregion 
+        // #endregion   
 
         // #region Make final request data 
         sequence = sequence.then(
             function(result)
             {
-                issuerKeyHash = result;
-
                 _this.tbsRequest = new in_window.org.pkijs.simpl.ocsp.TBSRequest({
                     requestList: [
                         new in_window.org.pkijs.simpl.ocsp.Request({
-                            reqCert: new in_window.org.pkijs.simpl.ocsp.CertID({
-                                hashAlgorithm: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
-                                    algorithm_id: hashOID,
-                                    algorithm_params: new in_window.org.pkijs.asn1.NULL()
-                                }),
-                                issuerNameHash: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: issuerNameHash }),
-                                issuerKeyHash: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: issuerKeyHash }),
-                                serialNumber: certificate.serialNumber
-                            })
+                            reqCert: certID
                         })
                     ]
                 })
@@ -1164,6 +1221,37 @@ function(in_window)
             _object.responseBytes = this.responseBytes.toJSON()
 
         return _object;
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.OCSP_RESPONSE.prototype.getCertificateStatus =
+    function(certificateID)
+    {
+        /// <summary>Get OCSP response status for specific certificate</summary>
+        /// <param name="certificateID" type="in_window.org.pkijs.simpl.ocsp.CertID">Identifier of the certificate to be checked</param>
+
+        // #region Initial variables 
+        var basicResponse;
+        // #endregion 
+
+        // #region Check that "ResponseBytes" contain "OCSP_BASIC_RESPONSE" 
+        if(("responseBytes" in this) == false)
+            return result;
+
+        if(this.responseBytes.responseType != "1.3.6.1.5.5.7.48.1.1") // id-pkix-ocsp-basic
+            return result;
+
+        try
+        {
+            var asn1Basic = org.pkijs.fromBER(ocspResponse.responseBytes.response.value_block.value_hex);
+            basicResponse = new org.pkijs.simpl.OCSP_BASIC_RESPONSE({ schema: asn1Basic.result });
+        }
+        catch(ex)
+        {
+            return result;
+        }
+        // #endregion   
+
+        return basicResponse.getCertificateStatus(certificateID);
     }
     //**************************************************************************************
     // #endregion 
@@ -2058,6 +2146,56 @@ function(in_window)
         return _object;
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE.prototype.getCertificateStatus =
+    function(certificateID)
+    {
+        /// <summary>Get OCSP response status for specific certificate</summary>
+        /// <param name="certificateID" type="in_window.org.pkijs.simpl.ocsp.CertID">Identifier of the certificate to be checked</param>
+
+        // #region Initial variables 
+        var result = {
+            isForCertificate: false,
+            status: 2 // 0 = good, 1 = revoked, 2 = unknown
+        };
+        // #endregion 
+
+        // #region Check "CertID" 
+        for(var i = 0; i < this.tbsResponseData.responses.length; i++)
+        {
+            if(this.tbsResponseData.responses[i].certID.isEqual(certificateID))
+            {
+                result.isForCertificate = true;
+
+                if(this.tbsResponseData.responses[i].certStatus instanceof in_window.org.pkijs.asn1.ASN1_PRIMITIVE)
+                {
+                    switch(this.tbsResponseData.responses[i].certStatus.id_block.tag_number)
+                    {
+                        case 0: // good
+                            result.status = 0;
+                            break;
+                        case 2: // unknown
+                            result.status = 2;
+                            break;
+                        default:;
+                    }
+                }
+                else
+                {
+                    if(this.tbsResponseData.responses[i].certStatus instanceof in_window.org.pkijs.asn1.ASN1_CONSTRUCTED)
+                    {
+                        if(this.tbsResponseData.responses[i].certStatus.id_block.tag_number == 1)
+                            result.status = 1; // revoked
+                    }
+                }
+
+                return result;
+            }
+        }
+        // #endregion 
+
+        return result;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "MessageImprint" type
@@ -2580,6 +2718,70 @@ function(in_window)
         return _object;
     }
     //**************************************************************************************
+    in_window.org.pkijs.simpl.TST_INFO.prototype.verify =
+    function()
+    {
+        // #region Initial variables 
+        var sequence = Promise.resolve();
+
+        var _this = this;
+
+        var data;
+
+        var notBefore;
+        var notAfter;
+        // #endregion 
+
+        // #region Get a "crypto" extension 
+        var crypto = in_window.org.pkijs.getCrypto();
+        if(typeof crypto == "undefined")
+            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+        // #endregion 
+
+        // #region Get initial parameters 
+        if(arguments[0] instanceof Object)
+        {
+            if("data" in arguments[0])
+                data = arguments[0].data;
+            else
+                return new Promise(function(resolve, reject) { reject("\"data\" is a mandatory attribute for TST_INFO verification"); });
+
+            if("notBefore" in arguments[0])
+                notBefore = arguments[0].notBefore;
+
+            if("notAfter" in arguments[0])
+                notAfter = arguments[0].notAfter;
+        }
+        // #endregion 
+
+        // #region Find hashing algorithm 
+        var shaAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.messageImprint.hashAlgorithm.algorithm_id);
+        if(("name" in shaAlgorithm) === false)
+            return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.messageImprint.hashAlgorithm.algorithm_id); });
+
+        sha_algorithm = shaAlgorithm.name;
+        // #endregion 
+
+        // #region Calculate message digest for input "data" buffer 
+        sequence = sequence.then(
+            function()
+            {
+                return crypto.digest(sha_algorithm, new Uint8Array(data));
+            }
+            ).then(
+            function(result)
+            {
+                if(in_window.org.pkijs.isEqual_buffer(result, _this.messageImprint.hashedMessage.value_block.value_hex))
+                    return true;
+                else
+                    return false;
+            }
+            );
+        // #endregion 
+
+        return sequence;
+    }
+    //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "PKIStatusInfo" type
@@ -2767,16 +2969,18 @@ function(in_window)
         /// <summary>!!! Works well in Chrome dev versions only (April 2014th) !!!</summary>
         /// <returns type="Promise">Returns a new Promise object (in case of error), or a result of "crypto.subtle.veryfy" function</returns>
 
+        // #region Initial variables 
         var _this = this;
+
+        var trusted_certs = new Array();
+        // #endregion 
 
         // #region Check that "timeStampToken" exists
         if(("timeStampToken" in this) === false)
             return new Promise(function(resolve, reject) { reject("timeStampToken is absent in TSP response"); });
         // #endregion 
 
-        // #region Get "trusted_certs" array 
-        var trusted_certs = new Array();
-
+        // #region Get initial parameters 
         if(arguments[0] instanceof Object)
         {
             if("trusted_certs" in arguments[0])

@@ -86,7 +86,14 @@ Public Key Infrastructure (PKI) is the basis of how identity and key management 
     * Getting/setting any internal values;
     * Creation (encryption) with full support for "Suite B" algorithms and more;
     * Decryption with full support for "Suite B" algorithms and more;
-
+  * CMS Encrypted Data:
+    * Parsing internal values;
+    * Getting/setting any internal values;
+    * Creation (encryption) with password;
+    * Decryption with password;
+  * PKCS#12:
+    * Parsing internal values;
+    * Making any kind of internal values (SafeContexts/SafeBags) with any kind of parameters;
 
 ## Examples
 
