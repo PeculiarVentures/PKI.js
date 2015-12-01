@@ -77,16 +77,6 @@ function(in_window)
     }
     // #endregion 
 
-    // #region "org.pkijs.schema.x509" namespace 
-    if (typeof in_window.org.pkijs.schema.x509 === "undefined")
-        in_window.org.pkijs.schema.x509 = {};
-    else
-    {
-        if (typeof in_window.org.pkijs.schema.x509 !== "object")
-            throw new Error("Name org.pkijs.schema.x509 already exists and it's not an object" + " but " + (typeof in_window.org.pkijs.schema.x509));
-    }
-    // #endregion 
-
     // #region "local" namespace 
     var local = {};
     // #endregion   
@@ -475,8 +465,6 @@ function(in_window)
                 })
             ]
         }));
-
-        //new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.eContent || "") })
     }
     //**************************************************************************************
     // #endregion 
@@ -628,6 +616,28 @@ function(in_window)
                         optional: true
                     }
                 })
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
+    // #region ASN.1 schema for CMS "PBES2-params" type (RFC2898)
+    //**************************************************************************************
+    in_window.org.pkijs.schema.cms.PBES2_params =
+    function()
+    {
+        //PBES2-params ::= SEQUENCE {
+        //    keyDerivationFunc AlgorithmIdentifier {{PBES2-KDFs}},
+        //    encryptionScheme AlgorithmIdentifier {{PBES2-Encs}} }
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.keyDerivationFunc || {}),
+                in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.encryptionScheme || {})
             ]
         }));
     }
@@ -1163,6 +1173,45 @@ function(in_window)
                         })
                     ]
                 }),
+                in_window.org.pkijs.schema.cms.EncryptedContentInfo(names.encryptedContentInfo || {}),
+                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                    optional: true,
+                    id_block: {
+                        tag_class: 3, // CONTEXT-SPECIFIC
+                        tag_number: 1 // [1]
+                    },
+                    value: [
+                        new in_window.org.pkijs.asn1.REPEATED({
+                            name: (names.unprotectedAttrs || ""),
+                            value: in_window.org.pkijs.schema.ATTRIBUTE()
+                        })
+                    ]
+                })
+            ]
+        }));
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
+    // #region ASN.1 schema definition for "EncryptedData" type (RFC5652) 
+    //**************************************************************************************
+    in_window.org.pkijs.schema.CMS_ENCRYPTED_DATA =
+    function()
+    {
+        //id-encryptedData OBJECT IDENTIFIER ::= { iso(1) member-body(2)
+        //    us(840) rsadsi(113549) pkcs(1) pkcs7(7) 6 }
+
+        //EncryptedData ::= SEQUENCE {
+        //    version CMSVersion,
+        //    encryptedContentInfo EncryptedContentInfo,
+        //    unprotectedAttrs [1] IMPLICIT UnprotectedAttributes OPTIONAL }
+
+        var names = in_window.org.pkijs.getNames(arguments[0]);
+
+        return (new in_window.org.pkijs.asn1.SEQUENCE({
+            name: (names.block_name || ""),
+            value: [
+                new in_window.org.pkijs.asn1.INTEGER({ name: (names.version || "") }),
                 in_window.org.pkijs.schema.cms.EncryptedContentInfo(names.encryptedContentInfo || {}),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                     optional: true,

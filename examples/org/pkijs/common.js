@@ -691,7 +691,7 @@ function(in_window)
                         result = {
                             algorithm: {
                                 name: "HMAC",
-                                length: 10,
+                                length: 32,
                                 hash: {
                                     name: "SHA-256"
                                 }

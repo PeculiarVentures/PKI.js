@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2014, GMO GlobalSign
  * Copyright (c) 2015, Peculiar Ventures
  * All rights reserved.
@@ -526,6 +526,45 @@ function(in_window)
             _object.algorithm_params = this.algorithm_params.toJSON();
 
         return _object;
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER.prototype.isEqual =
+    function(algorithmIdentifier)
+    {
+        /// <summary>Check that two "ALGORITHM_IDENTIFIERs" are equal</summary>
+        /// <param name="algorithmIdentifier" type="in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER">The algorithm identifier to compare with</param>
+
+        // #region Check input type 
+        if((algorithmIdentifier instanceof in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER) == false)
+            return false;
+        // #endregion 
+
+        // #region Check "algorithm_id" 
+        if(this.algorithm_id != algorithmIdentifier.algorithm_id)
+            return false;
+        // #endregion 
+
+        // #region Check "algorithm_params" 
+        if("algorithm_params" in this)
+        {
+            if("algorithm_params" in algorithmIdentifier)
+            {
+                if(JSON.stringify(this.algorithm_params) == JSON.stringify(algorithmIdentifier.algorithm_params))
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+        {
+            if("algorithm_params" in algorithmIdentifier)
+                return false;
+        }
+        // #endregion 
+
+        return true;
     }
     //**************************************************************************************
     // #endregion 
@@ -3315,6 +3354,7 @@ function(in_window)
             in_window.org.pkijs.schema.x509.IssuingDistributionPoint({
                 names: {
                     distributionPoint: "distributionPoint",
+                    distributionPoint_names: "distributionPoint_names",
                     onlyContainsUserCerts: "onlyContainsUserCerts",
                     onlyContainsCACerts: "onlyContainsCACerts",
                     onlySomeReasons: "onlySomeReasons",
@@ -4068,19 +4108,19 @@ function(in_window)
         // #endregion 
 
         // #region Set correct "subjectPublicKeyInfo" value 
-        if(this.issuer.isEqual(this.subject)) // Self-signed certificate
-            subjectPublicKeyInfo = this.subjectPublicKeyInfo;
+        if(arguments[0] instanceof Object)
+        {
+            if("issuerCertificate" in arguments[0]) // Must be of type "simpl.CERT"
+                subjectPublicKeyInfo = arguments[0].issuerCertificate.subjectPublicKeyInfo;
+        }
         else
         {
-            if(arguments[0] instanceof Object)
-            {
-                if("issuerCertificate" in arguments[0]) // Must be of type "simpl.CERT"
-                    subjectPublicKeyInfo = arguments[0].issuerCertificate.subjectPublicKeyInfo;
-            }
-
-            if((subjectPublicKeyInfo instanceof in_window.org.pkijs.simpl.PUBLIC_KEY_INFO) === false)
-                return new Promise(function(resolve, reject) { reject("Please provide issuer certificate as a parameter"); });
+            if(this.issuer.isEqual(this.subject)) // Self-signed certificate
+                subjectPublicKeyInfo = this.subjectPublicKeyInfo;
         }
+
+        if((subjectPublicKeyInfo instanceof in_window.org.pkijs.simpl.PUBLIC_KEY_INFO) === false)
+            return new Promise(function(resolve, reject) { reject("Please provide issuer certificate as a parameter"); });
         // #endregion 
 
         // #region Get a "crypto" extension 
@@ -4738,9 +4778,6 @@ function(in_window)
     in_window.org.pkijs.simpl.CRL.prototype.verify =
     function()
     {
-        /// <summary>!!! Works well in Chrome dev versions only (April 2014th) !!!</summary>
-        /// <returns type="Promise">Returns a new Promise object (in case of error), or a result of "crypto.subtle.veryfy" function</returns>
-
         // #region Global variables 
         var sequence = Promise.resolve();
 
@@ -4756,7 +4793,13 @@ function(in_window)
         if(arguments[0] instanceof Object)
         {
             if("issuerCertificate" in arguments[0]) // "issuerCertificate" must be of type "simpl.CERT"
+            {
                 subjectPublicKeyInfo = arguments[0].issuerCertificate.subjectPublicKeyInfo;
+
+                // The CRL issuer name and "issuerCertificate" subject name are not equal
+                if(this.issuer.isEqual(arguments[0].issuerCertificate.subject) == false)
+                    return new Promise(function(resolve, reject) { resolve(false); });
+            }
 
             // #region In case if there is only public key during verification 
             if("publicKeyInfo" in arguments[0])
@@ -4766,6 +4809,21 @@ function(in_window)
 
         if((subjectPublicKeyInfo instanceof in_window.org.pkijs.simpl.PUBLIC_KEY_INFO) === false)
             return new Promise(function(resolve, reject) { reject("Issuer's certificate must be provided as an input parameter"); });
+        // #endregion 
+
+        // #region Check the CRL for unknown critical extensions 
+        if("crlExtensions" in this)
+        {
+            for(var i = 0; i < this.crlExtensions.length; i++)
+            {
+                if(this.crlExtensions[i].critical)
+                {
+                    // We can not be sure that unknown extension has no value for CRL signature
+                    if(("parsedValue" in this.crlExtensions[i]) == false)
+                        return new Promise(function(resolve, reject) { resolve(false); });
+                }
+            }
+        }
         // #endregion 
 
         // #region Get a "crypto" extension 
@@ -5715,9 +5773,9 @@ function(in_window)
         /// <field name="trusted_certs" type="Array" elementType="in_window.org.pkijs.simpl.CERT">Array of pre-defined trusted (by user) certificates</field>
         this.trusted_certs = new Array();
         /// <field name="certs" type="Array" elementType="in_window.org.pkijs.simpl.CERT">Array with certificate chain. Could be only one end-user certificate in there!</field>
-        this.certs = new Array(); 
+        this.certs = new Array();
         /// <field name="crls" type="Array" elementType="in_window.org.pkijs.simpl.CRL">Array of all CRLs for all certificates from certificate chain</field>
-        this.crls = new Array(); 
+        this.crls = new Array();
         // #endregion 
 
         // #region Initialize internal properties by input values
@@ -6302,7 +6360,7 @@ function(in_window)
                 var policies_and_certs = new Array(); // In fact "array of array" where rows are for each specific policy, column for each certificate and value is "true/false"
 
                 var any_policy_array = new Array(_this.certs.length - 1); // Minus "trusted anchor"
-                for(var ii = 0; ii < (_this.certs.length - 1); ii++)
+                for(var ii = 0; ii < (_this.certs.length - 1) ; ii++)
                     any_policy_array[ii] = true;
 
                 policies_and_certs.push(any_policy_array);
@@ -6346,8 +6404,7 @@ function(in_window)
 
                                         policies_and_certs.push(cert_array);
                                     }
-                                    else
-                                        (policies_and_certs[policy_index])[i] = true;
+                                    else(policies_and_certs[policy_index])[i] = true;
                                 }
                             }
                             // #endregion 
@@ -6950,30 +7007,30 @@ function(in_window)
                             case 1:
                                 constr_groups[0].push(permitted_subtrees[j]);
                                 break;
-                            // #endregion 
-                            // #region dNSName 
+                                // #endregion 
+                                // #region dNSName 
                             case 2:
                                 constr_groups[1].push(permitted_subtrees[j]);
                                 break;
-                            // #endregion 
-                            // #region directoryName 
+                                // #endregion 
+                                // #region directoryName 
                             case 4:
                                 constr_groups[2].push(permitted_subtrees[j]);
                                 break;
-                            // #endregion 
-                            // #region uniformResourceIdentifier 
+                                // #endregion 
+                                // #region uniformResourceIdentifier 
                             case 6:
                                 constr_groups[3].push(permitted_subtrees[j]);
                                 break;
-                            // #endregion 
-                            // #region iPAddress 
+                                // #endregion 
+                                // #region iPAddress 
                             case 7:
                                 constr_groups[4].push(permitted_subtrees[j]);
                                 break;
-                            // #endregion 
-                            // #region default 
+                                // #endregion 
+                                // #region default 
                             default:;
-                            // #endregion 
+                                // #endregion 
                         }
                     }
                     // #endregion   
@@ -7010,8 +7067,8 @@ function(in_window)
                                         }
                                     }
                                     break;
-                                // #endregion 
-                                // #region dNSName 
+                                    // #endregion 
+                                    // #region dNSName 
                                 case 1:
                                     if(subject_alt_names.length > 0)
                                     {
@@ -7022,13 +7079,13 @@ function(in_window)
                                         }
                                     }
                                     break;
-                                // #endregion 
-                                // #region directoryName 
+                                    // #endregion 
+                                    // #region directoryName 
                                 case 2:
                                     group_permitted = compare_directoryName(_this.certs[i].subject, group[j].base.Name);
                                     break;
-                                // #endregion 
-                                // #region uniformResourceIdentifier 
+                                    // #endregion 
+                                    // #region uniformResourceIdentifier 
                                 case 3:
                                     if(subject_alt_names.length > 0)
                                     {
@@ -7039,8 +7096,8 @@ function(in_window)
                                         }
                                     }
                                     break;
-                                // #endregion 
-                                // #region iPAddress 
+                                    // #endregion 
+                                    // #region iPAddress 
                                 case 4:
                                     if(subject_alt_names.length > 0)
                                     {
@@ -7051,10 +7108,10 @@ function(in_window)
                                         }
                                     }
                                     break;
-                                // #endregion 
-                                // #region default 
+                                    // #endregion 
+                                    // #region default 
                                 default:;
-                                // #endregion 
+                                    // #endregion 
                             }
 
                             if(group_permitted)
@@ -7105,8 +7162,8 @@ function(in_window)
                                     }
                                 }
                                 break;
-                            // #endregion 
-                            // #region dNSName 
+                                // #endregion 
+                                // #region dNSName 
                             case 2:
                                 if(subject_alt_names.length > 0)
                                 {
@@ -7117,13 +7174,13 @@ function(in_window)
                                     }
                                 }
                                 break;
-                            // #endregion 
-                            // #region directoryName 
+                                // #endregion 
+                                // #region directoryName 
                             case 4:
                                 excluded = excluded || compare_directoryName(_this.certs[i].subject, excluded_subtrees[j].base.Name);
                                 break;
-                            // #endregion 
-                            // #region uniformResourceIdentifier 
+                                // #endregion 
+                                // #region uniformResourceIdentifier 
                             case 6:
                                 if(subject_alt_names.length > 0)
                                 {
@@ -7134,8 +7191,8 @@ function(in_window)
                                     }
                                 }
                                 break;
-                            // #endregion 
-                            // #region iPAddress 
+                                // #endregion 
+                                // #region iPAddress 
                             case 7:
                                 if(subject_alt_names.length > 0)
                                 {
@@ -7146,10 +7203,10 @@ function(in_window)
                                     }
                                 }
                                 break;
-                            // #endregion 
-                            // #region default 
+                                // #endregion 
+                                // #region default 
                             default:; // No action, but probably here we need to create a warning for "malformed constraint"
-                            // #endregion 
+                                // #endregion 
                         }
 
                         if(excluded)
