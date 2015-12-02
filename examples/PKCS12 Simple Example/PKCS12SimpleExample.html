@@ -262,10 +262,13 @@
         //*********************************************************************************
         // #endregion 
         //*********************************************************************************
-        function passwordBasedIntegrity()
+        function passwordBasedIntegrity(password)
         {
             // #region Initial variables 
             var sequence = Promise.resolve();
+
+            if(typeof password == "undefined")
+                password = document.getElementById("password2").value;
             // #endregion 
 
             // #region Create simplified structires for certificate and private key 
@@ -327,7 +330,7 @@
                 function()
                 {
                     return pkcs12.makeInternalValues({
-                        password: stringToArrayBuffer("12345"),
+                        password: stringToArrayBuffer(password),
                         iterations: 2048,
                         pbkdf2HashAlgorithm: "SHA-256", // Least two parameters are equal because at the moment it is not clear how to use PBMAC1 schema with PKCS#12 integrity protection
                         hmacHashAlgorithm: "SHA-256"
@@ -480,7 +483,7 @@
         //*********************************************************************************
         function noPrivacy()
         {
-            passwordBasedIntegrity(); // Same with previous example
+            passwordBasedIntegrity(document.getElementById("password3").value); // Same with previous example
         }
         //*********************************************************************************
         function passwordPrivacy()
@@ -535,7 +538,7 @@
                     return pkcs12.parsedValue.authenticatedSafe.makeInternalValues({
                         safeContents: [
                             {
-                                password: stringToArrayBuffer("12345"),
+                                password: stringToArrayBuffer(document.getElementById("password4").value),
                                 contentEncryptionAlgorithm: {
                                     name: "AES-CBC",
                                     length: 128
@@ -554,7 +557,7 @@
                 function()
                 {
                     return pkcs12.makeInternalValues({
-                        password: stringToArrayBuffer("12345"),
+                        password: stringToArrayBuffer(document.getElementById("password4").value),
                         iterations: 2048,
                         pbkdf2HashAlgorithm: "SHA-256", // Least two parameters are equal because at the moment it is not clear how to use PBMAC1 schema with PKCS#12 integrity protection
                         hmacHashAlgorithm: "SHA-256"
@@ -652,7 +655,7 @@
                 function()
                 {
                     return pkcs12.makeInternalValues({
-                        password: stringToArrayBuffer("12345"),
+                        password: stringToArrayBuffer(document.getElementById("password5").value),
                         iterations: 2048,
                         pbkdf2HashAlgorithm: "SHA-256", // Least two parameters are equal because at the moment it is not clear how to use PBMAC1 schema with PKCS#12 integrity protection
                         hmacHashAlgorithm: "SHA-256"
@@ -813,7 +816,7 @@
                 function()
                 {
                     return pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.makeInternalValues({
-                        password: stringToArrayBuffer("12345"),
+                        password: stringToArrayBuffer(document.getElementById("password1").value),
                         contentEncryptionAlgorithm: {
                             name: "AES-CBC", // OpenSSL can handle AES-CBC only
                             length: 128 
@@ -835,7 +838,7 @@
                                 // Empty parameters for first SafeContent since "No Privacy" protection mode there
                             },
                             {
-                                password: stringToArrayBuffer("12345"),
+                                password: stringToArrayBuffer(document.getElementById("password1").value),
                                 contentEncryptionAlgorithm: {
                                     name: "AES-CBC", // OpenSSL can handle AES-CBC only
                                     length: 128
@@ -854,7 +857,7 @@
                 function()
                 {
                     return pkcs12.makeInternalValues({
-                        password: stringToArrayBuffer("12345"),
+                        password: stringToArrayBuffer(document.getElementById("password1").value),
                         iterations: 2048,
                         pbkdf2HashAlgorithm: "SHA-256", // OpenSSL can not handle usage of PBKDF2, only PBKDF1
                         hmacHashAlgorithm: "SHA-256"
@@ -1003,6 +1006,12 @@
         <div>
             <fieldset>
                 <legend>PKCS#12 With OpenSSL-like Internal Structure</legend>
+
+                <p>
+                    <label for="password1" style="float:left;">Password:</label>
+                    <input id="password1" type="text" />
+                </p>
+
                 <button onclick="openSSLLike();">Create</button>
             </fieldset>
         </div>
@@ -1010,6 +1019,12 @@
         <div>
             <fieldset>
                 <legend>PKCS#12 With Password-Based Integrity Protection And No Privacy Protection</legend>
+
+                <p>
+                    <label for="password2" style="float:left;">Password:</label>
+                    <input id="password2" type="text" />
+                </p>
+
                 <button onclick="passwordBasedIntegrity();">Create</button>
             </fieldset>
         </div>
@@ -1024,6 +1039,12 @@
         <div>
             <fieldset>
                 <legend>PKCS#12 With No Privacy Protection and Password-Based Integrity Protection</legend>
+
+                <p>
+                    <label for="password3" style="float:left;">Password:</label>
+                    <input id="password3" type="text" />
+                </p>
+
                 <button onclick="noPrivacy();">Create</button>
             </fieldset>
         </div>
@@ -1031,13 +1052,25 @@
         <div>
             <fieldset>
                 <legend>PKCS#12 With Password-Based Privacy And Inegrity Protection</legend>
+
+                <p>
+                    <label for="password4" style="float:left;">Password:</label>
+                    <input id="password4" type="text" />
+                </p>
+
                 <button onclick="passwordPrivacy();">Create</button>
             </fieldset>
         </div>
 
         <div>
             <fieldset>
-                <legend>PKCS#12 With Certificate-Based Privacy And Integrity Protection</legend>
+                <legend>PKCS#12 With Certificate-Based Privacy And Password-Based Integrity Protection</legend>
+
+                <p>
+                    <label for="password5" style="float:left;">Password:</label>
+                    <input id="password5" type="text" />
+                </p>
+
                 <button onclick="certificatePrivacy();">Create</button>
             </fieldset>
         </div>
