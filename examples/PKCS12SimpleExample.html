@@ -331,7 +331,7 @@
                 {
                     return pkcs12.makeInternalValues({
                         password: stringToArrayBuffer(password),
-                        iterations: 2048,
+                        iterations: 100000,
                         pbkdf2HashAlgorithm: "SHA-256", // Least two parameters are equal because at the moment it is not clear how to use PBMAC1 schema with PKCS#12 integrity protection
                         hmacHashAlgorithm: "SHA-256"
                     });
@@ -558,7 +558,7 @@
                 {
                     return pkcs12.makeInternalValues({
                         password: stringToArrayBuffer(document.getElementById("password4").value),
-                        iterations: 2048,
+                        iterations: 100000,
                         pbkdf2HashAlgorithm: "SHA-256", // Least two parameters are equal because at the moment it is not clear how to use PBMAC1 schema with PKCS#12 integrity protection
                         hmacHashAlgorithm: "SHA-256"
                     });
@@ -656,7 +656,7 @@
                 {
                     return pkcs12.makeInternalValues({
                         password: stringToArrayBuffer(document.getElementById("password5").value),
-                        iterations: 2048,
+                        iterations: 100000,
                         pbkdf2HashAlgorithm: "SHA-256", // Least two parameters are equal because at the moment it is not clear how to use PBMAC1 schema with PKCS#12 integrity protection
                         hmacHashAlgorithm: "SHA-256"
                     });
@@ -822,7 +822,7 @@
                             length: 128 
                         },
                         hmacHashAlgorithm: "SHA-1", // OpenSSL can handle SHA-1 only
-                        iterationCount: 4096
+                        iterationCount: 100000
                     });
                 }
                 );
@@ -844,7 +844,7 @@
                                     length: 128
                                 },
                                 hmacHashAlgorithm: "SHA-1", // OpenSSL can handle SHA-1 only
-                                iterationCount: 2048
+                                iterationCount: 100000
                             }
                         ]
                     });
@@ -858,7 +858,7 @@
                 {
                     return pkcs12.makeInternalValues({
                         password: stringToArrayBuffer(document.getElementById("password1").value),
-                        iterations: 2048,
+                        iterations: 100000,
                         pbkdf2HashAlgorithm: "SHA-256", // OpenSSL can not handle usage of PBKDF2, only PBKDF1
                         hmacHashAlgorithm: "SHA-256"
                     });
@@ -993,7 +993,7 @@
             <div>
                 <p>PKIjs supports many different combinations of PKCS#12. Most clients only support one combination. Clients typically only support a combination where the same password is used for protection and integrity.</p>
 
-                <p>PKIjs, also only supports creation of AES-CBC protection PKCS#12’s which will not be readable by Windows which only supports weak ciphers in PKCS#12 files.</p>
+                <p>PKIjs, also only supports creation of AES-CBC and AES-GCM protected PKCS#12’s which will not be readable by Windows which only supports weak ciphers in PKCS#12 files.</p>
 
                 <p>You can parse the Password-Based Privacy Protection variant PKIjs creates using this command:</p>
 
