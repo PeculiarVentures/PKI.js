@@ -147,7 +147,7 @@ function(in_window)
     //**************************************************************************************
     // #region ASN.1 schema definition for "PFX" type (RFC7292) 
     //**************************************************************************************
-    in_window.org.pkijs.schema.PFX =
+    in_window.org.pkijs.schema.PKCS12 =
     function()
     {
         //PFX ::= SEQUENCE {
