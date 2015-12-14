@@ -63,6 +63,50 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
+    // #region Settings for "crypto engine" 
+    //**************************************************************************************
+    local.engine = {
+        name: "none",
+        crypto: null,
+        subtle: null
+    };
+
+    if("crypto" in window)
+    {
+        var engineName = "webcrypto";
+        var cryptoObject = window.crypto;
+        var subtleObject = null;
+
+        // Apple Safari support
+        if("webkitSubtle" in window.crypto)
+            subtleObject = window.crypto.webkitSubtle;
+
+        if("subtle" in window.crypto)
+            subtleObject = window.crypto.subtle;
+
+        local.engine = {
+            name: engineName,
+            crypto: cryptoObject,
+            subtle: subtleObject
+        };
+    }
+    //**************************************************************************************
+    function setEngine(name, crypto, subtle)
+    {
+        /// <summary>Setting the global "crypto engine" parameters</summary>
+        /// <param name="name" type="String">Auxiliary name for "crypto engine"</param>
+        /// <param name="crypto" type="Object">Object handling all root cryptographic requests (in fact currently it must handle only "getRandomValues")</param>
+        /// <param name="subtle" type="Object">Object handling all main cryptographic requests</param>
+
+        local.engine = {
+            name: name,
+            crypto: crypto,
+            subtle: subtle
+        };
+    }
+    //**************************************************************************************
+    // #endregion 
+    //**************************************************************************************
     // #region Declaration of common functions 
     //**************************************************************************************
     in_window.org.pkijs.emptyObject =
@@ -213,15 +257,8 @@ function(in_window)
     {
         var crypto_temp;
 
-        if("crypto" in in_window)
-        {
-            // Apple Safari support
-            if("webkitSubtle" in in_window.crypto)
-                crypto_temp = in_window.crypto.webkitSubtle;
-
-            if("subtle" in in_window.crypto)
-                crypto_temp = in_window.crypto.subtle;
-        }
+        if(local.engine.subtle !== null)
+            crypto_temp = local.engine.subtle;
 
         return crypto_temp;
     }
@@ -320,8 +357,8 @@ function(in_window)
     {
         /// <param name="view" type="Uint8Array">New array which gives a length for random value</param>
 
-        if("crypto" in in_window)
-            return in_window.crypto.getRandomValues(view);
+        if(local.engine.crypto !== null)
+            return local.engine.crypto.getRandomValues(view);
         else
             throw new Error("No support for Web Cryptography API");
     }
