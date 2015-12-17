@@ -157,6 +157,24 @@ function(in_window)
                                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
                                     id_block: {
                                         tag_class: 3, // CONTEXT-SPECIFIC
+                                        tag_number: 1 // [1]
+                                    },
+                                    value: [
+                                        new in_window.org.pkijs.asn1.ANY()
+                                    ]
+                                }), // JUST A STUB
+                                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                                    id_block: {
+                                        tag_class: 3, // CONTEXT-SPECIFIC
+                                        tag_number: 2 // [2]
+                                    },
+                                    value: [
+                                        new in_window.org.pkijs.asn1.ANY()
+                                    ]
+                                }), // JUST A STUB
+                                new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
+                                    id_block: {
+                                        tag_class: 3, // CONTEXT-SPECIFIC
                                         tag_number: 3 // [3]
                                     },
                                     value: [
@@ -289,7 +307,7 @@ function(in_window)
     //**************************************************************************************
     // #region ASN.1 schema definition for "RSAES-OAEP-params" type (RFC3447)
     //**************************************************************************************
-    in_window.org.pkijs.schema.x509.RSAES_OAEP_params =
+    in_window.org.pkijs.schema.cms.RSAES_OAEP_params =
     function()
     {
         //RSAES-OAEP-params ::= SEQUENCE {

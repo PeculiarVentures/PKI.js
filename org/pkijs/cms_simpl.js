@@ -841,6 +841,9 @@ function(in_window)
             case "1.2.840.113549.1.9.16.2.24": // revocation-values
                 this.parsedValue = new in_window.org.pkijs.simpl.cades.revocation_values({ schema: this.attrValues[0] });
                 break;
+            case "1.2.840.113583.1.1.8": // Adobe "RevocationInfoArchival"
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.RevocationInfoArchival({ schema: this.attrValues[0] });
+                break;
             default:;
         }
         // #endregion   
@@ -880,7 +883,7 @@ function(in_window)
     //**************************************************************************************
     // #region Simplified structure for "RSAES_OAEP_params" type (RFC3447)
     //**************************************************************************************
-    in_window.org.pkijs.simpl.x509.RSAES_OAEP_params =
+    in_window.org.pkijs.simpl.cms.RSAES_OAEP_params =
     function()
     {
         // #region Internal properties of the object 
@@ -891,7 +894,7 @@ function(in_window)
 
         // #region If input argument array contains "schema" for this object 
         if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
-            in_window.org.pkijs.simpl.x509.RSAES_OAEP_params.prototype.fromSchema.call(this, arguments[0].schema);
+            in_window.org.pkijs.simpl.cms.RSAES_OAEP_params.prototype.fromSchema.call(this, arguments[0].schema);
             // #endregion 
             // #region If input argument array contains "native" values for internal properties 
         else
@@ -911,13 +914,13 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
-    in_window.org.pkijs.simpl.x509.RSAES_OAEP_params.prototype.fromSchema =
+    in_window.org.pkijs.simpl.cms.RSAES_OAEP_params.prototype.fromSchema =
     function(schema)
     {
         // #region Check the schema is valid 
         var asn1 = in_window.org.pkijs.compareSchema(schema,
             schema,
-            in_window.org.pkijs.schema.x509.RSAES_OAEP_params({
+            in_window.org.pkijs.schema.cms.RSAES_OAEP_params({
                 names: {
                     hashAlgorithm: {
                         names: {
@@ -954,7 +957,7 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
-    in_window.org.pkijs.simpl.x509.RSAES_OAEP_params.prototype.toSchema =
+    in_window.org.pkijs.simpl.cms.RSAES_OAEP_params.prototype.toSchema =
     function()
     {
         // #region Create array for output sequence 
@@ -995,7 +998,7 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
-    in_window.org.pkijs.simpl.x509.RSAES_OAEP_params.prototype.toJSON =
+    in_window.org.pkijs.simpl.cms.RSAES_OAEP_params.prototype.toJSON =
     function()
     {
         var _object = {};
@@ -1646,12 +1649,16 @@ function(in_window)
                     this.certificates.push(new in_window.org.pkijs.simpl.CERT({ schema: current_certificates[k] }));
                 else
                 {
-                    // #region Create SEQUENCE from [3] 
-                    current_certificates[k].id_block.tag_class = 1; // UNIVERSAL
-                    current_certificates[k].id_block.tag_number = 16; // SEQUENCE
-                    // #endregion 
+                    if((current_certificates[k].id_block.tag_class == 3) && (current_certificates[k].id_block.tag_number == 3))
+                    {
+                        // #region Create SEQUENCE from [3] 
+                        current_certificates[k].id_block.tag_class = 1; // UNIVERSAL
+                        current_certificates[k].id_block.tag_number = 16; // SEQUENCE
+                        // #endregion 
 
-                    this.certificates.push(new in_window.org.pkijs.simpl.cms.OtherCertificateFormat({ schema: current_certificates[k] }));
+                        this.certificates.push(new in_window.org.pkijs.simpl.cms.OtherCertificateFormat({ schema: current_certificates[k] }));
+                    }
+                    //else // For now we would ignore "AttributeCertificateV1" and "AttributeCertificateV1"
                 }
             }
         }
@@ -1989,6 +1996,13 @@ function(in_window)
                                         if(_this.crls[i].otherRevInfoFormat == "1.3.6.1.5.5.7.48.1.1") // Basic OCSP response
                                             cert_chain_simpl.ocsps.push(new in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE({ schema: _this.crls[i].otherRevInfo }));
                                     }
+                                }
+                            }
+                            if("ocsps" in _this)
+                            {
+                                for(var i = 0; i < _this.ocsps.length; i++)
+                                {
+                                    cert_chain_simpl.ocsps.push(_this.ocsps[i]);
                                 }
                             }
 
@@ -4691,7 +4705,7 @@ function(in_window)
                         algorithm_params: new in_window.org.pkijs.asn1.NULL()
                     });
 
-                    var rsaOAEPParams = new in_window.org.pkijs.simpl.x509.RSAES_OAEP_params({
+                    var rsaOAEPParams = new in_window.org.pkijs.simpl.cms.RSAES_OAEP_params({
                         hashAlgorithm: hashAlgorithm,
                         maskGenAlgorithm: new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: "1.2.840.113549.1.1.8", // id-mgf1
@@ -5326,7 +5340,7 @@ function(in_window)
                 {
                     // #region Get current used SHA algorithm 
                     var schema = _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_params;
-                    var rsaOAEPParams = new in_window.org.pkijs.simpl.x509.RSAES_OAEP_params({ schema: schema });
+                    var rsaOAEPParams = new in_window.org.pkijs.simpl.cms.RSAES_OAEP_params({ schema: schema });
 
                     var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithm_id);
                     if(("name" in hashAlgorithm) === false)
@@ -5883,7 +5897,7 @@ function(in_window)
 
                     // #region Get current used SHA algorithm 
                     var schema = _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_params;
-                    var rsaOAEPParams = new in_window.org.pkijs.simpl.x509.RSAES_OAEP_params({ schema: schema });
+                    var rsaOAEPParams = new in_window.org.pkijs.simpl.cms.RSAES_OAEP_params({ schema: schema });
 
                     var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithm_id);
                     if(("name" in hashAlgorithm) === false)
