@@ -1,0 +1,424 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>P7B Data simple example</title>
+
+    <script type="text/javascript" src="org/pkijs/common.js"></script>
+    <script type="text/javascript" src="org/pkijs/asn1.js"></script>
+    <script type="text/javascript" src="org/pkijs/x509_schema.js"></script>
+    <script type="text/javascript" src="org/pkijs/x509_simpl.js"></script>
+    <script type="text/javascript" src="org/pkijs/cms_schema.js"></script>
+    <script type="text/javascript" src="org/pkijs/cms_simpl.js"></script>
+
+    <style type="text/css">
+        body{background:#EFEFEF;font:normal 14px/16px Helvetica, Arial, sans-serif;}
+        .wrapper{
+            width:600px;
+            margin:50px auto;
+            padding:50px;
+            border:solid 2px #CCC;
+            border-radius:10px;
+            -webkit-border-radius:10px;
+            box-shadow:0 0 12px 3px #CDCDCD;
+            -webkit-box-shadow:0 0 12px 3px #CDCDCD;
+            background:#FFF;
+        }
+        label{
+            font:bold 16px/20px Helvetica, Arial, sans-serif;
+            margin:0 0 8px;
+        }
+        textarea{
+            width:500px;
+            border:solid 1px #999;
+            border-radius:5px;
+            -webkit-border-radius:5px;
+            height:340px;
+            font:normal 12px/15px monospace;
+            display:block;
+            margin:0 0 12px;
+            box-shadow:0 0 5px 5px #EFEFEF inset;
+            -webkit-box-shadow:0 0 5px 5px #EFEFEF inset;
+            padding:20px;
+           resize: none;
+        }
+        a{
+            display:inline-block;
+            padding:5px 15px;
+            background:#ACD0EC;
+            border:solid 1px #4C6181;
+            color:#000;
+            font:normal 14px/16px Helvetica, Arial, sans-serif;
+        }
+        a:hover{
+            background:#DAEBF8;
+            cursor:pointer;
+        }
+        .header-block {
+            margin-top:30px;
+            font:bold 16px/20px Helvetica, Arial, sans-serif;
+        }
+        .border-block{
+            border:solid 2px #999;
+            border-radius:5px;
+            -webkit-border-radius:5px;
+            margin:10px 0 0;
+            padding:20px 30px;
+            background:#F0F4FF;
+        }
+        .border-block h2{
+            margin:0 0 16px;
+            font:bold 22px/24px Helvetica, Arial, sans-serif;
+        }
+        .border-block p{
+            margin:0 0 12px;
+        }
+        .border-block p .type{
+            font-weight:bold;
+            display:inline-block;
+            width:176px;
+        }
+        .border-block .two-col{
+            overflow:hidden;
+            margin:0 0 16px;
+        }
+        .border-block .two-col .subject{
+            width:180px;
+            font-weight:bold;
+            margin:0 0 12px;
+            float:left;
+        }
+        .border-block .two-col #cms-signed-attributes{
+            margin:0;
+            padding:0;
+            float:left;
+            list-style:none;
+        }
+        .border-block .two-col #cms-signed-attributes li p{
+            margin:0;
+        }
+        .border-block .two-col #cms-signed-attributes li p span{
+            width:40px;
+            display:inline-block;
+            margin:0 0 5px;
+        }
+        .border-block .two-col #cms-signed-exten{
+            overflow:hidden;
+            padding:0 0 0 17px;
+            margin:0;
+            list-style-type:square;
+        }
+        table {
+            border:solid;
+            border-collapse:collapse;
+            border-color:black;
+        }
+       th { 
+        text-align:center;
+        background: #ccc;
+        padding: 5px;
+        border: 1px solid black;
+       }
+       td { 
+        padding: 5px;
+        border: 1px solid black; 
+       }
+    </style>
+
+    <script>
+        //*********************************************************************************
+        // #region Auxiliary functions 
+        //*********************************************************************************
+        function formatPEM(pem_string)
+        {
+            /// <summary>Format string in order to have each line with length equal to 63</summary>
+            /// <param name="pem_string" type="String">String to format</param>
+
+            var string_length = pem_string.length;
+            var result_string = "";
+
+            for(var i = 0, count = 0; i < string_length; i++, count++)
+            {
+                if(count > 63)
+                {
+                    result_string = result_string + "\r\n";
+                    count = 0;
+                }
+
+                result_string = result_string + pem_string[i];
+            }
+
+            return result_string;
+        }
+        //*********************************************************************************
+        function arrayBufferToString(buffer)
+        {
+            /// <summary>Create a string from ArrayBuffer</summary>
+            /// <param name="buffer" type="ArrayBuffer">ArrayBuffer to create a string from</param>
+
+            var result_string = "";
+            var view = new Uint8Array(buffer);
+
+            for(var i = 0; i < view.length; i++)
+                result_string = result_string + String.fromCharCode(view[i]);
+
+            return result_string;
+        }
+        //*********************************************************************************
+        function stringToArrayBuffer(str)
+        {
+            /// <summary>Create an ArrayBuffer from string</summary>
+            /// <param name="str" type="String">String to create ArrayBuffer from</param>
+
+            var stringLength = str.length;
+
+            var resultBuffer = new ArrayBuffer(stringLength);
+            var resultView = new Uint8Array(resultBuffer);
+
+            for(var i = 0; i < stringLength; i++)
+                resultView[i] = str.charCodeAt(i);
+
+            return resultBuffer;
+        }
+        //*********************************************************************************
+        // #endregion 
+        //*********************************************************************************
+        // #region Create P7B Data  
+        //*********************************************************************************
+        function create_P7B()
+        {
+            // #region Initial variables 
+            var sequence = Promise.resolve();
+
+            var cert_simpl = new org.pkijs.simpl.CERT();
+            var cms_signed_simpl;
+
+            var publicKey;
+            var privateKey;
+
+            var hash_algorithm;
+            var hash_option = document.getElementById("hash_alg").value;
+            switch(hash_option)
+            {
+                case "alg_SHA1":
+                    hash_algorithm = "sha-1";
+                    break;
+                case "alg_SHA256":
+                    hash_algorithm = "sha-256";
+                    break;
+                case "alg_SHA384":
+                    hash_algorithm = "sha-384";
+                    break;
+                case "alg_SHA512":
+                    hash_algorithm = "sha-512";
+                    break;
+                default:;
+            }
+
+            var signature_algorithm_name;
+            var sign_option = document.getElementById("sign_alg").value;
+            switch(sign_option)
+            {
+                case "alg_RSA15":
+                    signature_algorithm_name = "RSASSA-PKCS1-V1_5";
+                    break;
+                case "alg_RSA2":
+                    signature_algorithm_name = "RSA-PSS";
+                    break;
+                case "alg_ECDSA":
+                    signature_algorithm_name = "ECDSA";
+                    break;
+                default:;
+            }
+            // #endregion 
+
+            // #region Get a "crypto" extension 
+            var crypto = org.pkijs.getCrypto();
+            if(typeof crypto == "undefined")
+            {
+                alert("No WebCrypto extension found");
+                return;
+            }
+            // #endregion 
+
+            // #region Put a static values 
+            cert_simpl.version = 2;
+            cert_simpl.serialNumber = new org.pkijs.asn1.INTEGER({ value: 1 });
+            cert_simpl.issuer.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+                type: "2.5.4.6", // Country name
+                value: new org.pkijs.asn1.PRINTABLESTRING({ value: "RU" })
+            }));
+            cert_simpl.issuer.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+                type: "2.5.4.3", // Common name
+                value: new org.pkijs.asn1.BMPSTRING({ value: "Test" })
+            }));
+            cert_simpl.subject.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+                type: "2.5.4.6", // Country name
+                value: new org.pkijs.asn1.PRINTABLESTRING({ value: "RU" })
+            }));
+            cert_simpl.subject.types_and_values.push(new org.pkijs.simpl.ATTR_TYPE_AND_VALUE({
+                type: "2.5.4.3", // Common name
+                value: new org.pkijs.asn1.BMPSTRING({ value: "Test" })
+            }));
+
+            cert_simpl.notBefore.value = new Date(2013, 01, 01);
+            cert_simpl.notAfter.value = new Date(2016, 01, 01);
+
+            cert_simpl.extensions = new Array(); // Extensions are not a part of certificate by default, it's an optional array
+
+            // #region "KeyUsage" extension 
+            var bit_array = new ArrayBuffer(1);
+            var bit_view = new Uint8Array(bit_array);
+
+            bit_view[0] = bit_view[0] | 0x02; // Key usage "cRLSign" flag
+            //bit_view[0] = bit_view[0] | 0x04; // Key usage "keyCertSign" flag
+
+            var key_usage = new org.pkijs.asn1.BITSTRING({ value_hex: bit_array });
+
+            cert_simpl.extensions.push(new org.pkijs.simpl.EXTENSION({
+                extnID: "2.5.29.15",
+                critical: false,
+                extnValue: key_usage.toBER(false),
+                parsedValue: key_usage // Parsed value for well-known extensions
+            }));
+            // #endregion 
+            // #endregion 
+
+            // #region Create a new key pair 
+            sequence = sequence.then(
+                function()
+                {
+                    // #region Get default algorithm parameters for key generation 
+                    var algorithm = org.pkijs.getAlgorithmParameters(signature_algorithm_name, "generatekey");
+                    if("hash" in algorithm.algorithm)
+                        algorithm.algorithm.hash.name = hash_algorithm;
+                    // #endregion 
+
+                    return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
+                }
+                );
+            // #endregion 
+
+            // #region Store new key in an interim variables
+            sequence = sequence.then(
+                function(keyPair)
+                {
+                    publicKey = keyPair.publicKey;
+                    privateKey = keyPair.privateKey;
+                },
+                function(error)
+                {
+                    alert("Error during key generation: " + error);
+                }
+                );
+            // #endregion 
+
+            // #region Exporting public key into "subjectPublicKeyInfo" value of certificate 
+            sequence = sequence.then(
+                function()
+                {
+                    return cert_simpl.subjectPublicKeyInfo.importKey(publicKey);
+                }
+                );
+            // #endregion 
+
+            // #region Signing final certificate 
+            sequence = sequence.then(
+                function()
+                {
+                    return cert_simpl.sign(privateKey, hash_algorithm);
+                },
+                function(error)
+                {
+                    alert("Error during exporting public key: " + error);
+                }
+                );
+            // #endregion 
+
+            sequence.then(
+                function(result)
+                {
+                    cms_signed_simpl = new org.pkijs.simpl.CMS_SIGNED_DATA({
+                        version: 1,
+                        encapContentInfo: new org.pkijs.simpl.cms.EncapsulatedContentInfo({
+                            eContentType: "1.2.840.113549.1.7.1" // "data" content type
+                        }),
+                        certificates: [
+                            cert_simpl,
+                            cert_simpl,
+                            cert_simpl
+                        ] // Put 3 copies of the same X.509 certificate
+                    });
+
+                    var cms_signed_schema = cms_signed_simpl.toSchema(true);
+
+                    var cms_content_simp = new org.pkijs.simpl.CMS_CONTENT_INFO({
+                        contentType: "1.2.840.113549.1.7.2",
+                        content: cms_signed_schema
+                    });
+
+                    var cms_signed_schema = cms_content_simp.toSchema(true);
+
+                    cmsSignedBuffer = cms_signed_schema.toBER(false);
+
+                    // #region Convert ArrayBuffer to String 
+                    var signed_data_string = "";
+                    var view = new Uint8Array(cmsSignedBuffer);
+
+                    for(var i = 0; i < view.length; i++)
+                        signed_data_string = signed_data_string + String.fromCharCode(view[i]);
+                    // #endregion 
+
+                    var result_string = document.getElementById("new_signed_data").innerHTML;
+
+                    result_string = "\r\n-----BEGIN CMS-----\r\n";
+                    result_string = result_string + formatPEM(window.btoa(signed_data_string));
+                    result_string = result_string + "\r\n-----END CMS-----\r\n\r\n";
+
+                    document.getElementById("new_signed_data").innerHTML = result_string;
+
+                    alert("P7B Data created successfully!");
+                },
+                function(error)
+                {
+                    alert("Erorr during signing of P7B Data: " + error);
+                }
+                );
+        }
+        //*********************************************************************************
+        // #endregion 
+        //*********************************************************************************
+    </script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <p class="header-block">Create new P7B Data</p>
+        <div id="output_div" class="border-block">
+            <p>
+                <label for="hash_alg" style="font-weight:bold">Hashing algorithm:</label>
+                <select id="hash_alg">
+                    <option value="alg_SHA1">SHA-1</option>
+                    <option value="alg_SHA256">SHA-256</option>
+                    <option value="alg_SHA384">SHA-384</option>
+                    <option value="alg_SHA512">SHA-512</option>
+                </select>
+            </p>
+            <p>
+                <label for="sign_alg" style="font-weight:bold">Signature algorithm:</label>
+                <select id="sign_alg">
+                    <option value="alg_RSA15">RSASSA-PKCS1-v1_5</option>
+                    <option value="alg_RSA2">RSA-PSS</option>
+                    <option value="alg_ECDSA">ECDSA</option>
+                </select>
+            </p>
+            <p>
+                <button onclick="create_P7B();">Create</button>
+            </p>
+            <label for="new_signed_data" style="font-weight:bold;float:left;">P7B data:</label>
+            <textarea id="new_signed_data">&lt;  New P7B data will be stored here &gt;</textarea>
+        </div>
+    </div>
+</body>
+</html>
