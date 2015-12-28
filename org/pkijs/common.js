@@ -71,24 +71,27 @@ function(in_window)
         subtle: null
     };
 
-    if("crypto" in window)
+    if(typeof window != "undefined")
     {
-        var engineName = "webcrypto";
-        var cryptoObject = window.crypto;
-        var subtleObject = null;
+        if("crypto" in window)
+        {
+            var engineName = "webcrypto";
+            var cryptoObject = window.crypto;
+            var subtleObject = null;
 
-        // Apple Safari support
-        if("webkitSubtle" in window.crypto)
-            subtleObject = window.crypto.webkitSubtle;
+            // Apple Safari support
+            if("webkitSubtle" in window.crypto)
+                subtleObject = window.crypto.webkitSubtle;
 
-        if("subtle" in window.crypto)
-            subtleObject = window.crypto.subtle;
+            if("subtle" in window.crypto)
+                subtleObject = window.crypto.subtle;
 
-        local.engine = {
-            name: engineName,
-            crypto: cryptoObject,
-            subtle: subtleObject
-        };
+            local.engine = {
+                name: engineName,
+                crypto: cryptoObject,
+                subtle: subtleObject
+            };
+        }
     }
     //**************************************************************************************
     in_window.org.pkijs.setEngine =
