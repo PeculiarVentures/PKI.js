@@ -91,7 +91,8 @@ function(in_window)
         };
     }
     //**************************************************************************************
-    function setEngine(name, crypto, subtle)
+    in_window.org.pkijs.setEngine =
+    function(name, crypto, subtle)
     {
         /// <summary>Setting the global "crypto engine" parameters</summary>
         /// <param name="name" type="String">Auxiliary name for "crypto engine"</param>
@@ -103,6 +104,14 @@ function(in_window)
             crypto: crypto,
             subtle: subtle
         };
+    }
+    //**************************************************************************************
+    in_window.org.pkijs.getEngine =
+    function()
+    {
+        /// <summary>Getting information about the global "crypto engine"</summary>
+
+        return local.engine;
     }
     //**************************************************************************************
     // #endregion 
