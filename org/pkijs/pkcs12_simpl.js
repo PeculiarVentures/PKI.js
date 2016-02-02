@@ -258,7 +258,7 @@ function(in_window)
     //**************************************************************************************
     // #region Simplified structure for "PFX" type
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12 =
+    in_window.org.pkijs.simpl.PFX =
     function()
     {
         // #region Internal properties of the object 
@@ -271,7 +271,7 @@ function(in_window)
 
         // #region If input argument array contains "schema" for this object 
         if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
-            in_window.org.pkijs.simpl.PKCS12.prototype.fromSchema.call(this, arguments[0].schema);
+            in_window.org.pkijs.simpl.PFX.prototype.fromSchema.call(this, arguments[0].schema);
         // #endregion 
         // #region If input argument array contains "native" values for internal properties 
         else
@@ -291,7 +291,7 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12.prototype.fromSchema =
+    in_window.org.pkijs.simpl.PFX.prototype.fromSchema =
     function(schema)
     {
         // #region Check the schema is valid 
@@ -327,7 +327,7 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12.prototype.toSchema =
+    in_window.org.pkijs.simpl.PFX.prototype.toSchema =
     function()
     {
         // #region Construct and return new ASN.1 schema for this object 
@@ -345,7 +345,7 @@ function(in_window)
         // #endregion 
     }
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12.prototype.toJSON =
+    in_window.org.pkijs.simpl.PFX.prototype.toJSON =
     function()
     {
         var output = {
@@ -359,7 +359,7 @@ function(in_window)
         return output;
     }
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12.prototype.makeInternalValues =
+    in_window.org.pkijs.simpl.PFX.prototype.makeInternalValues =
     function(parameters)
     {
         /// <summary>Making "CMS_CONTENT_INFO" from "parsedValue" object</summary>
@@ -676,7 +676,7 @@ function(in_window)
         return sequence;
     }
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12.prototype.parseInternalValues =
+    in_window.org.pkijs.simpl.PFX.prototype.parseInternalValues =
     function(parameters)
     {
         // #region Check input data from "parameters" 
