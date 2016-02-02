@@ -499,7 +499,7 @@ function(in_window)
                     sequence = sequence.then(
                         function(result)
                         {
-                            _this.authSafe = new org.pkijs.simpl.CMS_CONTENT_INFO({
+                            _this.authSafe = new in_window.org.pkijs.simpl.CMS_CONTENT_INFO({
                                 contentType: "1.2.840.113549.1.7.1",
                                 content: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: _this.parsedValue.authenticatedSafe.toSchema().toBER(false) })
                             });
@@ -566,9 +566,9 @@ function(in_window)
                     // #region Initial variables 
                     var cms_signed_simpl = new in_window.org.pkijs.simpl.CMS_SIGNED_DATA({
                         version: 1,
-                        encapContentInfo: new org.pkijs.simpl.cms.EncapsulatedContentInfo({
+                        encapContentInfo: new in_window.org.pkijs.simpl.cms.EncapsulatedContentInfo({
                             eContentType: "1.2.840.113549.1.7.1", // "data" content type
-                            eContent: new org.pkijs.asn1.OCTETSTRING({ value_hex: toBeSigned })
+                            eContent: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: toBeSigned })
                         }),
                         certificates: [parameters.signingCertificate]
                     });
@@ -593,38 +593,38 @@ function(in_window)
                             // #endregion 
 
                             // #region contentType 
-                            signed_attr.push(new org.pkijs.simpl.cms.Attribute({
+                            signed_attr.push(new in_window.org.pkijs.simpl.cms.Attribute({
                                 attrType: "1.2.840.113549.1.9.3",
                                 attrValues: [
-                                    new org.pkijs.asn1.OID({ value: "1.2.840.113549.1.7.1" })
+                                    new in_window.org.pkijs.asn1.OID({ value: "1.2.840.113549.1.7.1" })
                                 ]
                             }));
                             // #endregion 
                             // #region signingTime 
-                            signed_attr.push(new org.pkijs.simpl.cms.Attribute({
+                            signed_attr.push(new in_window.org.pkijs.simpl.cms.Attribute({
                                 attrType: "1.2.840.113549.1.9.5",
                                 attrValues: [
-                                    new org.pkijs.asn1.UTCTIME({ value_date: new Date() })
+                                    new in_window.org.pkijs.asn1.UTCTIME({ value_date: new Date() })
                                 ]
                             }));
                             // #endregion 
                             // #region messageDigest 
-                            signed_attr.push(new org.pkijs.simpl.cms.Attribute({
+                            signed_attr.push(new in_window.org.pkijs.simpl.cms.Attribute({
                                 attrType: "1.2.840.113549.1.9.4",
                                 attrValues: [
-                                    new org.pkijs.asn1.OCTETSTRING({ value_hex: result })
+                                    new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: result })
                                 ]
                             }));
                             // #endregion 
 
                             // #region Making final value for "SignerInfo" type 
-                            cms_signed_simpl.signerInfos.push(new org.pkijs.simpl.CMS_SIGNER_INFO({
+                            cms_signed_simpl.signerInfos.push(new in_window.org.pkijs.simpl.CMS_SIGNER_INFO({
                                 version: 1,
-                                sid: new org.pkijs.simpl.cms.IssuerAndSerialNumber({
+                                sid: new in_window.org.pkijs.simpl.cms.IssuerAndSerialNumber({
                                     issuer: parameters.signingCertificate.issuer,
                                     serialNumber: parameters.signingCertificate.serialNumber
                                 }),
-                                signedAttrs: new org.pkijs.simpl.cms.SignedUnsignedAttributes({
+                                signedAttrs: new in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes({
                                     type: 0,
                                     attributes: signed_attr
                                 })
@@ -652,7 +652,7 @@ function(in_window)
                     sequence = sequence.then(
                         function(result)
                         {
-                            _this.authSafe = new org.pkijs.simpl.CMS_CONTENT_INFO({
+                            _this.authSafe = new in_window.org.pkijs.simpl.CMS_CONTENT_INFO({
                                 contentType: "1.2.840.113549.1.7.2",
                                 content: cms_signed_simpl.toSchema(true)
                             });
@@ -1079,7 +1079,7 @@ function(in_window)
                 case "1.2.840.113549.1.7.3":
                     {
                         // #region Initial variables 
-                        var cms_enveloped_simp = new org.pkijs.simpl.CMS_ENVELOPED_DATA({ schema: _this.safeContents[j].content });
+                        var cms_enveloped_simp = new in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA({ schema: _this.safeContents[j].content });
                         // #endregion   
 
                         // #region Check mandatory parameters 
@@ -1108,7 +1108,7 @@ function(in_window)
                         sequence = sequence.then(
                             function(result)
                             {
-                                var asn1 = org.pkijs.fromBER(result);
+                                var asn1 = in_window.org.pkijs.fromBER(result);
                                 if(asn1.offset == (-1))
                                     return new Promise(function(resolve, reject) { reject("Error during parsing of decrypted data"); });
 
@@ -1126,7 +1126,7 @@ function(in_window)
                 case "1.2.840.113549.1.7.6":
                     {
                         // #region Initial variables 
-                        var cms_encrypted_simpl = new org.pkijs.simpl.CMS_ENCRYPTED_DATA({ schema: _this.safeContents[j].content });
+                        var cms_encrypted_simpl = new in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA({ schema: _this.safeContents[j].content });
                         // #endregion   
 
                         // #region Check mandatory parameters 
@@ -1155,7 +1155,7 @@ function(in_window)
                         sequence = sequence.then(
                             function(result)
                             {
-                                var asn1 = org.pkijs.fromBER(result);
+                                var asn1 = in_window.org.pkijs.fromBER(result);
                                 if(asn1.offset == (-1))
                                     return new Promise(function(resolve, reject) { reject("Error during parsing of decrypted data"); });
 
@@ -1257,7 +1257,7 @@ function(in_window)
                 case 1:
                     {
                         // #region Initial variables 
-                        var cms_encrypted_simp = new org.pkijs.simpl.CMS_ENCRYPTED_DATA();
+                        var cms_encrypted_simp = new in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA();
 
                         var currentParameters = parameters.safeContents[i];
                         currentParameters.contentToEncrypt = _this.parsedValue.safeContents[i].value.toSchema().toBER(false);
@@ -1298,7 +1298,7 @@ function(in_window)
                 case 2:
                     {
                         // #region Initial variables 
-                        var cmsEnveloped = new org.pkijs.simpl.CMS_ENVELOPED_DATA();
+                        var cmsEnveloped = new in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA();
                         var contentToEncrypt = _this.parsedValue.safeContents[i].value.toSchema().toBER(false)
                         // #endregion 
 
