@@ -7039,6 +7039,7 @@ function(in_window)
                     for(var p = 0; p < 5; p++)
                     {
                         var group_permitted = false;
+                        var valueExists = false;
                         var group = constr_groups[p];
 
                         for(var j = 0; j < group.length; j++)
@@ -7047,12 +7048,15 @@ function(in_window)
                             {
                                 // #region rfc822Name 
                                 case 0:
-                                    if(subject_alt_names.length >= 0)
+                                    if(subject_alt_names.length > 0)
                                     {
                                         for(var k = 0; k < subject_alt_names.length; k++)
                                         {
                                             if(subject_alt_names[k].NameType === 1) // rfc822Name
+                                            {
+                                                valueExists = true;
                                                 group_permitted = group_permitted || compare_rfc822Name(subject_alt_names[k].Name, group[j].base.Name);
+                                            }
                                         }
                                     }
                                     else // Try to find out "emailAddress" inside "subject"
@@ -7062,6 +7066,7 @@ function(in_window)
                                             if((_this.certs[i].subject.types_and_values[k].type === "1.2.840.113549.1.9.1") ||    // PKCS#9 e-mail address
                                                (_this.certs[i].subject.types_and_values[k].type === "0.9.2342.19200300.100.1.3")) // RFC1274 "rfc822Mailbox" e-mail address
                                             {
+                                                valueExists = true;
                                                 group_permitted = group_permitted || compare_rfc822Name(_this.certs[i].subject.types_and_values[k].value.value_block.value, group[j].base.Name);
                                             }
                                         }
@@ -7075,13 +7080,17 @@ function(in_window)
                                         for(var k = 0; k < subject_alt_names.length; k++)
                                         {
                                             if(subject_alt_names[k].NameType === 2) // dNSName
+                                            {
+                                                valueExists = true;
                                                 group_permitted = group_permitted || compare_dNSName(subject_alt_names[k].Name, group[j].base.Name);
+                                            }
                                         }
                                     }
                                     break;
                                     // #endregion 
                                     // #region directoryName 
                                 case 2:
+                                    valueExists = true;
                                     group_permitted = compare_directoryName(_this.certs[i].subject, group[j].base.Name);
                                     break;
                                     // #endregion 
@@ -7092,7 +7101,10 @@ function(in_window)
                                         for(var k = 0; k < subject_alt_names.length; k++)
                                         {
                                             if(subject_alt_names[k].NameType === 6) // uniformResourceIdentifier
+                                            {
+                                                valueExists = true;
                                                 group_permitted = group_permitted || compare_uniformResourceIdentifier(subject_alt_names[k].Name, group[j].base.Name);
+                                            }
                                         }
                                     }
                                     break;
@@ -7104,7 +7116,10 @@ function(in_window)
                                         for(var k = 0; k < subject_alt_names.length; k++)
                                         {
                                             if(subject_alt_names[k].NameType === 7) // iPAddress
+                                            {
+                                                valueExists = true;
                                                 group_permitted = group_permitted || compare_iPAddress(subject_alt_names[k].Name, group[j].base.Name);
+                                            }
                                         }
                                     }
                                     break;
@@ -7118,7 +7133,7 @@ function(in_window)
                                 break;
                         }
 
-                        if((group_permitted === false) && (group.length > 0))
+                        if((group_permitted === false) && (group.length > 0) && valueExists)
                         {
                             policy_result.result = false;
                             policy_result.result_code = 41;
