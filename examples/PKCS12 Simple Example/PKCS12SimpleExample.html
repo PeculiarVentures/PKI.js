@@ -692,12 +692,12 @@
             var keyLocalIDBuffer = new ArrayBuffer(4);
             var keyLocalIDView = new Uint8Array(keyLocalIDBuffer);
 
-            org.pkijs.getRandomValues(keyLocalIDView)
+            org.pkijs.getRandomValues(keyLocalIDView);
 
             var certLocalIDBuffer = new ArrayBuffer(4);
             var certLocalIDView = new Uint8Array(certLocalIDBuffer);
 
-            org.pkijs.getRandomValues(certLocalIDView)
+            org.pkijs.getRandomValues(certLocalIDView);
 
             // #region "KeyUsage" attribute 
             var bit_array = new ArrayBuffer(1);

@@ -106,7 +106,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.DigestInfo.prototype.fromSchema =
     function(schema)
@@ -134,7 +134,7 @@ function(in_window)
         this.digestAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["digestAlgorithm"] });
         this.digest = asn1.result["digest"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.DigestInfo.prototype.toSchema =
     function()
@@ -147,7 +147,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.DigestInfo.prototype.toJSON =
     function()
@@ -156,7 +156,7 @@ function(in_window)
             digestAlgorithm: this.digestAlgorithm.toJSON(),
             digest: this.digest.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -188,7 +188,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.MacData.prototype.fromSchema =
     function(schema)
@@ -220,7 +220,7 @@ function(in_window)
         if("iterations" in asn1.result)
             this.iterations = asn1.result["iterations"].value_block.value_dec;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.MacData.prototype.toSchema =
     function()
@@ -238,7 +238,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.MacData.prototype.toJSON =
     function()
@@ -252,7 +252,7 @@ function(in_window)
             output.iterations = this.iterations.toJSON();
             
         return output;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -289,7 +289,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PFX.prototype.fromSchema =
     function(schema)
@@ -325,7 +325,7 @@ function(in_window)
         if("macData" in asn1.result)
             this.macData = new in_window.org.pkijs.simpl.pkcs12.MacData({ schema: asn1.result["macData"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PFX.prototype.toSchema =
     function()
@@ -343,7 +343,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PFX.prototype.toJSON =
     function()
@@ -357,7 +357,7 @@ function(in_window)
             output.macData = this.macData.toJSON();
 
         return output;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PFX.prototype.makeInternalValues =
     function(parameters)
@@ -674,7 +674,7 @@ function(in_window)
         // #endregion   
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PFX.prototype.parseInternalValues =
     function(parameters)
@@ -918,7 +918,7 @@ function(in_window)
             // #endregion   
             // #region default 
             default:
-                return new Promise(function(resolve, reject) { reject("Incorrect value for \"this.authSafe.contentType\": " + this.authSafe.contentType); });
+                return new Promise(function(resolve, reject) { reject("Incorrect value for \"this.authSafe.contentType\": " + _this.authSafe.contentType); });
             // #endregion 
         }
         // #endregion 
@@ -935,7 +935,7 @@ function(in_window)
             }
             );
         // #endregion   
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -966,7 +966,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.AuthenticatedSafe.prototype.fromSchema =
     function(schema)
@@ -989,7 +989,7 @@ function(in_window)
         for(var i = 0; i < asn1.result["contentInfos"].length; i++)
             this.safeContents.push(new in_window.org.pkijs.simpl.CMS_CONTENT_INFO({ schema: (asn1.result["contentInfos"])[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.AuthenticatedSafe.prototype.toSchema =
     function()
@@ -1004,7 +1004,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.AuthenticatedSafe.prototype.toJSON =
     function()
@@ -1017,7 +1017,7 @@ function(in_window)
             output.contentInfos.push(this.safeContents[i].toJSON());
 
         return output;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.AuthenticatedSafe.prototype.parseInternalValues =
     function(parameters)
@@ -1178,11 +1178,11 @@ function(in_window)
                     throw new Error("Unknown \"contentType\" for AuthenticatedSafe: " + contentInfo.contentType);
                 // #endregion 
             }
-        };
+        }
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.AuthenticatedSafe.prototype.makeInternalValues =
     function(parameters)
@@ -1299,7 +1299,7 @@ function(in_window)
                     {
                         // #region Initial variables 
                         var cmsEnveloped = new in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA();
-                        var contentToEncrypt = _this.parsedValue.safeContents[i].value.toSchema().toBER(false)
+                        var contentToEncrypt = _this.parsedValue.safeContents[i].value.toSchema().toBER(false);
                         // #endregion 
 
                         // #region Check mandatory parameters 
@@ -1378,7 +1378,7 @@ function(in_window)
             }
             );
         // #endregion   
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1411,7 +1411,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.PKCS8ShroudedKeyBag.prototype.fromSchema =
     function(schema)
@@ -1439,7 +1439,7 @@ function(in_window)
         this.encryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["encryptionAlgorithm"] });
         this.encryptedData = asn1.result["encryptedData"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.PKCS8ShroudedKeyBag.prototype.toSchema =
     function()
@@ -1452,7 +1452,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.PKCS8ShroudedKeyBag.prototype.toJSON =
     function()
@@ -1461,7 +1461,7 @@ function(in_window)
             encryptionAlgorithm: this.encryptionAlgorithm.toJSON(),
             encryptedData: this.encryptedData.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.PKCS8ShroudedKeyBag.prototype.parseInternalValues =
     function(parameters)
@@ -1509,7 +1509,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.PKCS8ShroudedKeyBag.prototype.makeInternalValues =
     function(parameters)
@@ -1552,7 +1552,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1584,7 +1584,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CertBag.prototype.fromSchema =
     function(schema)
@@ -1621,7 +1621,7 @@ function(in_window)
                 throw new Error("Incorrect \"certId\" value in CertBag: " + this.certId);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CertBag.prototype.toSchema =
     function()
@@ -1646,7 +1646,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CertBag.prototype.toJSON =
     function()
@@ -1655,7 +1655,7 @@ function(in_window)
             certId: this.certId,
             certValue: this.certValue.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1688,7 +1688,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CRLBag.prototype.fromSchema =
     function(schema)
@@ -1724,7 +1724,7 @@ function(in_window)
                 throw new Error("Incorrect \"certId\" value in CertBag: " + this.certId);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CRLBag.prototype.toSchema =
     function()
@@ -1749,7 +1749,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CRLBag.prototype.toJSON =
     function()
@@ -1758,7 +1758,7 @@ function(in_window)
             crlId: this.crlId,
             crlValue: this.crlValue.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1786,7 +1786,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SecretBag.prototype.fromSchema =
     function(schema)
@@ -1810,7 +1810,7 @@ function(in_window)
         this.secretTypeId = asn1.result.secretTypeId.value_block.toString();
         this.secretValue = asn1.result["secretValue"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SecretBag.prototype.toSchema =
     function()
@@ -1829,7 +1829,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SecretBag.prototype.toJSON =
     function()
@@ -1838,7 +1838,7 @@ function(in_window)
             secretTypeId: this.secretTypeId,
             secretValue: this.secretValue.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1870,7 +1870,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeBag.prototype.fromSchema =
     function(schema)
@@ -1926,7 +1926,7 @@ function(in_window)
                 this.bagAttributes.push(new in_window.org.pkijs.simpl.cms.Attribute({ schema: (asn1.result["bagAttributes"])[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeBag.prototype.toSchema =
     function()
@@ -1959,7 +1959,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeBag.prototype.toJSON =
     function()
@@ -1978,7 +1978,7 @@ function(in_window)
         }
 
         return output;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2010,7 +2010,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeContents.prototype.fromSchema =
     function(schema)
@@ -2033,7 +2033,7 @@ function(in_window)
         for(var i = 0; i < asn1.result["safeBags"].length; i++)
             this.safeBags.push(new in_window.org.pkijs.simpl.pkcs12.SafeBag({ schema: (asn1.result["safeBags"])[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeContents.prototype.toSchema =
     function()
@@ -2048,7 +2048,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeContents.prototype.toJSON =
     function()
@@ -2061,7 +2061,7 @@ function(in_window)
             output.safeBags.push(this.safeBags[i].toJSON());
 
         return output;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************

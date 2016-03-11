@@ -167,7 +167,7 @@ function(in_window)
         }
         );
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.kdf =
     function(hashFunction, Zbuffer, keydatalen, SharedInfo)
@@ -285,7 +285,7 @@ function(in_window)
         }
         );
         // #endregion 
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -313,7 +313,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CONTENT_INFO.prototype.fromSchema =
     function(schema)
@@ -332,7 +332,7 @@ function(in_window)
         this.contentType = asn1.result["contentType"].value_block.toString();
         this.content = asn1.result["content"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CONTENT_INFO.prototype.toSchema =
     function()
@@ -351,7 +351,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CONTENT_INFO.prototype.toJSON =
     function()
@@ -364,7 +364,7 @@ function(in_window)
             _object.content = this.content.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -392,7 +392,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherCertificateFormat.prototype.fromSchema =
     function(schema)
@@ -411,7 +411,7 @@ function(in_window)
         this.otherCertFormat = asn1.result["otherCertFormat"].value_block.toString();
         this.otherCert = asn1.result["otherCert"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherCertificateFormat.prototype.toSchema =
     function()
@@ -424,7 +424,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherCertificateFormat.prototype.toJSON =
     function()
@@ -437,7 +437,7 @@ function(in_window)
             _object.otherCert = this.otherCert.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -465,7 +465,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRevocationInfoFormat.prototype.fromSchema =
     function(schema)
@@ -484,7 +484,7 @@ function(in_window)
         this.otherRevInfoFormat = asn1.result["otherRevInfoFormat"].value_block.toString();
         this.otherRevInfo = asn1.result["otherRevInfo"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRevocationInfoFormat.prototype.toSchema =
     function()
@@ -497,7 +497,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRevocationInfoFormat.prototype.toJSON =
     function()
@@ -510,7 +510,7 @@ function(in_window)
             _object.otherRevInfo = this.otherRevInfo.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -536,7 +536,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CERTIFICATE_SET.prototype.fromSchema =
     function(schema)
@@ -562,7 +562,7 @@ function(in_window)
                 this.certificates.push(certificates_array[i]);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CERTIFICATE_SET.prototype.toSchema =
     function()
@@ -584,7 +584,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CERTIFICATE_SET.prototype.toJSON =
     function()
@@ -596,7 +596,7 @@ function(in_window)
             _object.certificates.push(this.certificates[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -622,7 +622,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES.prototype.fromSchema =
     function(schema)
@@ -648,7 +648,7 @@ function(in_window)
                 this.crls.push(crls_array[i]);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES.prototype.toSchema =
     function()
@@ -670,7 +670,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES.prototype.toJSON =
     function()
@@ -682,7 +682,7 @@ function(in_window)
             _object.crls.push(this.crls[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -710,7 +710,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.IssuerAndSerialNumber.prototype.fromSchema =
     function(schema)
@@ -738,7 +738,7 @@ function(in_window)
         this.issuer = new in_window.org.pkijs.simpl.RDN({ schema: asn1.result["issuer"] });
         this.serialNumber = asn1.result["serialNumber"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.IssuerAndSerialNumber.prototype.toSchema =
     function()
@@ -751,7 +751,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.IssuerAndSerialNumber.prototype.toJSON =
     function()
@@ -760,7 +760,7 @@ function(in_window)
             issuer: this.issuer.toJSON(),
             serialNumber: this.serialNumber.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -790,7 +790,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.Attribute.prototype.fromSchema =
     function(schema)
@@ -814,7 +814,7 @@ function(in_window)
         this.attrType = asn1.result["attrType"].value_block.toString();
         this.attrValues = asn1.result["attrValues"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.Attribute.prototype.toSchema =
     function()
@@ -829,7 +829,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.Attribute.prototype.toJSON =
     function()
@@ -843,7 +843,7 @@ function(in_window)
             _object.attrValues.push(this.attrValues[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -878,7 +878,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RSAES_OAEP_params.prototype.fromSchema =
     function(schema)
@@ -921,7 +921,7 @@ function(in_window)
         if("pSourceAlgorithm" in asn1.result)
             this.pSourceAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["pSourceAlgorithm"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RSAES_OAEP_params.prototype.toSchema =
     function()
@@ -962,7 +962,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RSAES_OAEP_params.prototype.toJSON =
     function()
@@ -979,7 +979,7 @@ function(in_window)
             _object.pSourceAlgorithm = this.pSourceAlgorithm.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1015,7 +1015,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBKDF2_params.prototype.fromSchema =
     function(schema)
@@ -1057,7 +1057,7 @@ function(in_window)
         if("prf" in asn1.result)
             this.prf = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["prf"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBKDF2_params.prototype.toSchema =
     function()
@@ -1080,7 +1080,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBKDF2_params.prototype.toJSON =
     function()
@@ -1097,7 +1097,7 @@ function(in_window)
             _object.prf = this.prf.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1125,7 +1125,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBES2_params.prototype.fromSchema =
     function(schema)
@@ -1157,7 +1157,7 @@ function(in_window)
         this.keyDerivationFunc = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["keyDerivationFunc"] });
         this.encryptionScheme = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["encryptionScheme"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBES2_params.prototype.toSchema =
     function()
@@ -1170,7 +1170,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBES2_params.prototype.toJSON =
     function()
@@ -1179,7 +1179,7 @@ function(in_window)
             keyDerivationFunc: this.keyDerivationFunc.toJSON(),
             encryptionScheme: this.encryptionScheme.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1208,7 +1208,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes.prototype.fromSchema =
     function(schema)
@@ -1249,7 +1249,7 @@ function(in_window)
         for(var i = 0; i < attributes_array.length; i++)
             this.attributes.push(new in_window.org.pkijs.simpl.cms.Attribute({ schema: attributes_array[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes.prototype.toSchema =
     function()
@@ -1271,7 +1271,7 @@ function(in_window)
             value: attributes_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes.prototype.toJSON =
     function()
@@ -1285,7 +1285,7 @@ function(in_window)
             _object.attributes.push(this.attributes[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1325,7 +1325,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNER_INFO.prototype.fromSchema =
     function(schema)
@@ -1361,7 +1361,7 @@ function(in_window)
             this.unsignedAttrs.fromSchema(asn1.result["SignerInfo.unsignedAttrs"]);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNER_INFO.prototype.toSchema =
     function()
@@ -1390,7 +1390,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNER_INFO.prototype.toJSON =
     function()
@@ -1414,7 +1414,7 @@ function(in_window)
             _object.unsignedAttrs = this.unsignedAttrs.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1479,7 +1479,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncapsulatedContentInfo.prototype.fromSchema =
     function(schema)
@@ -1504,7 +1504,7 @@ function(in_window)
         if("eContent" in asn1.result)
             this.eContent = asn1.result["eContent"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncapsulatedContentInfo.prototype.toSchema =
     function()
@@ -1529,7 +1529,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncapsulatedContentInfo.prototype.toJSON =
     function()
@@ -1542,7 +1542,7 @@ function(in_window)
             _object.eContent = this.eContent.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1580,7 +1580,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.fromSchema =
     function(schema)
@@ -1654,7 +1654,7 @@ function(in_window)
         for(var j = 0; j < signer_infos.length; j++)
             this.signerInfos.push(new in_window.org.pkijs.simpl.CMS_SIGNER_INFO({ schema: signer_infos[j] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.toSchema =
     function(encodeFlag)
@@ -1756,7 +1756,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.verify =
     function()
@@ -2261,7 +2261,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.sign =
     function(privateKey, signerIndex, hashAlgorithm, data)
@@ -2345,7 +2345,7 @@ function(in_window)
                         case "SHA-512":
                             defParams.algorithm.saltLength = 64;
                             break;
-                        default:;
+                        default:
                     }
                     // #endregion 
 
@@ -2455,7 +2455,7 @@ function(in_window)
             }
             );
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.toJSON =
     function()
@@ -2493,7 +2493,7 @@ function(in_window)
             _object.signerInfos.push(this.signerInfos[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2526,7 +2526,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.ECC_CMS_SharedInfo.prototype.fromSchema =
     function(schema)
@@ -2559,7 +2559,7 @@ function(in_window)
 
         this.suppPubInfo = asn1.result["suppPubInfo"].value_block.value[0];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.ECC_CMS_SharedInfo.prototype.toSchema =
     function()
@@ -2594,7 +2594,7 @@ function(in_window)
             value: output_array
         });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.ECC_CMS_SharedInfo.prototype.toJSON =
     function()
@@ -2609,7 +2609,7 @@ function(in_window)
         _object.suppPubInfo = this.suppPubInfo.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2639,7 +2639,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientIdentifier.prototype.fromSchema =
     function(schema)
@@ -2670,7 +2670,7 @@ function(in_window)
             this.value = asn1.result["block_name"].value_block.value[0];
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientIdentifier.prototype.toSchema =
     function()
@@ -2696,7 +2696,7 @@ function(in_window)
         // #endregion 
 
         return new in_window.org.pkijs.asn1.ANY();
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientIdentifier.prototype.toJSON =
     function()
@@ -2709,7 +2709,7 @@ function(in_window)
             _object.value = this.value.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2745,7 +2745,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyTransRecipientInfo.prototype.fromSchema =
     function(schema)
@@ -2786,7 +2786,7 @@ function(in_window)
         this.keyEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["keyEncryptionAlgorithm"] });
         this.encryptedKey = asn1.result["encryptedKey"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyTransRecipientInfo.prototype.toSchema =
     function()
@@ -2824,7 +2824,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyTransRecipientInfo.prototype.toJSON =
     function()
@@ -2835,7 +2835,7 @@ function(in_window)
             keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
             encryptedKey: this.encryptedKey.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2863,7 +2863,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorPublicKey.prototype.fromSchema =
     function(schema)
@@ -2891,7 +2891,7 @@ function(in_window)
         this.algorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["algorithm"] });
         this.publicKey = asn1.result["publicKey"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorPublicKey.prototype.toSchema =
     function()
@@ -2904,7 +2904,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorPublicKey.prototype.toJSON =
     function()
@@ -2913,7 +2913,7 @@ function(in_window)
             algorithm: this.algorithm.toJSON(),
             publicKey: this.publicKey.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2943,7 +2943,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorIdentifierOrKey.prototype.fromSchema =
     function(schema)
@@ -2992,7 +2992,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorIdentifierOrKey.prototype.toSchema =
     function()
@@ -3027,7 +3027,7 @@ function(in_window)
         // #endregion 
 
         return new in_window.org.pkijs.asn1.ANY();
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorIdentifierOrKey.prototype.toJSON =
     function()
@@ -3040,7 +3040,7 @@ function(in_window)
             _object.value = this.value.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3070,7 +3070,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherKeyAttribute.prototype.fromSchema =
     function(schema)
@@ -3096,7 +3096,7 @@ function(in_window)
         if("keyAttr" in asn1.result)
             this.keyAttr = asn1.result["keyAttr"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherKeyAttribute.prototype.toSchema =
     function()
@@ -3115,7 +3115,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherKeyAttribute.prototype.toJSON =
     function()
@@ -3128,7 +3128,7 @@ function(in_window)
             _object.keyAttr = this.keyAttr.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3162,7 +3162,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientKeyIdentifier.prototype.fromSchema =
     function(schema)
@@ -3196,7 +3196,7 @@ function(in_window)
         if("other" in asn1.result)
             this.other = new in_window.org.pkijs.simpl.cms.OtherKeyAttribute({ schema: asn1.result["other"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientKeyIdentifier.prototype.toSchema =
     function()
@@ -3218,7 +3218,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientKeyIdentifier.prototype.toJSON =
     function()
@@ -3234,7 +3234,7 @@ function(in_window)
             _object.other = this.other.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3264,7 +3264,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientIdentifier.prototype.fromSchema =
     function(schema)
@@ -3299,7 +3299,7 @@ function(in_window)
             this.value = new in_window.org.pkijs.simpl.cms.RecipientKeyIdentifier({ schema: asn1.result["block_name"] });
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientIdentifier.prototype.toSchema =
     function()
@@ -3325,7 +3325,7 @@ function(in_window)
         // #endregion 
 
         return new in_window.org.pkijs.asn1.ANY();
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientIdentifier.prototype.toJSON =
     function()
@@ -3338,7 +3338,7 @@ function(in_window)
             _object.value = this.value.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3366,7 +3366,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKey.prototype.fromSchema =
     function(schema)
@@ -3394,7 +3394,7 @@ function(in_window)
         this.rid = new in_window.org.pkijs.simpl.cms.KeyAgreeRecipientIdentifier({ schema: asn1.result["rid"] });
         this.encryptedKey = asn1.result["encryptedKey"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKey.prototype.toSchema =
     function()
@@ -3407,7 +3407,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKey.prototype.toJSON =
     function()
@@ -3416,7 +3416,7 @@ function(in_window)
             rid: this.rid.toJSON(),
             encryptedKey: this.encryptedKey.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3442,7 +3442,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKeys.prototype.fromSchema =
     function(schema)
@@ -3467,7 +3467,7 @@ function(in_window)
         for(var i = 0; i < array.length; i++)
             this.encryptedKeys.push(new in_window.org.pkijs.simpl.cms.RecipientEncryptedKey({ schema: array[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKeys.prototype.toSchema =
     function()
@@ -3484,7 +3484,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKeys.prototype.toJSON =
     function()
@@ -3497,7 +3497,7 @@ function(in_window)
             _object.encryptedKeys.push(this.encryptedKeys[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3538,7 +3538,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientInfo.prototype.fromSchema =
     function(schema)
@@ -3583,7 +3583,7 @@ function(in_window)
         this.keyEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["keyEncryptionAlgorithm"] });
         this.recipientEncryptedKeys = new in_window.org.pkijs.simpl.cms.RecipientEncryptedKeys({ schema: asn1.result["recipientEncryptedKeys"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientInfo.prototype.toSchema =
     function()
@@ -3621,7 +3621,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientInfo.prototype.toJSON =
     function()
@@ -3633,7 +3633,7 @@ function(in_window)
             keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
             recipientEncryptedKeys: this.recipientEncryptedKeys.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3667,7 +3667,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKIdentifier.prototype.fromSchema =
     function(schema)
@@ -3699,9 +3699,9 @@ function(in_window)
             this.date = asn1.result["date"];
 
         if("other" in asn1.result)
-            this.other = new in_window.org.pkijs.simpl.cms.OtherKeyAttribute({ schema: asn1.result["other"] })
+            this.other = new in_window.org.pkijs.simpl.cms.OtherKeyAttribute({ schema: asn1.result["other"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKIdentifier.prototype.toSchema =
     function()
@@ -3723,7 +3723,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKIdentifier.prototype.toJSON =
     function()
@@ -3739,7 +3739,7 @@ function(in_window)
             _object.other = this.other.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3775,7 +3775,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKRecipientInfo.prototype.fromSchema =
     function(schema)
@@ -3811,7 +3811,7 @@ function(in_window)
         this.keyEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["keyEncryptionAlgorithm"] });
         this.encryptedKey = asn1.result["encryptedKey"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKRecipientInfo.prototype.toSchema =
     function()
@@ -3826,7 +3826,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKRecipientInfo.prototype.toJSON =
     function()
@@ -3837,7 +3837,7 @@ function(in_window)
             keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
             encryptedKey: this.encryptedKey.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3879,7 +3879,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PasswordRecipientinfo.prototype.fromSchema =
     function(schema)
@@ -3919,7 +3919,7 @@ function(in_window)
         this.keyEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["keyEncryptionAlgorithm"] });
         this.encryptedKey = asn1.result["encryptedKey"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PasswordRecipientinfo.prototype.toSchema =
     function()
@@ -3949,7 +3949,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PasswordRecipientinfo.prototype.toJSON =
     function()
@@ -3960,7 +3960,7 @@ function(in_window)
             keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
             encryptedKey: this.encryptedKey.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3988,7 +3988,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRecipientInfo.prototype.fromSchema =
     function(schema)
@@ -4012,7 +4012,7 @@ function(in_window)
         this.oriType = asn1.result["oriType"].value_block.toString();
         this.oriValue = asn1.result["oriValue"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRecipientInfo.prototype.toSchema =
     function()
@@ -4025,7 +4025,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRecipientInfo.prototype.toJSON =
     function()
@@ -4038,7 +4038,7 @@ function(in_window)
             _object.oriValue = this.oriValue.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -4068,7 +4068,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_RECIPIENT_INFO.prototype.fromSchema =
     function(schema)
@@ -4120,11 +4120,11 @@ function(in_window)
                     this.variant = 5;
                     this.value = new in_window.org.pkijs.simpl.cms.OtherRecipientInfo({ schema: asn1.result["block_name"] });
                     break;
-                default:;
+                default:
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_RECIPIENT_INFO.prototype.toSchema =
     function()
@@ -4155,7 +4155,7 @@ function(in_window)
         // #endregion 
 
         return new in_window.org.pkijs.asn1.ANY();
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_RECIPIENT_INFO.prototype.toJSON =
     function()
@@ -4168,7 +4168,7 @@ function(in_window)
             _object.value = this.value.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -4196,7 +4196,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorInfo.prototype.fromSchema =
     function(schema)
@@ -4227,7 +4227,7 @@ function(in_window)
 
         this.crls = new in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES({ schema: asn1.result["crls"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorInfo.prototype.toSchema =
     function()
@@ -4254,7 +4254,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorInfo.prototype.toJSON =
     function()
@@ -4263,7 +4263,7 @@ function(in_window)
             certs: this.certs.toJSON(),
             crls: this.crls.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -4331,7 +4331,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncryptedContentInfo.prototype.fromSchema =
     function(schema)
@@ -4368,7 +4368,7 @@ function(in_window)
             this.encryptedContent.id_block.tag_number = 4; // OCTETSTRING (!!!) The value still has instance of "in_window.org.pkijs.asn1.ASN1_CONSTRUCTED / ASN1_PRIMITIVE"
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncryptedContentInfo.prototype.toSchema =
     function()
@@ -4404,7 +4404,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncryptedContentInfo.prototype.toJSON =
     function()
@@ -4418,7 +4418,7 @@ function(in_window)
             _object.encryptedContent = this.encryptedContent.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -4457,7 +4457,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.fromSchema =
     function(schema)
@@ -4511,7 +4511,7 @@ function(in_window)
                 this.unprotectedAttrs.push(new in_window.org.pkijs.simpl.ATTRIBUTE({ schema: attributes_array[j] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.toSchema =
     function()
@@ -4565,7 +4565,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.toJSON =
     function()
@@ -4593,7 +4593,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.addRecipientByCertificate =
     function(certificate, parameters, variant)
@@ -4776,7 +4776,7 @@ function(in_window)
         // #endregion 
 
         return true;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.addRecipientByPreDefinedData =
     function(preDefinedData, parameters, variant)
@@ -4941,7 +4941,7 @@ function(in_window)
                 throw new Error("Unknown value for \"variant\": " + variant);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.encrypt =
     function(contentEncryptionAlgorithm, contentToEncrypt)
@@ -5608,7 +5608,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.decrypt =
     function(recipientIndex, parameters)
@@ -5626,7 +5626,7 @@ function(in_window)
 
         // #region Check for input parameters
         if((recipientIndex + 1) > this.recipientInfos.length)
-            return new Promise(function(resolve, reject) { reject("Maximum value for \"index\" is: " + (this.recipientInfos.length - 1)); });
+            return new Promise(function(resolve, reject) { reject("Maximum value for \"index\" is: " + (_this.recipientInfos.length - 1)); });
         // #endregion 
 
         // #region Get a "crypto" extension 
@@ -6135,7 +6135,7 @@ function(in_window)
                         currentSequence = PasswordRecipientinfo(recipientIndex);
                         break;
                     default:
-                        return new Promise(function(resolve, reject) { reject("Uknown recipient type in array with index " + i); });
+                        return new Promise(function(resolve, reject) { reject("Uknown recipient type in array with index " + recipientIndex); });
                 }
 
                 return currentSequence;
@@ -6189,7 +6189,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -6224,7 +6224,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.fromSchema =
     function(schema)
@@ -6262,7 +6262,7 @@ function(in_window)
                 this.unprotectedAttrs.push(new in_window.org.pkijs.simpl.ATTRIBUTE({ schema: attributes_array[j] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.toSchema =
     function()
@@ -6296,7 +6296,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.toJSON =
     function()
@@ -6316,7 +6316,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.encrypt =
     function(parameters)
@@ -6486,7 +6486,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.decrypt =
     function(parameters)
@@ -6633,7 +6633,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************

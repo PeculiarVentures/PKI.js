@@ -121,7 +121,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.CertID.prototype.fromSchema =
     function(schema)
@@ -149,7 +149,7 @@ function(in_window)
         this.issuerKeyHash = asn1.result["issuerKeyHash"];
         this.serialNumber = asn1.result["serialNumber"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.CertID.prototype.toSchema =
     function()
@@ -164,7 +164,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.CertID.prototype.toJSON =
     function()
@@ -175,7 +175,7 @@ function(in_window)
             issuerKeyHash: this.issuerKeyHash.toJSON(),
             serialNumber: this.serialNumber.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.CertID.prototype.isEqual =
     function(certificateID)
@@ -204,7 +204,7 @@ function(in_window)
         // #endregion 
 
         return true;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.CertID.prototype.createForCertificate =
     function(certificate, parameters)
@@ -293,7 +293,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -322,7 +322,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.Request.prototype.fromSchema =
     function(schema)
@@ -362,7 +362,7 @@ function(in_window)
                 this.singleRequestExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.Request.prototype.toSchema =
     function()
@@ -399,7 +399,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.Request.prototype.toJSON =
     function()
@@ -417,7 +417,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -456,7 +456,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.TBSRequest.prototype.fromSchema =
     function(schema)
@@ -492,7 +492,7 @@ function(in_window)
                 this.requestExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.TBSRequest.prototype.toSchema =
     function(encodeFlag)
@@ -579,7 +579,7 @@ function(in_window)
         // #region Construct and return new ASN.1 schema for this object 
         return tbs_schema;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.TBSRequest.prototype.toJSON =
     function()
@@ -606,7 +606,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -637,7 +637,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.Signature.prototype.fromSchema =
     function(schema)
@@ -674,7 +674,7 @@ function(in_window)
                 this.certs.push(new in_window.org.pkijs.simpl.CERT({ schema: certs_array[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.Signature.prototype.toSchema =
     function()
@@ -713,14 +713,14 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.Signature.prototype.toJSON =
     function()
     {
         var _object = {
             signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-            signature: this.signature.toJSON(),
+            signature: this.signature.toJSON()
         };
 
         if("certs" in this)
@@ -732,7 +732,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -761,7 +761,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_REQUEST.prototype.fromSchema =
     function(schema)
@@ -781,7 +781,7 @@ function(in_window)
         if("optionalSignature" in asn1.result)
             this.optionalSignature = new in_window.org.pkijs.simpl.ocsp.Signature({ schema: asn1.result["optionalSignature"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_REQUEST.prototype.toSchema =
     function(encodeFlag)
@@ -806,7 +806,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_REQUEST.prototype.sign =
     function(privateKey, hashAlgorithm)
@@ -867,7 +867,7 @@ function(in_window)
                         case "SHA-512":
                             defParams.algorithm.saltLength = 64;
                             break;
-                        default:;
+                        default:
                     }
                     // #endregion 
 
@@ -939,7 +939,7 @@ function(in_window)
             }
             );
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_REQUEST.prototype.toJSON =
     function()
@@ -969,7 +969,7 @@ function(in_window)
             _object.optionalSignature = this.optionalSignature.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_REQUEST.prototype.createForCertificate =
     function(certificate, parameters)
@@ -1014,7 +1014,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1042,7 +1042,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.ResponseBytes.prototype.fromSchema =
     function(schema)
@@ -1066,7 +1066,7 @@ function(in_window)
         this.responseType = asn1.result["responseType"].value_block.toString();
         this.response = asn1.result["response"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.ResponseBytes.prototype.toSchema =
     function()
@@ -1079,7 +1079,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.ResponseBytes.prototype.toJSON =
     function()
@@ -1088,7 +1088,7 @@ function(in_window)
             responseType: this.responseType,
             response: this.response.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1117,7 +1117,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_RESPONSE.prototype.fromSchema =
     function(schema)
@@ -1137,7 +1137,7 @@ function(in_window)
         if("responseBytes" in asn1.result)
             this.responseBytes = new in_window.org.pkijs.simpl.ocsp.ResponseBytes({ schema: asn1.result["responseBytes"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_RESPONSE.prototype.toSchema =
     function()
@@ -1161,7 +1161,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_RESPONSE.prototype.verify =
     function()
@@ -1187,7 +1187,7 @@ function(in_window)
         else
             return new Promise(function(resolve, reject) { reject("Unknown ResponseBytes type: " + _this.responseBytes.responseType); });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_RESPONSE.prototype.sign =
     function(privateKey, hashAlgorithm)
@@ -1208,7 +1208,7 @@ function(in_window)
         else
             return new Promise(function(resolve, reject) { reject("Unknown ResponseBytes type: " + _this.responseBytes.responseType); });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_RESPONSE.prototype.toJSON =
     function()
@@ -1218,10 +1218,10 @@ function(in_window)
         };
 
         if("responseBytes" in this)
-            _object.responseBytes = this.responseBytes.toJSON()
+            _object.responseBytes = this.responseBytes.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_RESPONSE.prototype.getCertificateStatus =
     function(certificateID)
@@ -1252,7 +1252,7 @@ function(in_window)
         // #endregion   
 
         return basicResponse.getCertificateStatus(certificateID);
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1300,7 +1300,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.SingleResponse.prototype.fromSchema =
     function(schema)
@@ -1343,7 +1343,7 @@ function(in_window)
                 this.singleExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.SingleResponse.prototype.toSchema =
     function()
@@ -1375,7 +1375,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.SingleResponse.prototype.toJSON =
     function()
@@ -1398,7 +1398,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1442,7 +1442,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.ResponseData.prototype.fromSchema =
     function(schema)
@@ -1483,7 +1483,7 @@ function(in_window)
                 this.responseExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.ResponseData.prototype.toSchema =
     function(encodeFlag)
@@ -1569,7 +1569,7 @@ function(in_window)
         // #region Construct and return new ASN.1 schema for this object 
         return tbs_schema;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ocsp.ResponseData.prototype.toJSON =
     function()
@@ -1602,7 +1602,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1635,7 +1635,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE.prototype.fromSchema =
     function(schema)
@@ -1665,7 +1665,7 @@ function(in_window)
                 this.certs.push(new in_window.org.pkijs.simpl.CERT({ schema: certs_array[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE.prototype.toSchema =
     function()
@@ -1706,7 +1706,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE.prototype.verify =
     function()
@@ -1996,7 +1996,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE.prototype.sign =
     function(privateKey, hashAlgorithm)
@@ -2052,7 +2052,7 @@ function(in_window)
                         case "SHA-512":
                             defParams.algorithm.saltLength = 64;
                             break;
-                        default:;
+                        default:
                     }
                     // #endregion 
 
@@ -2124,7 +2124,7 @@ function(in_window)
             }
             );
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE.prototype.toJSON =
     function()
@@ -2132,7 +2132,7 @@ function(in_window)
         var _object = {
             tbsResponseData: this.tbsResponseData.toJSON(),
             signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-            signature: this.signature.toJSON(),
+            signature: this.signature.toJSON()
         };
 
         if("certs" in this)
@@ -2144,7 +2144,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE.prototype.getCertificateStatus =
     function(certificateID)
@@ -2176,7 +2176,7 @@ function(in_window)
                         case 2: // unknown
                             result.status = 2;
                             break;
-                        default:;
+                        default:
                     }
                 }
                 else
@@ -2194,7 +2194,7 @@ function(in_window)
         // #endregion 
 
         return result;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2222,7 +2222,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.tsp.MessageImprint.prototype.fromSchema =
     function(schema)
@@ -2250,7 +2250,7 @@ function(in_window)
         this.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["hashAlgorithm"] });
         this.hashedMessage = asn1.result["hashedMessage"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.tsp.MessageImprint.prototype.toSchema =
     function()
@@ -2263,7 +2263,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.tsp.MessageImprint.prototype.toJSON =
     function()
@@ -2272,7 +2272,7 @@ function(in_window)
             hashAlgorithm: this.hashAlgorithm.toJSON(),
             hashedMessage: this.hashedMessage.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2312,7 +2312,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TSP_REQUEST.prototype.fromSchema =
     function(schema)
@@ -2346,7 +2346,7 @@ function(in_window)
                 this.extensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: extensions_array[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TSP_REQUEST.prototype.toSchema =
     function()
@@ -2388,7 +2388,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TSP_REQUEST.prototype.toJSON =
     function()
@@ -2416,7 +2416,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2449,7 +2449,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.tsp.Accuracy.prototype.fromSchema =
     function(schema)
@@ -2484,7 +2484,7 @@ function(in_window)
             this.micros = intMicros.value_block.value_dec;
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.tsp.Accuracy.prototype.toSchema =
     function()
@@ -2525,7 +2525,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.tsp.Accuracy.prototype.toJSON =
     function()
@@ -2542,7 +2542,7 @@ function(in_window)
             _object.micros = this.micros;
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2591,7 +2591,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TST_INFO.prototype.fromSchema =
     function(schema)
@@ -2628,7 +2628,7 @@ function(in_window)
                 this.extensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: extensions_array[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TST_INFO.prototype.toSchema =
     function()
@@ -2682,7 +2682,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TST_INFO.prototype.toJSON =
     function()
@@ -2716,7 +2716,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TST_INFO.prototype.verify =
     function()
@@ -2759,7 +2759,7 @@ function(in_window)
         if(("name" in shaAlgorithm) === false)
             return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.messageImprint.hashAlgorithm.algorithm_id); });
 
-        sha_algorithm = shaAlgorithm.name;
+        var sha_algorithm = shaAlgorithm.name;
         // #endregion 
 
         // #region Calculate message digest for input "data" buffer 
@@ -2771,16 +2771,13 @@ function(in_window)
             ).then(
             function(result)
             {
-                if(in_window.org.pkijs.isEqual_buffer(result, _this.messageImprint.hashedMessage.value_block.value_hex))
-                    return true;
-                else
-                    return false;
+                return !!in_window.org.pkijs.isEqual_buffer(result, _this.messageImprint.hashedMessage.value_block.value_hex);
             }
             );
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2812,7 +2809,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.tsp.PKIStatusInfo.prototype.fromSchema =
     function(schema)
@@ -2850,7 +2847,7 @@ function(in_window)
         if("failInfo" in asn1.result)
             this.failInfo = asn1.result["failInfo"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.tsp.PKIStatusInfo.prototype.toSchema =
     function()
@@ -2873,7 +2870,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.tsp.PKIStatusInfo.prototype.toJSON =
     function()
@@ -2894,7 +2891,7 @@ function(in_window)
             _object.failInfo = this.failInfo.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2923,7 +2920,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TSP_RESPONSE.prototype.fromSchema =
     function(schema)
@@ -2943,7 +2940,7 @@ function(in_window)
         if("TimeStampResp.timeStampToken" in asn1.result)
             this.timeStampToken = new in_window.org.pkijs.simpl.CMS_CONTENT_INFO({ schema: asn1.result["TimeStampResp.timeStampToken"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TSP_RESPONSE.prototype.toSchema =
     function()
@@ -2961,7 +2958,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TSP_RESPONSE.prototype.verify =
     function()
@@ -2998,7 +2995,7 @@ function(in_window)
 
         return signed_simp.verify({ signer: 0, trusted_certs: trusted_certs });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TSP_RESPONSE.prototype.sign =
     function(privateKey, hashAlgorithm)
@@ -3023,7 +3020,7 @@ function(in_window)
 
         return signed_simp.sign(privateKey, 0, hashAlgorithm);
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TSP_RESPONSE.prototype.toJSON =
     function()
@@ -3036,7 +3033,7 @@ function(in_window)
             _object.timeStampToken = this.timeStampToken.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
