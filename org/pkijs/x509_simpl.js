@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2014, GMO GlobalSign
  * Copyright (c) 2015, Peculiar Ventures
  * All rights reserved.
@@ -269,7 +269,7 @@ function(in_window)
                     this.Name = in_window.org.pkijs.fromBER(value_ber).result.value_block.toString(); // Getting a string representation of the OID
                 }
                 break;
-            default:
+            default:;
         }
         // #endregion 
     };
@@ -508,11 +508,6 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    };
-    //**************************************************************************************
-    in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER.prototype.getCommonName =
-    function()
-    {
     };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER.prototype.toJSON =
@@ -880,8 +875,8 @@ function(in_window)
         // #region Internal properties of the object 
         // OPTIONAL this.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
         // OPTIONAL this.maskGenAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
-        // OPTIONAL this.saltLength = 20; // new in_window.org.pkijs.asn1.INTEGER();
-        // OPTIONAL this.trailerField = 1; // new in_window.org.pkijs.asn1.INTEGER();
+        // OPTIONAL this.saltLength = 20; 
+        // OPTIONAL this.trailerField = 1;
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -1014,10 +1009,10 @@ function(in_window)
             _object.maskGenAlgorithm = this.maskGenAlgorithm.toJSON();
 
         if("saltLength" in this)
-            _object.saltLength = this.saltLength.toJSON();
+            _object.saltLength = this.saltLength;
 
         if("trailerField" in this)
-            _object.trailerField = this.trailerField.toJSON();
+            _object.trailerField = this.trailerField;
 
         return _object;
     };
@@ -1103,13 +1098,13 @@ function(in_window)
 
         // #region Initial check 
         if(typeof publicKey === "undefined")
-            return new Promise(function(resolve, reject) { reject("Need to provide publicKey input parameter"); });
+            return Promise.reject("Need to provide publicKey input parameter");
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Export public key 
@@ -1132,12 +1127,12 @@ function(in_window)
                 }
                 catch(exception)
                 {
-                    return new Promise(function(resolve, reject) { reject("Error during initializing object from schema"); });
+                    return Promise.reject("Error during initializing object from schema");
                 }
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Error during exporting public key: " + error); });
+                return Promise.reject("Error during exporting public key: " + error);
             }
             );
         // #endregion 
@@ -1965,7 +1960,7 @@ function(in_window)
         var output_array = new Array();
 
         for(var i = 0; i < this.mappings.length; i++)
-            output_array.push(this.mappings.toSchema());
+            output_array.push(this.mappings[i].toSchema());
         // #endregion 
 
         // #region Construct and return new ASN.1 schema for this object 
@@ -2742,8 +2737,8 @@ function(in_window)
         {
             var int2 = new in_window.org.pkijs.asn1.INTEGER({ value: this.inhibitPolicyMapping });
 
-            int1.id_block.tag_class = 3; // CONTEXT-SPECIFIC
-            int1.id_block.tag_number = 1; // [1]
+            int2.id_block.tag_class = 3; // CONTEXT-SPECIFIC
+            int2.id_block.tag_number = 1; // [1]
 
             output_array.push(int2);
         }
@@ -3562,7 +3557,7 @@ function(in_window)
             _object.onlyContainsCACerts = this.onlyContainsCACerts;
 
         if("onlySomeReasons" in this)
-            _object.onlySomeReasons = this.onlySomeReasons.toJSON();
+            _object.onlySomeReasons = this.onlySomeReasons;
 
         if("indirectCRL" in this)
             _object.indirectCRL = this.indirectCRL;
@@ -3637,7 +3632,7 @@ function(in_window)
         this.extnValue = asn1.result.extnValue;
 
         // #region Get "parsedValue" for well-known extensions 
-        var asn1 = in_window.org.pkijs.fromBER(this.extnValue.value_block.value_hex);
+        asn1 = in_window.org.pkijs.fromBER(this.extnValue.value_block.value_hex);
         if(asn1.offset === (-1))
             return;
 
@@ -3707,7 +3702,7 @@ function(in_window)
             case "1.3.6.1.5.5.7.1.11": // SubjectInfoAccess
                 this.parsedValue = new in_window.org.pkijs.simpl.x509.InfoAccess({ schema: asn1.result });
                 break;
-            default:
+            default:;
         }
         // #endregion 
         // #endregion 
@@ -4105,19 +4100,19 @@ function(in_window)
         }
 
         if((subjectPublicKeyInfo instanceof in_window.org.pkijs.simpl.PUBLIC_KEY_INFO) === false)
-            return new Promise(function(resolve, reject) { reject("Please provide issuer certificate as a parameter"); });
+            return Promise.reject("Please provide issuer certificate as a parameter");
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Find signer's hashing algorithm 
         var sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
         if(sha_algorithm === "")
-            return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+            return Promise.reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id);
         // #endregion 
 
         // #region Importing public key 
@@ -4127,7 +4122,7 @@ function(in_window)
                 // #region Get information about public key algorithm and default parameters for import
                 var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.signatureAlgorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
-                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+                    return Promise.reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id);
 
                 var algorithm_name = algorithmObject.name;
 
@@ -4176,7 +4171,7 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject(ex); });
+                        return Promise.reject(ex);
                     }
 
                     if("saltLength" in pssParameters)
@@ -4190,7 +4185,7 @@ function(in_window)
                     {
                         var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
                         if(("name" in hashAlgorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                            return Promise.reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id);
 
                         hash_algo = hashAlgorithm.name;
                     }
@@ -4222,7 +4217,7 @@ function(in_window)
 
         // #region Get a private key from function parameter 
         if(typeof privateKey === "undefined")
-            return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
+            return Promise.reject("Need to provide a private key for signing");
         // #endregion 
 
         // #region Get hashing algorithm 
@@ -4233,7 +4228,7 @@ function(in_window)
             // #region Simple check for supported algorithm 
             var oid = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
             if(oid === "")
-                return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
             // #endregion 
         }
         // #endregion 
@@ -4265,7 +4260,7 @@ function(in_window)
                         case "SHA-512":
                             defParams.algorithm.saltLength = 64;
                             break;
-                        default:
+                        default:;
                     }
                     // #endregion 
 
@@ -4276,7 +4271,7 @@ function(in_window)
                     {
                         var hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
                         if(hashAlgorithmOID === "")
-                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                            return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
 
                         paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
@@ -4305,7 +4300,7 @@ function(in_window)
                 }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
+                return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
         }
         // #endregion 
 
@@ -4316,7 +4311,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Signing TBS data on provided private key 
@@ -4334,7 +4329,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Signing error: " + error); });
+                return Promise.reject("Signing error: " + error);
             }
             );
         // #endregion 
@@ -4352,7 +4347,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Find correct algorithm for imported public key 
@@ -4361,20 +4356,20 @@ function(in_window)
             if("algorithm" in arguments[0])
                 algorithm = arguments[0].algorithm;
             else
-                return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"algorithm\""); });
+                return Promise.reject("Absent mandatory parameter \"algorithm\"");
         }
         else
         {
             // #region Find signer's hashing algorithm 
             var sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
             if(sha_algorithm === "")
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+                return Promise.reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id);
             // #endregion   
 
             // #region Get information about public key algorithm and default parameters for import
             var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(this.signatureAlgorithm.algorithm_id);
             if(("name" in algorithmObject) === false)
-                return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+                return Promise.reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id);
 
             var algorithm_name = algorithmObject.name;
 
@@ -4391,6 +4386,8 @@ function(in_window)
         var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
         // #endregion 
 
+        document.getElementById("new_data").value = in_window.formatPEM(in_window.btoa(in_window.arrayBufferToString(publicKeyInfo_buffer)));;
+
         return crypto.importKey("spki", publicKeyInfo_view, algorithm.algorithm, true, algorithm.usages);
     };
     //**************************************************************************************
@@ -4402,7 +4399,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         return crypto.digest({ name: "sha-1" }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.value_block.value_hex));
@@ -4783,7 +4780,7 @@ function(in_window)
 
                 // The CRL issuer name and "issuerCertificate" subject name are not equal
                 if(this.issuer.isEqual(arguments[0].issuerCertificate.subject) == false)
-                    return new Promise(function(resolve, reject) { resolve(false); });
+                    return Promise.resolve(false);
             }
 
             // #region In case if there is only public key during verification 
@@ -4793,7 +4790,7 @@ function(in_window)
         }
 
         if((subjectPublicKeyInfo instanceof in_window.org.pkijs.simpl.PUBLIC_KEY_INFO) === false)
-            return new Promise(function(resolve, reject) { reject("Issuer's certificate must be provided as an input parameter"); });
+            return Promise.reject("Issuer's certificate must be provided as an input parameter");
         // #endregion 
 
         // #region Check the CRL for unknown critical extensions 
@@ -4805,7 +4802,7 @@ function(in_window)
                 {
                     // We can not be sure that unknown extension has no value for CRL signature
                     if(("parsedValue" in this.crlExtensions[i]) == false)
-                        return new Promise(function(resolve, reject) { resolve(false); });
+                        return Promise.resolve(false);
                 }
             }
         }
@@ -4814,13 +4811,13 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Find signer's hashing algorithm 
         var sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
         if(sha_algorithm === "")
-            return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+            return Promise.reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id);
         // #endregion 
 
         // #region Import public key 
@@ -4830,7 +4827,7 @@ function(in_window)
                 // #region Get information about public key algorithm and default parameters for import
                 var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.signature.algorithm_id);
                 if(("name" in algorithmObject) === "")
-                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + _this.signature.algorithm_id); });
+                    return Promise.reject("Unsupported public key algorithm: " + _this.signature.algorithm_id);
 
                 var algorithm_name = algorithmObject.name;
 
@@ -4883,7 +4880,7 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject(ex); });
+                        return Promise.reject(ex);
                     }
 
                     if("saltLength" in pssParameters)
@@ -4897,7 +4894,7 @@ function(in_window)
                     {
                         var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
                         if(("name" in hashAlgorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                            return Promise.reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id);
 
                         hash_algo = hashAlgorithm.name;
                     }
@@ -4929,7 +4926,7 @@ function(in_window)
 
         // #region Get a private key from function parameter 
         if(typeof privateKey === "undefined")
-            return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
+            return Promise.reject("Need to provide a private key for signing");
         // #endregion 
 
         // #region Get hashing algorithm 
@@ -4940,7 +4937,7 @@ function(in_window)
             // #region Simple check for supported algorithm 
             var oid = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
             if(oid === "")
-                return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
             // #endregion 
         }
         // #endregion 
@@ -4972,7 +4969,7 @@ function(in_window)
                         case "SHA-512":
                             defParams.algorithm.saltLength = 64;
                             break;
-                        default:
+                        default:;
                     }
                     // #endregion 
 
@@ -4983,7 +4980,7 @@ function(in_window)
                     {
                         var hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
                         if(hashAlgorithmOID === "")
-                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                            return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
 
                         paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
@@ -5012,7 +5009,7 @@ function(in_window)
                 }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
+                return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
         }
         // #endregion 
 
@@ -5023,7 +5020,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Signing TBS data on provided private key 
@@ -5043,7 +5040,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Signing error: " + error); });
+                return Promise.reject("Signing error: " + error);
             }
             );
         // #endregion 
@@ -5368,13 +5365,13 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Find a correct hashing algorithm 
         sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
         if(sha_algorithm === "")
-            return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+            return Promise.reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id);
         // #endregion 
 
         // #region Importing public key 
@@ -5384,7 +5381,7 @@ function(in_window)
                 // #region Get information about public key algorithm and default parameters for import
                 var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.signatureAlgorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
-                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+                    return Promise.reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id);
 
                 var algorithm_name = algorithmObject.name;
 
@@ -5433,7 +5430,7 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject(ex); });
+                        return Promise.reject(ex);
                     }
 
                     if("saltLength" in pssParameters)
@@ -5447,7 +5444,7 @@ function(in_window)
                     {
                         var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
                         if(("name" in hashAlgorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                            return Promise.reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id);
 
                         hash_algo = hashAlgorithm.name;
                     }
@@ -5479,7 +5476,7 @@ function(in_window)
 
         // #region Get a private key from function parameter 
         if(typeof privateKey === "undefined")
-            return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
+            return Promise.reject("Need to provide a private key for signing");
         // #endregion 
 
         // #region Get hashing algorithm 
@@ -5490,7 +5487,7 @@ function(in_window)
             // #region Simple check for supported algorithm 
             var oid = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
             if(oid === "")
-                return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
             // #endregion 
         }
         // #endregion 
@@ -5521,7 +5518,7 @@ function(in_window)
                         case "SHA-512":
                             defParams.algorithm.saltLength = 64;
                             break;
-                        default:
+                        default:;
                     }
                     // #endregion 
 
@@ -5532,7 +5529,7 @@ function(in_window)
                     {
                         var hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
                         if(hashAlgorithmOID === "")
-                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                            return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
 
                         paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
@@ -5560,7 +5557,7 @@ function(in_window)
                 }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
+                return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
         }
         // #endregion 
 
@@ -5571,7 +5568,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Signing TBS data on provided private key 
@@ -5589,7 +5586,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Signing error: " + error); });
+                return Promise.reject("Signing error: " + error);
             }
             );
         // #endregion 
@@ -5758,9 +5755,12 @@ function(in_window)
         /// <field name="trusted_certs" type="Array" elementType="in_window.org.pkijs.simpl.CERT">Array of pre-defined trusted (by user) certificates</field>
         this.trusted_certs = new Array();
         /// <field name="certs" type="Array" elementType="in_window.org.pkijs.simpl.CERT">Array with certificate chain. Could be only one end-user certificate in there!</field>
-        this.certs = new Array();
+        this.certs = new Array(); 
         /// <field name="crls" type="Array" elementType="in_window.org.pkijs.simpl.CRL">Array of all CRLs for all certificates from certificate chain</field>
-        this.crls = new Array();
+        this.crls = new Array(); 
+        /// <field name="ocsps" type="Array" elementType="in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE">Array of all OCSP responses</field>
+        this.ocsps = new Array(); 
+        this.checkDate = new Date();
         // #endregion 
 
         // #region Initialize internal properties by input values
@@ -5769,11 +5769,12 @@ function(in_window)
             this.trusted_certs = arguments[0].trusted_certs || new Array();
             this.certs = arguments[0].certs || new Array();
             this.crls = arguments[0].crls || new Array();
+            this.checkDate = arguments[0].checkDate || new Date();
         }
         // #endregion 
     };
     //**************************************************************************************
-    in_window.org.pkijs.simpl.CERT_CHAIN.prototype.sort =
+    in_window.org.pkijs.simpl.CERT_CHAIN.prototype.old_sort =
     function()
     {
         // #region Initial variables 
@@ -5791,14 +5792,13 @@ function(in_window)
 
         // #region Initial checks 
         if(certs.length === 0)
-            return new Promise(function(resolve, reject)
-            {
-                reject({
-                    result: false,
-                    result_code: 2,
-                    result_message: "Certificate's array can not be empty"
-                });
+        {
+            return Promise.reject({
+                result: false,
+                result_code: 2,
+                result_message: "Certificate's array can not be empty"
             });
+        }
         // #endregion 
 
         // #region Find end-user certificate 
@@ -5819,14 +5819,11 @@ function(in_window)
                     if((certs[i].extensions[j].critical === true) &&
                        (("parsedValue" in certs[i].extensions[j]) === false))
                     {
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject({
+                        return Promise.reject({
                                 result: false,
                                 result_code: 6,
                                 result_message: "Unable to parse critical certificate extension: " + certs[i].extensions[j].extnID
                             });
-                        });
                     }
 
                     if(certs[i].extensions[j].extnID === "2.5.29.15") // KeyUsage
@@ -5853,47 +5850,44 @@ function(in_window)
                 }
 
                 if((mustBeCA === true) && (isCA === false))
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
+                {
+                    return Promise.reject({
                             result: false,
                             result_code: 3,
                             result_message: "Unable to build certificate chain - using \"keyCertSign\" flag set without BasicConstaints"
                         });
-                    });
+                }
 
                 if((keyUsagePresent === true) && (isCA === true) && (mustBeCA === false))
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
+                {
+                    return Promise.reject({
                             result: false,
                             result_code: 4,
                             result_message: "Unable to build certificate chain - \"keyCertSign\" flag was not set"
                         });
-                    });
+                }
 
+                // TODO: Change the check to be applied to CRL "issuer_certificate" only
                 if((isCA === true) && (keyUsagePresent === true) && (cRLSign === false))
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
+                {
+                    return Promise.reject({
                             result: false,
                             result_code: 5,
                             result_message: "Unable to build certificate chain - intermediate certificate must have \"cRLSign\" key usage flag"
                         });
-                    });
+                }
             }
 
             if(isCA === false)
             {
                 if(sorted_certs.length !== 0)
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
-                            result: false,
-                            result_code: 7,
-                            result_message: "Unable to build certificate chain - more than one possible end-user certificate"
-                        });
+                {
+                    return Promise.reject({
+                        result: false,
+                        result_code: 7,
+                        result_message: "Unable to build certificate chain - more than one possible end-user certificate"
                     });
+                }
 
                 sorted_certs.push(certs[i]);
                 end_user_index = i;
@@ -5905,33 +5899,29 @@ function(in_window)
 
         // #region Check that end-user certificate was found 
         if(sorted_certs.length === 0)
-            return new Promise(function(resolve, reject)
-            {
-                reject({
-                    result: false,
-                    result_code: 1,
-                    result_message: "Can't find end-user certificate"
-                });
+        {
+            return Promise.reject({
+                result: false,
+                result_code: 1,
+                result_message: "Can't find end-user certificate"
             });
+        }
         // #endregion 
 
         // #region Return if there is only one certificate in certificate's array 
         if(certs.length === 0)
         {
             if(sorted_certs[0].issuer.isEqual(sorted_certs[0].subject) === true)
-                return new Promise(function(resolve, reject) { resolve(sorted_certs); });
+                return Promise.resolve(sorted_certs);
             else
             {
                 if(this.trusted_certs.length === 0)
                 {
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
+                    return Promise.reject({
                             result: false,
                             result_code: 70,
                             result_message: "Can't find root certificate"
                         });
-                    });
                 }
                 else
                 {
@@ -5963,14 +5953,11 @@ function(in_window)
                     if((subject_certificate.notBefore.value > check_date) ||
                        (subject_certificate.notAfter.value < check_date))
                     {
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject({
+                        return Promise.reject({
                                 result: false,
                                 result_code: 8,
                                 result_message: "Certificate validity period is out of checking date"
                             });
-                        });
                     }
                 }
                 );
@@ -5978,49 +5965,71 @@ function(in_window)
 
             // #region Give ability to not provide CRLs (all certificates assume to be valid) 
             if(_this.crls.length === 0)
+            {
                 return sequence.then(
                     function()
                     {
-                        return new Promise(function(resolve, reject) { resolve(); });
+                        return Promise.resolve();
                     }
                     );
+            }
             // #endregion 
 
             // #region Find correct CRL for "issuer_certificate" 
-            function find_crl(index)
+            function find_crl(index, crl_issuer_certificate)
             {
-                return _this.crls[index].verify({ issuerCertificate: issuer_certificate }).then(
+                // #region Check "nextUpdate" value for current CRL
+                if("nextUpdate" in _this.crls[index])
+                {
+                    // The "nextUpdate" is older than "check_date".
+                    // Thus we should do have another, updated CRL.
+                    // Thus the CRL assumed to be invalid.
+                    if(_this.crls[index].nextUpdate.value < check_date)
+                    {
+                        index++;
+
+                        if(index < _this.crls.length)
+                            return find_crl(index, crl_issuer_certificate);
+                        else
+                        {
+                            return Promise.reject({
+                                result: false,
+                                result_code: 9,
+                                result_message: "Unable to find CRL for issuer's certificate"
+                            });
+                        }
+                    }
+                }
+                // #endregion 
+
+                return _this.crls[index].verify({ issuerCertificate: crl_issuer_certificate }).then(
                     function(result)
                     {
                         if(result === true)
-                            return new Promise(function(resolve, reject) { resolve(_this.crls[index]); });
+                            return Promise.resolve(_this.crls[index]);
                         else
                         {
                             index++;
 
                             if(index < _this.crls.length)
-                                return find_crl(index);
+                                return find_crl(index, crl_issuer_certificate);
                             else
-                                return new Promise(function(resolve, reject)
-                                {
-                                    reject({
-                                        result: false,
-                                        result_code: 9,
-                                        result_message: "Unable to find CRL for issuer's certificate"
-                                    });
+                            {
+                                return Promise.reject({
+                                    result: false,
+                                    result_code: 9,
+                                    result_message: "Unable to find CRL for issuer's certificate"
                                 });
+                            }
                         }
                     },
                     function(error)
                     {
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject({
+                        return Promise.reject({
                                 result: false,
                                 result_code: 10,
                                 result_message: "Unable to find CRL for issuer's certificate"
                             });
-                        });
                     }
                     );
             }
@@ -6028,7 +6037,46 @@ function(in_window)
             sequence = sequence.then(
                 function()
                 {
-                    return find_crl(0);
+                    // #region Initial variables 
+                    var issuerCertificates = [issuer_certificate];
+                    var index = 0;
+                    // #endregion 
+
+                    // #region Find all intermediate certificates with "subject" equal to subject in "issuer_certificate" 
+                    for(var i = 0; i < _this.certs.length; i++)
+                    {
+                        if(_this.certs[i].subject.isEqual(issuer_certificate.subject))
+                            issuerCertificates.push(_this.certs[i]);
+                    }
+                    // #endregion 
+
+                    return find_crl(0, issuerCertificates[0]).then(
+                        function(result)
+                        {
+                            return Promise.resolve(result);
+                        },
+                        function(error)
+                        {
+                            index++;
+
+                            if(index < issuerCertificates.length)
+                                return find_crl(0, issuerCertificates[index]);
+                            else
+                            {
+                                return Promise.reject({
+                                    result: false,
+                                    result_code: 9,
+                                    result_message: "Unable to find CRL for issuer's certificate"
+                                });
+                            }
+
+                            return Promise.reject({
+                                    result: false,
+                                    result_code: 10,
+                                    result_message: "Unable to find CRL for issuer's certificate"
+                                });
+                        }
+                        );
                 }
                 );
             // #endregion 
@@ -6040,21 +6088,23 @@ function(in_window)
                     /// <param name="crl" type="in_window.org.pkijs.simpl.CRL">CRL for issuer's certificate</param>                
 
                     if(crl.isCertificateRevoked({ certificate: subject_certificate }) === true)
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject({
-                                result: false,
-                                result_code: 11,
-                                result_message: "Subject certificate was revoked"
-                            });
+                    {
+                        return Promise.reject({
+                            result: false,
+                            result_code: 11,
+                            result_message: "Subject certificate was revoked"
                         });
+                    }
                     else
-                        return new Promise(function(resolve, reject) { resolve(); });
+                        return Promise.resolve();
                 },
                 function(error)
                 {
                     /// <summary>Not for all certificates we have a CRL. So, this "stub" is for handling such situation - assiming we have a valid, non-revoked certificate</summary>
-                    return new Promise(function(resolve, reject) { resolve(); });
+                    //if(error.result_code == 9)
+                    //    return Promise.resolve();
+                    //else
+                        return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -6088,58 +6138,71 @@ function(in_window)
                             }
                         }
 
-                        if(found === false)
-                            return new Promise(function(resolve, reject)
-                            {
-                                reject({
-                                    result: false,
-                                    result_code: 22,
-                                    result_message: "Self-signed root certificate not in \"trusted certificates\" array"
-                                });
-                            });
+                        //if(found === false)
+                        //{
+                        //    return Promise.reject({
+                        //            result: false,
+                        //            result_code: 22,
+                        //            result_message: "Self-signed root certificate not in \"trusted certificates\" array"
+                        //        });
+                        //}
                         // #endregion 
 
-                        return (current_certificate.verify()).then( // Verifing last, self-signed certificate
+                        return current_certificate.verify().then( // Verifing last, self-signed certificate
                             function(result)
                             {
                                 if(result === true)
+                                {
                                     return basic(current_certificate, current_certificate).then(
                                         function()
                                         {
-                                            return new Promise(function(resolve, reject) { resolve(sorted_certs); });
+                                            return Promise.resolve(sorted_certs);
                                         },
                                         function(error)
                                         {
-                                            return new Promise(function(resolve, reject)
-                                            {
-                                                reject({
+                                            return Promise.reject({
                                                     result: false,
                                                     result_code: 12,
                                                     result_message: error
                                                 });
-                                            });
                                         }
                                         );
+                                }
                                 else
-                                    return new Promise(function(resolve, reject)
+                                {
+                                    if(certs.length > 0)
+                                        return outer();
+                                    else
                                     {
-                                        reject({
-                                            result: false,
-                                            result_code: 13,
-                                            result_message: "Unable to build certificate chain - signature of root certificate is invalid"
-                                        });
-                                    });
+                                        if(_this.trusted_certs.length !== 0)
+                                        {
+                                            certs = _this.trusted_certs.splice(0);
+                                            return outer();
+                                        }
+                                        else
+                                        {
+                                            return Promise.reject({
+                                                result: false,
+                                                result_code: 23,
+                                                result_message: "Root certificate not found"
+                                            });
+                                        }
+                                    }
+
+                                    //return Promise.reject({
+                                    //        result: false,
+                                    //        result_code: 13,
+                                    //        result_message: "Unable to build certificate chain - signature of root certificate is invalid"
+                                    //    });
+                                }
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject)
-                                {
-                                    reject({
+                                return Promise.reject({
                                         result: false,
                                         result_code: 14,
                                         result_message: error
                                     });
-                                });
                             }
                             );
                     }
@@ -6155,23 +6218,19 @@ function(in_window)
                                 return outer();
                             }
                             else
-                                return new Promise(function(resolve, reject)
-                                {
-                                    reject({
-                                        result: false,
-                                        result_code: 23,
-                                        result_message: "Root certificate not found"
-                                    });
+                            {
+                                return Promise.reject({
+                                    result: false,
+                                    result_code: 23,
+                                    result_message: "Root certificate not found"
                                 });
+                            }
                         }
                     }
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject(error);
-                    });
+                    return Promise.reject(error);
                 }
                 );
         }
@@ -6188,18 +6247,22 @@ function(in_window)
                             return basic(current_certificate, certs[index]).then(
                                 function()
                                 {
-                                    return new Promise(function(resolve, reject) { resolve(index); });
+                                    return Promise.resolve(index);
                                 },
                                 function(error)
                                 {
-                                    return new Promise(function(resolve, reject)
+                                    if(error instanceof Object)
                                     {
-                                        reject({
+                                        return Promise.reject(error);
+                                    }
+                                    else
+                                    {
+                                        return Promise.reject({
                                             result: false,
                                             result_code: 16,
                                             result_message: error
                                         });
-                                    });
+                                    }
                                 }
                                 );
                         }
@@ -6208,26 +6271,22 @@ function(in_window)
                             if(index < (certs.length - 1))
                                 return inner(current_certificate, index + 1);
                             else
-                                return new Promise(function(resolve, reject)
-                                {
-                                    reject({
-                                        result: false,
-                                        result_code: 17,
-                                        result_message: "Unable to build certificate chain - incomplete certificate chain or signature of some certificate is invalid"
-                                    });
+                            {
+                                return Promise.reject({
+                                    result: false,
+                                    result_code: 17,
+                                    result_message: "Unable to build certificate chain - incomplete certificate chain or signature of some certificate is invalid"
                                 });
+                            }
                         }
                     },
                     function(error)
                     {
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject({
+                        return Promise.reject({
                                 result: false,
                                 result_code: 18,
                                 result_message: "Unable to build certificate chain - error during certificate signature verification"
                             });
-                        });
                     }
                     );
             }
@@ -6236,14 +6295,13 @@ function(in_window)
                 if(index < (certs.length - 1))
                     return inner(current_certificate, index + 1);
                 else
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
-                            result: false,
-                            result_code: 19,
-                            result_message: "Unable to build certificate chain - incomplete certificate chain"
-                        });
+                {
+                    return Promise.reject({
+                        result: false,
+                        result_code: 19,
+                        result_message: "Unable to build certificate chain - incomplete certificate chain"
                     });
+                }
             }
         }
         // #endregion   
@@ -6253,12 +6311,616 @@ function(in_window)
         // #endregion 
     };
     //**************************************************************************************
+    in_window.org.pkijs.simpl.CERT_CHAIN.prototype.sort =
+    function()
+    {
+        // #region Initial variables 
+        var _this = this;
+        var localCerts = new Array();
+        // #endregion 
+
+        // #region Finding certificate issuer 
+        function *findIssuer(certificate, index)
+        {
+            var result = new Array();
+
+            for(var i = 0; i < localCerts.length; i++)
+            {
+                var verificationResult;
+
+                try
+                {
+                    verificationResult = yield certificate.verify({ issuerCertificate: localCerts[i] });
+                    if(verificationResult)
+                        result.push(i);
+                }
+                catch(ex){}
+            }
+
+            return ((result.length) ? result : [-1]);
+        }
+        // #endregion 
+    
+        // #region Building certificate path 
+        function *buildPath(certificate, index)
+        {
+            var result = new Array();
+
+            // #region Aux function checking array for unique elements 
+            function checkUnique(array)
+            {
+                var unique = true;
+
+                for(var i = 0; i < array.length; i++)
+                {
+                    for(var j = 0; j < array.length; j++)
+                    {
+                        if(j == i)
+                            continue;
+
+                        if(array[i] == array[j])
+                        {
+                            unique = false;
+                            break;
+                        }
+                    }
+
+                    if(!unique)
+                        break;
+                }
+
+                return unique;
+            }
+            // #endregion 
+
+            var findIssuerResult = yield findIssuer(certificate, index);
+
+            if((findIssuerResult.length == 1) && (findIssuerResult[0] == (-1)))
+                throw new Error("Incorrect result");
+
+            if(findIssuerResult.length == 1)
+            {
+                if(findIssuerResult[0] == index)
+                {
+                    result.push(findIssuerResult);
+                    return result;
+                }
+
+                var buildPathResult = yield buildPath(localCerts[findIssuerResult[0]], findIssuerResult[0]);
+
+                for(var i = 0; i < buildPathResult.length; i++)
+                {
+                    var copy = buildPathResult[i].slice();
+                    copy.splice(0, 0, findIssuerResult[0]);
+
+                    if(checkUnique(copy))
+                        result.push(copy);
+                    else
+                        result.push(buildPathResult[i]);
+                }
+            }
+            else
+            {
+                for(var i = 0; i < findIssuerResult.length; i++)
+                {
+                    if(findIssuerResult[i] == index)
+                    {
+                        result.push([findIssuerResult[i]]);
+                        continue;
+                    }
+
+                    var buildPathResult = yield buildPath(localCerts[findIssuerResult[i]], findIssuerResult[i]);
+
+                    for(var j = 0; j < buildPathResult.length; j++)
+                    {
+                        var copy = buildPathResult[j].slice();
+                        copy.splice(0, 0, findIssuerResult[i]);
+
+                        if(checkUnique(copy))
+                            result.push(copy);
+                        else
+                            result.push(buildPathResult[j]);
+                    }
+                }
+            }
+
+            return result;
+        }
+        // #endregion 
+
+        // #region Find CRL for specific certificate 
+        function *findCRL(certificate)
+        {
+            // #region Initial variables 
+            var issuerCertificates = new Array();
+            var crls = new Array();
+            var crlsAndCertificates = new Array();
+            // #endregion 
+
+            // #region Find all possible CRL issuers 
+            for(var i = 0; i < localCerts.length; i++)
+            {
+                if(certificate.issuer.isEqual(localCerts[i].subject))
+                    issuerCertificates.push(localCerts[i]);
+            }
+
+            if(issuerCertificates.length == 0)
+            {
+                return {
+                    status: 1,
+                    status_message: "No certificate's issuers"
+                };
+            }
+            // #endregion 
+
+            // #region Find all CRLs for crtificate's issuer 
+            for(var i = 0; i < _this.crls.length; i++)
+            {
+                if(_this.crls[i].issuer.isEqual(certificate.issuer))
+                    crls.push(_this.crls[i]);
+            }
+
+            if(crls.length == 0)
+            {
+                return {
+                    status: 1,
+                    status_message: "No CRLs for specific certificate issuer"
+                };
+            }
+            // #endregion 
+
+            // #region Find specific certificate of issuer for each CRL 
+            for(var i = 0; i < crls.length; i++)
+            {
+                // #region Check "nextUpdate" for the CRL 
+                // The "nextUpdate" is older than "checkDate".
+                // Thus we should do have another, updated CRL.
+                // Thus the CRL assumed to be invalid.
+                if(crls[i].nextUpdate.value < _this.checkDate)
+                    continue;
+                // #endregion 
+
+                for(var j = 0; j < issuerCertificates.length; j++)
+                {
+                    var result;
+
+                    try
+                    {
+                        result = yield crls[i].verify({ issuerCertificate: issuerCertificates[j] });
+                        if(result)
+                        {
+                            crlsAndCertificates.push({
+                                crl: crls[i],
+                                certificate: issuerCertificates[j]
+                            });
+
+                            break;
+                        }
+                    }
+                    catch(ex){}
+                }
+            }
+            // #endregion 
+
+            if(crlsAndCertificates.length)
+            {
+                return {
+                    status: 0,
+                    status_message: "",
+                    result: crlsAndCertificates
+                };
+            }
+            else
+            {
+                return {
+                    status: 1,
+                    status_message: "No valid CRLs found"
+                };
+            }
+        }
+        // #endregion 
+
+        // #region Find OCSP for specific certificate 
+        function *findOCSP(certificate, issuerCertificate)
+        {
+            // #region Get hash algorithm from certificate 
+            var hashAlgorithm = org.pkijs.getAlgorithmByOID(certificate.signatureAlgorithm.algorithm_id);
+            if(("name" in hashAlgorithm) == false)
+                return 1;
+            if(("hash" in hashAlgorithm) == false)
+                return 1;
+            // #endregion 
+
+            // #region Search for OCSP response for the certificate 
+            for(var i = 0; i < _this.ocsps.length; i++)
+            {
+                var result = yield _this.ocsps[i].getCertificateStatus(certificate, issuerCertificate);
+                if(result.isForCertificate)
+                {
+                    if(result.status == 0)
+                        return 0;
+                    else
+                        return 1;
+                }
+            }
+            // #endregion   
+
+            return 2;
+        }
+        // #endregion   
+
+        // #region Check for certificate to be CA 
+        function *checkForCA(certificate, needToCheckCRL)
+        {
+            // #region Check input variables 
+            if(typeof needToCheckCRL == "undefined")
+                needToCheckCRL = false;
+            // #endregion 
+
+            // #region Initial variables 
+            var isCA = false;
+            var mustBeCA = false;
+            var keyUsagePresent = false;
+            var cRLSign = false;
+            // #endregion   
+
+            if("extensions" in certificate)
+            {
+                for(var j = 0; j < certificate.extensions.length; j++)
+                {
+                    if((certificate.extensions[j].critical === true) &&
+                        (("parsedValue" in certificate.extensions[j]) === false))
+                    {
+                        return {
+                            result: false,
+                            result_code: 6,
+                            result_message: "Unable to parse critical certificate extension: " + certificate.extensions[j].extnID
+                        };
+                    }
+
+                    if(certificate.extensions[j].extnID === "2.5.29.15") // KeyUsage
+                    {
+                        keyUsagePresent = true;
+
+                        var view = new Uint8Array(certificate.extensions[j].parsedValue.value_block.value_hex);
+
+                        if((view[0] & 0x04) === 0x04) // Set flag "keyCertSign"
+                            mustBeCA = true;
+
+                        if((view[0] & 0x02) === 0x02) // Set flag "cRLSign"
+                            cRLSign = true;
+                    }
+
+                    if(certificate.extensions[j].extnID === "2.5.29.19") // BasicConstraints
+                    {
+                        if("cA" in certificate.extensions[j].parsedValue)
+                        {
+                            if(certificate.extensions[j].parsedValue.cA === true)
+                                isCA = true;
+                        }
+                    }
+                }
+
+                if((mustBeCA === true) && (isCA === false))
+                {
+                    return {
+                        result: false,
+                        result_code: 3,
+                        result_message: "Unable to build certificate chain - using \"keyCertSign\" flag set without BasicConstaints"
+                    };
+                }
+
+                if((keyUsagePresent === true) && (isCA === true) && (mustBeCA === false))
+                {
+                    return{
+                        result: false,
+                        result_code: 4,
+                        result_message: "Unable to build certificate chain - \"keyCertSign\" flag was not set"
+                    };
+                }
+
+                if((isCA === true) && (keyUsagePresent === true) && ((needToCheckCRL) && (cRLSign === false)))
+                {
+                    return {
+                        result: false,
+                        result_code: 5,
+                        result_message: "Unable to build certificate chain - intermediate certificate must have \"cRLSign\" key usage flag"
+                    };
+                }
+            }
+
+            if(isCA === false)
+            {
+                return {
+                    result: false,
+                    result_code: 7,
+                    result_message: "Unable to build certificate chain - more than one possible end-user certificate"
+                };
+            }
+
+            return {
+                result: true,
+                result_code: 0,
+                result_message: ""
+            };            
+        }
+        // #endregion 
+
+        // #region Basic check for certificate path 
+        function *basicCheck(path, check_date)
+        {
+            // #region Check that all dates are valid 
+            for(var i = 0; i < path.length; i++)
+            {
+                if((path[i].notBefore.value > check_date) ||
+                   (path[i].notAfter.value < check_date))
+                {
+                    return {
+                        result: false,
+                        result_code: 8,
+                        result_message: "Certificate validity period is out of checking date"
+                    }; 
+                }
+            }
+            // #endregion 
+
+            // #region Check certificate name chain 
+
+            // We should have at least two certificates: end entity and trusted root
+            if(path.length < 2)
+            {
+                return {
+                    result: false,
+                    result_code: 9,
+                    result_message: "Too short certificate path"
+                };
+            }
+
+            for(var i = (path.length - 2); i >= 0; i--)
+            {
+                // #region Check that we do not have a "self-signed" certificate 
+                if(path[i].issuer.isEqual(path[i].subject) == false)
+                {
+                    if(path[i].issuer.isEqual(path[i + 1].subject) == false)
+                    {
+                        return {
+                            result: false,
+                            result_code: 10,
+                            result_message: "Incorrect name chaining"
+                        };
+                    }
+                }
+                // #endregion 
+            }
+            // #endregion 
+
+            // #region Check each certificate (except "trusted root") to be non-revoked 
+            if((_this.crls.length != 0) || (_this.ocsps.length != 0)) // If CRLs and OCSPs are empty the we consider all certificates to be valid
+            {
+                for(var i = 0; i < (path.length - 2); i++)
+                {
+                    // #region Initial variables 
+                    var ocspResult;
+                    var crlResult;
+                    // #endregion 
+
+                    // #region Check OCSPs first 
+                    if(_this.ocsps.length != 0)
+                    {
+                        ocspResult = yield findOCSP(path[i], path[i + 1]);
+
+                        switch(ocspResult)
+                        {
+                            case 0:
+                                continue;
+                                break;
+                            case 1:
+                                return {
+                                    result: false,
+                                    result_code: 12,
+                                    result_message: "One of certificates was revoked via OCSP response"
+                                };
+                                break;
+                            case 2: // continue to check the certificate with CRL
+                                break;
+                            default:;
+                        }
+                    }
+                    // #endregion 
+
+                    // #region Check CRLs 
+                    if(_this.crls.length != 0)
+                    {
+                        crlResult = yield findCRL(path[i]);
+                        if(crlResult.status)
+                        {
+                            return {
+                                result: false,
+                                result_code: 11,
+                                result_message: "No revocation values found for one of certificates"
+                            };
+                        }
+
+                        for(var j = 0; j < crlResult.result.length; j++)
+                        {
+                            // #region Check that the CRL issuer certificate have not been revoked 
+                            var isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked({ certificate: path[i] });
+                            if(isCertificateRevoked)
+                            {
+                                return {
+                                    result: false,
+                                    result_code: 12,
+                                    result_message: "One of certificates had been revoked"
+                                };
+                            }
+                            // #endregion   
+
+                            // #region Check that the CRL issuer certificate is a CA certificate 
+                            var isCertificateCA = yield checkForCA(crlResult.result[j].certificate, true);
+                            if(isCertificateCA.result == false)
+                            {
+                                return {
+                                    result: false,
+                                    result_code: 13,
+                                    result_message: "CRL issuer certificate is not a CA certificate or does not have crlSign flag"
+                                };
+                            }
+                            // #endregion   
+                        }
+                    }
+                    else
+                    {
+                        if(ocspResult == 2)
+                        {
+                            return {
+                                result: false,
+                                result_code: 11,
+                                result_message: "No revocation values found for one of certificates"
+                            };
+                        }
+                    }
+                    // #endregion   
+                }
+            }
+            // #endregion 
+
+            // #region Check each certificate (except "end entity") in the path to be a CA certificate 
+            for(var i = 1; i < path.length; i++)
+            {
+                var result = yield checkForCA(path[i]);
+                if(result.result == false)
+                {
+                    return {
+                        result: false,
+                        result_code: 14,
+                        result_message: "One of intermediate certificates is not a CA certificate"
+                    };
+                }
+            }
+            // #endregion   
+
+            return {
+                result: true
+            };
+        }
+        // #endregion 
+
+        return in_window.co(function *generatorFunction()
+            {
+                // #region Initialize "localCerts" by value of "this.certs" + "this.trusted_certs" arrays 
+                for(var i = 0; i < _this.trusted_certs.length; i++)
+                    localCerts.push(_this.trusted_certs[i]);
+
+                for(var i = 0; i < _this.certs.length; i++)
+                    localCerts.push(_this.certs[i]);
+                // #endregion 
+
+                // #region Check all certificates for been unique 
+                for(var i = 0; i < localCerts.length; i++)
+                {
+                    for(var j = 0; j < localCerts.length; j++)
+                    {
+                        if(i == j)
+                            continue;
+
+                        if(in_window.org.pkijs.isEqual_buffer(localCerts[i].tbs, localCerts[j].tbs))
+                        {
+                            localCerts.splice(j, 1);
+                            i = 0;
+                            break;
+                        }
+                    }
+                }
+                // #endregion 
+
+                // #region Initial variables 
+                var result;
+                var certificatePath = [localCerts[localCerts.length - 1]]; // The "end entity" certificate must be the least in "certs" array
+                // #endregion 
+
+                // #region Build path for "end entity" certificate 
+                result = yield buildPath(localCerts[localCerts.length - 1], localCerts.length - 1);
+                if(result.length == 0)
+                {
+                    return {
+                        result: false,
+                        result_code: 60,
+                        result_message: "Unable to find certificate path"
+                    };
+                }
+                // #endregion 
+
+                // #region Exclude certificate paths not ended with "trusted roots" 
+                for(var i = 0; i < result.length; i++)
+                {
+                    var found = false;
+                    var latestItem = ((result[i]).length - 1);
+
+                    for(var j = 0; j < _this.trusted_certs.length; j++)
+                    {
+                        var certificate = localCerts[(result[i])[latestItem]];
+
+                        if(in_window.org.pkijs.isEqual_buffer(certificate.tbs, _this.trusted_certs[j].tbs))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if(!found)
+                    {
+                        result.splice(i, 1);
+                        i = 0;
+                    }
+                }
+
+                if(result.length == 0)
+                {
+                    throw {
+                        result: false,
+                        result_code: 97,
+                        result_message: "No valid certificate paths found"
+                    };
+                }
+                // #endregion 
+
+                // #region Find shortest certificate path (for the moment it is the only criteria)
+                var shortestLength = result[0].length;
+                var shortestIndex = 0;
+
+                for(var i = 0; i < result.length; i++)
+                {
+                    if(result[i].length < shortestLength)
+                    {
+                        shortestLength = result[i].length;
+                        shortestIndex = i;
+                    }
+                }
+                // #endregion 
+
+                // #region Create certificate path for basic check 
+                for(var i = 0; i < result[shortestIndex].length; i++)
+                {
+                    certificatePath.push(localCerts[(result[shortestIndex])[i]]);
+                }
+                // #endregion   
+
+                // #region Perform basic checking for all certificates in the path 
+                result = yield basicCheck(certificatePath, _this.checkDate);
+                if(result.result == false)
+                    throw result;
+                // #endregion 
+
+                return certificatePath;
+            });
+    };
+    //**************************************************************************************
     in_window.org.pkijs.simpl.CERT_CHAIN.prototype.verify =
     function()
     {
         // #region Initial checks 
         if(this.certs.length === 0)
-            return new Promise(function(resolve, reject) { reject("Empty certificate array"); });
+            return Promise.reject("Empty certificate array");
         // #endregion 
 
         // #region Initial variables 
@@ -6345,25 +7007,40 @@ function(in_window)
                 var policies_and_certs = new Array(); // In fact "array of array" where rows are for each specific policy, column for each certificate and value is "true/false"
 
                 var any_policy_array = new Array(_this.certs.length - 1); // Minus "trusted anchor"
-                for(var ii = 0; ii < (_this.certs.length - 1) ; ii++)
+                for(var ii = 0; ii < (_this.certs.length - 1); ii++)
                     any_policy_array[ii] = true;
 
                 policies_and_certs.push(any_policy_array);
 
                 var policy_mappings = new Array(_this.certs.length - 1); // Array of "PolicyMappings" for each certificate
                 var cert_policies = new Array(_this.certs.length - 1); // Array of "CertificatePolicies" for each certificate
+
+                var explicit_policy_start = (explicit_policy_indicator) ? (_this.certs.length -1): (-1);
                 // #endregion 
 
+                // #region Gather all neccessary information from certificate chain 
                 for(var i = (_this.certs.length - 2) ; i >= 0 ; i--, path_depth++)
                 {
                     if("extensions" in _this.certs[i])
                     {
+                        // #region Get information about certificate extensions 
                         for(var j = 0; j < _this.certs[i].extensions.length; j++)
                         {
                             // #region CertificatePolicies 
                             if(_this.certs[i].extensions[j].extnID === "2.5.29.32")
                             {
                                 cert_policies[i] = _this.certs[i].extensions[j].parsedValue;
+
+                                // #region Remove entry from "anyPolicies" for the certificate 
+								for(var s = 0; s < all_policies.length; s++)
+								{
+									if(all_policies[s] == "2.5.29.32.0")
+									{
+										delete (policies_and_certs[s])[i];
+										break;
+									}
+								}
+                                // #endregion 
 
                                 for(var k = 0; k < _this.certs[i].extensions[j].parsedValue.certificatePolicies.length; k++)
                                 {
@@ -6389,14 +7066,28 @@ function(in_window)
 
                                         policies_and_certs.push(cert_array);
                                     }
-                                    else(policies_and_certs[policy_index])[i] = true;
+                                    else
+                                    {
+                                        (policies_and_certs[policy_index])[i] = true;
+                                    }
                                 }
                             }
                             // #endregion 
 
                             // #region PolicyMappings 
                             if(_this.certs[i].extensions[j].extnID === "2.5.29.33")
+                            {
+                                if(policy_mapping_inhibit_indicator)
+                                {
+                                    return {
+                                        result: false,
+                                        result_code: 98,
+                                        result_message: "Policy mapping prohibited"
+                                    };
+                                }
+
                                 policy_mappings[i] = _this.certs[i].extensions[j].parsedValue;
+                            }
                             // #endregion 
 
                             // #region PolicyConstraints 
@@ -6406,7 +7097,10 @@ function(in_window)
                                 {
                                     // #region requireExplicitPolicy 
                                     if(_this.certs[i].extensions[j].parsedValue.requireExplicitPolicy === 0)
+                                    {
                                         explicit_policy_indicator = true;
+                                        explicit_policy_start = i;
+                                    }
                                     else
                                     {
                                         if(pending_constraints[0] === false)
@@ -6429,11 +7123,11 @@ function(in_window)
                                         if(pending_constraints[1] === false)
                                         {
                                             pending_constraints[1] = true;
-                                            policy_mapping_inhibit_pending = _this.certs[i].extensions[j].parsedValue.requireExplicitPolicy;
+                                            policy_mapping_inhibit_pending = _this.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1;
                                         }
                                         else
                                         {
-                                            policy_mapping_inhibit_pending = (policy_mapping_inhibit_pending > _this.certs[i].extensions[j].parsedValue.requireExplicitPolicy) ? _this.certs[i].extensions[j].parsedValue.requireExplicitPolicy : policy_mapping_inhibit_pending;
+                                            policy_mapping_inhibit_pending = (policy_mapping_inhibit_pending > (_this.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1)) ? (_this.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1) : policy_mapping_inhibit_pending;
                                         }
                                     }
                                     // #endregion   
@@ -6464,61 +7158,26 @@ function(in_window)
                             }
                             // #endregion 
                         }
+                        // #endregion 
 
                         // #region Check "inhibit_any_policy_indicator" 
                         if(inhibit_any_policy_indicator === true)
-                            delete (policies_and_certs[0])[i]; // Unset value to "undefined" for "anyPolicies" value for current certificate
-                        // #endregion 
-
-                        // #region Combine information from certificate policies and policy mappings 
-                        if((typeof cert_policies[i] !== "undefined") &&
-                           (typeof policy_mappings[i] !== "undefined") &&
-                           (policy_mapping_inhibit_indicator === false))
                         {
-                            for(var m = 0; m < cert_policies[i].certificatePolicies.length; m++)
+                            var policy_index = (-1);
+
+                            // #region Find "anyPolicy" index 
+                            for(var searchAnyPolicy = 0; searchAnyPolicy < all_policies.length; searchAnyPolicy++)
                             {
-                                var domainPolicy = "";
-
-                                // #region Find if current policy is in "mappings" array 
-                                for(var n = 0; n < policy_mappings[i].mappings.length; n++)
+                                if(all_policies[searchAnyPolicy] == "2.5.29.32.0")
                                 {
-                                    if(policy_mappings[i].mappings[n].subjectDomainPolicy === cert_policies[i].certificatePolicies[m].policyIdentifier)
-                                    {
-                                        domainPolicy = policy_mappings[i].mappings[n].issuerDomainPolicy;
-                                        break;
-                                    }
-
-                                    // #region Could be the case for some reasons 
-                                    if(policy_mappings[i].mappings[n].issuerDomainPolicy === cert_policies[i].certificatePolicies[m].policyIdentifier)
-                                    {
-                                        domainPolicy = policy_mappings[i].mappings[n].subjectDomainPolicy;
-                                        break;
-                                    }
-                                    // #endregion 
+                                    policy_index = searchAnyPolicy;
+                                    break;
                                 }
-
-                                if(domainPolicy === "")
-                                    continue;
-                                // #endregion
-
-                                // #region Find the index of "domainPolicy"  
-                                var domainPolicy_index = (-1);
-
-                                for(var p = 0; p < all_policies.length; p++)
-                                {
-                                    if(all_policies[p] === domainPolicy)
-                                    {
-                                        domainPolicy_index = p;
-                                        break;
-                                    }
-                                }
-                                // #endregion 
-
-                                // #region Change array value for "domainPolicy" 
-                                if(domainPolicy_index !== (-1))
-                                    (policies_and_certs[domainPolicy_index])[i] = true; // Put "set" in "domainPolicy" cell for specific certificate
-                                // #endregion 
                             }
+                            // #endregion 
+
+                            if(policy_index != (-1))
+                                delete (policies_and_certs[0])[i]; // Unset value to "undefined" for "anyPolicies" value for current certificate
                         }
                         // #endregion 
 
@@ -6531,6 +7190,8 @@ function(in_window)
                                 if(explicit_policy_pending === 0)
                                 {
                                     explicit_policy_indicator = true;
+                                    explicit_policy_start = i;
+
                                     pending_constraints[0] = false;
                                 }
                             }
@@ -6564,6 +7225,87 @@ function(in_window)
                         // #endregion 
                     }
                 }
+                // #endregion 
+
+                // #region Working with policy mappings
+                for(var i = 0; i < (_this.certs.length - 1) ; i++)
+                {
+                    // #region Check that there is "policy mapping" for level "i + 1" 
+                    if((i < (_this.certs.length - 2)) && (typeof policy_mappings[i + 1] !== "undefined"))
+                    {
+                        for(var k = 0; k < policy_mappings[i + 1].mappings.length; k++)
+                        {
+                            // #region Check that we do not have "anyPolicy" in current mapping 
+                            if((policy_mappings[i + 1].mappings[k].issuerDomainPolicy == "2.5.29.32.0") || (policy_mappings[i + 1].mappings[k].subjectDomainPolicy == "2.5.29.32.0"))
+                            {
+                                return {
+                                    result: false,
+                                    result_code: 99,
+                                    result_message: "The \"anyPolicy\" should not be a part of policy mapping scheme"
+                                };
+                            }
+                            // #endregion 
+
+                            // #region Initial variables 
+                            var issuerDomainPolicyIndex = (-1);
+                            var subjectDomainPolicyIndex = (-1);
+                            // #endregion 
+
+                            // #region Search for index of policies indedes 
+                            for(var n = 0; n < all_policies.length; n++)
+                            {
+                                if(all_policies[n] == policy_mappings[i + 1].mappings[k].issuerDomainPolicy)
+                                    issuerDomainPolicyIndex = n;
+
+                                if(all_policies[n] == policy_mappings[i + 1].mappings[k].subjectDomainPolicy)
+                                    subjectDomainPolicyIndex = n;
+                            }
+                            // #endregion 
+
+                            // #region Delete existing "issuerDomainPolicy" because on the level we mapped the policy to another one 
+                            if(typeof (policies_and_certs[issuerDomainPolicyIndex])[i] !== "undefined")
+                                delete (policies_and_certs[issuerDomainPolicyIndex])[i];
+                            // #endregion 
+
+                            // #region Check all policies for the certificate 
+                            for(var j = 0; j < cert_policies[i].certificatePolicies.length; j++)
+                            {
+                                if(policy_mappings[i + 1].mappings[k].subjectDomainPolicy == cert_policies[i].certificatePolicies[j].policyIdentifier)
+                                {
+                                    // #region Set mapped policy for current certificate 
+                                    if((issuerDomainPolicyIndex != (-1)) && (subjectDomainPolicyIndex != (-1)))
+                                    {
+                                        for(var m = 0; m <= i ; m++)
+                                        {
+                                            if(typeof (policies_and_certs[subjectDomainPolicyIndex])[m] !== "undefined")
+                                            {
+                                                (policies_and_certs[issuerDomainPolicyIndex])[m] = true;
+                                                delete (policies_and_certs[subjectDomainPolicyIndex])[m];
+                                            }
+                                        }
+                                    }
+                                    // #endregion   
+                                }
+                            }
+                            // #endregion 
+                        }
+                    }
+                    // #endregion 
+                }
+                // #endregion 
+
+                // #region Working with "explicit_policy_indicator" and "anyPolicy" 
+                for(var i = 0; i < all_policies.length; i++)
+                {
+					if(all_policies[i] == "2.5.29.32.0")
+					{
+						for(var j = 0; j < explicit_policy_start; j++)
+						{
+							delete (policies_and_certs[i])[j];
+						}
+					}
+                }
+                // #endregion 
 
                 // #region Create "set of authorities-constrained policies"
                 var auth_constr_policies = new Array();
@@ -6574,10 +7316,37 @@ function(in_window)
 
                     for(var j = 0; j < (_this.certs.length - 1) ; j++)
                     {
-                        if(typeof (policies_and_certs[i])[j] === "undefined")
+                        var anyPolicyFound = false;
+
+                        if((j < explicit_policy_start) && (all_policies[i] == "2.5.29.32.0") && (all_policies.length > 1))
                         {
                             found = false;
                             break;
+                        }
+
+                        if(typeof (policies_and_certs[i])[j] === "undefined")
+                        {
+                            if(j >= explicit_policy_start)
+                            {
+                                // #region Search for "anyPolicy" in the policy set 
+                                for(var k = 0; k < all_policies.length; k++)
+                                {
+                                    if(all_policies[k] == "2.5.29.32.0")
+                                    {
+                                        if((policies_and_certs[k])[j] === true)
+                                            anyPolicyFound = true;
+
+                                        break;
+                                    }
+                                }
+                                // #endregion 
+                            }
+
+                            if(!anyPolicyFound)
+                            {
+                                found = false;
+                                break;
+                            }
                         }
                     }
 
@@ -6589,17 +7358,29 @@ function(in_window)
                 // #region Create "set of user-constrained policies"
                 var user_constr_policies = new Array();
 
-                for(var i = 0; i < auth_constr_policies.length; i++)
-                {
-                    for(var j = 0; j < initial_policy_set.length; j++)
-                    {
-                        if(initial_policy_set[j] === auth_constr_policies[i])
-                        {
-                            user_constr_policies.push(initial_policy_set[j]);
-                            break;
-                        }
-                    }
-                }
+				if((initial_policy_set.length == 1) && (initial_policy_set[0] == "2.5.29.32.0") && (explicit_policy_indicator == false))
+				{
+						user_constr_policies = initial_policy_set;
+				}
+				else
+				{
+					if((auth_constr_policies.length == 1) && (auth_constr_policies[0] == "2.5.29.32.0"))
+						user_constr_policies = initial_policy_set;
+					else
+					{
+						for(var i = 0; i < auth_constr_policies.length; i++)
+						{
+							for(var j = 0; j < initial_policy_set.length; j++)
+							{
+								if((initial_policy_set[j] === auth_constr_policies[i]) || (initial_policy_set[j] == "2.5.29.32.0"))
+								{
+									user_constr_policies.push(auth_constr_policies[i]);
+									break;
+								}
+							}
+						}
+					}
+				}
                 // #endregion 
 
                 // #region Combine output object 
@@ -6947,7 +7728,7 @@ function(in_window)
                                         break;
                                 }
                                 break;
-                            default: // ??? Probably here we should reject the certificate ???
+                            default:; // ??? Probably here we should reject the certificate ???
                         }
                     }
 
@@ -6957,10 +7738,7 @@ function(in_window)
                         policy_result.result_code = 21;
                         policy_result.result_message = "No neccessary name form found";
 
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject(policy_result);
-                        });
+                        return Promise.reject(policy_result);
                     }
                     // #endregion 
 
@@ -6981,31 +7759,30 @@ function(in_window)
                             case 1:
                                 constr_groups[0].push(permitted_subtrees[j]);
                                 break;
-                                // #endregion 
-                                // #region dNSName 
+                            // #endregion 
+                            // #region dNSName 
                             case 2:
                                 constr_groups[1].push(permitted_subtrees[j]);
                                 break;
-                                // #endregion 
-                                // #region directoryName 
+                            // #endregion 
+                            // #region directoryName 
                             case 4:
                                 constr_groups[2].push(permitted_subtrees[j]);
                                 break;
-                                // #endregion 
-                                // #region uniformResourceIdentifier 
+                            // #endregion 
+                            // #region uniformResourceIdentifier 
                             case 6:
                                 constr_groups[3].push(permitted_subtrees[j]);
                                 break;
-                                // #endregion 
-                                // #region iPAddress 
+                            // #endregion 
+                            // #region iPAddress 
                             case 7:
                                 constr_groups[4].push(permitted_subtrees[j]);
                                 break;
-                                // #endregion 
-                                // #region default 
-
-                            default:
-                            // #endregion
+                            // #endregion 
+                            // #region default 
+                            default:;
+                            // #endregion 
                         }
                     }
                     // #endregion   
@@ -7047,8 +7824,8 @@ function(in_window)
                                         }
                                     }
                                     break;
-                                    // #endregion 
-                                    // #region dNSName 
+                                // #endregion 
+                                // #region dNSName 
                                 case 1:
                                     if(subject_alt_names.length > 0)
                                     {
@@ -7062,14 +7839,14 @@ function(in_window)
                                         }
                                     }
                                     break;
-                                    // #endregion 
-                                    // #region directoryName 
+                                // #endregion 
+                                // #region directoryName 
                                 case 2:
                                     valueExists = true;
                                     group_permitted = compare_directoryName(_this.certs[i].subject, group[j].base.Name);
                                     break;
-                                    // #endregion 
-                                    // #region uniformResourceIdentifier 
+                                // #endregion 
+                                // #region uniformResourceIdentifier 
                                 case 3:
                                     if(subject_alt_names.length > 0)
                                     {
@@ -7083,8 +7860,8 @@ function(in_window)
                                         }
                                     }
                                     break;
-                                    // #endregion 
-                                    // #region iPAddress 
+                                // #endregion 
+                                // #region iPAddress 
                                 case 4:
                                     if(subject_alt_names.length > 0)
                                     {
@@ -7098,11 +7875,10 @@ function(in_window)
                                         }
                                     }
                                     break;
-                                    // #endregion 
-                                    // #region default 
-
-                                default:
-                                // #endregion
+                                // #endregion 
+                                // #region default 
+                                default:;
+                                // #endregion 
                             }
 
                             if(group_permitted)
@@ -7115,10 +7891,7 @@ function(in_window)
                             policy_result.result_code = 41;
                             policy_result.result_message = "Failed to meet \"permitted sub-trees\" name constraint";
 
-                            return new Promise(function(resolve, reject)
-                            {
-                                reject(policy_result);
-                            });
+                            return Promise.reject(policy_result);
                         }
                     }
                     // #endregion 
@@ -7153,8 +7926,8 @@ function(in_window)
                                     }
                                 }
                                 break;
-                                // #endregion 
-                                // #region dNSName 
+                            // #endregion 
+                            // #region dNSName 
                             case 2:
                                 if(subject_alt_names.length > 0)
                                 {
@@ -7165,13 +7938,13 @@ function(in_window)
                                     }
                                 }
                                 break;
-                                // #endregion 
-                                // #region directoryName 
+                            // #endregion 
+                            // #region directoryName 
                             case 4:
                                 excluded = excluded || compare_directoryName(_this.certs[i].subject, excluded_subtrees[j].base.Name);
                                 break;
-                                // #endregion 
-                                // #region uniformResourceIdentifier 
+                            // #endregion 
+                            // #region uniformResourceIdentifier 
                             case 6:
                                 if(subject_alt_names.length > 0)
                                 {
@@ -7182,8 +7955,8 @@ function(in_window)
                                     }
                                 }
                                 break;
-                                // #endregion 
-                                // #region iPAddress 
+                            // #endregion 
+                            // #region iPAddress 
                             case 7:
                                 if(subject_alt_names.length > 0)
                                 {
@@ -7194,11 +7967,10 @@ function(in_window)
                                     }
                                 }
                                 break;
-                                // #endregion 
-                                // #region default 
-
-                            default: // No action, but probably here we need to create a warning for "malformed constraint"
-                            // #endregion
+                            // #endregion 
+                            // #region default 
+                            default:; // No action, but probably here we need to create a warning for "malformed constraint"
+                            // #endregion 
                         }
 
                         if(excluded)
@@ -7211,10 +7983,7 @@ function(in_window)
                         policy_result.result_code = 42;
                         policy_result.result_message = "Failed to meet \"excluded sub-trees\" name constraint";
 
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject(policy_result);
-                        });
+                        return Promise.reject(policy_result);
                     }
                     // #endregion 
 
