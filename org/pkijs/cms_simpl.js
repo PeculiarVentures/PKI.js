@@ -113,20 +113,20 @@ function(in_window)
             case "SHA-512":
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unknown hash function: " + hashFunction); });
+                return Promise.reject("Unknown hash function: " + hashFunction);
         }
 
         if((Zbuffer instanceof ArrayBuffer) === false)
-            return new Promise(function(resolve, reject) { reject("Please set \"Zbuffer\" as \"ArrayBuffer\""); });
+            return Promise.reject("Please set \"Zbuffer\" as \"ArrayBuffer\"");
 
         if(Zbuffer.byteLength === 0)
-            return new Promise(function(resolve, reject) { reject("\"Zbuffer\" has zero length, error"); });
+            return Promise.reject("\"Zbuffer\" has zero length, error");
 
         if((SharedInfo instanceof ArrayBuffer) === false)
-            return new Promise(function(resolve, reject) { reject("Please set \"SharedInfo\" as \"ArrayBuffer\""); });
+            return Promise.reject("Please set \"SharedInfo\" as \"ArrayBuffer\"");
 
         if(Counter > 255)
-            return new Promise(function(resolve, reject) { reject("Please set \"Counter\" variable to value less or equal to 255"); });
+            return Promise.reject("Please set \"Counter\" variable to value less or equal to 255");
         // #endregion   
 
         // #region Initial variables 
@@ -143,7 +143,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Create a combined ArrayBuffer for digesting 
@@ -201,17 +201,17 @@ function(in_window)
                 hashLength = 512; // In bits
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unknown hash function: " + hashFunction); });
+                return Promise.reject("Unknown hash function: " + hashFunction);
         }
 
         if((Zbuffer instanceof ArrayBuffer) === false)
-            return new Promise(function(resolve, reject) { reject("Please set \"Zbuffer\" as \"ArrayBuffer\""); });
+            return Promise.reject("Please set \"Zbuffer\" as \"ArrayBuffer\"");
 
         if(Zbuffer.byteLength === 0)
-            return new Promise(function(resolve, reject) { reject("\"Zbuffer\" has zero length, error"); });
+            return Promise.reject("\"Zbuffer\" has zero length, error");
 
         if((SharedInfo instanceof ArrayBuffer) === false)
-            return new Promise(function(resolve, reject) { reject("Please set \"SharedInfo\" as \"ArrayBuffer\""); });
+            return Promise.reject("Please set \"SharedInfo\" as \"ArrayBuffer\"");
         // #endregion   
 
         // #region Calculated maximum value of "Counter" variable 
@@ -281,7 +281,7 @@ function(in_window)
         },
         function(error)
         {
-            return new Promise(function(resolve, reject) { reject(error); });
+            return Promise.reject(error);
         }
         );
         // #endregion 
@@ -556,7 +556,7 @@ function(in_window)
 
         for(var i = 0; i < certificates_array; i++)
         {
-            if(certificates_array.id_block.tag_class === 1)
+            if(certificates_array[i].id_block.tag_class === 1)
                 this.certificates.push(new in_window.org.pkijs.simpl.CERT({ schema: certificates_array[i] }));
             else
                 this.certificates.push(certificates_array[i]);
@@ -813,6 +813,40 @@ function(in_window)
         // #region Get internal properties from parsed schema 
         this.attrType = asn1.result["attrType"].value_block.toString();
         this.attrValues = asn1.result["attrValues"];
+
+        // #region Get "parsedValue" for well-known attributes
+        switch(this.attrType)
+        {
+            case "0.4.0.1733.2.5": // ATSHashIndex
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.ATSHashIndex({ schema: this.attrValues[0] });
+                break;
+            case "0.4.0.1733.2.4": // archive-time-stamp-v3
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.archive_time_stamp_v3({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.14": // signature-time-stamp
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.signature_time_stamp({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.21": // complete-certificate-references
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.complete_certificate_references({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.22": // complete-revocation-references
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.complete_revocation_references({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.25": // CAdES-C-Timestamp
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.CAdES_C_Timestamp({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.23": // certificate-values
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.certificate_values({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113549.1.9.16.2.24": // revocation-values
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.revocation_values({ schema: this.attrValues[0] });
+                break;
+            case "1.2.840.113583.1.1.8": // Adobe "RevocationInfoArchival"
+                this.parsedValue = new in_window.org.pkijs.simpl.cades.RevocationInfoArchival({ schema: this.attrValues[0] });
+                break;
+            default:;
+        }
+        // #endregion   
         // #endregion 
     };
     //**************************************************************************************
@@ -1785,6 +1819,7 @@ function(in_window)
         var checkDate = new Date();
 
         var checkChain = true;
+        var includeSignerCertificate = false;
 
         var _this = this;
         // #endregion 
@@ -1792,7 +1827,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Get a signer number
@@ -1812,15 +1847,18 @@ function(in_window)
 
             if("checkChain" in arguments[0])
                 checkChain = arguments[0].checkChain;
+
+            if("includeSignerCertificate" in arguments[0])
+                includeSignerCertificate = arguments[0].includeSignerCertificate;
         }
 
         if(signerIndex === (-1))
-            return new Promise(function(resolve, reject) { reject("Unable to get signer index from input parameters"); });
+            return Promise.reject("Unable to get signer index from input parameters");
         // #endregion 
 
         // #region Check that certificates field was included in signed data 
         if(("certificates" in this) === false)
-            return new Promise(function(resolve, reject) { reject("No certificates attached to this signed data"); });
+            return Promise.reject("No certificates attached to this signed data");
         // #endregion 
 
         // #region Find a certificate for specified signer 
@@ -1838,11 +1876,11 @@ function(in_window)
                            (certificates[i].serialNumber.isEqual(signerInfos[signerIndex].sid.serialNumber)))
                         {
                             signer_cert = certificates[i];
-                            return new Promise(function(resolve, reject) { resolve(); });
+                            return Promise.resolve();
                         }
                     }
 
-                    return new Promise(function(resolve, reject) { reject("Unable to find signer certificate"); });
+                    return Promise.reject("Unable to find signer certificate");
                 }
                 );
         }
@@ -1872,15 +1910,15 @@ function(in_window)
                                 if(in_window.org.pkijs.isEqual_buffer(results[i], signerInfos[signerIndex].sid.value_block.value_hex))
                                 {
                                     signer_cert = certificates[i];
-                                    return new Promise(function(resolve, reject) { resolve(); });
+                                    return Promise.resolve();
                                 }
                             }
 
-                            return new Promise(function(resolve, reject) { reject("Unable to find signer certificate"); });
+                            return Promise.reject("Unable to find signer certificate");
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject("Unable to find signer certificate"); });
+                            return Promise.reject("Unable to find signer certificate");
                         }
                         );
                 }
@@ -1976,19 +2014,19 @@ function(in_window)
                                 function(result)
                                 {
                                     if(result.result === true)
-                                        return new Promise(function(resolve, reject) { resolve(); });
+                                        return Promise.resolve();
                                     else
-                                        return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed"); });
+                                        return Promise.reject("Validation of signer's certificate failed");
                                 },
                                 function(error)
                                 {
-                                    return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed with error: " + ((error instanceof Object) ? error.result_message : error)); });
+                                    return Promise.reject("Validation of signer's certificate failed with error: " + ((error instanceof Object) ? error.result_message : error));
                                 }
                                 );
                         },
                         function(promiseError)
                         {
-                            return new Promise(function(resolve, reject) { reject("Error during checking certificates for CA flag: " + promiseError); });
+                            return Promise.reject("Error during checking certificates for CA flag: " + promiseError);
                         }
                         );
                 }
@@ -2002,7 +2040,7 @@ function(in_window)
             {
                 var shaAlgorithm= in_window.org.pkijs.getAlgorithmByOID(signerInfos[signerIndex].digestAlgorithm.algorithm_id);
                 if(("name" in shaAlgorithm) === false)
-                    return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signerInfos[signerIndex].digestAlgorithm.algorithm_id); });
+                    return Promise.reject("Unsupported signature algorithm: " + _this.signerInfos[signerIndex].digestAlgorithm.algorithm_id);
 
                 sha_algorithm = shaAlgorithm.name;
             }
@@ -2036,7 +2074,7 @@ function(in_window)
 
                     // #region Check that we do have detached data content 
                     if(data.byteLength === 0)
-                        return new Promise(function(resolve, reject) { reject("Missed detached data input array"); });
+                        return Promise.reject("Missed detached data input array");
                     // #endregion 
 
                     return tstInfo.verify({ data: data });
@@ -2077,7 +2115,7 @@ function(in_window)
                 else // Detached data
                 {
                     if(data.byteLength === 0) // Check that "data" already provided by function parameter
-                        return new Promise(function(resolve, reject) { reject("Missed detached data input array"); });
+                        return Promise.reject("Missed detached data input array");
                 }
 
                 if("signedAttrs" in signerInfos[signerIndex])
@@ -2108,10 +2146,10 @@ function(in_window)
                     }
 
                     if(foundContentType == false)
-                        return new Promise(function(resolve, reject) { reject("Attribute \"content-type\" is a mandatory attribute for \"signed attributes\""); });
+                        return Promise.reject("Attribute \"content-type\" is a mandatory attribute for \"signed attributes\"");
 
                     if(foundMessageDigest == false)
-                        return new Promise(function(resolve, reject) { reject("Attribute \"message-digest\" is a mandatory attribute for \"signed attributes\""); });
+                        return Promise.reject("Attribute \"message-digest\" is a mandatory attribute for \"signed attributes\"");
                     // #endregion 
                 }
 
@@ -2132,7 +2170,7 @@ function(in_window)
                 // #region Get information about public key algorithm and default parameters for import
                 var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(signer_cert.signatureAlgorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
-                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + signer_cert.signatureAlgorithm.algorithm_id); });
+                    return Promise.reject("Unsupported public key algorithm: " + signer_cert.signatureAlgorithm.algorithm_id);
 
                 var algorithm_name = algorithmObject.name;
 
@@ -2215,7 +2253,7 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject(ex); });
+                        return Promise.reject(ex);
                     }
 
                     if("saltLength" in pssParameters)
@@ -2229,7 +2267,7 @@ function(in_window)
                     {
                         var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
                         if(("name" in hashAlgorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                            return Promise.reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id);
 
                         hash_algo = hashAlgorithm.name;
                     }
@@ -2255,7 +2293,24 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
+            }
+            );
+        // #endregion 
+
+        // #region Make a final result 
+        sequence = sequence.then(
+            function(result)
+            {
+                if(includeSignerCertificate)
+                {
+                    return {
+                        result: result,
+                        signerCertificate: signer_cert
+                    };
+                }
+
+                return result;
             }
             );
         // #endregion 
@@ -2279,7 +2334,7 @@ function(in_window)
 
         // #region Get a private key from function parameter 
         if(typeof privateKey === "undefined")
-            return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
+            return Promise.reject("Need to provide a private key for signing");
         // #endregion 
 
         // #region Get hashing algorithm 
@@ -2289,7 +2344,7 @@ function(in_window)
         // #region Simple check for supported algorithm 
         hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
         if(hashAlgorithmOID === "")
-            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+            return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
         // #endregion 
         // #endregion 
 
@@ -2345,7 +2400,7 @@ function(in_window)
                         case "SHA-512":
                             defParams.algorithm.saltLength = 64;
                             break;
-                        default:
+                        default:;
                     }
                     // #endregion 
 
@@ -2356,7 +2411,7 @@ function(in_window)
                     {
                         hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
                         if(hashAlgorithmOID === "")
-                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                            return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
 
                         paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
@@ -2384,7 +2439,7 @@ function(in_window)
                 }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
+                return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
         }
         // #endregion 
 
@@ -2424,7 +2479,7 @@ function(in_window)
             else // Detached data
             {
                 if(data.byteLength === 0) // Check that "data" already provided by function parameter
-                    return new Promise(function(resolve, reject) { reject("Missed detached data input array"); });
+                    return Promise.reject("Missed detached data input array");
             }
         }
         // #endregion 
@@ -2432,7 +2487,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Signing TBS data on provided private key 
@@ -2447,11 +2502,11 @@ function(in_window)
                 // #endregion 
 
                 _this.signerInfos[signerIndex].signature = new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: result });
-                return new Promise(function(resolve, reject) { resolve(result); });
+                return Promise.resolve(result);
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Signing error: " + error); });
+                return Promise.reject("Signing error: " + error);
             }
             );
         // #endregion 
@@ -4120,7 +4175,7 @@ function(in_window)
                     this.variant = 5;
                     this.value = new in_window.org.pkijs.simpl.cms.OtherRecipientInfo({ schema: asn1.result["block_name"] });
                     break;
-                default:
+                default:;
             }
         }
         // #endregion 
@@ -4972,13 +5027,13 @@ function(in_window)
         // #region Check for input parameters 
         var contentEncryptionOID = in_window.org.pkijs.getOIDByAlgorithm(contentEncryptionAlgorithm);
         if(contentEncryptionOID === "")
-            return new Promise(function(resolve, reject) { reject("Wrong \"contentEncryptionAlgorithm\" value"); });
+            return Promise.reject("Wrong \"contentEncryptionAlgorithm\" value");
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Generate new content encryption key 
@@ -5004,7 +5059,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -5020,7 +5075,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             ).then(
             function(result)
@@ -5031,7 +5086,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -5051,7 +5106,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -5078,7 +5133,7 @@ function(in_window)
                     var curveObject = _this.recipientInfos[index].value.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithm_params;
 
                     if((curveObject instanceof in_window.org.pkijs.asn1.OID) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"recipientCertificate\" for index " + index); });
+                        return Promise.reject("Incorrect \"recipientCertificate\" for index " + index);
 
                     var curveOID = curveObject.value_block.toString();
 
@@ -5097,14 +5152,14 @@ function(in_window)
                             recipientCurveLength = 528;
                             break;
                         default:
-                            return new Promise(function(resolve, reject) { reject("Incorrect curve OID for index " + index); });
+                            return Promise.reject("Incorrect curve OID for index " + index);
                     }
 
                     return recipientCurve;
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5121,7 +5176,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5136,7 +5191,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5158,7 +5213,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5175,7 +5230,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5188,7 +5243,7 @@ function(in_window)
 
                     var KWalgorithm = in_window.org.pkijs.getAlgorithmByOID(aesKWAlgorithm.algorithm_id);
                     if(("name" in KWalgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for key encryption algorithm: " + aesKWAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for key encryption algorithm: " + aesKWAlgorithm.algorithm_id);
                     // #endregion 
 
                     // #region Translate AES-KW length to ArrayBuffer 
@@ -5225,14 +5280,14 @@ function(in_window)
                     // #region Get SHA algorithm used together with ECDH 
                     var ecdhAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in ecdhAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for key encryption algorithm: " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for key encryption algorithm: " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return in_window.org.pkijs.simpl.cms.kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5244,7 +5299,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5256,7 +5311,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5286,7 +5341,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5310,7 +5365,7 @@ function(in_window)
 
                     var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithm_id);
                     if(("name" in hashAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for hash algorithm: " + rsaOAEPParams.hashAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for hash algorithm: " + rsaOAEPParams.hashAlgorithm.algorithm_id);
                     // #endregion 
 
                     return _this.recipientInfos[index].value.recipientCertificate.getPublicKey({
@@ -5327,7 +5382,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5339,7 +5394,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5353,7 +5408,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5375,7 +5430,7 @@ function(in_window)
                     // #region Get WebCrypto form of "keyEncryptionAlgorithm" 
                     kekAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in kekAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.importKey("raw", 
@@ -5386,7 +5441,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5399,7 +5454,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5413,7 +5468,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5434,10 +5489,10 @@ function(in_window)
                 function(result)
                 {
                     if(("keyDerivationAlgorithm" in _this.recipientInfos[index].value) === false)
-                        return new Promise(function(resolve, reject) { reject("Please append encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Please append encoded \"keyDerivationAlgorithm\"");
 
                     if(("algorithm_params" in _this.recipientInfos[index].value.keyDerivationAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
 
                     try
                     {
@@ -5445,12 +5500,12 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
                     }
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5468,7 +5523,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5479,7 +5534,7 @@ function(in_window)
                     // #region Get WebCrypto form of "keyEncryptionAlgorithm" 
                     kekAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in kekAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     // #region Get HMAC hash algorithm 
@@ -5489,7 +5544,7 @@ function(in_window)
                     {
                         var algorithm = in_window.org.pkijs.getAlgorithmByOID(pbkdf2Params.prf.algorithm_id);
                         if(("name" in algorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Incorrect OID for HMAC hash algorithm"); });
+                            return Promise.reject("Incorrect OID for HMAC hash algorithm");
 
                         hmacHashAlgorithm = algorithm.hash.name;
                     }
@@ -5518,7 +5573,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5533,7 +5588,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5547,7 +5602,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5581,7 +5636,7 @@ function(in_window)
                             currentSequence = PasswordRecipientinfo(i);
                             break;
                         default:
-                            return new Promise(function(resolve, reject) { reject("Uknown recipient type in array with index " + i); });
+                            return Promise.reject("Uknown recipient type in array with index " + i);
                     }
 
                     recipientsPromises.push(currentSequence);
@@ -5589,7 +5644,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -5602,7 +5657,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -5626,13 +5681,13 @@ function(in_window)
 
         // #region Check for input parameters
         if((recipientIndex + 1) > this.recipientInfos.length)
-            return new Promise(function(resolve, reject) { reject("Maximum value for \"index\" is: " + (_this.recipientInfos.length - 1)); });
+            return Promise.reject("Maximum value for \"index\" is: " + (_this.recipientInfos.length - 1));
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Special sub-functions to work with each recipient's type 
@@ -5654,15 +5709,15 @@ function(in_window)
                 function(result)
                 {
                     if(("recipientCertificate" in decryptionParameters) === false)
-                        return new Promise(function(resolve, reject) { reject("Parameter \"recipientCertificate\" is mandatory for \"KeyAgreeRecipientInfo\""); });
+                        return Promise.reject("Parameter \"recipientCertificate\" is mandatory for \"KeyAgreeRecipientInfo\"");
 
                     if(("recipientPrivateKey" in decryptionParameters) === false)
-                        return new Promise(function(resolve, reject) { reject("Parameter \"recipientPrivateKey\" is mandatory for \"KeyAgreeRecipientInfo\""); });
+                        return Promise.reject("Parameter \"recipientPrivateKey\" is mandatory for \"KeyAgreeRecipientInfo\"");
 
                     var curveObject = decryptionParameters.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithm_params;
 
                     if((curveObject instanceof in_window.org.pkijs.asn1.OID) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"recipientCertificate\" for index " + index); });
+                        return Promise.reject("Incorrect \"recipientCertificate\" for index " + index);
 
                     curveOID = curveObject.value_block.toString();
 
@@ -5681,7 +5736,7 @@ function(in_window)
                             recipientCurveLength = 528;
                             break;
                         default:
-                            return new Promise(function(resolve, reject) { reject("Incorrect curve OID for index " + index); });
+                            return Promise.reject("Incorrect curve OID for index " + index);
                     }
 
                     return crypto.importKey("pkcs8",
@@ -5696,7 +5751,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5726,7 +5781,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5743,7 +5798,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5756,7 +5811,7 @@ function(in_window)
 
                     var KWalgorithm = in_window.org.pkijs.getAlgorithmByOID(aesKWAlgorithm.algorithm_id);
                     if(("name" in KWalgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for key encryption algorithm: " + aesKWAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for key encryption algorithm: " + aesKWAlgorithm.algorithm_id);
                     // #endregion 
 
                     // #region Translate AES-KW length to ArrayBuffer 
@@ -5793,14 +5848,14 @@ function(in_window)
                     // #region Get SHA algorithm used together with ECDH 
                     var ecdhAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in ecdhAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for key encryption algorithm: " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for key encryption algorithm: " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return in_window.org.pkijs.simpl.cms.kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5816,7 +5871,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5827,7 +5882,7 @@ function(in_window)
                     // #region Get WebCrypto form of content encryption algorithm 
                     var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     if(("name" in contentEncryptionAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.unwrapKey("raw",
@@ -5840,7 +5895,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5859,7 +5914,7 @@ function(in_window)
                 function(result)
                 {
                     if(("recipientPrivateKey" in decryptionParameters) === false)
-                        return new Promise(function(resolve, reject) { reject("Parameter \"recipientPrivateKey\" is mandatory for \"KeyTransRecipientInfo\""); });
+                        return Promise.reject("Parameter \"recipientPrivateKey\" is mandatory for \"KeyTransRecipientInfo\"");
 
                     // #region Get current used SHA algorithm 
                     var schema = _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_params;
@@ -5867,7 +5922,7 @@ function(in_window)
 
                     var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithm_id);
                     if(("name" in hashAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for hash algorithm: " + rsaOAEPParams.hashAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for hash algorithm: " + rsaOAEPParams.hashAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.importKey("pkcs8",
@@ -5883,7 +5938,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5900,7 +5955,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5911,7 +5966,7 @@ function(in_window)
                     // #region Get WebCrypto form of content encryption algorithm 
                     var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     if(("name" in contentEncryptionAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.importKey("raw",
@@ -5923,7 +5978,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5943,12 +5998,12 @@ function(in_window)
                 function(result)
                 {
                     if(("preDefinedData" in decryptionParameters) === false)
-                        return new Promise(function(resolve, reject) { reject("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\""); });
+                        return Promise.reject("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\"");
 
                     // #region Get WebCrypto form of "keyEncryptionAlgorithm" 
                     kekAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in kekAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.importKey("raw",
@@ -5959,7 +6014,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5970,7 +6025,7 @@ function(in_window)
                     // #region Get WebCrypto form of content encryption algorithm 
                     var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     if(("name" in contentEncryptionAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.unwrapKey("raw",
@@ -5983,7 +6038,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -6004,13 +6059,13 @@ function(in_window)
                 function(result)
                 {
                     if(("preDefinedData" in decryptionParameters) === false)
-                        return new Promise(function(resolve, reject) { reject("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\""); });
+                        return Promise.reject("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\"");
 
                     if(("keyDerivationAlgorithm" in _this.recipientInfos[index].value) === false)
-                        return new Promise(function(resolve, reject) { reject("Please append encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Please append encoded \"keyDerivationAlgorithm\"");
 
                     if(("algorithm_params" in _this.recipientInfos[index].value.keyDerivationAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
 
                     try
                     {
@@ -6018,7 +6073,7 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
                     }
 
                     return crypto.importKey("raw",
@@ -6029,7 +6084,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -6040,7 +6095,7 @@ function(in_window)
                     // #region Get WebCrypto form of "keyEncryptionAlgorithm" 
                     kekAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in kekAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     // #region Get HMAC hash algorithm 
@@ -6050,7 +6105,7 @@ function(in_window)
                     {
                         var algorithm = in_window.org.pkijs.getAlgorithmByOID(pbkdf2Params.prf.algorithm_id);
                         if(("name" in algorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Incorrect OID for HMAC hash algorithm"); });
+                            return Promise.reject("Incorrect OID for HMAC hash algorithm");
 
                         hmacHashAlgorithm = algorithm.hash.name;
                     }
@@ -6079,7 +6134,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -6090,7 +6145,7 @@ function(in_window)
                     // #region Get WebCrypto form of content encryption algorithm 
                     var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     if(("name" in contentEncryptionAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.unwrapKey("raw",
@@ -6103,7 +6158,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -6135,14 +6190,14 @@ function(in_window)
                         currentSequence = PasswordRecipientinfo(recipientIndex);
                         break;
                     default:
-                        return new Promise(function(resolve, reject) { reject("Uknown recipient type in array with index " + recipientIndex); });
+                        return Promise.reject("Uknown recipient type in array with index " + recipientIndex);
                 }
 
                 return currentSequence;
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -6154,7 +6209,7 @@ function(in_window)
                 // #region Get WebCrypto form of content encryption algorithm 
                 var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                 if(("name" in contentEncryptionAlgorithm) === false)
-                    return new Promise(function(resolve, reject) { reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+                    return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                 // #endregion 
 
                 // #region Get "intialization vector" for content encryption algorithm 
@@ -6183,7 +6238,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -6326,32 +6381,32 @@ function(in_window)
 
         // #region Check for input parameters 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("Parameters must have type \"Object\""); });
+            return Promise.reject("Parameters must have type \"Object\"");
 
         if(("password" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\""); });
+            return Promise.reject("Absent mandatory parameter \"password\"");
 
         if(("contentEncryptionAlgorithm" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"contentEncryptionAlgorithm\""); });
+            return Promise.reject("Absent mandatory parameter \"contentEncryptionAlgorithm\"");
 
         if(("hmacHashAlgorithm" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"hmacHashAlgorithm\""); });
+            return Promise.reject("Absent mandatory parameter \"hmacHashAlgorithm\"");
 
         if(("iterationCount" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"iterationCount\""); });
+            return Promise.reject("Absent mandatory parameter \"iterationCount\"");
 
         if(("contentToEncrypt" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"contentToEncrypt\""); });
+            return Promise.reject("Absent mandatory parameter \"contentToEncrypt\"");
 
         var contentEncryptionOID = in_window.org.pkijs.getOIDByAlgorithm(parameters.contentEncryptionAlgorithm);
         if(contentEncryptionOID === "")
-            return new Promise(function(resolve, reject) { reject("Wrong \"contentEncryptionAlgorithm\" value"); });
+            return Promise.reject("Wrong \"contentEncryptionAlgorithm\" value");
 
         var pbkdf2OID = in_window.org.pkijs.getOIDByAlgorithm({
             name: "PBKDF2"
         });
         if(pbkdf2OID === "")
-            return new Promise(function(resolve, reject) { reject("Can not find OID for PBKDF2"); });
+            return Promise.reject("Can not find OID for PBKDF2");
 
         var hmacOID = in_window.org.pkijs.getOIDByAlgorithm({
             name: "HMAC",
@@ -6360,13 +6415,13 @@ function(in_window)
             }
         });
         if(hmacOID === "")
-            return new Promise(function(resolve, reject) { reject("Incorrect value for \"hmacHashAlgorithm\": " + parameters.hmacHashAlgorithm); });
+            return Promise.reject("Incorrect value for \"hmacHashAlgorithm\": " + parameters.hmacHashAlgorithm);
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Initial variables 
@@ -6407,7 +6462,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -6431,7 +6486,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion   
@@ -6449,7 +6504,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion   
@@ -6480,7 +6535,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -6496,19 +6551,19 @@ function(in_window)
 
         // #region Check for input parameters 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("Parameters must have type \"Object\""); });
+            return Promise.reject("Parameters must have type \"Object\"");
 
         if(("password" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\""); });
+            return Promise.reject("Absent mandatory parameter \"password\"");
 
         if(this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id !== "1.2.840.113549.1.5.13") // pkcs5PBES2
-            return new Promise(function(resolve, reject) { reject("Unknown \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+            return Promise.reject("Unknown \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Initial variables 
@@ -6523,7 +6578,7 @@ function(in_window)
         }
         catch(ex)
         {
-            return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"pbes2Parameters\""); });
+            return Promise.reject("Incorrectly encoded \"pbes2Parameters\"");
         }
 
         var pbkdf2Params;
@@ -6534,12 +6589,12 @@ function(in_window)
         }
         catch(ex)
         {
-            return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"pbkdf2Params\""); });
+            return Promise.reject("Incorrectly encoded \"pbkdf2Params\"");
         }
 
         var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithm_id);
         if(("name" in contentEncryptionAlgorithm) == false)
-            return new Promise(function(resolve, reject) { reject("Incorrect OID for \"contentEncryptionAlgorithm\": " + pbes2Parameters.encryptionScheme.algorithm_id); });
+            return Promise.reject("Incorrect OID for \"contentEncryptionAlgorithm\": " + pbes2Parameters.encryptionScheme.algorithm_id);
 
         var ivBuffer = pbes2Parameters.encryptionScheme.algorithm_params.value_block.value_hex;
         var ivView = new Uint8Array(ivBuffer);
@@ -6555,7 +6610,7 @@ function(in_window)
         {
             var algorithm = in_window.org.pkijs.getAlgorithmByOID(pbkdf2Params.prf.algorithm_id);
             if(("name" in algorithm) === false)
-                return new Promise(function(resolve, reject) { reject("Incorrect OID for HMAC hash algorithm"); });
+                return Promise.reject("Incorrect OID for HMAC hash algorithm");
 
             hmacHashAlgorithm = algorithm.hash.name;
         }
@@ -6573,7 +6628,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -6597,7 +6652,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -6627,7 +6682,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 

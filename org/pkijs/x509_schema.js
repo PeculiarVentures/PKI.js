@@ -282,7 +282,7 @@ function(in_window)
                                 generalTimeName: "tbsCertList.thisUpdate"
                             }
                         }),
-                        in_window.org.pkijs.schema.TIME(names.tbsCertList_thisUpdate || {
+                        in_window.org.pkijs.schema.TIME(names.tbsCertList_nextUpdate || {
                             names: {
                                 utcTimeName: "tbsCertList.nextUpdate",
                                 generalTimeName: "tbsCertList.nextUpdate"
