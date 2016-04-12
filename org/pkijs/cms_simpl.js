@@ -2311,6 +2311,19 @@ function(in_window)
                 }
 
                 return result;
+            },
+            function(error)
+            {
+                if(includeSignerCertificate)
+                {
+                    return Promise.reject({
+                        result: false,
+                        signerCertificate: signer_cert,
+                        message: error
+                    });
+                }
+
+                return Promise.reject(error);
             }
             );
         // #endregion 
