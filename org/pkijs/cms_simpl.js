@@ -1926,6 +1926,50 @@ function(in_window)
         }
         // #endregion 
 
+        // #region Verify internal digest in case of "tSTInfo" content type 
+        sequence = sequence.then(
+            function()
+            {
+                if(encapContentInfo.eContentType == "1.2.840.113549.1.9.16.1.4")
+                {
+                    // #region Check "eContent" precense
+                    if(("eContent" in encapContentInfo) == false)
+                        return false;
+                    // #endregion 
+
+                    // #region Initialize TST_INFO value
+                    var asn1 = in_window.org.pkijs.fromBER(encapContentInfo.eContent.value_block.value_hex);
+                    var tstInfo;
+
+                    try
+                    {
+                        tstInfo = new in_window.org.pkijs.simpl.TST_INFO({ schema: asn1.result });
+                    }
+                    catch(ex)
+                    {
+                        return false;
+                    }
+                    // #endregion 
+
+                    // #region Get date from TST_INFO 
+                    checkDate = tstInfo.genTime;
+                    // #endregion 
+
+                    // #region Check that we do have detached data content 
+                    if(data.byteLength === 0)
+                        return Promise.reject("Missed detached data input array");
+                    // #endregion 
+
+                    return tstInfo.verify({ data: data });
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            );
+        // #endregion 
+
         // #region Make additional verification for signer's certificate 
         function checkCA(cert)
         {
@@ -1971,6 +2015,11 @@ function(in_window)
             sequence = sequence.then(
                 function(result)
                 {
+                    // #region Veify result of previous operation 
+                    if(result == false)
+                        return false;
+                    // #endregion 
+
                     return Promise.all(checkCA_promises).then(
                         function(promiseResults)
                         {
@@ -2014,7 +2063,7 @@ function(in_window)
                                 function(result)
                                 {
                                     if(result.result === true)
-                                        return Promise.resolve();
+                                        return Promise.resolve(true);
                                     else
                                         return Promise.reject("Validation of signer's certificate failed");
                                 },
@@ -2036,53 +2085,18 @@ function(in_window)
 
         // #region Find signer's hashing algorithm 
         sequence = sequence.then(
-            function()
+            function(result)
             {
-                var shaAlgorithm= in_window.org.pkijs.getAlgorithmByOID(signerInfos[signerIndex].digestAlgorithm.algorithm_id);
+                // #region Veify result of previous operation 
+                if(result == false)
+                    return false;
+                // #endregion 
+
+                var shaAlgorithm = in_window.org.pkijs.getAlgorithmByOID(signerInfos[signerIndex].digestAlgorithm.algorithm_id);
                 if(("name" in shaAlgorithm) === false)
                     return Promise.reject("Unsupported signature algorithm: " + _this.signerInfos[signerIndex].digestAlgorithm.algorithm_id);
 
                 sha_algorithm = shaAlgorithm.name;
-            }
-            );
-        // #endregion 
-
-        // #region Verify internal digest in case of "tSTInfo" content type 
-        sequence = sequence.then(
-            function()
-            {
-                if(encapContentInfo.eContentType == "1.2.840.113549.1.9.16.1.4")
-                {
-                    // #region Check "eContent" precense
-                    if(("eContent" in encapContentInfo) == false)
-                        return false;
-                    // #endregion 
-
-                    // #region Initialize TST_INFO value
-                    var asn1 = in_window.org.pkijs.fromBER(encapContentInfo.eContent.value_block.value_hex);
-                    var tstInfo;
-
-                    try
-                    {
-                        tstInfo = new in_window.org.pkijs.simpl.TST_INFO({ schema: asn1.result });
-                    }
-                    catch(ex)
-                    {
-                        return false;
-                    }
-                    // #endregion 
-
-                    // #region Check that we do have detached data content 
-                    if(data.byteLength === 0)
-                        return Promise.reject("Missed detached data input array");
-                    // #endregion 
-
-                    return tstInfo.verify({ data: data });
-                }
-                else
-                {
-                    return true;
-                }
             }
             );
         // #endregion 
@@ -2306,6 +2320,7 @@ function(in_window)
                 {
                     return {
                         result: result,
+                        date: checkDate,
                         signerCertificate: signer_cert
                     };
                 }
@@ -2319,6 +2334,7 @@ function(in_window)
                     return Promise.reject({
                         result: false,
                         signerCertificate: signer_cert,
+                        date: checkDate,
                         message: error
                     });
                 }
