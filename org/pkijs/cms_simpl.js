@@ -1822,6 +1822,8 @@ function(in_window)
         var includeSignerCertificate = false;
 
         var _this = this;
+
+        var extendedMode = false;
         // #endregion 
 
         // #region Get a "crypto" extension 
@@ -1850,15 +1852,46 @@ function(in_window)
 
             if("includeSignerCertificate" in arguments[0])
                 includeSignerCertificate = arguments[0].includeSignerCertificate;
+
+            if("extendedMode" in arguments[0])
+                extendedMode = arguments[0].extendedMode;
         }
 
         if(signerIndex === (-1))
+        {
+            if(extendedMode)
+            {
+                return Promise.reject({
+                    date: checkDate,
+                    code: 1,
+                    message: "Unable to get signer index from input parameters",
+                    signatureVerified: null,
+                    signerCertificate: null,
+                    signerCertificateVerified: null
+                });
+            }
+
             return Promise.reject("Unable to get signer index from input parameters");
+        }
         // #endregion 
 
         // #region Check that certificates field was included in signed data 
         if(("certificates" in this) === false)
+        {
+            if(extendedMode)
+            {
+                return Promise.reject({
+                    date: checkDate,
+                    code: 2,
+                    message: "No certificates attached to this signed data",
+                    signatureVerified: null,
+                    signerCertificate: null,
+                    signerCertificateVerified: null
+                });
+            }
+
             return Promise.reject("No certificates attached to this signed data");
+        }
         // #endregion 
 
         // #region Find a certificate for specified signer 
@@ -1878,6 +1911,18 @@ function(in_window)
                             signer_cert = certificates[i];
                             return Promise.resolve();
                         }
+                    }
+
+                    if(extendedMode)
+                    {
+                        return Promise.reject({
+                            date: checkDate,
+                            code: 3,
+                            message: "Unable to find signer certificate",
+                            signatureVerified: null,
+                            signerCertificate: null,
+                            signerCertificateVerified: null
+                        });
                     }
 
                     return Promise.reject("Unable to find signer certificate");
@@ -1914,10 +1959,34 @@ function(in_window)
                                 }
                             }
 
+                            if(extendedMode)
+                            {
+                                return Promise.reject({
+                                    date: checkDate,
+                                    code: 3,
+                                    message: "Unable to find signer certificate",
+                                    signatureVerified: null,
+                                    signerCertificate: null,
+                                    signerCertificateVerified: null
+                                });
+                            }
+
                             return Promise.reject("Unable to find signer certificate");
                         },
                         function(error)
                         {
+                            if(extendedMode)
+                            {
+                                return Promise.reject({
+                                    date: checkDate,
+                                    code: 3,
+                                    message: "Unable to find signer certificate",
+                                    signatureVerified: null,
+                                    signerCertificate: null,
+                                    signerCertificateVerified: null
+                                });
+                            }
+
                             return Promise.reject("Unable to find signer certificate");
                         }
                         );
@@ -1951,13 +2020,23 @@ function(in_window)
                     }
                     // #endregion 
 
-                    // #region Get date from TST_INFO 
-                    checkDate = tstInfo.genTime;
-                    // #endregion 
-
-                    // #region Check that we do have detached data content 
+                    // #region Check that we do have detached data content
                     if(data.byteLength === 0)
+                    {
+                        if(extendedMode)
+                        {
+                            return Promise.reject({
+                                date: checkDate,
+                                code: 4,
+                                message: "Missed detached data input array",
+                                signatureVerified: null,
+                                signerCertificate: signer_cert,
+                                signerCertificateVerified: null
+                            });
+                        }
+
                         return Promise.reject("Missed detached data input array");
+                    }
                     // #endregion 
 
                     return tstInfo.verify({ data: data });
@@ -2065,16 +2144,54 @@ function(in_window)
                                     if(result.result === true)
                                         return Promise.resolve(true);
                                     else
+                                    {
+                                        if(extendedMode)
+                                        {
+                                            return Promise.reject({
+                                                date: checkDate,
+                                                code: 5,
+                                                message: "Validation of signer's certificate failed",
+                                                signatureVerified: null,
+                                                signerCertificate: signer_cert,
+                                                signerCertificateVerified: false
+                                            });
+                                        }
+
                                         return Promise.reject("Validation of signer's certificate failed");
+                                    }
                                 },
                                 function(error)
                                 {
+                                    if(extendedMode)
+                                    {
+                                        return Promise.reject({
+                                            date: checkDate,
+                                            code: 5,
+                                            message: "Validation of signer's certificate failed with error: " + ((error instanceof Object) ? error.result_message : error),
+                                            signatureVerified: null,
+                                            signerCertificate: signer_cert,
+                                            signerCertificateVerified: false
+                                        });
+                                    }
+
                                     return Promise.reject("Validation of signer's certificate failed with error: " + ((error instanceof Object) ? error.result_message : error));
                                 }
                                 );
                         },
                         function(promiseError)
                         {
+                            if(extendedMode)
+                            {
+                                return Promise.reject({
+                                    date: checkDate,
+                                    code: 6,
+                                    message: "Error during checking certificates for CA flag: " + promiseError,
+                                    signatureVerified: null,
+                                    signerCertificate: signer_cert,
+                                    signerCertificateVerified: null
+                                });
+                            }
+
                             return Promise.reject("Error during checking certificates for CA flag: " + promiseError);
                         }
                         );
@@ -2094,7 +2211,21 @@ function(in_window)
 
                 var shaAlgorithm = in_window.org.pkijs.getAlgorithmByOID(signerInfos[signerIndex].digestAlgorithm.algorithm_id);
                 if(("name" in shaAlgorithm) === false)
+                {
+                    if(extendedMode)
+                    {
+                        return Promise.reject({
+                            date: checkDate,
+                            code: 7,
+                            message: "Error during checking certificates for CA flag: " + promiseError,
+                            signatureVerified: null,
+                            signerCertificate: signer_cert,
+                            signerCertificateVerified: true
+                        });
+                    }
+
                     return Promise.reject("Unsupported signature algorithm: " + _this.signerInfos[signerIndex].digestAlgorithm.algorithm_id);
+                }
 
                 sha_algorithm = shaAlgorithm.name;
             }
@@ -2129,7 +2260,21 @@ function(in_window)
                 else // Detached data
                 {
                     if(data.byteLength === 0) // Check that "data" already provided by function parameter
+                    {
+                        if(extendedMode)
+                        {
+                            return Promise.reject({
+                                date: checkDate,
+                                code: 8,
+                                message: "Missed detached data input array",
+                                signatureVerified: null,
+                                signerCertificate: signer_cert,
+                                signerCertificateVerified: true
+                            });
+                        }
+
                         return Promise.reject("Missed detached data input array");
+                    }
                 }
 
                 if("signedAttrs" in signerInfos[signerIndex])
@@ -2160,10 +2305,38 @@ function(in_window)
                     }
 
                     if(foundContentType == false)
+                    {
+                        if(extendedMode)
+                        {
+                            return Promise.reject({
+                                date: checkDate,
+                                code: 9,
+                                message: "Attribute \"content-type\" is a mandatory attribute for \"signed attributes\"",
+                                signatureVerified: null,
+                                signerCertificate: signer_cert,
+                                signerCertificateVerified: true
+                            });
+                        }
+
                         return Promise.reject("Attribute \"content-type\" is a mandatory attribute for \"signed attributes\"");
+                    }
 
                     if(foundMessageDigest == false)
+                    {
+                        if(extendedMode)
+                        {
+                            return Promise.reject({
+                                date: checkDate,
+                                code: 10,
+                                message: "Attribute \"message-digest\" is a mandatory attribute for \"signed attributes\"",
+                                signatureVerified: null,
+                                signerCertificate: signer_cert,
+                                signerCertificateVerified: true
+                            });
+                        }
+
                         return Promise.reject("Attribute \"message-digest\" is a mandatory attribute for \"signed attributes\"");
+                    }
                     // #endregion 
                 }
 
@@ -2184,7 +2357,21 @@ function(in_window)
                 // #region Get information about public key algorithm and default parameters for import
                 var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(signer_cert.signatureAlgorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
+                {
+                    if(extendedMode)
+                    {
+                        return Promise.reject({
+                            date: checkDate,
+                            code: 11,
+                            message: "Unsupported public key algorithm: " + signer_cert.signatureAlgorithm.algorithm_id,
+                            signatureVerified: null,
+                            signerCertificate: signer_cert,
+                            signerCertificateVerified: true
+                        });
+                    }
+
                     return Promise.reject("Unsupported public key algorithm: " + signer_cert.signatureAlgorithm.algorithm_id);
+                }
 
                 var algorithm_name = algorithmObject.name;
 
@@ -2267,6 +2454,18 @@ function(in_window)
                     }
                     catch(ex)
                     {
+                        if(extendedMode)
+                        {
+                            return Promise.reject({
+                                date: checkDate,
+                                code: 12,
+                                message: ex,
+                                signatureVerified: null,
+                                signerCertificate: signer_cert,
+                                signerCertificateVerified: true
+                            });
+                        }
+
                         return Promise.reject(ex);
                     }
 
@@ -2281,7 +2480,21 @@ function(in_window)
                     {
                         var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
                         if(("name" in hashAlgorithm) === false)
+                        {
+                            if(extendedMode)
+                            {
+                                return Promise.reject({
+                                    date: checkDate,
+                                    code: 13,
+                                    message: "Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id,
+                                    signatureVerified: null,
+                                    signerCertificate: signer_cert,
+                                    signerCertificateVerified: true
+                                });
+                            }
+
                             return Promise.reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id);
+                        }
 
                         hash_algo = hashAlgorithm.name;
                     }
@@ -2304,10 +2517,6 @@ function(in_window)
                     publicKey,
                     new Uint8Array(signature_value),
                     new Uint8Array(data));
-            },
-            function(error)
-            {
-                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -2316,12 +2525,15 @@ function(in_window)
         sequence = sequence.then(
             function(result)
             {
-                if(includeSignerCertificate)
+                if(extendedMode)
                 {
                     return {
-                        result: result,
                         date: checkDate,
-                        signerCertificate: signer_cert
+                        code: 14,
+                        message: "",
+                        signatureVerified: result,
+                        signerCertificate: signer_cert,
+                        signerCertificateVerified: true
                     };
                 }
 
@@ -2329,14 +2541,21 @@ function(in_window)
             },
             function(error)
             {
-                if(includeSignerCertificate)
+                if(extendedMode)
                 {
-                    return Promise.reject({
-                        result: false,
-                        signerCertificate: signer_cert,
-                        date: checkDate,
-                        message: error
-                    });
+                    if("code" in error)
+                        return Promise.reject(error);
+                    else
+                    {
+                        return Promise.reject({
+                            date: checkDate,
+                            code: 15,
+                            message: "Error during verification: " + error.message,
+                            signatureVerified: null,
+                            signerCertificate: signer_cert,
+                            signerCertificateVerified: true
+                        });
+                    }
                 }
 
                 return Promise.reject(error);
