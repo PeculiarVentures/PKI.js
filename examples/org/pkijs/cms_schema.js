@@ -107,7 +107,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -129,7 +129,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.ANY({ name: (names.otherCert || "otherCert") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.CMS_CERTIFICATE_SET =
     function()
@@ -187,8 +187,8 @@ function(in_window)
                     })
                 ]
             })
-            ); // __!!!__ Removed definition for "AttributeCertificateV2" __!!!__
-    }
+            ); // TODO: Add definition for "AttributeCertificateV2"
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -210,7 +210,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.ANY({ name: (names.otherRevInfo || "otherRevInfo") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.CSM_REVOCATION_INFO_CHOICES =
     function()
@@ -246,7 +246,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -270,7 +270,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.INTEGER({ name: (names.serialNumber || "") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -301,7 +301,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -347,7 +347,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -379,7 +379,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -452,7 +452,7 @@ function(in_window)
                 ]
             })
             );
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -483,7 +483,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -500,13 +500,14 @@ function(in_window)
         //    crls [1] IMPLICIT RevocationInfoChoices OPTIONAL,
         //    signerInfos SignerInfos }
 
-        var names = in_window.org.pkijs.getNames(arguments[0]);
+        names = in_window.org.pkijs.getNames(arguments[0]);
 
         if(typeof optional_flag === "undefined")
             optional_flag = false;
 
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             name: (names.block_name || "SignedData"),
+            optional: optional_flag,
             value: [
                 new in_window.org.pkijs.asn1.INTEGER({ name: (names.version || "SignedData.version") }),
                 new in_window.org.pkijs.asn1.SET({
@@ -556,7 +557,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -595,7 +596,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -636,7 +637,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -658,7 +659,7 @@ function(in_window)
                 in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.encryptionScheme || {})
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -692,7 +693,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.KeyTransRecipientInfo =
     function()
@@ -714,7 +715,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.encryptedKey || "") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.OriginatorPublicKey =
     function()
@@ -732,7 +733,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.BITSTRING({ name: (names.publicKey || "") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.OriginatorIdentifierOrKey =
     function()
@@ -768,7 +769,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.OtherKeyAttribute =
     function()
@@ -790,7 +791,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.RecipientKeyIdentifier =
     function()
@@ -813,7 +814,7 @@ function(in_window)
                 in_window.org.pkijs.schema.cms.OtherKeyAttribute(names.other || {})
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.KeyAgreeRecipientIdentifier =
     function()
@@ -845,7 +846,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.RecipientEncryptedKey =
     function()
@@ -865,7 +866,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.encryptedKey || "") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.RecipientEncryptedKeys =
     function()
@@ -883,7 +884,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.KeyAgreeRecipientInfo =
     function()
@@ -922,7 +923,7 @@ function(in_window)
                 in_window.org.pkijs.schema.cms.RecipientEncryptedKeys(names.recipientEncryptedKeys || {})
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.KEKIdentifier =
     function()
@@ -945,7 +946,7 @@ function(in_window)
                 in_window.org.pkijs.schema.cms.OtherKeyAttribute(names.other || {})
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.KEKRecipientInfo =
     function()
@@ -967,7 +968,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.encryptedKey || "") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.PasswordRecipientinfo =
     function()
@@ -997,7 +998,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.encryptedKey || "") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.OtherRecipientInfo =
     function()
@@ -1015,7 +1016,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.ANY({ name: (names.oriValue || "") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.CMS_RECIPIENT_INFO =
     function()
@@ -1070,7 +1071,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1108,7 +1109,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.cms.EncryptedContentInfo =
     function()
@@ -1156,7 +1157,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.CMS_ENVELOPED_DATA =
     function()
@@ -1207,7 +1208,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1246,7 +1247,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************

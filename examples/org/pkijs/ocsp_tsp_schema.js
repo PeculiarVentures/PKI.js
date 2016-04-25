@@ -119,7 +119,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.INTEGER({ name: (names.serialNumber || "") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.ocsp.Request =
     function()
@@ -148,7 +148,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.ocsp.TBSRequest =
     function()
@@ -207,7 +207,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.ocsp.Signature =
     function()
@@ -241,7 +241,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.OCSP_REQUEST =
     function()
@@ -276,7 +276,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -317,7 +317,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -339,7 +339,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.response || "") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.OCSP_RESPONSE =
     function()
@@ -380,7 +380,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.ocsp.SingleResponse =
     function()
@@ -466,7 +466,7 @@ function(in_window)
                 }) // EXPLICIT SEQUENCE value
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.ocsp.ResponseData =
     function()
@@ -538,7 +538,7 @@ function(in_window)
                 }) // EXPLICIT SEQUENCE value
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.OCSP_BASIC_RESPONSE =
     function()
@@ -582,7 +582,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -604,7 +604,7 @@ function(in_window)
                 new in_window.org.pkijs.asn1.OCTETSTRING({ name: (names.hashedMessage || "") })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.TSP_REQUEST =
     function()
@@ -655,7 +655,7 @@ function(in_window)
                 }) // IMPLICIT SEQUENCE value
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -675,7 +675,10 @@ function(in_window)
             name: (names.block_name || ""),
             optional: true,
             value: [
-                new in_window.org.pkijs.asn1.INTEGER({ name: (names.seconds || "") }),
+                new in_window.org.pkijs.asn1.INTEGER({
+                    optional: true,
+                    name: (names.seconds || "")
+                }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.millis || ""),
                     optional: true,
@@ -694,7 +697,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.TST_INFO =
     function()
@@ -765,7 +768,7 @@ function(in_window)
                 }) // IMPLICIT Extensions
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.tsp.PKIStatusInfo =
     function()
@@ -796,7 +799,7 @@ function(in_window)
                 })
             ]
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.schema.TSP_RESPONSE =
     function()
@@ -822,7 +825,7 @@ function(in_window)
                 }, true)
             ]
         }));
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************

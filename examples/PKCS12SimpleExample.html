@@ -280,7 +280,7 @@
             // #endregion 
 
             // #region Put initial values for PKCS#12 structures 
-            var pkcs12 = new org.pkijs.simpl.PKCS12({
+            var pkcs12 = new org.pkijs.simpl.PFX({
                 parsedValue: {
                     integrityMode: 0, // Password-Based Integrity Mode
                     authenticatedSafe: new org.pkijs.simpl.pkcs12.AuthenticatedSafe({
@@ -383,7 +383,7 @@
             // #endregion 
 
             // #region Put initial values for PKCS#12 structures 
-            var pkcs12 = new org.pkijs.simpl.PKCS12({
+            var pkcs12 = new org.pkijs.simpl.PFX({
                 parsedValue: {
                     integrityMode: 1, // Certificate-Based Integrity Mode
                     authenticatedSafe: new org.pkijs.simpl.pkcs12.AuthenticatedSafe({
@@ -501,7 +501,7 @@
             // #endregion 
 
             // #region Put initial values for PKCS#12 structures 
-            var pkcs12 = new org.pkijs.simpl.PKCS12({
+            var pkcs12 = new org.pkijs.simpl.PFX({
                 parsedValue: {
                     integrityMode: 0, // Password-Based Integrity Mode
                     authenticatedSafe: new org.pkijs.simpl.pkcs12.AuthenticatedSafe({
@@ -601,7 +601,7 @@
             // #endregion 
 
             // #region Put initial values for PKCS#12 structures 
-            var pkcs12 = new org.pkijs.simpl.PKCS12({
+            var pkcs12 = new org.pkijs.simpl.PFX({
                 parsedValue: {
                     integrityMode: 0, // Password-Based Integrity Mode
                     authenticatedSafe: new org.pkijs.simpl.pkcs12.AuthenticatedSafe({
@@ -732,7 +732,7 @@
             // #endregion 
 
             // #region Put initial values for PKCS#12 structures 
-            var pkcs12 = new org.pkijs.simpl.PKCS12({
+            var pkcs12 = new org.pkijs.simpl.PFX({
                 parsedValue: {
                     integrityMode: 0, // Password-Based Integrity Mode
                     authenticatedSafe: new org.pkijs.simpl.pkcs12.AuthenticatedSafe({
@@ -894,7 +894,7 @@
 
             // #region Parse internal PKCS#12 values 
             var asn1 = org.pkijs.fromBER(buffer);
-            var pkcs12 = new org.pkijs.simpl.PKCS12({ schema: asn1.result });
+            var pkcs12 = new org.pkijs.simpl.PFX({ schema: asn1.result });
             // #endregion 
 
             // #region Parse "AuthenticatedSafe" value of PKCS#12 data  

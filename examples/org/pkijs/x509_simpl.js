@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2014, GMO GlobalSign
  * Copyright (c) 2015, Peculiar Ventures
  * All rights reserved.
@@ -107,7 +107,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TIME.prototype.fromSchema =
     function(schema)
@@ -139,7 +139,7 @@ function(in_window)
             this.value = asn1.result.generalTimeName.toDate();
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TIME.prototype.toSchema =
     function()
@@ -154,7 +154,7 @@ function(in_window)
 
         return result;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.TIME.prototype.toJSON =
     function()
@@ -163,7 +163,7 @@ function(in_window)
             type: this.type,
             value: this.value
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -191,7 +191,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.GENERAL_NAME.prototype.fromSchema =
     function(schema)
@@ -272,7 +272,7 @@ function(in_window)
             default:;
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.GENERAL_NAME.prototype.toSchema =
     function(schema)
@@ -339,7 +339,7 @@ function(in_window)
                 return in_window.org.pkijs.schema.GENERAL_NAME();
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.GENERAL_NAME.prototype.toJSON =
     function()
@@ -354,7 +354,7 @@ function(in_window)
             _object.Name = this.Name.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -380,7 +380,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.GENERAL_NAMES.prototype.fromSchema =
     function(schema)
@@ -408,7 +408,7 @@ function(in_window)
         for(var i = 0; i < n.length; i++)
             this.names.push(new in_window.org.pkijs.simpl.GENERAL_NAME({ schema: n[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.GENERAL_NAMES.prototype.toSchema =
     function(schema)
@@ -423,7 +423,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.GENERAL_NAMES.prototype.toJSON =
     function()
@@ -436,7 +436,7 @@ function(in_window)
         return {
             names: _names
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -465,7 +465,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER.prototype.fromSchema =
     function(schema)
@@ -490,7 +490,7 @@ function(in_window)
         if("params" in asn1.result)
             this.algorithm_params = asn1.result.params;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER.prototype.toSchema =
     function()
@@ -508,12 +508,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
-    //**************************************************************************************
-    in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER.prototype.getCommonName =
-    function()
-    {
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER.prototype.toJSON =
     function()
@@ -526,7 +521,7 @@ function(in_window)
             _object.algorithm_params = this.algorithm_params.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER.prototype.isEqual =
     function(algorithmIdentifier)
@@ -549,10 +544,7 @@ function(in_window)
         {
             if("algorithm_params" in algorithmIdentifier)
             {
-                if(JSON.stringify(this.algorithm_params) == JSON.stringify(algorithmIdentifier.algorithm_params))
-                    return true;
-                else
-                    return false;
+                return JSON.stringify(this.algorithm_params) == JSON.stringify(algorithmIdentifier.algorithm_params);
             }
             else
                 return false;
@@ -565,7 +557,7 @@ function(in_window)
         // #endregion 
 
         return true;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -593,7 +585,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.RSAPublicKey.prototype.fromSchema =
     function(schema)
@@ -617,7 +609,7 @@ function(in_window)
         this.modulus = asn1.result["modulus"];
         this.publicExponent = asn1.result["publicExponent"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.RSAPublicKey.prototype.toSchema =
     function()
@@ -630,7 +622,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.RSAPublicKey.prototype.toJSON =
     function()
@@ -639,7 +631,7 @@ function(in_window)
             modulus: this.modulus.toJSON(),
             publicExponent: this.publicExponent.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -669,7 +661,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.OtherPrimeInfo.prototype.fromSchema =
     function(schema)
@@ -695,7 +687,7 @@ function(in_window)
         this.exponent = asn1.result["exponent"];
         this.coefficient = asn1.result["coefficient"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.OtherPrimeInfo.prototype.toSchema =
     function()
@@ -709,7 +701,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.OtherPrimeInfo.prototype.toJSON =
     function()
@@ -719,7 +711,7 @@ function(in_window)
             exponent: this.exponent.toJSON(),
             coefficient: this.coefficient.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -764,7 +756,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.RSAPrivateKey.prototype.fromSchema =
     function(schema)
@@ -811,7 +803,7 @@ function(in_window)
                 this.otherPrimeInfos.push(new in_window.org.pkijs.simpl.x509.OtherPrimeInfo({ schema: otherPrimeInfos_array[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.RSAPrivateKey.prototype.toSchema =
     function()
@@ -845,7 +837,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.RSAPrivateKey.prototype.toJSON =
     function()
@@ -859,7 +851,7 @@ function(in_window)
             prime2: this.prime2.toJSON(),
             exponent1: this.exponent1.toJSON(),
             exponent2: this.exponent2.toJSON(),
-            coefficient: this.coefficient.toJSON(),
+            coefficient: this.coefficient.toJSON()
         };
 
         if("otherPrimeInfos" in this)
@@ -871,7 +863,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -883,8 +875,8 @@ function(in_window)
         // #region Internal properties of the object 
         // OPTIONAL this.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
         // OPTIONAL this.maskGenAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER();
-        // OPTIONAL this.saltLength = 20; // new in_window.org.pkijs.asn1.INTEGER();
-        // OPTIONAL this.trailerField = 1; // new in_window.org.pkijs.asn1.INTEGER();
+        // OPTIONAL this.saltLength = 20; 
+        // OPTIONAL this.trailerField = 1;
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -910,7 +902,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.RSASSA_PSS_params.prototype.fromSchema =
     function(schema)
@@ -953,7 +945,7 @@ function(in_window)
         if("trailerField" in asn1.result)
             this.trailerField = asn1.result["trailerField"].value_block.value_dec;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.RSASSA_PSS_params.prototype.toSchema =
     function()
@@ -1003,7 +995,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.RSASSA_PSS_params.prototype.toJSON =
     function()
@@ -1017,13 +1009,13 @@ function(in_window)
             _object.maskGenAlgorithm = this.maskGenAlgorithm.toJSON();
 
         if("saltLength" in this)
-            _object.saltLength = this.saltLength.toJSON();
+            _object.saltLength = this.saltLength;
 
         if("trailerField" in this)
-            _object.trailerField = this.trailerField.toJSON();
+            _object.trailerField = this.trailerField;
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1051,7 +1043,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PUBLIC_KEY_INFO.prototype.fromSchema =
     function(schema)
@@ -1079,7 +1071,7 @@ function(in_window)
         this.algorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result.algorithm });
         this.subjectPublicKey = asn1.result.subjectPublicKey;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PUBLIC_KEY_INFO.prototype.toSchema =
     function()
@@ -1092,7 +1084,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PUBLIC_KEY_INFO.prototype.importKey =
     function(publicKey)
@@ -1106,13 +1098,13 @@ function(in_window)
 
         // #region Initial check 
         if(typeof publicKey === "undefined")
-            return new Promise(function(resolve, reject) { reject("Need to provide publicKey input parameter"); });
+            return Promise.reject("Need to provide publicKey input parameter");
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Export public key 
@@ -1135,18 +1127,18 @@ function(in_window)
                 }
                 catch(exception)
                 {
-                    return new Promise(function(resolve, reject) { reject("Error during initializing object from schema"); });
+                    return Promise.reject("Error during initializing object from schema");
                 }
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Error during exporting public key: " + error); });
+                return Promise.reject("Error during exporting public key: " + error);
             }
             );
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PUBLIC_KEY_INFO.prototype.toJSON =
     function()
@@ -1155,7 +1147,7 @@ function(in_window)
             algorithm: this.algorithm.toJSON(),
             subjectPublicKey: this.subjectPublicKey.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1183,7 +1175,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ATTR_TYPE_AND_VALUE.prototype.fromSchema =
     function(schema)
@@ -1207,7 +1199,7 @@ function(in_window)
         this.type = asn1.result.type.value_block.toString();
         this.value = asn1.result.typeValue;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ATTR_TYPE_AND_VALUE.prototype.toSchema =
     function()
@@ -1220,7 +1212,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ATTR_TYPE_AND_VALUE.prototype.isEqual =
     function()
@@ -1259,7 +1251,7 @@ function(in_window)
         }
         else
             return false;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ATTR_TYPE_AND_VALUE.prototype.toJSON =
     function()
@@ -1274,7 +1266,7 @@ function(in_window)
             _object.value = this.value;
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1304,7 +1296,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.RDN.prototype.fromSchema =
     function(schema)
@@ -1334,7 +1326,7 @@ function(in_window)
 
         this.value_before_decode = asn1.result.RDN.value_before_decode;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.RDN.prototype.toSchema =
     function()
@@ -1360,7 +1352,7 @@ function(in_window)
         // #region Construct and return new ASN.1 schema for this object 
         return asn1.result;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.RDN.prototype.isEqual =
     function()
@@ -1387,7 +1379,7 @@ function(in_window)
         }
 
         return false;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.RDN.prototype.toJSON =
     function()
@@ -1400,7 +1392,7 @@ function(in_window)
             _object.types_and_values.push(this.types_and_values[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1435,7 +1427,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.AuthorityKeyIdentifier.prototype.fromSchema =
     function(schema)
@@ -1482,7 +1474,7 @@ function(in_window)
             this.authorityCertSerialNumber = asn1.result["authorityCertSerialNumber"];
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.AuthorityKeyIdentifier.prototype.toSchema =
     function()
@@ -1535,7 +1527,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.AuthorityKeyIdentifier.prototype.toJSON =
     function()
@@ -1557,7 +1549,7 @@ function(in_window)
             _object.authorityCertSerialNumber = this.authorityCertSerialNumber.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1588,7 +1580,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PrivateKeyUsagePeriod.prototype.fromSchema =
     function(schema)
@@ -1623,7 +1615,7 @@ function(in_window)
             this.notAfter = localNotAfter.toDate();
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PrivateKeyUsagePeriod.prototype.toSchema =
     function()
@@ -1655,7 +1647,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PrivateKeyUsagePeriod.prototype.toJSON =
     function()
@@ -1669,7 +1661,7 @@ function(in_window)
             _object.notAfter = this.notAfter;
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1695,7 +1687,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.AltName.prototype.fromSchema =
     function(schema)
@@ -1723,7 +1715,7 @@ function(in_window)
                 this.altNames.push(new in_window.org.pkijs.simpl.GENERAL_NAME({ schema: altNames_array[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.AltName.prototype.toSchema =
     function()
@@ -1740,7 +1732,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.AltName.prototype.toJSON =
     function()
@@ -1753,7 +1745,7 @@ function(in_window)
             _object.altNames.push(this.altNames[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1779,7 +1771,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.SubjectDirectoryAttributes.prototype.fromSchema =
     function(schema)
@@ -1804,7 +1796,7 @@ function(in_window)
         for(var i = 0; i < attrs.length; i++)
             this.attributes.push(new in_window.org.pkijs.simpl.ATTRIBUTE({ schema: attrs[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.SubjectDirectoryAttributes.prototype.toSchema =
     function()
@@ -1821,7 +1813,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.SubjectDirectoryAttributes.prototype.toJSON =
     function()
@@ -1834,7 +1826,7 @@ function(in_window)
             _object.attributes.push(this.attributes[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1862,7 +1854,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyMapping.prototype.fromSchema =
     function(schema)
@@ -1886,7 +1878,7 @@ function(in_window)
         this.issuerDomainPolicy = asn1.result["issuerDomainPolicy"].value_block.toString();
         this.subjectDomainPolicy = asn1.result["subjectDomainPolicy"].value_block.toString();
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyMapping.prototype.toSchema =
     function()
@@ -1899,7 +1891,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyMapping.prototype.toJSON =
     function()
@@ -1908,7 +1900,7 @@ function(in_window)
             issuerDomainPolicy: this.issuerDomainPolicy,
             subjectDomainPolicy: this.subjectDomainPolicy
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1934,7 +1926,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyMappings.prototype.fromSchema =
     function(schema)
@@ -1959,7 +1951,7 @@ function(in_window)
         for(var i = 0; i < maps.length; i++)
             this.mappings.push(new in_window.org.pkijs.simpl.x509.PolicyMapping({ schema: maps[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyMappings.prototype.toSchema =
     function()
@@ -1968,7 +1960,7 @@ function(in_window)
         var output_array = new Array();
 
         for(var i = 0; i < this.mappings.length; i++)
-            output_array.push(this.mappings.toSchema());
+            output_array.push(this.mappings[i].toSchema());
         // #endregion 
 
         // #region Construct and return new ASN.1 schema for this object 
@@ -1976,7 +1968,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyMappings.prototype.toJSON =
     function()
@@ -1989,7 +1981,7 @@ function(in_window)
             _object.mappings.push(this.mappings[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2023,7 +2015,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.GeneralSubtree.prototype.fromSchema =
     function(schema)
@@ -2067,7 +2059,7 @@ function(in_window)
                 this.maximum = asn1.result["maximum"].value_block.value_dec;
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.GeneralSubtree.prototype.toSchema =
     function()
@@ -2121,7 +2113,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.GeneralSubtree.prototype.toJSON =
     function()
@@ -2147,7 +2139,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2178,7 +2170,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.NameConstraints.prototype.fromSchema =
     function(schema)
@@ -2217,7 +2209,7 @@ function(in_window)
                 this.excludedSubtrees.push(new in_window.org.pkijs.simpl.x509.GeneralSubtree({ schema: excluded_array[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.NameConstraints.prototype.toSchema =
     function()
@@ -2269,7 +2261,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.NameConstraints.prototype.toJSON =
     function()
@@ -2293,7 +2285,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2324,7 +2316,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.BasicConstraints.prototype.fromSchema =
     function(schema)
@@ -2351,7 +2343,7 @@ function(in_window)
         if("pathLenConstraint" in asn1.result)
             this.pathLenConstraint = asn1.result["pathLenConstraint"].value_block.value_dec;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.BasicConstraints.prototype.toSchema =
     function()
@@ -2371,7 +2363,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.BasicConstraints.prototype.toJSON =
     function()
@@ -2385,7 +2377,7 @@ function(in_window)
             _object.pathLenConstraint = this.pathLenConstraint;
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2413,7 +2405,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyQualifierInfo.prototype.fromSchema =
     function(schema)
@@ -2437,7 +2429,7 @@ function(in_window)
         this.policyQualifierId = asn1.result["policyQualifierId"].value_block.toString();
         this.qualifier = asn1.result["qualifier"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyQualifierInfo.prototype.toSchema =
     function()
@@ -2450,7 +2442,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyQualifierInfo.prototype.toJSON =
     function()
@@ -2459,7 +2451,7 @@ function(in_window)
             policyQualifierId: this.policyQualifierId,
             qualifier: this.qualifier.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2489,7 +2481,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyInformation.prototype.fromSchema =
     function(schema)
@@ -2521,7 +2513,7 @@ function(in_window)
                 this.policyQualifiers.push(new in_window.org.pkijs.simpl.x509.PolicyQualifierInfo({ schema: qualifiers[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyInformation.prototype.toSchema =
     function()
@@ -2549,7 +2541,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyInformation.prototype.toJSON =
     function()
@@ -2567,7 +2559,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2593,7 +2585,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.CertificatePolicies.prototype.fromSchema =
     function(schema)
@@ -2618,7 +2610,7 @@ function(in_window)
         for(var i = 0; i < policies.length; i++)
             this.certificatePolicies.push(new in_window.org.pkijs.simpl.x509.PolicyInformation({ schema: policies[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.CertificatePolicies.prototype.toSchema =
     function()
@@ -2635,7 +2627,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.CertificatePolicies.prototype.toJSON =
     function()
@@ -2648,7 +2640,7 @@ function(in_window)
             _object.certificatePolicies.push(this.certificatePolicies[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2676,7 +2668,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyConstraints.prototype.fromSchema =
     function(schema)
@@ -2723,7 +2715,7 @@ function(in_window)
             this.inhibitPolicyMapping = int2.result.value_block.value_dec;
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyConstraints.prototype.toSchema =
     function()
@@ -2745,8 +2737,8 @@ function(in_window)
         {
             var int2 = new in_window.org.pkijs.asn1.INTEGER({ value: this.inhibitPolicyMapping });
 
-            int1.id_block.tag_class = 3; // CONTEXT-SPECIFIC
-            int1.id_block.tag_number = 1; // [1]
+            int2.id_block.tag_class = 3; // CONTEXT-SPECIFIC
+            int2.id_block.tag_number = 1; // [1]
 
             output_array.push(int2);
         }
@@ -2757,7 +2749,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.PolicyConstraints.prototype.toJSON =
     function()
@@ -2771,7 +2763,7 @@ function(in_window)
             _object.inhibitPolicyMapping = this.inhibitPolicyMapping;
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2797,7 +2789,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.ExtKeyUsage.prototype.fromSchema =
     function(schema)
@@ -2822,7 +2814,7 @@ function(in_window)
         for(var i = 0; i < purposes.length; i++)
             this.keyPurposes.push(purposes[i].value_block.toString());
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.ExtKeyUsage.prototype.toSchema =
     function()
@@ -2839,7 +2831,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.ExtKeyUsage.prototype.toJSON =
     function()
@@ -2852,7 +2844,7 @@ function(in_window)
             _object.keyPurposes.push(this.keyPurposes[i]);
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2887,7 +2879,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.DistributionPoint.prototype.fromSchema =
     function(schema)
@@ -2943,7 +2935,7 @@ function(in_window)
                 this.cRLIssuer.push(new in_window.org.pkijs.simpl.GENERAL_NAME({ schema: crl_names[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.DistributionPoint.prototype.toSchema =
     function()
@@ -3004,8 +2996,6 @@ function(in_window)
         if("cRLIssuer" in this)
         {
             var value = new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                name: (names.cRLIssuer || ""),
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 2 // [2]
@@ -3024,7 +3014,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.DistributionPoint.prototype.toJSON =
     function()
@@ -3056,7 +3046,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3082,7 +3072,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.CRLDistributionPoints.prototype.fromSchema =
     function(schema)
@@ -3107,7 +3097,7 @@ function(in_window)
         for(var i = 0; i < points.length; i++)
             this.distributionPoints.push(new in_window.org.pkijs.simpl.x509.DistributionPoint({ schema: points[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.CRLDistributionPoints.prototype.toSchema =
     function()
@@ -3124,7 +3114,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.CRLDistributionPoints.prototype.toJSON =
     function()
@@ -3137,7 +3127,7 @@ function(in_window)
             _object.distributionPoints.push(this.distributionPoints[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3165,7 +3155,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.AccessDescription.prototype.fromSchema =
     function(schema)
@@ -3193,7 +3183,7 @@ function(in_window)
         this.accessMethod = asn1.result["accessMethod"].value_block.toString();
         this.accessLocation = new in_window.org.pkijs.simpl.GENERAL_NAME({ schema: asn1.result["accessLocation"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.AccessDescription.prototype.toSchema =
     function()
@@ -3206,7 +3196,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.AccessDescription.prototype.toJSON =
     function()
@@ -3215,7 +3205,7 @@ function(in_window)
             accessMethod: this.accessMethod,
             accessLocation: this.accessLocation.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3241,7 +3231,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.InfoAccess.prototype.fromSchema =
     function(schema)
@@ -3266,7 +3256,7 @@ function(in_window)
         for(var i = 0; i < descriptions.length; i++)
             this.accessDescriptions.push(new in_window.org.pkijs.simpl.x509.AccessDescription({ schema: descriptions[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.InfoAccess.prototype.toSchema =
     function()
@@ -3283,7 +3273,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.InfoAccess.prototype.toJSON =
     function()
@@ -3296,7 +3286,7 @@ function(in_window)
             _object.accessDescriptions.push(this.accessDescriptions[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3343,7 +3333,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.IssuingDistributionPoint.prototype.fromSchema =
     function(schema)
@@ -3392,13 +3382,13 @@ function(in_window)
         if("onlyContainsUserCerts" in asn1.result)
         {
             var view = new Uint8Array(asn1.result["onlyContainsUserCerts"].value_block.value_hex);
-            this.onlyContainsUserCerts = (view[0] === 0x00) ? false : true;
+            this.onlyContainsUserCerts = (view[0] !== 0x00);
         }
 
         if("onlyContainsCACerts" in asn1.result)
         {
             var view = new Uint8Array(asn1.result["onlyContainsCACerts"].value_block.value_hex);
-            this.onlyContainsCACerts = (view[0] === 0x00) ? false : true;
+            this.onlyContainsCACerts = (view[0] !== 0x00);
         }
 
         if("onlySomeReasons" in asn1.result)
@@ -3410,16 +3400,16 @@ function(in_window)
         if("indirectCRL" in asn1.result)
         {
             var view = new Uint8Array(asn1.result["indirectCRL"].value_block.value_hex);
-            this.indirectCRL = (view[0] === 0x00) ? false : true;
+            this.indirectCRL = (view[0] !== 0x00);
         }
 
         if("onlyContainsAttributeCerts" in asn1.result)
         {
             var view = new Uint8Array(asn1.result["onlyContainsAttributeCerts"].value_block.value_hex);
-            this.onlyContainsAttributeCerts = (view[0] === 0x00) ? false : true;
+            this.onlyContainsAttributeCerts = (view[0] !== 0x00);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.IssuingDistributionPoint.prototype.toSchema =
     function()
@@ -3462,8 +3452,6 @@ function(in_window)
             view[0] = (this.onlyContainsUserCerts === false) ? 0x00 : 0xFF;
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
-                name: (names.onlyContainsUserCerts || ""),
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 1 // [1]
@@ -3480,8 +3468,6 @@ function(in_window)
             view[0] = (this.onlyContainsCACerts === false) ? 0x00 : 0xFF;
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
-                name: (names.onlyContainsUserCerts || ""),
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 2 // [2]
@@ -3498,8 +3484,6 @@ function(in_window)
             view[0] = this.onlySomeReasons;
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
-                name: (names.onlyContainsUserCerts || ""),
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 3 // [3]
@@ -3516,8 +3500,6 @@ function(in_window)
             view[0] = (this.indirectCRL === false) ? 0x00 : 0xFF;
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
-                name: (names.onlyContainsUserCerts || ""),
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 4 // [4]
@@ -3534,8 +3516,6 @@ function(in_window)
             view[0] = (this.onlyContainsAttributeCerts === false) ? 0x00 : 0xFF;
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
-                name: (names.onlyContainsUserCerts || ""),
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 5 // [5]
@@ -3550,7 +3530,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.x509.IssuingDistributionPoint.prototype.toJSON =
     function()
@@ -3577,7 +3557,7 @@ function(in_window)
             _object.onlyContainsCACerts = this.onlyContainsCACerts;
 
         if("onlySomeReasons" in this)
-            _object.onlySomeReasons = this.onlySomeReasons.toJSON();
+            _object.onlySomeReasons = this.onlySomeReasons;
 
         if("indirectCRL" in this)
             _object.indirectCRL = this.indirectCRL;
@@ -3586,7 +3566,7 @@ function(in_window)
             _object.onlyContainsAttributeCerts = this.onlyContainsAttributeCerts;
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3624,7 +3604,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.EXTENSION.prototype.fromSchema =
     function(schema)
@@ -3652,7 +3632,7 @@ function(in_window)
         this.extnValue = asn1.result.extnValue;
 
         // #region Get "parsedValue" for well-known extensions 
-        var asn1 = in_window.org.pkijs.fromBER(this.extnValue.value_block.value_hex);
+        asn1 = in_window.org.pkijs.fromBER(this.extnValue.value_block.value_hex);
         if(asn1.offset === (-1))
             return;
 
@@ -3726,7 +3706,7 @@ function(in_window)
         }
         // #endregion 
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.EXTENSION.prototype.toSchema =
     function()
@@ -3747,7 +3727,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.EXTENSION.prototype.toJSON =
     function()
@@ -3762,7 +3742,7 @@ function(in_window)
             _object.parsedValue = this.parsedValue.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3786,7 +3766,7 @@ function(in_window)
                 this.extensions_array = (arguments[0].extensions_array || (new Array()));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.EXTENSIONS.prototype.fromSchema =
     function(schema)
@@ -3809,7 +3789,7 @@ function(in_window)
         for(var i = 0; i < asn1.result.extensions.length; i++)
             this.extensions_array.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: asn1.result.extensions[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.EXTENSIONS.prototype.toSchema =
     function()
@@ -3824,7 +3804,7 @@ function(in_window)
             value: extension_schemas
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.EXTENSIONS.prototype.toJSON =
     function()
@@ -3837,7 +3817,7 @@ function(in_window)
             _object.extensions_array.push(this.extensions_array[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3905,7 +3885,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT.prototype.fromSchema =
     function(schema)
@@ -3961,7 +3941,7 @@ function(in_window)
         this.signatureAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["signatureAlgorithm"] });
         this.signatureValue = asn1.result["signatureValue"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT.prototype.encodeTBS =
     function()
@@ -4051,7 +4031,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT.prototype.toSchema =
     function(encodeFlag)
@@ -4088,7 +4068,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT.prototype.verify =
     function()
@@ -4120,19 +4100,19 @@ function(in_window)
         }
 
         if((subjectPublicKeyInfo instanceof in_window.org.pkijs.simpl.PUBLIC_KEY_INFO) === false)
-            return new Promise(function(resolve, reject) { reject("Please provide issuer certificate as a parameter"); });
+            return Promise.reject("Please provide issuer certificate as a parameter");
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Find signer's hashing algorithm 
         var sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
         if(sha_algorithm === "")
-            return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+            return Promise.reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id);
         // #endregion 
 
         // #region Importing public key 
@@ -4142,7 +4122,7 @@ function(in_window)
                 // #region Get information about public key algorithm and default parameters for import
                 var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.signatureAlgorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
-                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+                    return Promise.reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id);
 
                 var algorithm_name = algorithmObject.name;
 
@@ -4191,7 +4171,7 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject(ex); });
+                        return Promise.reject(ex);
                     }
 
                     if("saltLength" in pssParameters)
@@ -4205,7 +4185,7 @@ function(in_window)
                     {
                         var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
                         if(("name" in hashAlgorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                            return Promise.reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id);
 
                         hash_algo = hashAlgorithm.name;
                     }
@@ -4223,7 +4203,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT.prototype.sign =
     function(privateKey, hashAlgorithm)
@@ -4237,7 +4217,7 @@ function(in_window)
 
         // #region Get a private key from function parameter 
         if(typeof privateKey === "undefined")
-            return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
+            return Promise.reject("Need to provide a private key for signing");
         // #endregion 
 
         // #region Get hashing algorithm 
@@ -4248,7 +4228,7 @@ function(in_window)
             // #region Simple check for supported algorithm 
             var oid = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
             if(oid === "")
-                return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
             // #endregion 
         }
         // #endregion 
@@ -4291,7 +4271,7 @@ function(in_window)
                     {
                         var hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
                         if(hashAlgorithmOID === "")
-                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                            return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
 
                         paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
@@ -4320,7 +4300,7 @@ function(in_window)
                 }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
+                return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
         }
         // #endregion 
 
@@ -4331,7 +4311,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Signing TBS data on provided private key 
@@ -4349,11 +4329,11 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Signing error: " + error); });
+                return Promise.reject("Signing error: " + error);
             }
             );
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT.prototype.getPublicKey =
     function()
@@ -4367,7 +4347,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Find correct algorithm for imported public key 
@@ -4376,20 +4356,20 @@ function(in_window)
             if("algorithm" in arguments[0])
                 algorithm = arguments[0].algorithm;
             else
-                return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"algorithm\""); });
+                return Promise.reject("Absent mandatory parameter \"algorithm\"");
         }
         else
         {
             // #region Find signer's hashing algorithm 
             var sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
             if(sha_algorithm === "")
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + this.signatureAlgorithm.algorithm_id); });
+                return Promise.reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id);
             // #endregion   
 
             // #region Get information about public key algorithm and default parameters for import
             var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(this.signatureAlgorithm.algorithm_id);
             if(("name" in algorithmObject) === false)
-                return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + this.signatureAlgorithm.algorithm_id); });
+                return Promise.reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id);
 
             var algorithm_name = algorithmObject.name;
 
@@ -4407,7 +4387,7 @@ function(in_window)
         // #endregion 
 
         return crypto.importKey("spki", publicKeyInfo_view, algorithm.algorithm, true, algorithm.usages);
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT.prototype.getKeyHash =
     function()
@@ -4417,11 +4397,11 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         return crypto.digest({ name: "sha-1" }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.value_block.value_hex));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT.prototype.toJSON =
     function()
@@ -4457,7 +4437,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -4488,7 +4468,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.REV_CERT.prototype.fromSchema =
     function(schema)
@@ -4531,7 +4511,7 @@ function(in_window)
                 this.crlEntryExtensions.push(new in_window.org.pkijs.simpl.EXTENSION({ schema: exts[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.REV_CERT.prototype.toSchema =
     function()
@@ -4557,7 +4537,7 @@ function(in_window)
             value: sequence_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.REV_CERT.prototype.toJSON =
     function()
@@ -4576,7 +4556,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -4636,7 +4616,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CRL.prototype.fromSchema =
     function(schema)
@@ -4681,7 +4661,7 @@ function(in_window)
         this.signatureAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["signatureAlgorithm"] });
         this.signatureValue = asn1.result["signatureValue"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CRL.prototype.encodeTBS =
     function()
@@ -4694,7 +4674,7 @@ function(in_window)
 
         output_array.push(this.signature.toSchema());
         output_array.push(this.issuer.toSchema());
-        output_array.push(this.thisUpdate.toSchema())
+        output_array.push(this.thisUpdate.toSchema());
 
         if("nextUpdate" in this)
             output_array.push(this.nextUpdate.toSchema());
@@ -4736,7 +4716,7 @@ function(in_window)
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             value: output_array
         }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CRL.prototype.toSchema =
     function(encodeFlag)
@@ -4773,7 +4753,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CRL.prototype.verify =
     function()
@@ -4798,7 +4778,7 @@ function(in_window)
 
                 // The CRL issuer name and "issuerCertificate" subject name are not equal
                 if(this.issuer.isEqual(arguments[0].issuerCertificate.subject) == false)
-                    return new Promise(function(resolve, reject) { resolve(false); });
+                    return Promise.resolve(false);
             }
 
             // #region In case if there is only public key during verification 
@@ -4808,7 +4788,7 @@ function(in_window)
         }
 
         if((subjectPublicKeyInfo instanceof in_window.org.pkijs.simpl.PUBLIC_KEY_INFO) === false)
-            return new Promise(function(resolve, reject) { reject("Issuer's certificate must be provided as an input parameter"); });
+            return Promise.reject("Issuer's certificate must be provided as an input parameter");
         // #endregion 
 
         // #region Check the CRL for unknown critical extensions 
@@ -4820,7 +4800,7 @@ function(in_window)
                 {
                     // We can not be sure that unknown extension has no value for CRL signature
                     if(("parsedValue" in this.crlExtensions[i]) == false)
-                        return new Promise(function(resolve, reject) { resolve(false); });
+                        return Promise.resolve(false);
                 }
             }
         }
@@ -4829,13 +4809,13 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Find signer's hashing algorithm 
         var sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
         if(sha_algorithm === "")
-            return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+            return Promise.reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id);
         // #endregion 
 
         // #region Import public key 
@@ -4845,7 +4825,7 @@ function(in_window)
                 // #region Get information about public key algorithm and default parameters for import
                 var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.signature.algorithm_id);
                 if(("name" in algorithmObject) === "")
-                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + _this.signature.algorithm_id); });
+                    return Promise.reject("Unsupported public key algorithm: " + _this.signature.algorithm_id);
 
                 var algorithm_name = algorithmObject.name;
 
@@ -4898,7 +4878,7 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject(ex); });
+                        return Promise.reject(ex);
                     }
 
                     if("saltLength" in pssParameters)
@@ -4912,7 +4892,7 @@ function(in_window)
                     {
                         var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
                         if(("name" in hashAlgorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                            return Promise.reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id);
 
                         hash_algo = hashAlgorithm.name;
                     }
@@ -4930,7 +4910,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CRL.prototype.sign =
     function(privateKey, hashAlgorithm)
@@ -4944,7 +4924,7 @@ function(in_window)
 
         // #region Get a private key from function parameter 
         if(typeof privateKey === "undefined")
-            return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
+            return Promise.reject("Need to provide a private key for signing");
         // #endregion 
 
         // #region Get hashing algorithm 
@@ -4955,7 +4935,7 @@ function(in_window)
             // #region Simple check for supported algorithm 
             var oid = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
             if(oid === "")
-                return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
             // #endregion 
         }
         // #endregion 
@@ -4998,7 +4978,7 @@ function(in_window)
                     {
                         var hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
                         if(hashAlgorithmOID === "")
-                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                            return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
 
                         paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
@@ -5027,7 +5007,7 @@ function(in_window)
                 }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
+                return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
         }
         // #endregion 
 
@@ -5038,7 +5018,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Signing TBS data on provided private key 
@@ -5058,11 +5038,11 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Signing error: " + error); });
+                return Promise.reject("Signing error: " + error);
             }
             );
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CRL.prototype.isCertificateRevoked =
     function()
@@ -5099,7 +5079,7 @@ function(in_window)
         // #endregion 
 
         return false;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CRL.prototype.toJSON =
     function()
@@ -5136,7 +5116,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -5164,7 +5144,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ATTRIBUTE.prototype.fromSchema =
     function(schema)
@@ -5188,7 +5168,7 @@ function(in_window)
         this.type = asn1.result["type"].value_block.toString();
         this.values = asn1.result["values"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ATTRIBUTE.prototype.toSchema =
     function()
@@ -5203,7 +5183,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.ATTRIBUTE.prototype.toJSON =
     function()
@@ -5217,7 +5197,7 @@ function(in_window)
             _object.values.push(this.values[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -5261,7 +5241,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PKCS10.prototype.fromSchema =
     function(schema)
@@ -5294,7 +5274,7 @@ function(in_window)
         this.signatureAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["signatureAlgorithm"] });
         this.signatureValue = asn1.result["signatureValue"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PKCS10.prototype.encodeTBS =
     function()
@@ -5324,7 +5304,7 @@ function(in_window)
         // #endregion 
 
         return (new in_window.org.pkijs.asn1.SEQUENCE({ value: output_array }));
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PKCS10.prototype.toSchema =
     function(encodeFlag)
@@ -5361,7 +5341,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PKCS10.prototype.verify =
     function()
@@ -5383,13 +5363,13 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Find a correct hashing algorithm 
         sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
         if(sha_algorithm === "")
-            return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+            return Promise.reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id);
         // #endregion 
 
         // #region Importing public key 
@@ -5399,7 +5379,7 @@ function(in_window)
                 // #region Get information about public key algorithm and default parameters for import
                 var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.signatureAlgorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
-                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id); });
+                    return Promise.reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id);
 
                 var algorithm_name = algorithmObject.name;
 
@@ -5448,7 +5428,7 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject(ex); });
+                        return Promise.reject(ex);
                     }
 
                     if("saltLength" in pssParameters)
@@ -5462,7 +5442,7 @@ function(in_window)
                     {
                         var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
                         if(("name" in hashAlgorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                            return Promise.reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id);
 
                         hash_algo = hashAlgorithm.name;
                     }
@@ -5480,7 +5460,7 @@ function(in_window)
         // #endregion   
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PKCS10.prototype.sign =
     function(privateKey, hashAlgorithm)
@@ -5494,7 +5474,7 @@ function(in_window)
 
         // #region Get a private key from function parameter 
         if(typeof privateKey === "undefined")
-            return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
+            return Promise.reject("Need to provide a private key for signing");
         // #endregion 
 
         // #region Get hashing algorithm 
@@ -5505,7 +5485,7 @@ function(in_window)
             // #region Simple check for supported algorithm 
             var oid = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
             if(oid === "")
-                return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
             // #endregion 
         }
         // #endregion 
@@ -5547,7 +5527,7 @@ function(in_window)
                     {
                         var hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
                         if(hashAlgorithmOID === "")
-                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                            return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
 
                         paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
@@ -5575,7 +5555,7 @@ function(in_window)
                 }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
+                return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
         }
         // #endregion 
 
@@ -5586,7 +5566,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Signing TBS data on provided private key 
@@ -5604,11 +5584,11 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Signing error: " + error); });
+                return Promise.reject("Signing error: " + error);
             }
             );
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PKCS10.prototype.toJSON =
     function()
@@ -5631,7 +5611,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -5665,7 +5645,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PKCS8.prototype.fromSchema =
     function(schema)
@@ -5705,7 +5685,7 @@ function(in_window)
                 this.attributes.push(new in_window.org.pkijs.simpl.ATTRIBUTE({ schema: attrs[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PKCS8.prototype.toSchema =
     function()
@@ -5740,7 +5720,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.PKCS8.prototype.toJSON =
     function()
@@ -5760,7 +5740,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -5773,9 +5753,12 @@ function(in_window)
         /// <field name="trusted_certs" type="Array" elementType="in_window.org.pkijs.simpl.CERT">Array of pre-defined trusted (by user) certificates</field>
         this.trusted_certs = new Array();
         /// <field name="certs" type="Array" elementType="in_window.org.pkijs.simpl.CERT">Array with certificate chain. Could be only one end-user certificate in there!</field>
-        this.certs = new Array();
+        this.certs = new Array(); 
         /// <field name="crls" type="Array" elementType="in_window.org.pkijs.simpl.CRL">Array of all CRLs for all certificates from certificate chain</field>
-        this.crls = new Array();
+        this.crls = new Array(); 
+        /// <field name="ocsps" type="Array" elementType="in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE">Array of all OCSP responses</field>
+        this.ocsps = new Array(); 
+        this.checkDate = new Date();
         // #endregion 
 
         // #region Initialize internal properties by input values
@@ -5784,11 +5767,12 @@ function(in_window)
             this.trusted_certs = arguments[0].trusted_certs || new Array();
             this.certs = arguments[0].certs || new Array();
             this.crls = arguments[0].crls || new Array();
+            this.checkDate = arguments[0].checkDate || new Date();
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
-    in_window.org.pkijs.simpl.CERT_CHAIN.prototype.sort =
+    in_window.org.pkijs.simpl.CERT_CHAIN.prototype.old_sort =
     function()
     {
         // #region Initial variables 
@@ -5806,14 +5790,13 @@ function(in_window)
 
         // #region Initial checks 
         if(certs.length === 0)
-            return new Promise(function(resolve, reject)
-            {
-                reject({
-                    result: false,
-                    result_code: 2,
-                    result_message: "Certificate's array can not be empty"
-                });
+        {
+            return Promise.reject({
+                result: false,
+                result_code: 2,
+                result_message: "Certificate's array can not be empty"
             });
+        }
         // #endregion 
 
         // #region Find end-user certificate 
@@ -5834,14 +5817,11 @@ function(in_window)
                     if((certs[i].extensions[j].critical === true) &&
                        (("parsedValue" in certs[i].extensions[j]) === false))
                     {
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject({
+                        return Promise.reject({
                                 result: false,
                                 result_code: 6,
                                 result_message: "Unable to parse critical certificate extension: " + certs[i].extensions[j].extnID
                             });
-                        });
                     }
 
                     if(certs[i].extensions[j].extnID === "2.5.29.15") // KeyUsage
@@ -5868,47 +5848,44 @@ function(in_window)
                 }
 
                 if((mustBeCA === true) && (isCA === false))
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
+                {
+                    return Promise.reject({
                             result: false,
                             result_code: 3,
                             result_message: "Unable to build certificate chain - using \"keyCertSign\" flag set without BasicConstaints"
                         });
-                    });
+                }
 
                 if((keyUsagePresent === true) && (isCA === true) && (mustBeCA === false))
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
+                {
+                    return Promise.reject({
                             result: false,
                             result_code: 4,
                             result_message: "Unable to build certificate chain - \"keyCertSign\" flag was not set"
                         });
-                    });
+                }
 
+                // TODO: Change the check to be applied to CRL "issuer_certificate" only
                 if((isCA === true) && (keyUsagePresent === true) && (cRLSign === false))
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
+                {
+                    return Promise.reject({
                             result: false,
                             result_code: 5,
                             result_message: "Unable to build certificate chain - intermediate certificate must have \"cRLSign\" key usage flag"
                         });
-                    });
+                }
             }
 
             if(isCA === false)
             {
                 if(sorted_certs.length !== 0)
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
-                            result: false,
-                            result_code: 7,
-                            result_message: "Unable to build certificate chain - more than one possible end-user certificate"
-                        });
+                {
+                    return Promise.reject({
+                        result: false,
+                        result_code: 7,
+                        result_message: "Unable to build certificate chain - more than one possible end-user certificate"
                     });
+                }
 
                 sorted_certs.push(certs[i]);
                 end_user_index = i;
@@ -5920,33 +5897,29 @@ function(in_window)
 
         // #region Check that end-user certificate was found 
         if(sorted_certs.length === 0)
-            return new Promise(function(resolve, reject)
-            {
-                reject({
-                    result: false,
-                    result_code: 1,
-                    result_message: "Can't find end-user certificate"
-                });
+        {
+            return Promise.reject({
+                result: false,
+                result_code: 1,
+                result_message: "Can't find end-user certificate"
             });
+        }
         // #endregion 
 
         // #region Return if there is only one certificate in certificate's array 
         if(certs.length === 0)
         {
             if(sorted_certs[0].issuer.isEqual(sorted_certs[0].subject) === true)
-                return new Promise(function(resolve, reject) { resolve(sorted_certs); });
+                return Promise.resolve(sorted_certs);
             else
             {
                 if(this.trusted_certs.length === 0)
                 {
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
+                    return Promise.reject({
                             result: false,
                             result_code: 70,
                             result_message: "Can't find root certificate"
                         });
-                    });
                 }
                 else
                 {
@@ -5968,7 +5941,7 @@ function(in_window)
             /// <param name="issuer_certificate" type="in_window.org.pkijs.simpl.CERT">Certificate for issuer of subject certificate</param>
 
             // #region Initial variables 
-            var sequence = Promise.resolve()
+            var sequence = Promise.resolve();
             // #endregion 
 
             // #region Check validity period for subject certificate 
@@ -5978,14 +5951,11 @@ function(in_window)
                     if((subject_certificate.notBefore.value > check_date) ||
                        (subject_certificate.notAfter.value < check_date))
                     {
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject({
+                        return Promise.reject({
                                 result: false,
                                 result_code: 8,
                                 result_message: "Certificate validity period is out of checking date"
                             });
-                        });
                     }
                 }
                 );
@@ -5993,49 +5963,71 @@ function(in_window)
 
             // #region Give ability to not provide CRLs (all certificates assume to be valid) 
             if(_this.crls.length === 0)
+            {
                 return sequence.then(
                     function()
                     {
-                        return new Promise(function(resolve, reject) { resolve(); });
+                        return Promise.resolve();
                     }
                     );
+            }
             // #endregion 
 
             // #region Find correct CRL for "issuer_certificate" 
-            function find_crl(index)
+            function find_crl(index, crl_issuer_certificate)
             {
-                return _this.crls[index].verify({ issuerCertificate: issuer_certificate }).then(
+                // #region Check "nextUpdate" value for current CRL
+                if("nextUpdate" in _this.crls[index])
+                {
+                    // The "nextUpdate" is older than "check_date".
+                    // Thus we should do have another, updated CRL.
+                    // Thus the CRL assumed to be invalid.
+                    if(_this.crls[index].nextUpdate.value < check_date)
+                    {
+                        index++;
+
+                        if(index < _this.crls.length)
+                            return find_crl(index, crl_issuer_certificate);
+                        else
+                        {
+                            return Promise.reject({
+                                result: false,
+                                result_code: 9,
+                                result_message: "Unable to find CRL for issuer's certificate"
+                            });
+                        }
+                    }
+                }
+                // #endregion 
+
+                return _this.crls[index].verify({ issuerCertificate: crl_issuer_certificate }).then(
                     function(result)
                     {
                         if(result === true)
-                            return new Promise(function(resolve, reject) { resolve(_this.crls[index]); });
+                            return Promise.resolve(_this.crls[index]);
                         else
                         {
                             index++;
 
                             if(index < _this.crls.length)
-                                return find_crl(index);
+                                return find_crl(index, crl_issuer_certificate);
                             else
-                                return new Promise(function(resolve, reject)
-                                {
-                                    reject({
-                                        result: false,
-                                        result_code: 9,
-                                        result_message: "Unable to find CRL for issuer's certificate"
-                                    });
+                            {
+                                return Promise.reject({
+                                    result: false,
+                                    result_code: 9,
+                                    result_message: "Unable to find CRL for issuer's certificate"
                                 });
+                            }
                         }
                     },
                     function(error)
                     {
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject({
+                        return Promise.reject({
                                 result: false,
                                 result_code: 10,
                                 result_message: "Unable to find CRL for issuer's certificate"
                             });
-                        });
                     }
                     );
             }
@@ -6043,7 +6035,46 @@ function(in_window)
             sequence = sequence.then(
                 function()
                 {
-                    return find_crl(0);
+                    // #region Initial variables 
+                    var issuerCertificates = [issuer_certificate];
+                    var index = 0;
+                    // #endregion 
+
+                    // #region Find all intermediate certificates with "subject" equal to subject in "issuer_certificate" 
+                    for(var i = 0; i < _this.certs.length; i++)
+                    {
+                        if(_this.certs[i].subject.isEqual(issuer_certificate.subject))
+                            issuerCertificates.push(_this.certs[i]);
+                    }
+                    // #endregion 
+
+                    return find_crl(0, issuerCertificates[0]).then(
+                        function(result)
+                        {
+                            return Promise.resolve(result);
+                        },
+                        function(error)
+                        {
+                            index++;
+
+                            if(index < issuerCertificates.length)
+                                return find_crl(0, issuerCertificates[index]);
+                            else
+                            {
+                                return Promise.reject({
+                                    result: false,
+                                    result_code: 9,
+                                    result_message: "Unable to find CRL for issuer's certificate"
+                                });
+                            }
+
+                            return Promise.reject({
+                                    result: false,
+                                    result_code: 10,
+                                    result_message: "Unable to find CRL for issuer's certificate"
+                                });
+                        }
+                        );
                 }
                 );
             // #endregion 
@@ -6055,21 +6086,23 @@ function(in_window)
                     /// <param name="crl" type="in_window.org.pkijs.simpl.CRL">CRL for issuer's certificate</param>                
 
                     if(crl.isCertificateRevoked({ certificate: subject_certificate }) === true)
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject({
-                                result: false,
-                                result_code: 11,
-                                result_message: "Subject certificate was revoked"
-                            });
+                    {
+                        return Promise.reject({
+                            result: false,
+                            result_code: 11,
+                            result_message: "Subject certificate was revoked"
                         });
+                    }
                     else
-                        return new Promise(function(resolve, reject) { resolve(); });
+                        return Promise.resolve();
                 },
                 function(error)
                 {
                     /// <summary>Not for all certificates we have a CRL. So, this "stub" is for handling such situation - assiming we have a valid, non-revoked certificate</summary>
-                    return new Promise(function(resolve, reject) { resolve(); });
+                    //if(error.result_code == 9)
+                    //    return Promise.resolve();
+                    //else
+                        return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -6090,7 +6123,7 @@ function(in_window)
                     if(current_certificate.issuer.isEqual(current_certificate.subject) === true)
                     {
                         // #region Check that the "self-signed" certificate there is in "trusted_certs" array 
-                        var found = (_this.trusted_certs.length === 0) ? true : false; // If user did not set "trusted_certs" then we have an option to trust any self-signed certificate as root
+                        var found = (_this.trusted_certs.length === 0); // If user did not set "trusted_certs" then we have an option to trust any self-signed certificate as root
 
                         for(var i = 0; i < _this.trusted_certs.length; i++)
                         {
@@ -6103,58 +6136,71 @@ function(in_window)
                             }
                         }
 
-                        if(found === false)
-                            return new Promise(function(resolve, reject)
-                            {
-                                reject({
-                                    result: false,
-                                    result_code: 22,
-                                    result_message: "Self-signed root certificate not in \"trusted certificates\" array"
-                                });
-                            });
+                        //if(found === false)
+                        //{
+                        //    return Promise.reject({
+                        //            result: false,
+                        //            result_code: 22,
+                        //            result_message: "Self-signed root certificate not in \"trusted certificates\" array"
+                        //        });
+                        //}
                         // #endregion 
 
-                        return (current_certificate.verify()).then( // Verifing last, self-signed certificate
+                        return current_certificate.verify().then( // Verifing last, self-signed certificate
                             function(result)
                             {
                                 if(result === true)
+                                {
                                     return basic(current_certificate, current_certificate).then(
                                         function()
                                         {
-                                            return new Promise(function(resolve, reject) { resolve(sorted_certs); });
+                                            return Promise.resolve(sorted_certs);
                                         },
                                         function(error)
                                         {
-                                            return new Promise(function(resolve, reject)
-                                            {
-                                                reject({
+                                            return Promise.reject({
                                                     result: false,
                                                     result_code: 12,
                                                     result_message: error
                                                 });
-                                            });
                                         }
                                         );
+                                }
                                 else
-                                    return new Promise(function(resolve, reject)
+                                {
+                                    if(certs.length > 0)
+                                        return outer();
+                                    else
                                     {
-                                        reject({
-                                            result: false,
-                                            result_code: 13,
-                                            result_message: "Unable to build certificate chain - signature of root certificate is invalid"
-                                        });
-                                    });
+                                        if(_this.trusted_certs.length !== 0)
+                                        {
+                                            certs = _this.trusted_certs.splice(0);
+                                            return outer();
+                                        }
+                                        else
+                                        {
+                                            return Promise.reject({
+                                                result: false,
+                                                result_code: 23,
+                                                result_message: "Root certificate not found"
+                                            });
+                                        }
+                                    }
+
+                                    //return Promise.reject({
+                                    //        result: false,
+                                    //        result_code: 13,
+                                    //        result_message: "Unable to build certificate chain - signature of root certificate is invalid"
+                                    //    });
+                                }
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject)
-                                {
-                                    reject({
+                                return Promise.reject({
                                         result: false,
                                         result_code: 14,
                                         result_message: error
                                     });
-                                });
                             }
                             );
                     }
@@ -6170,23 +6216,19 @@ function(in_window)
                                 return outer();
                             }
                             else
-                                return new Promise(function(resolve, reject)
-                                {
-                                    reject({
-                                        result: false,
-                                        result_code: 23,
-                                        result_message: "Root certificate not found"
-                                    });
+                            {
+                                return Promise.reject({
+                                    result: false,
+                                    result_code: 23,
+                                    result_message: "Root certificate not found"
                                 });
+                            }
                         }
                     }
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject(error);
-                    });
+                    return Promise.reject(error);
                 }
                 );
         }
@@ -6203,18 +6245,22 @@ function(in_window)
                             return basic(current_certificate, certs[index]).then(
                                 function()
                                 {
-                                    return new Promise(function(resolve, reject) { resolve(index); });
+                                    return Promise.resolve(index);
                                 },
                                 function(error)
                                 {
-                                    return new Promise(function(resolve, reject)
+                                    if(error instanceof Object)
                                     {
-                                        reject({
+                                        return Promise.reject(error);
+                                    }
+                                    else
+                                    {
+                                        return Promise.reject({
                                             result: false,
                                             result_code: 16,
                                             result_message: error
                                         });
-                                    });
+                                    }
                                 }
                                 );
                         }
@@ -6223,26 +6269,22 @@ function(in_window)
                             if(index < (certs.length - 1))
                                 return inner(current_certificate, index + 1);
                             else
-                                return new Promise(function(resolve, reject)
-                                {
-                                    reject({
-                                        result: false,
-                                        result_code: 17,
-                                        result_message: "Unable to build certificate chain - incomplete certificate chain or signature of some certificate is invalid"
-                                    });
+                            {
+                                return Promise.reject({
+                                    result: false,
+                                    result_code: 17,
+                                    result_message: "Unable to build certificate chain - incomplete certificate chain or signature of some certificate is invalid"
                                 });
+                            }
                         }
                     },
                     function(error)
                     {
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject({
+                        return Promise.reject({
                                 result: false,
                                 result_code: 18,
                                 result_message: "Unable to build certificate chain - error during certificate signature verification"
                             });
-                        });
                     }
                     );
             }
@@ -6251,14 +6293,13 @@ function(in_window)
                 if(index < (certs.length - 1))
                     return inner(current_certificate, index + 1);
                 else
-                    return new Promise(function(resolve, reject)
-                    {
-                        reject({
-                            result: false,
-                            result_code: 19,
-                            result_message: "Unable to build certificate chain - incomplete certificate chain"
-                        });
+                {
+                    return Promise.reject({
+                        result: false,
+                        result_code: 19,
+                        result_message: "Unable to build certificate chain - incomplete certificate chain"
                     });
+                }
             }
         }
         // #endregion   
@@ -6266,14 +6307,617 @@ function(in_window)
         // #region Find certificates for all issuers 
         return outer();
         // #endregion 
-    }
+    };
+    //**************************************************************************************
+    in_window.org.pkijs.simpl.CERT_CHAIN.prototype.sort =
+    function()
+    {
+        // #region Initial variables 
+        var _this = this;
+        var localCerts = new Array();
+        // #endregion 
+
+        // #region Finding certificate issuer 
+        function *findIssuer(certificate, index)
+        {
+            var result = new Array();
+
+            for(var i = 0; i < localCerts.length; i++)
+            {
+                var verificationResult;
+
+                try
+                {
+                    verificationResult = yield certificate.verify({ issuerCertificate: localCerts[i] });
+                    if(verificationResult)
+                        result.push(i);
+                }
+                catch(ex){}
+            }
+
+            return ((result.length) ? result : [-1]);
+        }
+        // #endregion 
+    
+        // #region Building certificate path 
+        function *buildPath(certificate, index)
+        {
+            var result = new Array();
+
+            // #region Aux function checking array for unique elements 
+            function checkUnique(array)
+            {
+                var unique = true;
+
+                for(var i = 0; i < array.length; i++)
+                {
+                    for(var j = 0; j < array.length; j++)
+                    {
+                        if(j == i)
+                            continue;
+
+                        if(array[i] == array[j])
+                        {
+                            unique = false;
+                            break;
+                        }
+                    }
+
+                    if(!unique)
+                        break;
+                }
+
+                return unique;
+            }
+            // #endregion 
+
+            var findIssuerResult = yield findIssuer(certificate, index);
+
+            if((findIssuerResult.length == 1) && (findIssuerResult[0] == (-1)))
+                throw new Error("Incorrect result");
+
+            if(findIssuerResult.length == 1)
+            {
+                if(findIssuerResult[0] == index)
+                {
+                    result.push(findIssuerResult);
+                    return result;
+                }
+
+                var buildPathResult = yield buildPath(localCerts[findIssuerResult[0]], findIssuerResult[0]);
+
+                for(var i = 0; i < buildPathResult.length; i++)
+                {
+                    var copy = buildPathResult[i].slice();
+                    copy.splice(0, 0, findIssuerResult[0]);
+
+                    if(checkUnique(copy))
+                        result.push(copy);
+                    else
+                        result.push(buildPathResult[i]);
+                }
+            }
+            else
+            {
+                for(var i = 0; i < findIssuerResult.length; i++)
+                {
+                    if(findIssuerResult[i] == index)
+                    {
+                        result.push([findIssuerResult[i]]);
+                        continue;
+                    }
+
+                    var buildPathResult = yield buildPath(localCerts[findIssuerResult[i]], findIssuerResult[i]);
+
+                    for(var j = 0; j < buildPathResult.length; j++)
+                    {
+                        var copy = buildPathResult[j].slice();
+                        copy.splice(0, 0, findIssuerResult[i]);
+
+                        if(checkUnique(copy))
+                            result.push(copy);
+                        else
+                            result.push(buildPathResult[j]);
+                    }
+                }
+            }
+
+            return result;
+        }
+        // #endregion 
+
+        // #region Find CRL for specific certificate 
+        function *findCRL(certificate)
+        {
+            // #region Initial variables 
+            var issuerCertificates = new Array();
+            var crls = new Array();
+            var crlsAndCertificates = new Array();
+            // #endregion 
+
+            // #region Find all possible CRL issuers 
+            for(var i = 0; i < localCerts.length; i++)
+            {
+                if(certificate.issuer.isEqual(localCerts[i].subject))
+                    issuerCertificates.push(localCerts[i]);
+            }
+
+            if(issuerCertificates.length == 0)
+            {
+                return {
+                    status: 1,
+                    status_message: "No certificate's issuers"
+                };
+            }
+            // #endregion 
+
+            // #region Find all CRLs for crtificate's issuer 
+            for(var i = 0; i < _this.crls.length; i++)
+            {
+                if(_this.crls[i].issuer.isEqual(certificate.issuer))
+                    crls.push(_this.crls[i]);
+            }
+
+            if(crls.length == 0)
+            {
+                return {
+                    status: 1,
+                    status_message: "No CRLs for specific certificate issuer"
+                };
+            }
+            // #endregion 
+
+            // #region Find specific certificate of issuer for each CRL 
+            for(var i = 0; i < crls.length; i++)
+            {
+                // #region Check "nextUpdate" for the CRL 
+                // The "nextUpdate" is older than "checkDate".
+                // Thus we should do have another, updated CRL.
+                // Thus the CRL assumed to be invalid.
+                if(crls[i].nextUpdate.value < _this.checkDate)
+                    continue;
+                // #endregion 
+
+                for(var j = 0; j < issuerCertificates.length; j++)
+                {
+                    var result;
+
+                    try
+                    {
+                        result = yield crls[i].verify({ issuerCertificate: issuerCertificates[j] });
+                        if(result)
+                        {
+                            crlsAndCertificates.push({
+                                crl: crls[i],
+                                certificate: issuerCertificates[j]
+                            });
+
+                            break;
+                        }
+                    }
+                    catch(ex){}
+                }
+            }
+            // #endregion 
+
+            if(crlsAndCertificates.length)
+            {
+                return {
+                    status: 0,
+                    status_message: "",
+                    result: crlsAndCertificates
+                };
+            }
+            else
+            {
+                return {
+                    status: 1,
+                    status_message: "No valid CRLs found"
+                };
+            }
+        }
+        // #endregion 
+
+        // #region Find OCSP for specific certificate 
+        function *findOCSP(certificate, issuerCertificate)
+        {
+            // #region Get hash algorithm from certificate 
+            var hashAlgorithm = org.pkijs.getAlgorithmByOID(certificate.signatureAlgorithm.algorithm_id);
+            if(("name" in hashAlgorithm) == false)
+                return 1;
+            if(("hash" in hashAlgorithm) == false)
+                return 1;
+            // #endregion 
+
+            // #region Search for OCSP response for the certificate 
+            for(var i = 0; i < _this.ocsps.length; i++)
+            {
+                var result = yield _this.ocsps[i].getCertificateStatus(certificate, issuerCertificate);
+                if(result.isForCertificate)
+                {
+                    if(result.status == 0)
+                        return 0;
+                    else
+                        return 1;
+                }
+            }
+            // #endregion   
+
+            return 2;
+        }
+        // #endregion   
+
+        // #region Check for certificate to be CA 
+        function *checkForCA(certificate, needToCheckCRL)
+        {
+            // #region Check input variables 
+            if(typeof needToCheckCRL == "undefined")
+                needToCheckCRL = false;
+            // #endregion 
+
+            // #region Initial variables 
+            var isCA = false;
+            var mustBeCA = false;
+            var keyUsagePresent = false;
+            var cRLSign = false;
+            // #endregion   
+
+            if("extensions" in certificate)
+            {
+                for(var j = 0; j < certificate.extensions.length; j++)
+                {
+                    if((certificate.extensions[j].critical === true) &&
+                        (("parsedValue" in certificate.extensions[j]) === false))
+                    {
+                        return {
+                            result: false,
+                            result_code: 6,
+                            result_message: "Unable to parse critical certificate extension: " + certificate.extensions[j].extnID
+                        };
+                    }
+
+                    if(certificate.extensions[j].extnID === "2.5.29.15") // KeyUsage
+                    {
+                        keyUsagePresent = true;
+
+                        var view = new Uint8Array(certificate.extensions[j].parsedValue.value_block.value_hex);
+
+                        if((view[0] & 0x04) === 0x04) // Set flag "keyCertSign"
+                            mustBeCA = true;
+
+                        if((view[0] & 0x02) === 0x02) // Set flag "cRLSign"
+                            cRLSign = true;
+                    }
+
+                    if(certificate.extensions[j].extnID === "2.5.29.19") // BasicConstraints
+                    {
+                        if("cA" in certificate.extensions[j].parsedValue)
+                        {
+                            if(certificate.extensions[j].parsedValue.cA === true)
+                                isCA = true;
+                        }
+                    }
+                }
+
+                if((mustBeCA === true) && (isCA === false))
+                {
+                    return {
+                        result: false,
+                        result_code: 3,
+                        result_message: "Unable to build certificate chain - using \"keyCertSign\" flag set without BasicConstaints"
+                    };
+                }
+
+                if((keyUsagePresent === true) && (isCA === true) && (mustBeCA === false))
+                {
+                    return{
+                        result: false,
+                        result_code: 4,
+                        result_message: "Unable to build certificate chain - \"keyCertSign\" flag was not set"
+                    };
+                }
+
+                if((isCA === true) && (keyUsagePresent === true) && ((needToCheckCRL) && (cRLSign === false)))
+                {
+                    return {
+                        result: false,
+                        result_code: 5,
+                        result_message: "Unable to build certificate chain - intermediate certificate must have \"cRLSign\" key usage flag"
+                    };
+                }
+            }
+
+            if(isCA === false)
+            {
+                return {
+                    result: false,
+                    result_code: 7,
+                    result_message: "Unable to build certificate chain - more than one possible end-user certificate"
+                };
+            }
+
+            return {
+                result: true,
+                result_code: 0,
+                result_message: ""
+            };            
+        }
+        // #endregion 
+
+        // #region Basic check for certificate path 
+        function *basicCheck(path, check_date)
+        {
+            // #region Check that all dates are valid 
+            for(var i = 0; i < path.length; i++)
+            {
+                if((path[i].notBefore.value > check_date) ||
+                   (path[i].notAfter.value < check_date))
+                {
+                    return {
+                        result: false,
+                        result_code: 8,
+                        result_message: "Certificate validity period is out of checking date"
+                    }; 
+                }
+            }
+            // #endregion 
+
+            // #region Check certificate name chain 
+
+            // We should have at least two certificates: end entity and trusted root
+            if(path.length < 2)
+            {
+                return {
+                    result: false,
+                    result_code: 9,
+                    result_message: "Too short certificate path"
+                };
+            }
+
+            for(var i = (path.length - 2); i >= 0; i--)
+            {
+                // #region Check that we do not have a "self-signed" certificate 
+                if(path[i].issuer.isEqual(path[i].subject) == false)
+                {
+                    if(path[i].issuer.isEqual(path[i + 1].subject) == false)
+                    {
+                        return {
+                            result: false,
+                            result_code: 10,
+                            result_message: "Incorrect name chaining"
+                        };
+                    }
+                }
+                // #endregion 
+            }
+            // #endregion 
+
+            // #region Check each certificate (except "trusted root") to be non-revoked 
+            if((_this.crls.length != 0) || (_this.ocsps.length != 0)) // If CRLs and OCSPs are empty the we consider all certificates to be valid
+            {
+                for(var i = 0; i < (path.length - 2); i++)
+                {
+                    // #region Initial variables 
+                    var ocspResult;
+                    var crlResult;
+                    // #endregion 
+
+                    // #region Check OCSPs first 
+                    if(_this.ocsps.length != 0)
+                    {
+                        ocspResult = yield findOCSP(path[i], path[i + 1]);
+
+                        switch(ocspResult)
+                        {
+                            case 0:
+                                continue;
+                                break;
+                            case 1:
+                                return {
+                                    result: false,
+                                    result_code: 12,
+                                    result_message: "One of certificates was revoked via OCSP response"
+                                };
+                                break;
+                            case 2: // continue to check the certificate with CRL
+                                break;
+                            default:;
+                        }
+                    }
+                    // #endregion 
+
+                    // #region Check CRLs 
+                    if(_this.crls.length != 0)
+                    {
+                        crlResult = yield findCRL(path[i]);
+                        if(crlResult.status)
+                        {
+                            return {
+                                result: false,
+                                result_code: 11,
+                                result_message: "No revocation values found for one of certificates"
+                            };
+                        }
+
+                        for(var j = 0; j < crlResult.result.length; j++)
+                        {
+                            // #region Check that the CRL issuer certificate have not been revoked 
+                            var isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked({ certificate: path[i] });
+                            if(isCertificateRevoked)
+                            {
+                                return {
+                                    result: false,
+                                    result_code: 12,
+                                    result_message: "One of certificates had been revoked"
+                                };
+                            }
+                            // #endregion   
+
+                            // #region Check that the CRL issuer certificate is a CA certificate 
+                            var isCertificateCA = yield checkForCA(crlResult.result[j].certificate, true);
+                            if(isCertificateCA.result == false)
+                            {
+                                return {
+                                    result: false,
+                                    result_code: 13,
+                                    result_message: "CRL issuer certificate is not a CA certificate or does not have crlSign flag"
+                                };
+                            }
+                            // #endregion   
+                        }
+                    }
+                    else
+                    {
+                        if(ocspResult == 2)
+                        {
+                            return {
+                                result: false,
+                                result_code: 11,
+                                result_message: "No revocation values found for one of certificates"
+                            };
+                        }
+                    }
+                    // #endregion   
+                }
+            }
+            // #endregion 
+
+            // #region Check each certificate (except "end entity") in the path to be a CA certificate 
+            for(var i = 1; i < path.length; i++)
+            {
+                var result = yield checkForCA(path[i]);
+                if(result.result == false)
+                {
+                    return {
+                        result: false,
+                        result_code: 14,
+                        result_message: "One of intermediate certificates is not a CA certificate"
+                    };
+                }
+            }
+            // #endregion   
+
+            return {
+                result: true
+            };
+        }
+        // #endregion 
+
+        return in_window.co(function *generatorFunction()
+            {
+                // #region Initialize "localCerts" by value of "this.certs" + "this.trusted_certs" arrays 
+                for(var i = 0; i < _this.trusted_certs.length; i++)
+                    localCerts.push(_this.trusted_certs[i]);
+
+                for(var i = 0; i < _this.certs.length; i++)
+                    localCerts.push(_this.certs[i]);
+                // #endregion 
+
+                // #region Check all certificates for been unique 
+                for(var i = 0; i < localCerts.length; i++)
+                {
+                    for(var j = 0; j < localCerts.length; j++)
+                    {
+                        if(i == j)
+                            continue;
+
+                        if(in_window.org.pkijs.isEqual_buffer(localCerts[i].tbs, localCerts[j].tbs))
+                        {
+                            localCerts.splice(j, 1);
+                            i = 0;
+                            break;
+                        }
+                    }
+                }
+                // #endregion 
+
+                // #region Initial variables 
+                var result;
+                var certificatePath = [localCerts[localCerts.length - 1]]; // The "end entity" certificate must be the least in "certs" array
+                // #endregion 
+
+                // #region Build path for "end entity" certificate 
+                result = yield buildPath(localCerts[localCerts.length - 1], localCerts.length - 1);
+                if(result.length == 0)
+                {
+                    return {
+                        result: false,
+                        result_code: 60,
+                        result_message: "Unable to find certificate path"
+                    };
+                }
+                // #endregion 
+
+                // #region Exclude certificate paths not ended with "trusted roots" 
+                for(var i = 0; i < result.length; i++)
+                {
+                    var found = false;
+                    var latestItem = ((result[i]).length - 1);
+                    var certificate = localCerts[(result[i])[latestItem]];
+
+                    for(var j = 0; j < _this.trusted_certs.length; j++)
+                    {
+                        if(in_window.org.pkijs.isEqual_buffer(certificate.tbs, _this.trusted_certs[j].tbs))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if(!found)
+                    {
+                        result.splice(i, 1);
+                        i = 0;
+                    }
+                }
+
+                if(result.length == 0)
+                {
+                    throw {
+                        result: false,
+                        result_code: 97,
+                        result_message: "No valid certificate paths found"
+                    };
+                }
+                // #endregion 
+
+                // #region Find shortest certificate path (for the moment it is the only criteria)
+                var shortestLength = result[0].length;
+                var shortestIndex = 0;
+
+                for(var i = 0; i < result.length; i++)
+                {
+                    if(result[i].length < shortestLength)
+                    {
+                        shortestLength = result[i].length;
+                        shortestIndex = i;
+                    }
+                }
+                // #endregion 
+
+                // #region Create certificate path for basic check 
+                for(var i = 0; i < result[shortestIndex].length; i++)
+                {
+                    certificatePath.push(localCerts[(result[shortestIndex])[i]]);
+                }
+                // #endregion   
+
+                // #region Perform basic checking for all certificates in the path 
+                result = yield basicCheck(certificatePath, _this.checkDate);
+                if(result.result == false)
+                    throw result;
+                // #endregion 
+
+                return certificatePath;
+            });
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CERT_CHAIN.prototype.verify =
     function()
     {
         // #region Initial checks 
         if(this.certs.length === 0)
-            return new Promise(function(resolve, reject) { reject("Empty certificate array"); });
+            return Promise.reject("Empty certificate array");
         // #endregion 
 
         // #region Initial variables 
@@ -6360,25 +7004,40 @@ function(in_window)
                 var policies_and_certs = new Array(); // In fact "array of array" where rows are for each specific policy, column for each certificate and value is "true/false"
 
                 var any_policy_array = new Array(_this.certs.length - 1); // Minus "trusted anchor"
-                for(var ii = 0; ii < (_this.certs.length - 1) ; ii++)
+                for(var ii = 0; ii < (_this.certs.length - 1); ii++)
                     any_policy_array[ii] = true;
 
                 policies_and_certs.push(any_policy_array);
 
                 var policy_mappings = new Array(_this.certs.length - 1); // Array of "PolicyMappings" for each certificate
                 var cert_policies = new Array(_this.certs.length - 1); // Array of "CertificatePolicies" for each certificate
+
+                var explicit_policy_start = (explicit_policy_indicator) ? (_this.certs.length -1): (-1);
                 // #endregion 
 
+                // #region Gather all neccessary information from certificate chain 
                 for(var i = (_this.certs.length - 2) ; i >= 0 ; i--, path_depth++)
                 {
                     if("extensions" in _this.certs[i])
                     {
+                        // #region Get information about certificate extensions 
                         for(var j = 0; j < _this.certs[i].extensions.length; j++)
                         {
                             // #region CertificatePolicies 
                             if(_this.certs[i].extensions[j].extnID === "2.5.29.32")
                             {
                                 cert_policies[i] = _this.certs[i].extensions[j].parsedValue;
+
+                                // #region Remove entry from "anyPolicies" for the certificate 
+								for(var s = 0; s < all_policies.length; s++)
+								{
+									if(all_policies[s] == "2.5.29.32.0")
+									{
+										delete (policies_and_certs[s])[i];
+										break;
+									}
+								}
+                                // #endregion 
 
                                 for(var k = 0; k < _this.certs[i].extensions[j].parsedValue.certificatePolicies.length; k++)
                                 {
@@ -6404,14 +7063,28 @@ function(in_window)
 
                                         policies_and_certs.push(cert_array);
                                     }
-                                    else(policies_and_certs[policy_index])[i] = true;
+                                    else
+                                    {
+                                        (policies_and_certs[policy_index])[i] = true;
+                                    }
                                 }
                             }
                             // #endregion 
 
                             // #region PolicyMappings 
                             if(_this.certs[i].extensions[j].extnID === "2.5.29.33")
+                            {
+                                if(policy_mapping_inhibit_indicator)
+                                {
+                                    return {
+                                        result: false,
+                                        result_code: 98,
+                                        result_message: "Policy mapping prohibited"
+                                    };
+                                }
+
                                 policy_mappings[i] = _this.certs[i].extensions[j].parsedValue;
+                            }
                             // #endregion 
 
                             // #region PolicyConstraints 
@@ -6421,7 +7094,10 @@ function(in_window)
                                 {
                                     // #region requireExplicitPolicy 
                                     if(_this.certs[i].extensions[j].parsedValue.requireExplicitPolicy === 0)
+                                    {
                                         explicit_policy_indicator = true;
+                                        explicit_policy_start = i;
+                                    }
                                     else
                                     {
                                         if(pending_constraints[0] === false)
@@ -6444,11 +7120,11 @@ function(in_window)
                                         if(pending_constraints[1] === false)
                                         {
                                             pending_constraints[1] = true;
-                                            policy_mapping_inhibit_pending = _this.certs[i].extensions[j].parsedValue.requireExplicitPolicy;
+                                            policy_mapping_inhibit_pending = _this.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1;
                                         }
                                         else
                                         {
-                                            policy_mapping_inhibit_pending = (policy_mapping_inhibit_pending > _this.certs[i].extensions[j].parsedValue.requireExplicitPolicy) ? _this.certs[i].extensions[j].parsedValue.requireExplicitPolicy : policy_mapping_inhibit_pending;
+                                            policy_mapping_inhibit_pending = (policy_mapping_inhibit_pending > (_this.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1)) ? (_this.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1) : policy_mapping_inhibit_pending;
                                         }
                                     }
                                     // #endregion   
@@ -6479,61 +7155,26 @@ function(in_window)
                             }
                             // #endregion 
                         }
+                        // #endregion 
 
                         // #region Check "inhibit_any_policy_indicator" 
                         if(inhibit_any_policy_indicator === true)
-                            delete (policies_and_certs[0])[i]; // Unset value to "undefined" for "anyPolicies" value for current certificate
-                        // #endregion 
-
-                        // #region Combine information from certificate policies and policy mappings 
-                        if((typeof cert_policies[i] !== "undefined") &&
-                           (typeof policy_mappings[i] !== "undefined") &&
-                           (policy_mapping_inhibit_indicator === false))
                         {
-                            for(var m = 0; m < cert_policies[i].certificatePolicies.length; m++)
+                            var policy_index = (-1);
+
+                            // #region Find "anyPolicy" index 
+                            for(var searchAnyPolicy = 0; searchAnyPolicy < all_policies.length; searchAnyPolicy++)
                             {
-                                var domainPolicy = "";
-
-                                // #region Find if current policy is in "mappings" array 
-                                for(var n = 0; n < policy_mappings[i].mappings.length; n++)
+                                if(all_policies[searchAnyPolicy] == "2.5.29.32.0")
                                 {
-                                    if(policy_mappings[i].mappings[n].subjectDomainPolicy === cert_policies[i].certificatePolicies[m].policyIdentifier)
-                                    {
-                                        domainPolicy = policy_mappings[i].mappings[n].issuerDomainPolicy;
-                                        break;
-                                    }
-
-                                    // #region Could be the case for some reasons 
-                                    if(policy_mappings[i].mappings[n].issuerDomainPolicy === cert_policies[i].certificatePolicies[m].policyIdentifier)
-                                    {
-                                        domainPolicy = policy_mappings[i].mappings[n].subjectDomainPolicy;
-                                        break;
-                                    }
-                                    // #endregion 
+                                    policy_index = searchAnyPolicy;
+                                    break;
                                 }
-
-                                if(domainPolicy === "")
-                                    continue;
-                                // #endregion
-
-                                // #region Find the index of "domainPolicy"  
-                                var domainPolicy_index = (-1);
-
-                                for(var p = 0; p < all_policies.length; p++)
-                                {
-                                    if(all_policies[p] === domainPolicy)
-                                    {
-                                        domainPolicy_index = p;
-                                        break;
-                                    }
-                                }
-                                // #endregion 
-
-                                // #region Change array value for "domainPolicy" 
-                                if(domainPolicy_index !== (-1))
-                                    (policies_and_certs[domainPolicy_index])[i] = true; // Put "set" in "domainPolicy" cell for specific certificate
-                                // #endregion 
                             }
+                            // #endregion 
+
+                            if(policy_index != (-1))
+                                delete (policies_and_certs[0])[i]; // Unset value to "undefined" for "anyPolicies" value for current certificate
                         }
                         // #endregion 
 
@@ -6546,6 +7187,8 @@ function(in_window)
                                 if(explicit_policy_pending === 0)
                                 {
                                     explicit_policy_indicator = true;
+                                    explicit_policy_start = i;
+
                                     pending_constraints[0] = false;
                                 }
                             }
@@ -6579,6 +7222,87 @@ function(in_window)
                         // #endregion 
                     }
                 }
+                // #endregion 
+
+                // #region Working with policy mappings
+                for(var i = 0; i < (_this.certs.length - 1) ; i++)
+                {
+                    // #region Check that there is "policy mapping" for level "i + 1" 
+                    if((i < (_this.certs.length - 2)) && (typeof policy_mappings[i + 1] !== "undefined"))
+                    {
+                        for(var k = 0; k < policy_mappings[i + 1].mappings.length; k++)
+                        {
+                            // #region Check that we do not have "anyPolicy" in current mapping 
+                            if((policy_mappings[i + 1].mappings[k].issuerDomainPolicy == "2.5.29.32.0") || (policy_mappings[i + 1].mappings[k].subjectDomainPolicy == "2.5.29.32.0"))
+                            {
+                                return {
+                                    result: false,
+                                    result_code: 99,
+                                    result_message: "The \"anyPolicy\" should not be a part of policy mapping scheme"
+                                };
+                            }
+                            // #endregion 
+
+                            // #region Initial variables 
+                            var issuerDomainPolicyIndex = (-1);
+                            var subjectDomainPolicyIndex = (-1);
+                            // #endregion 
+
+                            // #region Search for index of policies indedes 
+                            for(var n = 0; n < all_policies.length; n++)
+                            {
+                                if(all_policies[n] == policy_mappings[i + 1].mappings[k].issuerDomainPolicy)
+                                    issuerDomainPolicyIndex = n;
+
+                                if(all_policies[n] == policy_mappings[i + 1].mappings[k].subjectDomainPolicy)
+                                    subjectDomainPolicyIndex = n;
+                            }
+                            // #endregion 
+
+                            // #region Delete existing "issuerDomainPolicy" because on the level we mapped the policy to another one 
+                            if(typeof (policies_and_certs[issuerDomainPolicyIndex])[i] !== "undefined")
+                                delete (policies_and_certs[issuerDomainPolicyIndex])[i];
+                            // #endregion 
+
+                            // #region Check all policies for the certificate 
+                            for(var j = 0; j < cert_policies[i].certificatePolicies.length; j++)
+                            {
+                                if(policy_mappings[i + 1].mappings[k].subjectDomainPolicy == cert_policies[i].certificatePolicies[j].policyIdentifier)
+                                {
+                                    // #region Set mapped policy for current certificate 
+                                    if((issuerDomainPolicyIndex != (-1)) && (subjectDomainPolicyIndex != (-1)))
+                                    {
+                                        for(var m = 0; m <= i ; m++)
+                                        {
+                                            if(typeof (policies_and_certs[subjectDomainPolicyIndex])[m] !== "undefined")
+                                            {
+                                                (policies_and_certs[issuerDomainPolicyIndex])[m] = true;
+                                                delete (policies_and_certs[subjectDomainPolicyIndex])[m];
+                                            }
+                                        }
+                                    }
+                                    // #endregion   
+                                }
+                            }
+                            // #endregion 
+                        }
+                    }
+                    // #endregion 
+                }
+                // #endregion 
+
+                // #region Working with "explicit_policy_indicator" and "anyPolicy" 
+                for(var i = 0; i < all_policies.length; i++)
+                {
+					if(all_policies[i] == "2.5.29.32.0")
+					{
+						for(var j = 0; j < explicit_policy_start; j++)
+						{
+							delete (policies_and_certs[i])[j];
+						}
+					}
+                }
+                // #endregion 
 
                 // #region Create "set of authorities-constrained policies"
                 var auth_constr_policies = new Array();
@@ -6589,10 +7313,37 @@ function(in_window)
 
                     for(var j = 0; j < (_this.certs.length - 1) ; j++)
                     {
-                        if(typeof (policies_and_certs[i])[j] === "undefined")
+                        var anyPolicyFound = false;
+
+                        if((j < explicit_policy_start) && (all_policies[i] == "2.5.29.32.0") && (all_policies.length > 1))
                         {
                             found = false;
                             break;
+                        }
+
+                        if(typeof (policies_and_certs[i])[j] === "undefined")
+                        {
+                            if(j >= explicit_policy_start)
+                            {
+                                // #region Search for "anyPolicy" in the policy set 
+                                for(var k = 0; k < all_policies.length; k++)
+                                {
+                                    if(all_policies[k] == "2.5.29.32.0")
+                                    {
+                                        if((policies_and_certs[k])[j] === true)
+                                            anyPolicyFound = true;
+
+                                        break;
+                                    }
+                                }
+                                // #endregion 
+                            }
+
+                            if(!anyPolicyFound)
+                            {
+                                found = false;
+                                break;
+                            }
                         }
                     }
 
@@ -6604,22 +7355,34 @@ function(in_window)
                 // #region Create "set of user-constrained policies"
                 var user_constr_policies = new Array();
 
-                for(var i = 0; i < auth_constr_policies.length; i++)
-                {
-                    for(var j = 0; j < initial_policy_set.length; j++)
-                    {
-                        if(initial_policy_set[j] === auth_constr_policies[i])
-                        {
-                            user_constr_policies.push(initial_policy_set[j]);
-                            break;
-                        }
-                    }
-                }
+				if((initial_policy_set.length == 1) && (initial_policy_set[0] == "2.5.29.32.0") && (explicit_policy_indicator == false))
+				{
+						user_constr_policies = initial_policy_set;
+				}
+				else
+				{
+					if((auth_constr_policies.length == 1) && (auth_constr_policies[0] == "2.5.29.32.0"))
+						user_constr_policies = initial_policy_set;
+					else
+					{
+						for(var i = 0; i < auth_constr_policies.length; i++)
+						{
+							for(var j = 0; j < initial_policy_set.length; j++)
+							{
+								if((initial_policy_set[j] === auth_constr_policies[i]) || (initial_policy_set[j] == "2.5.29.32.0"))
+								{
+									user_constr_policies.push(auth_constr_policies[i]);
+									break;
+								}
+							}
+						}
+					}
+				}
                 // #endregion 
 
                 // #region Combine output object 
                 return {
-                    result: (user_constr_policies.length > 0) ? true : false,
+                    result: (user_constr_policies.length > 0),
                     result_code: 0,
                     result_message: (user_constr_policies.length > 0) ? "" : "Zero \"user_constr_policies\" array, no intersections with \"auth_constr_policies\"",
                     auth_constr_policies: auth_constr_policies,
@@ -6739,16 +7502,13 @@ function(in_window)
                             if(cs[0].length === 0)
                                 return true;
 
-                            if(ns.length !== cs.length)
-                                return false;
-                            else
-                                return true;
+                            return ns.length === cs.length;
                         }
                         else
                             return false;
                     }
                     else
-                        return (name_prepared.localeCompare(constraint_prepared) === 0) ? true : false;
+                        return (name_prepared.localeCompare(constraint_prepared) === 0);
 
                     return false;
                 }
@@ -6798,10 +7558,7 @@ function(in_window)
                         if(constraint_splitted[0].length === 0)
                             return true;
 
-                        if(name_splitted.length !== constraint_splitted.length)
-                            return false;
-                        else
-                            return true;
+                        return name_splitted.length === constraint_splitted.length;
                     }
                     else
                         return false;
@@ -6938,16 +7695,11 @@ function(in_window)
                             if(_this.certs[i].extensions[j].extnID === "2.5.29.17")
                                 subject_alt_names = subject_alt_names.concat(_this.certs[i].extensions[j].parsedValue.altNames);
                             // #endregion 
-
-                            // #region PKCS#9 e-mail address 
-                            if(_this.certs[i].extensions[j].extnID === "1.2.840.113549.1.9.1")
-                                email_addresses.push(_this.certs[i].extensions[j].parsedValue.value);
-                            // #endregion 
                         }
                     }
 
                     // #region Checking for "required name forms" 
-                    var form_found = (required_name_forms.length > 0) ? false : true;
+                    var form_found = (required_name_forms.length <= 0);
 
                     for(var j = 0; j < required_name_forms.length; j++)
                     {
@@ -6983,10 +7735,7 @@ function(in_window)
                         policy_result.result_code = 21;
                         policy_result.result_message = "No neccessary name form found";
 
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject(policy_result);
-                        });
+                        return Promise.reject(policy_result);
                     }
                     // #endregion 
 
@@ -7007,30 +7756,30 @@ function(in_window)
                             case 1:
                                 constr_groups[0].push(permitted_subtrees[j]);
                                 break;
-                                // #endregion 
-                                // #region dNSName 
+                            // #endregion 
+                            // #region dNSName 
                             case 2:
                                 constr_groups[1].push(permitted_subtrees[j]);
                                 break;
-                                // #endregion 
-                                // #region directoryName 
+                            // #endregion 
+                            // #region directoryName 
                             case 4:
                                 constr_groups[2].push(permitted_subtrees[j]);
                                 break;
-                                // #endregion 
-                                // #region uniformResourceIdentifier 
+                            // #endregion 
+                            // #region uniformResourceIdentifier 
                             case 6:
                                 constr_groups[3].push(permitted_subtrees[j]);
                                 break;
-                                // #endregion 
-                                // #region iPAddress 
+                            // #endregion 
+                            // #region iPAddress 
                             case 7:
                                 constr_groups[4].push(permitted_subtrees[j]);
                                 break;
-                                // #endregion 
-                                // #region default 
+                            // #endregion 
+                            // #region default 
                             default:;
-                                // #endregion 
+                            // #endregion 
                         }
                     }
                     // #endregion   
@@ -7039,6 +7788,7 @@ function(in_window)
                     for(var p = 0; p < 5; p++)
                     {
                         var group_permitted = false;
+                        var valueExists = false;
                         var group = constr_groups[p];
 
                         for(var j = 0; j < group.length; j++)
@@ -7047,12 +7797,15 @@ function(in_window)
                             {
                                 // #region rfc822Name 
                                 case 0:
-                                    if(subject_alt_names.length >= 0)
+                                    if(subject_alt_names.length > 0)
                                     {
                                         for(var k = 0; k < subject_alt_names.length; k++)
                                         {
                                             if(subject_alt_names[k].NameType === 1) // rfc822Name
+                                            {
+                                                valueExists = true;
                                                 group_permitted = group_permitted || compare_rfc822Name(subject_alt_names[k].Name, group[j].base.Name);
+                                            }
                                         }
                                     }
                                     else // Try to find out "emailAddress" inside "subject"
@@ -7062,72 +7815,80 @@ function(in_window)
                                             if((_this.certs[i].subject.types_and_values[k].type === "1.2.840.113549.1.9.1") ||    // PKCS#9 e-mail address
                                                (_this.certs[i].subject.types_and_values[k].type === "0.9.2342.19200300.100.1.3")) // RFC1274 "rfc822Mailbox" e-mail address
                                             {
+                                                valueExists = true;
                                                 group_permitted = group_permitted || compare_rfc822Name(_this.certs[i].subject.types_and_values[k].value.value_block.value, group[j].base.Name);
                                             }
                                         }
                                     }
                                     break;
-                                    // #endregion 
-                                    // #region dNSName 
+                                // #endregion 
+                                // #region dNSName 
                                 case 1:
                                     if(subject_alt_names.length > 0)
                                     {
                                         for(var k = 0; k < subject_alt_names.length; k++)
                                         {
                                             if(subject_alt_names[k].NameType === 2) // dNSName
+                                            {
+                                                valueExists = true;
                                                 group_permitted = group_permitted || compare_dNSName(subject_alt_names[k].Name, group[j].base.Name);
+                                            }
                                         }
                                     }
                                     break;
-                                    // #endregion 
-                                    // #region directoryName 
+                                // #endregion 
+                                // #region directoryName 
                                 case 2:
+                                    valueExists = true;
                                     group_permitted = compare_directoryName(_this.certs[i].subject, group[j].base.Name);
                                     break;
-                                    // #endregion 
-                                    // #region uniformResourceIdentifier 
+                                // #endregion 
+                                // #region uniformResourceIdentifier 
                                 case 3:
                                     if(subject_alt_names.length > 0)
                                     {
                                         for(var k = 0; k < subject_alt_names.length; k++)
                                         {
                                             if(subject_alt_names[k].NameType === 6) // uniformResourceIdentifier
+                                            {
+                                                valueExists = true;
                                                 group_permitted = group_permitted || compare_uniformResourceIdentifier(subject_alt_names[k].Name, group[j].base.Name);
+                                            }
                                         }
                                     }
                                     break;
-                                    // #endregion 
-                                    // #region iPAddress 
+                                // #endregion 
+                                // #region iPAddress 
                                 case 4:
                                     if(subject_alt_names.length > 0)
                                     {
                                         for(var k = 0; k < subject_alt_names.length; k++)
                                         {
                                             if(subject_alt_names[k].NameType === 7) // iPAddress
+                                            {
+                                                valueExists = true;
                                                 group_permitted = group_permitted || compare_iPAddress(subject_alt_names[k].Name, group[j].base.Name);
+                                            }
                                         }
                                     }
                                     break;
-                                    // #endregion 
-                                    // #region default 
+                                // #endregion 
+                                // #region default 
                                 default:;
-                                    // #endregion 
+                                // #endregion 
                             }
 
                             if(group_permitted)
                                 break;
                         }
 
-                        if((group_permitted === false) && (group.length > 0))
+                        if((group_permitted === false) && (group.length > 0) && valueExists)
                         {
                             policy_result.result = false;
                             policy_result.result_code = 41;
                             policy_result.result_message = "Failed to meet \"permitted sub-trees\" name constraint";
 
-                            return new Promise(function(resolve, reject)
-                            {
-                                reject(policy_result);
-                            });
+                            return Promise.reject(policy_result);
                         }
                     }
                     // #endregion 
@@ -7162,8 +7923,8 @@ function(in_window)
                                     }
                                 }
                                 break;
-                                // #endregion 
-                                // #region dNSName 
+                            // #endregion 
+                            // #region dNSName 
                             case 2:
                                 if(subject_alt_names.length > 0)
                                 {
@@ -7174,13 +7935,13 @@ function(in_window)
                                     }
                                 }
                                 break;
-                                // #endregion 
-                                // #region directoryName 
+                            // #endregion 
+                            // #region directoryName 
                             case 4:
                                 excluded = excluded || compare_directoryName(_this.certs[i].subject, excluded_subtrees[j].base.Name);
                                 break;
-                                // #endregion 
-                                // #region uniformResourceIdentifier 
+                            // #endregion 
+                            // #region uniformResourceIdentifier 
                             case 6:
                                 if(subject_alt_names.length > 0)
                                 {
@@ -7191,8 +7952,8 @@ function(in_window)
                                     }
                                 }
                                 break;
-                                // #endregion 
-                                // #region iPAddress 
+                            // #endregion 
+                            // #region iPAddress 
                             case 7:
                                 if(subject_alt_names.length > 0)
                                 {
@@ -7203,10 +7964,10 @@ function(in_window)
                                     }
                                 }
                                 break;
-                                // #endregion 
-                                // #region default 
+                            // #endregion 
+                            // #region default 
                             default:; // No action, but probably here we need to create a warning for "malformed constraint"
-                                // #endregion 
+                            // #endregion 
                         }
 
                         if(excluded)
@@ -7219,10 +7980,7 @@ function(in_window)
                         policy_result.result_code = 42;
                         policy_result.result_message = "Failed to meet \"excluded sub-trees\" name constraint";
 
-                        return new Promise(function(resolve, reject)
-                        {
-                            reject(policy_result);
-                        });
+                        return Promise.reject(policy_result);
                     }
                     // #endregion 
 
@@ -7239,7 +7997,7 @@ function(in_window)
         // #endregion   
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************

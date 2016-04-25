@@ -106,7 +106,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.DigestInfo.prototype.fromSchema =
     function(schema)
@@ -134,7 +134,7 @@ function(in_window)
         this.digestAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["digestAlgorithm"] });
         this.digest = asn1.result["digest"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.DigestInfo.prototype.toSchema =
     function()
@@ -147,7 +147,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.DigestInfo.prototype.toJSON =
     function()
@@ -156,7 +156,7 @@ function(in_window)
             digestAlgorithm: this.digestAlgorithm.toJSON(),
             digest: this.digest.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -188,7 +188,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.MacData.prototype.fromSchema =
     function(schema)
@@ -220,7 +220,7 @@ function(in_window)
         if("iterations" in asn1.result)
             this.iterations = asn1.result["iterations"].value_block.value_dec;
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.MacData.prototype.toSchema =
     function()
@@ -238,7 +238,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.MacData.prototype.toJSON =
     function()
@@ -252,13 +252,13 @@ function(in_window)
             output.iterations = this.iterations.toJSON();
             
         return output;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
     // #region Simplified structure for "PFX" type
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12 =
+    in_window.org.pkijs.simpl.PFX =
     function()
     {
         // #region Internal properties of the object 
@@ -271,7 +271,7 @@ function(in_window)
 
         // #region If input argument array contains "schema" for this object 
         if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
-            in_window.org.pkijs.simpl.PKCS12.prototype.fromSchema.call(this, arguments[0].schema);
+            in_window.org.pkijs.simpl.PFX.prototype.fromSchema.call(this, arguments[0].schema);
         // #endregion 
         // #region If input argument array contains "native" values for internal properties 
         else
@@ -289,9 +289,9 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12.prototype.fromSchema =
+    in_window.org.pkijs.simpl.PFX.prototype.fromSchema =
     function(schema)
     {
         // #region Check the schema is valid 
@@ -325,9 +325,9 @@ function(in_window)
         if("macData" in asn1.result)
             this.macData = new in_window.org.pkijs.simpl.pkcs12.MacData({ schema: asn1.result["macData"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12.prototype.toSchema =
+    in_window.org.pkijs.simpl.PFX.prototype.toSchema =
     function()
     {
         // #region Construct and return new ASN.1 schema for this object 
@@ -343,9 +343,9 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12.prototype.toJSON =
+    in_window.org.pkijs.simpl.PFX.prototype.toJSON =
     function()
     {
         var output = {
@@ -357,9 +357,9 @@ function(in_window)
             output.macData = this.macData.toJSON();
 
         return output;
-    }
+    };
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12.prototype.makeInternalValues =
+    in_window.org.pkijs.simpl.PFX.prototype.makeInternalValues =
     function(parameters)
     {
         /// <summary>Making "CMS_CONTENT_INFO" from "parsedValue" object</summary>
@@ -367,13 +367,13 @@ function(in_window)
 
         // #region Check mandatory parameter 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters\" must has \"Object\" type"); });
+            return Promise.reject("The \"parameters\" must has \"Object\" type");
 
         if(("parsedValue" in this) == false)
-            return new Promise(function(resolve, reject) { reject("Please call \"parseValues\" function first in order to make \"parsedValue\" data"); });
+            return Promise.reject("Please call \"parseValues\" function first in order to make \"parsedValue\" data");
 
         if(("integrityMode" in this.parsedValue) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"integrityMode\" inside \"parsedValue\""); });
+            return Promise.reject("Absent mandatory parameter \"integrityMode\" inside \"parsedValue\"");
         // #endregion   
 
         // #region Initial variables 
@@ -384,13 +384,13 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Makes values for each particular integrity mode 
         // #region Check that we do have neccessary fields in "parsedValue" object
         if(("authenticatedSafe" in _this.parsedValue) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"authenticatedSafe\" in \"parsedValue\""); });
+            return Promise.reject("Absent mandatory parameter \"authenticatedSafe\" in \"parsedValue\"");
         // #endregion 
 
         switch(this.parsedValue.integrityMode)
@@ -400,16 +400,16 @@ function(in_window)
                 {
                     // #region Check additional mandatory parameters 
                     if(("iterations" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"iterations\""); });
+                        return Promise.reject("Absent mandatory parameter \"iterations\"");
 
                     if(("pbkdf2HashAlgorithm" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"pbkdf2HashAlgorithm\""); });
+                        return Promise.reject("Absent mandatory parameter \"pbkdf2HashAlgorithm\"");
 
                     if(("hmacHashAlgorithm" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"hmacHashAlgorithm\""); });
+                        return Promise.reject("Absent mandatory parameter \"hmacHashAlgorithm\"");
 
                     if(("password" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\""); });
+                        return Promise.reject("Absent mandatory parameter \"password\"");
                     // #endregion   
 
                     // #region Initial variables 
@@ -436,7 +436,7 @@ function(in_window)
                             length = 512;
                             break;
                         default:
-                            return new Promise(function(resolve, reject) { reject("Incorrect \"parameters.hmacHashAlgorithm\" parameter: " + parameters.hmacHashAlgorithm); });
+                            return Promise.reject("Incorrect \"parameters.hmacHashAlgorithm\" parameter: " + parameters.hmacHashAlgorithm);
                     }
                     // #endregion 
 
@@ -464,7 +464,7 @@ function(in_window)
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject(error); });
+                            return Promise.reject(error);
                         }
                         );
                     // #endregion 
@@ -488,7 +488,7 @@ function(in_window)
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject(error); });
+                            return Promise.reject(error);
                         }
                         );
                     // #endregion 
@@ -499,7 +499,7 @@ function(in_window)
                     sequence = sequence.then(
                         function(result)
                         {
-                            _this.authSafe = new org.pkijs.simpl.CMS_CONTENT_INFO({
+                            _this.authSafe = new in_window.org.pkijs.simpl.CMS_CONTENT_INFO({
                                 contentType: "1.2.840.113549.1.7.1",
                                 content: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: _this.parsedValue.authenticatedSafe.toSchema().toBER(false) })
                             });
@@ -511,7 +511,7 @@ function(in_window)
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject(error); });
+                            return Promise.reject(error);
                         }
                         );
                     // #endregion 
@@ -533,7 +533,7 @@ function(in_window)
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject(error); });
+                            return Promise.reject(error);
                         }
                         );
                     // #endregion   
@@ -546,13 +546,13 @@ function(in_window)
                 {
                     // #region Check additional mandatory parameters 
                     if(("signingCertificate" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"signingCertificate\""); });
+                        return Promise.reject("Absent mandatory parameter \"signingCertificate\"");
 
                     if(("privateKey" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"privateKey\""); });
+                        return Promise.reject("Absent mandatory parameter \"privateKey\"");
 
                     if(("hashAlgorithm" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"hashAlgorithm\""); });
+                        return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
                     // #endregion   
 
                     // #region Making data to be signed
@@ -566,9 +566,9 @@ function(in_window)
                     // #region Initial variables 
                     var cms_signed_simpl = new in_window.org.pkijs.simpl.CMS_SIGNED_DATA({
                         version: 1,
-                        encapContentInfo: new org.pkijs.simpl.cms.EncapsulatedContentInfo({
+                        encapContentInfo: new in_window.org.pkijs.simpl.cms.EncapsulatedContentInfo({
                             eContentType: "1.2.840.113549.1.7.1", // "data" content type
-                            eContent: new org.pkijs.asn1.OCTETSTRING({ value_hex: toBeSigned })
+                            eContent: new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: toBeSigned })
                         }),
                         certificates: [parameters.signingCertificate]
                     });
@@ -593,38 +593,38 @@ function(in_window)
                             // #endregion 
 
                             // #region contentType 
-                            signed_attr.push(new org.pkijs.simpl.cms.Attribute({
+                            signed_attr.push(new in_window.org.pkijs.simpl.cms.Attribute({
                                 attrType: "1.2.840.113549.1.9.3",
                                 attrValues: [
-                                    new org.pkijs.asn1.OID({ value: "1.2.840.113549.1.7.1" })
+                                    new in_window.org.pkijs.asn1.OID({ value: "1.2.840.113549.1.7.1" })
                                 ]
                             }));
                             // #endregion 
                             // #region signingTime 
-                            signed_attr.push(new org.pkijs.simpl.cms.Attribute({
+                            signed_attr.push(new in_window.org.pkijs.simpl.cms.Attribute({
                                 attrType: "1.2.840.113549.1.9.5",
                                 attrValues: [
-                                    new org.pkijs.asn1.UTCTIME({ value_date: new Date() })
+                                    new in_window.org.pkijs.asn1.UTCTIME({ value_date: new Date() })
                                 ]
                             }));
                             // #endregion 
                             // #region messageDigest 
-                            signed_attr.push(new org.pkijs.simpl.cms.Attribute({
+                            signed_attr.push(new in_window.org.pkijs.simpl.cms.Attribute({
                                 attrType: "1.2.840.113549.1.9.4",
                                 attrValues: [
-                                    new org.pkijs.asn1.OCTETSTRING({ value_hex: result })
+                                    new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: result })
                                 ]
                             }));
                             // #endregion 
 
                             // #region Making final value for "SignerInfo" type 
-                            cms_signed_simpl.signerInfos.push(new org.pkijs.simpl.CMS_SIGNER_INFO({
+                            cms_signed_simpl.signerInfos.push(new in_window.org.pkijs.simpl.CMS_SIGNER_INFO({
                                 version: 1,
-                                sid: new org.pkijs.simpl.cms.IssuerAndSerialNumber({
+                                sid: new in_window.org.pkijs.simpl.cms.IssuerAndSerialNumber({
                                     issuer: parameters.signingCertificate.issuer,
                                     serialNumber: parameters.signingCertificate.serialNumber
                                 }),
-                                signedAttrs: new org.pkijs.simpl.cms.SignedUnsignedAttributes({
+                                signedAttrs: new in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes({
                                     type: 0,
                                     attributes: signed_attr
                                 })
@@ -633,7 +633,7 @@ function(in_window)
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject("Error during making digest for message: " + error); });
+                            return Promise.reject("Error during making digest for message: " + error);
                         }
                         );
                     // #endregion 
@@ -652,14 +652,14 @@ function(in_window)
                     sequence = sequence.then(
                         function(result)
                         {
-                            _this.authSafe = new org.pkijs.simpl.CMS_CONTENT_INFO({
+                            _this.authSafe = new in_window.org.pkijs.simpl.CMS_CONTENT_INFO({
                                 contentType: "1.2.840.113549.1.7.2",
                                 content: cms_signed_simpl.toSchema(true)
                             });
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject("Error during making signature: " + error); });
+                            return Promise.reject("Error during making signature: " + error);
                         }
                         );
                     // #endregion 
@@ -668,20 +668,20 @@ function(in_window)
             // #endregion 
             // #region default 
             default:
-                return new Promise(function(resolve, reject) { reject("Parameter \"integrityMode\" has unknown value: " + parameters.integrityMode); });
+                return Promise.reject("Parameter \"integrityMode\" has unknown value: " + parameters.integrityMode);
             // #endregion 
         }
         // #endregion   
 
         return sequence;
-    }
+    };
     //**************************************************************************************
-    in_window.org.pkijs.simpl.PKCS12.prototype.parseInternalValues =
+    in_window.org.pkijs.simpl.PFX.prototype.parseInternalValues =
     function(parameters)
     {
         // #region Check input data from "parameters" 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters\" must has \"Object\" type"); });
+            return Promise.reject("The \"parameters\" must has \"Object\" type");
 
         if(("checkIntegrity" in parameters) == false)
             parameters.checkIntegrity = true;
@@ -695,7 +695,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Create value for "this.parsedValue.authenticatedSafe" and check integrity 
@@ -708,7 +708,7 @@ function(in_window)
                 {
                     // #region Check additional mandatory parameters 
                     if(("password" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\""); });
+                        return Promise.reject("Absent mandatory parameter \"password\"");
                     // #endregion   
 
                     // #region Integrity based on HMAC 
@@ -717,13 +717,13 @@ function(in_window)
 
                     // #region Check that we do have OCTETSTRING as "content" 
                     if((this.authSafe.content instanceof in_window.org.pkijs.asn1.OCTETSTRING) == false)
-                        return new Promise(function(resolve, reject) { reject("Wrong type of \"this.authSafe.content\""); });
+                        return Promise.reject("Wrong type of \"this.authSafe.content\"");
                     // #endregion 
 
                     // #region Parse internal ASN.1 data 
                     var asn1 = in_window.org.pkijs.fromBER(this.authSafe.content.value_block.value_hex);
                     if(asn1.offset == (-1))
-                        return new Promise(function(resolve, reject) { reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\""); });
+                        return Promise.reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\"");
                     // #endregion   
 
                     // #region Set "authenticatedSafe" value 
@@ -735,13 +735,13 @@ function(in_window)
                     {
                         // #region Check that "MacData" exists 
                         if(("macData" in _this) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent \"macData\" value, can not check PKCS# data integrity"); });
+                            return Promise.reject("Absent \"macData\" value, can not check PKCS# data integrity");
                         // #endregion   
 
                         // #region Initial variables 
                         var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.macData.mac.digestAlgorithm.algorithm_id);
                         if(("name" in hashAlgorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Unsupported digest algorithm: " + _this.macData.mac.digestAlgorithm.algorithm_id); });
+                            return Promise.reject("Unsupported digest algorithm: " + _this.macData.mac.digestAlgorithm.algorithm_id);
 
                         var length;
 
@@ -761,7 +761,7 @@ function(in_window)
                                 length = 512;
                                 break;
                             default:
-                                return new Promise(function(resolve, reject) { reject("Incorrect \"hashAlgorithm\": " + hashAlgorithm.name); });
+                                return Promise.reject("Incorrect \"hashAlgorithm\": " + hashAlgorithm.name);
                         }
                         // #endregion 
 
@@ -789,7 +789,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion 
@@ -813,7 +813,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion 
@@ -833,7 +833,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
 
@@ -841,11 +841,11 @@ function(in_window)
                             function(result)
                             {
                                 if(result == false)
-                                    return new Promise(function(resolve, reject) { reject("Integrity for the PKCS#12 data is broken!"); });
+                                    return Promise.reject("Integrity for the PKCS#12 data is broken!");
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion   
@@ -867,10 +867,10 @@ function(in_window)
 
                     // #region Check that we do have OCTETSTRING as "content" 
                     if(("eContent" in cms_signed_simpl.encapContentInfo) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent of attached data in \"cms_signed_simpl.encapContentInfo\""); });
+                        return Promise.reject("Absent of attached data in \"cms_signed_simpl.encapContentInfo\"");
 
                     if((cms_signed_simpl.encapContentInfo.eContent instanceof in_window.org.pkijs.asn1.OCTETSTRING) == false)
-                        return new Promise(function(resolve, reject) { reject("Wrong type of \"cms_signed_simpl.encapContentInfo.eContent\""); });
+                        return Promise.reject("Wrong type of \"cms_signed_simpl.encapContentInfo.eContent\"");
                     // #endregion 
 
                     // #region Create correct data block for verification 
@@ -888,7 +888,7 @@ function(in_window)
                     // #region Parse internal ASN.1 data 
                     var asn1 = in_window.org.pkijs.fromBER(data);
                     if(asn1.offset == (-1))
-                        return new Promise(function(resolve, reject) { reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\""); });
+                        return Promise.reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\"");
                     // #endregion   
 
                     // #region Set "authenticatedSafe" value 
@@ -905,11 +905,11 @@ function(in_window)
                         function(result)
                         {
                             if(result == false)
-                                return new Promise(function(resolve, reject) { reject("Integrity for the PKCS#12 data is broken!"); });
+                                return Promise.reject("Integrity for the PKCS#12 data is broken!");
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject("Error during integrity verification: " + error); });
+                            return Promise.reject("Error during integrity verification: " + error);
                         }
                         );
                     // #endregion 
@@ -918,7 +918,7 @@ function(in_window)
             // #endregion   
             // #region default 
             default:
-                return new Promise(function(resolve, reject) { reject("Incorrect value for \"this.authSafe.contentType\": " + this.authSafe.contentType); });
+                return Promise.reject("Incorrect value for \"this.authSafe.contentType\": " + _this.authSafe.contentType);
             // #endregion 
         }
         // #endregion 
@@ -931,11 +931,11 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Error during parsing: " + error); });
+                return Promise.reject("Error during parsing: " + error);
             }
             );
         // #endregion   
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -966,7 +966,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.AuthenticatedSafe.prototype.fromSchema =
     function(schema)
@@ -989,7 +989,7 @@ function(in_window)
         for(var i = 0; i < asn1.result["contentInfos"].length; i++)
             this.safeContents.push(new in_window.org.pkijs.simpl.CMS_CONTENT_INFO({ schema: (asn1.result["contentInfos"])[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.AuthenticatedSafe.prototype.toSchema =
     function()
@@ -1004,7 +1004,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.AuthenticatedSafe.prototype.toJSON =
     function()
@@ -1017,23 +1017,23 @@ function(in_window)
             output.contentInfos.push(this.safeContents[i].toJSON());
 
         return output;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.AuthenticatedSafe.prototype.parseInternalValues =
     function(parameters)
     {
         // #region Check input data from "parameters" 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters\" must has \"Object\" type"); });
+            return Promise.reject("The \"parameters\" must has \"Object\" type");
 
         if(("safeContents" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"safeContents\""); });
+            return Promise.reject("Absent mandatory parameter \"safeContents\"");
 
         if((parameters.safeContents instanceof Array) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters.safeContents\" must has \"Array\" type"); });
+            return Promise.reject("The \"parameters.safeContents\" must has \"Array\" type");
 
         if(parameters.safeContents.length != this.safeContents.length)
-            return new Promise(function(resolve, reject) { reject("Length of \"parameters.safeContents\" must be equal to \"this.safeContents.length\""); });
+            return Promise.reject("Length of \"parameters.safeContents\" must be equal to \"this.safeContents.length\"");
         // #endregion 
 
         // #region Initial variables 
@@ -1057,13 +1057,13 @@ function(in_window)
                     {
                         // #region Check that we do have OCTETSTRING as "content" 
                         if((_this.safeContents[j].content instanceof in_window.org.pkijs.asn1.OCTETSTRING) == false)
-                            return new Promise(function(resolve, reject) { reject("Wrong type of \"this.safeContents[j].content\""); });
+                            return Promise.reject("Wrong type of \"this.safeContents[j].content\"");
                         // #endregion 
 
                         // #region Parse internal ASN.1 data 
                         var asn1 = in_window.org.pkijs.fromBER(_this.safeContents[j].content.value_block.value_hex);
                         if(asn1.offset == (-1))
-                            return new Promise(function(resolve, reject) { reject("Error during parsing of ASN.1 data inside \"_this.safeContents[j].content\""); });
+                            return Promise.reject("Error during parsing of ASN.1 data inside \"_this.safeContents[j].content\"");
                         // #endregion   
 
                         // #region Finilly initialize initial values of "SafeContents" type
@@ -1079,17 +1079,17 @@ function(in_window)
                 case "1.2.840.113549.1.7.3":
                     {
                         // #region Initial variables 
-                        var cms_enveloped_simp = new org.pkijs.simpl.CMS_ENVELOPED_DATA({ schema: _this.safeContents[j].content });
+                        var cms_enveloped_simp = new in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA({ schema: _this.safeContents[j].content });
                         // #endregion   
 
                         // #region Check mandatory parameters 
                         if(("recipientCertificate" in parameters.safeContents[j]) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"recipientCertificate\" in \"parameters.safeContents[j]\""); });
+                            return Promise.reject("Absent mandatory parameter \"recipientCertificate\" in \"parameters.safeContents[j]\"");
 
                         var recipientCertificate = parameters.safeContents[j].recipientCertificate;
 
                         if(("recipientKey" in parameters.safeContents[j]) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"recipientKey\" in \"parameters.safeContents[j]\""); });
+                            return Promise.reject("Absent mandatory parameter \"recipientKey\" in \"parameters.safeContents[j]\"");
 
                         var recipientKey = parameters.safeContents[j].recipientKey;
                         // #endregion 
@@ -1108,9 +1108,9 @@ function(in_window)
                         sequence = sequence.then(
                             function(result)
                             {
-                                var asn1 = org.pkijs.fromBER(result);
+                                var asn1 = in_window.org.pkijs.fromBER(result);
                                 if(asn1.offset == (-1))
-                                    return new Promise(function(resolve, reject) { reject("Error during parsing of decrypted data"); });
+                                    return Promise.reject("Error during parsing of decrypted data");
 
                                 _this.parsedValue.safeContents.push({
                                     privacyMode: 2, // Public-key privacy mode
@@ -1126,12 +1126,12 @@ function(in_window)
                 case "1.2.840.113549.1.7.6":
                     {
                         // #region Initial variables 
-                        var cms_encrypted_simpl = new org.pkijs.simpl.CMS_ENCRYPTED_DATA({ schema: _this.safeContents[j].content });
+                        var cms_encrypted_simpl = new in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA({ schema: _this.safeContents[j].content });
                         // #endregion   
 
                         // #region Check mandatory parameters 
                         if(("password" in parameters.safeContents[j]) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\" in \"parameters.safeContents[j]\""); });
+                            return Promise.reject("Absent mandatory parameter \"password\" in \"parameters.safeContents[j]\"");
 
                         var password = parameters.safeContents[j].password;
                         // #endregion 
@@ -1146,7 +1146,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion   
@@ -1155,9 +1155,9 @@ function(in_window)
                         sequence = sequence.then(
                             function(result)
                             {
-                                var asn1 = org.pkijs.fromBER(result);
+                                var asn1 = in_window.org.pkijs.fromBER(result);
                                 if(asn1.offset == (-1))
-                                    return new Promise(function(resolve, reject) { reject("Error during parsing of decrypted data"); });
+                                    return Promise.reject("Error during parsing of decrypted data");
 
                                 _this.parsedValue.safeContents.push({
                                     privacyMode: 1, // Password-based privacy mode
@@ -1166,7 +1166,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion   
@@ -1182,34 +1182,34 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.AuthenticatedSafe.prototype.makeInternalValues =
     function(parameters)
     {
         // #region Check data in "parsedValue" 
         if(("parsedValue" in this) == false)
-            return new Promise(function(resolve, reject) { reject("Please run \"parseValues\" first or add \"parsedValue\" manually"); });
+            return Promise.reject("Please run \"parseValues\" first or add \"parsedValue\" manually");
 
         if((this.parsedValue instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("The \"this.parsedValue\" must has \"Object\" type"); });
+            return Promise.reject("The \"this.parsedValue\" must has \"Object\" type");
 
         if((this.parsedValue.safeContents instanceof Array) == false)
-            return new Promise(function(resolve, reject) { reject("The \"this.parsedValue.safeContents\" must has \"Array\" type"); });
+            return Promise.reject("The \"this.parsedValue.safeContents\" must has \"Array\" type");
         // #endregion 
 
         // #region Check input data from "parameters" 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters\" must has \"Object\" type"); });
+            return Promise.reject("The \"parameters\" must has \"Object\" type");
 
         if(("safeContents" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"safeContents\""); });
+            return Promise.reject("Absent mandatory parameter \"safeContents\"");
 
         if((parameters.safeContents instanceof Array) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters.safeContents\" must has \"Array\" type"); });
+            return Promise.reject("The \"parameters.safeContents\" must has \"Array\" type");
 
         if(parameters.safeContents.length != this.parsedValue.safeContents.length)
-            return new Promise(function(resolve, reject) { reject("Length of \"parameters.safeContents\" must be equal to \"this.parsedValue.safeContents\""); });
+            return Promise.reject("Length of \"parameters.safeContents\" must be equal to \"this.parsedValue.safeContents\"");
         // #endregion 
 
         // #region Initial variables 
@@ -1226,13 +1226,13 @@ function(in_window)
         {
             // #region Check current "_this.parsedValue.safeContents[i]" value
             if(("privacyMode" in _this.parsedValue.safeContents[i]) == false)
-                return new Promise(function(resolve, reject) { reject("The \"privacyMode\" is a mandatory parameter for \"_this.parsedValue.safeContents[i]\""); });
+                return Promise.reject("The \"privacyMode\" is a mandatory parameter for \"_this.parsedValue.safeContents[i]\"");
 
             if(("value" in _this.parsedValue.safeContents[i]) == false)
-                return new Promise(function(resolve, reject) { reject("The \"value\" is a mandatory parameter for \"_this.parsedValue.safeContents[i]\""); });
+                return Promise.reject("The \"value\" is a mandatory parameter for \"_this.parsedValue.safeContents[i]\"");
 
             if((_this.parsedValue.safeContents[i].value instanceof in_window.org.pkijs.simpl.pkcs12.SafeContents) == false)
-                return new Promise(function(resolve, reject) { reject("The \"_this.parsedValue.safeContents[i].value\" must has \"in_window.org.pkijs.simpl.pkcs12.SafeContents\" type"); });
+                return Promise.reject("The \"_this.parsedValue.safeContents[i].value\" must has \"in_window.org.pkijs.simpl.pkcs12.SafeContents\" type");
             // #endregion 
 
             switch(_this.parsedValue.safeContents[i].privacyMode)
@@ -1257,7 +1257,7 @@ function(in_window)
                 case 1:
                     {
                         // #region Initial variables 
-                        var cms_encrypted_simp = new org.pkijs.simpl.CMS_ENCRYPTED_DATA();
+                        var cms_encrypted_simp = new in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA();
 
                         var currentParameters = parameters.safeContents[i];
                         currentParameters.contentToEncrypt = _this.parsedValue.safeContents[i].value.toSchema().toBER(false);
@@ -1271,7 +1271,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion 
@@ -1287,7 +1287,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion 
@@ -1298,16 +1298,16 @@ function(in_window)
                 case 2:
                     {
                         // #region Initial variables 
-                        var cmsEnveloped = new org.pkijs.simpl.CMS_ENVELOPED_DATA();
-                        var contentToEncrypt = _this.parsedValue.safeContents[i].value.toSchema().toBER(false)
+                        var cmsEnveloped = new in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA();
+                        var contentToEncrypt = _this.parsedValue.safeContents[i].value.toSchema().toBER(false);
                         // #endregion 
 
                         // #region Check mandatory parameters 
                         if(("encryptingCertificate" in parameters.safeContents[i]) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"encryptingCertificate\" in \"parameters.safeContents[i]\""); });
+                            return Promise.reject("Absent mandatory parameter \"encryptingCertificate\" in \"parameters.safeContents[i]\"");
 
                         if(("encryptionAlgorithm" in parameters.safeContents[i]) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\""); });
+                            return Promise.reject("Absent mandatory parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\"");
 
                         switch(true)
                         {
@@ -1315,7 +1315,7 @@ function(in_window)
                             case (parameters.safeContents[i].encryptionAlgorithm.name.toLowerCase() == "aes-gcm"):
                                 break;
                             default:
-                                return new Promise(function(resolve, reject) { reject("Incorrect parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\": " + parameters.safeContents[i].encryptionAlgorithm); });
+                                return Promise.reject("Incorrect parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\": " + parameters.safeContents[i].encryptionAlgorithm);
                         }
 
                         switch(true)
@@ -1325,7 +1325,7 @@ function(in_window)
                             case (parameters.safeContents[i].encryptionAlgorithm.length == 256):
                                 break;
                             default:
-                                return new Promise(function(resolve, reject) { reject("Incorrect parameter \"encryptionAlgorithm.length\" in \"parameters.safeContents[i]\": " + parameters.safeContents[i].encryptionAlgorithm.length); });
+                                return Promise.reject("Incorrect parameter \"encryptionAlgorithm.length\" in \"parameters.safeContents[i]\": " + parameters.safeContents[i].encryptionAlgorithm.length);
                         }
                         // #endregion   
 
@@ -1360,7 +1360,7 @@ function(in_window)
                 // #endregion 
                 // #region default 
                 default:
-                    return new Promise(function(resolve, reject) { reject("Incorrect value for \"_this.parsedValue.safeContents[i].privacyMode\": " + _this.parsedValue.safeContents[i].privacyMode); });
+                    return Promise.reject("Incorrect value for \"_this.parsedValue.safeContents[i].privacyMode\": " + _this.parsedValue.safeContents[i].privacyMode);
                 // #endregion 
             }
         }
@@ -1374,11 +1374,11 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Error during parsing: " + error); });
+                return Promise.reject("Error during parsing: " + error);
             }
             );
         // #endregion   
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1411,7 +1411,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.PKCS8ShroudedKeyBag.prototype.fromSchema =
     function(schema)
@@ -1439,7 +1439,7 @@ function(in_window)
         this.encryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["encryptionAlgorithm"] });
         this.encryptedData = asn1.result["encryptedData"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.PKCS8ShroudedKeyBag.prototype.toSchema =
     function()
@@ -1452,7 +1452,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.PKCS8ShroudedKeyBag.prototype.toJSON =
     function()
@@ -1461,7 +1461,7 @@ function(in_window)
             encryptionAlgorithm: this.encryptionAlgorithm.toJSON(),
             encryptedData: this.encryptedData.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.PKCS8ShroudedKeyBag.prototype.parseInternalValues =
     function(parameters)
@@ -1486,7 +1486,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -1497,26 +1497,26 @@ function(in_window)
             {
                 var asn1 = in_window.org.pkijs.fromBER(result);
                 if(asn1.offset == (-1))
-                    return new Promise(function(resolve, reject) { reject("Error during parsing ASN.1 data"); });
+                    return Promise.reject("Error during parsing ASN.1 data");
 
                 _this.parsedValue = new in_window.org.pkijs.simpl.PKCS8({ schema: asn1.result });
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.PKCS8ShroudedKeyBag.prototype.makeInternalValues =
     function(parameters)
     {
         // #region Check that we do have "parsedValue" 
         if(("parsedValue" in this) == false)
-            return new Promise(function(resolve, reject) { reject("Please initialize \"parsedValue\" first"); });
+            return Promise.reject("Please initialize \"parsedValue\" first");
         // #endregion 
 
         // #region Initial variables 
@@ -1536,7 +1536,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -1552,7 +1552,7 @@ function(in_window)
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1584,7 +1584,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CertBag.prototype.fromSchema =
     function(schema)
@@ -1621,7 +1621,7 @@ function(in_window)
                 throw new Error("Incorrect \"certId\" value in CertBag: " + this.certId);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CertBag.prototype.toSchema =
     function()
@@ -1646,7 +1646,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CertBag.prototype.toJSON =
     function()
@@ -1655,7 +1655,7 @@ function(in_window)
             certId: this.certId,
             certValue: this.certValue.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1688,7 +1688,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CRLBag.prototype.fromSchema =
     function(schema)
@@ -1724,7 +1724,7 @@ function(in_window)
                 throw new Error("Incorrect \"certId\" value in CertBag: " + this.certId);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CRLBag.prototype.toSchema =
     function()
@@ -1749,7 +1749,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.CRLBag.prototype.toJSON =
     function()
@@ -1758,7 +1758,7 @@ function(in_window)
             crlId: this.crlId,
             crlValue: this.crlValue.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1786,7 +1786,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SecretBag.prototype.fromSchema =
     function(schema)
@@ -1810,7 +1810,7 @@ function(in_window)
         this.secretTypeId = asn1.result.secretTypeId.value_block.toString();
         this.secretValue = asn1.result["secretValue"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SecretBag.prototype.toSchema =
     function()
@@ -1829,7 +1829,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SecretBag.prototype.toJSON =
     function()
@@ -1838,7 +1838,7 @@ function(in_window)
             secretTypeId: this.secretTypeId,
             secretValue: this.secretValue.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1870,7 +1870,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeBag.prototype.fromSchema =
     function(schema)
@@ -1926,7 +1926,7 @@ function(in_window)
                 this.bagAttributes.push(new in_window.org.pkijs.simpl.cms.Attribute({ schema: (asn1.result["bagAttributes"])[i] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeBag.prototype.toSchema =
     function()
@@ -1959,7 +1959,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeBag.prototype.toJSON =
     function()
@@ -1978,7 +1978,7 @@ function(in_window)
         }
 
         return output;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2010,7 +2010,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeContents.prototype.fromSchema =
     function(schema)
@@ -2033,7 +2033,7 @@ function(in_window)
         for(var i = 0; i < asn1.result["safeBags"].length; i++)
             this.safeBags.push(new in_window.org.pkijs.simpl.pkcs12.SafeBag({ schema: (asn1.result["safeBags"])[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeContents.prototype.toSchema =
     function()
@@ -2048,7 +2048,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.pkcs12.SafeContents.prototype.toJSON =
     function()
@@ -2061,7 +2061,7 @@ function(in_window)
             output.safeBags.push(this.safeBags[i].toJSON());
 
         return output;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************

@@ -113,20 +113,20 @@ function(in_window)
             case "SHA-512":
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unknown hash function: " + hashFunction); });
+                return Promise.reject("Unknown hash function: " + hashFunction);
         }
 
         if((Zbuffer instanceof ArrayBuffer) === false)
-            return new Promise(function(resolve, reject) { reject("Please set \"Zbuffer\" as \"ArrayBuffer\""); });
+            return Promise.reject("Please set \"Zbuffer\" as \"ArrayBuffer\"");
 
         if(Zbuffer.byteLength === 0)
-            return new Promise(function(resolve, reject) { reject("\"Zbuffer\" has zero length, error"); });
+            return Promise.reject("\"Zbuffer\" has zero length, error");
 
         if((SharedInfo instanceof ArrayBuffer) === false)
-            return new Promise(function(resolve, reject) { reject("Please set \"SharedInfo\" as \"ArrayBuffer\""); });
+            return Promise.reject("Please set \"SharedInfo\" as \"ArrayBuffer\"");
 
         if(Counter > 255)
-            return new Promise(function(resolve, reject) { reject("Please set \"Counter\" variable to value less or equal to 255"); });
+            return Promise.reject("Please set \"Counter\" variable to value less or equal to 255");
         // #endregion   
 
         // #region Initial variables 
@@ -143,7 +143,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Create a combined ArrayBuffer for digesting 
@@ -167,7 +167,7 @@ function(in_window)
         }
         );
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.kdf =
     function(hashFunction, Zbuffer, keydatalen, SharedInfo)
@@ -201,17 +201,17 @@ function(in_window)
                 hashLength = 512; // In bits
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unknown hash function: " + hashFunction); });
+                return Promise.reject("Unknown hash function: " + hashFunction);
         }
 
         if((Zbuffer instanceof ArrayBuffer) === false)
-            return new Promise(function(resolve, reject) { reject("Please set \"Zbuffer\" as \"ArrayBuffer\""); });
+            return Promise.reject("Please set \"Zbuffer\" as \"ArrayBuffer\"");
 
         if(Zbuffer.byteLength === 0)
-            return new Promise(function(resolve, reject) { reject("\"Zbuffer\" has zero length, error"); });
+            return Promise.reject("\"Zbuffer\" has zero length, error");
 
         if((SharedInfo instanceof ArrayBuffer) === false)
-            return new Promise(function(resolve, reject) { reject("Please set \"SharedInfo\" as \"ArrayBuffer\""); });
+            return Promise.reject("Please set \"SharedInfo\" as \"ArrayBuffer\"");
         // #endregion   
 
         // #region Calculated maximum value of "Counter" variable 
@@ -281,11 +281,11 @@ function(in_window)
         },
         function(error)
         {
-            return new Promise(function(resolve, reject) { reject(error); });
+            return Promise.reject(error);
         }
         );
         // #endregion 
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -313,7 +313,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CONTENT_INFO.prototype.fromSchema =
     function(schema)
@@ -332,7 +332,7 @@ function(in_window)
         this.contentType = asn1.result["contentType"].value_block.toString();
         this.content = asn1.result["content"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CONTENT_INFO.prototype.toSchema =
     function()
@@ -351,7 +351,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CONTENT_INFO.prototype.toJSON =
     function()
@@ -364,7 +364,7 @@ function(in_window)
             _object.content = this.content.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -392,7 +392,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherCertificateFormat.prototype.fromSchema =
     function(schema)
@@ -411,7 +411,7 @@ function(in_window)
         this.otherCertFormat = asn1.result["otherCertFormat"].value_block.toString();
         this.otherCert = asn1.result["otherCert"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherCertificateFormat.prototype.toSchema =
     function()
@@ -424,7 +424,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherCertificateFormat.prototype.toJSON =
     function()
@@ -437,7 +437,7 @@ function(in_window)
             _object.otherCert = this.otherCert.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -465,7 +465,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRevocationInfoFormat.prototype.fromSchema =
     function(schema)
@@ -484,7 +484,7 @@ function(in_window)
         this.otherRevInfoFormat = asn1.result["otherRevInfoFormat"].value_block.toString();
         this.otherRevInfo = asn1.result["otherRevInfo"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRevocationInfoFormat.prototype.toSchema =
     function()
@@ -497,7 +497,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRevocationInfoFormat.prototype.toJSON =
     function()
@@ -510,7 +510,7 @@ function(in_window)
             _object.otherRevInfo = this.otherRevInfo.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -536,7 +536,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CERTIFICATE_SET.prototype.fromSchema =
     function(schema)
@@ -556,13 +556,13 @@ function(in_window)
 
         for(var i = 0; i < certificates_array; i++)
         {
-            if(certificates_array.id_block.tag_class === 1)
+            if(certificates_array[i].id_block.tag_class === 1)
                 this.certificates.push(new in_window.org.pkijs.simpl.CERT({ schema: certificates_array[i] }));
             else
                 this.certificates.push(certificates_array[i]);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CERTIFICATE_SET.prototype.toSchema =
     function()
@@ -584,7 +584,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_CERTIFICATE_SET.prototype.toJSON =
     function()
@@ -596,7 +596,7 @@ function(in_window)
             _object.certificates.push(this.certificates[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -622,7 +622,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES.prototype.fromSchema =
     function(schema)
@@ -648,7 +648,7 @@ function(in_window)
                 this.crls.push(crls_array[i]);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES.prototype.toSchema =
     function()
@@ -670,7 +670,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES.prototype.toJSON =
     function()
@@ -682,7 +682,7 @@ function(in_window)
             _object.crls.push(this.crls[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -710,7 +710,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.IssuerAndSerialNumber.prototype.fromSchema =
     function(schema)
@@ -738,7 +738,7 @@ function(in_window)
         this.issuer = new in_window.org.pkijs.simpl.RDN({ schema: asn1.result["issuer"] });
         this.serialNumber = asn1.result["serialNumber"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.IssuerAndSerialNumber.prototype.toSchema =
     function()
@@ -751,7 +751,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.IssuerAndSerialNumber.prototype.toJSON =
     function()
@@ -760,7 +760,7 @@ function(in_window)
             issuer: this.issuer.toJSON(),
             serialNumber: this.serialNumber.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -790,7 +790,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.Attribute.prototype.fromSchema =
     function(schema)
@@ -848,7 +848,7 @@ function(in_window)
         }
         // #endregion   
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.Attribute.prototype.toSchema =
     function()
@@ -863,7 +863,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.Attribute.prototype.toJSON =
     function()
@@ -877,7 +877,7 @@ function(in_window)
             _object.attrValues.push(this.attrValues[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -912,7 +912,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RSAES_OAEP_params.prototype.fromSchema =
     function(schema)
@@ -955,7 +955,7 @@ function(in_window)
         if("pSourceAlgorithm" in asn1.result)
             this.pSourceAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["pSourceAlgorithm"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RSAES_OAEP_params.prototype.toSchema =
     function()
@@ -996,7 +996,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RSAES_OAEP_params.prototype.toJSON =
     function()
@@ -1013,7 +1013,7 @@ function(in_window)
             _object.pSourceAlgorithm = this.pSourceAlgorithm.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1049,7 +1049,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBKDF2_params.prototype.fromSchema =
     function(schema)
@@ -1091,7 +1091,7 @@ function(in_window)
         if("prf" in asn1.result)
             this.prf = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["prf"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBKDF2_params.prototype.toSchema =
     function()
@@ -1114,7 +1114,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBKDF2_params.prototype.toJSON =
     function()
@@ -1131,7 +1131,7 @@ function(in_window)
             _object.prf = this.prf.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1159,7 +1159,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBES2_params.prototype.fromSchema =
     function(schema)
@@ -1191,7 +1191,7 @@ function(in_window)
         this.keyDerivationFunc = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["keyDerivationFunc"] });
         this.encryptionScheme = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["encryptionScheme"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBES2_params.prototype.toSchema =
     function()
@@ -1204,7 +1204,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PBES2_params.prototype.toJSON =
     function()
@@ -1213,7 +1213,7 @@ function(in_window)
             keyDerivationFunc: this.keyDerivationFunc.toJSON(),
             encryptionScheme: this.encryptionScheme.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1242,7 +1242,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes.prototype.fromSchema =
     function(schema)
@@ -1283,7 +1283,7 @@ function(in_window)
         for(var i = 0; i < attributes_array.length; i++)
             this.attributes.push(new in_window.org.pkijs.simpl.cms.Attribute({ schema: attributes_array[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes.prototype.toSchema =
     function()
@@ -1305,7 +1305,7 @@ function(in_window)
             value: attributes_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.SignedUnsignedAttributes.prototype.toJSON =
     function()
@@ -1319,7 +1319,7 @@ function(in_window)
             _object.attributes.push(this.attributes[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1359,7 +1359,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNER_INFO.prototype.fromSchema =
     function(schema)
@@ -1395,7 +1395,7 @@ function(in_window)
             this.unsignedAttrs.fromSchema(asn1.result["SignerInfo.unsignedAttrs"]);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNER_INFO.prototype.toSchema =
     function()
@@ -1424,7 +1424,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNER_INFO.prototype.toJSON =
     function()
@@ -1448,7 +1448,7 @@ function(in_window)
             _object.unsignedAttrs = this.unsignedAttrs.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1513,7 +1513,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncapsulatedContentInfo.prototype.fromSchema =
     function(schema)
@@ -1538,7 +1538,7 @@ function(in_window)
         if("eContent" in asn1.result)
             this.eContent = asn1.result["eContent"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncapsulatedContentInfo.prototype.toSchema =
     function()
@@ -1563,7 +1563,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncapsulatedContentInfo.prototype.toJSON =
     function()
@@ -1576,7 +1576,7 @@ function(in_window)
             _object.eContent = this.eContent.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -1614,7 +1614,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.fromSchema =
     function(schema)
@@ -1688,7 +1688,7 @@ function(in_window)
         for(var j = 0; j < signer_infos.length; j++)
             this.signerInfos.push(new in_window.org.pkijs.simpl.CMS_SIGNER_INFO({ schema: signer_infos[j] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.toSchema =
     function(encodeFlag)
@@ -1790,7 +1790,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.verify =
     function()
@@ -1819,14 +1819,17 @@ function(in_window)
         var checkDate = new Date();
 
         var checkChain = true;
+        var includeSignerCertificate = false;
 
         var _this = this;
+
+        var extendedMode = false;
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Get a signer number
@@ -1846,15 +1849,49 @@ function(in_window)
 
             if("checkChain" in arguments[0])
                 checkChain = arguments[0].checkChain;
+
+            if("includeSignerCertificate" in arguments[0])
+                includeSignerCertificate = arguments[0].includeSignerCertificate;
+
+            if("extendedMode" in arguments[0])
+                extendedMode = arguments[0].extendedMode;
         }
 
         if(signerIndex === (-1))
-            return new Promise(function(resolve, reject) { reject("Unable to get signer index from input parameters"); });
+        {
+            if(extendedMode)
+            {
+                return Promise.reject({
+                    date: checkDate,
+                    code: 1,
+                    message: "Unable to get signer index from input parameters",
+                    signatureVerified: null,
+                    signerCertificate: null,
+                    signerCertificateVerified: null
+                });
+            }
+
+            return Promise.reject("Unable to get signer index from input parameters");
+        }
         // #endregion 
 
         // #region Check that certificates field was included in signed data 
         if(("certificates" in this) === false)
-            return new Promise(function(resolve, reject) { reject("No certificates attached to this signed data"); });
+        {
+            if(extendedMode)
+            {
+                return Promise.reject({
+                    date: checkDate,
+                    code: 2,
+                    message: "No certificates attached to this signed data",
+                    signatureVerified: null,
+                    signerCertificate: null,
+                    signerCertificateVerified: null
+                });
+            }
+
+            return Promise.reject("No certificates attached to this signed data");
+        }
         // #endregion 
 
         // #region Find a certificate for specified signer 
@@ -1872,11 +1909,23 @@ function(in_window)
                            (certificates[i].serialNumber.isEqual(signerInfos[signerIndex].sid.serialNumber)))
                         {
                             signer_cert = certificates[i];
-                            return new Promise(function(resolve, reject) { resolve(); });
+                            return Promise.resolve();
                         }
                     }
 
-                    return new Promise(function(resolve, reject) { reject("Unable to find signer certificate"); });
+                    if(extendedMode)
+                    {
+                        return Promise.reject({
+                            date: checkDate,
+                            code: 3,
+                            message: "Unable to find signer certificate",
+                            signatureVerified: null,
+                            signerCertificate: null,
+                            signerCertificateVerified: null
+                        });
+                    }
+
+                    return Promise.reject("Unable to find signer certificate");
                 }
                 );
         }
@@ -1906,20 +1955,98 @@ function(in_window)
                                 if(in_window.org.pkijs.isEqual_buffer(results[i], signerInfos[signerIndex].sid.value_block.value_hex))
                                 {
                                     signer_cert = certificates[i];
-                                    return new Promise(function(resolve, reject) { resolve(); });
+                                    return Promise.resolve();
                                 }
                             }
 
-                            return new Promise(function(resolve, reject) { reject("Unable to find signer certificate"); });
+                            if(extendedMode)
+                            {
+                                return Promise.reject({
+                                    date: checkDate,
+                                    code: 3,
+                                    message: "Unable to find signer certificate",
+                                    signatureVerified: null,
+                                    signerCertificate: null,
+                                    signerCertificateVerified: null
+                                });
+                            }
+
+                            return Promise.reject("Unable to find signer certificate");
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject("Unable to find signer certificate"); });
+                            if(extendedMode)
+                            {
+                                return Promise.reject({
+                                    date: checkDate,
+                                    code: 3,
+                                    message: "Unable to find signer certificate",
+                                    signatureVerified: null,
+                                    signerCertificate: null,
+                                    signerCertificateVerified: null
+                                });
+                            }
+
+                            return Promise.reject("Unable to find signer certificate");
                         }
                         );
                 }
                 );
         }
+        // #endregion 
+
+        // #region Verify internal digest in case of "tSTInfo" content type 
+        sequence = sequence.then(
+            function()
+            {
+                if(encapContentInfo.eContentType == "1.2.840.113549.1.9.16.1.4")
+                {
+                    // #region Check "eContent" precense
+                    if(("eContent" in encapContentInfo) == false)
+                        return false;
+                    // #endregion 
+
+                    // #region Initialize TST_INFO value
+                    var asn1 = in_window.org.pkijs.fromBER(encapContentInfo.eContent.value_block.value_hex);
+                    var tstInfo;
+
+                    try
+                    {
+                        tstInfo = new in_window.org.pkijs.simpl.TST_INFO({ schema: asn1.result });
+                    }
+                    catch(ex)
+                    {
+                        return false;
+                    }
+                    // #endregion 
+
+                    // #region Check that we do have detached data content
+                    if(data.byteLength === 0)
+                    {
+                        if(extendedMode)
+                        {
+                            return Promise.reject({
+                                date: checkDate,
+                                code: 4,
+                                message: "Missed detached data input array",
+                                signatureVerified: null,
+                                signerCertificate: signer_cert,
+                                signerCertificateVerified: null
+                            });
+                        }
+
+                        return Promise.reject("Missed detached data input array");
+                    }
+                    // #endregion 
+
+                    return tstInfo.verify({ data: data });
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            );
         // #endregion 
 
         // #region Make additional verification for signer's certificate 
@@ -1967,6 +2094,11 @@ function(in_window)
             sequence = sequence.then(
                 function(result)
                 {
+                    // #region Veify result of previous operation 
+                    if(result == false)
+                        return false;
+                    // #endregion 
+
                     return Promise.all(checkCA_promises).then(
                         function(promiseResults)
                         {
@@ -2010,19 +2142,57 @@ function(in_window)
                                 function(result)
                                 {
                                     if(result.result === true)
-                                        return new Promise(function(resolve, reject) { resolve(); });
+                                        return Promise.resolve(true);
                                     else
-                                        return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed"); });
+                                    {
+                                        if(extendedMode)
+                                        {
+                                            return Promise.reject({
+                                                date: checkDate,
+                                                code: 5,
+                                                message: "Validation of signer's certificate failed",
+                                                signatureVerified: null,
+                                                signerCertificate: signer_cert,
+                                                signerCertificateVerified: false
+                                            });
+                                        }
+
+                                        return Promise.reject("Validation of signer's certificate failed");
+                                    }
                                 },
                                 function(error)
                                 {
-                                    return new Promise(function(resolve, reject) { reject("Validation of signer's certificate failed with error: " + ((error instanceof Object) ? error.result_message : error)); });
+                                    if(extendedMode)
+                                    {
+                                        return Promise.reject({
+                                            date: checkDate,
+                                            code: 5,
+                                            message: "Validation of signer's certificate failed with error: " + ((error instanceof Object) ? error.result_message : error),
+                                            signatureVerified: null,
+                                            signerCertificate: signer_cert,
+                                            signerCertificateVerified: false
+                                        });
+                                    }
+
+                                    return Promise.reject("Validation of signer's certificate failed with error: " + ((error instanceof Object) ? error.result_message : error));
                                 }
                                 );
                         },
                         function(promiseError)
                         {
-                            return new Promise(function(resolve, reject) { reject("Error during checking certificates for CA flag: " + promiseError); });
+                            if(extendedMode)
+                            {
+                                return Promise.reject({
+                                    date: checkDate,
+                                    code: 6,
+                                    message: "Error during checking certificates for CA flag: " + promiseError,
+                                    signatureVerified: null,
+                                    signerCertificate: signer_cert,
+                                    signerCertificateVerified: null
+                                });
+                            }
+
+                            return Promise.reject("Error during checking certificates for CA flag: " + promiseError);
                         }
                         );
                 }
@@ -2032,53 +2202,32 @@ function(in_window)
 
         // #region Find signer's hashing algorithm 
         sequence = sequence.then(
-            function()
+            function(result)
             {
-                var shaAlgorithm= in_window.org.pkijs.getAlgorithmByOID(signerInfos[signerIndex].digestAlgorithm.algorithm_id);
+                // #region Veify result of previous operation 
+                if(result == false)
+                    return false;
+                // #endregion 
+
+                var shaAlgorithm = in_window.org.pkijs.getAlgorithmByOID(signerInfos[signerIndex].digestAlgorithm.algorithm_id);
                 if(("name" in shaAlgorithm) === false)
-                    return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + _this.signerInfos[signerIndex].digestAlgorithm.algorithm_id); });
+                {
+                    if(extendedMode)
+                    {
+                        return Promise.reject({
+                            date: checkDate,
+                            code: 7,
+                            message: "Error during checking certificates for CA flag: " + promiseError,
+                            signatureVerified: null,
+                            signerCertificate: signer_cert,
+                            signerCertificateVerified: true
+                        });
+                    }
+
+                    return Promise.reject("Unsupported signature algorithm: " + _this.signerInfos[signerIndex].digestAlgorithm.algorithm_id);
+                }
 
                 sha_algorithm = shaAlgorithm.name;
-            }
-            );
-        // #endregion 
-
-        // #region Verify internal digest in case of "tSTInfo" content type 
-        sequence = sequence.then(
-            function()
-            {
-                if(encapContentInfo.eContentType == "1.2.840.113549.1.9.16.1.4")
-                {
-                    // #region Check "eContent" precense
-                    if(("eContent" in encapContentInfo) == false)
-                        return false;
-                    // #endregion 
-
-                    // #region Initialize TST_INFO value
-                    var asn1 = in_window.org.pkijs.fromBER(encapContentInfo.eContent.value_block.value_hex);
-                    var tstInfo;
-
-                    try
-                    {
-                        tstInfo = new in_window.org.pkijs.simpl.TST_INFO({ schema: asn1.result });
-                    }
-                    catch(ex)
-                    {
-                        return false;
-                    }
-                    // #endregion 
-
-                    // #region Check that we do have detached data content 
-                    if(data.byteLength === 0)
-                        return new Promise(function(resolve, reject) { reject("Missed detached data input array"); });
-                    // #endregion 
-
-                    return tstInfo.verify({ data: data });
-                }
-                else
-                {
-                    return true;
-                }
             }
             );
         // #endregion 
@@ -2111,7 +2260,21 @@ function(in_window)
                 else // Detached data
                 {
                     if(data.byteLength === 0) // Check that "data" already provided by function parameter
-                        return new Promise(function(resolve, reject) { reject("Missed detached data input array"); });
+                    {
+                        if(extendedMode)
+                        {
+                            return Promise.reject({
+                                date: checkDate,
+                                code: 8,
+                                message: "Missed detached data input array",
+                                signatureVerified: null,
+                                signerCertificate: signer_cert,
+                                signerCertificateVerified: true
+                            });
+                        }
+
+                        return Promise.reject("Missed detached data input array");
+                    }
                 }
 
                 if("signedAttrs" in signerInfos[signerIndex])
@@ -2142,10 +2305,38 @@ function(in_window)
                     }
 
                     if(foundContentType == false)
-                        return new Promise(function(resolve, reject) { reject("Attribute \"content-type\" is a mandatory attribute for \"signed attributes\""); });
+                    {
+                        if(extendedMode)
+                        {
+                            return Promise.reject({
+                                date: checkDate,
+                                code: 9,
+                                message: "Attribute \"content-type\" is a mandatory attribute for \"signed attributes\"",
+                                signatureVerified: null,
+                                signerCertificate: signer_cert,
+                                signerCertificateVerified: true
+                            });
+                        }
+
+                        return Promise.reject("Attribute \"content-type\" is a mandatory attribute for \"signed attributes\"");
+                    }
 
                     if(foundMessageDigest == false)
-                        return new Promise(function(resolve, reject) { reject("Attribute \"message-digest\" is a mandatory attribute for \"signed attributes\""); });
+                    {
+                        if(extendedMode)
+                        {
+                            return Promise.reject({
+                                date: checkDate,
+                                code: 10,
+                                message: "Attribute \"message-digest\" is a mandatory attribute for \"signed attributes\"",
+                                signatureVerified: null,
+                                signerCertificate: signer_cert,
+                                signerCertificateVerified: true
+                            });
+                        }
+
+                        return Promise.reject("Attribute \"message-digest\" is a mandatory attribute for \"signed attributes\"");
+                    }
                     // #endregion 
                 }
 
@@ -2166,7 +2357,21 @@ function(in_window)
                 // #region Get information about public key algorithm and default parameters for import
                 var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(signer_cert.signatureAlgorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
-                    return new Promise(function(resolve, reject) { reject("Unsupported public key algorithm: " + signer_cert.signatureAlgorithm.algorithm_id); });
+                {
+                    if(extendedMode)
+                    {
+                        return Promise.reject({
+                            date: checkDate,
+                            code: 11,
+                            message: "Unsupported public key algorithm: " + signer_cert.signatureAlgorithm.algorithm_id,
+                            signatureVerified: null,
+                            signerCertificate: signer_cert,
+                            signerCertificateVerified: true
+                        });
+                    }
+
+                    return Promise.reject("Unsupported public key algorithm: " + signer_cert.signatureAlgorithm.algorithm_id);
+                }
 
                 var algorithm_name = algorithmObject.name;
 
@@ -2249,7 +2454,19 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject(ex); });
+                        if(extendedMode)
+                        {
+                            return Promise.reject({
+                                date: checkDate,
+                                code: 12,
+                                message: ex,
+                                signatureVerified: null,
+                                signerCertificate: signer_cert,
+                                signerCertificateVerified: true
+                            });
+                        }
+
+                        return Promise.reject(ex);
                     }
 
                     if("saltLength" in pssParameters)
@@ -2263,7 +2480,21 @@ function(in_window)
                     {
                         var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithm_id);
                         if(("name" in hashAlgorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id); });
+                        {
+                            if(extendedMode)
+                            {
+                                return Promise.reject({
+                                    date: checkDate,
+                                    code: 13,
+                                    message: "Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id,
+                                    signatureVerified: null,
+                                    signerCertificate: signer_cert,
+                                    signerCertificateVerified: true
+                                });
+                            }
+
+                            return Promise.reject("Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithm_id);
+                        }
 
                         hash_algo = hashAlgorithm.name;
                     }
@@ -2286,16 +2517,54 @@ function(in_window)
                     publicKey,
                     new Uint8Array(signature_value),
                     new Uint8Array(data));
+            }
+            );
+        // #endregion 
+
+        // #region Make a final result 
+        sequence = sequence.then(
+            function(result)
+            {
+                if(extendedMode)
+                {
+                    return {
+                        date: checkDate,
+                        code: 14,
+                        message: "",
+                        signatureVerified: result,
+                        signerCertificate: signer_cert,
+                        signerCertificateVerified: true
+                    };
+                }
+
+                return result;
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                if(extendedMode)
+                {
+                    if("code" in error)
+                        return Promise.reject(error);
+                    else
+                    {
+                        return Promise.reject({
+                            date: checkDate,
+                            code: 15,
+                            message: "Error during verification: " + error.message,
+                            signatureVerified: null,
+                            signerCertificate: signer_cert,
+                            signerCertificateVerified: true
+                        });
+                    }
+                }
+
+                return Promise.reject(error);
             }
             );
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.sign =
     function(privateKey, signerIndex, hashAlgorithm, data)
@@ -2313,7 +2582,7 @@ function(in_window)
 
         // #region Get a private key from function parameter 
         if(typeof privateKey === "undefined")
-            return new Promise(function(resolve, reject) { reject("Need to provide a private key for signing"); });
+            return Promise.reject("Need to provide a private key for signing");
         // #endregion 
 
         // #region Get hashing algorithm 
@@ -2323,7 +2592,7 @@ function(in_window)
         // #region Simple check for supported algorithm 
         hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
         if(hashAlgorithmOID === "")
-            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+            return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
         // #endregion 
         // #endregion 
 
@@ -2390,7 +2659,7 @@ function(in_window)
                     {
                         hashAlgorithmOID = in_window.org.pkijs.getOIDByAlgorithm({ name: hashAlgorithm });
                         if(hashAlgorithmOID === "")
-                            return new Promise(function(resolve, reject) { reject("Unsupported hash algorithm: " + hashAlgorithm); });
+                            return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
 
                         paramsObject.hashAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({
                             algorithm_id: hashAlgorithmOID,
@@ -2418,7 +2687,7 @@ function(in_window)
                 }
                 break;
             default:
-                return new Promise(function(resolve, reject) { reject("Unsupported signature algorithm: " + privateKey.algorithm.name); });
+                return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
         }
         // #endregion 
 
@@ -2458,7 +2727,7 @@ function(in_window)
             else // Detached data
             {
                 if(data.byteLength === 0) // Check that "data" already provided by function parameter
-                    return new Promise(function(resolve, reject) { reject("Missed detached data input array"); });
+                    return Promise.reject("Missed detached data input array");
             }
         }
         // #endregion 
@@ -2466,7 +2735,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Signing TBS data on provided private key 
@@ -2481,15 +2750,15 @@ function(in_window)
                 // #endregion 
 
                 _this.signerInfos[signerIndex].signature = new in_window.org.pkijs.asn1.OCTETSTRING({ value_hex: result });
-                return new Promise(function(resolve, reject) { resolve(result); });
+                return Promise.resolve(result);
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Signing error: " + error); });
+                return Promise.reject("Signing error: " + error);
             }
             );
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_SIGNED_DATA.prototype.toJSON =
     function()
@@ -2527,7 +2796,7 @@ function(in_window)
             _object.signerInfos.push(this.signerInfos[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2560,7 +2829,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.ECC_CMS_SharedInfo.prototype.fromSchema =
     function(schema)
@@ -2593,7 +2862,7 @@ function(in_window)
 
         this.suppPubInfo = asn1.result["suppPubInfo"].value_block.value[0];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.ECC_CMS_SharedInfo.prototype.toSchema =
     function()
@@ -2628,7 +2897,7 @@ function(in_window)
             value: output_array
         });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.ECC_CMS_SharedInfo.prototype.toJSON =
     function()
@@ -2643,7 +2912,7 @@ function(in_window)
         _object.suppPubInfo = this.suppPubInfo.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2673,7 +2942,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientIdentifier.prototype.fromSchema =
     function(schema)
@@ -2704,7 +2973,7 @@ function(in_window)
             this.value = asn1.result["block_name"].value_block.value[0];
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientIdentifier.prototype.toSchema =
     function()
@@ -2730,7 +2999,7 @@ function(in_window)
         // #endregion 
 
         return new in_window.org.pkijs.asn1.ANY();
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientIdentifier.prototype.toJSON =
     function()
@@ -2743,7 +3012,7 @@ function(in_window)
             _object.value = this.value.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2779,7 +3048,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyTransRecipientInfo.prototype.fromSchema =
     function(schema)
@@ -2820,7 +3089,7 @@ function(in_window)
         this.keyEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["keyEncryptionAlgorithm"] });
         this.encryptedKey = asn1.result["encryptedKey"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyTransRecipientInfo.prototype.toSchema =
     function()
@@ -2858,7 +3127,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyTransRecipientInfo.prototype.toJSON =
     function()
@@ -2869,7 +3138,7 @@ function(in_window)
             keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
             encryptedKey: this.encryptedKey.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2897,7 +3166,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorPublicKey.prototype.fromSchema =
     function(schema)
@@ -2925,7 +3194,7 @@ function(in_window)
         this.algorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["algorithm"] });
         this.publicKey = asn1.result["publicKey"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorPublicKey.prototype.toSchema =
     function()
@@ -2938,7 +3207,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorPublicKey.prototype.toJSON =
     function()
@@ -2947,7 +3216,7 @@ function(in_window)
             algorithm: this.algorithm.toJSON(),
             publicKey: this.publicKey.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -2977,7 +3246,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorIdentifierOrKey.prototype.fromSchema =
     function(schema)
@@ -3026,7 +3295,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorIdentifierOrKey.prototype.toSchema =
     function()
@@ -3061,7 +3330,7 @@ function(in_window)
         // #endregion 
 
         return new in_window.org.pkijs.asn1.ANY();
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorIdentifierOrKey.prototype.toJSON =
     function()
@@ -3074,7 +3343,7 @@ function(in_window)
             _object.value = this.value.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3104,7 +3373,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherKeyAttribute.prototype.fromSchema =
     function(schema)
@@ -3130,7 +3399,7 @@ function(in_window)
         if("keyAttr" in asn1.result)
             this.keyAttr = asn1.result["keyAttr"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherKeyAttribute.prototype.toSchema =
     function()
@@ -3149,7 +3418,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherKeyAttribute.prototype.toJSON =
     function()
@@ -3162,7 +3431,7 @@ function(in_window)
             _object.keyAttr = this.keyAttr.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3196,7 +3465,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientKeyIdentifier.prototype.fromSchema =
     function(schema)
@@ -3230,7 +3499,7 @@ function(in_window)
         if("other" in asn1.result)
             this.other = new in_window.org.pkijs.simpl.cms.OtherKeyAttribute({ schema: asn1.result["other"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientKeyIdentifier.prototype.toSchema =
     function()
@@ -3252,7 +3521,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientKeyIdentifier.prototype.toJSON =
     function()
@@ -3268,7 +3537,7 @@ function(in_window)
             _object.other = this.other.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3298,7 +3567,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientIdentifier.prototype.fromSchema =
     function(schema)
@@ -3333,7 +3602,7 @@ function(in_window)
             this.value = new in_window.org.pkijs.simpl.cms.RecipientKeyIdentifier({ schema: asn1.result["block_name"] });
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientIdentifier.prototype.toSchema =
     function()
@@ -3359,7 +3628,7 @@ function(in_window)
         // #endregion 
 
         return new in_window.org.pkijs.asn1.ANY();
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientIdentifier.prototype.toJSON =
     function()
@@ -3372,7 +3641,7 @@ function(in_window)
             _object.value = this.value.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3400,7 +3669,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKey.prototype.fromSchema =
     function(schema)
@@ -3428,7 +3697,7 @@ function(in_window)
         this.rid = new in_window.org.pkijs.simpl.cms.KeyAgreeRecipientIdentifier({ schema: asn1.result["rid"] });
         this.encryptedKey = asn1.result["encryptedKey"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKey.prototype.toSchema =
     function()
@@ -3441,7 +3710,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKey.prototype.toJSON =
     function()
@@ -3450,7 +3719,7 @@ function(in_window)
             rid: this.rid.toJSON(),
             encryptedKey: this.encryptedKey.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3476,7 +3745,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKeys.prototype.fromSchema =
     function(schema)
@@ -3501,7 +3770,7 @@ function(in_window)
         for(var i = 0; i < array.length; i++)
             this.encryptedKeys.push(new in_window.org.pkijs.simpl.cms.RecipientEncryptedKey({ schema: array[i] }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKeys.prototype.toSchema =
     function()
@@ -3518,7 +3787,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.RecipientEncryptedKeys.prototype.toJSON =
     function()
@@ -3531,7 +3800,7 @@ function(in_window)
             _object.encryptedKeys.push(this.encryptedKeys[i].toJSON());
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3572,7 +3841,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientInfo.prototype.fromSchema =
     function(schema)
@@ -3617,7 +3886,7 @@ function(in_window)
         this.keyEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["keyEncryptionAlgorithm"] });
         this.recipientEncryptedKeys = new in_window.org.pkijs.simpl.cms.RecipientEncryptedKeys({ schema: asn1.result["recipientEncryptedKeys"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientInfo.prototype.toSchema =
     function()
@@ -3655,7 +3924,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientInfo.prototype.toJSON =
     function()
@@ -3667,7 +3936,7 @@ function(in_window)
             keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
             recipientEncryptedKeys: this.recipientEncryptedKeys.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3701,7 +3970,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKIdentifier.prototype.fromSchema =
     function(schema)
@@ -3733,9 +4002,9 @@ function(in_window)
             this.date = asn1.result["date"];
 
         if("other" in asn1.result)
-            this.other = new in_window.org.pkijs.simpl.cms.OtherKeyAttribute({ schema: asn1.result["other"] })
+            this.other = new in_window.org.pkijs.simpl.cms.OtherKeyAttribute({ schema: asn1.result["other"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKIdentifier.prototype.toSchema =
     function()
@@ -3757,7 +4026,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKIdentifier.prototype.toJSON =
     function()
@@ -3773,7 +4042,7 @@ function(in_window)
             _object.other = this.other.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3809,7 +4078,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKRecipientInfo.prototype.fromSchema =
     function(schema)
@@ -3845,7 +4114,7 @@ function(in_window)
         this.keyEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["keyEncryptionAlgorithm"] });
         this.encryptedKey = asn1.result["encryptedKey"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKRecipientInfo.prototype.toSchema =
     function()
@@ -3860,7 +4129,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.KEKRecipientInfo.prototype.toJSON =
     function()
@@ -3871,7 +4140,7 @@ function(in_window)
             keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
             encryptedKey: this.encryptedKey.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -3913,7 +4182,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PasswordRecipientinfo.prototype.fromSchema =
     function(schema)
@@ -3953,7 +4222,7 @@ function(in_window)
         this.keyEncryptionAlgorithm = new in_window.org.pkijs.simpl.ALGORITHM_IDENTIFIER({ schema: asn1.result["keyEncryptionAlgorithm"] });
         this.encryptedKey = asn1.result["encryptedKey"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PasswordRecipientinfo.prototype.toSchema =
     function()
@@ -3983,7 +4252,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.PasswordRecipientinfo.prototype.toJSON =
     function()
@@ -3994,7 +4263,7 @@ function(in_window)
             keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
             encryptedKey: this.encryptedKey.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -4022,7 +4291,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRecipientInfo.prototype.fromSchema =
     function(schema)
@@ -4046,7 +4315,7 @@ function(in_window)
         this.oriType = asn1.result["oriType"].value_block.toString();
         this.oriValue = asn1.result["oriValue"];
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRecipientInfo.prototype.toSchema =
     function()
@@ -4059,7 +4328,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OtherRecipientInfo.prototype.toJSON =
     function()
@@ -4072,7 +4341,7 @@ function(in_window)
             _object.oriValue = this.oriValue.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -4102,7 +4371,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_RECIPIENT_INFO.prototype.fromSchema =
     function(schema)
@@ -4158,7 +4427,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_RECIPIENT_INFO.prototype.toSchema =
     function()
@@ -4189,7 +4458,7 @@ function(in_window)
         // #endregion 
 
         return new in_window.org.pkijs.asn1.ANY();
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_RECIPIENT_INFO.prototype.toJSON =
     function()
@@ -4202,7 +4471,7 @@ function(in_window)
             _object.value = this.value.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -4230,7 +4499,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorInfo.prototype.fromSchema =
     function(schema)
@@ -4261,7 +4530,7 @@ function(in_window)
 
         this.crls = new in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES({ schema: asn1.result["crls"] });
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorInfo.prototype.toSchema =
     function()
@@ -4288,7 +4557,7 @@ function(in_window)
             ]
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.OriginatorInfo.prototype.toJSON =
     function()
@@ -4297,7 +4566,7 @@ function(in_window)
             certs: this.certs.toJSON(),
             crls: this.crls.toJSON()
         };
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -4365,7 +4634,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncryptedContentInfo.prototype.fromSchema =
     function(schema)
@@ -4402,7 +4671,7 @@ function(in_window)
             this.encryptedContent.id_block.tag_number = 4; // OCTETSTRING (!!!) The value still has instance of "in_window.org.pkijs.asn1.ASN1_CONSTRUCTED / ASN1_PRIMITIVE"
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncryptedContentInfo.prototype.toSchema =
     function()
@@ -4438,7 +4707,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.cms.EncryptedContentInfo.prototype.toJSON =
     function()
@@ -4452,7 +4721,7 @@ function(in_window)
             _object.encryptedContent = this.encryptedContent.toJSON();
 
         return _object;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -4491,7 +4760,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.fromSchema =
     function(schema)
@@ -4545,7 +4814,7 @@ function(in_window)
                 this.unprotectedAttrs.push(new in_window.org.pkijs.simpl.ATTRIBUTE({ schema: attributes_array[j] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.toSchema =
     function()
@@ -4599,7 +4868,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.toJSON =
     function()
@@ -4627,7 +4896,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.addRecipientByCertificate =
     function(certificate, parameters, variant)
@@ -4810,7 +5079,7 @@ function(in_window)
         // #endregion 
 
         return true;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.addRecipientByPreDefinedData =
     function(preDefinedData, parameters, variant)
@@ -4975,7 +5244,7 @@ function(in_window)
                 throw new Error("Unknown value for \"variant\": " + variant);
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.encrypt =
     function(contentEncryptionAlgorithm, contentToEncrypt)
@@ -5006,13 +5275,13 @@ function(in_window)
         // #region Check for input parameters 
         var contentEncryptionOID = in_window.org.pkijs.getOIDByAlgorithm(contentEncryptionAlgorithm);
         if(contentEncryptionOID === "")
-            return new Promise(function(resolve, reject) { reject("Wrong \"contentEncryptionAlgorithm\" value"); });
+            return Promise.reject("Wrong \"contentEncryptionAlgorithm\" value");
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Generate new content encryption key 
@@ -5038,7 +5307,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -5054,7 +5323,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             ).then(
             function(result)
@@ -5065,7 +5334,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -5085,7 +5354,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -5112,7 +5381,7 @@ function(in_window)
                     var curveObject = _this.recipientInfos[index].value.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithm_params;
 
                     if((curveObject instanceof in_window.org.pkijs.asn1.OID) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"recipientCertificate\" for index " + index); });
+                        return Promise.reject("Incorrect \"recipientCertificate\" for index " + index);
 
                     var curveOID = curveObject.value_block.toString();
 
@@ -5131,14 +5400,14 @@ function(in_window)
                             recipientCurveLength = 528;
                             break;
                         default:
-                            return new Promise(function(resolve, reject) { reject("Incorrect curve OID for index " + index); });
+                            return Promise.reject("Incorrect curve OID for index " + index);
                     }
 
                     return recipientCurve;
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5155,7 +5424,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5170,7 +5439,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5192,7 +5461,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5209,7 +5478,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5222,7 +5491,7 @@ function(in_window)
 
                     var KWalgorithm = in_window.org.pkijs.getAlgorithmByOID(aesKWAlgorithm.algorithm_id);
                     if(("name" in KWalgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for key encryption algorithm: " + aesKWAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for key encryption algorithm: " + aesKWAlgorithm.algorithm_id);
                     // #endregion 
 
                     // #region Translate AES-KW length to ArrayBuffer 
@@ -5259,14 +5528,14 @@ function(in_window)
                     // #region Get SHA algorithm used together with ECDH 
                     var ecdhAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in ecdhAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for key encryption algorithm: " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for key encryption algorithm: " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return in_window.org.pkijs.simpl.cms.kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5278,7 +5547,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5290,7 +5559,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5320,7 +5589,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5344,7 +5613,7 @@ function(in_window)
 
                     var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithm_id);
                     if(("name" in hashAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for hash algorithm: " + rsaOAEPParams.hashAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for hash algorithm: " + rsaOAEPParams.hashAlgorithm.algorithm_id);
                     // #endregion 
 
                     return _this.recipientInfos[index].value.recipientCertificate.getPublicKey({
@@ -5361,7 +5630,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5373,7 +5642,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5387,7 +5656,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5409,7 +5678,7 @@ function(in_window)
                     // #region Get WebCrypto form of "keyEncryptionAlgorithm" 
                     kekAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in kekAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.importKey("raw", 
@@ -5420,7 +5689,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5433,7 +5702,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5447,7 +5716,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5468,10 +5737,10 @@ function(in_window)
                 function(result)
                 {
                     if(("keyDerivationAlgorithm" in _this.recipientInfos[index].value) === false)
-                        return new Promise(function(resolve, reject) { reject("Please append encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Please append encoded \"keyDerivationAlgorithm\"");
 
                     if(("algorithm_params" in _this.recipientInfos[index].value.keyDerivationAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
 
                     try
                     {
@@ -5479,12 +5748,12 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
                     }
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5502,7 +5771,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5513,7 +5782,7 @@ function(in_window)
                     // #region Get WebCrypto form of "keyEncryptionAlgorithm" 
                     kekAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in kekAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     // #region Get HMAC hash algorithm 
@@ -5523,7 +5792,7 @@ function(in_window)
                     {
                         var algorithm = in_window.org.pkijs.getAlgorithmByOID(pbkdf2Params.prf.algorithm_id);
                         if(("name" in algorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Incorrect OID for HMAC hash algorithm"); });
+                            return Promise.reject("Incorrect OID for HMAC hash algorithm");
 
                         hmacHashAlgorithm = algorithm.hash.name;
                     }
@@ -5552,7 +5821,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5567,7 +5836,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5581,7 +5850,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5615,7 +5884,7 @@ function(in_window)
                             currentSequence = PasswordRecipientinfo(i);
                             break;
                         default:
-                            return new Promise(function(resolve, reject) { reject("Uknown recipient type in array with index " + i); });
+                            return Promise.reject("Uknown recipient type in array with index " + i);
                     }
 
                     recipientsPromises.push(currentSequence);
@@ -5623,7 +5892,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -5636,13 +5905,13 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENVELOPED_DATA.prototype.decrypt =
     function(recipientIndex, parameters)
@@ -5660,13 +5929,13 @@ function(in_window)
 
         // #region Check for input parameters
         if((recipientIndex + 1) > this.recipientInfos.length)
-            return new Promise(function(resolve, reject) { reject("Maximum value for \"index\" is: " + (this.recipientInfos.length - 1)); });
+            return Promise.reject("Maximum value for \"index\" is: " + (_this.recipientInfos.length - 1));
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Special sub-functions to work with each recipient's type 
@@ -5688,15 +5957,15 @@ function(in_window)
                 function(result)
                 {
                     if(("recipientCertificate" in decryptionParameters) === false)
-                        return new Promise(function(resolve, reject) { reject("Parameter \"recipientCertificate\" is mandatory for \"KeyAgreeRecipientInfo\""); });
+                        return Promise.reject("Parameter \"recipientCertificate\" is mandatory for \"KeyAgreeRecipientInfo\"");
 
                     if(("recipientPrivateKey" in decryptionParameters) === false)
-                        return new Promise(function(resolve, reject) { reject("Parameter \"recipientPrivateKey\" is mandatory for \"KeyAgreeRecipientInfo\""); });
+                        return Promise.reject("Parameter \"recipientPrivateKey\" is mandatory for \"KeyAgreeRecipientInfo\"");
 
                     var curveObject = decryptionParameters.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithm_params;
 
                     if((curveObject instanceof in_window.org.pkijs.asn1.OID) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"recipientCertificate\" for index " + index); });
+                        return Promise.reject("Incorrect \"recipientCertificate\" for index " + index);
 
                     curveOID = curveObject.value_block.toString();
 
@@ -5715,7 +5984,7 @@ function(in_window)
                             recipientCurveLength = 528;
                             break;
                         default:
-                            return new Promise(function(resolve, reject) { reject("Incorrect curve OID for index " + index); });
+                            return Promise.reject("Incorrect curve OID for index " + index);
                     }
 
                     return crypto.importKey("pkcs8",
@@ -5730,7 +5999,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5760,7 +6029,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5777,7 +6046,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5790,7 +6059,7 @@ function(in_window)
 
                     var KWalgorithm = in_window.org.pkijs.getAlgorithmByOID(aesKWAlgorithm.algorithm_id);
                     if(("name" in KWalgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for key encryption algorithm: " + aesKWAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for key encryption algorithm: " + aesKWAlgorithm.algorithm_id);
                     // #endregion 
 
                     // #region Translate AES-KW length to ArrayBuffer 
@@ -5827,14 +6096,14 @@ function(in_window)
                     // #region Get SHA algorithm used together with ECDH 
                     var ecdhAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in ecdhAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for key encryption algorithm: " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for key encryption algorithm: " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return in_window.org.pkijs.simpl.cms.kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5850,7 +6119,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5861,7 +6130,7 @@ function(in_window)
                     // #region Get WebCrypto form of content encryption algorithm 
                     var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     if(("name" in contentEncryptionAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.unwrapKey("raw",
@@ -5874,7 +6143,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5893,7 +6162,7 @@ function(in_window)
                 function(result)
                 {
                     if(("recipientPrivateKey" in decryptionParameters) === false)
-                        return new Promise(function(resolve, reject) { reject("Parameter \"recipientPrivateKey\" is mandatory for \"KeyTransRecipientInfo\""); });
+                        return Promise.reject("Parameter \"recipientPrivateKey\" is mandatory for \"KeyTransRecipientInfo\"");
 
                     // #region Get current used SHA algorithm 
                     var schema = _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_params;
@@ -5901,7 +6170,7 @@ function(in_window)
 
                     var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithm_id);
                     if(("name" in hashAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for hash algorithm: " + rsaOAEPParams.hashAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for hash algorithm: " + rsaOAEPParams.hashAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.importKey("pkcs8",
@@ -5917,7 +6186,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5934,7 +6203,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5945,7 +6214,7 @@ function(in_window)
                     // #region Get WebCrypto form of content encryption algorithm 
                     var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     if(("name" in contentEncryptionAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.importKey("raw",
@@ -5957,7 +6226,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -5977,12 +6246,12 @@ function(in_window)
                 function(result)
                 {
                     if(("preDefinedData" in decryptionParameters) === false)
-                        return new Promise(function(resolve, reject) { reject("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\""); });
+                        return Promise.reject("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\"");
 
                     // #region Get WebCrypto form of "keyEncryptionAlgorithm" 
                     kekAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in kekAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.importKey("raw",
@@ -5993,7 +6262,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -6004,7 +6273,7 @@ function(in_window)
                     // #region Get WebCrypto form of content encryption algorithm 
                     var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     if(("name" in contentEncryptionAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.unwrapKey("raw",
@@ -6017,7 +6286,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -6038,13 +6307,13 @@ function(in_window)
                 function(result)
                 {
                     if(("preDefinedData" in decryptionParameters) === false)
-                        return new Promise(function(resolve, reject) { reject("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\""); });
+                        return Promise.reject("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\"");
 
                     if(("keyDerivationAlgorithm" in _this.recipientInfos[index].value) === false)
-                        return new Promise(function(resolve, reject) { reject("Please append encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Please append encoded \"keyDerivationAlgorithm\"");
 
                     if(("algorithm_params" in _this.recipientInfos[index].value.keyDerivationAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
 
                     try
                     {
@@ -6052,7 +6321,7 @@ function(in_window)
                     }
                     catch(ex)
                     {
-                        return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"keyDerivationAlgorithm\""); });
+                        return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
                     }
 
                     return crypto.importKey("raw",
@@ -6063,7 +6332,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -6074,7 +6343,7 @@ function(in_window)
                     // #region Get WebCrypto form of "keyEncryptionAlgorithm" 
                     kekAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     if(("name" in kekAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect OID for \"keyEncryptionAlgorithm\": " + _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     // #region Get HMAC hash algorithm 
@@ -6084,7 +6353,7 @@ function(in_window)
                     {
                         var algorithm = in_window.org.pkijs.getAlgorithmByOID(pbkdf2Params.prf.algorithm_id);
                         if(("name" in algorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Incorrect OID for HMAC hash algorithm"); });
+                            return Promise.reject("Incorrect OID for HMAC hash algorithm");
 
                         hmacHashAlgorithm = algorithm.hash.name;
                     }
@@ -6113,7 +6382,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -6124,7 +6393,7 @@ function(in_window)
                     // #region Get WebCrypto form of content encryption algorithm 
                     var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     if(("name" in contentEncryptionAlgorithm) === false)
-                        return new Promise(function(resolve, reject) { reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+                        return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                     // #endregion 
 
                     return crypto.unwrapKey("raw",
@@ -6137,7 +6406,7 @@ function(in_window)
                 },
                 function(error)
                 {
-                    return new Promise(function(resolve, reject) { reject(error); });
+                    return Promise.reject(error);
                 }
                 );
             // #endregion 
@@ -6169,14 +6438,14 @@ function(in_window)
                         currentSequence = PasswordRecipientinfo(recipientIndex);
                         break;
                     default:
-                        return new Promise(function(resolve, reject) { reject("Uknown recipient type in array with index " + i); });
+                        return Promise.reject("Uknown recipient type in array with index " + recipientIndex);
                 }
 
                 return currentSequence;
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -6188,7 +6457,7 @@ function(in_window)
                 // #region Get WebCrypto form of content encryption algorithm 
                 var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                 if(("name" in contentEncryptionAlgorithm) === false)
-                    return new Promise(function(resolve, reject) { reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+                    return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
                 // #endregion 
 
                 // #region Get "intialization vector" for content encryption algorithm 
@@ -6217,13 +6486,13 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
@@ -6258,7 +6527,7 @@ function(in_window)
             }
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.fromSchema =
     function(schema)
@@ -6296,7 +6565,7 @@ function(in_window)
                 this.unprotectedAttrs.push(new in_window.org.pkijs.simpl.ATTRIBUTE({ schema: attributes_array[j] }));
         }
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.toSchema =
     function()
@@ -6330,7 +6599,7 @@ function(in_window)
             value: output_array
         }));
         // #endregion 
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.toJSON =
     function()
@@ -6350,7 +6619,7 @@ function(in_window)
         }
 
         return _object;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.encrypt =
     function(parameters)
@@ -6360,32 +6629,32 @@ function(in_window)
 
         // #region Check for input parameters 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("Parameters must have type \"Object\""); });
+            return Promise.reject("Parameters must have type \"Object\"");
 
         if(("password" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\""); });
+            return Promise.reject("Absent mandatory parameter \"password\"");
 
         if(("contentEncryptionAlgorithm" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"contentEncryptionAlgorithm\""); });
+            return Promise.reject("Absent mandatory parameter \"contentEncryptionAlgorithm\"");
 
         if(("hmacHashAlgorithm" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"hmacHashAlgorithm\""); });
+            return Promise.reject("Absent mandatory parameter \"hmacHashAlgorithm\"");
 
         if(("iterationCount" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"iterationCount\""); });
+            return Promise.reject("Absent mandatory parameter \"iterationCount\"");
 
         if(("contentToEncrypt" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"contentToEncrypt\""); });
+            return Promise.reject("Absent mandatory parameter \"contentToEncrypt\"");
 
         var contentEncryptionOID = in_window.org.pkijs.getOIDByAlgorithm(parameters.contentEncryptionAlgorithm);
         if(contentEncryptionOID === "")
-            return new Promise(function(resolve, reject) { reject("Wrong \"contentEncryptionAlgorithm\" value"); });
+            return Promise.reject("Wrong \"contentEncryptionAlgorithm\" value");
 
         var pbkdf2OID = in_window.org.pkijs.getOIDByAlgorithm({
             name: "PBKDF2"
         });
         if(pbkdf2OID === "")
-            return new Promise(function(resolve, reject) { reject("Can not find OID for PBKDF2"); });
+            return Promise.reject("Can not find OID for PBKDF2");
 
         var hmacOID = in_window.org.pkijs.getOIDByAlgorithm({
             name: "HMAC",
@@ -6394,13 +6663,13 @@ function(in_window)
             }
         });
         if(hmacOID === "")
-            return new Promise(function(resolve, reject) { reject("Incorrect value for \"hmacHashAlgorithm\": " + parameters.hmacHashAlgorithm); });
+            return Promise.reject("Incorrect value for \"hmacHashAlgorithm\": " + parameters.hmacHashAlgorithm);
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Initial variables 
@@ -6441,7 +6710,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -6465,7 +6734,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion   
@@ -6483,7 +6752,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion   
@@ -6514,13 +6783,13 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     in_window.org.pkijs.simpl.CMS_ENCRYPTED_DATA.prototype.decrypt =
     function(parameters)
@@ -6530,19 +6799,19 @@ function(in_window)
 
         // #region Check for input parameters 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("Parameters must have type \"Object\""); });
+            return Promise.reject("Parameters must have type \"Object\"");
 
         if(("password" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\""); });
+            return Promise.reject("Absent mandatory parameter \"password\"");
 
         if(this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id !== "1.2.840.113549.1.5.13") // pkcs5PBES2
-            return new Promise(function(resolve, reject) { reject("Unknown \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id); });
+            return Promise.reject("Unknown \"contentEncryptionAlgorithm\": " + _this.encryptedContentInfo.contentEncryptionAlgorithm.algorithm_id);
         // #endregion 
 
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Initial variables 
@@ -6557,7 +6826,7 @@ function(in_window)
         }
         catch(ex)
         {
-            return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"pbes2Parameters\""); });
+            return Promise.reject("Incorrectly encoded \"pbes2Parameters\"");
         }
 
         var pbkdf2Params;
@@ -6568,12 +6837,12 @@ function(in_window)
         }
         catch(ex)
         {
-            return new Promise(function(resolve, reject) { reject("Incorrectly encoded \"pbkdf2Params\""); });
+            return Promise.reject("Incorrectly encoded \"pbkdf2Params\"");
         }
 
         var contentEncryptionAlgorithm = in_window.org.pkijs.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithm_id);
         if(("name" in contentEncryptionAlgorithm) == false)
-            return new Promise(function(resolve, reject) { reject("Incorrect OID for \"contentEncryptionAlgorithm\": " + pbes2Parameters.encryptionScheme.algorithm_id); });
+            return Promise.reject("Incorrect OID for \"contentEncryptionAlgorithm\": " + pbes2Parameters.encryptionScheme.algorithm_id);
 
         var ivBuffer = pbes2Parameters.encryptionScheme.algorithm_params.value_block.value_hex;
         var ivView = new Uint8Array(ivBuffer);
@@ -6589,7 +6858,7 @@ function(in_window)
         {
             var algorithm = in_window.org.pkijs.getAlgorithmByOID(pbkdf2Params.prf.algorithm_id);
             if(("name" in algorithm) === false)
-                return new Promise(function(resolve, reject) { reject("Incorrect OID for HMAC hash algorithm"); });
+                return Promise.reject("Incorrect OID for HMAC hash algorithm");
 
             hmacHashAlgorithm = algorithm.hash.name;
         }
@@ -6607,7 +6876,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -6631,7 +6900,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -6661,13 +6930,13 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
 
         return sequence;
-    }
+    };
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
