@@ -367,13 +367,13 @@ function(in_window)
 
         // #region Check mandatory parameter 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters\" must has \"Object\" type"); });
+            return Promise.reject("The \"parameters\" must has \"Object\" type");
 
         if(("parsedValue" in this) == false)
-            return new Promise(function(resolve, reject) { reject("Please call \"parseValues\" function first in order to make \"parsedValue\" data"); });
+            return Promise.reject("Please call \"parseValues\" function first in order to make \"parsedValue\" data");
 
         if(("integrityMode" in this.parsedValue) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"integrityMode\" inside \"parsedValue\""); });
+            return Promise.reject("Absent mandatory parameter \"integrityMode\" inside \"parsedValue\"");
         // #endregion   
 
         // #region Initial variables 
@@ -384,13 +384,13 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Makes values for each particular integrity mode 
         // #region Check that we do have neccessary fields in "parsedValue" object
         if(("authenticatedSafe" in _this.parsedValue) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"authenticatedSafe\" in \"parsedValue\""); });
+            return Promise.reject("Absent mandatory parameter \"authenticatedSafe\" in \"parsedValue\"");
         // #endregion 
 
         switch(this.parsedValue.integrityMode)
@@ -400,16 +400,16 @@ function(in_window)
                 {
                     // #region Check additional mandatory parameters 
                     if(("iterations" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"iterations\""); });
+                        return Promise.reject("Absent mandatory parameter \"iterations\"");
 
                     if(("pbkdf2HashAlgorithm" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"pbkdf2HashAlgorithm\""); });
+                        return Promise.reject("Absent mandatory parameter \"pbkdf2HashAlgorithm\"");
 
                     if(("hmacHashAlgorithm" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"hmacHashAlgorithm\""); });
+                        return Promise.reject("Absent mandatory parameter \"hmacHashAlgorithm\"");
 
                     if(("password" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\""); });
+                        return Promise.reject("Absent mandatory parameter \"password\"");
                     // #endregion   
 
                     // #region Initial variables 
@@ -436,7 +436,7 @@ function(in_window)
                             length = 512;
                             break;
                         default:
-                            return new Promise(function(resolve, reject) { reject("Incorrect \"parameters.hmacHashAlgorithm\" parameter: " + parameters.hmacHashAlgorithm); });
+                            return Promise.reject("Incorrect \"parameters.hmacHashAlgorithm\" parameter: " + parameters.hmacHashAlgorithm);
                     }
                     // #endregion 
 
@@ -464,7 +464,7 @@ function(in_window)
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject(error); });
+                            return Promise.reject(error);
                         }
                         );
                     // #endregion 
@@ -488,7 +488,7 @@ function(in_window)
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject(error); });
+                            return Promise.reject(error);
                         }
                         );
                     // #endregion 
@@ -511,7 +511,7 @@ function(in_window)
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject(error); });
+                            return Promise.reject(error);
                         }
                         );
                     // #endregion 
@@ -533,7 +533,7 @@ function(in_window)
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject(error); });
+                            return Promise.reject(error);
                         }
                         );
                     // #endregion   
@@ -546,13 +546,13 @@ function(in_window)
                 {
                     // #region Check additional mandatory parameters 
                     if(("signingCertificate" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"signingCertificate\""); });
+                        return Promise.reject("Absent mandatory parameter \"signingCertificate\"");
 
                     if(("privateKey" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"privateKey\""); });
+                        return Promise.reject("Absent mandatory parameter \"privateKey\"");
 
                     if(("hashAlgorithm" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"hashAlgorithm\""); });
+                        return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
                     // #endregion   
 
                     // #region Making data to be signed
@@ -633,7 +633,7 @@ function(in_window)
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject("Error during making digest for message: " + error); });
+                            return Promise.reject("Error during making digest for message: " + error);
                         }
                         );
                     // #endregion 
@@ -659,7 +659,7 @@ function(in_window)
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject("Error during making signature: " + error); });
+                            return Promise.reject("Error during making signature: " + error);
                         }
                         );
                     // #endregion 
@@ -668,7 +668,7 @@ function(in_window)
             // #endregion 
             // #region default 
             default:
-                return new Promise(function(resolve, reject) { reject("Parameter \"integrityMode\" has unknown value: " + parameters.integrityMode); });
+                return Promise.reject("Parameter \"integrityMode\" has unknown value: " + parameters.integrityMode);
             // #endregion 
         }
         // #endregion   
@@ -681,7 +681,7 @@ function(in_window)
     {
         // #region Check input data from "parameters" 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters\" must has \"Object\" type"); });
+            return Promise.reject("The \"parameters\" must has \"Object\" type");
 
         if(("checkIntegrity" in parameters) == false)
             parameters.checkIntegrity = true;
@@ -695,7 +695,7 @@ function(in_window)
         // #region Get a "crypto" extension 
         var crypto = in_window.org.pkijs.getCrypto();
         if(typeof crypto == "undefined")
-            return new Promise(function(resolve, reject) { reject("Unable to create WebCrypto object"); });
+            return Promise.reject("Unable to create WebCrypto object");
         // #endregion 
 
         // #region Create value for "this.parsedValue.authenticatedSafe" and check integrity 
@@ -708,7 +708,7 @@ function(in_window)
                 {
                     // #region Check additional mandatory parameters 
                     if(("password" in parameters) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\""); });
+                        return Promise.reject("Absent mandatory parameter \"password\"");
                     // #endregion   
 
                     // #region Integrity based on HMAC 
@@ -717,13 +717,13 @@ function(in_window)
 
                     // #region Check that we do have OCTETSTRING as "content" 
                     if((this.authSafe.content instanceof in_window.org.pkijs.asn1.OCTETSTRING) == false)
-                        return new Promise(function(resolve, reject) { reject("Wrong type of \"this.authSafe.content\""); });
+                        return Promise.reject("Wrong type of \"this.authSafe.content\"");
                     // #endregion 
 
                     // #region Parse internal ASN.1 data 
                     var asn1 = in_window.org.pkijs.fromBER(this.authSafe.content.value_block.value_hex);
                     if(asn1.offset == (-1))
-                        return new Promise(function(resolve, reject) { reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\""); });
+                        return Promise.reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\"");
                     // #endregion   
 
                     // #region Set "authenticatedSafe" value 
@@ -735,13 +735,13 @@ function(in_window)
                     {
                         // #region Check that "MacData" exists 
                         if(("macData" in _this) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent \"macData\" value, can not check PKCS# data integrity"); });
+                            return Promise.reject("Absent \"macData\" value, can not check PKCS# data integrity");
                         // #endregion   
 
                         // #region Initial variables 
                         var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(_this.macData.mac.digestAlgorithm.algorithm_id);
                         if(("name" in hashAlgorithm) === false)
-                            return new Promise(function(resolve, reject) { reject("Unsupported digest algorithm: " + _this.macData.mac.digestAlgorithm.algorithm_id); });
+                            return Promise.reject("Unsupported digest algorithm: " + _this.macData.mac.digestAlgorithm.algorithm_id);
 
                         var length;
 
@@ -761,7 +761,7 @@ function(in_window)
                                 length = 512;
                                 break;
                             default:
-                                return new Promise(function(resolve, reject) { reject("Incorrect \"hashAlgorithm\": " + hashAlgorithm.name); });
+                                return Promise.reject("Incorrect \"hashAlgorithm\": " + hashAlgorithm.name);
                         }
                         // #endregion 
 
@@ -789,7 +789,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion 
@@ -813,7 +813,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion 
@@ -833,7 +833,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
 
@@ -841,11 +841,11 @@ function(in_window)
                             function(result)
                             {
                                 if(result == false)
-                                    return new Promise(function(resolve, reject) { reject("Integrity for the PKCS#12 data is broken!"); });
+                                    return Promise.reject("Integrity for the PKCS#12 data is broken!");
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion   
@@ -867,10 +867,10 @@ function(in_window)
 
                     // #region Check that we do have OCTETSTRING as "content" 
                     if(("eContent" in cms_signed_simpl.encapContentInfo) == false)
-                        return new Promise(function(resolve, reject) { reject("Absent of attached data in \"cms_signed_simpl.encapContentInfo\""); });
+                        return Promise.reject("Absent of attached data in \"cms_signed_simpl.encapContentInfo\"");
 
                     if((cms_signed_simpl.encapContentInfo.eContent instanceof in_window.org.pkijs.asn1.OCTETSTRING) == false)
-                        return new Promise(function(resolve, reject) { reject("Wrong type of \"cms_signed_simpl.encapContentInfo.eContent\""); });
+                        return Promise.reject("Wrong type of \"cms_signed_simpl.encapContentInfo.eContent\"");
                     // #endregion 
 
                     // #region Create correct data block for verification 
@@ -888,7 +888,7 @@ function(in_window)
                     // #region Parse internal ASN.1 data 
                     var asn1 = in_window.org.pkijs.fromBER(data);
                     if(asn1.offset == (-1))
-                        return new Promise(function(resolve, reject) { reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\""); });
+                        return Promise.reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\"");
                     // #endregion   
 
                     // #region Set "authenticatedSafe" value 
@@ -905,11 +905,11 @@ function(in_window)
                         function(result)
                         {
                             if(result == false)
-                                return new Promise(function(resolve, reject) { reject("Integrity for the PKCS#12 data is broken!"); });
+                                return Promise.reject("Integrity for the PKCS#12 data is broken!");
                         },
                         function(error)
                         {
-                            return new Promise(function(resolve, reject) { reject("Error during integrity verification: " + error); });
+                            return Promise.reject("Error during integrity verification: " + error);
                         }
                         );
                     // #endregion 
@@ -918,7 +918,7 @@ function(in_window)
             // #endregion   
             // #region default 
             default:
-                return new Promise(function(resolve, reject) { reject("Incorrect value for \"this.authSafe.contentType\": " + _this.authSafe.contentType); });
+                return Promise.reject("Incorrect value for \"this.authSafe.contentType\": " + _this.authSafe.contentType);
             // #endregion 
         }
         // #endregion 
@@ -931,7 +931,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Error during parsing: " + error); });
+                return Promise.reject("Error during parsing: " + error);
             }
             );
         // #endregion   
@@ -1024,16 +1024,16 @@ function(in_window)
     {
         // #region Check input data from "parameters" 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters\" must has \"Object\" type"); });
+            return Promise.reject("The \"parameters\" must has \"Object\" type");
 
         if(("safeContents" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"safeContents\""); });
+            return Promise.reject("Absent mandatory parameter \"safeContents\"");
 
         if((parameters.safeContents instanceof Array) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters.safeContents\" must has \"Array\" type"); });
+            return Promise.reject("The \"parameters.safeContents\" must has \"Array\" type");
 
         if(parameters.safeContents.length != this.safeContents.length)
-            return new Promise(function(resolve, reject) { reject("Length of \"parameters.safeContents\" must be equal to \"this.safeContents.length\""); });
+            return Promise.reject("Length of \"parameters.safeContents\" must be equal to \"this.safeContents.length\"");
         // #endregion 
 
         // #region Initial variables 
@@ -1057,13 +1057,13 @@ function(in_window)
                     {
                         // #region Check that we do have OCTETSTRING as "content" 
                         if((_this.safeContents[j].content instanceof in_window.org.pkijs.asn1.OCTETSTRING) == false)
-                            return new Promise(function(resolve, reject) { reject("Wrong type of \"this.safeContents[j].content\""); });
+                            return Promise.reject("Wrong type of \"this.safeContents[j].content\"");
                         // #endregion 
 
                         // #region Parse internal ASN.1 data 
                         var asn1 = in_window.org.pkijs.fromBER(_this.safeContents[j].content.value_block.value_hex);
                         if(asn1.offset == (-1))
-                            return new Promise(function(resolve, reject) { reject("Error during parsing of ASN.1 data inside \"_this.safeContents[j].content\""); });
+                            return Promise.reject("Error during parsing of ASN.1 data inside \"_this.safeContents[j].content\"");
                         // #endregion   
 
                         // #region Finilly initialize initial values of "SafeContents" type
@@ -1084,12 +1084,12 @@ function(in_window)
 
                         // #region Check mandatory parameters 
                         if(("recipientCertificate" in parameters.safeContents[j]) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"recipientCertificate\" in \"parameters.safeContents[j]\""); });
+                            return Promise.reject("Absent mandatory parameter \"recipientCertificate\" in \"parameters.safeContents[j]\"");
 
                         var recipientCertificate = parameters.safeContents[j].recipientCertificate;
 
                         if(("recipientKey" in parameters.safeContents[j]) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"recipientKey\" in \"parameters.safeContents[j]\""); });
+                            return Promise.reject("Absent mandatory parameter \"recipientKey\" in \"parameters.safeContents[j]\"");
 
                         var recipientKey = parameters.safeContents[j].recipientKey;
                         // #endregion 
@@ -1110,7 +1110,7 @@ function(in_window)
                             {
                                 var asn1 = in_window.org.pkijs.fromBER(result);
                                 if(asn1.offset == (-1))
-                                    return new Promise(function(resolve, reject) { reject("Error during parsing of decrypted data"); });
+                                    return Promise.reject("Error during parsing of decrypted data");
 
                                 _this.parsedValue.safeContents.push({
                                     privacyMode: 2, // Public-key privacy mode
@@ -1131,7 +1131,7 @@ function(in_window)
 
                         // #region Check mandatory parameters 
                         if(("password" in parameters.safeContents[j]) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"password\" in \"parameters.safeContents[j]\""); });
+                            return Promise.reject("Absent mandatory parameter \"password\" in \"parameters.safeContents[j]\"");
 
                         var password = parameters.safeContents[j].password;
                         // #endregion 
@@ -1146,7 +1146,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion   
@@ -1157,7 +1157,7 @@ function(in_window)
                             {
                                 var asn1 = in_window.org.pkijs.fromBER(result);
                                 if(asn1.offset == (-1))
-                                    return new Promise(function(resolve, reject) { reject("Error during parsing of decrypted data"); });
+                                    return Promise.reject("Error during parsing of decrypted data");
 
                                 _this.parsedValue.safeContents.push({
                                     privacyMode: 1, // Password-based privacy mode
@@ -1166,7 +1166,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion   
@@ -1178,7 +1178,7 @@ function(in_window)
                     throw new Error("Unknown \"contentType\" for AuthenticatedSafe: " + contentInfo.contentType);
                 // #endregion 
             }
-        }
+        };
         // #endregion 
 
         return sequence;
@@ -1189,27 +1189,27 @@ function(in_window)
     {
         // #region Check data in "parsedValue" 
         if(("parsedValue" in this) == false)
-            return new Promise(function(resolve, reject) { reject("Please run \"parseValues\" first or add \"parsedValue\" manually"); });
+            return Promise.reject("Please run \"parseValues\" first or add \"parsedValue\" manually");
 
         if((this.parsedValue instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("The \"this.parsedValue\" must has \"Object\" type"); });
+            return Promise.reject("The \"this.parsedValue\" must has \"Object\" type");
 
         if((this.parsedValue.safeContents instanceof Array) == false)
-            return new Promise(function(resolve, reject) { reject("The \"this.parsedValue.safeContents\" must has \"Array\" type"); });
+            return Promise.reject("The \"this.parsedValue.safeContents\" must has \"Array\" type");
         // #endregion 
 
         // #region Check input data from "parameters" 
         if((parameters instanceof Object) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters\" must has \"Object\" type"); });
+            return Promise.reject("The \"parameters\" must has \"Object\" type");
 
         if(("safeContents" in parameters) == false)
-            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"safeContents\""); });
+            return Promise.reject("Absent mandatory parameter \"safeContents\"");
 
         if((parameters.safeContents instanceof Array) == false)
-            return new Promise(function(resolve, reject) { reject("The \"parameters.safeContents\" must has \"Array\" type"); });
+            return Promise.reject("The \"parameters.safeContents\" must has \"Array\" type");
 
         if(parameters.safeContents.length != this.parsedValue.safeContents.length)
-            return new Promise(function(resolve, reject) { reject("Length of \"parameters.safeContents\" must be equal to \"this.parsedValue.safeContents\""); });
+            return Promise.reject("Length of \"parameters.safeContents\" must be equal to \"this.parsedValue.safeContents\"");
         // #endregion 
 
         // #region Initial variables 
@@ -1226,13 +1226,13 @@ function(in_window)
         {
             // #region Check current "_this.parsedValue.safeContents[i]" value
             if(("privacyMode" in _this.parsedValue.safeContents[i]) == false)
-                return new Promise(function(resolve, reject) { reject("The \"privacyMode\" is a mandatory parameter for \"_this.parsedValue.safeContents[i]\""); });
+                return Promise.reject("The \"privacyMode\" is a mandatory parameter for \"_this.parsedValue.safeContents[i]\"");
 
             if(("value" in _this.parsedValue.safeContents[i]) == false)
-                return new Promise(function(resolve, reject) { reject("The \"value\" is a mandatory parameter for \"_this.parsedValue.safeContents[i]\""); });
+                return Promise.reject("The \"value\" is a mandatory parameter for \"_this.parsedValue.safeContents[i]\"");
 
             if((_this.parsedValue.safeContents[i].value instanceof in_window.org.pkijs.simpl.pkcs12.SafeContents) == false)
-                return new Promise(function(resolve, reject) { reject("The \"_this.parsedValue.safeContents[i].value\" must has \"in_window.org.pkijs.simpl.pkcs12.SafeContents\" type"); });
+                return Promise.reject("The \"_this.parsedValue.safeContents[i].value\" must has \"in_window.org.pkijs.simpl.pkcs12.SafeContents\" type");
             // #endregion 
 
             switch(_this.parsedValue.safeContents[i].privacyMode)
@@ -1271,7 +1271,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion 
@@ -1287,7 +1287,7 @@ function(in_window)
                             },
                             function(error)
                             {
-                                return new Promise(function(resolve, reject) { reject(error); });
+                                return Promise.reject(error);
                             }
                             );
                         // #endregion 
@@ -1304,10 +1304,10 @@ function(in_window)
 
                         // #region Check mandatory parameters 
                         if(("encryptingCertificate" in parameters.safeContents[i]) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"encryptingCertificate\" in \"parameters.safeContents[i]\""); });
+                            return Promise.reject("Absent mandatory parameter \"encryptingCertificate\" in \"parameters.safeContents[i]\"");
 
                         if(("encryptionAlgorithm" in parameters.safeContents[i]) == false)
-                            return new Promise(function(resolve, reject) { reject("Absent mandatory parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\""); });
+                            return Promise.reject("Absent mandatory parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\"");
 
                         switch(true)
                         {
@@ -1315,7 +1315,7 @@ function(in_window)
                             case (parameters.safeContents[i].encryptionAlgorithm.name.toLowerCase() == "aes-gcm"):
                                 break;
                             default:
-                                return new Promise(function(resolve, reject) { reject("Incorrect parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\": " + parameters.safeContents[i].encryptionAlgorithm); });
+                                return Promise.reject("Incorrect parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\": " + parameters.safeContents[i].encryptionAlgorithm);
                         }
 
                         switch(true)
@@ -1325,7 +1325,7 @@ function(in_window)
                             case (parameters.safeContents[i].encryptionAlgorithm.length == 256):
                                 break;
                             default:
-                                return new Promise(function(resolve, reject) { reject("Incorrect parameter \"encryptionAlgorithm.length\" in \"parameters.safeContents[i]\": " + parameters.safeContents[i].encryptionAlgorithm.length); });
+                                return Promise.reject("Incorrect parameter \"encryptionAlgorithm.length\" in \"parameters.safeContents[i]\": " + parameters.safeContents[i].encryptionAlgorithm.length);
                         }
                         // #endregion   
 
@@ -1360,7 +1360,7 @@ function(in_window)
                 // #endregion 
                 // #region default 
                 default:
-                    return new Promise(function(resolve, reject) { reject("Incorrect value for \"_this.parsedValue.safeContents[i].privacyMode\": " + _this.parsedValue.safeContents[i].privacyMode); });
+                    return Promise.reject("Incorrect value for \"_this.parsedValue.safeContents[i].privacyMode\": " + _this.parsedValue.safeContents[i].privacyMode);
                 // #endregion 
             }
         }
@@ -1374,7 +1374,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject("Error during parsing: " + error); });
+                return Promise.reject("Error during parsing: " + error);
             }
             );
         // #endregion   
@@ -1486,7 +1486,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -1497,13 +1497,13 @@ function(in_window)
             {
                 var asn1 = in_window.org.pkijs.fromBER(result);
                 if(asn1.offset == (-1))
-                    return new Promise(function(resolve, reject) { reject("Error during parsing ASN.1 data"); });
+                    return Promise.reject("Error during parsing ASN.1 data");
 
                 _this.parsedValue = new in_window.org.pkijs.simpl.PKCS8({ schema: asn1.result });
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
@@ -1516,7 +1516,7 @@ function(in_window)
     {
         // #region Check that we do have "parsedValue" 
         if(("parsedValue" in this) == false)
-            return new Promise(function(resolve, reject) { reject("Please initialize \"parsedValue\" first"); });
+            return Promise.reject("Please initialize \"parsedValue\" first");
         // #endregion 
 
         // #region Initial variables 
@@ -1536,7 +1536,7 @@ function(in_window)
             },
             function(error)
             {
-                return new Promise(function(resolve, reject) { reject(error); });
+                return Promise.reject(error);
             }
             );
         // #endregion 
