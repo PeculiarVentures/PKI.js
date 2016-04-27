@@ -187,7 +187,7 @@ function(in_window)
                     })
                 ]
             })
-            ); // __!!!__ Removed definition for "AttributeCertificateV2" __!!!__
+            ); // TODO: Add definition for "AttributeCertificateV2"
     };
     //**************************************************************************************
     // #endregion 
@@ -212,7 +212,7 @@ function(in_window)
         }));
     };
     //**************************************************************************************
-    in_window.org.pkijs.schema.CSM_REVOCATION_INFO_CHOICES =
+    in_window.org.pkijs.schema.CMS_REVOCATION_INFO_CHOICES =
     function()
     {
         //RevocationInfoChoices ::= SET OF RevocationInfoChoice
@@ -500,13 +500,14 @@ function(in_window)
         //    crls [1] IMPLICIT RevocationInfoChoices OPTIONAL,
         //    signerInfos SignerInfos }
 
-        var names = in_window.org.pkijs.getNames(arguments[0]);
+        names = in_window.org.pkijs.getNames(arguments[0]);
 
         if(typeof optional_flag === "undefined")
             optional_flag = false;
 
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             name: (names.block_name || "SignedData"),
+            optional: optional_flag,
             value: [
                 new in_window.org.pkijs.asn1.INTEGER({ name: (names.version || "SignedData.version") }),
                 new in_window.org.pkijs.asn1.SET({
@@ -540,7 +541,7 @@ function(in_window)
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
                     },
-                    value: in_window.org.pkijs.schema.CSM_REVOCATION_INFO_CHOICES(names.crls || {
+                    value: in_window.org.pkijs.schema.CMS_REVOCATION_INFO_CHOICES(names.crls || {
                         names: {
                             crls: "SignedData.crls"
                         }
@@ -1104,7 +1105,7 @@ function(in_window)
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
                     },
-                    value: in_window.org.pkijs.schema.CSM_REVOCATION_INFO_CHOICES().value_block.value
+                    value: in_window.org.pkijs.schema.CMS_REVOCATION_INFO_CHOICES().value_block.value
                 })
             ]
         }));
