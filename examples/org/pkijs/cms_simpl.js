@@ -600,9 +600,9 @@ function(in_window)
     //**************************************************************************************
     // #endregion 
     //**************************************************************************************
-    // #region Simplified structure for "CSM_REVOCATION_INFO_CHOICES" type
+    // #region Simplified structure for "CMS_REVOCATION_INFO_CHOICES" type
     //**************************************************************************************
-    in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES =
+    in_window.org.pkijs.simpl.CMS_REVOCATION_INFO_CHOICES =
     function()
     {
         // #region Internal properties of the object 
@@ -611,7 +611,7 @@ function(in_window)
 
         // #region If input argument array contains "schema" for this object 
         if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
-            in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES.prototype.fromSchema.call(this, arguments[0].schema);
+            in_window.org.pkijs.simpl.CMS_REVOCATION_INFO_CHOICES.prototype.fromSchema.call(this, arguments[0].schema);
         // #endregion 
         // #region If input argument array contains "native" values for internal properties 
         else
@@ -624,17 +624,17 @@ function(in_window)
         // #endregion 
     };
     //**************************************************************************************
-    in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES.prototype.fromSchema =
+    in_window.org.pkijs.simpl.CMS_REVOCATION_INFO_CHOICES.prototype.fromSchema =
     function(schema)
     {
         // #region Check the schema is valid 
         var asn1 = in_window.org.pkijs.compareSchema(schema,
             schema,
-            in_window.org.pkijs.schema.CSM_REVOCATION_INFO_CHOICES()
+            in_window.org.pkijs.schema.CMS_REVOCATION_INFO_CHOICES()
             );
 
         if(asn1.verified === false)
-            throw new Error("Object's schema was not verified against input data for CSM_REVOCATION_INFO_CHOICES");
+            throw new Error("Object's schema was not verified against input data for CMS_REVOCATION_INFO_CHOICES");
         // #endregion 
 
         // #region Get internal properties from parsed schema 
@@ -650,7 +650,7 @@ function(in_window)
         // #endregion 
     };
     //**************************************************************************************
-    in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES.prototype.toSchema =
+    in_window.org.pkijs.simpl.CMS_REVOCATION_INFO_CHOICES.prototype.toSchema =
     function()
     {
         // #region Create array for output set
@@ -672,7 +672,7 @@ function(in_window)
         // #endregion 
     };
     //**************************************************************************************
-    in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES.prototype.toJSON =
+    in_window.org.pkijs.simpl.CMS_REVOCATION_INFO_CHOICES.prototype.toJSON =
     function()
     {
         var _object = {};
@@ -2378,6 +2378,22 @@ function(in_window)
                 var algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
                 if("hash" in algorithm.algorithm)
                     algorithm.algorithm.hash.name = sha_algorithm;
+
+                // #region Special case for ECDSA 
+                if(algorithm_name === "ECDSA")
+                {
+                    // #region Get information about named curve 
+                    if((signer_cert.subjectPublicKeyInfo.algorithm.algorithm_params instanceof in_window.org.pkijs.asn1.OID) === false)
+                        return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+                    var curveObject = in_window.org.pkijs.getAlgorithmByOID(signer_cert.subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                    if(("name" in curveObject) === false)
+                        return Promise.reject("Unsupported named curve algorithm: " + signer_cert.subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                    // #endregion 
+
+                    algorithm.algorithm.namedCurve = curveObject.name;
+                }
+                // #endregion 
                 // #endregion 
 
                 var publicKeyInfo_schema = signer_cert.subjectPublicKeyInfo.toSchema();
@@ -4482,7 +4498,7 @@ function(in_window)
     {
         // #region Internal properties of the object 
         this.certs = new in_window.org.pkijs.simpl.CMS_CERTIFICATE_SET();
-        this.crls = new in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES();
+        this.crls = new in_window.org.pkijs.simpl.CMS_REVOCATION_INFO_CHOICES();
         // #endregion 
 
         // #region If input argument array contains "schema" for this object 
@@ -4495,7 +4511,7 @@ function(in_window)
             if(arguments[0] instanceof Object)
             {
                 this.certs = arguments[0].certs || new in_window.org.pkijs.simpl.CMS_CERTIFICATE_SET();
-                this.crls = arguments[0].crls || new in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES();
+                this.crls = arguments[0].crls || new in_window.org.pkijs.simpl.CMS_REVOCATION_INFO_CHOICES();
             }
         }
         // #endregion 
@@ -4528,7 +4544,7 @@ function(in_window)
         asn1.result["crls"].id_block.tag_class = 1; // UNIVERSAL
         asn1.result["crls"].id_block.tag_number = 17; // SET
 
-        this.crls = new in_window.org.pkijs.simpl.CSM_REVOCATION_INFO_CHOICES({ schema: asn1.result["crls"] });
+        this.crls = new in_window.org.pkijs.simpl.CMS_REVOCATION_INFO_CHOICES({ schema: asn1.result["crls"] });
         // #endregion 
     };
     //**************************************************************************************

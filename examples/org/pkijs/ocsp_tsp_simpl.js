@@ -1930,6 +1930,22 @@ function(in_window)
                 var algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
                 if("hash" in algorithm.algorithm)
                     algorithm.algorithm.hash.name = sha_algorithm;
+
+                // #region Special case for ECDSA 
+                if(algorithm_name === "ECDSA")
+                {
+                    // #region Get information about named curve 
+                    if((certs[cert_index].subjectPublicKeyInfo.algorithm.algorithm_params instanceof in_window.org.pkijs.asn1.OID) === false)
+                        return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+                    var curveObject = in_window.org.pkijs.getAlgorithmByOID(certs[cert_index].subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                    if(("name" in curveObject) === false)
+                        return Promise.reject("Unsupported named curve algorithm: " + certs[cert_index].subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                    // #endregion 
+
+                    algorithm.algorithm.namedCurve = curveObject.name;
+                }
+                // #endregion 
                 // #endregion 
 
                 var publicKeyInfo_schema = certs[cert_index].subjectPublicKeyInfo.toSchema();

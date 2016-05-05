@@ -4129,6 +4129,22 @@ function(in_window)
                 var algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
                 if("hash" in algorithm.algorithm)
                     algorithm.algorithm.hash.name = sha_algorithm;
+
+                // #region Special case for ECDSA 
+                if(algorithm_name === "ECDSA")
+                {
+                    // #region Get information about named curve 
+                    if((subjectPublicKeyInfo.algorithm.algorithm_params instanceof in_window.org.pkijs.asn1.OID) === false)
+                        return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+                    var curveObject = in_window.org.pkijs.getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                    if(("name" in curveObject) === false)
+                        return Promise.reject("Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                    // #endregion 
+
+                    algorithm.algorithm.namedCurve = curveObject.name;
+                }
+                // #endregion 
                 // #endregion 
 
                 var publicKeyInfo_schema = subjectPublicKeyInfo.toSchema();
@@ -4363,19 +4379,35 @@ function(in_window)
             // #region Find signer's hashing algorithm 
             var sha_algorithm = in_window.org.pkijs.getHashAlgorithm(this.signatureAlgorithm);
             if(sha_algorithm === "")
-                return Promise.reject("Unsupported signature algorithm: " + this.signatureAlgorithm.algorithm_id);
+                return Promise.reject("Unsupported signature algorithm: " + _this.signatureAlgorithm.algorithm_id);
             // #endregion   
 
             // #region Get information about public key algorithm and default parameters for import
             var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(this.signatureAlgorithm.algorithm_id);
             if(("name" in algorithmObject) === false)
-                return Promise.reject("Unsupported public key algorithm: " + this.signatureAlgorithm.algorithm_id);
+                return Promise.reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id);
 
             var algorithm_name = algorithmObject.name;
 
             algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
             if("hash" in algorithm.algorithm)
                 algorithm.algorithm.hash.name = sha_algorithm;
+
+            // #region Special case for ECDSA 
+            if(algorithm_name === "ECDSA")
+            {
+                // #region Get information about named curve 
+                if((subjectPublicKeyInfo.algorithm.algorithm_params instanceof in_window.org.pkijs.asn1.OID) === false)
+                    return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+                var curveObject = in_window.org.pkijs.getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                if(("name" in curveObject) === false)
+                    return Promise.reject("Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                // #endregion 
+
+                algorithm.algorithm.namedCurve = curveObject.name;
+            }
+            // #endregion 
             // #endregion 
         }
         // #endregion 
@@ -4385,8 +4417,6 @@ function(in_window)
         var publicKeyInfo_buffer = publicKeyInfo_schema.toBER(false);
         var publicKeyInfo_view = new Uint8Array(publicKeyInfo_buffer);
         // #endregion 
-
-        document.getElementById("new_data").value = in_window.formatPEM(in_window.btoa(in_window.arrayBufferToString(publicKeyInfo_buffer)));;
 
         return crypto.importKey("spki", publicKeyInfo_view, algorithm.algorithm, true, algorithm.usages);
     };
@@ -4834,6 +4864,22 @@ function(in_window)
                 var algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
                 if("hash" in algorithm.algorithm)
                     algorithm.algorithm.hash.name = sha_algorithm;
+
+                // #region Special case for ECDSA 
+                if(algorithm_name === "ECDSA")
+                {
+                    // #region Get information about named curve 
+                    if((subjectPublicKeyInfo.algorithm.algorithm_params instanceof in_window.org.pkijs.asn1.OID) === false)
+                        return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+                    var curveObject = in_window.org.pkijs.getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                    if(("name" in curveObject) === false)
+                        return Promise.reject("Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                    // #endregion 
+
+                    algorithm.algorithm.namedCurve = curveObject.name;
+                }
+                // #endregion 
                 // #endregion 
 
                 var publicKeyInfo_schema = subjectPublicKeyInfo.toSchema();
@@ -5388,6 +5434,22 @@ function(in_window)
                 var algorithm = in_window.org.pkijs.getAlgorithmParameters(algorithm_name, "importkey");
                 if("hash" in algorithm.algorithm)
                     algorithm.algorithm.hash.name = sha_algorithm;
+
+                // #region Special case for ECDSA 
+                if(algorithm_name === "ECDSA")
+                {
+                    // #region Get information about named curve 
+                    if((subjectPublicKeyInfo.algorithm.algorithm_params instanceof in_window.org.pkijs.asn1.OID) === false)
+                        return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+                    var curveObject = in_window.org.pkijs.getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                    if(("name" in curveObject) === false)
+                        return Promise.reject("Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                    // #endregion 
+
+                    algorithm.algorithm.namedCurve = curveObject.name;
+                }
+                // #endregion 
                 // #endregion 
 
                 var publicKeyInfo_schema = subjectPublicKeyInfo.toSchema();
