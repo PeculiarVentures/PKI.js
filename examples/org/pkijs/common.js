@@ -1247,17 +1247,20 @@ function(in_window)
             // #region Special case - OIDs for ECC curves 
             case "1.2.840.10045.3.1.7":
                 result = {
-                    name: "P-256"
+                    name: "P-256",
+                    size: 32
                 };
                 break;
             case "1.3.132.0.34":
                 result = {
-                    name: "P-384"
+                    name: "P-384",
+                    size: 48
                 };
                 break;
             case "1.3.132.0.35":
                 result = {
-                    name: "P-521"
+                    name: "P-521",
+                    size: 66
                 };
                 break;
             // #endregion 
@@ -1325,9 +1328,6 @@ function(in_window)
     in_window.org.pkijs.createCMSECDSASignature =
     function(signatureBuffer)
     {
-        /// <summary>Create CMS ECDSA signature from WebCrypto ECDSA signature</summary>
-        /// <param name="signatureBuffer" type="ArrayBuffer">WebCrypto result of "sign" function</param>
-
         // #region Initial check for correct length 
         if((signatureBuffer.byteLength % 2) != 0)
             return new ArrayBuffer(0);
@@ -1341,57 +1341,62 @@ function(in_window)
 
         var r_buffer = new ArrayBuffer(length);
         var r_view = new Uint8Array(r_buffer);
+        r_view.set(new Uint8Array(signatureBuffer, 0, length));
         var r_corrected_buffer;
         var r_corrected_view;
 
         var s_buffer = new ArrayBuffer(length);
         var s_view = new Uint8Array(s_buffer);
+        s_view.set(new Uint8Array(signatureBuffer, length, length));
         var s_corrected_buffer;
         var s_corrected_view;
         // #endregion   
 
         // #region Get "r" part of ECDSA signature 
-        for(; i < length; i++)
-            r_view[i] = signatureView[i];
-
-        if(r_view[0] & 0x80)
+        switch(true)
         {
-            r_corrected_buffer = new ArrayBuffer(length + 1);
-            r_corrected_view = new Uint8Array(r_corrected_buffer);
+            case ((r_view[0] & 0x80) !== 0):
+                r_corrected_buffer = new ArrayBuffer(length + 1);
+                r_corrected_view = new Uint8Array(r_corrected_buffer);
 
-            r_corrected_view[0] = 0x00;
+                r_corrected_view[0] = 0x00;
 
-            for(var j = 0; j < length; j++)
-                r_corrected_view[j + 1] = r_view[j];
+                r_corrected_view.set(r_view, 1);
+                break;
+            case ((r_view[0] === 0x00) && ((r_view[1] & 0x80) === 0)):
+                r_corrected_buffer = new ArrayBuffer(length - 1);
+                r_corrected_view = new Uint8Array(r_corrected_buffer);
+
+                r_corrected_view.set(new Uint8Array(signatureBuffer, 1, length - 1));
+                break;
+            default:
+                r_corrected_buffer = r_buffer;
+                r_corrected_view = r_view;
         }
-        else
-        {
-            r_corrected_buffer = r_buffer;
-            r_corrected_view = r_view;
-        }
-        // #endregion 
+        // #endregion   
 
         // #region Get "s" part of ECDSA signature 
-        for(; i < signatureBuffer.byteLength; i++)
-            s_view[i - length] = signatureView[i];
-
-
-        if(s_view[0] & 0x80)
+        switch(true)
         {
-            s_corrected_buffer = new ArrayBuffer(length + 1);
-            s_corrected_view = new Uint8Array(s_corrected_buffer);
+            case ((s_view[0] & 0x80) !== 0):
+                s_corrected_buffer = new ArrayBuffer(length + 1);
+                s_corrected_view = new Uint8Array(s_corrected_buffer);
 
-            s_corrected_view[0] = 0x00;
+                s_corrected_view[0] = 0x00;
 
-            for(var j = 0; j < length; j++)
-                s_corrected_view[j + 1] = s_view[j];
+                s_corrected_view.set(s_view, 1);
+                break;
+            case ((s_view[0] === 0x00) && ((s_view[1] & 0x80) === 0)):
+                s_corrected_buffer = new ArrayBuffer(length - 1);
+                s_corrected_view = new Uint8Array(s_corrected_buffer);
+
+                s_corrected_view.set(new Uint8Array(signatureBuffer, 1, length - 1));
+                break;
+            default:
+                s_corrected_buffer = s_buffer;
+                s_corrected_view = s_view;
         }
-        else
-        {
-            s_corrected_buffer = s_buffer;
-            s_corrected_view = s_view;
-        }
-        // #endregion 
+        // #endregion   
 
         // #region Create ASN.1 structure of CMS ECDSA signature 
         var r_integer = new in_window.org.pkijs.asn1.INTEGER();
@@ -1411,57 +1416,70 @@ function(in_window)
         // #endregion   
 
         return asn1.toBER(false);
-    };
+    }
     //**************************************************************************************
     in_window.org.pkijs.createECDSASignatureFromCMS =
     function(cmsSignature)
     {
-        /// <summary>Create a single ArrayBuffer from CMS ECDSA signature</summary>
-        /// <param name="cmsSignature" type="in_window.org.pkijs.asn1.SEQUENCE">ASN.1 SEQUENCE contains CMS ECDSA signature</param>
-
         // #region Initial variables 
-        var length = 0;
-
-        var r_start = 0;
-        var s_start = 0;
-
-        var r_length = cmsSignature.value_block.value[0].value_block.value_hex.byteLength;
-        var s_length = cmsSignature.value_block.value[1].value_block.value_hex.byteLength;
+        var sBuffer;
+        var rBuffer;
         // #endregion 
 
-        // #region Get length of final "ArrayBuffer" 
-        var r_view = new Uint8Array(cmsSignature.value_block.value[0].value_block.value_hex);
-        if((r_view[0] === 0x00) && (r_view[1] & 0x80))
+        // #region Check input variables 
+        if((cmsSignature instanceof in_window.org.pkijs.asn1.SEQUENCE) === false)
+            return new ArrayBuffer(0);
+
+        if(cmsSignature.value_block.value.length !== 2)
+            return new ArrayBuffer(0);
+
+        if((cmsSignature.value_block.value[0] instanceof in_window.org.pkijs.asn1.INTEGER) === false)
+            return new ArrayBuffer(0);
+
+        if((cmsSignature.value_block.value[1] instanceof in_window.org.pkijs.asn1.INTEGER) === false)
+            return new ArrayBuffer(0);
+        // #endregion 
+
+        // #region Aux functions 
+        function transformINTEGER(integer)
         {
-            length = r_length - 1;
-            r_start = 1;
-        }
-        else
-            length = r_length;
+            var view = new Uint8Array(integer.value_block.value_hex);
 
-        var s_view = new Uint8Array(cmsSignature.value_block.value[1].value_block.value_hex);
-        if((s_view[0] === 0x00) && (s_view[1] & 0x80))
-        {
-            length += s_length - 1;
-            s_start = 1;
+            switch(integer.value_block.value_hex.byteLength)
+            {
+                case 32:
+                case 48:
+                case 66:
+                    return integer.value_block.value_hex;
+                    break;
+                case 33:
+                case 49:
+                case 67:
+                    return (view.slice(1)).buffer;
+                    break;
+                case 31:
+                case 47:
+                case 65:
+                    {
+                        var updatedBuffer = new ArrayBuffer(integer.value_block.value_hex.byteLength + 1);
+                        var updatedView = new Uint8Array(updatedBuffer);
+
+                        updatedView.set(view, 1);
+
+                        return updatedBuffer;
+                    }
+                    break;
+                default:
+                    return new ArrayBuffer(0);
+            }
         }
-        else
-            length += s_length;
         // #endregion 
 
-        // #region Copy values from CMS ECDSA signature 
-        var result = new ArrayBuffer(length);
-        var result_view = new Uint8Array(result);
+        rBuffer = transformINTEGER(cmsSignature.value_block.value[0]);
+        sBuffer = transformINTEGER(cmsSignature.value_block.value[1]);
 
-        for(var i = r_start; i < r_length; i++)
-            result_view[i - r_start] = r_view[i];
-
-        for(var i = s_start; i < s_length; i++)
-            result_view[i - s_start + r_length - r_start] = s_view[i];
-        // #endregion 
-
-        return result;
-    };
+        return in_window.org.pkijs.concat_buffers(rBuffer, sBuffer);
+    }
     //**************************************************************************************
     in_window.org.pkijs.getEncryptionAlgorithm =
     function(algorithm)
