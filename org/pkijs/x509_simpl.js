@@ -1,9 +1,9 @@
 ﻿/*
  * Copyright (c) 2014, GMO GlobalSign
- * Copyright (c) 2015, Peculiar Ventures
+ * Copyright (c) 2015-2016, Peculiar Ventures
  * All rights reserved.
  *
- * Author 2014-2015, Yury Strozhevsky <www.strozhevsky.com>.
+ * Author 2014-2016, Yury Strozhevsky <www.strozhevsky.com>.
  *
  * Redistribution and use in source and binary forms, with or without modification, 
  * are permitted provided that the following conditions are met:
@@ -5406,6 +5406,8 @@ function(in_window)
         var subjectPublicKeyInfo = this.subjectPublicKeyInfo;
         var signature = this.signatureValue;
         var tbs = this.tbs;
+
+        var ecdsaKeySize = 0;
         // #endregion 
 
         // #region Get a "crypto" extension 
