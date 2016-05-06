@@ -2091,12 +2091,12 @@ function(in_window)
 
                     var checkCA_promises = new Array();
 
-                    for(var i = 0; i < this.certificates.length; i++)
+                    for(var i = 0; i < _this.certificates.length; i++)
                     {
-                        if((this.certificates[i] instanceof in_window.org.pkijs.simpl.CERT) == false)
+                        if((_this.certificates[i] instanceof in_window.org.pkijs.simpl.CERT) == false)
                             continue;
 
-                        checkCA_promises.push(checkCA(this.certificates[i]));
+                        checkCA_promises.push(checkCA(_this.certificates[i]));
                     }
 
                     return Promise.all(checkCA_promises).then(
