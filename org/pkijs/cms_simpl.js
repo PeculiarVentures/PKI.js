@@ -2079,16 +2079,6 @@ function(in_window)
                 return null;
         }
 
-        var checkCA_promises = new Array();
-
-        for(var i = 0; i < this.certificates.length; i++)
-        {
-            if((this.certificates[i] instanceof in_window.org.pkijs.simpl.CERT) == false)
-                continue;
-
-            checkCA_promises.push(checkCA(this.certificates[i]));
-        }
-
         if(checkChain)
         {
             sequence = sequence.then(
@@ -2098,6 +2088,16 @@ function(in_window)
                     if(result == false)
                         return false;
                     // #endregion 
+
+                    var checkCA_promises = new Array();
+
+                    for(var i = 0; i < this.certificates.length; i++)
+                    {
+                        if((this.certificates[i] instanceof in_window.org.pkijs.simpl.CERT) == false)
+                            continue;
+
+                        checkCA_promises.push(checkCA(this.certificates[i]));
+                    }
 
                     return Promise.all(checkCA_promises).then(
                         function(promiseResults)
