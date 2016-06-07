@@ -4397,12 +4397,12 @@ function(in_window)
             if(algorithm_name === "ECDSA")
             {
                 // #region Get information about named curve 
-                if((subjectPublicKeyInfo.algorithm.algorithm_params instanceof in_window.org.pkijs.asn1.OID) === false)
+                if((this.subjectPublicKeyInfo.algorithm.algorithm_params instanceof in_window.org.pkijs.asn1.OID) === false)
                     return Promise.reject("Incorrect type for ECDSA public key parameters");
 
-                var curveObject = in_window.org.pkijs.getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                var curveObject = in_window.org.pkijs.getAlgorithmByOID(this.subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
                 if(("name" in curveObject) === false)
-                    return Promise.reject("Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
+                    return Promise.reject("Unsupported named curve algorithm: " + this.subjectPublicKeyInfo.algorithm.algorithm_params.value_block.toString());
                 // #endregion 
 
                 algorithm.algorithm.namedCurve = curveObject.name;
