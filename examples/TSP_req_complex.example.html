@@ -254,7 +254,7 @@
             });
 
             tsp_req_simpl.reqPolicy = "1.1.1";
-            tsp_req_simpl.certReq = new org.pkijs.asn1.BOOLEAN({ value: true });
+            tsp_req_simpl.certReq = true;
             tsp_req_simpl.nonce = new org.pkijs.asn1.INTEGER({ value_hex: fictionBuffer });
             // #endregion 
 
