@@ -86,7 +86,7 @@ function(in_window)
     // #region ASN.1 schema definition for "ContentInfo" type (RFC5652) 
     //**************************************************************************************
     in_window.org.pkijs.schema.CMS_CONTENT_INFO =
-    function()
+    function(input_args, optional)
     {
         //ContentInfo ::= SEQUENCE {
         //    contentType ContentType,
@@ -94,8 +94,12 @@ function(in_window)
 
         var names = in_window.org.pkijs.getNames(arguments[0]);
 
+        if(typeof optional === "undefined")
+            optional = false;
+
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             name: (names.block_name || "ContentInfo"),
+            optional: optional,
             value: [
                 new in_window.org.pkijs.asn1.OID({ name: (names.contentType || "contentType") }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
