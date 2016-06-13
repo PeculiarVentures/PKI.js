@@ -3093,6 +3093,7 @@ function(in_window)
         var _this = this;
 
         var trusted_certs = new Array();
+        var data = new ArrayBuffer(0);
         // #endregion 
 
         // #region Check that "timeStampToken" exists
@@ -3105,6 +3106,9 @@ function(in_window)
         {
             if("trusted_certs" in arguments[0])
                 trusted_certs = arguments[0].trusted_certs;
+
+            if("data" in arguments[0])
+                data = arguments[0].data;
         }
         // #endregion 
 
@@ -3116,7 +3120,7 @@ function(in_window)
         // #region Verify internal signed data value 
         var signed_simp = new in_window.org.pkijs.simpl.CMS_SIGNED_DATA({ schema: this.timeStampToken.content });
 
-        return signed_simp.verify({ signer: 0, trusted_certs: trusted_certs });
+        return signed_simp.verify({ signer: 0, trusted_certs: trusted_certs, data: data });
         // #endregion 
     };
     //**************************************************************************************

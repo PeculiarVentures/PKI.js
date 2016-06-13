@@ -86,7 +86,7 @@ function(in_window)
     // #region ASN.1 schema definition for "ContentInfo" type (RFC5652) 
     //**************************************************************************************
     in_window.org.pkijs.schema.CMS_CONTENT_INFO =
-    function()
+    function(input_args, optional)
     {
         //ContentInfo ::= SEQUENCE {
         //    contentType ContentType,
@@ -94,8 +94,12 @@ function(in_window)
 
         var names = in_window.org.pkijs.getNames(arguments[0]);
 
+        if(typeof optional === "undefined")
+            optional = false;
+
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             name: (names.block_name || "ContentInfo"),
+            optional: optional,
             value: [
                 new in_window.org.pkijs.asn1.OID({ name: (names.contentType || "contentType") }),
                 new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
@@ -212,7 +216,7 @@ function(in_window)
         }));
     };
     //**************************************************************************************
-    in_window.org.pkijs.schema.CSM_REVOCATION_INFO_CHOICES =
+    in_window.org.pkijs.schema.CMS_REVOCATION_INFO_CHOICES =
     function()
     {
         //RevocationInfoChoices ::= SET OF RevocationInfoChoice
@@ -541,7 +545,7 @@ function(in_window)
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
                     },
-                    value: in_window.org.pkijs.schema.CSM_REVOCATION_INFO_CHOICES(names.crls || {
+                    value: in_window.org.pkijs.schema.CMS_REVOCATION_INFO_CHOICES(names.crls || {
                         names: {
                             crls: "SignedData.crls"
                         }
@@ -1105,7 +1109,7 @@ function(in_window)
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
                     },
-                    value: in_window.org.pkijs.schema.CSM_REVOCATION_INFO_CHOICES().value_block.value
+                    value: in_window.org.pkijs.schema.CMS_REVOCATION_INFO_CHOICES().value_block.value
                 })
             ]
         }));

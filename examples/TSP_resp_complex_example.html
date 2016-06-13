@@ -135,6 +135,9 @@
         //*********************************************************************************
         // #region Auxiliary functions 
         //*********************************************************************************
+
+        var testData = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09]);
+
         function formatPEM(pem_string)
         {
             /// <summary>Format string in order to have each line with length equal to 63</summary>
@@ -442,9 +445,18 @@
                 );
             // #endregion 
 
-            // #region Create specific TST info structure to sign 
+            // #region Hash "testData" value 
             sequence = sequence.then(
                 function()
+                {
+                    return crypto.digest(hash_algorithm, testData);
+                }
+                );
+            // #endregion 
+
+            // #region Create specific TST info structure to sign 
+            sequence = sequence.then(
+                function(result)
                 {
                     var hashedBuffer = new ArrayBuffer(4);
                     var hashedView = new Uint8Array(hashedBuffer);
@@ -458,7 +470,7 @@
                         policy: "1.1.1",
                         messageImprint: new org.pkijs.simpl.tsp.MessageImprint({
                             hashAlgorithm: new org.pkijs.simpl.ALGORITHM_IDENTIFIER({ algorithm_id: "1.3.14.3.2.26" }),
-                            hashedMessage: new org.pkijs.asn1.OCTETSTRING({ value_hex: hashedBuffer })
+                            hashedMessage: new org.pkijs.asn1.OCTETSTRING({ value_hex: result })
                         }),
                         serialNumber: new org.pkijs.asn1.INTEGER({ value_hex: hashedBuffer }),
                         genTime: new Date(),
@@ -806,7 +818,7 @@
             // #endregion 
 
             // #region Verify TSP response 
-            tsp_resp_simpl.verify({ trusted_certs: trustedCertificates }).
+            tsp_resp_simpl.verify({ trusted_certs: trustedCertificates, data: testData.buffer }).
             then(
             function(result)
             {
