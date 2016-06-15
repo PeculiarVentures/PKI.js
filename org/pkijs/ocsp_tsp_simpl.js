@@ -3090,10 +3090,11 @@ function(in_window)
         /// <returns type="Promise">Returns a new Promise object (in case of error), or a result of "crypto.subtle.veryfy" function</returns>
 
         // #region Initial variables 
-        var _this = this;
-
-        var trusted_certs = new Array();
-        var data = new ArrayBuffer(0);
+        var verificationParameters = {
+            signer: 0,
+            trusted_certs: [],
+            data: new ArrayBuffer(0)
+        };
         // #endregion 
 
         // #region Check that "timeStampToken" exists
@@ -3104,11 +3105,8 @@ function(in_window)
         // #region Get initial parameters 
         if(arguments[0] instanceof Object)
         {
-            if("trusted_certs" in arguments[0])
-                trusted_certs = arguments[0].trusted_certs;
-
-            if("data" in arguments[0])
-                data = arguments[0].data;
+            verificationParameters = arguments[0];
+            verificationParameters.signer = 0;
         }
         // #endregion 
 
@@ -3120,7 +3118,7 @@ function(in_window)
         // #region Verify internal signed data value 
         var signed_simp = new in_window.org.pkijs.simpl.CMS_SIGNED_DATA({ schema: this.timeStampToken.content });
 
-        return signed_simp.verify({ signer: 0, trusted_certs: trusted_certs, data: data });
+        return signed_simp.verify(verificationParameters);
         // #endregion 
     };
     //**************************************************************************************
