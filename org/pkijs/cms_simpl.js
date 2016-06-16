@@ -2228,6 +2228,8 @@ function(in_window)
                 }
 
                 sha_algorithm = shaAlgorithm.name;
+
+                return true;
             }
             );
         // #endregion 
