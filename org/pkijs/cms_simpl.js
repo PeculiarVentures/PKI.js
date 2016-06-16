@@ -2217,7 +2217,7 @@ function(in_window)
                         return Promise.reject({
                             date: checkDate,
                             code: 7,
-                            message: "Error during checking certificates for CA flag: " + promiseError,
+                            message: "Unsupported signature algorithm: " + _this.signerInfos[signerIndex].digestAlgorithm.algorithm_id,
                             signatureVerified: null,
                             signerCertificate: signer_cert,
                             signerCertificateVerified: true
