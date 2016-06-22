@@ -383,7 +383,6 @@ function(in_window)
                 extensions.push(this.singleRequestExtensions[j].toSchema());
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 0 // [0]
@@ -525,7 +524,6 @@ function(in_window)
 
             if("version" in this)
                 output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 0 // [0]
@@ -535,7 +533,6 @@ function(in_window)
 
             if("requestorName" in this)
                 output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 1 // [1]
@@ -560,7 +557,6 @@ function(in_window)
                     extensions.push(this.requestExtensions[j].toSchema());
 
                 output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                    optional: true,
                     id_block: {
                         tag_class: 3, // CONTEXT-SPECIFIC
                         tag_number: 2 // [2]
@@ -697,7 +693,6 @@ function(in_window)
             // #endregion 
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 0 // [0]
@@ -947,26 +942,9 @@ function(in_window)
     in_window.org.pkijs.simpl.OCSP_REQUEST.prototype.toJSON =
     function()
     {
-        var _object = {};
-
-        if("version" in this)
-            _object.version = this.version;
-
-        if("requestorName" in this)
-            _object.requestorName = this.requestorName.toJSON();
-
-        _object.requestList = new Array();
-
-        for(var i = 0; i < this.requestList.length; i++)
-            _object.requestList.push(this.requestList[i].toJSON());
-
-        if("requestExtensions" in this)
-        {
-            _object.requestExtensions = new Array();
-
-            for(var i = 0; i < this.requestExtensions.length; i++)
-                _object.requestExtensions.push(this.requestExtensions[i].toJSON());
-        }
+        var _object = {
+            tbsRequest: this.tbsRequest.toJSON()
+        };
 
         if("optionalSignature" in this)
             _object.optionalSignature = this.optionalSignature.toJSON();
@@ -1694,7 +1672,6 @@ function(in_window)
                 certs_array.push(this.certs[i].toSchema());
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 0 // [0]
@@ -2495,7 +2472,6 @@ function(in_window)
                 extensions_array.push(this.extensions[i].toSchema());
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 0 // [0]
@@ -2772,7 +2748,6 @@ function(in_window)
             output_array.push(this.nonce);
         if("tsa" in this)
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 0 // [0]
@@ -2789,7 +2764,6 @@ function(in_window)
                 extensions_array.push(this.extensions[i].toSchema());
 
             output_array.push(new in_window.org.pkijs.asn1.ASN1_CONSTRUCTED({
-                optional: true,
                 id_block: {
                     tag_class: 3, // CONTEXT-SPECIFIC
                     tag_number: 1 // [1]
@@ -2981,7 +2955,6 @@ function(in_window)
         output_array.push(new in_window.org.pkijs.asn1.INTEGER({ value: this.status }));
         if("statusStrings" in this)
             output_array.push(new in_window.org.pkijs.asn1.SEQUENCE({
-                optional: true,
                 value: this.statusStrings
             }));
         if("failInfo" in this)

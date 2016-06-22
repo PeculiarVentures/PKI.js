@@ -3947,13 +3947,18 @@ function(in_window)
     in_window.org.pkijs.simpl.cms.KeyAgreeRecipientInfo.prototype.toJSON =
     function()
     {
-        return {
+        var _object = {
             version: this.version,
-            originator: this.originator.toJSON(),
-            ukm: this.ukm.toJSON(),
-            keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
-            recipientEncryptedKeys: this.recipientEncryptedKeys.toJSON()
+            originator: this.originator.toJSON()
         };
+
+        if("ukm" in this)
+            _object.ukm = this.ukm.toJSON();
+
+        _object.keyEncryptionAlgorithm = this.keyEncryptionAlgorithm.toJSON();
+        _object.recipientEncryptedKeys = this.recipientEncryptedKeys.toJSON();
+
+        return _object;
     };
     //**************************************************************************************
     // #endregion 
@@ -4485,7 +4490,7 @@ function(in_window)
             variant: this.variant
         };
 
-        if((this.variant == 1) || (this.variant === 2))
+        if((this.variant >= 1) && (this.variant <= 4))
             _object.value = this.value.toJSON();
 
         return _object;

@@ -109,7 +109,7 @@ function(in_window)
         return (new in_window.org.pkijs.asn1.SEQUENCE({
             name: (names.block_name || ""),
             value: [
-                in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.signature || {
+                in_window.org.pkijs.schema.ALGORITHM_IDENTIFIER(names.hashAlgorithm_object || {
                     names: {
                         block_name: (names.hashAlgorithm || "")
                     }
@@ -675,7 +675,10 @@ function(in_window)
             name: (names.block_name || ""),
             optional: true,
             value: [
-                new in_window.org.pkijs.asn1.INTEGER({ name: (names.seconds || "") }),
+                new in_window.org.pkijs.asn1.INTEGER({
+                    optional: true,
+                    name: (names.seconds || "")
+                }),
                 new in_window.org.pkijs.asn1.ASN1_PRIMITIVE({
                     name: (names.millis || ""),
                     optional: true,
