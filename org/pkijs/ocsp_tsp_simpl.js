@@ -1228,8 +1228,8 @@ function(in_window)
 
         try
         {
-            var asn1Basic = org.pkijs.fromBER(this.responseBytes.response.value_block.value_hex);
-            basicResponse = new org.pkijs.simpl.OCSP_BASIC_RESPONSE({ schema: asn1Basic.result });
+            var asn1Basic = in_window.org.pkijs.fromBER(this.responseBytes.response.value_block.value_hex);
+            basicResponse = new in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE({ schema: asn1Basic.result });
         }
         catch(ex)
         {
@@ -2147,56 +2147,6 @@ function(in_window)
         return _object;
     };
     //**************************************************************************************
-    in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE.prototype.old_getCertificateStatus =
-    function(certificateID)
-    {
-        /// <summary>Get OCSP response status for specific certificate</summary>
-        /// <param name="certificateID" type="in_window.org.pkijs.simpl.ocsp.CertID">Identifier of the certificate to be checked</param>
-
-        // #region Initial variables 
-        var result = {
-            isForCertificate: false,
-            status: 2 // 0 = good, 1 = revoked, 2 = unknown
-        };
-        // #endregion 
-
-        // #region Check "CertID" 
-        for(var i = 0; i < this.tbsResponseData.responses.length; i++)
-        {
-            if(this.tbsResponseData.responses[i].certID.isEqual(certificateID))
-            {
-                result.isForCertificate = true;
-
-                if(this.tbsResponseData.responses[i].certStatus instanceof in_window.org.pkijs.asn1.ASN1_PRIMITIVE)
-                {
-                    switch(this.tbsResponseData.responses[i].certStatus.id_block.tag_number)
-                    {
-                        case 0: // good
-                            result.status = 0;
-                            break;
-                        case 2: // unknown
-                            result.status = 2;
-                            break;
-                        default:;
-                    }
-                }
-                else
-                {
-                    if(this.tbsResponseData.responses[i].certStatus instanceof in_window.org.pkijs.asn1.ASN1_CONSTRUCTED)
-                    {
-                        if(this.tbsResponseData.responses[i].certStatus.id_block.tag_number == 1)
-                            result.status = 1; // revoked
-                    }
-                }
-
-                return result;
-            }
-        }
-        // #endregion 
-
-        return result;
-    };
-    //**************************************************************************************
     in_window.org.pkijs.simpl.OCSP_BASIC_RESPONSE.prototype.getCertificateStatus =
     function(certificate, issuerCertificate)
     {
@@ -2223,7 +2173,7 @@ function(in_window)
         // #region Create all "certIDs" for input certificates 
         for(var i = 0; i < this.tbsResponseData.responses.length; i++)
         {
-            var hashAlgorithm = org.pkijs.getAlgorithmByOID(this.tbsResponseData.responses[i].certID.hashAlgorithm.algorithm_id);
+            var hashAlgorithm = in_window.org.pkijs.getAlgorithmByOID(this.tbsResponseData.responses[i].certID.hashAlgorithm.algorithm_id);
             if(("name" in hashAlgorithm) == false)
                 return Promise.reject("Wrong CertID hashing algorithm: " + this.tbsResponseData.responses[i].certID.hashAlgorithm.algorithm_id);
 
@@ -2231,7 +2181,7 @@ function(in_window)
             {
                 hashesObject[hashAlgorithm.name] = 1;
 
-                var certID = new org.pkijs.simpl.ocsp.CertID();
+                var certID = new in_window.org.pkijs.simpl.ocsp.CertID();
 
                 certIDs.push(certID);
                 certIDPromises.push(certID.createForCertificate(certificate, {
