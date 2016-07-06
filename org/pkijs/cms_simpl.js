@@ -813,40 +813,6 @@ function(in_window)
         // #region Get internal properties from parsed schema 
         this.attrType = asn1.result["attrType"].value_block.toString();
         this.attrValues = asn1.result["attrValues"];
-
-        // #region Get "parsedValue" for well-known attributes
-        switch(this.attrType)
-        {
-            case "0.4.0.1733.2.5": // ATSHashIndex
-                this.parsedValue = new in_window.org.pkijs.simpl.cades.ATSHashIndex({ schema: this.attrValues[0] });
-                break;
-            case "0.4.0.1733.2.4": // archive-time-stamp-v3
-                this.parsedValue = new in_window.org.pkijs.simpl.cades.archive_time_stamp_v3({ schema: this.attrValues[0] });
-                break;
-            case "1.2.840.113549.1.9.16.2.14": // signature-time-stamp
-                this.parsedValue = new in_window.org.pkijs.simpl.cades.signature_time_stamp({ schema: this.attrValues[0] });
-                break;
-            case "1.2.840.113549.1.9.16.2.21": // complete-certificate-references
-                this.parsedValue = new in_window.org.pkijs.simpl.cades.complete_certificate_references({ schema: this.attrValues[0] });
-                break;
-            case "1.2.840.113549.1.9.16.2.22": // complete-revocation-references
-                this.parsedValue = new in_window.org.pkijs.simpl.cades.complete_revocation_references({ schema: this.attrValues[0] });
-                break;
-            case "1.2.840.113549.1.9.16.2.25": // CAdES-C-Timestamp
-                this.parsedValue = new in_window.org.pkijs.simpl.cades.CAdES_C_Timestamp({ schema: this.attrValues[0] });
-                break;
-            case "1.2.840.113549.1.9.16.2.23": // certificate-values
-                this.parsedValue = new in_window.org.pkijs.simpl.cades.certificate_values({ schema: this.attrValues[0] });
-                break;
-            case "1.2.840.113549.1.9.16.2.24": // revocation-values
-                this.parsedValue = new in_window.org.pkijs.simpl.cades.revocation_values({ schema: this.attrValues[0] });
-                break;
-            case "1.2.840.113583.1.1.8": // Adobe "RevocationInfoArchival"
-                this.parsedValue = new in_window.org.pkijs.simpl.cades.RevocationInfoArchival({ schema: this.attrValues[0] });
-                break;
-            default:;
-        }
-        // #endregion   
         // #endregion 
     };
     //**************************************************************************************
