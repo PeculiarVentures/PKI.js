@@ -180,14 +180,15 @@ function(in_window)
         // #region If input argument array contains "schema" for this object 
         if((arguments[0] instanceof Object) && ("schema" in arguments[0]))
             in_window.org.pkijs.simpl.GENERAL_NAME.prototype.fromSchema.call(this, arguments[0].schema);
-            // #endregion 
-            // #region If input argument array contains "native" values for internal properties 
+        // #endregion 
+        // #region If input argument array contains "native" values for internal properties 
         else
         {
             if(arguments[0] instanceof Object)
             {
                 this.NameType = arguments[0].NameType || 9;
-                this.Name = arguments[0].Name || {};
+                if("Name" in arguments[0])
+                    this.Name = arguments[0].Name;
             }
         }
         // #endregion 
