@@ -1012,6 +1012,11 @@ function(in_window)
 
         switch(oid)
         {
+            case "1.2.840.113549.1.1.1":
+                result = {
+                    name: "RSASSA-PKCS1-v1_5"
+                };
+                break;
             case "1.2.840.113549.1.1.5":
                 result = {
                     name: "RSASSA-PKCS1-v1_5",
