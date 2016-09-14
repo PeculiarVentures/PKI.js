@@ -1898,9 +1898,9 @@ function(in_window)
             function()
             {
                 // #region Get information about public key algorithm and default parameters for import
-                var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(certs[cert_index].signatureAlgorithm.algorithm_id);
+                var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(certs[cert_index].subjectPublicKeyInfo.algorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
-                    return Promise.reject("Unsupported public key algorithm: " + certs[cert_index].signatureAlgorithm.algorithm_id);
+                    return Promise.reject("Unsupported public key algorithm: " + certs[cert_index].subjectPublicKeyInfo.algorithm.algorithm_id);
 
                 var algorithm_name = algorithmObject.name;
 

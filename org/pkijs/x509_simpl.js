@@ -4121,9 +4121,9 @@ function(in_window)
             function()
             {
                 // #region Get information about public key algorithm and default parameters for import
-                var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.signatureAlgorithm.algorithm_id);
+                var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.subjectPublicKeyInfo.algorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
-                    return Promise.reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id);
+                    return Promise.reject("Unsupported public key algorithm: " + _this.subjectPublicKeyInfo.algorithm.algorithm_id);
 
                 var algorithm_name = algorithmObject.name;
 
@@ -4384,9 +4384,9 @@ function(in_window)
             // #endregion   
 
             // #region Get information about public key algorithm and default parameters for import
-            var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(this.signatureAlgorithm.algorithm_id);
+            var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(this.subjectPublicKeyInfo.algorithm.algorithm_id);
             if(("name" in algorithmObject) === false)
-                return Promise.reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id);
+                return Promise.reject("Unsupported public key algorithm: " + _this.subjectPublicKeyInfo.algorithm.algorithm_id);
 
             var algorithm_name = algorithmObject.name;
 
@@ -4856,9 +4856,9 @@ function(in_window)
             function()
             {
                 // #region Get information about public key algorithm and default parameters for import
-                var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.signature.algorithm_id);
+                var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.subjectPublicKeyInfo.algorthim.algorithm_id);
                 if(("name" in algorithmObject) === "")
-                    return Promise.reject("Unsupported public key algorithm: " + _this.signature.algorithm_id);
+                    return Promise.reject("Unsupported public key algorithm: " + _this.subjectPublicKeyInfo.algorithm.algorithm_id);
 
                 var algorithm_name = algorithmObject.name;
 
@@ -5428,9 +5428,9 @@ function(in_window)
             function()
             {
                 // #region Get information about public key algorithm and default parameters for import
-                var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.signatureAlgorithm.algorithm_id);
+                var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(_this.subjectPublicKeyInfo.algorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
-                    return Promise.reject("Unsupported public key algorithm: " + _this.signatureAlgorithm.algorithm_id);
+                    return Promise.reject("Unsupported public key algorithm: " + _this.subjectPublicKeyInfo.algorithm.algorithm_id);
 
                 var algorithm_name = algorithmObject.name;
 
