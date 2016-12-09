@@ -2323,7 +2323,7 @@ function(in_window)
                 // #endregion 
 
                 // #region Get information about public key algorithm and default parameters for import
-                var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(signer_cert.signatureAlgorithm.algorithm_id);
+                var algorithmObject = in_window.org.pkijs.getAlgorithmByOID(signer_cert.subjectPublicKeyInfo.algorithm.algorithm_id);
                 if(("name" in algorithmObject) === false)
                 {
                     if(extendedMode)
@@ -2331,14 +2331,14 @@ function(in_window)
                         return Promise.reject({
                             date: checkDate,
                             code: 11,
-                            message: "Unsupported public key algorithm: " + signer_cert.signatureAlgorithm.algorithm_id,
+                            message: "Unsupported public key algorithm: " + signer_cert.subjectPublicKeyInfo.algorithm.algorithm_id,
                             signatureVerified: null,
                             signerCertificate: signer_cert,
                             signerCertificateVerified: true
                         });
                     }
 
-                    return Promise.reject("Unsupported public key algorithm: " + signer_cert.signatureAlgorithm.algorithm_id);
+                    return Promise.reject("Unsupported public key algorithm: " + signer_cert.subjectPublicKeyInfo.algorithm.algorithm_id);
                 }
 
                 var algorithm_name = algorithmObject.name;
