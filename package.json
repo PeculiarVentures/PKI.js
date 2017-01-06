@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/PeculiarVenturess/PKI.js.git"
+    "url": "git://github.com/PeculiarVentures/PKI.js.git"
   },
   "devDependencies": {
     "mocha": "^3.0.2",
