@@ -23,7 +23,7 @@ In the new version of library we have some new features:
 * Internal realization of special routine working with ES2015 generators;
 
 Full detailed information about all PKI.js features could be found [in separate file](FEATURES.MD).
-Description of PKI.js code structure could be found [in separate file](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/README.MD).
+Description of PKI.js code structure could be found [in separate file](https://github.com/PeculiarVentures/PKI.js/tree/master/src/README.MD).
 
 ## Important Information for PKI.js V1 Users
 PKI.js V2 (ES2015 version) is **incompactible** with PKI.js V1 code. In order to make it easier to move from PKIjs V1 code to PKIjs V2 code we made a file that provides a [mapping](MAPPING.MD) between old and new class names.
