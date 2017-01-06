@@ -1,5 +1,5 @@
-﻿# PKIjs
-[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://raw.githubusercontent.com/PeculiarVentures/pki.js/master/LICENSE)  [![NPM version](https://badge.fury.io/js/pkijs.png)](http://badge.fury.io/js/pkijs)  [![CircleCI](https://circleci.com/gh/PeculiarVentures/pkijs-es6.svg?style=svg)](https://circleci.com/gh/PeculiarVentures/pkijs-es6)
+# PKIjs
+[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://raw.githubusercontent.com/PeculiarVentures/pki.js/master/LICENSE)  [![NPM version](https://badge.fury.io/js/pkijs.png)](http://badge.fury.io/js/pkijs)  [![CircleCI](https://circleci.com/gh/PeculiarVentures/PKI.js.svg?style=svg)](https://circleci.com/gh/PeculiarVentures/PKI.js)
 
 [![NPM](https://nodei.co/npm-dl/pkijs.png?months=3&height=2)](https://nodei.co/npm/pkijs/)
 
