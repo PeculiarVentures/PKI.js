@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "buildes6": "rollup -i es6.js -o bundle.js -c ../../config/rollup.config_es6.js",
+    "buildes5": "rollup -i es6.js -o bundle.js -c ../../config/rollup.config_babel.js"
+  }
+}

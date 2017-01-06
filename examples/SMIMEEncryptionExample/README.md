@@ -1,0 +1,1 @@
+Example demonstrating encrypting and decrypting an S/MIME email message.

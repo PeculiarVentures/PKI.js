@@ -1,0 +1,18 @@
+machine:
+  node:
+    version: 6.9.1
+
+dependencies:
+  pre:
+    - npm install -g typescript rollup@0.34.7 https://github.com/PeculiarVentures/rollem.git
+  post:
+    - npm install rollup-plugin-node-resolve
+
+test:
+  pre:
+    - npm run build:tests
+
+general:
+  branches:
+    ignore:
+      - gh-pages

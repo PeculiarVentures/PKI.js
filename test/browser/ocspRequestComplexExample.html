@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>PKIjs Mocha Test - OCSP Request Complex Example</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.css" />
+</head>
+<body>
+    <div id="mocha"></div>
+
+    <script src="https://cdn.rawgit.com/jquery/jquery/2.1.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.js"></script>
+    <script src="https://cdn.rawgit.com/chaijs/chai/4.0.0-canary.1/chai.js"></script>
+
+    <script>mocha.setup('bdd'); window.assert = chai.assert;</script>
+
+    <script type="text/javascript" src="ocspRequestComplexExample.js"></script>
+
+    <script>
+	    mocha.checkLeaks();
+	    mocha.globals(['jQuery']);
+	    mocha.run();
+    </script>
+</body>
+</html>
