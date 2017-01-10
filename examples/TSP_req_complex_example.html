@@ -3,7 +3,8 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title>OCSP request complex example</title>
+    <title>TSP request complex example</title>
+
 
     <style type="text/css">
         body{background:#EFEFEF;font:normal 14px/16px Helvetica, Arial, sans-serif;}
@@ -82,21 +83,21 @@
             margin:0 0 12px;
             float:left;
         }
-        .border-block .two-col #ocsp-req-attributes{
+        .border-block .two-col #tsp-req-attributes{
             margin:0;
             padding:0;
             float:left;
             list-style:none;
         }
-        .border-block .two-col #ocsp-req-attributes li p{
+        .border-block .two-col #tsp-req-attributes li p{
             margin:0;
         }
-        .border-block .two-col #ocsp-req-attributes li p span{
+        .border-block .two-col #tsp-req-attributes li p span{
             width:40px;
             display:inline-block;
             margin:0 0 5px;
         }
-        .border-block .two-col #ocsp-req-exten{
+        .border-block .two-col #tsp-req-exten{
             overflow:hidden;
             padding:0 0 0 17px;
             margin:0;
@@ -119,43 +120,41 @@
        }
     </style>
 
-    <script type="text/javascript" src="OCSP_req_complex_example.js"></script>
+    <script type="text/javascript" src="TSP_req_complex_example.js"></script>
 </head>
 
 <body>
     <div class="wrapper">
 
-        <p class="header-block">Create new OCSP request</p>
+        <p class="header-block">Create new TSP request</p>
         <div id="output_div" class="border-block">
-            <label for="new_signed_data" style="font-weight:bold;float:left;">BASE-64 encoded new OCSP request:</label>
-            <textarea id="new_signed_data">&lt;  New encoded OCSP request will be stored here &gt;</textarea>
-            <a onclick="createOCSPReq();">Create</a>
+            <label for="new_signed_data" style="font-weight:bold;float:left;">BASE-64 encoded new TSP request:</label>
+            <textarea id="new_signed_data">&lt;  New encoded TSP request will be stored here &gt;</textarea>
+            <a onclick="createTSPReq();">Create</a>
         </div>
 
-        <p class="header-block">Parse loaded/created OCSP request</p>
-        <div id="ocsp-req-data-block" class="border-block">
+        <p class="header-block">Parse loaded/created TSP request</p>
+        <div id="tsp-req-data-block" class="border-block">
             <p>
-                <label for="ocsp-req-file">Select OCSP request file:</label>
-                <input type="file" id="ocsp-req-file" title="OCSP request" />
+                <label for="tsp-req-file">Select TSP request file (binary):</label>
+                <input type="file" id="tsp-req-file" title="TSP request" />
             </p>
-            <div id="ocsp-req-requests-div" class="two-col">
-                <p class="subject">Requests:</p>
-                <table id="ocsp-req-requests"><tr><th>Cert. serial number</th></tr></table>
+            <div id="tsp-req-imprint-div" class="two-col">
+                <p class="subject">Message imprint:</p>
+                <table id="tsp-req-imprint"><tr><th>Algorithm</th><th>Message</th></tr></table>
             </div>
-            <div id="ocsp-req-name-div" class="two-col" style="display:none;">
-                <p class="subject">Requestor name:</p>
-                <table id="ocsp-req-name"><tr><th>OID</th><th>Value</th></tr></table>
-            </div>
-            <p id="ocsp-req-nm-simpl" style="display:none;"><span class="type">Requestor name:</span> <span id="ocsp-req-name-simpl"></span></p>
-            <div id="ocsp-req-extn-div" class="two-col" style="display:none;">
+            <p id="tsp-req-pol" style="display:none;"><span class="type">Policy:</span> <span id="tsp-req-policy"></span></p>
+            <p id="tsp-req-non" style="display:none;"><span class="type">Nonce:</span> <span id="tsp-req-nonce"></span></p>
+            <p id="tsp-req-cert" style="display:none;"><span class="type">Cert. req. exists:</span> <span id="tsp-req-cert-req"></span></p>
+            <div id="tsp-req-extn-div" class="two-col" style="display:none;">
                 <p class="subject">Extensions:</p>
-                <table id="ocsp-req-extn-table"><tr><th>OID</th></tr></table>
+                <table id="tsp-req-extn-table"><tr><th>OID</th></tr></table>
             </div>
         </div>
     </div>
 
     <script>
-        document.getElementById('ocsp-req-file').addEventListener('change', handleFileBrowse, false);
+        document.getElementById('tsp-req-file').addEventListener('change', handleFileBrowse, false);
     </script>
 </body>
 </html>

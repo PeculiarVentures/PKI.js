@@ -3,9 +3,17 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title>X.509 certificate's complex example</title>
+    <title>S/MIME encryption and decryption</title>
 
-    <script type="text/javascript" src="X509_cert_complex_example.js"></script>
+    <script type="text/javascript" src="js/mimefuncs.js"></script>
+    <script type="text/javascript" src="js/addressparser.js"></script>
+    <script type="text/javascript" src="js/mimeparser-tzabbr.js"></script>
+    <script type="text/javascript" src="js/mimeparser.js"></script>
+    <script type="text/javascript" src="js/emailjs-mime-codec.js"></script>
+    <script type="text/javascript" src="js/emailjs-mime-types.js"></script>
+    <script type="text/javascript" src="js/emailjs-addressparser.js"></script>
+    <script type="text/javascript" src="js/punycode.js"></script>
+    <script type="text/javascript" src="js/emailjs-mime-builder.js"></script>
 
     <style type="text/css">
         body{background:#EFEFEF;font:normal 14px/16px Helvetica, Arial, sans-serif;}
@@ -120,12 +128,13 @@
         border: 1px solid black; 
        }
     </style>
+
+    <script type="text/javascript" src="SMIMEEncryptionExample.js"></script>
 </head>
 
 <body>
     <div class="wrapper">
-
-        <p class="header-block">Create new X.509 certificate</p>
+        <p class="header-block">Put existing data or create new X.509 certificate and private key</p>
         <div id="output_div" class="border-block">
             <p>
                 <label for="hash_alg" style="font-weight:bold">Hashing algorithm:</label>
@@ -144,67 +153,48 @@
                     <option value="alg_ECDSA">ECDSA</option>
                 </select>
             </p>
-            <label for="new_signed_data" style="font-weight:bold;float:left;">BASE-64 encoded new certificate + PKCS#8 private key:</label>
-            <textarea id="new_signed_data">&lt;  New encoded certificate + PKCS#8 exported private key will be stored here &gt;</textarea>
-            <a onclick="createCertificate()">Create</a>
-        </div>
-
-        <p class="header-block">Parse loaded/created X.509 certificate</p>
-        <div id="cert-data-block" class="border-block">
             <p>
-                <label for="cert-file">Select binary X.509 cert file:</label>
-                <input type="file" id="cert-file" title="X.509 certificate" />
+                <a onclick="createCertificate();">Create</a>
             </p>
-            <div id="cert-issuer-div" class="two-col">
-                <p class="subject">Issuer:</p>
-                <table id="cert-issuer-table"><tr><th>OID</th><th>Value</th></tr></table>
-            </div>
-            <div id="cert-subject-div" class="two-col">
-                <p class="subject">Subject:</p>
-                <table id="cert-subject-table"><tr><th>OID</th><th>Value</th></tr></table>
-            </div>
-            <p><span class="type">Serial number:</span> <span id="cert-serial-number"></span></p>
-            <p><span class="type">Issuance date:</span> <span id="cert-not-before"></span></p>
-            <p><span class="type">Expiration date:</span> <span id="cert-not-after"></span></p>
-            <p><span class="type">Public key size (bits):</span> <span id="cert-keysize"></span></p>
-            <p><span class="type">Signature algorithm:</span> <span id="cert-sign-algo"></span></p>
-            <div id="cert-extn-div" class="two-col" style="display:none;">
-                <p class="subject">Extensions:</p>
-                <table id="cert-extn-table"><tr><th>OID</th></tr></table>
-            </div>
-        </div>
-
-        <p class="header-block">Verify loaded/created X.509 certificate</p>
-        <div id="add-cert-block" class="border-block">
-            <div class="border-block" style="margin-bottom: 15px;">
-                <p>
-                    <label for="ca_bundle">Load "CA bundle":</label>
-                    <input type="file" id="ca_bundle" title="Load CA bundle" />
-                </p>
-                <p>OR</p>
-                <p>
-                    <label for="trusted_certs">Select trusted certs (binary):</label>
-                    <input type="file" id="trusted_certs" title="Load trusted certs" multiple="multiple" />
-                </p>
-            </div>
-            <p>
-                <label for="inter_certs">Load intermediate certificates (binary):</label>
-                <input type="file" id="inter_certs" title="Load interm. certs" multiple="multiple" />
-            </p>
-            <p>
-                <label for="crls">Load CRLs (binary):</label>
-                <input type="file" id="crls" title="Load CRLs" multiple="multiple" />
-            </p>
-            <a onclick="verifyCertificate()">Verify</a>
+            <label for="new_signed_data" style="font-weight:bold;float:left;">BASE-64 encoded certificate:</label>
+            <textarea id="new_signed_data">&lt;  Encoded certificate must be put here &gt;</textarea>
+            <label for="pkcs8_key" style="font-weight:bold;float:left;">BASE-64 encoded PKCS#8 private key:</label>
+            <textarea id="pkcs8_key">&lt; PKCS#8 private key must be put here &gt;</textarea>
         </div>
     </div>
-
-    <script>
-        document.getElementById('cert-file').addEventListener('change', handleFileBrowse, false);
-        document.getElementById('inter_certs').addEventListener('change', handleInterCertsFile, false);
-        document.getElementById('trusted_certs').addEventListener('change', handleTrustedCertsFile, false);
-        document.getElementById('crls').addEventListener('change', handleCRLsFile, false);
-        document.getElementById('ca_bundle').addEventListener('change', handleCABundle, false);
-    </script>
+    <div class="wrapper">
+        <p class="header-block">Work with S/MIME Encryption</p>
+        <div class="border-block">
+            <label for="content" style="font-weight:bold;float:left;">Content to encrypt:</label>
+            <textarea id="content">&lt; Put input data here &gt;</textarea>
+            <p>
+                <label for="content_enc_alg" style="font-weight:bold">Content encryption algorithm:</label>
+                <select id="content_enc_alg" onchange="handleEncAlgOnChange()">
+                    <option value="alg_CBC">AES-CBC</option>
+                    <option value="alg_GCM">AES-GCM</option>
+                </select>
+            </p>
+            <p>
+                <label for="content_enc_alg_len" style="font-weight:bold">Content encryption algorithm length:</label>
+                <select id="content_enc_alg_len" onchange="handleEncLenOnChange()">
+                    <option value="len_128">128</option>
+                    <!-- Currently in Google Chrome AES 192 bit keys are not supported
+                    <option value="len_192">192</option>
+                    -->
+                    <option value="len_256">256</option>
+                </select>
+            </p>
+            <p>
+                <a onclick="smimeEncrypt();">Encrypt</a>
+            </p>
+            <label for="encrypted_content" style="font-weight:bold;float:left;">S/MIME message:</label>
+            <textarea id="encrypted_content">&lt; Put encrypted content here &gt;</textarea>
+            <p>
+                <a onclick="smimeDecrypt();">Decrypt</a>
+            </p>
+            <label for="decrypted_content" style="font-weight:bold;float:left;">Decrypted content:</label>
+            <textarea id="decrypted_content">&lt; Decrypted content will be put here &gt;</textarea>
+        </div>
+    </div>
 </body>
 </html>

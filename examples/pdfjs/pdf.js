@@ -21058,10 +21058,8 @@ function isRTLRangeFor(value) {
     return true;
   }
   range = UnicodeRanges[11];
-  if (value >= range.begin && value < range.end) {
-    return true;
-  }
-  return false;
+  return !!(value >= range.begin && value < range.end);
+
 }
 
 // The normalization table is obtained by filtering the Unicode characters
