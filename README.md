@@ -120,7 +120,14 @@ PKI.js V2 (ES2015 version) is **incompactible** with PKI.js V1 code. In order to
 
 ```
 
-More examples could be found in [**"examples" folder**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples). Live example can be found at [pkijs.org](https://pkijs.org).
+More examples could be found in [**"examples" folder**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples). To run these samples you must compile them, for example to build the Certificate Request Sample example you would run:
+
+```
+npm install
+npm run ex7
+```
+
+ Live example can be found at [pkijs.org](https://pkijs.org).
 
 ## Limitations
 
