@@ -127,7 +127,7 @@ npm install
 npm run ex7
 ```
 
- Live example can be found at [pkijs.org](https://pkijs.org).
+Live examples can be found at [pkijs.org](https://pkijs.org).
 
 ## Limitations
 
