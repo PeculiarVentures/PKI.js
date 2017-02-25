@@ -402,7 +402,7 @@ function createCMSSignedInternal()
 			publicKey = keyPair.publicKey;
 			privateKey = keyPair.privateKey;
 		},
-		error => alert(`Error during key generation: ${error}`)
+		error => Promise.reject(`Error during key generation: ${error}`)
 	);
 	//endregion
 	
@@ -415,7 +415,7 @@ function createCMSSignedInternal()
 	//region Signing final certificate
 	sequence = sequence.then(
 		() => certSimpl.sign(privateKey, hashAlg),
-		error => alert(`Error during exporting public key: ${error}`)
+		error => Promise.reject(`Error during exporting public key: ${error}`)
 	);
 	//endregion
 	
@@ -426,7 +426,7 @@ function createCMSSignedInternal()
 			trustedCertificates.push(certSimpl);
 			certificateBuffer = certSimpl.toSchema(true).toBER(false);
 		},
-		error => alert(`Error during signing: ${error}`)
+		error => Promise.reject(`Error during signing: ${error}`)
 	);
 	//endregion
 	
@@ -442,7 +442,7 @@ function createCMSSignedInternal()
 		{
 			privateKeyBuffer = result;
 		},
-		error => alert(`Error during exporting of private key: ${error}`)
+		error => Promise.reject(`Error during exporting of private key: ${error}`)
 	);
 	//endregion
 	
@@ -567,8 +567,7 @@ function createCMSSignedInternal()
 			
 			cmsSignedBuffer = _cmsSignedSchema.toBER(false);
 		},
-		error =>
-			alert(`Erorr during signing of CMS Signed Data: ${error}`)
+		error => Promise.reject(`Erorr during signing of CMS Signed Data: ${error}`)
 	);
 	//endregion
 	
