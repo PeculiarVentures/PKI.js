@@ -46,7 +46,6 @@ export default class CertificateChainValidationEngine {
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -70,7 +69,6 @@ export default class CertificateChainValidationEngine {
 				throw new Error(`Invalid member name for CertificateChainValidationEngine class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	sort()
 	{
@@ -84,12 +82,27 @@ export default class CertificateChainValidationEngine {
 		{
 			const result = [];
 			
+			//region Speed-up searching in case of self-signed certificates
+			if(certificate.subject.isEqual(certificate.issuer))
+			{
+				try
+				{
+					const verificationResult = yield certificate.verify();
+					if(verificationResult === true)
+						return [index];
+				}
+				catch(ex)
+				{
+				}
+			}
+			//endregion
+			
 			for(let i = 0; i < localCerts.length; i++)
 			{
 				try
 				{
 					const verificationResult = yield certificate.verify(localCerts[i]);
-					if(verificationResult)
+					if(verificationResult === true)
 						result.push(i);
 				}
 				catch(ex)
@@ -99,7 +112,6 @@ export default class CertificateChainValidationEngine {
 			
 			return ((result.length) ? result : [-1]);
 		}
-		
 		//endregion
 		
 		//region Building certificate path
@@ -655,7 +667,6 @@ export default class CertificateChainValidationEngine {
 			return certificatePath;
 		});
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Major verification function for certificate chain.
@@ -1728,7 +1739,6 @@ export default class CertificateChainValidationEngine {
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************
