@@ -281,7 +281,7 @@ export default class BasicOCSPResponse {
 		//endregion
 		
 		//region Create all "certIDs" for input certificates
-		for(const response of this.tbsResponseData)
+		for(const response of this.tbsResponseData.responses)
 		{
 			const hashAlgorithm = getAlgorithmByOID(response.certID.hashAlgorithm.algorithmId);
 			if(("name" in hashAlgorithm) === false)
@@ -317,26 +317,33 @@ export default class BasicOCSPResponse {
 					{
 						result.isForCertificate = true;
 						
-						if(response.certStatus instanceof asn1js.Primitive)
+						try
 						{
-							switch(response.certStatus.idBlock.tagNumber)
+							switch(response.certStatus.idBlock.isConstructed)
 							{
-								case 0: // good
-									result.status = 0;
+								case true:
+									if(response.certStatus.idBlock.tagNumber === 1)
+										result.status = 1; // revoked
+									
 									break;
-								case 2: // unknown
-									result.status = 2;
+								case false:
+									switch(response.certStatus.idBlock.tagNumber)
+									{
+										case 0: // good
+											result.status = 0;
+											break;
+										case 2: // unknown
+											result.status = 2;
+											break;
+										default:
+									}
+									
 									break;
 								default:
 							}
 						}
-						else
+						catch(ex)
 						{
-							if(response.certStatus instanceof asn1js.Constructed)
-							{
-								if(response.certStatus.idBlock.tagNumber === 1)
-									result.status = 1; // revoked
-							}
 						}
 						
 						return result;
