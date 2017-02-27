@@ -267,14 +267,14 @@ export default class RSAPrivateKey
 	toJSON()
 	{
 		const jwk = {
-			n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true),
-			e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true),
-			d: toBase64(arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true),
-			p: toBase64(arrayBufferToString(this.prime1.valueBlock.valueHex), true, true),
-			q: toBase64(arrayBufferToString(this.prime2.valueBlock.valueHex), true, true),
-			dp: toBase64(arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true),
-			dq: toBase64(arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true),
-			qi: toBase64(arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true)
+			n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
+			e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true),
+			d: toBase64(arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true, true),
+			p: toBase64(arrayBufferToString(this.prime1.valueBlock.valueHex), true, true, true),
+			q: toBase64(arrayBufferToString(this.prime2.valueBlock.valueHex), true, true, true),
+			dp: toBase64(arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true, true),
+			dq: toBase64(arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true, true),
+			qi: toBase64(arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true, true)
 		};
 
 		if("otherPrimeInfos" in this)

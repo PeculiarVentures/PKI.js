@@ -134,8 +134,8 @@ export default class RSAPublicKey
 	toJSON()
 	{
 		return {
-			n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true),
-			e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true)
+			n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
+			e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true)
 		};
 	}
 	//**********************************************************************************

@@ -617,6 +617,33 @@ export default class CertificateRevocationList {
 			const algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
 			if("hash" in algorithm.algorithm)
 				algorithm.algorithm.hash.name = shaAlgorithm;
+			
+			//region Special case for ECDSA
+			if(algorithmObject.name === "ECDSA")
+			{
+				// #region Get information about named curve
+				let algorithmParamsChecked = false;
+				
+				if(("algorithmParams" in subjectPublicKeyInfo.algorithm) === true)
+				{
+					if("idBlock" in subjectPublicKeyInfo.algorithm.algorithmParams)
+					{
+						if((subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
+							algorithmParamsChecked = true;
+					}
+				}
+				
+				if(algorithmParamsChecked === false)
+					return Promise.reject("Incorrect type for ECDSA public key parameters");
+				
+				const curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+				if(("name" in curveObject) === false)
+					return Promise.reject(`Unsupported named curve algorithm: ${subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
+				// #endregion
+				
+				algorithm.algorithm.namedCurve = curveObject.name;
+			}
+			//endregion
 			//endregion
 			
 			const publicKeyInfoSchema = subjectPublicKeyInfo.toSchema();

@@ -260,7 +260,7 @@ export default class ECPrivateKey
 
 		const privateKeyJSON = {
 			crv: crvName,
-			d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true)
+			d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, true)
 		};
 
 		if("publicKey" in this)

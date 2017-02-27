@@ -168,8 +168,8 @@ export default class ECPublicKey
 
 		return {
 			crv: crvName,
-			x: toBase64(arrayBufferToString(this.x), true, true),
-			y: toBase64(arrayBufferToString(this.y), true, true)
+			x: toBase64(arrayBufferToString(this.x), true, true, true),
+			y: toBase64(arrayBufferToString(this.y), true, true, true)
 		};
 	}
 	//**********************************************************************************

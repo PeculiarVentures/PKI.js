@@ -907,7 +907,18 @@ export default class SignedData
 			if(algorithmObject.name === "ECDSA")
 			{
 				//region Get information about named curve
-				if((signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams instanceof asn1js.ObjectIdentifier) === false)
+				let algorithmParamsChecked = false;
+				
+				if(("algorithmParams" in signerCertificate.subjectPublicKeyInfo.algorithm) === true)
+				{
+					if("idBlock" in signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams)
+					{
+						if((signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
+							algorithmParamsChecked = true;
+					}
+				}
+				
+				if(algorithmParamsChecked === false)
 					return Promise.reject("Incorrect type for ECDSA public key parameters");
 				
 				const curveObject = getAlgorithmByOID(signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
