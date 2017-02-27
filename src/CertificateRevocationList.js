@@ -628,7 +628,7 @@ export default class CertificateRevocationList {
 				{
 					if("idBlock" in subjectPublicKeyInfo.algorithm.algorithmParams)
 					{
-						if((subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
+						if((subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
 							algorithmParamsChecked = true;
 					}
 				}
