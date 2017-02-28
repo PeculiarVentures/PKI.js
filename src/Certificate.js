@@ -572,7 +572,7 @@ export default class Certificate {
 				{
 					if("idBlock" in this.subjectPublicKeyInfo.algorithm.algorithmParams)
 					{
-						if((this.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
+						if((this.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (this.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
 							algorithmParamsChecked = true;
 					}
 				}
