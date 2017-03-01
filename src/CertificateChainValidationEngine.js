@@ -4,7 +4,8 @@ import CertificateRevocationList from "./CertificateRevocationList";
 import Certificate from "./Certificate";
 import generatorsDriver from "./GeneratorsDriver";
 //**************************************************************************************
-export default class CertificateChainValidationEngine {
+export default class CertificateChainValidationEngine
+{
 	//**********************************************************************************
 	/**
 	 * Constructor for CertificateChainValidationEngine class
@@ -455,7 +456,7 @@ export default class CertificateChainValidationEngine {
 			//endregion
 			
 			//region Check each certificate (except "trusted root") to be non-revoked
-			if((_this.crls.length !== 0) || (_this.ocsps.length !== 0)) // If CRLs and OCSPs are empty the we consider all certificates to be valid
+			if((_this.crls.length !== 0) || (_this.ocsps.length !== 0)) // If CRLs and OCSPs are empty then we consider all certificates to be valid
 			{
 				for(let i = 0; i < (path.length - 2); i++)
 				{
@@ -561,7 +562,6 @@ export default class CertificateChainValidationEngine {
 				result: true
 			};
 		}
-		
 		//endregion
 		
 		return generatorsDriver(function *generatorFunction()
