@@ -493,10 +493,10 @@ export default class CertificateChainValidationEngine
 						crlResult = yield findCRL(path[i]);
 						if(crlResult.status)
 						{
-							return {
+							throw {
 								result: false,
 								resultCode: 11,
-								resultMessage: "No revocation values found for one of certificates"
+								resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
 							};
 						}
 						
@@ -610,16 +610,22 @@ export default class CertificateChainValidationEngine
 			for(let i = 0; i < result.length; i++)
 			{
 				let found = false;
-				const latestItem = ((result[i]).length - 1);
-				const certificate = localCerts[(result[i])[latestItem]];
 				
-				for(let j = 0; j < _this.trustedCerts.length; j++)
+				for(let j = 0; j < (result[i]).length; j++)
 				{
-					if(isEqualBuffer(certificate.tbs, _this.trustedCerts[j].tbs))
+					const certificate = localCerts[(result[i])[j]];
+					
+					for(let k = 0; k < _this.trustedCerts.length; k++)
 					{
-						found = true;
-						break;
+						if(isEqualBuffer(certificate.tbs, _this.trustedCerts[k].tbs))
+						{
+							found = true;
+							break;
+						}
 					}
+					
+					if(found)
+						break;
 				}
 				
 				if(!found)
@@ -1729,10 +1735,25 @@ export default class CertificateChainValidationEngine
 		//region Error handling stub
 		sequence = sequence.then(result => result, error =>
 		{
+			if(error instanceof Object)
+			{
+				if("resultMessage" in error)
+					return error;
+				
+				if("message" in error)
+				{
+					return {
+						result: false,
+						resultCode: -1,
+						resultMessage: error.message
+					};
+				}
+			}
+			
 			return {
 				result: false,
 				resultCode: -1,
-				resultMessage: error.message
+				resultMessage: error
 			};
 		});
 		//endregion

@@ -679,7 +679,7 @@ export default class SignedData
 								return Promise.reject({
 									date: checkDate,
 									code: 5,
-									message: "Validation of signer's certificate failed",
+									message: `Validation of signer's certificate failed: ${verificationResult.resultMessage}`,
 									signatureVerified: null,
 									signerCertificate,
 									signerCertificateVerified: false
