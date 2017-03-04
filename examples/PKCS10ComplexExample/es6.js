@@ -108,7 +108,7 @@ function createPKCS10Internal()
 				pkcs10.attributes.push(new Attribute({
 					type: "1.2.840.113549.1.9.14", // pkcs-9-at-extensionRequest
 					values: [(new Extensions({
-						extensionsArray: [
+						extensions: [
 							new Extension({
 								extnID: "2.5.29.14",
 								critical: false,
