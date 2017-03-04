@@ -16628,7 +16628,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			pkcs10.attributes.push(new Attribute({
 				type: "1.2.840.113549.1.9.14", // pkcs-9-at-extensionRequest
 				values: [new Extensions({
-					extensionsArray: [new Extension({
+					extensions: [new Extension({
 						extnID: "2.5.29.14",
 						critical: false,
 						extnValue: new OctetString({ valueHex: result }).toBER(false)
