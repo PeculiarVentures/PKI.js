@@ -1,4 +1,5 @@
 # PKIjs
+
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://raw.githubusercontent.com/PeculiarVentures/pki.js/master/LICENSE)  [![NPM version](https://badge.fury.io/js/pkijs.png)](http://badge.fury.io/js/pkijs)  [![CircleCI](https://circleci.com/gh/PeculiarVentures/PKI.js.svg?style=svg)](https://circleci.com/gh/PeculiarVentures/PKI.js)
 
 [![NPM](https://nodei.co/npm-dl/pkijs.png?months=3&height=2)](https://nodei.co/npm/pkijs/)
@@ -22,13 +23,14 @@ In the new version of library we have some new features:
 * Internal "WebCrypto shim" making it possible to work with "spki/pkcs8" formats in any environment;
 * Internal realization of special routine working with ES2015 generators;
 
-Full detailed information about all PKI.js features could be found [in separate file](FEATURES.MD).
-Description of PKI.js code structure could be found [in separate file](https://github.com/PeculiarVentures/PKI.js/tree/master/src/README.MD).
+Full detailed information about all PKI.js features could be found [in separate file](FEATURES.md).
+Description of PKI.js code structure could be found [in separate file](https://github.com/PeculiarVentures/PKI.js/tree/master/src/README.md).
 
 ## Important Information for PKI.js V1 Users
-PKI.js V2 (ES2015 version) is **incompactible** with PKI.js V1 code. In order to make it easier to move from PKIjs V1 code to PKIjs V2 code we made a file that provides a [mapping](MAPPING.MD) between old and new class names.
+PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to make it easier to move from PKIjs V1 code to PKIjs V2 code we made a file that provides a [mapping](MAPPING.md) between old and new class names.
 
 ## Examples
+
 ### Parse a X.509 certificate
 
 ```javascript
@@ -39,6 +41,7 @@ PKI.js V2 (ES2015 version) is **incompactible** with PKI.js V1 code. In order to
 ```
 
 ### Create a X.509 certificate
+
 ```javascript
     // #region Creation of a new X.509 certificate
     certificate.serialNumber = new asn1js.Integer({ value: 1 });
@@ -76,9 +79,9 @@ PKI.js V2 (ES2015 version) is **incompactible** with PKI.js V1 code. In order to
         extnValue: basicConstr.toSchema().toBER(false),
         parsedValue: basicConstr // Parsed value for well-known extensions
     }));
-    // #endregion 
+    // #endregion
 
-    // #region "KeyUsage" extension 
+    // #region "KeyUsage" extension
     var bitArray = new ArrayBuffer(1);
     var bitView = new Uint8Array(bitArray);
 
@@ -93,12 +96,14 @@ PKI.js V2 (ES2015 version) is **incompactible** with PKI.js V1 code. In order to
         extnValue: keyUsage.toBER(false),
         parsedValue: keyUsage // Parsed value for well-known extensions
     }));
-    // #endregion 
-    // #endregion 
+    // #endregion
+    // #endregion
 ```
+
 ### Create signed CMS message
+
 ```javascript
-    // #region Creation of a new CMS Signed Data 
+    // #region Creation of a new CMS Signed Data
     cmsSigned = new SignedData({
         encapContentInfo: new EncapsulatedContentInfo({
             eContentType: "1.2.840.113549.1.7.1", // "data" content type
@@ -115,12 +120,12 @@ PKI.js V2 (ES2015 version) is **incompactible** with PKI.js V1 code. In order to
         certificates: [certificate]
     });
 
-        return cms_signed_simpl.sign(privateKey, 0, hashAlgorithm);
-        // #endregion 
+    return cms_signed_simpl.sign(privateKey, 0, hashAlgorithm);
+    // #endregion
 
 ```
 
-More examples could be found in [**"examples" folder**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples). To run these samples you must compile them, for example you would run:
+More examples could be found in [**examples**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples) folder. To run these samples you must compile them, for example you would run:
 
 ```
 npm install

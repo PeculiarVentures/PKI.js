@@ -1,15 +1,15 @@
 ## Overview
 
-* More than 33 000 lines of code and comments ([PKIjs][] library + [ASN1js][] library).
+* More than 33 000 lines of code and comments ([PKIjs][url-pkijs] library + [ASN1js][url-asnjs] library).
 * More than 90 specialized "helpers" working with almost all internal data (for example "GeneralName" type, all X.509 certificate extensions types, "revoked certificates" type, etc.).
 * Everything that you need to work with all five major parts of PKI: X.509, PKCS#10, CMS, OCSP, Time-stamping.
 
 ## Features
 
-* First "crypto-related" library complitelly written on ES6 (ES2015);
+* First "crypto-related" library completely written on ES6 (ES2015);
 * First and **ONLY** open-source JS library with full support for all "Suite B" algorithms in CMS messages;
 * First library with support for CMS Enveloped data (encrypt/decrypt) in pure JavaScript + Web Cryptography API;
-* Fully object-oriented library. Inhiritence is using everywhere inside the lib;
+* Fully object-oriented. Inheritence is used everywhere in the lib;
 * Working with HTML5 data objects (ArrayBuffer, Uint8Array, Promises, Web Cryptography API, etc.);
 * Has a complete set of helpers for working with types like:
   * GeneralName;
@@ -84,3 +84,6 @@
   * PKCS#12:
     * Parsing internal values;
     * Making any kind of internal values (SafeContexts/SafeBags) with any kind of parameters;
+
+[url-pkijs]: https://github.com/PeculiarVentures/PKI.js
+[url-asnjs]: https://github.com/PeculiarVentures/ASN1.js
