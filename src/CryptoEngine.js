@@ -368,8 +368,9 @@ export default class CryptoEngine
 		//region Special case for Safari browser (since its acting not as WebCrypto standard describes)
 		if(this.name.toLowerCase() === "safari")
 		{
-			if((jwk instanceof ArrayBuffer) === false)
-				jwk = stringToArrayBuffer(JSON.stringify(jwk));
+			// Try to use both ways - import using ArrayBuffer and pure JWK (for Safari Technology Preview)
+			return Promise.resolve().then(() => this.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages))
+				.then(result => result, error => this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages));
 		}
 		//endregion
 		
@@ -388,7 +389,16 @@ export default class CryptoEngine
 		
 		//region Currently Safari returns ArrayBuffer as JWK thus we need an additional transformation
 		if(this.name.toLowerCase() === "safari")
-			sequence = sequence.then(result => JSON.parse(arrayBufferToString(result)));
+		{
+			sequence = sequence.then(result =>
+			{
+				// Some additional checks for Safari Technology Preview
+				if(result instanceof ArrayBuffer)
+					return JSON.parse(arrayBufferToString(result))
+				
+				return result;
+			});
+		}
 		//endregion
 		
 		switch(format.toLowerCase())
