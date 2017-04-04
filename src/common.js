@@ -44,8 +44,16 @@ export function getEngine()
 				
 				// Apple Safari support
 			if("webkitSubtle" in self.crypto)
+			{
+				try
 				{
-				subtleObject = self.crypto.webkitSubtle;
+					subtleObject = self.crypto.webkitSubtle;
+				}
+				catch(ex)
+				{
+					subtleObject = self.crypto.subtle;
+				}
+
 				engineName = "safari";
 			}
 				
