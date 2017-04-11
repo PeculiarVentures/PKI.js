@@ -9494,7 +9494,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Special case for Safari browser (since its acting not as WebCrypto standard describes)
 				if (this.name.toLowerCase() === "safari") {
-					if (jwk instanceof ArrayBuffer === false) jwk = stringToArrayBuffer(JSON.stringify(jwk));
+			// Try to use both ways - import using ArrayBuffer and pure JWK (for Safari Technology Preview)
+			return Promise.resolve().then(function(){ return this.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages); })
+				.then(function(result){ return result; }, function(error){ return this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages); });
 				}
 				//endregion
 
@@ -9515,7 +9517,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Currently Safari returns ArrayBuffer as JWK thus we need an additional transformation
 				if (this.name.toLowerCase() === "safari") sequence = sequence.then(function (result) {
-					return JSON.parse(arrayBufferToString(result));
+				// Some additional checks for Safari Technology Preview
+				if(result instanceof ArrayBuffer)
+					return JSON.parse(arrayBufferToString(result))
+				
+				return result;
 				});
 				//endregion
 
@@ -9851,10 +9857,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var subtleObject = null;
 
 				// Apple Safari support
-				if ("webkitSubtle" in self.crypto) {
+			if("webkitSubtle" in self.crypto)
+			{
+				try
+				{
 					subtleObject = self.crypto.webkitSubtle;
-					engineName = "safari";
 				}
+				catch(ex)
+				{
+					subtleObject = self.crypto.subtle;
+				}
+				
+				engineName = "safari";
+			}
 
 				if ("subtle" in self.crypto) subtleObject = self.crypto.subtle;
 
