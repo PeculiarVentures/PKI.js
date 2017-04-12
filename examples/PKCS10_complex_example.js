@@ -542,7 +542,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		return floor === round ? floor : round;
 	}
-	//**************************************************************************************
 
 	//**************************************************************************************
 	//region Declaration for "LocalBaseBlock" class
@@ -564,6 +563,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {ArrayBuffer} [valueBeforeDecode]
    */
+
 		function LocalBaseBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -652,6 +652,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     * @param {Object} [parameters={}]
     * @property {ArrayBuffer} [valueHex]
     */
+
 			function LocalHexBlockMixin() {
 				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -660,6 +661,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				/**
      * @type {boolean}
      */
+
 				var _this2 = _possibleConstructorReturn(this, (LocalHexBlockMixin.__proto__ || Object.getPrototypeOf(LocalHexBlockMixin)).call(this, parameters));
 
 				_this2.isHexOnly = getParametersValue(parameters, "isHexOnly", false);
@@ -784,6 +786,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [idBlock]
    */
+
 		function LocalIdentificationBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -1105,6 +1108,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [lenBlock]
    */
+
 		function LocalLengthBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -1327,6 +1331,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "LocalValueBlock" class
    * @param {Object} [parameters={}]
    */
+
 		function LocalValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -1409,6 +1414,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @property {boolean} [optional]
    * @param valueBlockType Type of value block
    */
+
 		function BaseBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 			var valueBlockType = arguments.length <= 1 || arguments[1] === undefined ? LocalValueBlock : arguments[1];
@@ -1556,12 +1562,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {ArrayBuffer} [valueBeforeDecode]
    */
+
 		function LocalPrimitiveValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
 			_classCallCheck(this, LocalPrimitiveValueBlock);
 
 			//region Variables from "hexBlock" class
+
 			var _this7 = _possibleConstructorReturn(this, (LocalPrimitiveValueBlock.__proto__ || Object.getPrototypeOf(LocalPrimitiveValueBlock)).call(this, parameters));
 
 			if ("valueHex" in parameters) _this7.valueHex = parameters.valueHex.slice(0);else _this7.valueHex = new ArrayBuffer(0);
@@ -1677,6 +1685,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {ArrayBuffer} [valueHex]
    */
+
 		function Primitive() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -1720,6 +1729,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "LocalConstructedValueBlock" class
    * @param {Object} [parameters={}]
    */
+
 		function LocalConstructedValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -1875,6 +1885,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "Constructed" class
    * @param {Object} [parameters={}]
    */
+
 		function Constructed() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -1946,6 +1957,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "LocalEndOfContentValueBlock" class
    * @param {Object} [parameters={}]
    */
+
 		function LocalEndOfContentValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -2010,6 +2022,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		_inherits(EndOfContent, _BaseBlock3);
 
 		//**********************************************************************************
+
 		function EndOfContent() {
 			var paramaters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -2054,6 +2067,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "LocalBooleanValueBlock" class
    * @param {Object} [parameters={}]
    */
+
 		function LocalBooleanValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -2179,6 +2193,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "Boolean" class
    * @param {Object} [parameters={}]
    */
+
 		function Boolean() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -2223,6 +2238,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "Sequence" class
    * @param {Object} [parameters={}]
    */
+
 		function Sequence() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -2263,6 +2279,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "Set" class
    * @param {Object} [parameters={}]
    */
+
 		function Set() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -2307,6 +2324,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "Null" class
    * @param {Object} [parameters={}]
    */
+
 		function Null() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -2399,6 +2417,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {ArrayBuffer} [valueHex]
    */
+
 		function LocalOctetStringValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -2525,6 +2544,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "OctetString" class
    * @param {Object} [parameters={}]
    */
+
 		function OctetString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -2617,6 +2637,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {ArrayBuffer} [valueHex]
    */
+
 		function LocalBitStringValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -2790,6 +2811,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "BitString" class
    * @param {Object} [parameters={}]
    */
+
 		function BitString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -2878,6 +2900,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {ArrayBuffer} [valueHex]
    */
+
 		function LocalIntegerValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -3111,6 +3134,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "Integer" class
    * @param {Object} [parameters={}]
    */
+
 		function Integer() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -3208,6 +3232,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "Enumerated" class
    * @param {Object} [parameters={}]
    */
+
 		function Enumerated() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -3254,6 +3279,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @property {number} [valueDec]
    * @property {boolean} [isFirstSid]
    */
+
 		function LocalSidValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -3457,6 +3483,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {ArrayBuffer} [valueHex]
    */
+
 		function LocalObjectIdentifierValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -3676,6 +3703,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {ArrayBuffer} [valueHex]
    */
+
 		function ObjectIdentifier() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -3721,6 +3749,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "LocalUtf8StringValueBlock" class
    * @param {Object} [parameters={}]
    */
+
 		function LocalUtf8StringValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -3787,6 +3816,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {ArrayBuffer} [valueHex]
    */
+
 		function Utf8String() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -3899,6 +3929,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "LocalBmpStringValueBlock" class
    * @param {Object} [parameters={}]
    */
+
 		function LocalBmpStringValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -3964,6 +3995,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "BmpString" class
    * @param {Object} [parameters={}]
    */
+
 		function BmpString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4084,6 +4116,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "LocalUniversalStringValueBlock" class
    * @param {Object} [parameters={}]
    */
+
 		function LocalUniversalStringValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4149,6 +4182,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "UniversalString" class
    * @param {Object} [parameters={}]
    */
+
 		function UniversalString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4269,6 +4303,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "LocalSimpleStringValueBlock" class
    * @param {Object} [parameters={}]
    */
+
 		function LocalSimpleStringValueBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4334,6 +4369,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "LocalSimpleStringBlock" class
    * @param {Object} [parameters={}]
    */
+
 		function LocalSimpleStringBlock() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4433,6 +4469,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "NumericString" class
    * @param {Object} [parameters={}]
    */
+
 		function NumericString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4476,6 +4513,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "PrintableString" class
    * @param {Object} [parameters={}]
    */
+
 		function PrintableString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4519,6 +4557,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "TeletexString" class
    * @param {Object} [parameters={}]
    */
+
 		function TeletexString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4562,6 +4601,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "VideotexString" class
    * @param {Object} [parameters={}]
    */
+
 		function VideotexString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4605,6 +4645,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "IA5String" class
    * @param {Object} [parameters={}]
    */
+
 		function IA5String() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4648,6 +4689,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "GraphicString" class
    * @param {Object} [parameters={}]
    */
+
 		function GraphicString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4691,6 +4733,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "VisibleString" class
    * @param {Object} [parameters={}]
    */
+
 		function VisibleString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4734,6 +4777,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "GeneralString" class
    * @param {Object} [parameters={}]
    */
+
 		function GeneralString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4777,6 +4821,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "CharacterString" class
    * @param {Object} [parameters={}]
    */
+
 		function CharacterString() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -4826,6 +4871,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @property {string} [value] String representatio of the date
    * @property {Date} [valueDate] JavaScript "Date" object
    */
+
 		function UTCTime() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -5058,6 +5104,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @property {string} [value] String representatio of the date
    * @property {Date} [valueDate] JavaScript "Date" object
    */
+
 		function GeneralizedTime() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -5459,6 +5506,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "DATE" class
    * @param {Object} [parameters={}]
    */
+
 		function DATE() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -5502,6 +5550,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "TimeOfDay" class
    * @param {Object} [parameters={}]
    */
+
 		function TimeOfDay() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -5545,6 +5594,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "DateTime" class
    * @param {Object} [parameters={}]
    */
+
 		function DateTime() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -5588,6 +5638,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "Duration" class
    * @param {Object} [parameters={}]
    */
+
 		function Duration() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -5631,6 +5682,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * Constructor for "Time" class
    * @param {Object} [parameters={}]
    */
+
 		function TIME() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -5755,6 +5807,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @property {string} [name]
    * @property {boolean} [optional]
    */
+
 		function RawData() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -6540,6 +6593,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		//endregion
 	}
 
+	var PASSED = Symbol("PASSED");
+
 	//**************************************************************************************
 	/**
   * Class from RFC5280
@@ -6553,6 +6608,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @property {Object} [schema] asn1js parsed value
    * @property {string} [algorithmId] ObjectIdentifier for algorithm (string representation)
    */
+
 		function AlgorithmIdentifier() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -6762,6 +6818,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function RSASSAPSSParams() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -7028,6 +7085,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function ECPublicKey() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -7148,8 +7206,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return {
 					crv: crvName,
-					x: toBase64(arrayBufferToString(this.x), true, true),
-					y: toBase64(arrayBufferToString(this.y), true, true)
+					x: toBase64(arrayBufferToString(this.x), true, true, true),
+					y: toBase64(arrayBufferToString(this.y), true, true, true)
 				};
 			}
 			//**********************************************************************************
@@ -7255,6 +7313,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @property {Integer} [modulus]
    * @property {Integer} [publicExponent]
    */
+
 		function RSAPublicKey() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -7337,8 +7396,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			key: "toJSON",
 			value: function toJSON() {
 				return {
-					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true),
-					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true)
+					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
+					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true)
 				};
 			}
 			//**********************************************************************************
@@ -7416,6 +7475,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function PublicKeyInfo() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -7730,6 +7790,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function Attribute() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -7785,7 +7846,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				this.values = asn1.result.values;
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convert current object to asn1js object and set correct values
@@ -7803,7 +7863,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convertion for the class to JSON object
@@ -7820,7 +7879,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					})
 				};
 			}
+			//**********************************************************************************
+			//region Basic Building Blocks for Verification Engine
+			//**********************************************************************************
 
+		}, {
+			key: "formatChecking",
+			value: function formatChecking() {
+				return {
+					indication: PASSED
+				};
+			}
+			//**********************************************************************************
+			//endregion
 			//**********************************************************************************
 
 		}], [{
@@ -7912,6 +7983,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function ECPrivateKey() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -8060,7 +8132,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				var privateKeyJSON = {
 					crv: crvName,
-					d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true)
+					d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, true)
 				};
 
 				if ("publicKey" in this) {
@@ -8213,6 +8285,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function OtherPrimeInfo() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -8388,6 +8461,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function RSAPrivateKey() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -8557,14 +8631,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			key: "toJSON",
 			value: function toJSON() {
 				var jwk = {
-					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true),
-					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true),
-					d: toBase64(arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true),
-					p: toBase64(arrayBufferToString(this.prime1.valueBlock.valueHex), true, true),
-					q: toBase64(arrayBufferToString(this.prime2.valueBlock.valueHex), true, true),
-					dp: toBase64(arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true),
-					dq: toBase64(arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true),
-					qi: toBase64(arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true)
+					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
+					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true),
+					d: toBase64(arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true, true),
+					p: toBase64(arrayBufferToString(this.prime1.valueBlock.valueHex), true, true, true),
+					q: toBase64(arrayBufferToString(this.prime2.valueBlock.valueHex), true, true, true),
+					dp: toBase64(arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true, true),
+					dq: toBase64(arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true, true),
+					qi: toBase64(arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true, true)
 				};
 
 				if ("otherPrimeInfos" in this) jwk.oth = Array.from(this.otherPrimeInfos, function (element) {
@@ -8706,6 +8780,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function PrivateKeyInfo() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -9037,6 +9112,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function CryptoEngine() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -9071,6 +9147,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		_createClass(CryptoEngine, [{
 			key: "importKey",
 			value: function importKey(format, keyData, algorithm, extractable, keyUsages) {
+				var _this52 = this;
+
 				//region Initial variables
 				var jwk = {};
 				//endregion
@@ -9494,8 +9572,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Special case for Safari browser (since its acting not as WebCrypto standard describes)
 				if (this.name.toLowerCase() === "safari") {
-			return Promise.resolve().then(function(){ return this.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages); })
-				.then(function(result){ return result; }, function(error){ return this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages); });
+					// Try to use both ways - import using ArrayBuffer and pure JWK (for Safari Technology Preview)
+					return Promise.resolve().then(function () {
+						return _this52.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages);
+					}).then(function (result) {
+						return result;
+					}, function (error) {
+						return _this52.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages);
+					});
+
+					return Promise.resolve().then(function () {
+						return this.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages);
+					}).then(function (result) {
+						return result;
+					}, function (error) {
+						return this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages);
+					});
 				}
 				//endregion
 
@@ -9515,13 +9607,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var sequence = this.crypto.exportKey("jwk", key);
 
 				//region Currently Safari returns ArrayBuffer as JWK thus we need an additional transformation
-				if (this.name.toLowerCase() === "safari") sequence = sequence.then(function (result) {
-				// Some additional checks for Safari Technology Preview
-				if(result instanceof ArrayBuffer)
-					return JSON.parse(arrayBufferToString(result))
-				
-				return result;
-				});
+				if (this.name.toLowerCase() === "safari") {
+					sequence = sequence.then(function (result) {
+						// Some additional checks for Safari Technology Preview
+						if (result instanceof ArrayBuffer) return JSON.parse(arrayBufferToString(result));
+
+						return result;
+					});
+				}
 				//endregion
 
 				switch (format.toLowerCase()) {
@@ -9576,7 +9669,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "convert",
 			value: function convert(inputFormat, outputFormat, keyData, algorithm, extractable, keyUsages) {
-				var _this52 = this;
+				var _this53 = this;
 
 				switch (inputFormat.toLowerCase()) {
 					case "raw":
@@ -9585,21 +9678,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.resolve(keyData);
 							case "spki":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("spki", result);
+									return _this53.exportKey("spki", result);
 								});
 							case "pkcs8":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("pkcs8", result);
+									return _this53.exportKey("pkcs8", result);
 								});
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9608,9 +9701,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("spki", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("spki", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.resolve(keyData);
@@ -9618,9 +9711,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.reject("Impossible to convert between SPKI/PKCS8");
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("spki", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("spki", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9629,9 +9722,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.reject("Impossible to convert between SPKI/PKCS8");
@@ -9639,9 +9732,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.resolve(keyData);
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9650,21 +9743,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("spki", result);
+									return _this53.exportKey("spki", result);
 								});
 							case "pkcs8":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("pkcs8", result);
+									return _this53.exportKey("pkcs8", result);
 								});
 							case "jwk":
 								return Promise.resolve(keyData);
@@ -9856,19 +9949,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var subtleObject = null;
 
 				// Apple Safari support
-			if("webkitSubtle" in self.crypto)
-			{
-				try
-				{
-					subtleObject = self.crypto.webkitSubtle;
+				if ("webkitSubtle" in self.crypto) {
+					try {
+						subtleObject = self.crypto.webkitSubtle;
+					} catch (ex) {
+						subtleObject = self.crypto.subtle;
+					}
+
+					engineName = "safari";
 				}
-				catch(ex)
-				{
-					subtleObject = self.crypto.subtle;
-				}
-				
-				engineName = "safari";
-			}
 
 				if ("subtle" in self.crypto) subtleObject = self.crypto.subtle;
 
@@ -9957,6 +10046,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				break;
 			case "ECDH":
 				switch (algorithm.kdf.toUpperCase()) {// Non-standard addition - hash algorithm of KDF function
+
 					case "SHA-1":
 						result = "1.3.133.16.840.63.0.2"; // dhSinglePass-stdDH-sha1kdf-scheme
 						break;
@@ -10570,7 +10660,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		if (cmsSignature.valueBlock.value[0] instanceof Integer === false) return new ArrayBuffer(0);
 
 		if (cmsSignature.valueBlock.value[1] instanceof Integer === false) return new ArrayBuffer(0);
-		// #endregion 
+		// #endregion
 
 		var rValue = cmsSignature.valueBlock.value[0].convertFromDER();
 		var sValue = cmsSignature.valueBlock.value[1].convertFromDER();
@@ -10860,6 +10950,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function AttributeTypeAndValue() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -11047,6 +11138,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @property {Array.<AttributeTypeAndValue>} [typesAndValues] Array of "type and value" objects
    * @property {ArrayBuffer} [valueBeforeDecode] Value of the RDN before decoding from schema
    */
+
 		function RelativeDistinguishedNames() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -11337,6 +11429,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function CertificationRequest() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -11523,7 +11616,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "sign",
 			value: function sign(privateKey) {
-				var _this53 = this;
+				var _this54 = this;
 
 				var hashAlgorithm = arguments.length <= 1 || arguments[1] === undefined ? "SHA-1" : arguments[1];
 
@@ -11615,7 +11708,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					if (defParams.algorithm.name === "ECDSA") result = createCMSECDSASignature(result);
 					//endregion
 
-					_this53.signatureValue = new BitString({ valueHex: result });
+					_this54.signatureValue = new BitString({ valueHex: result });
 				}, function (error) {
 					return Promise.reject("Signing error: " + error);
 				});
@@ -11631,7 +11724,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this54 = this;
+				var _this55 = this;
 
 				//region Global variables
 				var sequence = Promise.resolve();
@@ -11655,7 +11748,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				sequence = sequence.then(function () {
 					//region Get information about public key algorithm and default parameters for import
 					var algorithmId = void 0;
-					if (_this54.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this54.signatureAlgorithm.algorithmId;else algorithmId = _this54.subjectPublicKeyInfo.algorithm.algorithmId;
+					if (_this55.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this55.signatureAlgorithm.algorithmId;else algorithmId = _this55.subjectPublicKeyInfo.algorithm.algorithmId;
 
 					var algorithmObject = getAlgorithmByOID(algorithmId);
 					if ("name" in algorithmObject === false) return Promise.reject("Unsupported public key algorithm: " + algorithmId);
@@ -11664,6 +11757,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					var algorithm = getAlgorithmParameters(algorithmName, "importkey");
 					if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = shaAlgorithm;
+
+					//region Special case for ECDSA
+					if (algorithmObject.name === "ECDSA") {
+						// #region Get information about named curve
+						var algorithmParamsChecked = false;
+
+						if ("algorithmParams" in subjectPublicKeyInfo.algorithm === true) {
+							if ("idBlock" in subjectPublicKeyInfo.algorithm.algorithmParams) {
+								if (subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1 && subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6) algorithmParamsChecked = true;
+							}
+						}
+
+						if (algorithmParamsChecked === false) return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+						var curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						if ("name" in curveObject === false) return Promise.reject("Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						// #endregion
+
+						algorithm.algorithm.namedCurve = curveObject.name;
+					}
+					//endregion
 					//endregion
 
 					var publicKeyInfoSchema = subjectPublicKeyInfo.toSchema();
@@ -11695,7 +11809,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var pssParameters = void 0;
 
 						try {
-							pssParameters = new RSASSAPSSParams({ schema: _this54.signatureAlgorithm.algorithmParams });
+							pssParameters = new RSASSAPSSParams({ schema: _this55.signatureAlgorithm.algorithmParams });
 						} catch (ex) {
 							return Promise.reject(ex);
 						}
@@ -11800,6 +11914,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function SubjectDirectoryAttributes() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -11944,6 +12059,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function PrivateKeyUsagePeriod() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -12343,6 +12459,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @property {number} [type] value type - from a tagged value (0 for "otherName", 1 for "rfc822Name" etc.)
    * @property {Object} [value] asn1js object having GENERAL_NAME value (type depends on "type" value)
    */
+
 		function GeneralName() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -12707,6 +12824,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function AltName() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -12853,6 +12971,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @property {Object} [cA]
    * @property {Object} [pathLenConstraint]
    */
+
 		function BasicConstraints() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -13024,6 +13143,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function IssuingDistributionPoint() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -13438,6 +13558,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function GeneralNames() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -13572,6 +13693,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function GeneralSubtree() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -13802,6 +13924,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function NameConstraints() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -14021,6 +14144,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @property {Object} [reasons]
    * @property {Object} [cRLIssuer]
    */
+
 		function DistributionPoint() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -14335,6 +14459,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function CRLDistributionPoints() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -14478,6 +14603,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function PolicyQualifierInfo() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -14629,6 +14755,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function PolicyInformation() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -14807,6 +14934,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function CertificatePolicies() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -14950,6 +15078,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function PolicyMapping() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -15095,6 +15224,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function PolicyMappings() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -15239,6 +15369,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function AuthorityKeyIdentifier() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -15486,6 +15617,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function PolicyConstraints() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -15700,6 +15832,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function ExtKeyUsage() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -15843,6 +15976,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function AccessDescription() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -15992,6 +16126,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function InfoAccess() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -16137,6 +16272,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function Extension() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -16415,6 +16551,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    */
+
 		function Extensions() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -16820,7 +16957,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	//endregion
 	//*********************************************************************************
 	function handleHashAlgOnChange() {
-		var hashOption = document.getElementById("hash_alg").value;
+		var hashOption = document.getElementById("hashAlg").value;
 		switch (hashOption) {
 			case "alg_SHA1":
 				hashAlg = "sha-1";
@@ -16839,7 +16976,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	}
 	//*********************************************************************************
 	function handleSignAlgOnChange() {
-		var signOption = document.getElementById("sign_alg").value;
+		var signOption = document.getElementById("signAlg").value;
 		switch (signOption) {
 			case "alg_RSA15":
 				signAlg = "RSASSA-PKCS1-V1_5";
