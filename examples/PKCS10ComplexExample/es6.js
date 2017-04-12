@@ -317,7 +317,7 @@ function verifyPKCS10()
 //*********************************************************************************
 function handleHashAlgOnChange()
 {
-	const hashOption = document.getElementById("hash_alg").value;
+	const hashOption = document.getElementById("hashAlg").value;
 	switch(hashOption)
 	{
 		case "alg_SHA1":
@@ -338,7 +338,7 @@ function handleHashAlgOnChange()
 //*********************************************************************************
 function handleSignAlgOnChange()
 {
-	const signOption = document.getElementById("sign_alg").value;
+	const signOption = document.getElementById("signAlg").value;
 	switch(signOption)
 	{
 		case "alg_RSA15":
