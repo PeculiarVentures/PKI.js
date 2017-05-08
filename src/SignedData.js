@@ -79,7 +79,6 @@ export default class SignedData
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -105,7 +104,6 @@ export default class SignedData
 				throw new Error(`Invalid member name for SignedData class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -129,7 +127,6 @@ export default class SignedData
 				throw new Error(`Invalid member name for SignedData class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -214,7 +211,6 @@ export default class SignedData
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -282,7 +278,6 @@ export default class SignedData
 			this.signerInfos = Array.from(asn1.result["SignedData.signerInfos"], signerInfoSchema => new SignerInfo({ schema: signerInfoSchema }));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -364,7 +359,6 @@ export default class SignedData
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -388,7 +382,6 @@ export default class SignedData
 		
 		return _object;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Verify current SignedData value
@@ -421,6 +414,8 @@ export default class SignedData
 		let shaAlgorithm = "";
 		
 		let signerCertificate = {};
+		
+		let timestampSerial = null;
 		//endregion
 		
 		//region Get a "crypto" extension 
@@ -574,6 +569,11 @@ export default class SignedData
 				{
 					return false;
 				}
+				//endregion
+				
+				//region Change "checkDate" and append "timestampSerial"
+				checkDate = tstInfo.genTime;
+				timestampSerial = tstInfo.serialNumber.valueBlock.valueHex;
 				//endregion
 				
 				//region Check that we do have detached data content
@@ -1075,6 +1075,7 @@ export default class SignedData
 					message: "",
 					signatureVerified: result,
 					signerCertificate,
+					timestampSerial,
 					signerCertificateVerified: true
 				};
 			}
@@ -1103,7 +1104,6 @@ export default class SignedData
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Signing current SignedData
@@ -1283,7 +1283,6 @@ export default class SignedData
 			}, error => Promise.reject(`Signing error: ${error}`));
 		//endregion
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************
