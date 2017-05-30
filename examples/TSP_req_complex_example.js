@@ -378,11 +378,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   * @param {string} input
   * @param {boolean} useUrlTemplate If "true" then output would be encoded using "base64url"
   * @param {boolean} skipPadding Skip BASE-64 padding or not
+  * @param {boolean} skipLeadingZeros Skip leading zeros in input data or not
   * @returns {string}
   */
 	function toBase64(input) {
 		var useUrlTemplate = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 		var skipPadding = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+		var skipLeadingZeros = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
 		var i = 0;
 
@@ -392,6 +394,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		var output = "";
 
 		var template = useUrlTemplate ? base64UrlTemplate : base64Template;
+
+		if (skipLeadingZeros) {
+			var nonZeroPosition = 0;
+
+			for (var _i = 0; _i < input.length; _i++) {
+				if (input.charCodeAt(_i) !== 0) {
+					nonZeroPosition = _i;
+					break;
+				}
+			}
+
+			input = input.slice(nonZeroPosition);
+		}
 
 		while (i < input.length) {
 			var chr1 = input.charCodeAt(i++);
@@ -434,8 +449,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		//region Aux functions
 		function indexof(toSearch) {
-			for (var _i = 0; _i < 64; _i++) {
-				if (template.charAt(_i) === toSearch) return _i;
+			for (var _i2 = 0; _i2 < 64; _i2++) {
+				if (template.charAt(_i2) === toSearch) return _i2;
 			}
 
 			return 64;
@@ -471,9 +486,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			var outputLength = output.length;
 			var nonZeroStart = -1;
 
-			for (var _i2 = outputLength - 1; _i2 >= 0; _i2--) {
-				if (output.charCodeAt(_i2) !== 0) {
-					nonZeroStart = _i2;
+			for (var _i3 = outputLength - 1; _i3 >= 0; _i3--) {
+				if (output.charCodeAt(_i3) !== 0) {
+					nonZeroStart = _i3;
 					break;
 				}
 			}
@@ -526,23 +541,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			resultView[i] = str.charCodeAt(i);
 		}return resultBuffer;
 	}
-	//**************************************************************************************
-	var log2 = Math.log(2);
-	//**************************************************************************************
-	/**
-  * Get nearest to input length power of 2
-  * @param {number} length Current length of existing array
-  * @returns {number}
-  */
-	function nearestPowerOf2(length) {
-		var base = Math.log(length) / log2;
-
-		var floor = Math.floor(base);
-		var round = Math.round(base);
-
-		return floor === round ? floor : round;
-	}
-	//**************************************************************************************
 
 	//**************************************************************************************
 	//region Declaration for "LocalBaseBlock" class
@@ -893,8 +891,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				if (sizeOnly === false) {
 					var curView = new Uint8Array(this.valueHex);
 
-					for (var _i3 = 0; _i3 < curView.length - 1; _i3++) {
-						retView[_i3 + 1] = curView[_i3] | 0x80;
+					for (var _i4 = 0; _i4 < curView.length - 1; _i4++) {
+						retView[_i4 + 1] = curView[_i4] | 0x80;
 					}retView[this.valueHex.byteLength] = curView[curView.length - 1];
 				}
 
@@ -1005,8 +1003,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var tempBuffer = new ArrayBuffer(count);
 						var tempBufferView = new Uint8Array(tempBuffer);
 
-						for (var _i4 = 0; _i4 < count; _i4++) {
-							tempBufferView[_i4] = intTagNumberBuffer[_i4];
+						for (var _i5 = 0; _i5 < count; _i5++) {
+							tempBufferView[_i5] = intTagNumberBuffer[_i5];
 						}this.valueHex = new ArrayBuffer(count);
 						intTagNumberBuffer = new Uint8Array(this.valueHex);
 						intTagNumberBuffer.set(tempBufferView);
@@ -1331,10 +1329,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
 			_classCallCheck(this, LocalValueBlock);
-
-			//region Do not let a user to create abstract class
-			if (new.target === LocalValueBlock) throw TypeError("new of abstract class \"LocalValueBlock\"");
-			//endregion
 
 			return _possibleConstructorReturn(this, (LocalValueBlock.__proto__ || Object.getPrototypeOf(LocalValueBlock)).call(this, parameters));
 		}
@@ -2700,8 +2694,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//region Copy input buffer to internal buffer
 				this.valueHex = new ArrayBuffer(intBuffer.length - 1);
 				var view = new Uint8Array(this.valueHex);
-				for (var _i5 = 0; _i5 < inputLength - 1; _i5++) {
-					view[_i5] = intBuffer[_i5 + 1];
+				for (var _i6 = 0; _i6 < inputLength - 1; _i6++) {
+					view[_i6] = intBuffer[_i6 + 1];
 				} //endregion
 
 				this.blockLength = intBuffer.length;
@@ -3176,7 +3170,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "convertFromDER",
 			value: function convertFromDER() {
-				var expectedLength = Math.pow(2, nearestPowerOf2(this.valueBlock.valueHex.byteLength));
+				var expectedLength = this.valueBlock.valueHex.byteLength % 2 ? this.valueBlock.valueHex.byteLength + 1 : this.valueBlock.valueHex.byteLength;
 				var integer = new Integer({ valueHex: this.valueBlock.valueHex });
 				integer.valueBlock.fromDER(integer.valueBlock.valueHex, 0, integer.valueBlock.valueHex.byteLength, expectedLength);
 
@@ -3308,8 +3302,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var tempValueHex = new ArrayBuffer(this.blockLength);
 				var tempView = new Uint8Array(tempValueHex);
 
-				for (var _i6 = 0; _i6 < this.blockLength; _i6++) {
-					tempView[_i6] = view[_i6];
+				for (var _i7 = 0; _i7 < this.blockLength; _i7++) {
+					tempView[_i7] = view[_i7];
 				} //noinspection JSCheckFunctionSignatures
 				this.valueHex = tempValueHex.slice(0);
 				view = new Uint8Array(this.valueHex);
@@ -3373,8 +3367,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					var encodedView = new Uint8Array(encodedBuf);
 					retView = new Uint8Array(retBuf);
 
-					for (var _i7 = 0; _i7 < encodedBuf.byteLength - 1; _i7++) {
-						retView[_i7] = encodedView[_i7] | 0x80;
+					for (var _i8 = 0; _i8 < encodedBuf.byteLength - 1; _i8++) {
+						retView[_i8] = encodedView[_i8] | 0x80;
 					}retView[encodedBuf.byteLength - 1] = encodedView[encodedBuf.byteLength - 1];
 				}
 
@@ -6384,8 +6378,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if (inputData.valueBlock.value.length === 0 && inputSchema.valueBlock.value.length !== 0) {
 				var _optional = true;
 
-				for (var _i8 = 0; _i8 < inputSchema.valueBlock.value.length; _i8++) {
-					_optional = _optional && (inputSchema.valueBlock.value[_i8].optional || false);
+				for (var _i9 = 0; _i9 < inputSchema.valueBlock.value.length; _i9++) {
+					_optional = _optional && (inputSchema.valueBlock.value[_i9].optional || false);
 				}if (_optional === true) {
 					return {
 						verified: true,
@@ -6409,10 +6403,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			}
 			//endregion
 
-			for (var _i9 = 0; _i9 < maxLength; _i9++) {
+			for (var _i10 = 0; _i10 < maxLength; _i10++) {
 				//region Special case when there is an "optional" element of ASN.1 schema at the end
-				if (_i9 - admission >= inputData.valueBlock.value.length) {
-					if (inputSchema.valueBlock.value[_i9].optional === false) {
+				if (_i10 - admission >= inputData.valueBlock.value.length) {
+					if (inputSchema.valueBlock.value[_i10].optional === false) {
 						var _result3 = {
 							verified: false,
 							result: root
@@ -6437,7 +6431,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				else {
 						//region Special case for Repeated type of ASN.1 schema element
 						if (inputSchema.valueBlock.value[0] instanceof Repeated) {
-							_result2 = compareSchema(root, inputData.valueBlock.value[_i9], inputSchema.valueBlock.value[0].value);
+							_result2 = compareSchema(root, inputData.valueBlock.value[_i10], inputSchema.valueBlock.value[0].value);
 							if (_result2.verified === false) {
 								if (inputSchema.valueBlock.value[0].optional === true) admission++;else {
 									//region Delete early added name of block
@@ -6458,14 +6452,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 								if (typeof arrayRoot[inputSchema.valueBlock.value[0].name] === "undefined") arrayRoot[inputSchema.valueBlock.value[0].name] = [];
 
-								arrayRoot[inputSchema.valueBlock.value[0].name].push(inputData.valueBlock.value[_i9]);
+								arrayRoot[inputSchema.valueBlock.value[0].name].push(inputData.valueBlock.value[_i10]);
 							}
 						}
 						//endregion
 						else {
-								_result2 = compareSchema(root, inputData.valueBlock.value[_i9 - admission], inputSchema.valueBlock.value[_i9]);
+								_result2 = compareSchema(root, inputData.valueBlock.value[_i10 - admission], inputSchema.valueBlock.value[_i10]);
 								if (_result2.verified === false) {
-									if (inputSchema.valueBlock.value[_i9].optional === true) admission++;else {
+									if (inputSchema.valueBlock.value[_i10].optional === true) admission++;else {
 										//region Delete early added name of block
 										if (inputSchema.hasOwnProperty("name")) {
 											inputSchema.name = inputSchema.name.replace(/^\s+|\s+$/g, "");
@@ -6539,6 +6533,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		};
 		//endregion
 	}
+
+	var PASSED = Symbol("PASSED");
 
 	//**************************************************************************************
 	/**
@@ -6882,8 +6878,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return {
 					crv: crvName,
-					x: toBase64(arrayBufferToString(this.x), true, true),
-					y: toBase64(arrayBufferToString(this.y), true, true)
+					x: toBase64(arrayBufferToString(this.x), true, true, true),
+					y: toBase64(arrayBufferToString(this.y), true, true, true)
 				};
 			}
 			//**********************************************************************************
@@ -7071,8 +7067,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			key: "toJSON",
 			value: function toJSON() {
 				return {
-					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true),
-					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true)
+					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
+					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true)
 				};
 			}
 			//**********************************************************************************
@@ -7519,7 +7515,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				this.values = asn1.result.values;
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convert current object to asn1js object and set correct values
@@ -7537,7 +7532,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convertion for the class to JSON object
@@ -7554,7 +7548,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					})
 				};
 			}
+			//**********************************************************************************
+			//region Basic Building Blocks for Verification Engine
+			//**********************************************************************************
 
+		}, {
+			key: "formatChecking",
+			value: function formatChecking() {
+				return {
+					indication: PASSED
+				};
+			}
+			//**********************************************************************************
+			//endregion
 			//**********************************************************************************
 
 		}], [{
@@ -7794,7 +7800,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				var privateKeyJSON = {
 					crv: crvName,
-					d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true)
+					d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, true)
 				};
 
 				if ("publicKey" in this) {
@@ -8291,14 +8297,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			key: "toJSON",
 			value: function toJSON() {
 				var jwk = {
-					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true),
-					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true),
-					d: toBase64(arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true),
-					p: toBase64(arrayBufferToString(this.prime1.valueBlock.valueHex), true, true),
-					q: toBase64(arrayBufferToString(this.prime2.valueBlock.valueHex), true, true),
-					dp: toBase64(arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true),
-					dq: toBase64(arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true),
-					qi: toBase64(arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true)
+					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
+					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true),
+					d: toBase64(arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true, true),
+					p: toBase64(arrayBufferToString(this.prime1.valueBlock.valueHex), true, true, true),
+					q: toBase64(arrayBufferToString(this.prime2.valueBlock.valueHex), true, true, true),
+					dp: toBase64(arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true, true),
+					dq: toBase64(arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true, true),
+					qi: toBase64(arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true, true)
 				};
 
 				if ("otherPrimeInfos" in this) jwk.oth = Array.from(this.otherPrimeInfos, function (element) {
@@ -8805,6 +8811,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		_createClass(CryptoEngine, [{
 			key: "importKey",
 			value: function importKey(format, keyData, algorithm, extractable, keyUsages) {
+				var _this52 = this;
+
 				//region Initial variables
 				var jwk = {};
 				//endregion
@@ -9228,8 +9236,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Special case for Safari browser (since its acting not as WebCrypto standard describes)
 				if (this.name.toLowerCase() === "safari") {
-			return Promise.resolve().then(function(){ return this.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages); })
-				.then(function(result){ return result; }, function(error){ return this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages); });
+					// Try to use both ways - import using ArrayBuffer and pure JWK (for Safari Technology Preview)
+					return Promise.resolve().then(function () {
+						return _this52.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages);
+					}).then(function (result) {
+						return result;
+					}, function (error) {
+						return _this52.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages);
+					});
+
+					return Promise.resolve().then(function () {
+						return this.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages);
+					}).then(function (result) {
+						return result;
+					}, function (error) {
+						return this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages);
+					});
 				}
 				//endregion
 
@@ -9249,13 +9271,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var sequence = this.crypto.exportKey("jwk", key);
 
 				//region Currently Safari returns ArrayBuffer as JWK thus we need an additional transformation
-				if (this.name.toLowerCase() === "safari") sequence = sequence.then(function (result) {
-				// Some additional checks for Safari Technology Preview
-				if(result instanceof ArrayBuffer)
-					return JSON.parse(arrayBufferToString(result))
-				
-				return result;
-				});
+				if (this.name.toLowerCase() === "safari") {
+					sequence = sequence.then(function (result) {
+						// Some additional checks for Safari Technology Preview
+						if (result instanceof ArrayBuffer) return JSON.parse(arrayBufferToString(result));
+
+						return result;
+					});
+				}
 				//endregion
 
 				switch (format.toLowerCase()) {
@@ -9310,7 +9333,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "convert",
 			value: function convert(inputFormat, outputFormat, keyData, algorithm, extractable, keyUsages) {
-				var _this52 = this;
+				var _this53 = this;
 
 				switch (inputFormat.toLowerCase()) {
 					case "raw":
@@ -9319,21 +9342,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.resolve(keyData);
 							case "spki":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("spki", result);
+									return _this53.exportKey("spki", result);
 								});
 							case "pkcs8":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("pkcs8", result);
+									return _this53.exportKey("pkcs8", result);
 								});
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9342,9 +9365,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("spki", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("spki", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.resolve(keyData);
@@ -9352,9 +9375,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.reject("Impossible to convert between SPKI/PKCS8");
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("spki", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("spki", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9363,9 +9386,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.reject("Impossible to convert between SPKI/PKCS8");
@@ -9373,9 +9396,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.resolve(keyData);
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9384,21 +9407,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("spki", result);
+									return _this53.exportKey("spki", result);
 								});
 							case "pkcs8":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("pkcs8", result);
+									return _this53.exportKey("pkcs8", result);
 								});
 							case "jwk":
 								return Promise.resolve(keyData);
@@ -9590,19 +9613,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var subtleObject = null;
 
 				// Apple Safari support
-			if("webkitSubtle" in self.crypto)
-			{
-				try
-				{
-					subtleObject = self.crypto.webkitSubtle;
+				if ("webkitSubtle" in self.crypto) {
+					try {
+						subtleObject = self.crypto.webkitSubtle;
+					} catch (ex) {
+						subtleObject = self.crypto.subtle;
+					}
+
+					engineName = "safari";
 				}
-				catch(ex)
-				{
-					subtleObject = self.crypto.subtle;
-				}
-				
-				engineName = "safari";
-			}
 
 				if ("subtle" in self.crypto) subtleObject = self.crypto.subtle;
 

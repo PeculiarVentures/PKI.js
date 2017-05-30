@@ -378,11 +378,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   * @param {string} input
   * @param {boolean} useUrlTemplate If "true" then output would be encoded using "base64url"
   * @param {boolean} skipPadding Skip BASE-64 padding or not
+  * @param {boolean} skipLeadingZeros Skip leading zeros in input data or not
   * @returns {string}
   */
 	function toBase64(input) {
 		var useUrlTemplate = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 		var skipPadding = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+		var skipLeadingZeros = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
 		var i = 0;
 
@@ -392,6 +394,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		var output = "";
 
 		var template = useUrlTemplate ? base64UrlTemplate : base64Template;
+
+		if (skipLeadingZeros) {
+			var nonZeroPosition = 0;
+
+			for (var _i = 0; _i < input.length; _i++) {
+				if (input.charCodeAt(_i) !== 0) {
+					nonZeroPosition = _i;
+					break;
+				}
+			}
+
+			input = input.slice(nonZeroPosition);
+		}
 
 		while (i < input.length) {
 			var chr1 = input.charCodeAt(i++);
@@ -434,8 +449,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		//region Aux functions
 		function indexof(toSearch) {
-			for (var _i = 0; _i < 64; _i++) {
-				if (template.charAt(_i) === toSearch) return _i;
+			for (var _i2 = 0; _i2 < 64; _i2++) {
+				if (template.charAt(_i2) === toSearch) return _i2;
 			}
 
 			return 64;
@@ -471,9 +486,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			var outputLength = output.length;
 			var nonZeroStart = -1;
 
-			for (var _i2 = outputLength - 1; _i2 >= 0; _i2--) {
-				if (output.charCodeAt(_i2) !== 0) {
-					nonZeroStart = _i2;
+			for (var _i3 = outputLength - 1; _i3 >= 0; _i3--) {
+				if (output.charCodeAt(_i3) !== 0) {
+					nonZeroStart = _i3;
 					break;
 				}
 			}
@@ -526,23 +541,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			resultView[i] = str.charCodeAt(i);
 		}return resultBuffer;
 	}
-	//**************************************************************************************
-	var log2 = Math.log(2);
-	//**************************************************************************************
-	/**
-  * Get nearest to input length power of 2
-  * @param {number} length Current length of existing array
-  * @returns {number}
-  */
-	function nearestPowerOf2(length) {
-		var base = Math.log(length) / log2;
-
-		var floor = Math.floor(base);
-		var round = Math.round(base);
-
-		return floor === round ? floor : round;
-	}
-	//**************************************************************************************
 
 	//**************************************************************************************
 	//region Declaration for "LocalBaseBlock" class
@@ -893,8 +891,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				if (sizeOnly === false) {
 					var curView = new Uint8Array(this.valueHex);
 
-					for (var _i3 = 0; _i3 < curView.length - 1; _i3++) {
-						retView[_i3 + 1] = curView[_i3] | 0x80;
+					for (var _i4 = 0; _i4 < curView.length - 1; _i4++) {
+						retView[_i4 + 1] = curView[_i4] | 0x80;
 					}retView[this.valueHex.byteLength] = curView[curView.length - 1];
 				}
 
@@ -1005,8 +1003,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var tempBuffer = new ArrayBuffer(count);
 						var tempBufferView = new Uint8Array(tempBuffer);
 
-						for (var _i4 = 0; _i4 < count; _i4++) {
-							tempBufferView[_i4] = intTagNumberBuffer[_i4];
+						for (var _i5 = 0; _i5 < count; _i5++) {
+							tempBufferView[_i5] = intTagNumberBuffer[_i5];
 						}this.valueHex = new ArrayBuffer(count);
 						intTagNumberBuffer = new Uint8Array(this.valueHex);
 						intTagNumberBuffer.set(tempBufferView);
@@ -1331,10 +1329,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
 			_classCallCheck(this, LocalValueBlock);
-
-			//region Do not let a user to create abstract class
-			if (new.target === LocalValueBlock) throw TypeError("new of abstract class \"LocalValueBlock\"");
-			//endregion
 
 			return _possibleConstructorReturn(this, (LocalValueBlock.__proto__ || Object.getPrototypeOf(LocalValueBlock)).call(this, parameters));
 		}
@@ -2700,8 +2694,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//region Copy input buffer to internal buffer
 				this.valueHex = new ArrayBuffer(intBuffer.length - 1);
 				var view = new Uint8Array(this.valueHex);
-				for (var _i5 = 0; _i5 < inputLength - 1; _i5++) {
-					view[_i5] = intBuffer[_i5 + 1];
+				for (var _i6 = 0; _i6 < inputLength - 1; _i6++) {
+					view[_i6] = intBuffer[_i6 + 1];
 				} //endregion
 
 				this.blockLength = intBuffer.length;
@@ -3176,7 +3170,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "convertFromDER",
 			value: function convertFromDER() {
-				var expectedLength = Math.pow(2, nearestPowerOf2(this.valueBlock.valueHex.byteLength));
+				var expectedLength = this.valueBlock.valueHex.byteLength % 2 ? this.valueBlock.valueHex.byteLength + 1 : this.valueBlock.valueHex.byteLength;
 				var integer = new Integer({ valueHex: this.valueBlock.valueHex });
 				integer.valueBlock.fromDER(integer.valueBlock.valueHex, 0, integer.valueBlock.valueHex.byteLength, expectedLength);
 
@@ -3308,8 +3302,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var tempValueHex = new ArrayBuffer(this.blockLength);
 				var tempView = new Uint8Array(tempValueHex);
 
-				for (var _i6 = 0; _i6 < this.blockLength; _i6++) {
-					tempView[_i6] = view[_i6];
+				for (var _i7 = 0; _i7 < this.blockLength; _i7++) {
+					tempView[_i7] = view[_i7];
 				} //noinspection JSCheckFunctionSignatures
 				this.valueHex = tempValueHex.slice(0);
 				view = new Uint8Array(this.valueHex);
@@ -3373,8 +3367,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					var encodedView = new Uint8Array(encodedBuf);
 					retView = new Uint8Array(retBuf);
 
-					for (var _i7 = 0; _i7 < encodedBuf.byteLength - 1; _i7++) {
-						retView[_i7] = encodedView[_i7] | 0x80;
+					for (var _i8 = 0; _i8 < encodedBuf.byteLength - 1; _i8++) {
+						retView[_i8] = encodedView[_i8] | 0x80;
 					}retView[encodedBuf.byteLength - 1] = encodedView[encodedBuf.byteLength - 1];
 				}
 
@@ -6384,8 +6378,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if (inputData.valueBlock.value.length === 0 && inputSchema.valueBlock.value.length !== 0) {
 				var _optional = true;
 
-				for (var _i8 = 0; _i8 < inputSchema.valueBlock.value.length; _i8++) {
-					_optional = _optional && (inputSchema.valueBlock.value[_i8].optional || false);
+				for (var _i9 = 0; _i9 < inputSchema.valueBlock.value.length; _i9++) {
+					_optional = _optional && (inputSchema.valueBlock.value[_i9].optional || false);
 				}if (_optional === true) {
 					return {
 						verified: true,
@@ -6409,10 +6403,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			}
 			//endregion
 
-			for (var _i9 = 0; _i9 < maxLength; _i9++) {
+			for (var _i10 = 0; _i10 < maxLength; _i10++) {
 				//region Special case when there is an "optional" element of ASN.1 schema at the end
-				if (_i9 - admission >= inputData.valueBlock.value.length) {
-					if (inputSchema.valueBlock.value[_i9].optional === false) {
+				if (_i10 - admission >= inputData.valueBlock.value.length) {
+					if (inputSchema.valueBlock.value[_i10].optional === false) {
 						var _result3 = {
 							verified: false,
 							result: root
@@ -6437,7 +6431,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				else {
 						//region Special case for Repeated type of ASN.1 schema element
 						if (inputSchema.valueBlock.value[0] instanceof Repeated) {
-							_result2 = compareSchema(root, inputData.valueBlock.value[_i9], inputSchema.valueBlock.value[0].value);
+							_result2 = compareSchema(root, inputData.valueBlock.value[_i10], inputSchema.valueBlock.value[0].value);
 							if (_result2.verified === false) {
 								if (inputSchema.valueBlock.value[0].optional === true) admission++;else {
 									//region Delete early added name of block
@@ -6458,14 +6452,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 								if (typeof arrayRoot[inputSchema.valueBlock.value[0].name] === "undefined") arrayRoot[inputSchema.valueBlock.value[0].name] = [];
 
-								arrayRoot[inputSchema.valueBlock.value[0].name].push(inputData.valueBlock.value[_i9]);
+								arrayRoot[inputSchema.valueBlock.value[0].name].push(inputData.valueBlock.value[_i10]);
 							}
 						}
 						//endregion
 						else {
-								_result2 = compareSchema(root, inputData.valueBlock.value[_i9 - admission], inputSchema.valueBlock.value[_i9]);
+								_result2 = compareSchema(root, inputData.valueBlock.value[_i10 - admission], inputSchema.valueBlock.value[_i10]);
 								if (_result2.verified === false) {
-									if (inputSchema.valueBlock.value[_i9].optional === true) admission++;else {
+									if (inputSchema.valueBlock.value[_i10].optional === true) admission++;else {
 										//region Delete early added name of block
 										if (inputSchema.hasOwnProperty("name")) {
 											inputSchema.name = inputSchema.name.replace(/^\s+|\s+$/g, "");
@@ -6539,6 +6533,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		};
 		//endregion
 	}
+
+	var PASSED = Symbol("PASSED");
+	var FAILED = Symbol("FAILED");
+	var SIG_CRYPTO_FAILURE = Symbol("SIG_CRYPTO_FAILURE");
 
 	//**************************************************************************************
 	/**
@@ -7148,8 +7146,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return {
 					crv: crvName,
-					x: toBase64(arrayBufferToString(this.x), true, true),
-					y: toBase64(arrayBufferToString(this.y), true, true)
+					x: toBase64(arrayBufferToString(this.x), true, true, true),
+					y: toBase64(arrayBufferToString(this.y), true, true, true)
 				};
 			}
 			//**********************************************************************************
@@ -7337,8 +7335,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			key: "toJSON",
 			value: function toJSON() {
 				return {
-					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true),
-					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true)
+					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
+					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true)
 				};
 			}
 			//**********************************************************************************
@@ -7785,7 +7783,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				this.values = asn1.result.values;
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convert current object to asn1js object and set correct values
@@ -7803,7 +7800,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convertion for the class to JSON object
@@ -7820,7 +7816,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					})
 				};
 			}
+			//**********************************************************************************
+			//region Basic Building Blocks for Verification Engine
+			//**********************************************************************************
 
+		}, {
+			key: "formatChecking",
+			value: function formatChecking() {
+				return {
+					indication: PASSED
+				};
+			}
+			//**********************************************************************************
+			//endregion
 			//**********************************************************************************
 
 		}], [{
@@ -8060,7 +8068,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				var privateKeyJSON = {
 					crv: crvName,
-					d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true)
+					d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, true)
 				};
 
 				if ("publicKey" in this) {
@@ -8557,14 +8565,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			key: "toJSON",
 			value: function toJSON() {
 				var jwk = {
-					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true),
-					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true),
-					d: toBase64(arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true),
-					p: toBase64(arrayBufferToString(this.prime1.valueBlock.valueHex), true, true),
-					q: toBase64(arrayBufferToString(this.prime2.valueBlock.valueHex), true, true),
-					dp: toBase64(arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true),
-					dq: toBase64(arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true),
-					qi: toBase64(arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true)
+					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
+					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true),
+					d: toBase64(arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true, true),
+					p: toBase64(arrayBufferToString(this.prime1.valueBlock.valueHex), true, true, true),
+					q: toBase64(arrayBufferToString(this.prime2.valueBlock.valueHex), true, true, true),
+					dp: toBase64(arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true, true),
+					dq: toBase64(arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true, true),
+					qi: toBase64(arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true, true)
 				};
 
 				if ("otherPrimeInfos" in this) jwk.oth = Array.from(this.otherPrimeInfos, function (element) {
@@ -9071,6 +9079,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		_createClass(CryptoEngine, [{
 			key: "importKey",
 			value: function importKey(format, keyData, algorithm, extractable, keyUsages) {
+				var _this52 = this;
+
 				//region Initial variables
 				var jwk = {};
 				//endregion
@@ -9494,9 +9504,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Special case for Safari browser (since its acting not as WebCrypto standard describes)
 				if (this.name.toLowerCase() === "safari") {
-			// Try to use both ways - import using ArrayBuffer and pure JWK (for Safari Technology Preview)
-			return Promise.resolve().then(function(){ return this.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages); })
-				.then(function(result){ return result; }, function(error){ return this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages); });
+					// Try to use both ways - import using ArrayBuffer and pure JWK (for Safari Technology Preview)
+					return Promise.resolve().then(function () {
+						return _this52.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages);
+					}).then(function (result) {
+						return result;
+					}, function (error) {
+						return _this52.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages);
+					});
+
+					return Promise.resolve().then(function () {
+						return this.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages);
+					}).then(function (result) {
+						return result;
+					}, function (error) {
+						return this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages);
+					});
 				}
 				//endregion
 
@@ -9516,13 +9539,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var sequence = this.crypto.exportKey("jwk", key);
 
 				//region Currently Safari returns ArrayBuffer as JWK thus we need an additional transformation
-				if (this.name.toLowerCase() === "safari") sequence = sequence.then(function (result) {
-				// Some additional checks for Safari Technology Preview
-				if(result instanceof ArrayBuffer)
-					return JSON.parse(arrayBufferToString(result))
-				
-				return result;
-				});
+				if (this.name.toLowerCase() === "safari") {
+					sequence = sequence.then(function (result) {
+						// Some additional checks for Safari Technology Preview
+						if (result instanceof ArrayBuffer) return JSON.parse(arrayBufferToString(result));
+
+						return result;
+					});
+				}
 				//endregion
 
 				switch (format.toLowerCase()) {
@@ -9577,7 +9601,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "convert",
 			value: function convert(inputFormat, outputFormat, keyData, algorithm, extractable, keyUsages) {
-				var _this52 = this;
+				var _this53 = this;
 
 				switch (inputFormat.toLowerCase()) {
 					case "raw":
@@ -9586,21 +9610,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.resolve(keyData);
 							case "spki":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("spki", result);
+									return _this53.exportKey("spki", result);
 								});
 							case "pkcs8":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("pkcs8", result);
+									return _this53.exportKey("pkcs8", result);
 								});
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9609,9 +9633,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("spki", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("spki", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.resolve(keyData);
@@ -9619,9 +9643,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.reject("Impossible to convert between SPKI/PKCS8");
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("spki", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("spki", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9630,9 +9654,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.reject("Impossible to convert between SPKI/PKCS8");
@@ -9640,9 +9664,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.resolve(keyData);
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9651,21 +9675,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("spki", result);
+									return _this53.exportKey("spki", result);
 								});
 							case "pkcs8":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("pkcs8", result);
+									return _this53.exportKey("pkcs8", result);
 								});
 							case "jwk":
 								return Promise.resolve(keyData);
@@ -9857,19 +9881,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var subtleObject = null;
 
 				// Apple Safari support
-			if("webkitSubtle" in self.crypto)
-			{
-				try
-				{
-					subtleObject = self.crypto.webkitSubtle;
+				if ("webkitSubtle" in self.crypto) {
+					try {
+						subtleObject = self.crypto.webkitSubtle;
+					} catch (ex) {
+						subtleObject = self.crypto.subtle;
+					}
+
+					engineName = "safari";
 				}
-				catch(ex)
-				{
-					subtleObject = self.crypto.subtle;
-				}
-				
-				engineName = "safari";
-			}
 
 				if ("subtle" in self.crypto) subtleObject = self.crypto.subtle;
 
@@ -10848,6 +10868,54 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		return result;
 	}
+	//**************************************************************************************
+	/**
+  * Check that all OIDs are mapped to existing WebCrypto API algorithms
+  * @param {Array.<string>} oids Array with OIDs for checking
+  * @returns {{indication}}
+  */
+	function checkOids(oids) {
+		var _iteratorNormalCompletion13 = true;
+		var _didIteratorError13 = false;
+		var _iteratorError13 = undefined;
+
+		try {
+			for (var _iterator13 = oids.entries()[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+				var _step13$value = _slicedToArray(_step13.value, 2);
+
+				var index = _step13$value[0];
+				var oid = _step13$value[1];
+
+				var algorithm = getAlgorithmByOID(oid);
+				if ("name" in algorithm === false) {
+					return {
+						indication: FAILED,
+						message: index
+					};
+				}
+			}
+		} catch (err) {
+			_didIteratorError13 = true;
+			_iteratorError13 = err;
+		} finally {
+			try {
+				if (!_iteratorNormalCompletion13 && _iterator13.return) {
+					_iterator13.return();
+				}
+			} finally {
+				if (_didIteratorError13) {
+					throw _iteratorError13;
+				}
+			}
+		}
+
+		return {
+			indication: PASSED
+		};
+	}
+	//**************************************************************************************
+	//endregion
+	//**************************************************************************************
 
 	//**************************************************************************************
 	/**
@@ -11165,30 +11233,30 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				if (compareTo instanceof RelativeDistinguishedNames) {
 					if (this.typesAndValues.length !== compareTo.typesAndValues.length) return false;
 
-					var _iteratorNormalCompletion13 = true;
-					var _didIteratorError13 = false;
-					var _iteratorError13 = undefined;
+					var _iteratorNormalCompletion14 = true;
+					var _didIteratorError14 = false;
+					var _iteratorError14 = undefined;
 
 					try {
-						for (var _iterator13 = this.typesAndValues.entries()[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
-							var _step13$value = _slicedToArray(_step13.value, 2);
+						for (var _iterator14 = this.typesAndValues.entries()[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+							var _step14$value = _slicedToArray(_step14.value, 2);
 
-							var index = _step13$value[0];
-							var typeAndValue = _step13$value[1];
+							var index = _step14$value[0];
+							var typeAndValue = _step14$value[1];
 
 							if (typeAndValue.isEqual(compareTo.typesAndValues[index]) === false) return false;
 						}
 					} catch (err) {
-						_didIteratorError13 = true;
-						_iteratorError13 = err;
+						_didIteratorError14 = true;
+						_iteratorError14 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion13 && _iterator13.return) {
-								_iterator13.return();
+							if (!_iteratorNormalCompletion14 && _iterator14.return) {
+								_iterator14.return();
 							}
 						} finally {
-							if (_didIteratorError13) {
-								throw _iteratorError13;
+							if (_didIteratorError14) {
+								throw _iteratorError14;
 							}
 						}
 					}
@@ -11291,7 +11359,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    * @property {number} [type] 0 - UTCTime; 1 - GeneralizedTime; 2 - empty value
-   * @property {Date} [value] Value of the TIME class
+   * @property {Date} [value] Value of the Time class
    */
 		function Time() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -11306,7 +11374,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			this.type = getParametersValue(parameters, "type", Time.defaultValues("type"));
 			/**
     * @type {Date}
-    * @description Value of the TIME class
+    * @description Value of the Time class
     */
 			this.value = getParametersValue(parameters, "value", Time.defaultValues("value"));
 			//endregion
@@ -11339,7 +11407,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					}
 				}));
 
-				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for TIME");
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for Time");
 				//endregion
 
 				//region Get internal properties from parsed schema
@@ -16403,7 +16471,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if ("schema" in parameters) this.fromSchema(parameters.schema);
 			//endregion
 		}
-
 		//**********************************************************************************
 		/**
    * Return default values for all class members
@@ -16413,7 +16480,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		_createClass(Certificate, [{
 			key: "fromSchema",
-
 
 			//**********************************************************************************
 			/**
@@ -16460,7 +16526,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				this.signatureValue = asn1.result.signatureValue;
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Create ASN.1 schema for existing values of TBS part for the certificate
@@ -16549,7 +16614,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convert current object to asn1js object and set correct values
@@ -16581,7 +16645,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convertion for the class to JSON object
@@ -16616,7 +16679,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return object;
 			}
-
 			//**********************************************************************************
 			/**
     * Importing public key for current certificate
@@ -16649,6 +16711,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					parameters.algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
 					if ("hash" in parameters.algorithm.algorithm) parameters.algorithm.algorithm.hash.name = shaAlgorithm;
+
+					//region Special case for ECDSA
+					if (algorithmObject.name === "ECDSA") {
+						//region Get information about named curve
+						var algorithmParamsChecked = false;
+
+						if ("algorithmParams" in this.subjectPublicKeyInfo.algorithm === true) {
+							if ("idBlock" in this.subjectPublicKeyInfo.algorithm.algorithmParams) {
+								if (this.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1 && this.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6) algorithmParamsChecked = true;
+							}
+						}
+
+						if (algorithmParamsChecked === false) return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+						var curveObject = getAlgorithmByOID(this.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						if ("name" in curveObject === false) return Promise.reject("Unsupported named curve algorithm: " + this.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						//endregion
+
+						parameters.algorithm.algorithm.namedCurve = curveObject.name;
+					}
+					//endregion
 					//endregion
 				}
 				//endregion
@@ -16661,7 +16744,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return crypto.importKey("spki", publicKeyInfoView, parameters.algorithm.algorithm, true, parameters.algorithm.usages);
 			}
-
 			//**********************************************************************************
 			/**
     * Get SHA-1 hash value for subject public key
@@ -16677,7 +16759,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return crypto.digest({ name: "sha-1" }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
 			}
-
 			//**********************************************************************************
 			/**
     * Make a signature for current value from TBS section
@@ -16688,7 +16769,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "sign",
 			value: function sign(privateKey) {
-				var _this53 = this;
+				var _this54 = this;
 
 				var hashAlgorithm = arguments.length <= 1 || arguments[1] === undefined ? "SHA-1" : arguments[1];
 
@@ -16778,19 +16859,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					if (defParams.algorithm.name === "ECDSA") result = createCMSECDSASignature(result);
 					//endregion
 
-					_this53.signatureValue = new BitString({ valueHex: result });
+					_this54.signatureValue = new BitString({ valueHex: result });
 				}, function (error) {
 					return Promise.reject("Signing error: " + error);
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this54 = this;
+				var _this55 = this;
 
 				var issuerCertificate = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 
@@ -16826,13 +16906,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				sequence = sequence.then(function () {
 					//region Get information about public key algorithm and default parameters for import
 					var algorithmId = void 0;
-					if (_this54.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this54.signatureAlgorithm.algorithmId;else algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
+					if (_this55.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this55.signatureAlgorithm.algorithmId;else algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
 
 					var algorithmObject = getAlgorithmByOID(algorithmId);
 					if ("name" in algorithmObject === false) return Promise.reject("Unsupported public key algorithm: " + algorithmId);
 
 					var algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
 					if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = shaAlgorithm;
+
+					//region Special case for ECDSA
+					if (algorithmObject.name === "ECDSA") {
+						// #region Get information about named curve
+						var algorithmParamsChecked = false;
+
+						if ("algorithmParams" in subjectPublicKeyInfo.algorithm === true) {
+							if ("idBlock" in subjectPublicKeyInfo.algorithm.algorithmParams) {
+								if (subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1 && subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6) algorithmParamsChecked = true;
+							}
+						}
+
+						if (algorithmParamsChecked === false) return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+						var curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						if ("name" in curveObject === false) return Promise.reject("Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						// #endregion
+
+						algorithm.algorithm.namedCurve = curveObject.name;
+					}
+					//endregion
 					//endregion
 
 					var publicKeyInfoSchema = subjectPublicKeyInfo.toSchema();
@@ -16864,7 +16965,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var pssParameters = void 0;
 
 						try {
-							pssParameters = new RSASSAPSSParams({ schema: _this54.signatureAlgorithm.algorithmParams });
+							pssParameters = new RSASSAPSSParams({ schema: _this55.signatureAlgorithm.algorithmParams });
 						} catch (ex) {
 							return Promise.reject(ex);
 						}
@@ -16890,7 +16991,274 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return sequence;
 			}
+			//**********************************************************************************
+			//region Basic Building Blocks for Verification Engine
+			//**********************************************************************************
 
+		}, {
+			key: "formatChecking",
+			value: function formatChecking(_ref) {
+				var _ref$strictChecking = _ref.strictChecking;
+				var strictChecking = _ref$strictChecking === undefined ? false : _ref$strictChecking;
+
+				if (strictChecking) {
+					//region Check "version"
+					if ("extensions" in this) {
+						if (this.version !== 2) {
+							return {
+								indication: FAILED,
+								message: "Version value for Certificate must be 2 (V3)"
+							};
+						}
+					} else {
+						if ("subjectUniqueID" in this || "issuerUniqueID" in this) {
+							if (this.version !== 1 && this.version !== 2) {
+								return {
+									indication: FAILED,
+									message: "Version value for Certificate must be 1 (V2) or 2 (V3)"
+								};
+							}
+						} else {
+							if (this.version !== 0) {
+								return {
+									indication: FAILED,
+									message: "Version value for Certificate must be 0 (V1)"
+								};
+							}
+						}
+					}
+					//endregion
+
+					//region Check serial number
+					var serialNumberView = new Uint8Array(this.serialNumber.valueBlock.valueHex);
+
+					if ((serialNumberView[0] & 0x80) === 0x80) {
+						return {
+							indication: FAILED,
+							message: "Serial number for Certificate must be encoded as non-negative integer"
+						};
+					}
+					//endregion
+				}
+
+				//region Check all certificate's algorithms
+				var algorithms = [this.signature.algorithmId, this.subjectPublicKeyInfo.algorithm.algorithmId, this.signatureAlgorithm.algorithmId];
+
+				var algorithmsChecking = checkOids(algorithms);
+				if (algorithmsChecking.indication !== PASSED) {
+					return {
+						indication: FAILED,
+						message: "Incorrect OID in Certificate: " + algorithms[algorithmsCheckResult.message]
+					};
+				}
+				//endregion
+
+				//region Check validity period
+				if (this.notBefore.value >= this.notAfter.value) {
+					return {
+						indication: FAILED,
+						message: "Invalid validity perion for Certificate"
+					};
+				}
+				//endregion
+
+				return {
+					indication: PASSED
+				};
+			}
+			//**********************************************************************************
+
+		}, {
+			key: "cryptographicVerification",
+			value: function cryptographicVerification(_ref2) {
+				var _this56 = this;
+
+				var _ref2$issuerCertifica = _ref2.issuerCertificate;
+				var issuerCertificate = _ref2$issuerCertifica === undefined ? null : _ref2$issuerCertifica;
+
+				//region Initial variables
+				var sequence = Promise.resolve();
+
+				var subjectPublicKeyInfo = {};
+
+				var signature = this.signatureValue;
+				var tbs = this.tbs;
+				//endregion
+
+				//region Set correct "subjectPublicKeyInfo" value
+				if (issuerCertificate !== null) subjectPublicKeyInfo = issuerCertificate.subjectPublicKeyInfo;else {
+					if (this.issuer.isEqual(this.subject)) // Self-signed certificate
+						subjectPublicKeyInfo = this.subjectPublicKeyInfo;
+				}
+
+				if ("algorithm" in subjectPublicKeyInfo === false) {
+					return Promise.resolve({
+						indication: FAILED,
+						subIndication: SIG_CRYPTO_FAILURE,
+						message: "Please provide issuer certificate as a parameter"
+					});
+				}
+				//endregion
+
+				//region Get a "crypto" extension
+				var crypto = getCrypto();
+				if (typeof crypto === "undefined") {
+					return Promise.resolve({
+						indication: FAILED,
+						subIndication: SIG_CRYPTO_FAILURE,
+						message: "Unable to create WebCrypto object"
+					});
+				}
+				//endregion
+
+				//region Find signer's hashing algorithm
+				var shaAlgorithm = getHashAlgorithm(this.signatureAlgorithm);
+				if (shaAlgorithm === "") {
+					return Promise.resolve({
+						indication: FAILED,
+						subIndication: SIG_CRYPTO_FAILURE,
+						message: "Please run FormatChecking block before CryptographicVerification block: Unsupported signature algorithm: " + this.signatureAlgorithm.algorithmId
+					});
+				}
+				//endregion
+
+				//region Importing public key
+				sequence = sequence.then(function () {
+					//region Get information about public key algorithm and default parameters for import
+					var algorithmId = void 0;
+					if (_this56.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this56.signatureAlgorithm.algorithmId;else algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
+
+					var algorithmObject = getAlgorithmByOID(algorithmId);
+					if ("name" in algorithmObject === false) {
+						return Promise.resolve({
+							indication: FAILED,
+							subIndication: SIG_CRYPTO_FAILURE,
+							message: "Please run FormatChecking block before CryptographicVerification block: Unsupported public key algorithm: " + algorithmId
+						});
+					}
+
+					var algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
+					if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = shaAlgorithm;
+
+					//region Special case for ECDSA
+					if (algorithmObject.name === "ECDSA") {
+						// #region Get information about named curve
+						var algorithmParamsChecked = false;
+
+						if ("algorithmParams" in subjectPublicKeyInfo.algorithm === true) {
+							if ("idBlock" in subjectPublicKeyInfo.algorithm.algorithmParams) {
+								if (subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1 && subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6) algorithmParamsChecked = true;
+							}
+						}
+
+						if (algorithmParamsChecked === false) {
+							return Promise.resolve({
+								indication: FAILED,
+								subIndication: SIG_CRYPTO_FAILURE,
+								message: "Incorrect type for ECDSA public key parameters"
+							});
+						}
+
+						var curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						if ("name" in curveObject === false) {
+							return Promise.resolve({
+								indication: FAILED,
+								subIndication: SIG_CRYPTO_FAILURE,
+								message: "Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString()
+							});
+						}
+						// #endregion
+
+						algorithm.algorithm.namedCurve = curveObject.name;
+					}
+					//endregion
+					//endregion
+
+					var publicKeyInfoSchema = subjectPublicKeyInfo.toSchema();
+					var publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
+					var publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
+
+					return crypto.importKey("spki", publicKeyInfoView, algorithm.algorithm, true, algorithm.usages);
+				});
+				//endregion
+
+				//region Verify signature for the certificate
+				sequence = sequence.then(function (publicKey) {
+					//region Get default algorithm parameters for verification
+					var algorithm = getAlgorithmParameters(publicKey.algorithm.name, "verify");
+					if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = shaAlgorithm;
+					//endregion
+
+					//region Special case for ECDSA signatures
+					var signatureValue = signature.valueBlock.valueHex;
+
+					if (publicKey.algorithm.name === "ECDSA") {
+						var asn1 = fromBER(signatureValue);
+						signatureValue = createECDSASignatureFromCMS(asn1.result);
+					}
+					//endregion
+
+					//region Special case for RSA-PSS
+					if (publicKey.algorithm.name === "RSA-PSS") {
+						var pssParameters = void 0;
+
+						try {
+							pssParameters = new RSASSAPSSParams({ schema: _this56.signatureAlgorithm.algorithmParams });
+						} catch (ex) {
+							return Promise.reject(ex);
+						}
+
+						if ("saltLength" in pssParameters) algorithm.algorithm.saltLength = pssParameters.saltLength;else algorithm.algorithm.saltLength = 20;
+
+						var hashAlgo = "SHA-1";
+
+						if ("hashAlgorithm" in pssParameters) {
+							var hashAlgorithm = getAlgorithmByOID(pssParameters.hashAlgorithm.algorithmId);
+							if ("name" in hashAlgorithm === false) {
+								return Promise.resolve({
+									indication: FAILED,
+									subIndication: SIG_CRYPTO_FAILURE,
+									message: "Please run FormatChecking block before CryptographicVerification block: Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithmId
+								});
+							}
+
+							hashAlgo = hashAlgorithm.name;
+						}
+
+						algorithm.algorithm.hash.name = hashAlgo;
+					}
+					//endregion
+
+					return crypto.verify(algorithm.algorithm, publicKey, new Uint8Array(signatureValue), new Uint8Array(tbs));
+				});
+				//endregion
+
+				//region Error handling stub
+				sequence = sequence.then(function (result) {
+					if (result) {
+						return {
+							indication: PASSED
+						};
+					}
+
+					return {
+						indication: FAILED,
+						subIndication: SIG_CRYPTO_FAILURE,
+						message: "Certificate signature was not verified"
+					};
+				}, function (error) {
+					return Promise.resolve({
+						indication: FAILED,
+						subIndication: SIG_CRYPTO_FAILURE,
+						message: "Error during process \"Certificate.cryptographicVerification\": " + error
+					});
+				});
+				//endregion
+
+				return sequence;
+			}
+			//**********************************************************************************
+			//endregion
 			//**********************************************************************************
 
 		}], [{
@@ -16929,7 +17297,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						throw new Error("Invalid member name for Certificate class: " + memberName);
 				}
 			}
-
 			//**********************************************************************************
 			/**
     * Return value of asn1js schema for current class
@@ -17303,7 +17670,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if ("schema" in parameters) this.fromSchema(parameters.schema);
 			//endregion
 		}
-
 		//**********************************************************************************
 		/**
    * Return default values for all class members
@@ -17313,7 +17679,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		_createClass(CertificateRevocationList, [{
 			key: "fromSchema",
-
 
 			//**********************************************************************************
 			/**
@@ -17344,7 +17709,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				this.signatureValue = asn1.result.signatureValue;
 				//endregion
 			}
-
 			//**********************************************************************************
 
 		}, {
@@ -17385,7 +17749,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					value: outputArray
 				});
 			}
-
 			//**********************************************************************************
 			/**
     * Convert current object to asn1js object and set correct values
@@ -17417,7 +17780,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convertion for the class to JSON object
@@ -17448,7 +17810,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return object;
 			}
-
 			//**********************************************************************************
 
 		}, {
@@ -17463,35 +17824,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//endregion
 
 				//region Search for input certificate in revoked certificates array
-				var _iteratorNormalCompletion14 = true;
-				var _didIteratorError14 = false;
-				var _iteratorError14 = undefined;
+				var _iteratorNormalCompletion15 = true;
+				var _didIteratorError15 = false;
+				var _iteratorError15 = undefined;
 
 				try {
-					for (var _iterator14 = this.revokedCertificates[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-						var revokedCertificate = _step14.value;
+					for (var _iterator15 = this.revokedCertificates[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+						var revokedCertificate = _step15.value;
 
 						if (revokedCertificate.userCertificate.isEqual(certificate.serialNumber)) return true;
 					}
 					//endregion
 				} catch (err) {
-					_didIteratorError14 = true;
-					_iteratorError14 = err;
+					_didIteratorError15 = true;
+					_iteratorError15 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion14 && _iterator14.return) {
-							_iterator14.return();
+						if (!_iteratorNormalCompletion15 && _iterator15.return) {
+							_iterator15.return();
 						}
 					} finally {
-						if (_didIteratorError14) {
-							throw _iteratorError14;
+						if (_didIteratorError15) {
+							throw _iteratorError15;
 						}
 					}
 				}
 
 				return false;
 			}
-
 			//**********************************************************************************
 			/**
     * Make a signature for existing CRL data
@@ -17502,7 +17862,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "sign",
 			value: function sign(privateKey) {
-				var _this55 = this;
+				var _this57 = this;
 
 				var hashAlgorithm = arguments.length <= 1 || arguments[1] === undefined ? "SHA-1" : arguments[1];
 
@@ -17596,13 +17956,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					if (defParams.algorithm.name === "ECDSA") result = createCMSECDSASignature(result);
 					//endregion
 
-					_this55.signatureValue = new BitString({ valueHex: result });
+					_this57.signatureValue = new BitString({ valueHex: result });
 				}, function (error) {
 					return Promise.reject("Signing error: " + error);
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Verify existing signature
@@ -17613,7 +17972,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this56 = this;
+				var _this58 = this;
 
 				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -17644,13 +18003,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Check the CRL for unknown critical extensions
 				if ("crlExtensions" in this) {
-					var _iteratorNormalCompletion15 = true;
-					var _didIteratorError15 = false;
-					var _iteratorError15 = undefined;
+					var _iteratorNormalCompletion16 = true;
+					var _didIteratorError16 = false;
+					var _iteratorError16 = undefined;
 
 					try {
-						for (var _iterator15 = this.crlExtensions.extensions[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
-							var extension = _step15.value;
+						for (var _iterator16 = this.crlExtensions.extensions[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+							var extension = _step16.value;
 
 							if (extension.critical) {
 								// We can not be sure that unknown extension has no value for CRL signature
@@ -17658,16 +18017,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							}
 						}
 					} catch (err) {
-						_didIteratorError15 = true;
-						_iteratorError15 = err;
+						_didIteratorError16 = true;
+						_iteratorError16 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion15 && _iterator15.return) {
-								_iterator15.return();
+							if (!_iteratorNormalCompletion16 && _iterator16.return) {
+								_iterator16.return();
 							}
 						} finally {
-							if (_didIteratorError15) {
-								throw _iteratorError15;
+							if (_didIteratorError16) {
+								throw _iteratorError16;
 							}
 						}
 					}
@@ -17687,11 +18046,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//region Import public key
 				sequence = sequence.then(function () {
 					//region Get information about public key algorithm and default parameters for import
-					var algorithmObject = getAlgorithmByOID(_this56.signature.algorithmId);
-					if ("name" in algorithmObject === "") return Promise.reject("Unsupported public key algorithm: " + _this56.signature.algorithmId);
+					var algorithmObject = getAlgorithmByOID(_this58.signature.algorithmId);
+					if ("name" in algorithmObject === "") return Promise.reject("Unsupported public key algorithm: " + _this58.signature.algorithmId);
 
 					var algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
 					if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = shaAlgorithm;
+
+					//region Special case for ECDSA
+					if (algorithmObject.name === "ECDSA") {
+						// #region Get information about named curve
+						var algorithmParamsChecked = false;
+
+						if ("algorithmParams" in subjectPublicKeyInfo.algorithm === true) {
+							if ("idBlock" in subjectPublicKeyInfo.algorithm.algorithmParams) {
+								if (subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1 && subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6) algorithmParamsChecked = true;
+							}
+						}
+
+						if (algorithmParamsChecked === false) return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+						var curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						if ("name" in curveObject === false) return Promise.reject("Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						// #endregion
+
+						algorithm.algorithm.namedCurve = curveObject.name;
+					}
+					//endregion
 					//endregion
 
 					var publicKeyInfoSchema = subjectPublicKeyInfo.toSchema();
@@ -17723,7 +18103,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var pssParameters = void 0;
 
 						try {
-							pssParameters = new RSASSAPSSParams({ schema: _this56.signatureAlgorithm.algorithmParams });
+							pssParameters = new RSASSAPSSParams({ schema: _this58.signatureAlgorithm.algorithmParams });
 						} catch (ex) {
 							return Promise.reject(ex);
 						}
@@ -17749,7 +18129,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return sequence;
 			}
-
 			//**********************************************************************************
 
 		}], [{
@@ -17780,7 +18159,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						throw new Error("Invalid member name for CertificateRevocationList class: " + memberName);
 				}
 			}
-
 			//**********************************************************************************
 			/**
     * Return value of asn1js schema for current class
@@ -18089,12 +18467,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		//region Put information about revoked certificates
 		if ("revokedCertificates" in crlSimpl) {
-			for (var _i10 = 0; _i10 < crlSimpl.revokedCertificates.length; _i10++) {
+			for (var _i11 = 0; _i11 < crlSimpl.revokedCertificates.length; _i11++) {
 				var _row = revokedTable.insertRow(revokedTable.rows.length);
 				var _cell = _row.insertCell(0);
-				_cell.innerHTML = bufferToHexCodes(crlSimpl.revokedCertificates[_i10].userCertificate.valueBlock.valueHex);
+				_cell.innerHTML = bufferToHexCodes(crlSimpl.revokedCertificates[_i11].userCertificate.valueBlock.valueHex);
 				var _cell2 = _row.insertCell(1);
-				_cell2.innerHTML = crlSimpl.revokedCertificates[_i10].revocationDate.value.toString();
+				_cell2.innerHTML = crlSimpl.revokedCertificates[_i11].revocationDate.value.toString();
 			}
 
 			document.getElementById("crl-rev-certs-div").style.display = "block";
@@ -18102,10 +18480,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		//endregion
 		//region Put information about CRL extensions
 		if ("crlExtensions" in crlSimpl) {
-			for (var _i11 = 0; _i11 < crlSimpl.crlExtensions.extensions.length; _i11++) {
+			for (var _i12 = 0; _i12 < crlSimpl.crlExtensions.extensions.length; _i12++) {
 				var _row2 = extensionTable.insertRow(extensionTable.rows.length);
 				var _cell3 = _row2.insertCell(0);
-				_cell3.innerHTML = crlSimpl.crlExtensions.extensions[_i11].extnID;
+				_cell3.innerHTML = crlSimpl.crlExtensions.extensions[_i12].extnID;
 			}
 
 			document.getElementById("crl-extn-div").style.display = "block";
@@ -18217,7 +18595,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						assert.equal(crl.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), "Signature algorithm must be " + testName);
 
 						return verifyCRLInternal().then(function (result) {
-							assert.equal(result.result, true, "CRL must be verified sucessfully");
+							assert.equal(result, true, "CRL must be verified sucessfully");
 						});
 					});
 				});

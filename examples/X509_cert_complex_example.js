@@ -380,11 +380,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   * @param {string} input
   * @param {boolean} useUrlTemplate If "true" then output would be encoded using "base64url"
   * @param {boolean} skipPadding Skip BASE-64 padding or not
+  * @param {boolean} skipLeadingZeros Skip leading zeros in input data or not
   * @returns {string}
   */
 	function toBase64(input) {
 		var useUrlTemplate = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 		var skipPadding = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+		var skipLeadingZeros = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
 
 		var i = 0;
 
@@ -394,6 +396,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		var output = "";
 
 		var template = useUrlTemplate ? base64UrlTemplate : base64Template;
+
+		if (skipLeadingZeros) {
+			var nonZeroPosition = 0;
+
+			for (var _i = 0; _i < input.length; _i++) {
+				if (input.charCodeAt(_i) !== 0) {
+					nonZeroPosition = _i;
+					break;
+				}
+			}
+
+			input = input.slice(nonZeroPosition);
+		}
 
 		while (i < input.length) {
 			var chr1 = input.charCodeAt(i++);
@@ -436,8 +451,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		//region Aux functions
 		function indexof(toSearch) {
-			for (var _i = 0; _i < 64; _i++) {
-				if (template.charAt(_i) === toSearch) return _i;
+			for (var _i2 = 0; _i2 < 64; _i2++) {
+				if (template.charAt(_i2) === toSearch) return _i2;
 			}
 
 			return 64;
@@ -473,9 +488,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			var outputLength = output.length;
 			var nonZeroStart = -1;
 
-			for (var _i2 = outputLength - 1; _i2 >= 0; _i2--) {
-				if (output.charCodeAt(_i2) !== 0) {
-					nonZeroStart = _i2;
+			for (var _i3 = outputLength - 1; _i3 >= 0; _i3--) {
+				if (output.charCodeAt(_i3) !== 0) {
+					nonZeroStart = _i3;
 					break;
 				}
 			}
@@ -529,21 +544,95 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}return resultBuffer;
 	}
 	//**************************************************************************************
-	var log2 = Math.log(2);
+	//region GeneratorDriver's related functions
+	//**************************************************************************************
+	var isGenerator = function isGenerator(generator) {
+		if (typeof generator === "undefined") return false;
+
+		return typeof generator.next === "function" && typeof generator.throw === "function";
+	};
+	//**************************************************************************************
+	var isGeneratorFunction = function isGeneratorFunction(generator) {
+		if (typeof generator === "undefined") return false;
+
+		var constructor = generator.constructor;
+
+		if (!constructor) return false;
+
+		if (constructor.name === "GeneratorFunction" || constructor.displayName === "GeneratorFunction") return true;
+
+		return isGenerator(generator);
+	};
 	//**************************************************************************************
 	/**
-  * Get nearest to input length power of 2
-  * @param {number} length Current length of existing array
-  * @returns {number}
+  * Simple "generator's driver" inspired by "https://github.com/tj/co".
+  * @param {Generator|GeneratorFunction} generatorInstance
+  * @returns {Promise}
   */
-	function nearestPowerOf2(length) {
-		var base = Math.log(length) / log2;
+	function generatorsDriver(generatorInstance) {
+		//region Check that we do have instance of "Generator" as input
+		if (!isGenerator(generatorInstance)) {
+			if (isGeneratorFunction(generatorInstance)) generatorInstance = generatorInstance();else throw new Error("Only generator instance of generator function is a valid input");
+		}
+		//endregion
 
-		var floor = Math.floor(base);
-		var round = Math.round(base);
+		return new Promise(function (resolve, reject) {
+			/**
+    * Driver function called on "reject" status in Promises
+    * @param {*} error
+    * @returns {*}
+    */
+			var onReject = function onReject(error) {
+				var result = void 0;
 
-		return floor === round ? floor : round;
+				try {
+					result = generatorInstance.throw(error);
+				} catch (ex) {
+					return reject(ex);
+				}
+
+				return callback(result);
+			};
+
+			/**
+    * Main driver function
+    * @param {*} [result]
+    * @returns {*}
+    */
+			var callback = function callback(result) {
+				/**
+     * @type Object
+     * @property {boolean} done
+     * @property {*} value
+     */
+				var generatorResult = void 0;
+
+				try {
+					generatorResult = generatorInstance.next(result);
+				} catch (ex) {
+					return reject(ex);
+				}
+
+				switch (true) {
+					case generatorResult.value instanceof Promise:
+						return generatorResult.done ? resolve(generatorResult.value) : generatorResult.value.then(callback, onReject);
+					case isGeneratorFunction(generatorResult.value):
+					case isGenerator(generatorResult.value):
+						return generatorResult.done ? generatorsDriver(generatorResult.value).then(function (driverResult) {
+							resolve(driverResult);
+						}, onReject) : generatorsDriver(generatorResult.value).then(callback, onReject);
+					case typeof generatorResult.value === "function":
+						generatorResult.value = generatorResult.value();
+					default:
+						return generatorResult.done ? resolve(generatorResult.value) : callback(generatorResult.value);
+				}
+			};
+
+			callback();
+		});
 	}
+	//**************************************************************************************
+	//endregion
 	//**************************************************************************************
 
 	//**************************************************************************************
@@ -895,8 +984,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				if (sizeOnly === false) {
 					var curView = new Uint8Array(this.valueHex);
 
-					for (var _i3 = 0; _i3 < curView.length - 1; _i3++) {
-						retView[_i3 + 1] = curView[_i3] | 0x80;
+					for (var _i4 = 0; _i4 < curView.length - 1; _i4++) {
+						retView[_i4 + 1] = curView[_i4] | 0x80;
 					}retView[this.valueHex.byteLength] = curView[curView.length - 1];
 				}
 
@@ -1007,8 +1096,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var tempBuffer = new ArrayBuffer(count);
 						var tempBufferView = new Uint8Array(tempBuffer);
 
-						for (var _i4 = 0; _i4 < count; _i4++) {
-							tempBufferView[_i4] = intTagNumberBuffer[_i4];
+						for (var _i5 = 0; _i5 < count; _i5++) {
+							tempBufferView[_i5] = intTagNumberBuffer[_i5];
 						}this.valueHex = new ArrayBuffer(count);
 						intTagNumberBuffer = new Uint8Array(this.valueHex);
 						intTagNumberBuffer.set(tempBufferView);
@@ -1333,10 +1422,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
 			_classCallCheck(this, LocalValueBlock);
-
-			//region Do not let a user to create abstract class
-			if (new.target === LocalValueBlock) throw TypeError("new of abstract class \"LocalValueBlock\"");
-			//endregion
 
 			return _possibleConstructorReturn(this, (LocalValueBlock.__proto__ || Object.getPrototypeOf(LocalValueBlock)).call(this, parameters));
 		}
@@ -2702,8 +2787,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//region Copy input buffer to internal buffer
 				this.valueHex = new ArrayBuffer(intBuffer.length - 1);
 				var view = new Uint8Array(this.valueHex);
-				for (var _i5 = 0; _i5 < inputLength - 1; _i5++) {
-					view[_i5] = intBuffer[_i5 + 1];
+				for (var _i6 = 0; _i6 < inputLength - 1; _i6++) {
+					view[_i6] = intBuffer[_i6 + 1];
 				} //endregion
 
 				this.blockLength = intBuffer.length;
@@ -3178,7 +3263,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "convertFromDER",
 			value: function convertFromDER() {
-				var expectedLength = Math.pow(2, nearestPowerOf2(this.valueBlock.valueHex.byteLength));
+				var expectedLength = this.valueBlock.valueHex.byteLength % 2 ? this.valueBlock.valueHex.byteLength + 1 : this.valueBlock.valueHex.byteLength;
 				var integer = new Integer({ valueHex: this.valueBlock.valueHex });
 				integer.valueBlock.fromDER(integer.valueBlock.valueHex, 0, integer.valueBlock.valueHex.byteLength, expectedLength);
 
@@ -3310,8 +3395,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var tempValueHex = new ArrayBuffer(this.blockLength);
 				var tempView = new Uint8Array(tempValueHex);
 
-				for (var _i6 = 0; _i6 < this.blockLength; _i6++) {
-					tempView[_i6] = view[_i6];
+				for (var _i7 = 0; _i7 < this.blockLength; _i7++) {
+					tempView[_i7] = view[_i7];
 				} //noinspection JSCheckFunctionSignatures
 				this.valueHex = tempValueHex.slice(0);
 				view = new Uint8Array(this.valueHex);
@@ -3375,8 +3460,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					var encodedView = new Uint8Array(encodedBuf);
 					retView = new Uint8Array(retBuf);
 
-					for (var _i7 = 0; _i7 < encodedBuf.byteLength - 1; _i7++) {
-						retView[_i7] = encodedView[_i7] | 0x80;
+					for (var _i8 = 0; _i8 < encodedBuf.byteLength - 1; _i8++) {
+						retView[_i8] = encodedView[_i8] | 0x80;
 					}retView[encodedBuf.byteLength - 1] = encodedView[encodedBuf.byteLength - 1];
 				}
 
@@ -6386,8 +6471,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if (inputData.valueBlock.value.length === 0 && inputSchema.valueBlock.value.length !== 0) {
 				var _optional = true;
 
-				for (var _i8 = 0; _i8 < inputSchema.valueBlock.value.length; _i8++) {
-					_optional = _optional && (inputSchema.valueBlock.value[_i8].optional || false);
+				for (var _i9 = 0; _i9 < inputSchema.valueBlock.value.length; _i9++) {
+					_optional = _optional && (inputSchema.valueBlock.value[_i9].optional || false);
 				}if (_optional === true) {
 					return {
 						verified: true,
@@ -6411,10 +6496,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			}
 			//endregion
 
-			for (var _i9 = 0; _i9 < maxLength; _i9++) {
+			for (var _i10 = 0; _i10 < maxLength; _i10++) {
 				//region Special case when there is an "optional" element of ASN.1 schema at the end
-				if (_i9 - admission >= inputData.valueBlock.value.length) {
-					if (inputSchema.valueBlock.value[_i9].optional === false) {
+				if (_i10 - admission >= inputData.valueBlock.value.length) {
+					if (inputSchema.valueBlock.value[_i10].optional === false) {
 						var _result3 = {
 							verified: false,
 							result: root
@@ -6439,7 +6524,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				else {
 						//region Special case for Repeated type of ASN.1 schema element
 						if (inputSchema.valueBlock.value[0] instanceof Repeated) {
-							_result2 = compareSchema(root, inputData.valueBlock.value[_i9], inputSchema.valueBlock.value[0].value);
+							_result2 = compareSchema(root, inputData.valueBlock.value[_i10], inputSchema.valueBlock.value[0].value);
 							if (_result2.verified === false) {
 								if (inputSchema.valueBlock.value[0].optional === true) admission++;else {
 									//region Delete early added name of block
@@ -6460,14 +6545,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 								if (typeof arrayRoot[inputSchema.valueBlock.value[0].name] === "undefined") arrayRoot[inputSchema.valueBlock.value[0].name] = [];
 
-								arrayRoot[inputSchema.valueBlock.value[0].name].push(inputData.valueBlock.value[_i9]);
+								arrayRoot[inputSchema.valueBlock.value[0].name].push(inputData.valueBlock.value[_i10]);
 							}
 						}
 						//endregion
 						else {
-								_result2 = compareSchema(root, inputData.valueBlock.value[_i9 - admission], inputSchema.valueBlock.value[_i9]);
+								_result2 = compareSchema(root, inputData.valueBlock.value[_i10 - admission], inputSchema.valueBlock.value[_i10]);
 								if (_result2.verified === false) {
-									if (inputSchema.valueBlock.value[_i9].optional === true) admission++;else {
+									if (inputSchema.valueBlock.value[_i10].optional === true) admission++;else {
 										//region Delete early added name of block
 										if (inputSchema.hasOwnProperty("name")) {
 											inputSchema.name = inputSchema.name.replace(/^\s+|\s+$/g, "");
@@ -6541,6 +6626,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		};
 		//endregion
 	}
+
+	var PASSED = Symbol("PASSED");
+	var FAILED = Symbol("FAILED");
+	var SIG_CRYPTO_FAILURE = Symbol("SIG_CRYPTO_FAILURE");
 
 	//**************************************************************************************
 	/**
@@ -7150,8 +7239,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return {
 					crv: crvName,
-					x: toBase64(arrayBufferToString(this.x), true, true),
-					y: toBase64(arrayBufferToString(this.y), true, true)
+					x: toBase64(arrayBufferToString(this.x), true, true, true),
+					y: toBase64(arrayBufferToString(this.y), true, true, true)
 				};
 			}
 			//**********************************************************************************
@@ -7339,8 +7428,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			key: "toJSON",
 			value: function toJSON() {
 				return {
-					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true),
-					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true)
+					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
+					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true)
 				};
 			}
 			//**********************************************************************************
@@ -7787,7 +7876,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				this.values = asn1.result.values;
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convert current object to asn1js object and set correct values
@@ -7805,7 +7893,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convertion for the class to JSON object
@@ -7822,7 +7909,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					})
 				};
 			}
+			//**********************************************************************************
+			//region Basic Building Blocks for Verification Engine
+			//**********************************************************************************
 
+		}, {
+			key: "formatChecking",
+			value: function formatChecking() {
+				return {
+					indication: PASSED
+				};
+			}
+			//**********************************************************************************
+			//endregion
 			//**********************************************************************************
 
 		}], [{
@@ -8062,7 +8161,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				var privateKeyJSON = {
 					crv: crvName,
-					d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true)
+					d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, true)
 				};
 
 				if ("publicKey" in this) {
@@ -8559,14 +8658,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			key: "toJSON",
 			value: function toJSON() {
 				var jwk = {
-					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true),
-					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true),
-					d: toBase64(arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true),
-					p: toBase64(arrayBufferToString(this.prime1.valueBlock.valueHex), true, true),
-					q: toBase64(arrayBufferToString(this.prime2.valueBlock.valueHex), true, true),
-					dp: toBase64(arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true),
-					dq: toBase64(arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true),
-					qi: toBase64(arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true)
+					n: toBase64(arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
+					e: toBase64(arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true),
+					d: toBase64(arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true, true),
+					p: toBase64(arrayBufferToString(this.prime1.valueBlock.valueHex), true, true, true),
+					q: toBase64(arrayBufferToString(this.prime2.valueBlock.valueHex), true, true, true),
+					dp: toBase64(arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true, true),
+					dq: toBase64(arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true, true),
+					qi: toBase64(arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true, true)
 				};
 
 				if ("otherPrimeInfos" in this) jwk.oth = Array.from(this.otherPrimeInfos, function (element) {
@@ -9073,6 +9172,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		_createClass(CryptoEngine, [{
 			key: "importKey",
 			value: function importKey(format, keyData, algorithm, extractable, keyUsages) {
+				var _this52 = this;
+
 				//region Initial variables
 				var jwk = {};
 				//endregion
@@ -9496,8 +9597,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Special case for Safari browser (since its acting not as WebCrypto standard describes)
 				if (this.name.toLowerCase() === "safari") {
-			return Promise.resolve().then(function(){ return this.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages); })
-				.then(function(result){ return result; }, function(error){ return this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages); });
+					// Try to use both ways - import using ArrayBuffer and pure JWK (for Safari Technology Preview)
+					return Promise.resolve().then(function () {
+						return _this52.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages);
+					}).then(function (result) {
+						return result;
+					}, function (error) {
+						return _this52.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages);
+					});
+
+					return Promise.resolve().then(function () {
+						return this.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages);
+					}).then(function (result) {
+						return result;
+					}, function (error) {
+						return this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages);
+					});
 				}
 				//endregion
 
@@ -9517,13 +9632,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var sequence = this.crypto.exportKey("jwk", key);
 
 				//region Currently Safari returns ArrayBuffer as JWK thus we need an additional transformation
-				if (this.name.toLowerCase() === "safari") sequence = sequence.then(function (result) {
-				// Some additional checks for Safari Technology Preview
-				if(result instanceof ArrayBuffer)
-					return JSON.parse(arrayBufferToString(result))
-				
-				return result;
-				});
+				if (this.name.toLowerCase() === "safari") {
+					sequence = sequence.then(function (result) {
+						// Some additional checks for Safari Technology Preview
+						if (result instanceof ArrayBuffer) return JSON.parse(arrayBufferToString(result));
+
+						return result;
+					});
+				}
 				//endregion
 
 				switch (format.toLowerCase()) {
@@ -9578,7 +9694,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "convert",
 			value: function convert(inputFormat, outputFormat, keyData, algorithm, extractable, keyUsages) {
-				var _this52 = this;
+				var _this53 = this;
 
 				switch (inputFormat.toLowerCase()) {
 					case "raw":
@@ -9587,21 +9703,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.resolve(keyData);
 							case "spki":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("spki", result);
+									return _this53.exportKey("spki", result);
 								});
 							case "pkcs8":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("pkcs8", result);
+									return _this53.exportKey("pkcs8", result);
 								});
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("raw", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("raw", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9610,9 +9726,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("spki", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("spki", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.resolve(keyData);
@@ -9620,9 +9736,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.reject("Impossible to convert between SPKI/PKCS8");
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("spki", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("spki", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9631,9 +9747,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.reject("Impossible to convert between SPKI/PKCS8");
@@ -9641,9 +9757,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								return Promise.resolve(keyData);
 							case "jwk":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("pkcs8", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("jwk", result);
+									return _this53.exportKey("jwk", result);
 								});
 							default:
 								return Promise.reject("Incorrect outputFormat: " + outputFormat);
@@ -9652,21 +9768,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						switch (outputFormat.toLowerCase()) {
 							case "raw":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("raw", result);
+									return _this53.exportKey("raw", result);
 								});
 							case "spki":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("spki", result);
+									return _this53.exportKey("spki", result);
 								});
 							case "pkcs8":
 								return Promise.resolve().then(function () {
-									return _this52.importKey("jwk", keyData, algorithm, extractable, keyUsages);
+									return _this53.importKey("jwk", keyData, algorithm, extractable, keyUsages);
 								}).then(function (result) {
-									return _this52.exportKey("pkcs8", result);
+									return _this53.exportKey("pkcs8", result);
 								});
 							case "jwk":
 								return Promise.resolve(keyData);
@@ -9858,19 +9974,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var subtleObject = null;
 
 				// Apple Safari support
-			if("webkitSubtle" in self.crypto)
-			{
-				try
-				{
-					subtleObject = self.crypto.webkitSubtle;
+				if ("webkitSubtle" in self.crypto) {
+					try {
+						subtleObject = self.crypto.webkitSubtle;
+					} catch (ex) {
+						subtleObject = self.crypto.subtle;
+					}
+
+					engineName = "safari";
 				}
-				catch(ex)
-				{
-					subtleObject = self.crypto.subtle;
-				}
-				
-				engineName = "safari";
-			}
 
 				if ("subtle" in self.crypto) subtleObject = self.crypto.subtle;
 
@@ -10849,6 +10961,54 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		return result;
 	}
+	//**************************************************************************************
+	/**
+  * Check that all OIDs are mapped to existing WebCrypto API algorithms
+  * @param {Array.<string>} oids Array with OIDs for checking
+  * @returns {{indication}}
+  */
+	function checkOids(oids) {
+		var _iteratorNormalCompletion13 = true;
+		var _didIteratorError13 = false;
+		var _iteratorError13 = undefined;
+
+		try {
+			for (var _iterator13 = oids.entries()[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+				var _step13$value = _slicedToArray(_step13.value, 2);
+
+				var index = _step13$value[0];
+				var oid = _step13$value[1];
+
+				var algorithm = getAlgorithmByOID(oid);
+				if ("name" in algorithm === false) {
+					return {
+						indication: FAILED,
+						message: index
+					};
+				}
+			}
+		} catch (err) {
+			_didIteratorError13 = true;
+			_iteratorError13 = err;
+		} finally {
+			try {
+				if (!_iteratorNormalCompletion13 && _iterator13.return) {
+					_iterator13.return();
+				}
+			} finally {
+				if (_didIteratorError13) {
+					throw _iteratorError13;
+				}
+			}
+		}
+
+		return {
+			indication: PASSED
+		};
+	}
+	//**************************************************************************************
+	//endregion
+	//**************************************************************************************
 
 	//**************************************************************************************
 	/**
@@ -11166,30 +11326,30 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				if (compareTo instanceof RelativeDistinguishedNames) {
 					if (this.typesAndValues.length !== compareTo.typesAndValues.length) return false;
 
-					var _iteratorNormalCompletion13 = true;
-					var _didIteratorError13 = false;
-					var _iteratorError13 = undefined;
+					var _iteratorNormalCompletion14 = true;
+					var _didIteratorError14 = false;
+					var _iteratorError14 = undefined;
 
 					try {
-						for (var _iterator13 = this.typesAndValues.entries()[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
-							var _step13$value = _slicedToArray(_step13.value, 2);
+						for (var _iterator14 = this.typesAndValues.entries()[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+							var _step14$value = _slicedToArray(_step14.value, 2);
 
-							var index = _step13$value[0];
-							var typeAndValue = _step13$value[1];
+							var index = _step14$value[0];
+							var typeAndValue = _step14$value[1];
 
 							if (typeAndValue.isEqual(compareTo.typesAndValues[index]) === false) return false;
 						}
 					} catch (err) {
-						_didIteratorError13 = true;
-						_iteratorError13 = err;
+						_didIteratorError14 = true;
+						_iteratorError14 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion13 && _iterator13.return) {
-								_iterator13.return();
+							if (!_iteratorNormalCompletion14 && _iterator14.return) {
+								_iterator14.return();
 							}
 						} finally {
-							if (_didIteratorError13) {
-								throw _iteratorError13;
+							if (_didIteratorError14) {
+								throw _iteratorError14;
 							}
 						}
 					}
@@ -11292,7 +11452,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
    * @param {Object} [parameters={}]
    * @property {Object} [schema] asn1js parsed value
    * @property {number} [type] 0 - UTCTime; 1 - GeneralizedTime; 2 - empty value
-   * @property {Date} [value] Value of the TIME class
+   * @property {Date} [value] Value of the Time class
    */
 		function Time() {
 			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -11307,7 +11467,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			this.type = getParametersValue(parameters, "type", Time.defaultValues("type"));
 			/**
     * @type {Date}
-    * @description Value of the TIME class
+    * @description Value of the Time class
     */
 			this.value = getParametersValue(parameters, "value", Time.defaultValues("value"));
 			//endregion
@@ -11340,7 +11500,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					}
 				}));
 
-				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for TIME");
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for Time");
 				//endregion
 
 				//region Get internal properties from parsed schema
@@ -16404,7 +16564,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if ("schema" in parameters) this.fromSchema(parameters.schema);
 			//endregion
 		}
-
 		//**********************************************************************************
 		/**
    * Return default values for all class members
@@ -16414,7 +16573,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		_createClass(Certificate, [{
 			key: "fromSchema",
-
 
 			//**********************************************************************************
 			/**
@@ -16461,7 +16619,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				this.signatureValue = asn1.result.signatureValue;
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Create ASN.1 schema for existing values of TBS part for the certificate
@@ -16550,7 +16707,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convert current object to asn1js object and set correct values
@@ -16582,7 +16738,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convertion for the class to JSON object
@@ -16617,7 +16772,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return object;
 			}
-
 			//**********************************************************************************
 			/**
     * Importing public key for current certificate
@@ -16650,6 +16804,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					parameters.algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
 					if ("hash" in parameters.algorithm.algorithm) parameters.algorithm.algorithm.hash.name = shaAlgorithm;
+
+					//region Special case for ECDSA
+					if (algorithmObject.name === "ECDSA") {
+						//region Get information about named curve
+						var algorithmParamsChecked = false;
+
+						if ("algorithmParams" in this.subjectPublicKeyInfo.algorithm === true) {
+							if ("idBlock" in this.subjectPublicKeyInfo.algorithm.algorithmParams) {
+								if (this.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1 && this.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6) algorithmParamsChecked = true;
+							}
+						}
+
+						if (algorithmParamsChecked === false) return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+						var curveObject = getAlgorithmByOID(this.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						if ("name" in curveObject === false) return Promise.reject("Unsupported named curve algorithm: " + this.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						//endregion
+
+						parameters.algorithm.algorithm.namedCurve = curveObject.name;
+					}
+					//endregion
 					//endregion
 				}
 				//endregion
@@ -16662,7 +16837,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return crypto.importKey("spki", publicKeyInfoView, parameters.algorithm.algorithm, true, parameters.algorithm.usages);
 			}
-
 			//**********************************************************************************
 			/**
     * Get SHA-1 hash value for subject public key
@@ -16678,7 +16852,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return crypto.digest({ name: "sha-1" }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
 			}
-
 			//**********************************************************************************
 			/**
     * Make a signature for current value from TBS section
@@ -16689,7 +16862,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "sign",
 			value: function sign(privateKey) {
-				var _this53 = this;
+				var _this54 = this;
 
 				var hashAlgorithm = arguments.length <= 1 || arguments[1] === undefined ? "SHA-1" : arguments[1];
 
@@ -16779,19 +16952,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					if (defParams.algorithm.name === "ECDSA") result = createCMSECDSASignature(result);
 					//endregion
 
-					_this53.signatureValue = new BitString({ valueHex: result });
+					_this54.signatureValue = new BitString({ valueHex: result });
 				}, function (error) {
 					return Promise.reject("Signing error: " + error);
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this54 = this;
+				var _this55 = this;
 
 				var issuerCertificate = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 
@@ -16827,13 +16999,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				sequence = sequence.then(function () {
 					//region Get information about public key algorithm and default parameters for import
 					var algorithmId = void 0;
-					if (_this54.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this54.signatureAlgorithm.algorithmId;else algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
+					if (_this55.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this55.signatureAlgorithm.algorithmId;else algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
 
 					var algorithmObject = getAlgorithmByOID(algorithmId);
 					if ("name" in algorithmObject === false) return Promise.reject("Unsupported public key algorithm: " + algorithmId);
 
 					var algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
 					if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = shaAlgorithm;
+
+					//region Special case for ECDSA
+					if (algorithmObject.name === "ECDSA") {
+						// #region Get information about named curve
+						var algorithmParamsChecked = false;
+
+						if ("algorithmParams" in subjectPublicKeyInfo.algorithm === true) {
+							if ("idBlock" in subjectPublicKeyInfo.algorithm.algorithmParams) {
+								if (subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1 && subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6) algorithmParamsChecked = true;
+							}
+						}
+
+						if (algorithmParamsChecked === false) return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+						var curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						if ("name" in curveObject === false) return Promise.reject("Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						// #endregion
+
+						algorithm.algorithm.namedCurve = curveObject.name;
+					}
+					//endregion
 					//endregion
 
 					var publicKeyInfoSchema = subjectPublicKeyInfo.toSchema();
@@ -16865,7 +17058,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var pssParameters = void 0;
 
 						try {
-							pssParameters = new RSASSAPSSParams({ schema: _this54.signatureAlgorithm.algorithmParams });
+							pssParameters = new RSASSAPSSParams({ schema: _this55.signatureAlgorithm.algorithmParams });
 						} catch (ex) {
 							return Promise.reject(ex);
 						}
@@ -16891,7 +17084,274 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return sequence;
 			}
+			//**********************************************************************************
+			//region Basic Building Blocks for Verification Engine
+			//**********************************************************************************
 
+		}, {
+			key: "formatChecking",
+			value: function formatChecking(_ref) {
+				var _ref$strictChecking = _ref.strictChecking;
+				var strictChecking = _ref$strictChecking === undefined ? false : _ref$strictChecking;
+
+				if (strictChecking) {
+					//region Check "version"
+					if ("extensions" in this) {
+						if (this.version !== 2) {
+							return {
+								indication: FAILED,
+								message: "Version value for Certificate must be 2 (V3)"
+							};
+						}
+					} else {
+						if ("subjectUniqueID" in this || "issuerUniqueID" in this) {
+							if (this.version !== 1 && this.version !== 2) {
+								return {
+									indication: FAILED,
+									message: "Version value for Certificate must be 1 (V2) or 2 (V3)"
+								};
+							}
+						} else {
+							if (this.version !== 0) {
+								return {
+									indication: FAILED,
+									message: "Version value for Certificate must be 0 (V1)"
+								};
+							}
+						}
+					}
+					//endregion
+
+					//region Check serial number
+					var serialNumberView = new Uint8Array(this.serialNumber.valueBlock.valueHex);
+
+					if ((serialNumberView[0] & 0x80) === 0x80) {
+						return {
+							indication: FAILED,
+							message: "Serial number for Certificate must be encoded as non-negative integer"
+						};
+					}
+					//endregion
+				}
+
+				//region Check all certificate's algorithms
+				var algorithms = [this.signature.algorithmId, this.subjectPublicKeyInfo.algorithm.algorithmId, this.signatureAlgorithm.algorithmId];
+
+				var algorithmsChecking = checkOids(algorithms);
+				if (algorithmsChecking.indication !== PASSED) {
+					return {
+						indication: FAILED,
+						message: "Incorrect OID in Certificate: " + algorithms[algorithmsCheckResult.message]
+					};
+				}
+				//endregion
+
+				//region Check validity period
+				if (this.notBefore.value >= this.notAfter.value) {
+					return {
+						indication: FAILED,
+						message: "Invalid validity perion for Certificate"
+					};
+				}
+				//endregion
+
+				return {
+					indication: PASSED
+				};
+			}
+			//**********************************************************************************
+
+		}, {
+			key: "cryptographicVerification",
+			value: function cryptographicVerification(_ref2) {
+				var _this56 = this;
+
+				var _ref2$issuerCertifica = _ref2.issuerCertificate;
+				var issuerCertificate = _ref2$issuerCertifica === undefined ? null : _ref2$issuerCertifica;
+
+				//region Initial variables
+				var sequence = Promise.resolve();
+
+				var subjectPublicKeyInfo = {};
+
+				var signature = this.signatureValue;
+				var tbs = this.tbs;
+				//endregion
+
+				//region Set correct "subjectPublicKeyInfo" value
+				if (issuerCertificate !== null) subjectPublicKeyInfo = issuerCertificate.subjectPublicKeyInfo;else {
+					if (this.issuer.isEqual(this.subject)) // Self-signed certificate
+						subjectPublicKeyInfo = this.subjectPublicKeyInfo;
+				}
+
+				if ("algorithm" in subjectPublicKeyInfo === false) {
+					return Promise.resolve({
+						indication: FAILED,
+						subIndication: SIG_CRYPTO_FAILURE,
+						message: "Please provide issuer certificate as a parameter"
+					});
+				}
+				//endregion
+
+				//region Get a "crypto" extension
+				var crypto = getCrypto();
+				if (typeof crypto === "undefined") {
+					return Promise.resolve({
+						indication: FAILED,
+						subIndication: SIG_CRYPTO_FAILURE,
+						message: "Unable to create WebCrypto object"
+					});
+				}
+				//endregion
+
+				//region Find signer's hashing algorithm
+				var shaAlgorithm = getHashAlgorithm(this.signatureAlgorithm);
+				if (shaAlgorithm === "") {
+					return Promise.resolve({
+						indication: FAILED,
+						subIndication: SIG_CRYPTO_FAILURE,
+						message: "Please run FormatChecking block before CryptographicVerification block: Unsupported signature algorithm: " + this.signatureAlgorithm.algorithmId
+					});
+				}
+				//endregion
+
+				//region Importing public key
+				sequence = sequence.then(function () {
+					//region Get information about public key algorithm and default parameters for import
+					var algorithmId = void 0;
+					if (_this56.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this56.signatureAlgorithm.algorithmId;else algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
+
+					var algorithmObject = getAlgorithmByOID(algorithmId);
+					if ("name" in algorithmObject === false) {
+						return Promise.resolve({
+							indication: FAILED,
+							subIndication: SIG_CRYPTO_FAILURE,
+							message: "Please run FormatChecking block before CryptographicVerification block: Unsupported public key algorithm: " + algorithmId
+						});
+					}
+
+					var algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
+					if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = shaAlgorithm;
+
+					//region Special case for ECDSA
+					if (algorithmObject.name === "ECDSA") {
+						// #region Get information about named curve
+						var algorithmParamsChecked = false;
+
+						if ("algorithmParams" in subjectPublicKeyInfo.algorithm === true) {
+							if ("idBlock" in subjectPublicKeyInfo.algorithm.algorithmParams) {
+								if (subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1 && subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6) algorithmParamsChecked = true;
+							}
+						}
+
+						if (algorithmParamsChecked === false) {
+							return Promise.resolve({
+								indication: FAILED,
+								subIndication: SIG_CRYPTO_FAILURE,
+								message: "Incorrect type for ECDSA public key parameters"
+							});
+						}
+
+						var curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						if ("name" in curveObject === false) {
+							return Promise.resolve({
+								indication: FAILED,
+								subIndication: SIG_CRYPTO_FAILURE,
+								message: "Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString()
+							});
+						}
+						// #endregion
+
+						algorithm.algorithm.namedCurve = curveObject.name;
+					}
+					//endregion
+					//endregion
+
+					var publicKeyInfoSchema = subjectPublicKeyInfo.toSchema();
+					var publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
+					var publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
+
+					return crypto.importKey("spki", publicKeyInfoView, algorithm.algorithm, true, algorithm.usages);
+				});
+				//endregion
+
+				//region Verify signature for the certificate
+				sequence = sequence.then(function (publicKey) {
+					//region Get default algorithm parameters for verification
+					var algorithm = getAlgorithmParameters(publicKey.algorithm.name, "verify");
+					if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = shaAlgorithm;
+					//endregion
+
+					//region Special case for ECDSA signatures
+					var signatureValue = signature.valueBlock.valueHex;
+
+					if (publicKey.algorithm.name === "ECDSA") {
+						var asn1 = fromBER(signatureValue);
+						signatureValue = createECDSASignatureFromCMS(asn1.result);
+					}
+					//endregion
+
+					//region Special case for RSA-PSS
+					if (publicKey.algorithm.name === "RSA-PSS") {
+						var pssParameters = void 0;
+
+						try {
+							pssParameters = new RSASSAPSSParams({ schema: _this56.signatureAlgorithm.algorithmParams });
+						} catch (ex) {
+							return Promise.reject(ex);
+						}
+
+						if ("saltLength" in pssParameters) algorithm.algorithm.saltLength = pssParameters.saltLength;else algorithm.algorithm.saltLength = 20;
+
+						var hashAlgo = "SHA-1";
+
+						if ("hashAlgorithm" in pssParameters) {
+							var hashAlgorithm = getAlgorithmByOID(pssParameters.hashAlgorithm.algorithmId);
+							if ("name" in hashAlgorithm === false) {
+								return Promise.resolve({
+									indication: FAILED,
+									subIndication: SIG_CRYPTO_FAILURE,
+									message: "Please run FormatChecking block before CryptographicVerification block: Unrecognized hash algorithm: " + pssParameters.hashAlgorithm.algorithmId
+								});
+							}
+
+							hashAlgo = hashAlgorithm.name;
+						}
+
+						algorithm.algorithm.hash.name = hashAlgo;
+					}
+					//endregion
+
+					return crypto.verify(algorithm.algorithm, publicKey, new Uint8Array(signatureValue), new Uint8Array(tbs));
+				});
+				//endregion
+
+				//region Error handling stub
+				sequence = sequence.then(function (result) {
+					if (result) {
+						return {
+							indication: PASSED
+						};
+					}
+
+					return {
+						indication: FAILED,
+						subIndication: SIG_CRYPTO_FAILURE,
+						message: "Certificate signature was not verified"
+					};
+				}, function (error) {
+					return Promise.resolve({
+						indication: FAILED,
+						subIndication: SIG_CRYPTO_FAILURE,
+						message: "Error during process \"Certificate.cryptographicVerification\": " + error
+					});
+				});
+				//endregion
+
+				return sequence;
+			}
+			//**********************************************************************************
+			//endregion
 			//**********************************************************************************
 
 		}], [{
@@ -16930,7 +17390,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						throw new Error("Invalid member name for Certificate class: " + memberName);
 				}
 			}
-
 			//**********************************************************************************
 			/**
     * Return value of asn1js schema for current class
@@ -17304,7 +17763,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if ("schema" in parameters) this.fromSchema(parameters.schema);
 			//endregion
 		}
-
 		//**********************************************************************************
 		/**
    * Return default values for all class members
@@ -17314,7 +17772,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		_createClass(CertificateRevocationList, [{
 			key: "fromSchema",
-
 
 			//**********************************************************************************
 			/**
@@ -17345,7 +17802,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				this.signatureValue = asn1.result.signatureValue;
 				//endregion
 			}
-
 			//**********************************************************************************
 
 		}, {
@@ -17386,7 +17842,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					value: outputArray
 				});
 			}
-
 			//**********************************************************************************
 			/**
     * Convert current object to asn1js object and set correct values
@@ -17418,7 +17873,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convertion for the class to JSON object
@@ -17449,7 +17903,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return object;
 			}
-
 			//**********************************************************************************
 
 		}, {
@@ -17464,35 +17917,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//endregion
 
 				//region Search for input certificate in revoked certificates array
-				var _iteratorNormalCompletion14 = true;
-				var _didIteratorError14 = false;
-				var _iteratorError14 = undefined;
+				var _iteratorNormalCompletion15 = true;
+				var _didIteratorError15 = false;
+				var _iteratorError15 = undefined;
 
 				try {
-					for (var _iterator14 = this.revokedCertificates[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-						var revokedCertificate = _step14.value;
+					for (var _iterator15 = this.revokedCertificates[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+						var revokedCertificate = _step15.value;
 
 						if (revokedCertificate.userCertificate.isEqual(certificate.serialNumber)) return true;
 					}
 					//endregion
 				} catch (err) {
-					_didIteratorError14 = true;
-					_iteratorError14 = err;
+					_didIteratorError15 = true;
+					_iteratorError15 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion14 && _iterator14.return) {
-							_iterator14.return();
+						if (!_iteratorNormalCompletion15 && _iterator15.return) {
+							_iterator15.return();
 						}
 					} finally {
-						if (_didIteratorError14) {
-							throw _iteratorError14;
+						if (_didIteratorError15) {
+							throw _iteratorError15;
 						}
 					}
 				}
 
 				return false;
 			}
-
 			//**********************************************************************************
 			/**
     * Make a signature for existing CRL data
@@ -17503,7 +17955,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "sign",
 			value: function sign(privateKey) {
-				var _this55 = this;
+				var _this57 = this;
 
 				var hashAlgorithm = arguments.length <= 1 || arguments[1] === undefined ? "SHA-1" : arguments[1];
 
@@ -17597,13 +18049,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					if (defParams.algorithm.name === "ECDSA") result = createCMSECDSASignature(result);
 					//endregion
 
-					_this55.signatureValue = new BitString({ valueHex: result });
+					_this57.signatureValue = new BitString({ valueHex: result });
 				}, function (error) {
 					return Promise.reject("Signing error: " + error);
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Verify existing signature
@@ -17614,7 +18065,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this56 = this;
+				var _this58 = this;
 
 				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -17645,13 +18096,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Check the CRL for unknown critical extensions
 				if ("crlExtensions" in this) {
-					var _iteratorNormalCompletion15 = true;
-					var _didIteratorError15 = false;
-					var _iteratorError15 = undefined;
+					var _iteratorNormalCompletion16 = true;
+					var _didIteratorError16 = false;
+					var _iteratorError16 = undefined;
 
 					try {
-						for (var _iterator15 = this.crlExtensions.extensions[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
-							var extension = _step15.value;
+						for (var _iterator16 = this.crlExtensions.extensions[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+							var extension = _step16.value;
 
 							if (extension.critical) {
 								// We can not be sure that unknown extension has no value for CRL signature
@@ -17659,16 +18110,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							}
 						}
 					} catch (err) {
-						_didIteratorError15 = true;
-						_iteratorError15 = err;
+						_didIteratorError16 = true;
+						_iteratorError16 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion15 && _iterator15.return) {
-								_iterator15.return();
+							if (!_iteratorNormalCompletion16 && _iterator16.return) {
+								_iterator16.return();
 							}
 						} finally {
-							if (_didIteratorError15) {
-								throw _iteratorError15;
+							if (_didIteratorError16) {
+								throw _iteratorError16;
 							}
 						}
 					}
@@ -17688,11 +18139,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//region Import public key
 				sequence = sequence.then(function () {
 					//region Get information about public key algorithm and default parameters for import
-					var algorithmObject = getAlgorithmByOID(_this56.signature.algorithmId);
-					if ("name" in algorithmObject === "") return Promise.reject("Unsupported public key algorithm: " + _this56.signature.algorithmId);
+					var algorithmObject = getAlgorithmByOID(_this58.signature.algorithmId);
+					if ("name" in algorithmObject === "") return Promise.reject("Unsupported public key algorithm: " + _this58.signature.algorithmId);
 
 					var algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
 					if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = shaAlgorithm;
+
+					//region Special case for ECDSA
+					if (algorithmObject.name === "ECDSA") {
+						// #region Get information about named curve
+						var algorithmParamsChecked = false;
+
+						if ("algorithmParams" in subjectPublicKeyInfo.algorithm === true) {
+							if ("idBlock" in subjectPublicKeyInfo.algorithm.algorithmParams) {
+								if (subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1 && subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6) algorithmParamsChecked = true;
+							}
+						}
+
+						if (algorithmParamsChecked === false) return Promise.reject("Incorrect type for ECDSA public key parameters");
+
+						var curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						if ("name" in curveObject === false) return Promise.reject("Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						// #endregion
+
+						algorithm.algorithm.namedCurve = curveObject.name;
+					}
+					//endregion
 					//endregion
 
 					var publicKeyInfoSchema = subjectPublicKeyInfo.toSchema();
@@ -17724,7 +18196,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var pssParameters = void 0;
 
 						try {
-							pssParameters = new RSASSAPSSParams({ schema: _this56.signatureAlgorithm.algorithmParams });
+							pssParameters = new RSASSAPSSParams({ schema: _this58.signatureAlgorithm.algorithmParams });
 						} catch (ex) {
 							return Promise.reject(ex);
 						}
@@ -17750,7 +18222,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return sequence;
 			}
-
 			//**********************************************************************************
 
 		}], [{
@@ -17781,7 +18252,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						throw new Error("Invalid member name for CertificateRevocationList class: " + memberName);
 				}
 			}
-
 			//**********************************************************************************
 			/**
     * Return value of asn1js schema for current class
@@ -17823,100 +18293,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	//**************************************************************************************
 
 	//**************************************************************************************
-	//region Aux functions
-	//**************************************************************************************
 
-
-	var isGenerator = function isGenerator(generator) {
-		if (typeof generator === "undefined") return false;
-
-		return typeof generator.next === "function" && typeof generator.throw === "function";
-	};
-	//**************************************************************************************
-	var isGeneratorFunction = function isGeneratorFunction(generator) {
-		if (typeof generator === "undefined") return false;
-
-		var constructor = generator.constructor;
-
-		if (!constructor) return false;
-
-		if (constructor.name === "GeneratorFunction" || constructor.displayName === "GeneratorFunction") return true;
-
-		return isGenerator(generator);
-	};
-	//**************************************************************************************
-	//endregion
-	//**************************************************************************************
-	/**
-  * Simple "generator's driver" inspired by "https://github.com/tj/co".
-  * @param {Generator|GeneratorFunction} generatorInstance
-  * @returns {Promise}
-  */
-	function generatorsDriver(generatorInstance) {
-		//region Check that we do have instance of "Generator" as input
-		if (!isGenerator(generatorInstance)) {
-			if (isGeneratorFunction(generatorInstance)) generatorInstance = generatorInstance();else throw new Error("Only generator instance of generator function is a valid input");
-		}
-		//endregion
-
-		return new Promise(function (resolve, reject) {
-			/**
-    * Driver function called on "reject" status in Promises
-    * @param {*} error
-    * @returns {*}
-    */
-			var onReject = function onReject(error) {
-				var result = void 0;
-
-				try {
-					result = generatorInstance.throw(error);
-				} catch (ex) {
-					return reject(ex);
-				}
-
-				return callback(result);
-			};
-
-			/**
-    * Main driver function
-    * @param {*} [result]
-    * @returns {*}
-    */
-			var callback = function callback(result) {
-				/**
-     * @type Object
-     * @property {boolean} done
-     * @property {*} value
-     */
-				var generatorResult = void 0;
-
-				try {
-					generatorResult = generatorInstance.next(result);
-				} catch (ex) {
-					return reject(ex);
-				}
-
-				switch (true) {
-					case generatorResult.value instanceof Promise:
-						return generatorResult.done ? resolve(generatorResult.value) : generatorResult.value.then(callback, onReject);
-					case isGeneratorFunction(generatorResult.value):
-					case isGenerator(generatorResult.value):
-						return generatorResult.done ? generatorsDriver(generatorResult.value).then(function (driverResult) {
-							resolve(driverResult);
-						}, onReject) : generatorsDriver(generatorResult.value).then(callback, onReject);
-					case typeof generatorResult.value === "function":
-						generatorResult.value = generatorResult.value();
-					default:
-						return generatorResult.done ? resolve(generatorResult.value) : callback(generatorResult.value);
-				}
-			};
-
-			callback();
-		});
-	}
-	//**************************************************************************************
-
-	//**************************************************************************************
 
 	var CertificateChainValidationEngine = function () {
 		//**********************************************************************************
@@ -17962,7 +18339,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if ("schema" in parameters) this.fromSchema(parameters.schema);
 			//endregion
 		}
-
 		//**********************************************************************************
 		/**
    * Return default values for all class members
@@ -17972,7 +18348,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		_createClass(CertificateChainValidationEngine, [{
 			key: "sort",
-
 
 			//**********************************************************************************
 			value: function sort() {
@@ -17985,56 +18360,88 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Finding certificate issuer
 				function findIssuer(certificate, index) {
-					var result, i, verificationResult;
+					var result, verificationResult, i, _verificationResult;
+
 					return regeneratorRuntime.wrap(function findIssuer$(_context) {
 						while (1) {
 							switch (_context.prev = _context.next) {
 								case 0:
 									result = [];
-									i = 0;
 
-								case 2:
-									if (!(i < localCerts.length)) {
-										_context.next = 15;
+									//region Speed-up searching in case of self-signed certificates
+
+									if (!certificate.subject.isEqual(certificate.issuer)) {
+										_context.next = 12;
 										break;
 									}
 
-									_context.prev = 3;
-									_context.next = 6;
-									return certificate.verify(localCerts[i]);
+									_context.prev = 2;
+									_context.next = 5;
+									return certificate.verify();
 
-								case 6:
+								case 5:
 									verificationResult = _context.sent;
 
-									if (verificationResult) result.push(i);
+									if (!(verificationResult === true)) {
+										_context.next = 8;
+										break;
+									}
+
+									return _context.abrupt("return", [index]);
+
+								case 8:
 									_context.next = 12;
 									break;
 
 								case 10:
 									_context.prev = 10;
-									_context.t0 = _context["catch"](3);
+									_context.t0 = _context["catch"](2);
 
 								case 12:
-									i++;
-									_context.next = 2;
+									i = 0;
+
+								case 13:
+									if (!(i < localCerts.length)) {
+										_context.next = 26;
+										break;
+									}
+
+									_context.prev = 14;
+									_context.next = 17;
+									return certificate.verify(localCerts[i]);
+
+								case 17:
+									_verificationResult = _context.sent;
+
+									if (_verificationResult === true) result.push(i);
+									_context.next = 23;
 									break;
 
-								case 15:
+								case 21:
+									_context.prev = 21;
+									_context.t1 = _context["catch"](14);
+
+								case 23:
+									i++;
+									_context.next = 13;
+									break;
+
+								case 26:
 									return _context.abrupt("return", result.length ? result : [-1]);
 
-								case 16:
+								case 27:
 								case "end":
 									return _context.stop();
 							}
 						}
-					}, _marked[0], this, [[3, 10]]);
+					}, _marked[0], this, [[2, 10], [14, 21]]);
 				}
 
 				//endregion
 
 				//region Building certificate path
 				function buildPath(certificate, index) {
-					var result, checkUnique, findIssuerResult, buildPathResult, i, copy, _i10, _buildPathResult, j, _copy;
+					var result, checkUnique, findIssuerResult, buildPathResult, i, copy, _i11, _buildPathResult, j, _copy;
 
 					return regeneratorRuntime.wrap(function buildPath$(_context2) {
 						while (1) {
@@ -18109,25 +18516,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									break;
 
 								case 17:
-									_i10 = 0;
+									_i11 = 0;
 
 								case 18:
-									if (!(_i10 < findIssuerResult.length)) {
+									if (!(_i11 < findIssuerResult.length)) {
 										_context2.next = 29;
 										break;
 									}
 
-									if (!(findIssuerResult[_i10] === index)) {
+									if (!(findIssuerResult[_i11] === index)) {
 										_context2.next = 22;
 										break;
 									}
 
-									result.push([findIssuerResult[_i10]]);
+									result.push([findIssuerResult[_i11]]);
 									return _context2.abrupt("continue", 26);
 
 								case 22:
 									_context2.next = 24;
-									return buildPath(localCerts[findIssuerResult[_i10]], findIssuerResult[_i10]);
+									return buildPath(localCerts[findIssuerResult[_i11]], findIssuerResult[_i11]);
 
 								case 24:
 									_buildPathResult = _context2.sent;
@@ -18136,13 +18543,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									for (j = 0; j < _buildPathResult.length; j++) {
 										_copy = _buildPathResult[j].slice();
 
-										_copy.splice(0, 0, findIssuerResult[_i10]);
+										_copy.splice(0, 0, findIssuerResult[_i11]);
 
 										if (checkUnique(_copy)) result.push(_copy);else result.push(_buildPathResult[j]);
 									}
 
 								case 26:
-									_i10++;
+									_i11++;
 									_context2.next = 18;
 									break;
 
@@ -18156,7 +18563,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						}
 					}, _marked[1], this);
 				}
-
 				//endregion
 
 				//region Find CRL for specific certificate
@@ -18293,7 +18699,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						}
 					}, _marked[2], this, [[15, 24]]);
 				}
-
 				//endregion
 
 				//region Find OCSP for specific certificate
@@ -18366,7 +18771,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						}
 					}, _marked[3], this);
 				}
-
 				//endregion
 
 				//region Check for certificate to be CA
@@ -18498,12 +18902,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						}
 					}, _marked[4], this);
 				}
-
 				//endregion
 
 				//region Basic check for certificate path
 				function basicCheck(path, checkDate) {
-					var i, _i11, _i12, ocspResult, crlResult, j, isCertificateRevoked, isCertificateCA, _i13, result;
+					var i, _i12, _i13, ocspResult, crlResult, j, isCertificateRevoked, isCertificateCA, _i14, result;
 
 					return regeneratorRuntime.wrap(function basicCheck$(_context6) {
 						while (1) {
@@ -18546,20 +18949,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									});
 
 								case 9:
-									_i11 = path.length - 2;
+									_i12 = path.length - 2;
 
 								case 10:
-									if (!(_i11 >= 0)) {
+									if (!(_i12 >= 0)) {
 										_context6.next = 17;
 										break;
 									}
 
-									if (!(path[_i11].issuer.isEqual(path[_i11].subject) === false)) {
+									if (!(path[_i12].issuer.isEqual(path[_i12].subject) === false)) {
 										_context6.next = 14;
 										break;
 									}
 
-									if (!(path[_i11].issuer.isEqual(path[_i11 + 1].subject) === false)) {
+									if (!(path[_i12].issuer.isEqual(path[_i12 + 1].subject) === false)) {
 										_context6.next = 14;
 										break;
 									}
@@ -18571,7 +18974,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									});
 
 								case 14:
-									_i11--;
+									_i12--;
 									_context6.next = 10;
 									break;
 
@@ -18581,10 +18984,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										break;
 									}
 
-									_i12 = 0;
+									_i13 = 0;
 
 								case 19:
-									if (!(_i12 < path.length - 2)) {
+									if (!(_i13 < path.length - 2)) {
 										_context6.next = 58;
 										break;
 									}
@@ -18602,7 +19005,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									}
 
 									_context6.next = 25;
-									return findOCSP(path[_i12], path[_i12 + 1]);
+									return findOCSP(path[_i13], path[_i13 + 1]);
 
 								case 25:
 									ocspResult = _context6.sent;
@@ -18630,7 +19033,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									}
 
 									_context6.next = 35;
-									return findCRL(path[_i12]);
+									return findCRL(path[_i13]);
 
 								case 35:
 									crlResult = _context6.sent;
@@ -18656,7 +19059,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									}
 
 									//region Check that the CRL issuer certificate have not been revoked
-									isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked(path[_i12]);
+									isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked(path[_i13]);
 
 									if (!isCertificateRevoked) {
 										_context6.next = 43;
@@ -18709,21 +19112,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									});
 
 								case 55:
-									_i12++;
+									_i13++;
 									_context6.next = 19;
 									break;
 
 								case 58:
-									_i13 = 1;
+									_i14 = 1;
 
 								case 59:
-									if (!(_i13 < path.length)) {
+									if (!(_i14 < path.length)) {
 										_context6.next = 68;
 										break;
 									}
 
 									_context6.next = 62;
-									return checkForCA(path[_i13]);
+									return checkForCA(path[_i14]);
 
 								case 62:
 									result = _context6.sent;
@@ -18740,7 +19143,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									});
 
 								case 65:
-									_i13++;
+									_i14++;
 									_context6.next = 59;
 									break;
 
@@ -18756,11 +19159,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						}
 					}, _marked[5], this);
 				}
-
 				//endregion
 
 				return generatorsDriver(regeneratorRuntime.mark(function generatorFunction() {
-					var i, j, result, certificatePath, _i14, found, latestItem, certificate, _j, shortestLength, shortestIndex, _i15, _i16;
+					var i, j, result, certificatePath, _i15, found, _j, certificate, k, shortestLength, shortestIndex, _i16, _i17;
 
 					return regeneratorRuntime.wrap(function generatorFunction$(_context7) {
 						while (1) {
@@ -18843,53 +19245,73 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									});
 
 								case 25:
-									_i14 = 0;
+									_i15 = 0;
 
 								case 26:
-									if (!(_i14 < result.length)) {
-										_context7.next = 42;
+									if (!(_i15 < result.length)) {
+										_context7.next = 48;
 										break;
 									}
 
 									found = false;
-									latestItem = result[_i14].length - 1;
-									certificate = localCerts[result[_i14][latestItem]];
 									_j = 0;
 
-								case 31:
-									if (!(_j < _this.trustedCerts.length)) {
-										_context7.next = 38;
+								case 29:
+									if (!(_j < result[_i15].length)) {
+										_context7.next = 44;
 										break;
 									}
 
-									if (!isEqualBuffer(certificate.tbs, _this.trustedCerts[_j].tbs)) {
-										_context7.next = 35;
+									certificate = localCerts[result[_i15][_j]];
+									k = 0;
+
+								case 32:
+									if (!(k < _this.trustedCerts.length)) {
+										_context7.next = 39;
+										break;
+									}
+
+									if (!isEqualBuffer(certificate.tbs, _this.trustedCerts[k].tbs)) {
+										_context7.next = 36;
 										break;
 									}
 
 									found = true;
-									return _context7.abrupt("break", 38);
+									return _context7.abrupt("break", 39);
 
-								case 35:
-									_j++;
-									_context7.next = 31;
+								case 36:
+									k++;
+									_context7.next = 32;
 									break;
 
-								case 38:
-
+								case 39:
 									if (!found) {
-										result.splice(_i14, 1);
-										_i14 = 0;
+										_context7.next = 41;
+										break;
 									}
 
-								case 39:
-									_i14++;
+									return _context7.abrupt("break", 44);
+
+								case 41:
+									_j++;
+									_context7.next = 29;
+									break;
+
+								case 44:
+
+									if (!found) {
+										result.splice(_i15, 1);
+										_i15 = 0;
+									}
+
+								case 45:
+									_i15++;
 									_context7.next = 26;
 									break;
 
-								case 42:
+								case 48:
 									if (!(result.length === 0)) {
-										_context7.next = 44;
+										_context7.next = 50;
 										break;
 									}
 
@@ -18899,7 +19321,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										resultMessage: "No valid certificate paths found"
 									};
 
-								case 44:
+								case 50:
 									//endregion
 
 									//region Find shortest certificate path (for the moment it is the only criteria)
@@ -18907,37 +19329,37 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									shortestIndex = 0;
 
 
-									for (_i15 = 0; _i15 < result.length; _i15++) {
-										if (result[_i15].length < shortestLength) {
-											shortestLength = result[_i15].length;
-											shortestIndex = _i15;
+									for (_i16 = 0; _i16 < result.length; _i16++) {
+										if (result[_i16].length < shortestLength) {
+											shortestLength = result[_i16].length;
+											shortestIndex = _i16;
 										}
 									}
 									//endregion
 
 									//region Create certificate path for basic check
-									for (_i16 = 0; _i16 < result[shortestIndex].length; _i16++) {
-										certificatePath.push(localCerts[result[shortestIndex][_i16]]);
+									for (_i17 = 0; _i17 < result[shortestIndex].length; _i17++) {
+										certificatePath.push(localCerts[result[shortestIndex][_i17]]);
 									} //endregion
 
 									//region Perform basic checking for all certificates in the path
-									_context7.next = 50;
+									_context7.next = 56;
 									return basicCheck(certificatePath, _this.checkDate);
 
-								case 50:
+								case 56:
 									result = _context7.sent;
 
 									if (!(result.result === false)) {
-										_context7.next = 53;
+										_context7.next = 59;
 										break;
 									}
 
 									throw result;
 
-								case 53:
+								case 59:
 									return _context7.abrupt("return", certificatePath);
 
-								case 54:
+								case 60:
 								case "end":
 									return _context7.stop();
 							}
@@ -18945,7 +19367,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					}, generatorFunction, this);
 				}));
 			}
-
 			//**********************************************************************************
 			/**
     * Major verification function for certificate chain.
@@ -18956,7 +19377,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this57 = this;
+				var _this59 = this;
 
 				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -19016,7 +19437,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Sorting certificates in the chain array
 				sequence = this.sort().then(function (sortedCerts) {
-					_this57.certs = sortedCerts;
+					_this59.certs = sortedCerts;
 				});
 				//endregion
 
@@ -19028,25 +19449,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					var policiesAndCerts = []; // In fact "array of array" where rows are for each specific policy, column for each certificate and value is "true/false"
 
-					var anyPolicyArray = new Array(_this57.certs.length - 1); // Minus "trusted anchor"
-					for (var ii = 0; ii < _this57.certs.length - 1; ii++) {
+					var anyPolicyArray = new Array(_this59.certs.length - 1); // Minus "trusted anchor"
+					for (var ii = 0; ii < _this59.certs.length - 1; ii++) {
 						anyPolicyArray[ii] = true;
 					}policiesAndCerts.push(anyPolicyArray);
 
-					var policyMappings = new Array(_this57.certs.length - 1); // Array of "PolicyMappings" for each certificate
-					var certPolicies = new Array(_this57.certs.length - 1); // Array of "CertificatePolicies" for each certificate
+					var policyMappings = new Array(_this59.certs.length - 1); // Array of "PolicyMappings" for each certificate
+					var certPolicies = new Array(_this59.certs.length - 1); // Array of "CertificatePolicies" for each certificate
 
-					var explicitPolicyStart = explicitPolicyIndicator ? _this57.certs.length - 1 : -1;
+					var explicitPolicyStart = explicitPolicyIndicator ? _this59.certs.length - 1 : -1;
 					//endregion
 
 					//region Gather all neccessary information from certificate chain
-					for (var i = _this57.certs.length - 2; i >= 0; i--, pathDepth++) {
-						if ("extensions" in _this57.certs[i]) {
+					for (var i = _this59.certs.length - 2; i >= 0; i--, pathDepth++) {
+						if ("extensions" in _this59.certs[i]) {
 							//region Get information about certificate extensions
-							for (var j = 0; j < _this57.certs[i].extensions.length; j++) {
+							for (var j = 0; j < _this59.certs[i].extensions.length; j++) {
 								//region CertificatePolicies
-								if (_this57.certs[i].extensions[j].extnID === "2.5.29.32") {
-									certPolicies[i] = _this57.certs[i].extensions[j].parsedValue;
+								if (_this59.certs[i].extensions[j].extnID === "2.5.29.32") {
+									certPolicies[i] = _this59.certs[i].extensions[j].parsedValue;
 
 									//region Remove entry from "anyPolicies" for the certificate
 									for (var s = 0; s < allPolicies.length; s++) {
@@ -19057,12 +19478,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									}
 									//endregion
 
-									for (var k = 0; k < _this57.certs[i].extensions[j].parsedValue.certificatePolicies.length; k++) {
+									for (var k = 0; k < _this59.certs[i].extensions[j].parsedValue.certificatePolicies.length; k++) {
 										var policyIndex = -1;
 
 										//region Try to find extension in "allPolicies" array
 										for (var _s = 0; _s < allPolicies.length; _s++) {
-											if (_this57.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier === allPolicies[_s]) {
+											if (_this59.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier === allPolicies[_s]) {
 												policyIndex = _s;
 												break;
 											}
@@ -19070,9 +19491,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										//endregion
 
 										if (policyIndex === -1) {
-											allPolicies.push(_this57.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier);
+											allPolicies.push(_this59.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier);
 
-											var certArray = new Array(_this57.certs.length - 1);
+											var certArray = new Array(_this59.certs.length - 1);
 											certArray[i] = true;
 
 											policiesAndCerts.push(certArray);
@@ -19082,7 +19503,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								//endregion
 
 								//region PolicyMappings
-								if (_this57.certs[i].extensions[j].extnID === "2.5.29.33") {
+								if (_this59.certs[i].extensions[j].extnID === "2.5.29.33") {
 									if (policyMappingInhibitIndicator) {
 										return {
 											result: false,
@@ -19091,31 +19512,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										};
 									}
 
-									policyMappings[i] = _this57.certs[i].extensions[j].parsedValue;
+									policyMappings[i] = _this59.certs[i].extensions[j].parsedValue;
 								}
 								//endregion
 
 								//region PolicyConstraints
-								if (_this57.certs[i].extensions[j].extnID === "2.5.29.36") {
+								if (_this59.certs[i].extensions[j].extnID === "2.5.29.36") {
 									if (explicitPolicyIndicator === false) {
 										//region requireExplicitPolicy
-										if (_this57.certs[i].extensions[j].parsedValue.requireExplicitPolicy === 0) {
+										if (_this59.certs[i].extensions[j].parsedValue.requireExplicitPolicy === 0) {
 											explicitPolicyIndicator = true;
 											explicitPolicyStart = i;
 										} else {
 											if (pendingConstraints[0] === false) {
 												pendingConstraints[0] = true;
-												explicitPolicyPending = _this57.certs[i].extensions[j].parsedValue.requireExplicitPolicy;
-											} else explicitPolicyPending = explicitPolicyPending > _this57.certs[i].extensions[j].parsedValue.requireExplicitPolicy ? _this57.certs[i].extensions[j].parsedValue.requireExplicitPolicy : explicitPolicyPending;
+												explicitPolicyPending = _this59.certs[i].extensions[j].parsedValue.requireExplicitPolicy;
+											} else explicitPolicyPending = explicitPolicyPending > _this59.certs[i].extensions[j].parsedValue.requireExplicitPolicy ? _this59.certs[i].extensions[j].parsedValue.requireExplicitPolicy : explicitPolicyPending;
 										}
 										//endregion
 
 										//region inhibitPolicyMapping
-										if (_this57.certs[i].extensions[j].parsedValue.inhibitPolicyMapping === 0) policyMappingInhibitIndicator = true;else {
+										if (_this59.certs[i].extensions[j].parsedValue.inhibitPolicyMapping === 0) policyMappingInhibitIndicator = true;else {
 											if (pendingConstraints[1] === false) {
 												pendingConstraints[1] = true;
-												policyMappingInhibitPending = _this57.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1;
-											} else policyMappingInhibitPending = policyMappingInhibitPending > _this57.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 ? _this57.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 : policyMappingInhibitPending;
+												policyMappingInhibitPending = _this59.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1;
+											} else policyMappingInhibitPending = policyMappingInhibitPending > _this59.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 ? _this59.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 : policyMappingInhibitPending;
 										}
 										//endregion
 									}
@@ -19123,13 +19544,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								//endregion
 
 								//region InhibitAnyPolicy
-								if (_this57.certs[i].extensions[j].extnID === "2.5.29.54") {
+								if (_this59.certs[i].extensions[j].extnID === "2.5.29.54") {
 									if (inhibitAnyPolicyIndicator === false) {
-										if (_this57.certs[i].extensions[j].parsedValue.valueBlock.valueDec === 0) inhibitAnyPolicyIndicator = true;else {
+										if (_this59.certs[i].extensions[j].parsedValue.valueBlock.valueDec === 0) inhibitAnyPolicyIndicator = true;else {
 											if (pendingConstraints[2] === false) {
 												pendingConstraints[2] = true;
-												inhibitAnyPolicyPending = _this57.certs[i].extensions[j].parsedValue.valueBlock.valueDec;
-											} else inhibitAnyPolicyPending = inhibitAnyPolicyPending > _this57.certs[i].extensions[j].parsedValue.valueBlock.valueDec ? _this57.certs[i].extensions[j].parsedValue.valueBlock.valueDec : inhibitAnyPolicyPending;
+												inhibitAnyPolicyPending = _this59.certs[i].extensions[j].parsedValue.valueBlock.valueDec;
+											} else inhibitAnyPolicyPending = inhibitAnyPolicyPending > _this59.certs[i].extensions[j].parsedValue.valueBlock.valueDec ? _this59.certs[i].extensions[j].parsedValue.valueBlock.valueDec : inhibitAnyPolicyPending;
 										}
 									}
 								}
@@ -19192,12 +19613,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//endregion
 
 					//region Working with policy mappings
-					for (var _i17 = 0; _i17 < _this57.certs.length - 1; _i17++) {
+					for (var _i18 = 0; _i18 < _this59.certs.length - 1; _i18++) {
 						//region Check that there is "policy mapping" for level "i + 1"
-						if (_i17 < _this57.certs.length - 2 && typeof policyMappings[_i17 + 1] !== "undefined") {
-							for (var _k = 0; _k < policyMappings[_i17 + 1].mappings.length; _k++) {
+						if (_i18 < _this59.certs.length - 2 && typeof policyMappings[_i18 + 1] !== "undefined") {
+							for (var _k = 0; _k < policyMappings[_i18 + 1].mappings.length; _k++) {
 								//region Check that we do not have "anyPolicy" in current mapping
-								if (policyMappings[_i17 + 1].mappings[_k].issuerDomainPolicy === "2.5.29.32.0" || policyMappings[_i17 + 1].mappings[_k].subjectDomainPolicy === "2.5.29.32.0") {
+								if (policyMappings[_i18 + 1].mappings[_k].issuerDomainPolicy === "2.5.29.32.0" || policyMappings[_i18 + 1].mappings[_k].subjectDomainPolicy === "2.5.29.32.0") {
 									return {
 										result: false,
 										resultCode: 99,
@@ -19213,22 +19634,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 								//region Search for index of policies indedes
 								for (var n = 0; n < allPolicies.length; n++) {
-									if (allPolicies[n] === policyMappings[_i17 + 1].mappings[_k].issuerDomainPolicy) issuerDomainPolicyIndex = n;
+									if (allPolicies[n] === policyMappings[_i18 + 1].mappings[_k].issuerDomainPolicy) issuerDomainPolicyIndex = n;
 
-									if (allPolicies[n] === policyMappings[_i17 + 1].mappings[_k].subjectDomainPolicy) subjectDomainPolicyIndex = n;
+									if (allPolicies[n] === policyMappings[_i18 + 1].mappings[_k].subjectDomainPolicy) subjectDomainPolicyIndex = n;
 								}
 								//endregion
 
 								//region Delete existing "issuerDomainPolicy" because on the level we mapped the policy to another one
-								if (typeof policiesAndCerts[issuerDomainPolicyIndex][_i17] !== "undefined") delete policiesAndCerts[issuerDomainPolicyIndex][_i17];
+								if (typeof policiesAndCerts[issuerDomainPolicyIndex][_i18] !== "undefined") delete policiesAndCerts[issuerDomainPolicyIndex][_i18];
 								//endregion
 
 								//region Check all policies for the certificate
-								for (var _j2 = 0; _j2 < certPolicies[_i17].certificatePolicies.length; _j2++) {
-									if (policyMappings[_i17 + 1].mappings[_k].subjectDomainPolicy === certPolicies[_i17].certificatePolicies[_j2].policyIdentifier) {
+								for (var _j2 = 0; _j2 < certPolicies[_i18].certificatePolicies.length; _j2++) {
+									if (policyMappings[_i18 + 1].mappings[_k].subjectDomainPolicy === certPolicies[_i18].certificatePolicies[_j2].policyIdentifier) {
 										//region Set mapped policy for current certificate
 										if (issuerDomainPolicyIndex !== -1 && subjectDomainPolicyIndex !== -1) {
-											for (var m = 0; m <= _i17; m++) {
+											for (var m = 0; m <= _i18; m++) {
 												if (typeof policiesAndCerts[subjectDomainPolicyIndex][m] !== "undefined") {
 													policiesAndCerts[issuerDomainPolicyIndex][m] = true;
 													delete policiesAndCerts[subjectDomainPolicyIndex][m];
@@ -19246,10 +19667,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//endregion
 
 					//region Working with "explicitPolicyIndicator" and "anyPolicy"
-					for (var _i18 = 0; _i18 < allPolicies.length; _i18++) {
-						if (allPolicies[_i18] === "2.5.29.32.0") {
+					for (var _i19 = 0; _i19 < allPolicies.length; _i19++) {
+						if (allPolicies[_i19] === "2.5.29.32.0") {
 							for (var _j3 = 0; _j3 < explicitPolicyStart; _j3++) {
-								delete policiesAndCerts[_i18][_j3];
+								delete policiesAndCerts[_i19][_j3];
 							}
 						}
 					}
@@ -19258,18 +19679,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//region Create "set of authorities-constrained policies"
 					var authConstrPolicies = [];
 
-					for (var _i19 = 0; _i19 < policiesAndCerts.length; _i19++) {
+					for (var _i20 = 0; _i20 < policiesAndCerts.length; _i20++) {
 						var found = true;
 
-						for (var _j4 = 0; _j4 < _this57.certs.length - 1; _j4++) {
+						for (var _j4 = 0; _j4 < _this59.certs.length - 1; _j4++) {
 							var anyPolicyFound = false;
 
-							if (_j4 < explicitPolicyStart && allPolicies[_i19] === "2.5.29.32.0" && allPolicies.length > 1) {
+							if (_j4 < explicitPolicyStart && allPolicies[_i20] === "2.5.29.32.0" && allPolicies.length > 1) {
 								found = false;
 								break;
 							}
 
-							if (typeof policiesAndCerts[_i19][_j4] === "undefined") {
+							if (typeof policiesAndCerts[_i20][_j4] === "undefined") {
 								if (_j4 >= explicitPolicyStart) {
 									//region Search for "anyPolicy" in the policy set
 									for (var _k2 = 0; _k2 < allPolicies.length; _k2++) {
@@ -19289,7 +19710,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							}
 						}
 
-						if (found === true) authConstrPolicies.push(allPolicies[_i19]);
+						if (found === true) authConstrPolicies.push(allPolicies[_i20]);
 					}
 					//endregion
 
@@ -19298,10 +19719,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					if (initialPolicySet.length === 1 && initialPolicySet[0] === "2.5.29.32.0" && explicitPolicyIndicator === false) userConstrPolicies = initialPolicySet;else {
 						if (authConstrPolicies.length === 1 && authConstrPolicies[0] === "2.5.29.32.0") userConstrPolicies = initialPolicySet;else {
-							for (var _i20 = 0; _i20 < authConstrPolicies.length; _i20++) {
+							for (var _i21 = 0; _i21 < authConstrPolicies.length; _i21++) {
 								for (var _j5 = 0; _j5 < initialPolicySet.length; _j5++) {
-									if (initialPolicySet[_j5] === authConstrPolicies[_i20] || initialPolicySet[_j5] === "2.5.29.32.0") {
-										userConstrPolicies.push(authConstrPolicies[_i20]);
+									if (initialPolicySet[_j5] === authConstrPolicies[_i21] || initialPolicySet[_j5] === "2.5.29.32.0") {
+										userConstrPolicies.push(authConstrPolicies[_i21]);
 										break;
 									}
 								}
@@ -19357,9 +19778,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						//endregion
 
 						//region Check that no part of "constraint" has zero length
-						for (var _i21 = 0; _i21 < constrLen; _i21++) {
-							if (constraintSplitted[_i21].length === 0) {
-								if (_i21 === 0) {
+						for (var _i22 = 0; _i22 < constrLen; _i22++) {
+							if (constraintSplitted[_i22].length === 0) {
+								if (_i22 === 0) {
 									if (constrLen === 1) return false;
 
 									continue;
@@ -19372,10 +19793,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 						//region Check that "name" has a tail as "constraint"
 
-						for (var _i22 = 0; _i22 < constrLen; _i22++) {
-							if (constraintSplitted[constrLen - 1 - _i22].length === 0) continue;
+						for (var _i23 = 0; _i23 < constrLen; _i23++) {
+							if (constraintSplitted[constrLen - 1 - _i23].length === 0) continue;
 
-							if (nameSplitted[nameLen - 1 - _i22].localeCompare(constraintSplitted[constrLen - 1 - _i22]) !== 0) return false;
+							if (nameSplitted[nameLen - 1 - _i23].localeCompare(constraintSplitted[constrLen - 1 - _i23]) !== 0) return false;
 						}
 						//endregion
 
@@ -19491,8 +19912,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 						//region Work with IPv6 addresses
 						if (nameView.length === 16 && constraintView.length === 32) {
-							for (var _i23 = 0; _i23 < 16; _i23++) {
-								if ((nameView[_i23] ^ constraintView[_i23]) & constraintView[_i23 + 16]) return false;
+							for (var _i24 = 0; _i24 < 16; _i24++) {
+								if ((nameView[_i24] ^ constraintView[_i24]) & constraintView[_i24 + 16]) return false;
 							}
 
 							return true;
@@ -19552,7 +19973,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//region Check all certificates, excluding "trust anchor"
 					pathDepth = 1;
 
-					for (var i = _this57.certs.length - 2; i >= 0; i--, pathDepth++) {
+					for (var i = _this59.certs.length - 2; i >= 0; i--, pathDepth++) {
 						//region Support variables
 						var subjectAltNames = [];
 
@@ -19560,18 +19981,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var certExcludedSubtrees = [];
 						//endregion
 
-						if ("extensions" in _this57.certs[i]) {
-							for (var j = 0; j < _this57.certs[i].extensions.length; j++) {
+						if ("extensions" in _this59.certs[i]) {
+							for (var j = 0; j < _this59.certs[i].extensions.length; j++) {
 								//region NameConstraints
-								if (_this57.certs[i].extensions[j].extnID === "2.5.29.30") {
-									if ("permittedSubtrees" in _this57.certs[i].extensions[j].parsedValue) certPermittedSubtrees = certPermittedSubtrees.concat(_this57.certs[i].extensions[j].parsedValue.permittedSubtrees);
+								if (_this59.certs[i].extensions[j].extnID === "2.5.29.30") {
+									if ("permittedSubtrees" in _this59.certs[i].extensions[j].parsedValue) certPermittedSubtrees = certPermittedSubtrees.concat(_this59.certs[i].extensions[j].parsedValue.permittedSubtrees);
 
-									if ("excludedSubtrees" in _this57.certs[i].extensions[j].parsedValue) certExcludedSubtrees = certExcludedSubtrees.concat(_this57.certs[i].extensions[j].parsedValue.excludedSubtrees);
+									if ("excludedSubtrees" in _this59.certs[i].extensions[j].parsedValue) certExcludedSubtrees = certExcludedSubtrees.concat(_this59.certs[i].extensions[j].parsedValue.excludedSubtrees);
 								}
 								//endregion
 
 								//region SubjectAltName
-								if (_this57.certs[i].extensions[j].extnID === "2.5.29.17") subjectAltNames = subjectAltNames.concat(_this57.certs[i].extensions[j].parsedValue.altNames);
+								if (_this59.certs[i].extensions[j].extnID === "2.5.29.17") subjectAltNames = subjectAltNames.concat(_this59.certs[i].extensions[j].parsedValue.altNames);
 								//endregion
 							}
 						}
@@ -19584,12 +20005,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								case 4:
 									// directoryName
 									{
-										if (requiredNameForms[_j6].base.value.typesAndValues.length !== _this57.certs[i].subject.typesAndValues.length) continue;
+										if (requiredNameForms[_j6].base.value.typesAndValues.length !== _this59.certs[i].subject.typesAndValues.length) continue;
 
 										formFound = true;
 
-										for (var k = 0; k < _this57.certs[i].subject.typesAndValues.length; k++) {
-											if (_this57.certs[i].subject.typesAndValues[k].type !== requiredNameForms[_j6].base.value.typesAndValues[k].type) {
+										for (var k = 0; k < _this59.certs[i].subject.typesAndValues.length; k++) {
+											if (_this59.certs[i].subject.typesAndValues[k].type !== requiredNameForms[_j6].base.value.typesAndValues[k].type) {
 												formFound = false;
 												break;
 											}
@@ -19674,12 +20095,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 											}
 										} else // Try to find out "emailAddress" inside "subject"
 											{
-												for (var _k4 = 0; _k4 < _this57.certs[i].subject.typesAndValues.length; _k4++) {
-													if (_this57.certs[i].subject.typesAndValues[_k4].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
-													_this57.certs[i].subject.typesAndValues[_k4].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
+												for (var _k4 = 0; _k4 < _this59.certs[i].subject.typesAndValues.length; _k4++) {
+													if (_this59.certs[i].subject.typesAndValues[_k4].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
+													_this59.certs[i].subject.typesAndValues[_k4].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
 														{
 															valueExists = true;
-															groupPermitted = groupPermitted || compareRFC822Name(_this57.certs[i].subject.typesAndValues[_k4].value.valueBlock.value, group[_j8].base.value);
+															groupPermitted = groupPermitted || compareRFC822Name(_this59.certs[i].subject.typesAndValues[_k4].value.valueBlock.value, group[_j8].base.value);
 														}
 												}
 											}
@@ -19701,7 +20122,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									//region directoryName
 									case 2:
 										valueExists = true;
-										groupPermitted = compareDirectoryName(_this57.certs[i].subject, group[_j8].base.value);
+										groupPermitted = compareDirectoryName(_this59.certs[i].subject, group[_j8].base.value);
 										break;
 									//endregion
 									//region uniformResourceIdentifier
@@ -19763,10 +20184,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										}
 									} else // Try to find out "emailAddress" inside "subject"
 										{
-											for (var _k9 = 0; _k9 < _this57.subject.typesAndValues.length; _k9++) {
-												if (_this57.subject.typesAndValues[_k9].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
-												_this57.subject.typesAndValues[_k9].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
-													excluded = excluded || compareRFC822Name(_this57.subject.typesAndValues[_k9].value.valueBlock.value, excludedSubtrees[_j9].base.value);
+											for (var _k9 = 0; _k9 < _this59.subject.typesAndValues.length; _k9++) {
+												if (_this59.subject.typesAndValues[_k9].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
+												_this59.subject.typesAndValues[_k9].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
+													excluded = excluded || compareRFC822Name(_this59.subject.typesAndValues[_k9].value.valueBlock.value, excludedSubtrees[_j9].base.value);
 											}
 										}
 									break;
@@ -19783,7 +20204,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								//endregion
 								//region directoryName
 								case 4:
-									excluded = excluded || compareDirectoryName(_this57.certs[i].subject, excludedSubtrees[_j9].base.value);
+									excluded = excluded || compareDirectoryName(_this59.certs[i].subject, excludedSubtrees[_j9].base.value);
 									break;
 								//endregion
 								//region uniformResourceIdentifier
@@ -19848,7 +20269,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return sequence;
 			}
-
 			//**********************************************************************************
 
 		}], [{
@@ -19948,13 +20368,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			"1.2.840.113549.1.9.1": "E-mail"
 		};
 
-		var _iteratorNormalCompletion16 = true;
-		var _didIteratorError16 = false;
-		var _iteratorError16 = undefined;
+		var _iteratorNormalCompletion17 = true;
+		var _didIteratorError17 = false;
+		var _iteratorError17 = undefined;
 
 		try {
-			for (var _iterator16 = certificate.issuer.typesAndValues[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
-				var typeAndValue = _step16.value;
+			for (var _iterator17 = certificate.issuer.typesAndValues[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+				var typeAndValue = _step17.value;
 
 				var typeval = rdnmap[typeAndValue.type];
 				if (typeof typeval === "undefined") typeval = typeAndValue.type;
@@ -19971,27 +20391,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 			//region Put information about X.509 certificate subject
 		} catch (err) {
-			_didIteratorError16 = true;
-			_iteratorError16 = err;
+			_didIteratorError17 = true;
+			_iteratorError17 = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion16 && _iterator16.return) {
-					_iterator16.return();
+				if (!_iteratorNormalCompletion17 && _iterator17.return) {
+					_iterator17.return();
 				}
 			} finally {
-				if (_didIteratorError16) {
-					throw _iteratorError16;
+				if (_didIteratorError17) {
+					throw _iteratorError17;
 				}
 			}
 		}
 
-		var _iteratorNormalCompletion17 = true;
-		var _didIteratorError17 = false;
-		var _iteratorError17 = undefined;
+		var _iteratorNormalCompletion18 = true;
+		var _didIteratorError18 = false;
+		var _iteratorError18 = undefined;
 
 		try {
-			for (var _iterator17 = certificate.subject.typesAndValues[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-				var _typeAndValue = _step17.value;
+			for (var _iterator18 = certificate.subject.typesAndValues[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+				var _typeAndValue = _step18.value;
 
 				var _typeval = rdnmap[_typeAndValue.type];
 				if (typeof _typeval === "undefined") _typeval = _typeAndValue.type;
@@ -20008,16 +20428,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 			//region Put information about X.509 certificate serial number
 		} catch (err) {
-			_didIteratorError17 = true;
-			_iteratorError17 = err;
+			_didIteratorError18 = true;
+			_iteratorError18 = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion17 && _iterator17.return) {
-					_iterator17.return();
+				if (!_iteratorNormalCompletion18 && _iterator18.return) {
+					_iterator18.return();
 				}
 			} finally {
-				if (_didIteratorError17) {
-					throw _iteratorError17;
+				if (_didIteratorError18) {
+					throw _iteratorError18;
 				}
 			}
 		}
@@ -20191,7 +20611,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		sequence = sequence.then(function () {
 			return certificate.sign(privateKey, hashAlg);
 		}, function (error) {
-			return Promis.reject("Error during exporting public key: " + error);
+			return Promise.reject("Error during exporting public key: " + error);
 		});
 		//endregion 
 
