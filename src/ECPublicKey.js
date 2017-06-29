@@ -168,8 +168,8 @@ export default class ECPublicKey
 
 		return {
 			crv: crvName,
-			x: toBase64(arrayBufferToString(this.x), true, true, true),
-			y: toBase64(arrayBufferToString(this.y), true, true, true)
+			x: toBase64(arrayBufferToString(this.x), true, true, false),
+			y: toBase64(arrayBufferToString(this.y), true, true, false)
 		};
 	}
 	//**********************************************************************************
@@ -204,12 +204,36 @@ export default class ECPublicKey
 			throw new Error("Absent mandatory parameter \"crv\"");
 
 		if("x" in json)
-			this.x = stringToArrayBuffer(fromBase64(json.x, true)).slice(0, coodinateLength);
+		{
+			const convertBuffer = stringToArrayBuffer(fromBase64(json.x, true));
+			
+			if(convertBuffer.byteLength < coodinateLength)
+			{
+				this.x = new ArrayBuffer(coodinateLength);
+				const view = new Uint8Array(this.x);
+				const convertBufferView = new Uint8Array(convertBuffer);
+				view.set(1, convertBufferView);
+			}
+			else
+				this.x = convertBuffer.slice(0, coodinateLength);
+		}
 		else
 			throw new Error("Absent mandatory parameter \"x\"");
 
 		if("y" in json)
-			this.y = stringToArrayBuffer(fromBase64(json.y, true)).slice(0, coodinateLength);
+		{
+			const convertBuffer = stringToArrayBuffer(fromBase64(json.y, true));
+			
+			if(convertBuffer.byteLength < coodinateLength)
+			{
+				this.y = new ArrayBuffer(coodinateLength);
+				const view = new Uint8Array(this.y);
+				const convertBufferView = new Uint8Array(convertBuffer);
+				view.set(1, convertBufferView);
+			}
+			else
+				this.y = convertBuffer.slice(0, coodinateLength);
+		}
 		else
 			throw new Error("Absent mandatory parameter \"y\"");
 	}

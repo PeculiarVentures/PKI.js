@@ -260,7 +260,7 @@ export default class ECPrivateKey
 
 		const privateKeyJSON = {
 			crv: crvName,
-			d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, true)
+			d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, false)
 		};
 
 		if("publicKey" in this)
@@ -305,7 +305,21 @@ export default class ECPrivateKey
 			throw new Error("Absent mandatory parameter \"crv\"");
 
 		if("d" in json)
-			this.privateKey = new asn1js.OctetString({ valueHex: stringToArrayBuffer(fromBase64(json.d, true)).slice(0, coodinateLength) });
+		{
+			const convertBuffer = stringToArrayBuffer(fromBase64(json.d, true));
+			
+			if(convertBuffer.byteLength < coodinateLength)
+			{
+				const buffer = new ArrayBuffer(coodinateLength);
+				const view = new Uint8Array(buffer);
+				const convertBufferView = new Uint8Array(convertBuffer);
+				view.set(1, convertBufferView);
+				
+				this.privateKey = new asn1js.OctetString({ valueHex: buffer });
+			}
+			else
+				this.privateKey = new asn1js.OctetString({ valueHex: convertBuffer.slice(0, coodinateLength) });
+		}
 		else
 			throw new Error("Absent mandatory parameter \"d\"");
 
