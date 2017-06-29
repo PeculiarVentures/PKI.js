@@ -70,5 +70,5 @@
   "main": "./build/index.js",
   "name": "pkijs",
   "version": "2.0.59",
-  "license": "MIT"
+  "license": "BSD-3"
 }
