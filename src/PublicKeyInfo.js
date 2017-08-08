@@ -132,10 +132,14 @@ export default class PublicKeyInfo
 				{
 					if(this.algorithm.algorithmParams instanceof asn1js.ObjectIdentifier)
 					{
-						this.parsedKey = new ECPublicKey({
-							namedCurve: this.algorithm.algorithmParams.valueBlock.toString(),
-							schema: this.subjectPublicKey.valueBlock.valueHex
-						});
+						try
+						{
+							this.parsedKey = new ECPublicKey({
+								namedCurve: this.algorithm.algorithmParams.valueBlock.toString(),
+								schema: this.subjectPublicKey.valueBlock.valueHex
+							});
+						}
+						catch(ex){} // Could be a problems during recognision of internal public key data here. Let's ignore them.
 					}
 				}
 				break;
@@ -143,7 +147,13 @@ export default class PublicKeyInfo
 				{
 					const publicKeyASN1 = asn1js.fromBER(this.subjectPublicKey.valueBlock.valueHex);
 					if(publicKeyASN1.offset !== (-1))
-						this.parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
+					{
+						try
+						{
+							this.parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
+						}
+						catch(ex){} // Could be a problems during recognision of internal public key data here. Let's ignore them.
+					}
 				}
 				break;
 			default:
