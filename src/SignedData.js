@@ -614,14 +614,17 @@ export default class SignedData
 			
 			let isCA = false;
 			
-			for(const extension of cert.extensions)
+			if("extensions" in cert)
 			{
-				if(extension.extnID === "2.5.29.19") // BasicConstraints
+				for(const extension of cert.extensions)
 				{
-					if("cA" in extension.parsedValue)
+					if(extension.extnID === "2.5.29.19") // BasicConstraints
 					{
-						if(extension.parsedValue.cA === true)
-							isCA = true;
+						if("cA" in extension.parsedValue)
+						{
+							if(extension.parsedValue.cA === true)
+								isCA = true;
+						}
 					}
 				}
 			}
