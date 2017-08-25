@@ -253,6 +253,7 @@ export default class OCSPResponse
 	//**********************************************************************************
 	/**
 	 * Verify current OCSP Response
+	 * @param {Certificate|null} issuerCertificate In order to decrease size of resp issuer cert could be ommited. In such case you need manually provide it.
 	 * @returns {Promise}
 	 */
 	verify(issuerCertificate = null)
