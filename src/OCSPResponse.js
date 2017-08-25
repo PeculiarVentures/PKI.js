@@ -255,7 +255,7 @@ export default class OCSPResponse
 	 * Verify current OCSP Response
 	 * @returns {Promise}
 	 */
-	verify()
+	verify(issuerCertificate = null)
 	{
 		//region Check that ResponseBytes exists in the object
 		if(("responseBytes" in this) === false)
@@ -268,6 +268,14 @@ export default class OCSPResponse
 			const asn1 = asn1js.fromBER(this.responseBytes.response.valueBlock.valueHex);
 			const basicResponse = new BasicOCSPResponse({ schema: asn1.result });
 
+			if(issuerCertificate !== null)
+			{
+				if(("certs" in basicResponse) === false)
+					basicResponse.certs = [];
+				
+				basicResponse.certs.push(issuerCertificate);
+			}
+			
 			return basicResponse.verify();
 		}
 
