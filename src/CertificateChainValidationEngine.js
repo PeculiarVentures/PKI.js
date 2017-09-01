@@ -150,7 +150,7 @@ export default class CertificateChainValidationEngine
 			
 			const findIssuerResult = yield findIssuer(certificate, index);
 			if((findIssuerResult.length === 1) && (findIssuerResult[0] === (-1)))
-				throw new Error("Incorrect result");
+				throw new Error("No valid certificate paths found");
 			
 			if(findIssuerResult.length === 1)
 			{
