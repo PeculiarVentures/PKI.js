@@ -49,7 +49,7 @@ export default class GeneralNames
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
-	static schema(parameters = {})
+	static schema(parameters = {}, optional = false)
 	{
 		/**
 		 * @type {Object}
@@ -57,11 +57,13 @@ export default class GeneralNames
 		 * @property {string} generalTimeName Name for "generalTimeName" choice
 		 */
 		const names = getParametersValue(parameters, "names", {});
-
+		
 		return (new asn1js.Sequence({
+			optional,
+			name: (names.blockName || ""),
 			value: [
 				new asn1js.Repeated({
-					name: (names.blockName || "names"),
+					name: (names.generalNames || ""),
 					value: GeneralName.schema()
 				})
 			]
@@ -77,7 +79,12 @@ export default class GeneralNames
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
-			GeneralNames.schema()
+			GeneralNames.schema({
+				names: {
+					blockName: "names",
+					generalNames: "generalNames"
+				}
+			})
 		);
 
 		if(asn1.verified === false)
@@ -85,7 +92,7 @@ export default class GeneralNames
 		//endregion
 
 		//region Get internal properties from parsed schema
-		this.names = Array.from(asn1.result.names, element => new GeneralName({ schema: element }));
+		this.names = Array.from(asn1.result.generalNames, element => new GeneralName({ schema: element }));
 		//endregion
 	}
 	//**********************************************************************************
