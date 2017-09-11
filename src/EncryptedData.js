@@ -438,7 +438,7 @@ export default class EncryptedData {
 		
 		let hmacHashAlgorithm = "SHA-1";
 		
-		if("prf" in pbkdf2Params)
+		if("prf" in pbkdf2Params && pbkdf2Params.prf.algorithmId)
 		{
 			const algorithm = getAlgorithmByOID(pbkdf2Params.prf.algorithmId);
 			if(("name" in algorithm) === false)
