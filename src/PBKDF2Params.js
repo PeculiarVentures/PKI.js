@@ -26,16 +26,20 @@ export default class PBKDF2Params
 		 * @description iterationCount
 		 */
 		this.iterationCount = getParametersValue(parameters, "iterationCount", PBKDF2Params.defaultValues("iterationCount"));
-		/**
-		 * @type {number}
-		 * @description keyLength
-		 */
-		this.keyLength = getParametersValue(parameters, "keyLength", PBKDF2Params.defaultValues("keyLength"));
-		/**
-		 * @type {AlgorithmIdentifier}
-		 * @description prf
-		 */
-		this.prf = getParametersValue(parameters, "prf", PBKDF2Params.defaultValues("prf"));
+		
+		if("keyLength" in parameters)
+			/**
+			 * @type {number}
+			 * @description keyLength
+			 */
+			this.keyLength = getParametersValue(parameters, "keyLength", PBKDF2Params.defaultValues("keyLength"));
+		
+		if("prf" in parameters)
+			/**
+			 * @type {AlgorithmIdentifier}
+			 * @description prf
+			 */
+			this.prf = getParametersValue(parameters, "prf", PBKDF2Params.defaultValues("prf"));
 		//endregion
 
 		//region If input argument array contains "schema" for this object
@@ -59,7 +63,10 @@ export default class PBKDF2Params
 			case "keyLength":
 				return 0;
 			case "prf":
-				return new AlgorithmIdentifier();
+				return new AlgorithmIdentifier({
+					algorithmId: "1.3.14.3.2.26", // SHA-1
+					algorithmParams: new asn1js.Null()
+				});
 			default:
 				throw new Error(`Invalid member name for PBKDF2Params class: ${memberName}`);
 		}
