@@ -179,11 +179,17 @@ export default class PBKDF2Params
 		outputArray.push(this.salt);
 		outputArray.push(new asn1js.Integer({ value: this.iterationCount }));
 		
-		if(PBKDF2Params.defaultValues("keyLength") !== this.keyLength)
-			outputArray.push(new asn1js.Integer({ value: this.keyLength }));
+		if("keyLength" in this)
+		{
+			if(PBKDF2Params.defaultValues("keyLength") !== this.keyLength)
+				outputArray.push(new asn1js.Integer({ value: this.keyLength }));
+		}
 		
-		if(PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false)
-			outputArray.push(this.prf.toSchema());
+		if("prf" in this)
+		{
+			if(PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false)
+				outputArray.push(this.prf.toSchema());
+		}
 		//endregion 
 		
 		//region Construct and return new ASN.1 schema for this object 
@@ -203,12 +209,18 @@ export default class PBKDF2Params
 			salt: this.salt.toJSON(),
 			iterationCount: this.iterationCount
 		};
-
-		if(PBKDF2Params.defaultValues("keyLength") !== this.keyLength)
-			_object.keyLength = this.keyLength;
-
-		if(PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false)
-			_object.prf = this.prf.toJSON();
+		
+		if("keyLength" in this)
+		{
+			if(PBKDF2Params.defaultValues("keyLength") !== this.keyLength)
+				_object.keyLength = this.keyLength;
+		}
+		
+		if("prf" in this)
+		{
+			if(PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false)
+				_object.prf = this.prf.toJSON();
+		}
 
 		return _object;
 	}
