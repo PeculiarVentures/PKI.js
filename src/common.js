@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import { utilConcatBuf } from "pvutils";
+import * as constants from "ades-validation-engine/src/constants";
 import AlgorithmIdentifier from "./AlgorithmIdentifier";
 import RSASSAPSSParams from "./RSASSAPSSParams";
 import CryptoEngine from "./CryptoEngine";
@@ -27,22 +28,22 @@ export function getEngine()
 }
 //**************************************************************************************
 (function initCryptoEngine()
-	{
+{
 	if(typeof self !== "undefined")
-		{
+	{
 		if("crypto" in self)
-			{
+		{
 			let engineName = "webcrypto";
 				
-				/**
-				 * Standard crypto object
-				 * @type {Object}
-				 * @property {Object} [webkitSubtle] Subtle object from Apple
-				 */
+			/**
+			 * Standard crypto object
+			 * @type {Object}
+			 * @property {Object} [webkitSubtle] Subtle object from Apple
+			 */
 			const cryptoObject = self.crypto;
 			let subtleObject = null;
 				
-				// Apple Safari support
+			// Apple Safari support
 			if("webkitSubtle" in self.crypto)
 			{
 				try
@@ -53,7 +54,7 @@ export function getEngine()
 				{
 					subtleObject = self.crypto.subtle;
 				}
-
+				
 				engineName = "safari";
 			}
 				
@@ -63,7 +64,7 @@ export function getEngine()
 			engine = {
 				name: engineName,
 				crypto: cryptoObject,
-				subtle: new CryptoEngine({ name: engineName, crypto: subtleObject })
+				subtle: new CryptoEngine({ name: engineName, crypto: self.crypto, subtle: subtleObject })
 			};
 		}
 	}
@@ -92,202 +93,17 @@ export function getCrypto()
  */
 export function getRandomValues(view)
 {
-	if(engine.crypto !== null)
-		return engine.crypto.getRandomValues(view);
-	
-	throw new Error("No support for Web Cryptography API");
+	return engine.subtle.getRandomValues(view);
 }
 //**************************************************************************************
 /**
- * Get OID for each specific WebCrypto algorithm
- * @param {Object} algorithm WebCrypto algorithm
+ * Get OID for each specific algorithm
+ * @param {Object} algorithm
  * @returns {string}
  */
 export function getOIDByAlgorithm(algorithm)
 {
-	let result = "";
-	
-	switch(algorithm.name.toUpperCase())
-	{
-		case "RSASSA-PKCS1-V1_5":
-			switch(algorithm.hash.name.toUpperCase())
-			{
-				case "SHA-1":
-					result = "1.2.840.113549.1.1.5";
-					break;
-				case "SHA-256":
-					result = "1.2.840.113549.1.1.11";
-					break;
-				case "SHA-384":
-					result = "1.2.840.113549.1.1.12";
-					break;
-				case "SHA-512":
-					result = "1.2.840.113549.1.1.13";
-					break;
-				default:
-			}
-			break;
-		case "RSA-PSS":
-			result = "1.2.840.113549.1.1.10";
-			break;
-		case "RSA-OAEP":
-			result = "1.2.840.113549.1.1.7";
-			break;
-		case "ECDSA":
-			switch(algorithm.hash.name.toUpperCase())
-			{
-				case "SHA-1":
-					result = "1.2.840.10045.4.1";
-					break;
-				case "SHA-256":
-					result = "1.2.840.10045.4.3.2";
-					break;
-				case "SHA-384":
-					result = "1.2.840.10045.4.3.3";
-					break;
-				case "SHA-512":
-					result = "1.2.840.10045.4.3.4";
-					break;
-				default:
-			}
-			break;
-		case "ECDH":
-			switch(algorithm.kdf.toUpperCase()) // Non-standard addition - hash algorithm of KDF function
-			{
-				case "SHA-1":
-					result = "1.3.133.16.840.63.0.2"; // dhSinglePass-stdDH-sha1kdf-scheme
-					break;
-				case "SHA-256":
-					result = "1.3.132.1.11.1"; // dhSinglePass-stdDH-sha256kdf-scheme
-					break;
-				case "SHA-384":
-					result = "1.3.132.1.11.2"; // dhSinglePass-stdDH-sha384kdf-scheme
-					break;
-				case "SHA-512":
-					result = "1.3.132.1.11.3"; // dhSinglePass-stdDH-sha512kdf-scheme
-					break;
-				default:
-			}
-			break;
-		case "AES-CTR":
-			break;
-		case "AES-CBC":
-			switch(algorithm.length)
-			{
-				case 128:
-					result = "2.16.840.1.101.3.4.1.2";
-					break;
-				case 192:
-					result = "2.16.840.1.101.3.4.1.22";
-					break;
-				case 256:
-					result = "2.16.840.1.101.3.4.1.42";
-					break;
-				default:
-			}
-			break;
-		case "AES-CMAC":
-			break;
-		case "AES-GCM":
-			switch(algorithm.length)
-			{
-				case 128:
-					result = "2.16.840.1.101.3.4.1.6";
-					break;
-				case 192:
-					result = "2.16.840.1.101.3.4.1.26";
-					break;
-				case 256:
-					result = "2.16.840.1.101.3.4.1.46";
-					break;
-				default:
-			}
-			break;
-		case "AES-CFB":
-			switch(algorithm.length)
-			{
-				case 128:
-					result = "2.16.840.1.101.3.4.1.4";
-					break;
-				case 192:
-					result = "2.16.840.1.101.3.4.1.24";
-					break;
-				case 256:
-					result = "2.16.840.1.101.3.4.1.44";
-					break;
-				default:
-			}
-			break;
-		case "AES-KW":
-			switch(algorithm.length)
-			{
-				case 128:
-					result = "2.16.840.1.101.3.4.1.5";
-					break;
-				case 192:
-					result = "2.16.840.1.101.3.4.1.25";
-					break;
-				case 256:
-					result = "2.16.840.1.101.3.4.1.45";
-					break;
-				default:
-			}
-			break;
-		case "HMAC":
-			switch(algorithm.hash.name.toUpperCase())
-			{
-				case "SHA-1":
-					result = "1.2.840.113549.2.7";
-					break;
-				case "SHA-256":
-					result = "1.2.840.113549.2.9";
-					break;
-				case "SHA-384":
-					result = "1.2.840.113549.2.10";
-					break;
-				case "SHA-512":
-					result = "1.2.840.113549.2.11";
-					break;
-				default:
-			}
-			break;
-		case "DH":
-			result = "1.2.840.113549.1.9.16.3.5";
-			break;
-		case "SHA-1":
-			result = "1.3.14.3.2.26";
-			break;
-		case "SHA-256":
-			result = "2.16.840.1.101.3.4.2.1";
-			break;
-		case "SHA-384":
-			result = "2.16.840.1.101.3.4.2.2";
-			break;
-		case "SHA-512":
-			result = "2.16.840.1.101.3.4.2.3";
-			break;
-		case "CONCAT":
-			break;
-		case "HKDF":
-			break;
-		case "PBKDF2":
-			result = "1.2.840.113549.1.5.12";
-			break;
-		//region Special case - OIDs for ECC curves
-		case "P-256":
-			result = "1.2.840.10045.3.1.7";
-			break;
-		case "P-384":
-			result = "1.3.132.0.34";
-			break;
-		case "P-521":
-			result = "1.3.132.0.35";
-			break;
-		//endregion
-		default:
-	}
-	
-	return result;
+	return engine.subtle.getOIDByAlgorithm(algorithm);
 }
 //**************************************************************************************
 /**
@@ -298,434 +114,7 @@ export function getOIDByAlgorithm(algorithm)
  */
 export function getAlgorithmParameters(algorithmName, operation)
 {
-	let result = {
-		algorithm: {},
-		usages: []
-	};
-	
-	switch(algorithmName.toUpperCase())
-	{
-		case "RSASSA-PKCS1-V1_5":
-			switch(operation.toLowerCase())
-			{
-				case "generatekey":
-					result = {
-						algorithm: {
-							name: "RSASSA-PKCS1-v1_5",
-							modulusLength: 2048,
-							publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-							hash: {
-								name: "SHA-256"
-							}
-						},
-						usages: ["sign", "verify"]
-					};
-					break;
-				case "verify":
-				case "sign":
-				case "importkey":
-					result = {
-						algorithm: {
-							name: "RSASSA-PKCS1-v1_5",
-							hash: {
-								name: "SHA-256"
-							}
-						},
-						usages: ["verify"] // For importKey("pkcs8") usage must be "sign" only
-					};
-					break;
-				case "exportkey":
-				default:
-					return {
-						algorithm: {
-							name: "RSASSA-PKCS1-v1_5"
-						},
-						usages: []
-					};
-			}
-			break;
-		case "RSA-PSS":
-			switch(operation.toLowerCase())
-			{
-				case "sign":
-				case "verify":
-					result = {
-						algorithm: {
-							name: "RSA-PSS",
-							hash: {
-								name: "SHA-1"
-							},
-							saltLength: 20
-						},
-						usages: ["sign", "verify"]
-					};
-					break;
-				case "generatekey":
-					result = {
-						algorithm: {
-							name: "RSA-PSS",
-							modulusLength: 2048,
-							publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-							hash: {
-								name: "SHA-1"
-							}
-						},
-						usages: ["sign", "verify"]
-					};
-					break;
-				case "importkey":
-					result = {
-						algorithm: {
-							name: "RSA-PSS",
-							hash: {
-								name: "SHA-1"
-							}
-						},
-						usages: ["verify"] // For importKey("pkcs8") usage must be "sign" only
-					};
-					break;
-				case "exportkey":
-				default:
-					return {
-						algorithm: {
-							name: "RSA-PSS"
-						},
-						usages: []
-					};
-			}
-			break;
-		case "RSA-OAEP":
-			switch(operation.toLowerCase())
-			{
-				case "encrypt":
-				case "decrypt":
-					result = {
-						algorithm: {
-							name: "RSA-OAEP"
-						},
-						usages: ["encrypt", "decrypt"]
-					};
-					break;
-				case "generatekey":
-					result = {
-						algorithm: {
-							name: "RSA-OAEP",
-							modulusLength: 2048,
-							publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-							hash: {
-								name: "SHA-256"
-							}
-						},
-						usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-					};
-					break;
-				case "importkey":
-					result = {
-						algorithm: {
-							name: "RSA-OAEP",
-							hash: {
-								name: "SHA-256"
-							}
-						},
-						usages: ["encrypt"] // encrypt for "spki" and decrypt for "pkcs8"
-					};
-					break;
-				case "exportkey":
-				default:
-					return {
-						algorithm: {
-							name: "RSA-OAEP"
-						},
-						usages: []
-					};
-			}
-			break;
-		case "ECDSA":
-			switch(operation.toLowerCase())
-			{
-				case "generatekey":
-					result = {
-						algorithm: {
-							name: "ECDSA",
-							namedCurve: "P-256"
-						},
-						usages: ["sign", "verify"]
-					};
-					break;
-				case "importkey":
-					result = {
-						algorithm: {
-							name: "ECDSA",
-							namedCurve: "P-256"
-						},
-						usages: ["verify"] // "sign" for "pkcs8"
-					};
-					break;
-				case "verify":
-				case "sign":
-					result = {
-						algorithm: {
-							name: "ECDSA",
-							hash: {
-								name: "SHA-256"
-							}
-						},
-						usages: ["sign"]
-					};
-					break;
-				default:
-					return {
-						algorithm: {
-							name: "ECDSA"
-						},
-						usages: []
-					};
-			}
-			break;
-		case "ECDH":
-			switch(operation.toLowerCase())
-			{
-				case "exportkey":
-				case "importkey":
-				case "generatekey":
-					result = {
-						algorithm: {
-							name: "ECDH",
-							namedCurve: "P-256"
-						},
-						usages: ["deriveKey", "deriveBits"]
-					};
-					break;
-				case "derivekey":
-				case "derivebits":
-					result = {
-						algorithm: {
-							name: "ECDH",
-							namedCurve: "P-256",
-							public: [] // Must be a "publicKey"
-						},
-						usages: ["encrypt", "decrypt"]
-					};
-					break;
-				default:
-					return {
-						algorithm: {
-							name: "ECDH"
-						},
-						usages: []
-					};
-			}
-			break;
-		case "AES-CTR":
-			switch(operation.toLowerCase())
-			{
-				case "importkey":
-				case "exportkey":
-				case "generatekey":
-					result = {
-						algorithm: {
-							name: "AES-CTR",
-							length: 256
-						},
-						usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-					};
-					break;
-				case "decrypt":
-				case "encrypt":
-					result = {
-						algorithm: {
-							name: "AES-CTR",
-							counter: new Uint8Array(16),
-							length: 10
-						},
-						usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-					};
-					break;
-				default:
-					return {
-						algorithm: {
-							name: "AES-CTR"
-						},
-						usages: []
-					};
-			}
-			break;
-		case "AES-CBC":
-			switch(operation.toLowerCase())
-			{
-				case "importkey":
-				case "exportkey":
-				case "generatekey":
-					result = {
-						algorithm: {
-							name: "AES-CBC",
-							length: 256
-						},
-						usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-					};
-					break;
-				case "decrypt":
-				case "encrypt":
-					result = {
-						algorithm: {
-							name: "AES-CBC",
-							iv: getRandomValues(new Uint8Array(16)) // For "decrypt" the value should be replaced with value got on "encrypt" step
-						},
-						usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-					};
-					break;
-				default:
-					return {
-						algorithm: {
-							name: "AES-CBC"
-						},
-						usages: []
-					};
-			}
-			break;
-		case "AES-GCM":
-			switch(operation.toLowerCase())
-			{
-				case "importkey":
-				case "exportkey":
-				case "generatekey":
-					result = {
-						algorithm: {
-							name: "AES-GCM",
-							length: 256
-						},
-						usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-					};
-					break;
-				case "decrypt":
-				case "encrypt":
-					result = {
-						algorithm: {
-							name: "AES-GCM",
-							iv: getRandomValues(new Uint8Array(16)) // For "decrypt" the value should be replaced with value got on "encrypt" step
-						},
-						usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-					};
-					break;
-				default:
-					return {
-						algorithm: {
-							name: "AES-GCM"
-						},
-						usages: []
-					};
-			}
-			break;
-		case "AES-KW":
-			switch(operation.toLowerCase())
-			{
-				case "importkey":
-				case "exportkey":
-				case "generatekey":
-				case "wrapkey":
-				case "unwrapkey":
-					result = {
-						algorithm: {
-							name: "AES-KW",
-							length: 256
-						},
-						usages: ["wrapKey", "unwrapKey"]
-					};
-					break;
-				default:
-					return {
-						algorithm: {
-							name: "AES-KW"
-						},
-						usages: []
-					};
-			}
-			break;
-		case "HMAC":
-			switch(operation.toLowerCase())
-			{
-				case "sign":
-				case "verify":
-					result = {
-						algorithm: {
-							name: "HMAC"
-						},
-						usages: ["sign", "verify"]
-					};
-					break;
-				case "importkey":
-				case "exportkey":
-				case "generatekey":
-					result = {
-						algorithm: {
-							name: "HMAC",
-							length: 32,
-							hash: {
-								name: "SHA-256"
-							}
-						},
-						usages: ["sign", "verify"]
-					};
-					break;
-				default:
-					return {
-						algorithm: {
-							name: "HMAC"
-						},
-						usages: []
-					};
-			}
-			break;
-		case "HKDF":
-			switch(operation.toLowerCase())
-			{
-				case "derivekey":
-					result = {
-						algorithm: {
-							name: "HKDF",
-							hash: "SHA-256",
-							salt: new Uint8Array([]),
-							info: new Uint8Array([])
-						},
-						usages: ["encrypt", "decrypt"]
-					};
-					break;
-				default:
-					return {
-						algorithm: {
-							name: "HKDF"
-						},
-						usages: []
-					};
-			}
-			break;
-		case "PBKDF2":
-			switch(operation.toLowerCase())
-			{
-				case "derivekey":
-					result = {
-						algorithm: {
-							name: "PBKDF2",
-							hash: { name: "SHA-256" },
-							salt: new Uint8Array([]),
-							iterations: 1000
-						},
-						usages: ["encrypt", "decrypt"]
-					};
-					break;
-				default:
-					return {
-						algorithm: {
-							name: "PBKDF2"
-						},
-						usages: []
-					};
-			}
-			break;
-		default:
-	}
-	
-	return result;
+	return engine.subtle.getAlgorithmParameters(algorithmName, operation);
 }
 //**************************************************************************************
 /**
@@ -807,229 +196,12 @@ export function createECDSASignatureFromCMS(cmsSignature)
 //**************************************************************************************
 /**
  * Get WebCrypto algorithm by wel-known OID
- * @param {string} oid Wel-known OID to search for
+ * @param {string} oid well-known OID to search for
  * @returns {Object}
  */
 export function getAlgorithmByOID(oid)
 {
-	switch(oid)
-	{
-		case "1.2.840.113549.1.1.1":
-		case "1.2.840.113549.1.1.5":
-			return {
-				name: "RSASSA-PKCS1-v1_5",
-				hash: {
-					name: "SHA-1"
-				}
-			};
-		case "1.2.840.113549.1.1.11":
-			return {
-				name: "RSASSA-PKCS1-v1_5",
-				hash: {
-					name: "SHA-256"
-				}
-			};
-		case "1.2.840.113549.1.1.12":
-			return {
-				name: "RSASSA-PKCS1-v1_5",
-				hash: {
-					name: "SHA-384"
-				}
-			};
-		case "1.2.840.113549.1.1.13":
-			return {
-				name: "RSASSA-PKCS1-v1_5",
-				hash: {
-					name: "SHA-512"
-				}
-			};
-		case "1.2.840.113549.1.1.10":
-			return {
-				name: "RSA-PSS"
-			};
-		case "1.2.840.113549.1.1.7":
-			return {
-				name: "RSA-OAEP"
-			};
-		case "1.2.840.10045.2.1":
-		case "1.2.840.10045.4.1":
-			return {
-				name: "ECDSA",
-				hash: {
-					name: "SHA-1"
-				}
-			};
-		case "1.2.840.10045.4.3.2":
-			return {
-				name: "ECDSA",
-				hash: {
-					name: "SHA-256"
-				}
-			};
-		case "1.2.840.10045.4.3.3":
-			return {
-				name: "ECDSA",
-				hash: {
-					name: "SHA-384"
-				}
-			};
-		case "1.2.840.10045.4.3.4":
-			return {
-				name: "ECDSA",
-				hash: {
-					name: "SHA-512"
-				}
-			};
-		case "1.3.133.16.840.63.0.2":
-			return {
-				name: "ECDH",
-				kdf: "SHA-1"
-			};
-		case "1.3.132.1.11.1":
-			return {
-				name: "ECDH",
-				kdf: "SHA-256"
-			};
-		case "1.3.132.1.11.2":
-			return {
-				name: "ECDH",
-				kdf: "SHA-384"
-			};
-		case "1.3.132.1.11.3":
-			return {
-				name: "ECDH",
-				kdf: "SHA-512"
-			};
-		case "2.16.840.1.101.3.4.1.2":
-			return {
-				name: "AES-CBC",
-				length: 128
-			};
-		case "2.16.840.1.101.3.4.1.22":
-			return {
-				name: "AES-CBC",
-				length: 192
-			};
-		case "2.16.840.1.101.3.4.1.42":
-			return {
-				name: "AES-CBC",
-				length: 256
-			};
-		case "2.16.840.1.101.3.4.1.6":
-			return {
-				name: "AES-GCM",
-				length: 128
-			};
-		case "2.16.840.1.101.3.4.1.26":
-			return {
-				name: "AES-GCM",
-				length: 192
-			};
-		case "2.16.840.1.101.3.4.1.46":
-			return {
-				name: "AES-GCM",
-				length: 256
-			};
-		case "2.16.840.1.101.3.4.1.4":
-			return {
-				name: "AES-CFB",
-				length: 128
-			};
-		case "2.16.840.1.101.3.4.1.24":
-			return {
-				name: "AES-CFB",
-				length: 192
-			};
-		case "2.16.840.1.101.3.4.1.44":
-			return {
-				name: "AES-CFB",
-				length: 256
-			};
-		case "2.16.840.1.101.3.4.1.5":
-			return {
-				name: "AES-KW",
-				length: 128
-			};
-		case "2.16.840.1.101.3.4.1.25":
-			return {
-				name: "AES-KW",
-				length: 192
-			};
-		case "2.16.840.1.101.3.4.1.45":
-			return {
-				name: "AES-KW",
-				length: 256
-			};
-		case "1.2.840.113549.2.7":
-			return {
-				name: "HMAC",
-				hash: {
-					name: "SHA-1"
-				}
-			};
-		case "1.2.840.113549.2.9":
-			return {
-				name: "HMAC",
-				hash: {
-					name: "SHA-256"
-				}
-			};
-		case "1.2.840.113549.2.10":
-			return {
-				name: "HMAC",
-				hash: {
-					name: "SHA-384"
-				}
-			};
-		case "1.2.840.113549.2.11":
-			return {
-				name: "HMAC",
-				hash: {
-					name: "SHA-512"
-				}
-			};
-		case "1.2.840.113549.1.9.16.3.5":
-			return {
-				name: "DH"
-			};
-		case "1.3.14.3.2.26":
-			return {
-				name: "SHA-1"
-			};
-		case "2.16.840.1.101.3.4.2.1":
-			return {
-				name: "SHA-256"
-			};
-		case "2.16.840.1.101.3.4.2.2":
-			return {
-				name: "SHA-384"
-			};
-		case "2.16.840.1.101.3.4.2.3":
-			return {
-				name: "SHA-512"
-			};
-		case "1.2.840.113549.1.5.12":
-			return {
-				name: "PBKDF2"
-			};
-		//region Special case - OIDs for ECC curves
-		case "1.2.840.10045.3.1.7":
-			return {
-				name: "P-256"
-			};
-		case "1.3.132.0.34":
-			return {
-				name: "P-384"
-			};
-		case "1.3.132.0.35":
-			return {
-				name: "P-521"
-			};
-		//endregion
-		default:
-	}
-	
-	return {};
+	return engine.subtle.getAlgorithmByOID(oid);
 }
 //**************************************************************************************
 /**
@@ -1039,51 +211,7 @@ export function getAlgorithmByOID(oid)
  */
 export function getHashAlgorithm(signatureAlgorithm)
 {
-	let result = "";
-	
-	switch(signatureAlgorithm.algorithmId)
-	{
-		case "1.2.840.10045.4.1": // ecdsa-with-SHA1
-		case "1.2.840.113549.1.1.5":
-			result = "SHA-1";
-			break;
-		case "1.2.840.10045.4.3.2": // ecdsa-with-SHA256
-		case "1.2.840.113549.1.1.11":
-			result = "SHA-256";
-			break;
-		case "1.2.840.10045.4.3.3": // ecdsa-with-SHA384
-		case "1.2.840.113549.1.1.12":
-			result = "SHA-384";
-			break;
-		case "1.2.840.10045.4.3.4": // ecdsa-with-SHA512
-		case "1.2.840.113549.1.1.13":
-			result = "SHA-512";
-			break;
-		case "1.2.840.113549.1.1.10": // RSA-PSS
-			{
-				try
-			{
-				const params = new RSASSAPSSParams({ schema: signatureAlgorithm.algorithmParams });
-				if("hashAlgorithm" in params)
-				{
-					const algorithm = getAlgorithmByOID(params.hashAlgorithm.algorithmId);
-					if(("name" in algorithm) === false)
-						return "";
-					
-					result = algorithm.name;
-				}
-				else
-					result = "SHA-1";
-			}
-			catch(ex)
-			{
-			}
-			}
-			break;
-		default:
-	}
-	
-	return result;
+	return engine.subtle.getHashAlgorithm(signatureAlgorithm);
 }
 //**************************************************************************************
 /**
@@ -1266,6 +394,30 @@ export function kdf(hashFunction, Zbuffer, keydatalen, SharedInfo)
 		//endregion
 	});
 	//endregion
+}
+//**************************************************************************************
+/**
+ * Check that all OIDs are mapped to existing crypto engine algorithms
+ * @param {Array.<string>} oids Array with OIDs for checking
+ * @returns {{indication}}
+ */
+export function checkOids(oids)
+{
+	for(const [index, oid] of oids.entries())
+	{
+		const algorithm = getAlgorithmByOID(oid);
+		if(("name" in algorithm) === false)
+		{
+			return {
+				indication: constants.FAILED,
+				message: index
+			};
+		}
+	}
+	
+	return {
+		indication: constants.PASSED
+	};
 }
 //**************************************************************************************
 //endregion

@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
 import Certificate from "./Certificate";
+import AttributeCertificateV1 from "./AttributeCertificateV1";
 //**************************************************************************************
 /**
  * Class from RFC7292
@@ -148,6 +149,12 @@ export default class CertBag
 					this.parsedValue = new Certificate({ schema: asn1Inner.result });
 				}
 				break;
+			case "1.2.840.113549.1.9.22.3": // attributeCertificate - (!!!) THIS OID IS SUBJECT FOR CHANGE IN FUTURE (!!!)
+				{
+					const asn1Inner = asn1js.fromBER(this.certValue.valueBlock.valueHex);
+					this.parsedValue = new AttributeCertificateV1({ schema: asn1Inner.result });
+				}
+				break;
 			case "1.2.840.113549.1.9.22.2": // sdsiCertificate
 			default:
 				throw new Error(`Incorrect \"certId\" value in CertBag: ${this.certId}`);
@@ -164,7 +171,11 @@ export default class CertBag
 		//region Construct and return new ASN.1 schema for this object
 		if("parsedValue" in this)
 		{
-			this.certId = "1.2.840.113549.1.9.22.1";
+			if("acinfo" in this.parsedValue) // attributeCertificate
+				this.certId = "1.2.840.113549.1.9.22.3";
+			else // x509Certificate
+				this.certId = "1.2.840.113549.1.9.22.1";
+
 			this.certValue = new asn1js.OctetString({ valueHex: this.parsedValue.toSchema().toBER(false) });
 		}
 		

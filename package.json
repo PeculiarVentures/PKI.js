@@ -46,7 +46,8 @@
     "ex14": "cd examples/PDFExample && rollem -c && cd ../..",
     "ex15": "cd examples/SMIMEVerificationExample && rollem -c && cd ../..",
     "ex16": "cd examples/SMIMEEncryptionExample && rollem -c && cd ../..",
-    "build:examples": "npm run ex1; npm run ex2; npm run ex3; npm run ex4; npm run ex5; npm run ex6; npm run ex7; npm run ex8; npm run ex9; npm run ex10; npm run ex11; npm run ex12; npm run ex13; npm run ex14; npm run ex15; npm run ex16;",
+    "ex17": "cd examples/NodePKCS12Example && rollem -c && cd ../..",
+    "build:examples": "npm run ex1; npm run ex2; npm run ex3; npm run ex4; npm run ex5; npm run ex6; npm run ex7; npm run ex8; npm run ex9; npm run ex10; npm run ex11; npm run ex12; npm run ex13; npm run ex14; npm run ex15; npm run ex16; npm run ex17;",
     "build:tests": "npm run build:examples",
     "test": "mocha",
     "postinstall": "npm run build"
@@ -69,6 +70,6 @@
   "jsnext:main": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.0.67",
+  "version": "2.1.1",
   "license": "MIT"
 }

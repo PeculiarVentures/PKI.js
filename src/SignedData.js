@@ -22,6 +22,8 @@ import TSTInfo from "./TSTInfo";
 import CertificateChainValidationEngine from "./CertificateChainValidationEngine";
 import BasicOCSPResponse from "./BasicOCSPResponse";
 import RSASSAPSSParams from "./RSASSAPSSParams";
+import AttributeCertificateV1 from "./AttributeCertificateV1";
+import AttributeCertificateV2 from "./AttributeCertificateV2";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -225,7 +227,7 @@ export default class SignedData
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CMS_SIGNED_DATA");
+			throw new Error("Object's schema was not verified against input data for SignedData");
 		//endregion
 		
 		//region Get internal properties from parsed schema
@@ -240,19 +242,47 @@ export default class SignedData
 		{
 			this.certificates = Array.from(asn1.result["SignedData.certificates"], certificate =>
 			{
-				if(certificate.idBlock.tagClass === 1)
-					return new Certificate({ schema: certificate });
-				
-				if((certificate.idBlock.tagClass === 3) && (certificate.idBlock.tagNumber === 3))
+				switch(certificate.idBlock.tagClass)
 				{
-					//region Create SEQUENCE from [3]
-					certificate.idBlock.tagClass = 1; // UNIVERSAL
-					certificate.idBlock.tagNumber = 16; // SEQUENCE
-					//endregion
-					
-					return new OtherCertificateFormat({ schema: certificate });
+					case 1:
+						return new Certificate({ schema: certificate });
+					case 3:
+						{
+							switch(certificate.idBlock.tagNumber)
+							{
+								//region ExtendedCertificate
+								case 0:
+									break;
+								//endregion
+								//region AttributeCertificateV1
+								case 1:
+									return new AttributeCertificateV1({ schema: certificate });
+								//endregion
+								//region AttributeCertificateV2
+								case 2:
+									return new AttributeCertificateV2({ schema: certificate });
+								//endregion
+								//region OtherCertificateFormat
+								case 3:
+									{
+										//region Create SEQUENCE from [3]
+										certificate.idBlock.tagClass = 1; // UNIVERSAL
+										certificate.idBlock.tagNumber = 16; // SEQUENCE
+										//endregion
+										
+										return new OtherCertificateFormat({ schema: certificate });
+									}
+								//endregion
+								//region default
+								default:
+									throw new Error("Object's schema was not verified against input data for SignedData");
+								//endregion
+							}
+						}
+						break;
+					default:
+						throw new Error("Object's schema was not verified against input data for SignedData");
 				}
-				//else // For now we would ignore "AttributeCertificateV1" and "AttributeCertificateV1"
 				
 				return new Certificate();
 			});
@@ -945,25 +975,25 @@ export default class SignedData
 		//region Verify signer's signature 
 		sequence = sequence.then(result =>
 		{
-			// #region Veify result of previous operation
+			//region Veify result of previous operation
 			if(typeof result === "boolean")
 				return false;
-			// #endregion
+			//endregion
 			
 			publicKey = result;
 			
-			// #region Verify "message-digest" attribute in case of "signedAttrs"
+			//region Verify "message-digest" attribute in case of "signedAttrs"
 			if("signedAttrs" in this.signerInfos[signer])
 				return crypto.digest(shaAlgorithm, new Uint8Array(data));
 			
 			return true;
-			// #endregion
+			//endregion
 		}).then(result =>
 		{
-			// #region Verify result of previous operation
+			//region Verify result of previous operation
 			if(result === false)
 				return false;
-			// #endregion
+			//endregion
 			
 			if("signedAttrs" in this.signerInfos[signer])
 			{
@@ -1168,9 +1198,9 @@ export default class SignedData
 				break;
 			case "RSA-PSS":
 				{
-				//region Set "saltLength" as a length (in octets) of hash function result
+					//region Set "saltLength" as a length (in octets) of hash function result
 					switch(hashAlgorithm.toUpperCase())
-				{
+					{
 						case "SHA-256":
 							defParams.algorithm.saltLength = 32;
 							break;
@@ -1182,13 +1212,13 @@ export default class SignedData
 							break;
 						default:
 					}
-				//endregion
-				
-				//region Fill "RSASSA_PSS_params" object
+					//endregion
+					
+					//region Fill "RSASSA_PSS_params" object
 					const paramsObject = {};
 				
 					if(hashAlgorithm.toUpperCase() !== "SHA-1")
-				{
+					{
 						hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
 						if(hashAlgorithmOID === "")
 							return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
@@ -1208,14 +1238,14 @@ export default class SignedData
 						paramsObject.saltLength = defParams.algorithm.saltLength;
 				
 					const pssParameters = new RSASSAPSSParams(paramsObject);
-				//endregion
-				
-				//region Automatically set signature algorithm
+					//endregion
+					
+					//region Automatically set signature algorithm
 					this.signerInfos[signerIndex].signatureAlgorithm = new AlgorithmIdentifier({
 						algorithmId: "1.2.840.113549.1.1.10",
 						algorithmParams: pssParameters.toSchema()
 					});
-				//endregion
+					//endregion
 				}
 				break;
 			default:
@@ -1276,14 +1306,14 @@ export default class SignedData
 			new Uint8Array(data)).then(result =>
 		{
 			//region Special case for ECDSA algorithm
-				if(defParams.algorithm.name === "ECDSA")
-					result = createCMSECDSASignature(result);
+			if(defParams.algorithm.name === "ECDSA")
+				result = createCMSECDSASignature(result);
 			//endregion
-			
-				this.signerInfos[signerIndex].signature = new asn1js.OctetString({ valueHex: result });
-			
-				return result;
-			}, error => Promise.reject(`Signing error: ${error}`));
+		
+			this.signerInfos[signerIndex].signature = new asn1js.OctetString({ valueHex: result });
+		
+			return result;
+		}, error => Promise.reject(`Signing error: ${error}`));
 		//endregion
 	}
 	//**********************************************************************************

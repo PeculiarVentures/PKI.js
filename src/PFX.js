@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, utilConcatBuf } from "pvutils";
-import { getCrypto, getRandomValues, getOIDByAlgorithm, getAlgorithmByOID } from "./common";
+import { getCrypto, getEngine, getRandomValues, getOIDByAlgorithm, getAlgorithmByOID } from "./common";
 import ContentInfo from "./ContentInfo";
 import MacData from "./MacData";
 import DigestInfo from "./DigestInfo";
@@ -58,7 +58,6 @@ export default class PFX
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -80,7 +79,6 @@ export default class PFX
 				throw new Error(`Invalid member name for PFX class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -106,7 +104,6 @@ export default class PFX
 				throw new Error(`Invalid member name for PFX class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -148,7 +145,6 @@ export default class PFX
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -188,7 +184,6 @@ export default class PFX
 			this.macData = new MacData({ schema: asn1.result.macData });
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -210,7 +205,6 @@ export default class PFX
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -228,7 +222,6 @@ export default class PFX
 		
 		return output;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Making ContentInfo from "parsedValue" object
@@ -268,7 +261,7 @@ export default class PFX
 			//region HMAC-based integrity
 			case 0:
 				{
-				//region Check additional mandatory parameters
+					//region Check additional mandatory parameters
 					if(("iterations" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"iterations\"");
 				
@@ -280,126 +273,66 @@ export default class PFX
 				
 					if(("password" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"password\"");
-				//endregion
+					//endregion
 				
-				//region Initial variables
+					//region Initial variables
 					const saltBuffer = new ArrayBuffer(64);
 					const saltView = new Uint8Array(saltBuffer);
 				
 					getRandomValues(saltView);
 				
-					let length;
-				
-				//region Choose correct length for HMAC key
-					switch(parameters.hmacHashAlgorithm.toLowerCase())
-				{
-						case "sha-1":
-							length = 160;
-							break;
-						case "sha-256":
-							length = 256;
-							break;
-						case "sha-384":
-							length = 384;
-							break;
-						case "sha-512":
-							length = 512;
-							break;
-						default:
-							return Promise.reject(`Incorrect \"parameters.hmacHashAlgorithm\" parameter: ${parameters.hmacHashAlgorithm}`);
-					}
-				//endregion
-				
-					const hmacAlgorithm = {
-						name: "HMAC",
-						length,
-						hash: {
-							name: parameters.hmacHashAlgorithm
-						}
-					};
-				//endregion
-				
-				//region Generate HMAC key using PBKDF2
-				//region Derive PBKDF2 key from "password" buffer
+					this.authSafe = new ContentInfo({
+						contentType: "1.2.840.113549.1.7.1",
+						content: new asn1js.OctetString({ valueHex: this.parsedValue.authenticatedSafe.toSchema().toBER(false) })
+					});
+					
+					const data = this.authSafe.content.toBER(false);
+					const view = new Uint8Array(data);
+					//endregion
+					
+					//region Call current crypto engine for making HMAC-based data stamp
+					const engine = getEngine();
+					
+					if(("stampDataWithPassword" in engine.subtle) === false)
+						return Promise.reject(`No support for \"stampDataWithPassword\" in current engine \"${engine.name}\"`);
+					
+					sequence = sequence.then(() =>
+						engine.subtle.stampDataWithPassword({
+							password: parameters.password,
+							hashAlgorithm: parameters.hmacHashAlgorithm,
+							salt: saltBuffer,
+							iterationCount: parameters.iterations,
+							contentToStamp: data
+						})
+					);
+					//endregion
+					
+					//region Make "MacData" values
 					sequence = sequence.then(
-					() =>
-					{
-						const passwordView = new Uint8Array(parameters.password);
-						
-						return crypto.importKey("raw",
-							passwordView,
-							"PBKDF2",
-							false,
-							["deriveKey"]);
-					},
-					error => Promise.reject(error)
-				);
-				//endregion
-				
-				//region Derive key for HMAC
-					sequence = sequence.then(
-					result => crypto.deriveKey({
-						name: "PBKDF2",
-						hash: {
-							name: parameters.pbkdf2HashAlgorithm
-						},
-						salt: saltView,
-						iterations: parameters.iterations
-					},
-					result,
-					hmacAlgorithm,
-					false,
-					["sign"]),
-					error => Promise.reject(error)
-				);
-				//endregion
-				//endregion
-				
-				//region Make final "MacData" value
-				//region Make signed HMAC value
-					sequence = sequence.then(
-					result =>
-					{
-						this.authSafe = new ContentInfo({
-							contentType: "1.2.840.113549.1.7.1",
-							content: new asn1js.OctetString({ valueHex: this.parsedValue.authenticatedSafe.toSchema().toBER(false) })
-						});
-						
-						const data = this.authSafe.content.toBER(false);
-						const view = new Uint8Array(data);
-						
-						return crypto.sign(hmacAlgorithm, result, view);
-					},
-					error => Promise.reject(error)
-				);
-				//endregion
-				
-				//region Make "MacData" values
-					sequence = sequence.then(
-					result =>
-					{
-						this.macData = new MacData({
-							mac: new DigestInfo({
-								digestAlgorithm: new AlgorithmIdentifier({
-									algorithmId: getOIDByAlgorithm({ name: parameters.hmacHashAlgorithm })
+						result =>
+						{
+							this.macData = new MacData({
+								mac: new DigestInfo({
+									digestAlgorithm: new AlgorithmIdentifier({
+										algorithmId: getOIDByAlgorithm({ name: parameters.hmacHashAlgorithm })
+									}),
+									digest: new asn1js.OctetString({ valueHex: result })
 								}),
-								digest: new asn1js.OctetString({ valueHex: result })
-							}),
-							macSalt: new asn1js.OctetString({ valueHex: saltBuffer }),
-							iterations: parameters.iterations
-						});
-					},
+								macSalt: new asn1js.OctetString({ valueHex: saltBuffer }),
+								iterations: parameters.iterations
+							});
+						},
 					error => Promise.reject(error)
-				);
-				//endregion
-				//endregion
+					);
+					//endregion
+					//endregion
 				}
 				break;
 			//endregion
 			//region publicKey-based integrity
 			case 1:
 				{
-				//region Check additional mandatory parameters
+					//region Check additional mandatory parameters
 					if(("signingCertificate" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"signingCertificate\"");
 				
@@ -408,17 +341,17 @@ export default class PFX
 				
 					if(("hashAlgorithm" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
-				//endregion
+					//endregion
 				
-				//region Making data to be signed
-				// NOTE: all internal data for "authenticatedSafe" must be already prepared.
-				// Thus user must call "makeValues" for all internal "SafeContent" value with appropriate parameters.
-				// Or user can choose to use values from initial parsing of existing PKCS#12 data.
+					//region Making data to be signed
+					// NOTE: all internal data for "authenticatedSafe" must be already prepared.
+					// Thus user must call "makeValues" for all internal "SafeContent" value with appropriate parameters.
+					// Or user can choose to use values from initial parsing of existing PKCS#12 data.
 				
 					const toBeSigned = this.parsedValue.authenticatedSafe.toSchema().toBER(false);
-				//endregion
-				
-				//region Initial variables
+					//endregion
+					
+					//region Initial variables
 					const cmsSigned = new SignedData({
 						version: 1,
 						encapContentInfo: new EncapsulatedContentInfo({
@@ -427,85 +360,85 @@ export default class PFX
 						}),
 						certificates: [parameters.signingCertificate]
 					});
-				//endregion
-				
-				//region Making additional attributes for CMS Signed Data
-				//region Create a message digest
+					//endregion
+					
+					//region Making additional attributes for CMS Signed Data
+					//region Create a message digest
 					sequence = sequence.then(
-					() => crypto.digest({ name: parameters.hashAlgorithm }, new Uint8Array(toBeSigned))
-				);
-				//endregion
+						() => crypto.digest({ name: parameters.hashAlgorithm }, new Uint8Array(toBeSigned))
+					);
+					//endregion
 				
-				//region Combine all signed extensions
+					//region Combine all signed extensions
 					sequence = sequence.then(
-					result =>
-					{
-						//region Initial variables
-						const signedAttr = [];
-						//endregion
-						
-						//region contentType
-						signedAttr.push(new Attribute({
-							type: "1.2.840.113549.1.9.3",
-							values: [
-								new asn1js.ObjectIdentifier({ value: "1.2.840.113549.1.7.1" })
-							]
-						}));
-						//endregion
-						//region signingTime
-						signedAttr.push(new Attribute({
-							type: "1.2.840.113549.1.9.5",
-							values: [
-								new asn1js.UTCTime({ valueDate: new Date() })
-							]
-						}));
-						//endregion
-						//region messageDigest
-						signedAttr.push(new Attribute({
-							type: "1.2.840.113549.1.9.4",
-							values: [
-								new asn1js.OctetString({ valueHex: result })
-							]
-						}));
-						//endregion
-						
-						//region Making final value for "SignerInfo" type
-						cmsSigned.signerInfos.push(new SignerInfo({
-							version: 1,
-							sid: new IssuerAndSerialNumber({
-								issuer: parameters.signingCertificate.issuer,
-								serialNumber: parameters.signingCertificate.serialNumber
-							}),
-							signedAttrs: new SignedAndUnsignedAttributes({
-								type: 0,
-								attributes: signedAttr
-							})
-						}));
-						//endregion
-					},
-					error => Promise.reject(`Error during making digest for message: ${error}`)
-				);
-				//endregion
-				//endregion
+						result =>
+						{
+							//region Initial variables
+							const signedAttr = [];
+							//endregion
+							
+							//region contentType
+							signedAttr.push(new Attribute({
+								type: "1.2.840.113549.1.9.3",
+								values: [
+									new asn1js.ObjectIdentifier({ value: "1.2.840.113549.1.7.1" })
+								]
+							}));
+							//endregion
+							//region signingTime
+							signedAttr.push(new Attribute({
+								type: "1.2.840.113549.1.9.5",
+								values: [
+									new asn1js.UTCTime({ valueDate: new Date() })
+								]
+							}));
+							//endregion
+							//region messageDigest
+							signedAttr.push(new Attribute({
+								type: "1.2.840.113549.1.9.4",
+								values: [
+									new asn1js.OctetString({ valueHex: result })
+								]
+							}));
+							//endregion
+							
+							//region Making final value for "SignerInfo" type
+							cmsSigned.signerInfos.push(new SignerInfo({
+								version: 1,
+								sid: new IssuerAndSerialNumber({
+									issuer: parameters.signingCertificate.issuer,
+									serialNumber: parameters.signingCertificate.serialNumber
+								}),
+								signedAttrs: new SignedAndUnsignedAttributes({
+									type: 0,
+									attributes: signedAttr
+								})
+							}));
+							//endregion
+						},
+						error => Promise.reject(`Error during making digest for message: ${error}`)
+					);
+					//endregion
+					//endregion
 				
-				//region Signing CMS Signed Data
+					//region Signing CMS Signed Data
 					sequence = sequence.then(
-					() => cmsSigned.sign(parameters.privateKey, 0, parameters.hashAlgorithm)
-				);
-				//endregion
+						() => cmsSigned.sign(parameters.privateKey, 0, parameters.hashAlgorithm)
+					);
+					//endregion
 				
-				//region Making final CMS_CONTENT_INFO type
+					//region Making final CMS_CONTENT_INFO type
 					sequence = sequence.then(
-					() =>
-					{
-						this.authSafe = new ContentInfo({
-							contentType: "1.2.840.113549.1.7.2",
-							content: cmsSigned.toSchema(true)
-						});
-					},
-					error => Promise.reject(`Error during making signature: ${error}`)
-				);
-				//endregion
+						() =>
+						{
+							this.authSafe = new ContentInfo({
+								contentType: "1.2.840.113549.1.7.2",
+								content: cmsSigned.toSchema(true)
+							});
+						},
+						error => Promise.reject(`Error during making signature: ${error}`)
+					);
+					//endregion
 				}
 				break;
 			//endregion
@@ -518,7 +451,6 @@ export default class PFX
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 	parseInternalValues(parameters)
 	{
@@ -548,48 +480,48 @@ export default class PFX
 			//region data 
 			case "1.2.840.113549.1.7.1":
 				{
-				//region Check additional mandatory parameters
+					//region Check additional mandatory parameters
 					if(("password" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"password\"");
-				//endregion
+					//endregion
 				
-				//region Integrity based on HMAC
+					//region Integrity based on HMAC
 					this.parsedValue.integrityMode = 0;
-				//endregion
+					//endregion
 				
-				//region Check that we do have OCTETSTRING as "content"
+					//region Check that we do have OCTETSTRING as "content"
 					if((this.authSafe.content instanceof asn1js.OctetString) === false)
 						return Promise.reject("Wrong type of \"this.authSafe.content\"");
-				//endregion
+					//endregion
 				
-				//region Parse internal ASN.1 data
+					//region Parse internal ASN.1 data
 					const asn1 = asn1js.fromBER(this.authSafe.content.valueBlock.valueHex);
 					if(asn1.offset === (-1))
 						return Promise.reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\"");
-				//endregion
+					//endregion
 				
-				//region Set "authenticatedSafe" value
+					//region Set "authenticatedSafe" value
 					this.parsedValue.authenticatedSafe = new AuthenticatedSafe({ schema: asn1.result });
-				//endregion
+					//endregion
 				
-				//region Check integrity
+					//region Check integrity
 					if(parameters.checkIntegrity)
-				{
-					//region Check that "MacData" exists
+					{
+						//region Check that "MacData" exists
 						if(("macData" in this) === false)
 							return Promise.reject("Absent \"macData\" value, can not check PKCS# data integrity");
-					//endregion
-					
-					//region Initial variables
+						//endregion
+						
+						//region Initial variables
 						const hashAlgorithm = getAlgorithmByOID(this.macData.mac.digestAlgorithm.algorithmId);
 						if(("name" in hashAlgorithm) === false)
 							return Promise.reject(`Unsupported digest algorithm: ${this.macData.mac.digestAlgorithm.algorithmId}`);
 					
 						let length;
 					
-					//region Choose correct length for HMAC key
+						//region Choose correct length for HMAC key
 						switch(hashAlgorithm.name.toLowerCase())
-					{
+						{
 							case "sha-1":
 								length = 160;
 								break;
@@ -605,7 +537,7 @@ export default class PFX
 							default:
 								return Promise.reject(`Incorrect \"hashAlgorithm\": ${hashAlgorithm.name}`);
 						}
-					//endregion
+						//endregion
 					
 						const hmacAlgorithm = {
 							name: "HMAC",
@@ -614,126 +546,126 @@ export default class PFX
 								name: hashAlgorithm.name
 							}
 						};
-					//endregion
+						//endregion
 					
-					//region Generate HMAC key using PBKDF2
-					//region Derive PBKDF2 key from "password" buffer
+						//region Generate HMAC key using PBKDF2
+						//region Derive PBKDF2 key from "password" buffer
 						sequence = sequence.then(
-						() =>
-						{
-							const passwordView = new Uint8Array(parameters.password);
-							
-							return crypto.importKey("raw",
-								passwordView,
-								"PBKDF2",
-								false,
-								["deriveKey"]);
-						},
-						error => Promise.reject(error)
-					);
-					//endregion
-					
-					//region Derive key for HMAC
-						sequence = sequence.then(
-						result => crypto.deriveKey({
-							name: "PBKDF2",
-							hash: {
-								name: hashAlgorithm.name
+							() =>
+							{
+								const passwordView = new Uint8Array(parameters.password);
+								
+								return crypto.importKey("raw",
+									passwordView,
+									"PBKDF2",
+									false,
+									["deriveKey"]);
 							},
-							salt: new Uint8Array(this.macData.macSalt.valueBlock.valueHex),
-							iterations: this.macData.iterations
-						},
-						result,
-						hmacAlgorithm,
-						false,
-						["verify"]),
-						error => Promise.reject(error)
-					);
-					//endregion
-					//endregion
+							error => Promise.reject(error)
+						);
+						//endregion
 					
-					//region Verify HMAC signature
+						//region Derive key for HMAC
 						sequence = sequence.then(
-						result =>
-						{
-							const data = this.authSafe.content.toBER(false);
-							const view = new Uint8Array(data);
-							
-							return crypto.verify(hmacAlgorithm,
+							result => crypto.deriveKey({
+									name: "PBKDF2",
+									hash: {
+										name: hashAlgorithm.name
+									},
+									salt: new Uint8Array(this.macData.macSalt.valueBlock.valueHex),
+									iterations: this.macData.iterations
+								},
 								result,
-								new Uint8Array(this.macData.mac.digest.valueBlock.valueHex),
-								view);
-						},
-						error => Promise.reject(error)
-					);
+								hmacAlgorithm,
+								false,
+								["verify"]),
+							error => Promise.reject(error)
+						);
+						//endregion
+						//endregion
+					
+						//region Verify HMAC signature
+						sequence = sequence.then(
+							result =>
+							{
+								const data = this.authSafe.content.toBER(false);
+								const view = new Uint8Array(data);
+								
+								return crypto.verify(hmacAlgorithm,
+									result,
+									new Uint8Array(this.macData.mac.digest.valueBlock.valueHex),
+									view);
+							},
+							error => Promise.reject(error)
+						);
 					
 						sequence = sequence.then(
-						result =>
-						{
-							if(result === false)
-								return Promise.reject("Integrity for the PKCS#12 data is broken!");
-						},
-						error => Promise.reject(error)
-					);
-					//endregion
+							result =>
+							{
+								if(result === false)
+									return Promise.reject("Integrity for the PKCS#12 data is broken!");
+							},
+							error => Promise.reject(error)
+						);
+						//endregion
 					}
-				//endregion
+					//endregion
 				}
 				break;
 			//endregion 
 			//region signedData 
 			case "1.2.840.113549.1.7.2":
 				{
-				//region Integrity based on signature using public key
+					//region Integrity based on signature using public key
 					this.parsedValue.integrityMode = 1;
-				//endregion
+					//endregion
 				
-				//region Parse CMS Signed Data
+					//region Parse CMS Signed Data
 					const cmsSigned = new SignedData({ schema: this.authSafe.content });
-				//endregion
+					//endregion
 				
-				//region Check that we do have OCTETSTRING as "content"
+					//region Check that we do have OCTETSTRING as "content"
 					if(("eContent" in cmsSigned.encapContentInfo) === false)
 						return Promise.reject("Absent of attached data in \"cmsSigned.encapContentInfo\"");
 				
 					if((cmsSigned.encapContentInfo.eContent instanceof asn1js.OctetString) === false)
 						return Promise.reject("Wrong type of \"cmsSigned.encapContentInfo.eContent\"");
-				//endregion
+					//endregion
 				
-				//region Create correct data block for verification
+					//region Create correct data block for verification
 					let data = new ArrayBuffer(0);
 				
 					if(cmsSigned.encapContentInfo.eContent.idBlock.isConstructed === false)
 						data = cmsSigned.encapContentInfo.eContent.valueBlock.valueHex;
 					else
-				{
+					{
 						for(let i = 0; i < cmsSigned.encapContentInfo.eContent.valueBlock.value.length; i++)
 							data = utilConcatBuf(data, cmsSigned.encapContentInfo.eContent.valueBlock.value[i].valueBlock.valueHex);
 					}
-				//endregion
+					//endregion
 				
-				//region Parse internal ASN.1 data
+					//region Parse internal ASN.1 data
 					const asn1 = asn1js.fromBER(data);
 					if(asn1.offset === (-1))
 						return Promise.reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\"");
-				//endregion
+					//endregion
 				
-				//region Set "authenticatedSafe" value
+					//region Set "authenticatedSafe" value
 					this.parsedValue.authenticatedSafe = new AuthenticatedSafe({ schema: asn1.result });
-				//endregion
+					//endregion
 				
-				//region Check integrity
+					//region Check integrity
 					sequence = sequence.then(
-					() => cmsSigned.verify({ signer: 0, checkChain: false })
-				).then(
-					result =>
-					{
-						if(result === false)
-							return Promise.reject("Integrity for the PKCS#12 data is broken!");
-					},
-					error => Promise.reject(`Error during integrity verification: ${error}`)
-				);
-				//endregion
+						() => cmsSigned.verify({ signer: 0, checkChain: false })
+					).then(
+						result =>
+						{
+							if(result === false)
+								return Promise.reject("Integrity for the PKCS#12 data is broken!");
+						},
+						error => Promise.reject(`Error during integrity verification: ${error}`)
+					);
+					//endregion
 				}
 				break;
 			//endregion   
@@ -751,7 +683,6 @@ export default class PFX
 		);
 		//endregion   
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

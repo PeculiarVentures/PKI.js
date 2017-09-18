@@ -29,7 +29,7 @@ function context(name, func) {}`,
 		intro: `const WebCrypto = require("node-webcrypto-ossl");
 const webcrypto = new WebCrypto();`,
 		outro: `const assert = require("assert");
-setEngine("newEngine", webcrypto, webcrypto.subtle);`,
+setEngine("newEngine", webcrypto, new CryptoEngine({ name: "", crypto: webcrypto, subtle: webcrypto.subtle }));`,
 		plugins: [
 			rollupNodeResolve({ jsnext: true, main: true })
 		]
