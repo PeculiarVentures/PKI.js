@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { utilConcatBuf } from "pvutils";
-import * as constants from "ades-validation-engine/src/constants";
 import AlgorithmIdentifier from "./AlgorithmIdentifier";
 import RSASSAPSSParams from "./RSASSAPSSParams";
 import CryptoEngine from "./CryptoEngine";
@@ -394,30 +393,6 @@ export function kdf(hashFunction, Zbuffer, keydatalen, SharedInfo)
 		//endregion
 	});
 	//endregion
-}
-//**************************************************************************************
-/**
- * Check that all OIDs are mapped to existing crypto engine algorithms
- * @param {Array.<string>} oids Array with OIDs for checking
- * @returns {{indication}}
- */
-export function checkOids(oids)
-{
-	for(const [index, oid] of oids.entries())
-	{
-		const algorithm = getAlgorithmByOID(oid);
-		if(("name" in algorithm) === false)
-		{
-			return {
-				indication: constants.FAILED,
-				message: index
-			};
-		}
-	}
-	
-	return {
-		indication: constants.PASSED
-	};
 }
 //**************************************************************************************
 //endregion
