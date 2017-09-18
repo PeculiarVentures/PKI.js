@@ -7,6 +7,7 @@ dependencies:
     - npm install -g typescript rollup@0.34.7 https://github.com/PeculiarVentures/rollem.git
   post:
     - npm install rollup-plugin-node-resolve
+    - npm install rollup-plugin-commonjs
 
 test:
   pre:
