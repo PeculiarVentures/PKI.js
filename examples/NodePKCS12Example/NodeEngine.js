@@ -455,14 +455,16 @@ export default class NodeEngine extends CryptoEngine
 					})
 				});
 				
-				return new EncryptedContentInfo({
+				const encryptedContentInfo = new EncryptedContentInfo({
 					contentType: parameters.contentType,
 					contentEncryptionAlgorithm: new AlgorithmIdentifier({
 						algorithmId: "1.2.840.113549.1.5.13", // pkcs5PBES2
 						algorithmParams: pbes2Parameters.toSchema()
-					}),
-					encryptedContent: new asn1js.OctetString({ valueHex: result })
+					})
 				});
+				encryptedContentInfo.encryptedContent = new asn1js.OctetString({ valueHex: result });
+				
+				return encryptedContentInfo;
 			}, error =>
 				Promise.reject(error)
 		);
