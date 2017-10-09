@@ -70,6 +70,6 @@
   "jsnext:main": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "license": "MIT"
 }
