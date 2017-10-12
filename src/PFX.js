@@ -280,14 +280,14 @@ export default class PFX
 					const saltView = new Uint8Array(saltBuffer);
 				
 					getRandomValues(saltView);
-				
+					
+					const data = this.parsedValue.authenticatedSafe.toSchema().toBER(false);
+					const view = new Uint8Array(data);
+
 					this.authSafe = new ContentInfo({
 						contentType: "1.2.840.113549.1.7.1",
-						content: new asn1js.OctetString({ valueHex: this.parsedValue.authenticatedSafe.toSchema().toBER(false) })
+						content: new asn1js.OctetString({ valueHex: data })
 					});
-					
-					const data = this.authSafe.content.toBER(false);
-					const view = new Uint8Array(data);
 					//endregion
 					
 					//region Call current crypto engine for making HMAC-based data stamp
@@ -509,7 +509,7 @@ export default class PFX
 					{
 						//region Check that "MacData" exists
 						if(("macData" in this) === false)
-							return Promise.reject("Absent \"macData\" value, can not check PKCS# data integrity");
+							return Promise.reject("Absent \"macData\" value, can not check PKCS#12 data integrity");
 						//endregion
 						
 						//region Initial variables
