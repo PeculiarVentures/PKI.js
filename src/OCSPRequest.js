@@ -1,13 +1,11 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import { getOIDByAlgorithm, getAlgorithmParameters, getCrypto, createCMSECDSASignature } from "./common";
+import { getEngine } from "./common";
 import TBSRequest from "./TBSRequest";
 import Signature from "./Signature";
 import Request from "./Request";
 import CertID from "./CertID";
 import Certificate from "./Certificate";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import RSASSAPSSParams from "./RSASSAPSSParams";
 //**************************************************************************************
 /**
  * Class from RFC6960
@@ -85,7 +83,6 @@ export default class OCSPRequest
 				throw new Error(`Invalid member name for OCSPRequest class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -131,7 +128,6 @@ export default class OCSPRequest
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -155,7 +151,6 @@ export default class OCSPRequest
 			this.optionalSignature = new Signature({ schema: asn1.result.optionalSignature });
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -178,7 +173,6 @@ export default class OCSPRequest
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -195,7 +189,6 @@ export default class OCSPRequest
 		
 		return _object;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Making OCSP Request for specific certificate
@@ -234,7 +227,6 @@ export default class OCSPRequest
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Make signature for current OCSP Request
@@ -242,133 +234,62 @@ export default class OCSPRequest
 	 * @param {string} [hashAlgorithm] Hashing algorithm. Default SHA-1
 	 * @returns {Promise}
 	 */
-	sign(privateKey, hashAlgorithm)
+	sign(privateKey, hashAlgorithm = "SHA-1")
 	{
-		//region Get a private key from function parameter
+		//region Initial checking
+		//region Check private key
 		if(typeof privateKey === "undefined")
 			return Promise.reject("Need to provide a private key for signing");
-		//endregion
-		
-		//region Get hashing algorithm
-		if(typeof hashAlgorithm === "undefined")
-			hashAlgorithm = "SHA-1";
-		else
-		{
-			//region Simple check for supported algorithm
-			const oid = getOIDByAlgorithm({ name: hashAlgorithm });
-			if(oid === "")
-				return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
-			//endregion
-		}
 		//endregion
 		
 		//region Check that "optionalSignature" exists in the current request
 		if(("optionalSignature" in this) === false)
 			return Promise.reject("Need to create \"optionalSignature\" field before signing");
 		//endregion
-		
-		//region Get a "default parameters" for current algorithm
-		const defParams = getAlgorithmParameters(privateKey.algorithm.name, "sign");
-		defParams.algorithm.hash.name = hashAlgorithm;
 		//endregion
 		
-		//region Fill internal structures base on "privateKey" and "hashAlgorithm"
-		switch(privateKey.algorithm.name.toUpperCase())
+		//region Initial variables
+		let sequence = Promise.resolve();
+		let parameters;
+		
+		let tbs;
+		
+		const engine = getEngine();
+		//endregion
+
+		//region Get a "default parameters" for current algorithm and set correct signature algorithm
+		sequence = sequence.then(() => engine.subtle.getSignatureParameters(privateKey, hashAlgorithm));
+		
+		sequence = sequence.then(result =>
 		{
-			case "RSASSA-PKCS1-V1_5":
-			case "ECDSA":
-				this.optionalSignature.signatureAlgorithm.algorithmId = getOIDByAlgorithm(defParams.algorithm);
-				break;
-			case "RSA-PSS":
-				{
-				//region Set "saltLength" as a length (in octets) of hash function result
-					switch(hashAlgorithm.toUpperCase())
-				{
-						case "SHA-256":
-							defParams.algorithm.saltLength = 32;
-							break;
-						case "SHA-384":
-							defParams.algorithm.saltLength = 48;
-							break;
-						case "SHA-512":
-							defParams.algorithm.saltLength = 64;
-							break;
-						default:
-					}
-				//endregion
-				
-				//region Fill "RSASSA_PSS_params" object
-					const paramsObject = {};
-				
-					if(hashAlgorithm.toUpperCase() !== "SHA-1")
-				{
-						const hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
-						if(hashAlgorithmOID === "")
-							return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
-					
-						paramsObject.hashAlgorithm = new AlgorithmIdentifier({
-							algorithmId: hashAlgorithmOID,
-							algorithmParams: new asn1js.Null()
-						});
-					
-						paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
-							algorithmId: "1.2.840.113549.1.1.8", // MGF1
-							algorithmParams: paramsObject.hashAlgorithm.toSchema()
-						});
-					}
-				
-					if(defParams.algorithm.saltLength !== 20)
-						paramsObject.saltLength = defParams.algorithm.saltLength;
-				
-					const pssParameters = new RSASSAPSSParams(paramsObject);
-				//endregion
-				
-				//region Automatically set signature algorithm
-					this.optionalSignature.signatureAlgorithm = new AlgorithmIdentifier({
-						algorithmId: "1.2.840.113549.1.1.10",
-						algorithmParams: pssParameters.toSchema()
-					});
-				//endregion
-				}
-				break;
-			default:
-				return Promise.reject(`Unsupported signature algorithm: ${privateKey.algorithm.name}`);
-		}
+			parameters = result.parameters;
+			this.optionalSignature.signatureAlgorithm = result.signatureAlgorithm;
+		});
 		//endregion
 		
 		//region Create TBS data for signing
-		const tbs = this.tbsRequest.toSchema(true).toBER(false);
-		//endregion
-		
-		//region Get a "crypto" extension
-		const crypto = getCrypto();
-		if(typeof crypto === "undefined")
-			return Promise.reject("Unable to create WebCrypto object");
+		sequence = sequence.then(() =>
+		{
+			tbs = this.tbsRequest.toSchema(true).toBER(false);
+		});
 		//endregion
 		
 		//region Signing TBS data on provided private key
-		return crypto.sign(defParams.algorithm,
-			privateKey,
-			new Uint8Array(tbs)).then(result =>
-			{
-				//region Special case for ECDSA algorithm
-				if(defParams.algorithm.name === "ECDSA")
-					result = createCMSECDSASignature(result);
-				//endregion
-				
-				this.optionalSignature.signature = new asn1js.BitString({ valueHex: result });
-			}, error =>
-				Promise.reject(`Signing error: ${error}`)
-		);
+		sequence = sequence.then(() => engine.subtle.signWithPrivateKey(tbs, privateKey, parameters));
+		
+		sequence = sequence.then(result =>
+		{
+			this.optionalSignature.signature = new asn1js.BitString({ valueHex: result });
+		});
 		//endregion
+		
+		return sequence;
 	}
-	
 	//**********************************************************************************
 	verify()
 	{
 		// TODO: Create the function
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

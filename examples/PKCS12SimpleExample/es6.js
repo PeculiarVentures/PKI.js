@@ -683,7 +683,7 @@ function parsePKCS12Internal(buffer, password)
 	sequence = sequence.then(
 		() => pkcs12.parseInternalValues({
 			password: passwordConverted,
-			checkIntegrity: false // Do not check an integrity since OpenSSL produce HMAC using old PBKDF1 function
+			checkIntegrity: true
 		})
 	);
 	//endregion

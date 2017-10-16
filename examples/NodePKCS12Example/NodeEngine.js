@@ -611,5 +611,57 @@ export default class NodeEngine extends CryptoEngine
 		);
 	}
 	//**********************************************************************************
+	verifyDataStampedWithPassword(parameters)
+	{
+		//region Check for input parameters
+		if((parameters instanceof Object) === false)
+			return Promise.reject("Parameters must have type \"Object\"");
+		
+		if(("password" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"password\"");
+		
+		if(("hashAlgorithm" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
+		
+		if(("salt" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"iterationCount\"");
+		
+		if(("iterationCount" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"salt\"");
+		
+		if(("contentToVerify" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"contentToVerify\"");
+		
+		if(("signatureToVerify" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"signatureToVerify\"");
+		//endregion
+		
+		//region Choose correct length for HMAC key
+		let length;
+		
+		switch(parameters.hashAlgorithm.toLowerCase())
+		{
+			case "sha-1":
+				length = 160;
+				break;
+			case "sha-256":
+				length = 256;
+				break;
+			case "sha-384":
+				length = 384;
+				break;
+			case "sha-512":
+				length = 512;
+				break;
+			default:
+				return Promise.reject(`Incorrect \"parameters.hashAlgorithm\" parameter: ${parameters.hashAlgorithm}`);
+		}
+		//endregion
+		
+		return Promise.resolve().then(() =>
+			nodeSpecificCrypto.verifyDataStampedWithPassword(parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount, parameters.contentToVerify, parameters.signatureToVerify)
+		);
+	}
+	//**********************************************************************************
 }
 //**************************************************************************************

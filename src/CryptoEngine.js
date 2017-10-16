@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, stringToArrayBuffer, arrayBufferToString, utilConcatBuf } from "pvutils";
+import { createCMSECDSASignature } from "./common";
 import PublicKeyInfo from "./PublicKeyInfo";
 import PrivateKeyInfo from "./PrivateKeyInfo";
 import AlgorithmIdentifier from "./AlgorithmIdentifier";
@@ -7,6 +8,199 @@ import EncryptedContentInfo from "./EncryptedContentInfo";
 import RSASSAPSSParams from "./RSASSAPSSParams";
 import PBKDF2Params from "./PBKDF2Params";
 import PBES2Params from "./PBES2Params";
+//**************************************************************************************
+/**
+ * Making MAC key using algorithm described in B.2 of PKCS#12 standard.
+ */
+function makePKCS12B2Key(cryptoEngine, hashAlgorithm, keyLength, password, salt, iterationCount)
+{
+	//region Initial variables
+	let u;
+	let v;
+	
+	const result = [];
+	//endregion
+	
+	//region Get "u" and "v" values
+	switch(hashAlgorithm.toUpperCase())
+	{
+		case "SHA-1":
+			u = 20; // 160
+			v = 64; // 512
+			break;
+		case "SHA-256":
+			u = 32; // 256
+			v = 64; // 512
+			break;
+		case "SHA-384":
+			u = 48; // 384
+			v = 128; // 1024
+			break;
+		case "SHA-512":
+			u = 64; // 512
+			v = 128; // 1024
+			break;
+		default:
+			throw new Error("Unsupported hashing algorithm");
+	}
+	//endregion
+	
+	//region Main algorithm making key
+	//region Transform password to UTF-8 like string
+	const passwordViewInitial = new Uint8Array(password);
+	
+	const passwordTransformed = new ArrayBuffer((password.byteLength * 2) + 2);
+	const passwordTransformedView = new Uint8Array(passwordTransformed);
+	
+	for(let i = 0; i < passwordViewInitial.length; i++)
+	{
+		passwordTransformedView[i * 2] = 0x00;
+		passwordTransformedView[i * 2 + 1] = passwordViewInitial[i];
+	}
+	
+	passwordTransformedView[passwordTransformedView.length - 2] = 0x00;
+	passwordTransformedView[passwordTransformedView.length - 1] = 0x00;
+	
+	password = passwordTransformed.slice(0);
+	//endregion
+	
+	//region Construct a string D (the "diversifier") by concatenating v/8 copies of ID
+	const D = new ArrayBuffer(v);
+	const dView = new Uint8Array(D);
+	
+	for(let i = 0; i < D.byteLength; i++)
+		dView[i] = 3; // The ID value equal to "3" for MACing (see B.3 of standard)
+	//endregion
+	
+	//region Concatenate copies of the salt together to create a string S of length v * ceil(s / v) bytes (the final copy of the salt may be trunacted to create S)
+	const saltLength = salt.byteLength;
+	
+	const sLen = v * Math.ceil(saltLength / v);
+	const S = new ArrayBuffer(sLen);
+	const sView = new Uint8Array(S);
+	
+	const saltView = new Uint8Array(salt);
+	
+	for(let i = 0; i < sLen; i++)
+		sView[i] = saltView[i % saltLength];
+	//endregion
+	
+	//region Concatenate copies of the password together to create a string P of length v * ceil(p / v) bytes (the final copy of the password may be truncated to create P)
+	const passwordLength = password.byteLength;
+	
+	const pLen = v * Math.ceil(passwordLength / v);
+	const P = new ArrayBuffer(pLen);
+	const pView = new Uint8Array(P);
+	
+	const passwordView = new Uint8Array(password);
+	
+	for(let i = 0; i < pLen; i++)
+		pView[i] = passwordView[i % passwordLength];
+	//endregion
+	
+	//region Set I=S||P to be the concatenation of S and P
+	const sPlusPLength = S.byteLength + P.byteLength;
+	
+	let I = new ArrayBuffer(sPlusPLength);
+	let iView = new Uint8Array(I);
+	
+	iView.set(sView);
+	iView.set(pView, sView.length);
+	//endregion
+	
+	//region Set c=ceil(n / u)
+	const c = Math.ceil((keyLength >> 3) / u);
+	//endregion
+	
+	//region Initial variables
+	let internalSequence = Promise.resolve(I);
+	//endregion
+	
+	//region For i=1, 2, ..., c, do the following:
+	for(let i = 0; i <= c; i++)
+	{
+		internalSequence = internalSequence.then(_I =>
+		{
+			//region Create contecanetion of D and I
+			const dAndI = new ArrayBuffer(D.byteLength + _I.byteLength);
+			const dAndIView = new Uint8Array(dAndI);
+			
+			dAndIView.set(dView);
+			dAndIView.set(iView, dView.length);
+			//endregion
+			
+			return dAndI;
+		});
+		
+		//region Make "iterationCount" rounds of hashing
+		for(let j = 0; j < iterationCount; j++)
+			internalSequence = internalSequence.then(roundBuffer => cryptoEngine.digest({ name: hashAlgorithm }, new Uint8Array(roundBuffer)));
+		//endregion
+		
+		internalSequence = internalSequence.then(roundBuffer =>
+		{
+			//region Concatenate copies of Ai to create a string B of length v bits (the final copy of Ai may be truncated to create B)
+			const B = new ArrayBuffer(v);
+			const bView = new Uint8Array(B);
+			
+			for(let j = 0; j < B.byteLength; j++)
+				bView[j] = roundBuffer[j % roundBuffer.length];
+			//endregion
+			
+			//region Make new I value
+			const k = Math.ceil(saltLength / v) + Math.ceil(passwordLength / v);
+			const iRound = [];
+			
+			let sliceStart = 0;
+			let sliceLength = v;
+			
+			for(let j = 0; j < k; j++)
+			{
+				const chunk = Array.from(new Uint8Array(I.slice(sliceStart, sliceStart + sliceLength)));
+				sliceStart += v;
+				if((sliceStart + v) > I.byteLength)
+					sliceLength = I.byteLength - sliceStart;
+				
+				let x = 0x1ff;
+				
+				for(let l = (B.byteLength - 1); l >= 0; l--)
+				{
+					x = x >> 8;
+					x += bView[l] + chunk[l];
+					chunk[l] = (x & 0xff);
+				}
+				
+				iRound.push(...chunk);
+			}
+			
+			I = new ArrayBuffer(iRound.length);
+			iView = new Uint8Array(I);
+			
+			iView.set(iRound);
+			//endregion
+			
+			result.push(...(new Uint8Array(roundBuffer)));
+			
+			return I;
+		});
+	}
+	//endregion
+	
+	//region Initialize final key
+	internalSequence = internalSequence.then(() =>
+	{
+		const resultBuffer = new ArrayBuffer(keyLength >> 3);
+		const resultView = new Uint8Array(resultBuffer);
+		
+		resultView.set((new Uint8Array(result)).slice(0, keyLength >> 3));
+		
+		return resultBuffer;
+	});
+	//endregion
+	//endregion
+	
+	return internalSequence;
+}
 //**************************************************************************************
 /**
  * Default cryptographic engine for Web Cryptography API
@@ -1886,11 +2080,12 @@ export default class CryptoEngine
 		//endregion
 		
 		//region Initial variables
-		let sequence = Promise.resolve();
-		let length;
+		const _this = this;
 		//endregion
 		
 		//region Choose correct length for HMAC key
+		let length;
+		
 		switch(parameters.hashAlgorithm.toLowerCase())
 		{
 			case "sha-1":
@@ -1910,6 +2105,9 @@ export default class CryptoEngine
 		}
 		//endregion
 		
+		//region Initial variables
+		let sequence = Promise.resolve();
+		
 		const hmacAlgorithm = {
 			name: "HMAC",
 			length,
@@ -1917,41 +2115,20 @@ export default class CryptoEngine
 				name: parameters.hashAlgorithm
 			}
 		};
+		//endregion
 
-		//region Generate HMAC key using PBKDF2
-		//region Derive PBKDF2 key from "password" buffer
-		sequence = sequence.then(
-			() =>
-			{
-				const passwordView = new Uint8Array(parameters.password);
-				
-				return this.importKey("raw",
-					passwordView,
-					"PBKDF2",
-					false,
-					["deriveKey"]);
-			},
-			error => Promise.reject(error)
-		);
+		//region Create PKCS#12 key for integrity checking
+		sequence = sequence.then(() => makePKCS12B2Key(this, parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount));
 		//endregion
 		
-		//region Derive key for HMAC
-		sequence = sequence.then(
-			result => this.deriveKey({
-					name: "PBKDF2",
-					hash: {
-						name: parameters.hashAlgorithm
-					},
-					salt: new Uint8Array(parameters.salt),
-					iterations: parameters.iterationCount
-				},
-				result,
+		//region Import HMAC key
+		sequence = sequence.then(result =>
+			this.importKey("raw",
+				new Uint8Array(result),
 				hmacAlgorithm,
 				false,
-				["sign"]),
-			error => Promise.reject(error)
+				["sign"])
 		);
-		//endregion
 		//endregion
 		
 		//region Make signed HMAC value
@@ -1963,6 +2140,210 @@ export default class CryptoEngine
 		//endregion
 
 		return sequence;
+	}
+	//**********************************************************************************
+	verifyDataStampedWithPassword(parameters)
+	{
+		//region Check for input parameters
+		if((parameters instanceof Object) === false)
+			return Promise.reject("Parameters must have type \"Object\"");
+		
+		if(("password" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"password\"");
+		
+		if(("hashAlgorithm" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
+		
+		if(("salt" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"iterationCount\"");
+		
+		if(("iterationCount" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"salt\"");
+		
+		if(("contentToVerify" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"contentToVerify\"");
+		
+		if(("signatureToVerify" in parameters) === false)
+			return Promise.reject("Absent mandatory parameter \"signatureToVerify\"");
+		//endregion
+		
+		//region Initial variables
+		const _this = this;
+		//endregion
+		
+		//region Choose correct length for HMAC key
+		let length;
+		
+		switch(parameters.hashAlgorithm.toLowerCase())
+		{
+			case "sha-1":
+				length = 160;
+				break;
+			case "sha-256":
+				length = 256;
+				break;
+			case "sha-384":
+				length = 384;
+				break;
+			case "sha-512":
+				length = 512;
+				break;
+			default:
+				return Promise.reject(`Incorrect \"parameters.hashAlgorithm\" parameter: ${parameters.hashAlgorithm}`);
+		}
+		//endregion
+		
+		//region Initial variables
+		let sequence = Promise.resolve();
+		
+		const hmacAlgorithm = {
+			name: "HMAC",
+			length,
+			hash: {
+				name: parameters.hashAlgorithm
+			}
+		};
+		//endregion
+		
+		//region Create PKCS#12 key for integrity checking
+		sequence = sequence.then(() => makePKCS12B2Key(this, parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount));
+		//endregion
+		
+		//region Import HMAC key
+		sequence = sequence.then(result =>
+			this.importKey("raw",
+				new Uint8Array(result),
+				hmacAlgorithm,
+				false,
+				["sign"])
+		);
+		//endregion
+		
+		//region Make signed HMAC value
+		sequence = sequence.then(
+			result =>
+				this.verify(hmacAlgorithm, result, new Uint8Array(parameters.signatureToVerify), new Uint8Array(parameters.contentToVerify)),
+			error => Promise.reject(error)
+		);
+		//endregion
+		
+		return sequence;
+	}
+	//**********************************************************************************
+	/**
+	 * Get signature parameters by analyzing private key algorithm
+	 * @param {Object} privateKey The private key user would like to use
+	 * @param {string} [hashAlgorithm="SHA-1"] The private key user would like to use
+	 * @return {Promise.<T>|Promise}
+	 */
+	getSignatureParameters(privateKey, hashAlgorithm = "SHA-1")
+	{
+		//region Check hashing algorithm
+		const oid = this.getOIDByAlgorithm({ name: hashAlgorithm });
+		if(oid === "")
+			return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
+		//endregion
+		
+		//region Initial variables
+		const signatureAlgorithm = new AlgorithmIdentifier();
+		//endregion
+		
+		//region Get a "default parameters" for current algorithm
+		const parameters = this.getAlgorithmParameters(privateKey.algorithm.name, "sign");
+		parameters.algorithm.hash.name = hashAlgorithm;
+		//endregion
+		
+		//region Fill internal structures base on "privateKey" and "hashAlgorithm"
+		switch(privateKey.algorithm.name.toUpperCase())
+		{
+			case "RSASSA-PKCS1-V1_5":
+			case "ECDSA":
+				signatureAlgorithm.algorithmId = this.getOIDByAlgorithm(parameters.algorithm);
+				break;
+			case "RSA-PSS":
+				{
+					//region Set "saltLength" as a length (in octets) of hash function result
+					switch(hashAlgorithm.toUpperCase())
+					{
+						case "SHA-256":
+							parameters.algorithm.saltLength = 32;
+							break;
+						case "SHA-384":
+							parameters.algorithm.saltLength = 48;
+							break;
+						case "SHA-512":
+							parameters.algorithm.saltLength = 64;
+							break;
+						default:
+					}
+					//endregion
+					
+					//region Fill "RSASSA_PSS_params" object
+					const paramsObject = {};
+					
+					if(hashAlgorithm.toUpperCase() !== "SHA-1")
+					{
+						const hashAlgorithmOID = this.getOIDByAlgorithm({ name: hashAlgorithm });
+						if(hashAlgorithmOID === "")
+							return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
+						
+						paramsObject.hashAlgorithm = new AlgorithmIdentifier({
+							algorithmId: hashAlgorithmOID,
+							algorithmParams: new asn1js.Null()
+						});
+						
+						paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
+							algorithmId: "1.2.840.113549.1.1.8", // MGF1
+							algorithmParams: paramsObject.hashAlgorithm.toSchema()
+						});
+					}
+					
+					if(parameters.algorithm.saltLength !== 20)
+						paramsObject.saltLength = parameters.algorithm.saltLength;
+					
+					const pssParameters = new RSASSAPSSParams(paramsObject);
+					//endregion
+					
+					//region Automatically set signature algorithm
+					signatureAlgorithm.algorithmId = "1.2.840.113549.1.1.10";
+					signatureAlgorithm.algorithmParams = pssParameters.toSchema();
+					//endregion
+				}
+				break;
+			default:
+				return Promise.reject(`Unsupported signature algorithm: ${privateKey.algorithm.name}`);
+		}
+		//endregion
+
+		return Promise.resolve().then(() => ({
+			signatureAlgorithm,
+			parameters
+		}));
+	}
+	//**********************************************************************************
+	/**
+	 * Sign data with pre-defined private key
+	 * @param {ArrayBuffer} data Data to be signed
+	 * @param {Object} privateKey Private key to use
+	 * @param {Object} parameters Parameters for used algorithm
+	 * @return {Promise.<T>|Promise}
+	 */
+	signWithPrivateKey(data, privateKey, parameters)
+	{
+		return this.sign(parameters.algorithm,
+			privateKey,
+			new Uint8Array(data))
+			.then(result =>
+			{
+				//region Special case for ECDSA algorithm
+				if(parameters.algorithm.name === "ECDSA")
+					result = createCMSECDSASignature(result);
+				//endregion
+				
+				return result;
+			}, error =>
+				Promise.reject(`Signing error: ${error}`)
+		);
 	}
 	//**********************************************************************************
 }

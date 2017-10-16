@@ -2,12 +2,11 @@ import * as asn1js from "asn1js";
 import { getParametersValue, isEqualBuffer } from "pvutils";
 import {
 	getAlgorithmByOID,
-	getOIDByAlgorithm,
 	getAlgorithmParameters,
 	getCrypto,
+	getEngine,
 	createECDSASignatureFromCMS,
-	getHashAlgorithm,
-	createCMSECDSASignature
+	getHashAlgorithm
 } from "./common";
 import ResponseData from "./ResponseData";
 import AlgorithmIdentifier from "./AlgorithmIdentifier";
@@ -20,7 +19,8 @@ import CertificateChainValidationEngine from "./CertificateChainValidationEngine
 /**
  * Class from RFC6960
  */
-export default class BasicOCSPResponse {
+export default class BasicOCSPResponse
+{
 	//**********************************************************************************
 	/**
 	 * Constructor for BasicOCSPResponse class
@@ -59,7 +59,6 @@ export default class BasicOCSPResponse {
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -81,7 +80,6 @@ export default class BasicOCSPResponse {
 				throw new Error(`Invalid member name for BasicOCSPResponse class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -114,7 +112,6 @@ export default class BasicOCSPResponse {
 				throw new Error(`Invalid member name for BasicOCSPResponse class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -171,7 +168,6 @@ export default class BasicOCSPResponse {
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -198,7 +194,6 @@ export default class BasicOCSPResponse {
 			this.certs = Array.from(asn1.result["BasicOCSPResponse.certs"], element => new Certificate({ schema: element }));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -237,7 +232,6 @@ export default class BasicOCSPResponse {
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -256,7 +250,6 @@ export default class BasicOCSPResponse {
 		
 		return _object;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Get OCSP response status for specific certificate
@@ -316,7 +309,7 @@ export default class BasicOCSPResponse {
 					if(response.certID.isEqual(id))
 					{
 						result.isForCertificate = true;
-						
+
 						try
 						{
 							switch(response.certStatus.idBlock.isConstructed)
@@ -357,130 +350,57 @@ export default class BasicOCSPResponse {
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Make signature for current OCSP Basic Response
 	 * @param {Object} privateKey Private key for "subjectPublicKeyInfo" structure
-	 * @param {string} [hashAlgorithm] Hashing algorithm. Default SHA-1
+	 * @param {string} [hashAlgorithm="SHA-1"] Hashing algorithm. Default SHA-1
 	 * @returns {Promise}
 	 */
-	sign(privateKey, hashAlgorithm)
+	sign(privateKey, hashAlgorithm = "SHA-1")
 	{
+		//region Initial checking
 		//region Get a private key from function parameter
 		if(typeof privateKey === "undefined")
 			return Promise.reject("Need to provide a private key for signing");
 		//endregion
-		
-		//region Get hashing algorithm
-		if(typeof hashAlgorithm === "undefined")
-			hashAlgorithm = "SHA-1";
-		else
-		{
-			//region Simple check for supported algorithm
-			const oid = getOIDByAlgorithm({ name: hashAlgorithm });
-			if(oid === "")
-				return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
-			//endregion
-		}
 		//endregion
 		
-		//region Get a "default parameters" for current algorithm
-		const defParams = getAlgorithmParameters(privateKey.algorithm.name, "sign");
-		defParams.algorithm.hash.name = hashAlgorithm;
+		//region Initial variables
+		let sequence = Promise.resolve();
+		let parameters;
+		
+		const engine = getEngine();
 		//endregion
 		
-		//region Fill internal structures base on "privateKey" and "hashAlgorithm"
-		switch(privateKey.algorithm.name.toUpperCase())
+		//region Get a "default parameters" for current algorithm and set correct signature algorithm
+		sequence = sequence.then(() => engine.subtle.getSignatureParameters(privateKey, hashAlgorithm));
+		
+		sequence = sequence.then(result =>
 		{
-			case "RSASSA-PKCS1-V1_5":
-			case "ECDSA":
-				this.signatureAlgorithm.algorithmId = getOIDByAlgorithm(defParams.algorithm);
-				break;
-			case "RSA-PSS":
-				{
-					//region Set "saltLength" as a length (in octets) of hash function result
-					switch(hashAlgorithm.toUpperCase())
-					{
-						case "SHA-256":
-							defParams.algorithm.saltLength = 32;
-							break;
-						case "SHA-384":
-							defParams.algorithm.saltLength = 48;
-							break;
-						case "SHA-512":
-							defParams.algorithm.saltLength = 64;
-							break;
-						default:
-					}
-					//endregion
-					
-					//region Fill "RSASSA_PSS_params" object
-					const paramsObject = {};
-					
-					if(hashAlgorithm.toUpperCase() !== "SHA-1")
-					{
-						const hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
-						if(hashAlgorithmOID === "")
-							return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
-						
-						paramsObject.hashAlgorithm = new AlgorithmIdentifier({
-							algorithmId: hashAlgorithmOID,
-							algorithmParams: new asn1js.Null()
-						});
-						
-						paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
-							algorithmId: "1.2.840.113549.1.1.8", // MGF1
-							algorithmParams: paramsObject.hashAlgorithm.toSchema()
-						});
-					}
-					
-					if(defParams.algorithm.saltLength !== 20)
-						paramsObject.saltLength = defParams.algorithm.saltLength;
-					
-					const pssParameters = new RSASSAPSSParams(paramsObject);
-					//endregion
-					
-					//region Automatically set signature algorithm
-					this.signatureAlgorithm = new AlgorithmIdentifier({
-						algorithmId: "1.2.840.113549.1.1.10",
-						algorithmParams: pssParameters.toSchema()
-					});
-					//endregion
-				}
-				break;
-			default:
-				return Promise.reject(`Unsupported signature algorithm: ${privateKey.algorithm.name}`);
-		}
+			parameters = result.parameters;
+			this.signatureAlgorithm = result.signatureAlgorithm;
+		});
 		//endregion
 		
 		//region Create TBS data for signing
-		this.tbsResponseData.tbs = this.tbsResponseData.toSchema(true).toBER(false);
-		//endregion
-		
-		//region Get a "crypto" extension
-		const crypto = getCrypto();
-		if(typeof crypto === "undefined")
-			return Promise.reject("Unable to create WebCrypto object");
+		sequence = sequence.then(() =>
+		{
+			this.tbsResponseData.tbs = this.tbsResponseData.toSchema(true).toBER(false);
+		});
 		//endregion
 		
 		//region Signing TBS data on provided private key
-		return crypto.sign(defParams.algorithm,
-			privateKey,
-			new Uint8Array(this.tbsResponseData.tbs)).then(result =>
-			{
-				//region Special case for ECDSA algorithm
-				if(defParams.algorithm.name === "ECDSA")
-					result = createCMSECDSASignature(result);
-				//endregion
-				
-				this.signature = new asn1js.BitString({ valueHex: result });
-			}, error =>
-				Promise.reject(`Signing error: ${error}`)
-		);
+		sequence = sequence.then(() => engine.subtle.signWithPrivateKey(this.tbsResponseData.tbs, privateKey, parameters));
+		
+		sequence = sequence.then(result =>
+		{
+			this.signature = new asn1js.BitString({ valueHex: result });
+		});
 		//endregion
+		
+		return sequence;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Verify existing OCSP Basic Response
@@ -756,7 +676,6 @@ export default class BasicOCSPResponse {
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

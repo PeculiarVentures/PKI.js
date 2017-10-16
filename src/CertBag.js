@@ -146,7 +146,15 @@ export default class CertBag
 			case "1.2.840.113549.1.9.22.1": // x509Certificate
 				{
 					const asn1Inner = asn1js.fromBER(this.certValue.valueBlock.valueHex);
-					this.parsedValue = new Certificate({ schema: asn1Inner.result });
+					
+					try
+					{
+						this.parsedValue = new Certificate({ schema: asn1Inner.result });
+					}
+					catch(ex) // In some realizations the same OID used for attribute certificates
+					{
+						this.parsedValue = new AttributeCertificateV1({ schema: asn1Inner.result });
+					}
 				}
 				break;
 			case "1.2.840.113549.1.9.22.3": // attributeCertificate - (!!!) THIS OID IS SUBJECT FOR CHANGE IN FUTURE (!!!)

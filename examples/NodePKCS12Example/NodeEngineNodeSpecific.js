@@ -290,6 +290,60 @@ function stampDataWithPassword(hashAlgorithm, keyLength, password, salt, iterati
 	return (new Uint8Array(hmac.digest())).buffer;
 }
 //**************************************************************************************
+function verifyDataStampedWithPassword(hashAlgorithm, keyLength, password, salt, iterationCount, stampedData, signatureToVerify, method)
+{
+	//region Initial variables
+	let key;
+	//endregion
+	
+	//region Check input "method" value
+	if((typeof method === "undefined"))
+		method = "pkcs12";
+	//endregion
+	
+	//region Make hash algorithm name to be Node-friendly
+	hashAlgorithm = hashAlgorithm.replace("-", "");
+	//endregion
+	
+	//region Derive key using PKCS#12 algorithm from B.2 item of standard
+	switch(method.toLowerCase())
+	{
+		case "pbkdf2":
+			key = crypto.pbkdf2Sync(Buffer.from(password), Buffer.from(salt), iterationCount, keyLength, hashAlgorithm);
+			break;
+		case "pkcs12":
+		default:
+			key = makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCount);
+	}
+	//endregion
+	
+	//region Making HMAC value
+	const hmac = crypto.createHmac(hashAlgorithm, key);
+	hmac.update(Buffer.from(stampedData));
+	const hmacValue = new Uint8Array(hmac.digest());
+	//endregion
+	
+	//region Compare HMAC digest with signature to verify
+	const dataView = new Uint8Array(signatureToVerify);
+	
+	if(hmacValue.length !== dataView.length)
+		return false;
+	
+	let result = true;
+	
+	for(let i = 0; i < hmacValue.length; i++)
+	{
+		if(hmacValue[i] !== dataView[i])
+		{
+			result = false;
+			break;
+		}
+	}
+	//endregion
+	
+	return result;
+}
+//**************************************************************************************
 function subtle(){
 }
 //**************************************************************************************

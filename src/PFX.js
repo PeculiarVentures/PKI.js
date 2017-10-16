@@ -516,89 +516,24 @@ export default class PFX
 						const hashAlgorithm = getAlgorithmByOID(this.macData.mac.digestAlgorithm.algorithmId);
 						if(("name" in hashAlgorithm) === false)
 							return Promise.reject(`Unsupported digest algorithm: ${this.macData.mac.digestAlgorithm.algorithmId}`);
-					
-						let length;
-					
-						//region Choose correct length for HMAC key
-						switch(hashAlgorithm.name.toLowerCase())
-						{
-							case "sha-1":
-								length = 160;
-								break;
-							case "sha-256":
-								length = 256;
-								break;
-							case "sha-384":
-								length = 384;
-								break;
-							case "sha-512":
-								length = 512;
-								break;
-							default:
-								return Promise.reject(`Incorrect \"hashAlgorithm\": ${hashAlgorithm.name}`);
-						}
 						//endregion
-					
-						const hmacAlgorithm = {
-							name: "HMAC",
-							length,
-							hash: {
-								name: hashAlgorithm.name
-							}
-						};
-						//endregion
-					
-						//region Generate HMAC key using PBKDF2
-						//region Derive PBKDF2 key from "password" buffer
-						sequence = sequence.then(
-							() =>
-							{
-								const passwordView = new Uint8Array(parameters.password);
-								
-								return crypto.importKey("raw",
-									passwordView,
-									"PBKDF2",
-									false,
-									["deriveKey"]);
-							},
-							error => Promise.reject(error)
+						
+						//region Call current crypto engine for verifying HMAC-based data stamp
+						const engine = getEngine();
+						
+						sequence = sequence.then(() =>
+							engine.subtle.verifyDataStampedWithPassword({
+								password: parameters.password,
+								hashAlgorithm: hashAlgorithm.name,
+								salt: this.macData.macSalt.valueBlock.valueHex,
+								iterationCount: this.macData.iterations,
+								contentToVerify: this.authSafe.content.valueBlock.valueHex,
+								signatureToVerify: this.macData.mac.digest.valueBlock.valueHex
+							})
 						);
 						//endregion
-					
-						//region Derive key for HMAC
-						sequence = sequence.then(
-							result => crypto.deriveKey({
-									name: "PBKDF2",
-									hash: {
-										name: hashAlgorithm.name
-									},
-									salt: new Uint8Array(this.macData.macSalt.valueBlock.valueHex),
-									iterations: this.macData.iterations
-								},
-								result,
-								hmacAlgorithm,
-								false,
-								["verify"]),
-							error => Promise.reject(error)
-						);
-						//endregion
-						//endregion
-					
+
 						//region Verify HMAC signature
-						sequence = sequence.then(
-							result =>
-							{
-								const data = this.authSafe.content.toBER(false);
-								const view = new Uint8Array(data);
-								
-								return crypto.verify(hmacAlgorithm,
-									result,
-									new Uint8Array(this.macData.mac.digest.valueBlock.valueHex),
-									view);
-							},
-							error => Promise.reject(error)
-						);
-					
 						sequence = sequence.then(
 							result =>
 							{
