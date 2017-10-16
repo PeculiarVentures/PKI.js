@@ -1,12 +1,11 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, bufferToHexCodes } from "pvutils";
 import {
-	getOIDByAlgorithm,
 	getAlgorithmParameters,
 	getCrypto,
+	getEngine,
 	getAlgorithmByOID,
 	createECDSASignatureFromCMS,
-	createCMSECDSASignature,
 	getHashAlgorithm
 } from "./common";
 import AlgorithmIdentifier from "./AlgorithmIdentifier";
