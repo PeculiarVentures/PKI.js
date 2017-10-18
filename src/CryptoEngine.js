@@ -2215,7 +2215,7 @@ export default class CryptoEngine
 				new Uint8Array(result),
 				hmacAlgorithm,
 				false,
-				["sign"])
+				["verify"])
 		);
 		//endregion
 		

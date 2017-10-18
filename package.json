@@ -49,7 +49,7 @@
     "ex17": "cd examples/NodePKCS12Example && rollem -c && cd ../..",
     "build:examples": "npm run ex1; npm run ex2; npm run ex3; npm run ex4; npm run ex5; npm run ex6; npm run ex7; npm run ex8; npm run ex9; npm run ex10; npm run ex11; npm run ex12; npm run ex13; npm run ex14; npm run ex15; npm run ex16; npm run ex17;",
     "build:tests": "npm run build:examples",
-    "test": "mocha --timeout 15000",
+    "test": "mocha --timeout 40000",
     "postinstall": "npm run build"
   },
   "keywords": [
@@ -70,6 +70,6 @@
   "jsnext:main": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.9",
+  "version": "2.1.10",
   "license": "MIT"
 }
