@@ -179,7 +179,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	//**************************************************************************************
 	/**
   * Concatenate two ArrayBuffers
-  * @param {...ArrayBuffer} buffers First ArrayBuffer (first part of concatenated array)
+  * @param {...ArrayBuffer} buffers Set of ArrayBuffer
   */
 	function utilConcatBuf() {
 		//region Initial variables
@@ -248,6 +248,79 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}
 
 		return retBuf;
+	}
+	//**************************************************************************************
+	/**
+  * Concatenate two Uint8Array
+  * @param {...Uint8Array} views Set of Uint8Array
+  */
+	function utilConcatView() {
+		//region Initial variables
+		var outputLength = 0;
+		var prevLength = 0;
+		//endregion
+
+		//region Calculate output length
+
+		for (var _len2 = arguments.length, views = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+			views[_key2] = arguments[_key2];
+		}
+
+		var _iteratorNormalCompletion4 = true;
+		var _didIteratorError4 = false;
+		var _iteratorError4 = undefined;
+
+		try {
+			for (var _iterator4 = views[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+				var view = _step4.value;
+
+				outputLength += view.length;
+			} //endregion
+		} catch (err) {
+			_didIteratorError4 = true;
+			_iteratorError4 = err;
+		} finally {
+			try {
+				if (!_iteratorNormalCompletion4 && _iterator4.return) {
+					_iterator4.return();
+				}
+			} finally {
+				if (_didIteratorError4) {
+					throw _iteratorError4;
+				}
+			}
+		}
+
+		var retBuf = new ArrayBuffer(outputLength);
+		var retView = new Uint8Array(retBuf);
+
+		var _iteratorNormalCompletion5 = true;
+		var _didIteratorError5 = false;
+		var _iteratorError5 = undefined;
+
+		try {
+			for (var _iterator5 = views[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+				var _view2 = _step5.value;
+
+				retView.set(_view2, prevLength);
+				prevLength += _view2.length;
+			}
+		} catch (err) {
+			_didIteratorError5 = true;
+			_iteratorError5 = err;
+		} finally {
+			try {
+				if (!_iteratorNormalCompletion5 && _iterator5.return) {
+					_iterator5.return();
+				}
+			} finally {
+				if (_didIteratorError5) {
+					throw _iteratorError5;
+				}
+			}
+		}
+
+		return retView;
 	}
 	//**************************************************************************************
 	/**
@@ -507,27 +580,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		var resultString = "";
 		var view = new Uint8Array(buffer);
 
-		var _iteratorNormalCompletion4 = true;
-		var _didIteratorError4 = false;
-		var _iteratorError4 = undefined;
+		var _iteratorNormalCompletion6 = true;
+		var _didIteratorError6 = false;
+		var _iteratorError6 = undefined;
 
 		try {
-			for (var _iterator4 = view[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-				var element = _step4.value;
+			for (var _iterator6 = view[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+				var element = _step6.value;
 
 				resultString = resultString + String.fromCharCode(element);
 			}
 		} catch (err) {
-			_didIteratorError4 = true;
-			_iteratorError4 = err;
+			_didIteratorError6 = true;
+			_iteratorError6 = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion4 && _iterator4.return) {
-					_iterator4.return();
+				if (!_iteratorNormalCompletion6 && _iterator6.return) {
+					_iterator6.return();
 				}
 			} finally {
-				if (_didIteratorError4) {
-					throw _iteratorError4;
+				if (_didIteratorError6) {
+					throw _iteratorError6;
 				}
 			}
 		}
@@ -637,6 +710,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	//endregion
 	//**************************************************************************************
 
+	var powers2 = [new Uint8Array([1])];
+	var digitsString = "0123456789";
+	//**************************************************************************************
+	//endregion
 	//**************************************************************************************
 	//region Declaration for "LocalBaseBlock" class
 	//**************************************************************************************
@@ -3132,6 +3209,178 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				return object;
 			}
 			//**********************************************************************************
+			/**
+    * Convert current value to decimal string representation
+    */
+
+		}, {
+			key: "toString",
+			value: function toString() {
+				//region Aux functions
+				function viewAdd(first, second) {
+					//region Initial variables
+					var c = new Uint8Array([0]);
+
+					var firstView = new Uint8Array(first);
+					var secondView = new Uint8Array(second);
+
+					var firstViewCopy = firstView.slice(0);
+					var firstViewCopyLength = firstViewCopy.length - 1;
+					var secondViewCopy = secondView.slice(0);
+					var secondViewCopyLength = secondViewCopy.length - 1;
+
+					var value = 0;
+
+					var max = secondViewCopyLength < firstViewCopyLength ? firstViewCopyLength : secondViewCopyLength;
+
+					var counter = 0;
+					//endregion
+
+					for (var i = max; i >= 0; i--, counter++) {
+						switch (true) {
+							case counter < secondViewCopy.length:
+								value = firstViewCopy[firstViewCopyLength - counter] + secondViewCopy[secondViewCopyLength - counter] + c[0];
+								break;
+							default:
+								value = firstViewCopy[firstViewCopyLength - counter] + c[0];
+						}
+
+						c[0] = value / 10;
+
+						switch (true) {
+							case counter >= firstViewCopy.length:
+								firstViewCopy = utilConcatView(new Uint8Array([value % 10]), firstViewCopy);
+								break;
+							default:
+								firstViewCopy[firstViewCopyLength - counter] = value % 10;
+						}
+					}
+
+					if (c[0] > 0) firstViewCopy = utilConcatView(c, firstViewCopy);
+
+					return firstViewCopy.slice(0);
+				}
+
+				function power2(n) {
+					if (n >= powers2.length) {
+						for (var p = powers2.length; p <= n; p++) {
+							var c = new Uint8Array([0]);
+							var _digits = powers2[p - 1].slice(0);
+
+							for (var i = _digits.length - 1; i >= 0; i--) {
+								var newValue = new Uint8Array([(_digits[i] << 1) + c[0]]);
+								c[0] = newValue[0] / 10;
+								_digits[i] = newValue[0] % 10;
+							}
+
+							if (c[0] > 0) _digits = utilConcatView(c, _digits);
+
+							powers2.push(_digits);
+						}
+					}
+
+					return powers2[n];
+				}
+
+				function viewSub(first, second) {
+					//region Initial variables
+					var b = 0;
+
+					var firstView = new Uint8Array(first);
+					var secondView = new Uint8Array(second);
+
+					var firstViewCopy = firstView.slice(0);
+					var firstViewCopyLength = firstViewCopy.length - 1;
+					var secondViewCopy = secondView.slice(0);
+					var secondViewCopyLength = secondViewCopy.length - 1;
+
+					var value = void 0;
+
+					var counter = 0;
+					//endregion
+
+					for (var i = secondViewCopyLength; i >= 0; i--, counter++) {
+						value = firstViewCopy[firstViewCopyLength - counter] - secondViewCopy[secondViewCopyLength - counter] - b;
+
+						switch (true) {
+							case value < 0:
+								b = 1;
+								firstViewCopy[firstViewCopyLength - counter] = value + 10;
+								break;
+							default:
+								b = 0;
+								firstViewCopy[firstViewCopyLength - counter] = value;
+						}
+					}
+
+					if (b > 0) {
+						for (var _i7 = firstViewCopyLength - secondViewCopyLength + 1; _i7 >= 0; _i7--, counter++) {
+							value = firstViewCopy[firstViewCopyLength - counter] - b;
+
+							if (value < 0) {
+								b = 1;
+								firstViewCopy[firstViewCopyLength - counter] = value + 10;
+							} else {
+								b = 0;
+								firstViewCopy[firstViewCopyLength - counter] = value;
+								break;
+							}
+						}
+					}
+
+					return firstViewCopy.slice();
+				}
+				//endregion
+
+				//region Initial variables
+				var firstBit = this._valueHex.byteLength * 8 - 1;
+
+				var digits = new Uint8Array(this._valueHex.byteLength * 8 / 3);
+				var bitNumber = 0;
+				var currentByte = void 0;
+
+				var asn1View = new Uint8Array(this._valueHex);
+
+				var result = "";
+
+				var flag = false;
+				//endregion
+
+				//region Calculate number
+				for (var byteNumber = this._valueHex.byteLength - 1; byteNumber >= 0; byteNumber--) {
+					currentByte = asn1View[byteNumber];
+
+					for (var i = 0; i < 8; i++) {
+						if ((currentByte & 1) === 1) {
+							switch (bitNumber) {
+								case firstBit:
+									digits = viewSub(power2(bitNumber), digits);
+									result = "-";
+									break;
+								default:
+									digits = viewAdd(digits, power2(bitNumber));
+							}
+						}
+
+						bitNumber++;
+						currentByte >>= 1;
+					}
+				}
+				//endregion
+
+				//region Print number
+				for (var _i8 = 0; _i8 < digits.length; _i8++) {
+					if (digits[_i8]) flag = true;
+
+					if (flag) result += digitsString.charAt(digits[_i8]);
+				}
+
+				if (flag === false) result += digitsString.charAt(0);
+				//endregion
+
+				return result;
+			}
+			//**********************************************************************************
 
 		}, {
 			key: "valueHex",
@@ -3397,8 +3646,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var tempValueHex = new ArrayBuffer(this.blockLength);
 				var tempView = new Uint8Array(tempValueHex);
 
-				for (var _i7 = 0; _i7 < this.blockLength; _i7++) {
-					tempView[_i7] = view[_i7];
+				for (var _i9 = 0; _i9 < this.blockLength; _i9++) {
+					tempView[_i9] = view[_i9];
 				} //noinspection JSCheckFunctionSignatures
 				this.valueHex = tempValueHex.slice(0);
 				view = new Uint8Array(this.valueHex);
@@ -3462,8 +3711,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					var encodedView = new Uint8Array(encodedBuf);
 					retView = new Uint8Array(retBuf);
 
-					for (var _i8 = 0; _i8 < encodedBuf.byteLength - 1; _i8++) {
-						retView[_i8] = encodedView[_i8] | 0x80;
+					for (var _i10 = 0; _i10 < encodedBuf.byteLength - 1; _i10++) {
+						retView[_i10] = encodedView[_i10] | 0x80;
 					}retView[encodedBuf.byteLength - 1] = encodedView[encodedBuf.byteLength - 1];
 				}
 
@@ -6473,8 +6722,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if (inputData.valueBlock.value.length === 0 && inputSchema.valueBlock.value.length !== 0) {
 				var _optional = true;
 
-				for (var _i9 = 0; _i9 < inputSchema.valueBlock.value.length; _i9++) {
-					_optional = _optional && (inputSchema.valueBlock.value[_i9].optional || false);
+				for (var _i11 = 0; _i11 < inputSchema.valueBlock.value.length; _i11++) {
+					_optional = _optional && (inputSchema.valueBlock.value[_i11].optional || false);
 				}if (_optional === true) {
 					return {
 						verified: true,
@@ -6498,10 +6747,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			}
 			//endregion
 
-			for (var _i10 = 0; _i10 < maxLength; _i10++) {
+			for (var _i12 = 0; _i12 < maxLength; _i12++) {
 				//region Special case when there is an "optional" element of ASN.1 schema at the end
-				if (_i10 - admission >= inputData.valueBlock.value.length) {
-					if (inputSchema.valueBlock.value[_i10].optional === false) {
+				if (_i12 - admission >= inputData.valueBlock.value.length) {
+					if (inputSchema.valueBlock.value[_i12].optional === false) {
 						var _result3 = {
 							verified: false,
 							result: root
@@ -6526,7 +6775,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				else {
 						//region Special case for Repeated type of ASN.1 schema element
 						if (inputSchema.valueBlock.value[0] instanceof Repeated) {
-							_result2 = compareSchema(root, inputData.valueBlock.value[_i10], inputSchema.valueBlock.value[0].value);
+							_result2 = compareSchema(root, inputData.valueBlock.value[_i12], inputSchema.valueBlock.value[0].value);
 							if (_result2.verified === false) {
 								if (inputSchema.valueBlock.value[0].optional === true) admission++;else {
 									//region Delete early added name of block
@@ -6547,14 +6796,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 								if (typeof arrayRoot[inputSchema.valueBlock.value[0].name] === "undefined") arrayRoot[inputSchema.valueBlock.value[0].name] = [];
 
-								arrayRoot[inputSchema.valueBlock.value[0].name].push(inputData.valueBlock.value[_i10]);
+								arrayRoot[inputSchema.valueBlock.value[0].name].push(inputData.valueBlock.value[_i12]);
 							}
 						}
 						//endregion
 						else {
-								_result2 = compareSchema(root, inputData.valueBlock.value[_i10 - admission], inputSchema.valueBlock.value[_i10]);
+								_result2 = compareSchema(root, inputData.valueBlock.value[_i12 - admission], inputSchema.valueBlock.value[_i12]);
 								if (_result2.verified === false) {
-									if (inputSchema.valueBlock.value[_i10].optional === true) admission++;else {
+									if (inputSchema.valueBlock.value[_i12].optional === true) admission++;else {
 										//region Delete early added name of block
 										if (inputSchema.hasOwnProperty("name")) {
 											inputSchema.name = inputSchema.name.replace(/^\s+|\s+$/g, "");
@@ -6847,272 +7096,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 	//**************************************************************************************
 	/**
-  * Class from RFC4055
-  */
-
-
-	var RSASSAPSSParams = function () {
-		//**********************************************************************************
-		/**
-   * Constructor for RSASSAPSSParams class
-   * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
-   */
-		function RSASSAPSSParams() {
-			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-			_classCallCheck(this, RSASSAPSSParams);
-
-			//region Internal properties of the object
-			/**
-    * @type {AlgorithmIdentifier}
-    * @description Algorithms of hashing (DEFAULT sha1)
-    */
-			this.hashAlgorithm = getParametersValue(parameters, "hashAlgorithm", RSASSAPSSParams.defaultValues("hashAlgorithm"));
-			/**
-    * @type {AlgorithmIdentifier}
-    * @description Algorithm of "mask generaion function (MGF)" (DEFAULT mgf1SHA1)
-    */
-			this.maskGenAlgorithm = getParametersValue(parameters, "maskGenAlgorithm", RSASSAPSSParams.defaultValues("maskGenAlgorithm"));
-			/**
-    * @type {number}
-    * @description Salt length (DEFAULT 20)
-    */
-			this.saltLength = getParametersValue(parameters, "saltLength", RSASSAPSSParams.defaultValues("saltLength"));
-			/**
-    * @type {number}
-    * @description (DEFAULT 1)
-    */
-			this.trailerField = getParametersValue(parameters, "trailerField", RSASSAPSSParams.defaultValues("trailerField"));
-			//endregion
-
-			//region If input argument array contains "schema" for this object
-			if ("schema" in parameters) this.fromSchema(parameters.schema);
-			//endregion
-		}
-		//**********************************************************************************
-		/**
-   * Return default values for all class members
-   * @param {string} memberName String name for a class member
-   */
-
-
-		_createClass(RSASSAPSSParams, [{
-			key: "fromSchema",
-
-			//**********************************************************************************
-			/**
-    * Convert parsed asn1js object into current class
-    * @param {!Object} schema
-    */
-			value: function fromSchema(schema) {
-				//region Check the schema is valid
-				var asn1 = compareSchema(schema, schema, RSASSAPSSParams.schema({
-					names: {
-						hashAlgorithm: {
-							names: {
-								blockName: "hashAlgorithm"
-							}
-						},
-						maskGenAlgorithm: {
-							names: {
-								blockName: "maskGenAlgorithm"
-							}
-						},
-						saltLength: "saltLength",
-						trailerField: "trailerField"
-					}
-				}));
-
-				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for RSASSA_PSS_params");
-				//endregion
-
-				//region Get internal properties from parsed schema
-				if ("hashAlgorithm" in asn1.result) this.hashAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.hashAlgorithm });
-
-				if ("maskGenAlgorithm" in asn1.result) this.maskGenAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.maskGenAlgorithm });
-
-				if ("saltLength" in asn1.result) this.saltLength = asn1.result.saltLength.valueBlock.valueDec;
-
-				if ("trailerField" in asn1.result) this.trailerField = asn1.result.trailerField.valueBlock.valueDec;
-				//endregion
-			}
-			//**********************************************************************************
-			/**
-    * Convert current object to asn1js object and set correct values
-    * @returns {Object} asn1js object
-    */
-
-		}, {
-			key: "toSchema",
-			value: function toSchema() {
-				//region Create array for output sequence
-				var outputArray = [];
-
-				if (!this.hashAlgorithm.isEqual(RSASSAPSSParams.defaultValues("hashAlgorithm"))) {
-					outputArray.push(new Constructed({
-						idBlock: {
-							tagClass: 3, // CONTEXT-SPECIFIC
-							tagNumber: 0 // [0]
-						},
-						value: [this.hashAlgorithm.toSchema()]
-					}));
-				}
-
-				if (!this.maskGenAlgorithm.isEqual(RSASSAPSSParams.defaultValues("maskGenAlgorithm"))) {
-					outputArray.push(new Constructed({
-						idBlock: {
-							tagClass: 3, // CONTEXT-SPECIFIC
-							tagNumber: 1 // [1]
-						},
-						value: [this.maskGenAlgorithm.toSchema()]
-					}));
-				}
-
-				if (this.saltLength !== RSASSAPSSParams.defaultValues("saltLength")) {
-					outputArray.push(new Constructed({
-						idBlock: {
-							tagClass: 3, // CONTEXT-SPECIFIC
-							tagNumber: 2 // [2]
-						},
-						value: [new Integer({ value: this.saltLength })]
-					}));
-				}
-
-				if (this.trailerField !== RSASSAPSSParams.defaultValues("trailerField")) {
-					outputArray.push(new Constructed({
-						idBlock: {
-							tagClass: 3, // CONTEXT-SPECIFIC
-							tagNumber: 3 // [3]
-						},
-						value: [new Integer({ value: this.trailerField })]
-					}));
-				}
-				//endregion
-
-				//region Construct and return new ASN.1 schema for this object
-				return new Sequence({
-					value: outputArray
-				});
-				//endregion
-			}
-			//**********************************************************************************
-			/**
-    * Convertion for the class to JSON object
-    * @returns {Object}
-    */
-
-		}, {
-			key: "toJSON",
-			value: function toJSON() {
-				var object = {};
-
-				if (!this.hashAlgorithm.isEqual(RSASSAPSSParams.defaultValues("hashAlgorithm"))) object.hashAlgorithm = this.hashAlgorithm.toJSON();
-
-				if (!this.maskGenAlgorithm.isEqual(RSASSAPSSParams.defaultValues("maskGenAlgorithm"))) object.maskGenAlgorithm = this.maskGenAlgorithm.toJSON();
-
-				if (this.saltLength !== RSASSAPSSParams.defaultValues("saltLength")) object.saltLength = this.saltLength;
-
-				if (this.trailerField !== RSASSAPSSParams.defaultValues("trailerField")) object.trailerField = this.trailerField;
-
-				return object;
-			}
-			//**********************************************************************************
-
-		}], [{
-			key: "defaultValues",
-			value: function defaultValues(memberName) {
-				switch (memberName) {
-					case "hashAlgorithm":
-						return new AlgorithmIdentifier({
-							algorithmId: "1.3.14.3.2.26", // SHA-1
-							algorithmParams: new Null()
-						});
-					case "maskGenAlgorithm":
-						return new AlgorithmIdentifier({
-							algorithmId: "1.2.840.113549.1.1.8", // MGF1
-							algorithmParams: new AlgorithmIdentifier({
-								algorithmId: "1.3.14.3.2.26", // SHA-1
-								algorithmParams: new Null()
-							}).toSchema()
-						});
-					case "saltLength":
-						return 20;
-					case "trailerField":
-						return 1;
-					default:
-						throw new Error("Invalid member name for RSASSAPSSParams class: " + memberName);
-				}
-			}
-			//**********************************************************************************
-			/**
-    * Return value of asn1js schema for current class
-    * @param {Object} parameters Input parameters for the schema
-    * @returns {Object} asn1js schema object
-    */
-
-		}, {
-			key: "schema",
-			value: function schema() {
-				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-				//RSASSA-PSS-params  ::=  Sequence  {
-				//    hashAlgorithm      [0] HashAlgorithm DEFAULT sha1Identifier,
-				//    maskGenAlgorithm   [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
-				//    saltLength         [2] Integer DEFAULT 20,
-				//    trailerField       [3] Integer DEFAULT 1  }
-
-				/**
-     * @type {Object}
-     * @property {string} [blockName]
-     * @property {string} [hashAlgorithm]
-     * @property {string} [maskGenAlgorithm]
-     * @property {string} [saltLength]
-     * @property {string} [trailerField]
-     */
-				var names = getParametersValue(parameters, "names", {});
-
-				return new Sequence({
-					name: names.blockName || "",
-					value: [new Constructed({
-						idBlock: {
-							tagClass: 3, // CONTEXT-SPECIFIC
-							tagNumber: 0 // [0]
-						},
-						optional: true,
-						value: [AlgorithmIdentifier.schema(names.hashAlgorithm || {})]
-					}), new Constructed({
-						idBlock: {
-							tagClass: 3, // CONTEXT-SPECIFIC
-							tagNumber: 1 // [1]
-						},
-						optional: true,
-						value: [AlgorithmIdentifier.schema(names.maskGenAlgorithm || {})]
-					}), new Constructed({
-						idBlock: {
-							tagClass: 3, // CONTEXT-SPECIFIC
-							tagNumber: 2 // [2]
-						},
-						optional: true,
-						value: [new Integer({ name: names.saltLength || "" })]
-					}), new Constructed({
-						idBlock: {
-							tagClass: 3, // CONTEXT-SPECIFIC
-							tagNumber: 3 // [3]
-						},
-						optional: true,
-						value: [new Integer({ name: names.trailerField || "" })]
-					})]
-				});
-			}
-		}]);
-
-		return RSASSAPSSParams;
-	}();
-	//**************************************************************************************
-
-	//**************************************************************************************
-	/**
   * Class from RFC5480
   */
 
@@ -7244,8 +7227,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return {
 					crv: crvName,
-					x: toBase64(arrayBufferToString(this.x), true, true, true),
-					y: toBase64(arrayBufferToString(this.y), true, true, true)
+					x: toBase64(arrayBufferToString(this.x), true, true, false),
+					y: toBase64(arrayBufferToString(this.y), true, true, false)
 				};
 			}
 			//**********************************************************************************
@@ -7277,9 +7260,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					}
 				} else throw new Error("Absent mandatory parameter \"crv\"");
 
-				if ("x" in json) this.x = stringToArrayBuffer(fromBase64(json.x, true)).slice(0, coodinateLength);else throw new Error("Absent mandatory parameter \"x\"");
+				if ("x" in json) {
+					var convertBuffer = stringToArrayBuffer(fromBase64(json.x, true));
 
-				if ("y" in json) this.y = stringToArrayBuffer(fromBase64(json.y, true)).slice(0, coodinateLength);else throw new Error("Absent mandatory parameter \"y\"");
+					if (convertBuffer.byteLength < coodinateLength) {
+						this.x = new ArrayBuffer(coodinateLength);
+						var view = new Uint8Array(this.x);
+						var convertBufferView = new Uint8Array(convertBuffer);
+						view.set(1, convertBufferView);
+					} else this.x = convertBuffer.slice(0, coodinateLength);
+				} else throw new Error("Absent mandatory parameter \"x\"");
+
+				if ("y" in json) {
+					var _convertBuffer = stringToArrayBuffer(fromBase64(json.y, true));
+
+					if (_convertBuffer.byteLength < coodinateLength) {
+						this.y = new ArrayBuffer(coodinateLength);
+						var _view3 = new Uint8Array(this.y);
+						var _convertBufferView = new Uint8Array(_convertBuffer);
+						_view3.set(1, _convertBufferView);
+					} else this.y = _convertBuffer.slice(0, coodinateLength);
+				} else throw new Error("Absent mandatory parameter \"y\"");
 			}
 			//**********************************************************************************
 
@@ -7586,10 +7587,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						// ECDSA
 						if ("algorithmParams" in this.algorithm) {
 							if (this.algorithm.algorithmParams instanceof ObjectIdentifier) {
-								this.parsedKey = new ECPublicKey({
-									namedCurve: this.algorithm.algorithmParams.valueBlock.toString(),
-									schema: this.subjectPublicKey.valueBlock.valueHex
-								});
+								try {
+									this.parsedKey = new ECPublicKey({
+										namedCurve: this.algorithm.algorithmParams.valueBlock.toString(),
+										schema: this.subjectPublicKey.valueBlock.valueHex
+									});
+								} catch (ex) {} // Could be a problems during recognision of internal public key data here. Let's ignore them.
 							}
 						}
 						break;
@@ -7597,7 +7600,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						// RSA
 						{
 							var publicKeyASN1 = fromBER(this.subjectPublicKey.valueBlock.valueHex);
-							if (publicKeyASN1.offset !== -1) this.parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
+							if (publicKeyASN1.offset !== -1) {
+								try {
+									this.parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
+								} catch (ex) {} // Could be a problems during recognision of internal public key data here. Let's ignore them.
+							}
 						}
 						break;
 					default:
@@ -7656,27 +7663,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				var publicKeyJWK = this.parsedKey.toJSON();
 
-				var _iteratorNormalCompletion5 = true;
-				var _didIteratorError5 = false;
-				var _iteratorError5 = undefined;
+				var _iteratorNormalCompletion7 = true;
+				var _didIteratorError7 = false;
+				var _iteratorError7 = undefined;
 
 				try {
-					for (var _iterator5 = Object.keys(publicKeyJWK)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-						var key = _step5.value;
+					for (var _iterator7 = Object.keys(publicKeyJWK)[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+						var key = _step7.value;
 
 						jwk[key] = publicKeyJWK[key];
 					}
 				} catch (err) {
-					_didIteratorError5 = true;
-					_iteratorError5 = err;
+					_didIteratorError7 = true;
+					_iteratorError7 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion5 && _iterator5.return) {
-							_iterator5.return();
+						if (!_iteratorNormalCompletion7 && _iterator7.return) {
+							_iterator7.return();
 						}
 					} finally {
-						if (_didIteratorError5) {
-							throw _iteratorError5;
+						if (_didIteratorError7) {
+							throw _iteratorError7;
 						}
 					}
 				}
@@ -8166,7 +8173,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				var privateKeyJSON = {
 					crv: crvName,
-					d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, true)
+					d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, false)
 				};
 
 				if ("publicKey" in this) {
@@ -8207,7 +8214,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					}
 				} else throw new Error("Absent mandatory parameter \"crv\"");
 
-				if ("d" in json) this.privateKey = new OctetString({ valueHex: stringToArrayBuffer(fromBase64(json.d, true)).slice(0, coodinateLength) });else throw new Error("Absent mandatory parameter \"d\"");
+				if ("d" in json) {
+					var convertBuffer = stringToArrayBuffer(fromBase64(json.d, true));
+
+					if (convertBuffer.byteLength < coodinateLength) {
+						var buffer = new ArrayBuffer(coodinateLength);
+						var view = new Uint8Array(buffer);
+						var convertBufferView = new Uint8Array(convertBuffer);
+						view.set(1, convertBufferView);
+
+						this.privateKey = new OctetString({ valueHex: buffer });
+					} else this.privateKey = new OctetString({ valueHex: convertBuffer.slice(0, coodinateLength) });
+				} else throw new Error("Absent mandatory parameter \"d\"");
 
 				if ("x" in json && "y" in json) this.publicKey = new ECPublicKey({ json: json });
 			}
@@ -8998,27 +9016,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				var publicKeyJWK = this.parsedKey.toJSON();
 
-				var _iteratorNormalCompletion6 = true;
-				var _didIteratorError6 = false;
-				var _iteratorError6 = undefined;
+				var _iteratorNormalCompletion8 = true;
+				var _didIteratorError8 = false;
+				var _iteratorError8 = undefined;
 
 				try {
-					for (var _iterator6 = Object.keys(publicKeyJWK)[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-						var key = _step6.value;
+					for (var _iterator8 = Object.keys(publicKeyJWK)[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+						var key = _step8.value;
 
 						jwk[key] = publicKeyJWK[key];
 					}
 				} catch (err) {
-					_didIteratorError6 = true;
-					_iteratorError6 = err;
+					_didIteratorError8 = true;
+					_iteratorError8 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion6 && _iterator6.return) {
-							_iterator6.return();
+						if (!_iteratorNormalCompletion8 && _iterator8.return) {
+							_iterator8.return();
 						}
 					} finally {
-						if (_didIteratorError6) {
-							throw _iteratorError6;
+						if (_didIteratorError8) {
+							throw _iteratorError8;
 						}
 					}
 				}
@@ -9134,7 +9152,1112 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	//**************************************************************************************
 
 	//**************************************************************************************
+	/**
+  * Class from RFC5652
+  */
 
+
+	var EncryptedContentInfo = function () {
+		//**********************************************************************************
+		/**
+   * Constructor for EncryptedContentInfo class
+   * @param {Object} [parameters={}]
+   * @property {Object} [schema] asn1js parsed value
+   */
+		function EncryptedContentInfo() {
+			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, EncryptedContentInfo);
+
+			//region Internal properties of the object
+			/**
+    * @type {string}
+    * @description contentType
+    */
+			this.contentType = getParametersValue(parameters, "contentType", EncryptedContentInfo.defaultValues("contentType"));
+			/**
+    * @type {AlgorithmIdentifier}
+    * @description contentEncryptionAlgorithm
+    */
+			this.contentEncryptionAlgorithm = getParametersValue(parameters, "contentEncryptionAlgorithm", EncryptedContentInfo.defaultValues("contentEncryptionAlgorithm"));
+
+			if ("encryptedContent" in parameters) {
+				/**
+     * @type {OctetString}
+     * @description encryptedContent (!!!) could be contructive or primitive value (!!!)
+     */
+				this.encryptedContent = parameters.encryptedContent;
+
+				if (this.encryptedContent.idBlock.tagClass === 1 && this.encryptedContent.idBlock.tagNumber === 4) {
+					//region Divide OCTETSTRING value down to small pieces
+					if (this.encryptedContent.idBlock.isConstructed === false) {
+						var constrString = new OctetString({
+							idBlock: { isConstructed: true },
+							isConstructed: true
+						});
+
+						var offset = 0;
+						var length = this.encryptedContent.valueBlock.valueHex.byteLength;
+
+						while (length > 0) {
+							var pieceView = new Uint8Array(this.encryptedContent.valueBlock.valueHex, offset, offset + 1024 > this.encryptedContent.valueBlock.valueHex.byteLength ? this.encryptedContent.valueBlock.valueHex.byteLength - offset : 1024);
+							var _array = new ArrayBuffer(pieceView.length);
+							var _view = new Uint8Array(_array);
+
+							for (var i = 0; i < _view.length; i++) {
+								_view[i] = pieceView[i];
+							}constrString.valueBlock.value.push(new OctetString({ valueHex: _array }));
+
+							length -= pieceView.length;
+							offset += pieceView.length;
+						}
+
+						this.encryptedContent = constrString;
+					}
+					//endregion
+				}
+			}
+			//endregion
+
+			//region If input argument array contains "schema" for this object
+			if ("schema" in parameters) this.fromSchema(parameters.schema);
+			//endregion
+		}
+		//**********************************************************************************
+		/**
+   * Return default values for all class members
+   * @param {string} memberName String name for a class member
+   */
+
+
+		_createClass(EncryptedContentInfo, [{
+			key: "fromSchema",
+
+			//**********************************************************************************
+			/**
+    * Convert parsed asn1js object into current class
+    * @param {!Object} schema
+    */
+			value: function fromSchema(schema) {
+				//region Check the schema is valid
+				var asn1 = compareSchema(schema, schema, EncryptedContentInfo.schema({
+					names: {
+						contentType: "contentType",
+						contentEncryptionAlgorithm: {
+							names: {
+								blockName: "contentEncryptionAlgorithm"
+							}
+						},
+						encryptedContent: "encryptedContent"
+					}
+				}));
+
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for EncryptedContentInfo");
+				//endregion
+
+				//region Get internal properties from parsed schema
+				this.contentType = asn1.result.contentType.valueBlock.toString();
+				this.contentEncryptionAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.contentEncryptionAlgorithm });
+
+				if ("encryptedContent" in asn1.result) {
+					this.encryptedContent = asn1.result.encryptedContent;
+
+					this.encryptedContent.idBlock.tagClass = 1; // UNIVERSAL
+					this.encryptedContent.idBlock.tagNumber = 4; // OCTETSTRING (!!!) The value still has instance of "in_window.org.pkijs.asn1.ASN1_CONSTRUCTED / ASN1_PRIMITIVE"
+				}
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convert current object to asn1js object and set correct values
+    * @returns {Object} asn1js object
+    */
+
+		}, {
+			key: "toSchema",
+			value: function toSchema() {
+				//region Create array for output sequence
+				var sequenceLengthBlock = {
+					isIndefiniteForm: false
+				};
+
+				var outputArray = [];
+
+				outputArray.push(new ObjectIdentifier({ value: this.contentType }));
+				outputArray.push(this.contentEncryptionAlgorithm.toSchema());
+
+				if ("encryptedContent" in this) {
+					sequenceLengthBlock.isIndefiniteForm = this.encryptedContent.idBlock.isConstructed;
+
+					var encryptedValue = this.encryptedContent;
+
+					encryptedValue.idBlock.tagClass = 3; // CONTEXT-SPECIFIC
+					encryptedValue.idBlock.tagNumber = 0; // [0]
+
+					encryptedValue.lenBlock.isIndefiniteForm = this.encryptedContent.idBlock.isConstructed;
+
+					outputArray.push(encryptedValue);
+				}
+				//endregion
+
+				//region Construct and return new ASN.1 schema for this object
+				return new Sequence({
+					lenBlock: sequenceLengthBlock,
+					value: outputArray
+				});
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convertion for the class to JSON object
+    * @returns {Object}
+    */
+
+		}, {
+			key: "toJSON",
+			value: function toJSON() {
+				var _object = {
+					contentType: this.contentType,
+					contentEncryptionAlgorithm: this.contentEncryptionAlgorithm.toJSON()
+				};
+
+				if ("encryptedContent" in this) _object.encryptedContent = this.encryptedContent.toJSON();
+
+				return _object;
+			}
+			//**********************************************************************************
+
+		}], [{
+			key: "defaultValues",
+			value: function defaultValues(memberName) {
+				switch (memberName) {
+					case "contentType":
+						return "";
+					case "contentEncryptionAlgorithm":
+						return new AlgorithmIdentifier();
+					case "encryptedContent":
+						return new OctetString();
+					default:
+						throw new Error("Invalid member name for EncryptedContentInfo class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Compare values with default values for all class members
+    * @param {string} memberName String name for a class member
+    * @param {*} memberValue Value to compare with default value
+    */
+
+		}, {
+			key: "compareWithDefault",
+			value: function compareWithDefault(memberName, memberValue) {
+				switch (memberName) {
+					case "contentType":
+						return memberValue === "";
+					case "contentEncryptionAlgorithm":
+						return memberValue.algorithmId === "" && "algorithmParams" in memberValue === false;
+					case "encryptedContent":
+						return memberValue.isEqual(EncryptedContentInfo.defaultValues(memberName));
+					default:
+						throw new Error("Invalid member name for EncryptedContentInfo class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Return value of asn1js schema for current class
+    * @param {Object} parameters Input parameters for the schema
+    * @returns {Object} asn1js schema object
+    */
+
+		}, {
+			key: "schema",
+			value: function schema() {
+				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+				//EncryptedContentInfo ::= SEQUENCE {
+				//    contentType ContentType,
+				//    contentEncryptionAlgorithm ContentEncryptionAlgorithmIdentifier,
+				//    encryptedContent [0] IMPLICIT EncryptedContent OPTIONAL }
+				//
+				// Comment: Strange, but modern crypto engines create "encryptedContent" as "[0] EXPLICIT EncryptedContent"
+				//
+				//EncryptedContent ::= OCTET STRING
+
+				/**
+     * @type {Object}
+     * @property {string} [blockName]
+     * @property {string} [contentType]
+     * @property {string} [contentEncryptionAlgorithm]
+     * @property {string} [encryptedContent]
+     */
+				var names = getParametersValue(parameters, "names", {});
+
+				return new Sequence({
+					name: names.blockName || "",
+					value: [new ObjectIdentifier({ name: names.contentType || "" }), AlgorithmIdentifier.schema(names.contentEncryptionAlgorithm || {}),
+					// The CHOICE we need because "EncryptedContent" could have either "constructive"
+					// or "primitive" form of encoding and we need to handle both variants
+					new Choice({
+						value: [new Constructed({
+							name: names.encryptedContent || "",
+							idBlock: {
+								tagClass: 3, // CONTEXT-SPECIFIC
+								tagNumber: 0 // [0]
+							},
+							value: [new Repeated({
+								value: new OctetString()
+							})]
+						}), new Primitive({
+							name: names.encryptedContent || "",
+							idBlock: {
+								tagClass: 3, // CONTEXT-SPECIFIC
+								tagNumber: 0 // [0]
+							}
+						})]
+					})]
+				});
+			}
+		}]);
+
+		return EncryptedContentInfo;
+	}();
+	//**************************************************************************************
+
+	//**************************************************************************************
+	/**
+  * Class from RFC4055
+  */
+
+
+	var RSASSAPSSParams = function () {
+		//**********************************************************************************
+		/**
+   * Constructor for RSASSAPSSParams class
+   * @param {Object} [parameters={}]
+   * @property {Object} [schema] asn1js parsed value
+   */
+		function RSASSAPSSParams() {
+			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, RSASSAPSSParams);
+
+			//region Internal properties of the object
+			/**
+    * @type {AlgorithmIdentifier}
+    * @description Algorithms of hashing (DEFAULT sha1)
+    */
+			this.hashAlgorithm = getParametersValue(parameters, "hashAlgorithm", RSASSAPSSParams.defaultValues("hashAlgorithm"));
+			/**
+    * @type {AlgorithmIdentifier}
+    * @description Algorithm of "mask generaion function (MGF)" (DEFAULT mgf1SHA1)
+    */
+			this.maskGenAlgorithm = getParametersValue(parameters, "maskGenAlgorithm", RSASSAPSSParams.defaultValues("maskGenAlgorithm"));
+			/**
+    * @type {number}
+    * @description Salt length (DEFAULT 20)
+    */
+			this.saltLength = getParametersValue(parameters, "saltLength", RSASSAPSSParams.defaultValues("saltLength"));
+			/**
+    * @type {number}
+    * @description (DEFAULT 1)
+    */
+			this.trailerField = getParametersValue(parameters, "trailerField", RSASSAPSSParams.defaultValues("trailerField"));
+			//endregion
+
+			//region If input argument array contains "schema" for this object
+			if ("schema" in parameters) this.fromSchema(parameters.schema);
+			//endregion
+		}
+		//**********************************************************************************
+		/**
+   * Return default values for all class members
+   * @param {string} memberName String name for a class member
+   */
+
+
+		_createClass(RSASSAPSSParams, [{
+			key: "fromSchema",
+
+			//**********************************************************************************
+			/**
+    * Convert parsed asn1js object into current class
+    * @param {!Object} schema
+    */
+			value: function fromSchema(schema) {
+				//region Check the schema is valid
+				var asn1 = compareSchema(schema, schema, RSASSAPSSParams.schema({
+					names: {
+						hashAlgorithm: {
+							names: {
+								blockName: "hashAlgorithm"
+							}
+						},
+						maskGenAlgorithm: {
+							names: {
+								blockName: "maskGenAlgorithm"
+							}
+						},
+						saltLength: "saltLength",
+						trailerField: "trailerField"
+					}
+				}));
+
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for RSASSA_PSS_params");
+				//endregion
+
+				//region Get internal properties from parsed schema
+				if ("hashAlgorithm" in asn1.result) this.hashAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.hashAlgorithm });
+
+				if ("maskGenAlgorithm" in asn1.result) this.maskGenAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.maskGenAlgorithm });
+
+				if ("saltLength" in asn1.result) this.saltLength = asn1.result.saltLength.valueBlock.valueDec;
+
+				if ("trailerField" in asn1.result) this.trailerField = asn1.result.trailerField.valueBlock.valueDec;
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convert current object to asn1js object and set correct values
+    * @returns {Object} asn1js object
+    */
+
+		}, {
+			key: "toSchema",
+			value: function toSchema() {
+				//region Create array for output sequence
+				var outputArray = [];
+
+				if (!this.hashAlgorithm.isEqual(RSASSAPSSParams.defaultValues("hashAlgorithm"))) {
+					outputArray.push(new Constructed({
+						idBlock: {
+							tagClass: 3, // CONTEXT-SPECIFIC
+							tagNumber: 0 // [0]
+						},
+						value: [this.hashAlgorithm.toSchema()]
+					}));
+				}
+
+				if (!this.maskGenAlgorithm.isEqual(RSASSAPSSParams.defaultValues("maskGenAlgorithm"))) {
+					outputArray.push(new Constructed({
+						idBlock: {
+							tagClass: 3, // CONTEXT-SPECIFIC
+							tagNumber: 1 // [1]
+						},
+						value: [this.maskGenAlgorithm.toSchema()]
+					}));
+				}
+
+				if (this.saltLength !== RSASSAPSSParams.defaultValues("saltLength")) {
+					outputArray.push(new Constructed({
+						idBlock: {
+							tagClass: 3, // CONTEXT-SPECIFIC
+							tagNumber: 2 // [2]
+						},
+						value: [new Integer({ value: this.saltLength })]
+					}));
+				}
+
+				if (this.trailerField !== RSASSAPSSParams.defaultValues("trailerField")) {
+					outputArray.push(new Constructed({
+						idBlock: {
+							tagClass: 3, // CONTEXT-SPECIFIC
+							tagNumber: 3 // [3]
+						},
+						value: [new Integer({ value: this.trailerField })]
+					}));
+				}
+				//endregion
+
+				//region Construct and return new ASN.1 schema for this object
+				return new Sequence({
+					value: outputArray
+				});
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convertion for the class to JSON object
+    * @returns {Object}
+    */
+
+		}, {
+			key: "toJSON",
+			value: function toJSON() {
+				var object = {};
+
+				if (!this.hashAlgorithm.isEqual(RSASSAPSSParams.defaultValues("hashAlgorithm"))) object.hashAlgorithm = this.hashAlgorithm.toJSON();
+
+				if (!this.maskGenAlgorithm.isEqual(RSASSAPSSParams.defaultValues("maskGenAlgorithm"))) object.maskGenAlgorithm = this.maskGenAlgorithm.toJSON();
+
+				if (this.saltLength !== RSASSAPSSParams.defaultValues("saltLength")) object.saltLength = this.saltLength;
+
+				if (this.trailerField !== RSASSAPSSParams.defaultValues("trailerField")) object.trailerField = this.trailerField;
+
+				return object;
+			}
+			//**********************************************************************************
+
+		}], [{
+			key: "defaultValues",
+			value: function defaultValues(memberName) {
+				switch (memberName) {
+					case "hashAlgorithm":
+						return new AlgorithmIdentifier({
+							algorithmId: "1.3.14.3.2.26", // SHA-1
+							algorithmParams: new Null()
+						});
+					case "maskGenAlgorithm":
+						return new AlgorithmIdentifier({
+							algorithmId: "1.2.840.113549.1.1.8", // MGF1
+							algorithmParams: new AlgorithmIdentifier({
+								algorithmId: "1.3.14.3.2.26", // SHA-1
+								algorithmParams: new Null()
+							}).toSchema()
+						});
+					case "saltLength":
+						return 20;
+					case "trailerField":
+						return 1;
+					default:
+						throw new Error("Invalid member name for RSASSAPSSParams class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Return value of asn1js schema for current class
+    * @param {Object} parameters Input parameters for the schema
+    * @returns {Object} asn1js schema object
+    */
+
+		}, {
+			key: "schema",
+			value: function schema() {
+				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+				//RSASSA-PSS-params  ::=  Sequence  {
+				//    hashAlgorithm      [0] HashAlgorithm DEFAULT sha1Identifier,
+				//    maskGenAlgorithm   [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
+				//    saltLength         [2] Integer DEFAULT 20,
+				//    trailerField       [3] Integer DEFAULT 1  }
+
+				/**
+     * @type {Object}
+     * @property {string} [blockName]
+     * @property {string} [hashAlgorithm]
+     * @property {string} [maskGenAlgorithm]
+     * @property {string} [saltLength]
+     * @property {string} [trailerField]
+     */
+				var names = getParametersValue(parameters, "names", {});
+
+				return new Sequence({
+					name: names.blockName || "",
+					value: [new Constructed({
+						idBlock: {
+							tagClass: 3, // CONTEXT-SPECIFIC
+							tagNumber: 0 // [0]
+						},
+						optional: true,
+						value: [AlgorithmIdentifier.schema(names.hashAlgorithm || {})]
+					}), new Constructed({
+						idBlock: {
+							tagClass: 3, // CONTEXT-SPECIFIC
+							tagNumber: 1 // [1]
+						},
+						optional: true,
+						value: [AlgorithmIdentifier.schema(names.maskGenAlgorithm || {})]
+					}), new Constructed({
+						idBlock: {
+							tagClass: 3, // CONTEXT-SPECIFIC
+							tagNumber: 2 // [2]
+						},
+						optional: true,
+						value: [new Integer({ name: names.saltLength || "" })]
+					}), new Constructed({
+						idBlock: {
+							tagClass: 3, // CONTEXT-SPECIFIC
+							tagNumber: 3 // [3]
+						},
+						optional: true,
+						value: [new Integer({ name: names.trailerField || "" })]
+					})]
+				});
+			}
+		}]);
+
+		return RSASSAPSSParams;
+	}();
+	//**************************************************************************************
+
+	//**************************************************************************************
+	/**
+  * Class from RFC2898
+  */
+
+
+	var PBKDF2Params = function () {
+		//**********************************************************************************
+		/**
+   * Constructor for PBKDF2Params class
+   * @param {Object} [parameters={}]
+   * @property {Object} [schema] asn1js parsed value
+   */
+		function PBKDF2Params() {
+			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, PBKDF2Params);
+
+			//region Internal properties of the object
+			/**
+    * @type {Object}
+    * @description salt
+    */
+			this.salt = getParametersValue(parameters, "salt", PBKDF2Params.defaultValues("salt"));
+			/**
+    * @type {number}
+    * @description iterationCount
+    */
+			this.iterationCount = getParametersValue(parameters, "iterationCount", PBKDF2Params.defaultValues("iterationCount"));
+
+			if ("keyLength" in parameters)
+				/**
+     * @type {number}
+     * @description keyLength
+     */
+				this.keyLength = getParametersValue(parameters, "keyLength", PBKDF2Params.defaultValues("keyLength"));
+
+			if ("prf" in parameters)
+				/**
+     * @type {AlgorithmIdentifier}
+     * @description prf
+     */
+				this.prf = getParametersValue(parameters, "prf", PBKDF2Params.defaultValues("prf"));
+			//endregion
+
+			//region If input argument array contains "schema" for this object
+			if ("schema" in parameters) this.fromSchema(parameters.schema);
+			//endregion
+		}
+		//**********************************************************************************
+		/**
+   * Return default values for all class members
+   * @param {string} memberName String name for a class member
+   */
+
+
+		_createClass(PBKDF2Params, [{
+			key: "fromSchema",
+
+			//**********************************************************************************
+			/**
+    * Convert parsed asn1js object into current class
+    * @param {!Object} schema
+    */
+			value: function fromSchema(schema) {
+				//region Check the schema is valid
+				var asn1 = compareSchema(schema, schema, PBKDF2Params.schema({
+					names: {
+						saltPrimitive: "salt",
+						saltConstructed: {
+							names: {
+								blockName: "salt"
+							}
+						},
+						iterationCount: "iterationCount",
+						keyLength: "keyLength",
+						prf: {
+							names: {
+								blockName: "prf",
+								optional: true
+							}
+						}
+					}
+				}));
+
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for PBKDF2_params");
+				//endregion
+
+				//region Get internal properties from parsed schema
+				this.salt = asn1.result.salt;
+				this.iterationCount = asn1.result.iterationCount.valueBlock.valueDec;
+
+				if ("keyLength" in asn1.result) this.keyLength = asn1.result.keyLength.valueBlock.valueDec;
+
+				if ("prf" in asn1.result) this.prf = new AlgorithmIdentifier({ schema: asn1.result.prf });
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convert current object to asn1js object and set correct values
+    * @returns {Object} asn1js object
+    */
+
+		}, {
+			key: "toSchema",
+			value: function toSchema() {
+				//region Create array for output sequence 
+				var outputArray = [];
+
+				outputArray.push(this.salt);
+				outputArray.push(new Integer({ value: this.iterationCount }));
+
+				if ("keyLength" in this) {
+					if (PBKDF2Params.defaultValues("keyLength") !== this.keyLength) outputArray.push(new Integer({ value: this.keyLength }));
+				}
+
+				if ("prf" in this) {
+					if (PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false) outputArray.push(this.prf.toSchema());
+				}
+				//endregion 
+
+				//region Construct and return new ASN.1 schema for this object 
+				return new Sequence({
+					value: outputArray
+				});
+				//endregion 
+			}
+			//**********************************************************************************
+			/**
+    * Convertion for the class to JSON object
+    * @returns {Object}
+    */
+
+		}, {
+			key: "toJSON",
+			value: function toJSON() {
+				var _object = {
+					salt: this.salt.toJSON(),
+					iterationCount: this.iterationCount
+				};
+
+				if ("keyLength" in this) {
+					if (PBKDF2Params.defaultValues("keyLength") !== this.keyLength) _object.keyLength = this.keyLength;
+				}
+
+				if ("prf" in this) {
+					if (PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false) _object.prf = this.prf.toJSON();
+				}
+
+				return _object;
+			}
+			//**********************************************************************************
+
+		}], [{
+			key: "defaultValues",
+			value: function defaultValues(memberName) {
+				switch (memberName) {
+					case "salt":
+						return {};
+					case "iterationCount":
+						return -1;
+					case "keyLength":
+						return 0;
+					case "prf":
+						return new AlgorithmIdentifier({
+							algorithmId: "1.3.14.3.2.26", // SHA-1
+							algorithmParams: new Null()
+						});
+					default:
+						throw new Error("Invalid member name for PBKDF2Params class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Return value of asn1js schema for current class
+    * @param {Object} parameters Input parameters for the schema
+    * @returns {Object} asn1js schema object
+    */
+
+		}, {
+			key: "schema",
+			value: function schema() {
+				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+				//PBKDF2-params ::= SEQUENCE {
+				//    salt CHOICE {
+				//        specified OCTET STRING,
+				//        otherSource AlgorithmIdentifier },
+				//  iterationCount INTEGER (1..MAX),
+				//  keyLength INTEGER (1..MAX) OPTIONAL,
+				//  prf AlgorithmIdentifier
+				//    DEFAULT { algorithm hMAC-SHA1, parameters NULL } }
+
+				/**
+     * @type {Object}
+     * @property {string} [blockName]
+     * @property {string} [saltPrimitive]
+     * @property {string} [saltConstructed]
+     * @property {string} [iterationCount]
+     * @property {string} [keyLength]
+     * @property {string} [prf]
+     */
+				var names = getParametersValue(parameters, "names", {});
+
+				return new Sequence({
+					name: names.blockName || "",
+					value: [new Choice({
+						value: [new OctetString({ name: names.saltPrimitive || "" }), AlgorithmIdentifier.schema(names.saltConstructed || {})]
+					}), new Integer({ name: names.iterationCount || "" }), new Integer({
+						name: names.keyLength || "",
+						optional: true
+					}), AlgorithmIdentifier.schema(names.prf || {
+						names: {
+							optional: true
+						}
+					})]
+				});
+			}
+		}]);
+
+		return PBKDF2Params;
+	}();
+	//**************************************************************************************
+
+	//**************************************************************************************
+	/**
+  * Class from RFC2898
+  */
+
+
+	var PBES2Params = function () {
+		//**********************************************************************************
+		/**
+   * Constructor for PBES2Params class
+   * @param {Object} [parameters={}]
+   * @property {Object} [schema] asn1js parsed value
+   */
+		function PBES2Params() {
+			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, PBES2Params);
+
+			//region Internal properties of the object
+			/**
+    * @type {AlgorithmIdentifier}
+    * @description keyDerivationFunc
+    */
+			this.keyDerivationFunc = getParametersValue(parameters, "keyDerivationFunc", PBES2Params.defaultValues("keyDerivationFunc"));
+			/**
+    * @type {AlgorithmIdentifier}
+    * @description encryptionScheme
+    */
+			this.encryptionScheme = getParametersValue(parameters, "encryptionScheme", PBES2Params.defaultValues("encryptionScheme"));
+			//endregion
+
+			//region If input argument array contains "schema" for this object
+			if ("schema" in parameters) this.fromSchema(parameters.schema);
+			//endregion
+		}
+		//**********************************************************************************
+		/**
+   * Return default values for all class members
+   * @param {string} memberName String name for a class member
+   */
+
+
+		_createClass(PBES2Params, [{
+			key: "fromSchema",
+
+			//**********************************************************************************
+			/**
+    * Convert parsed asn1js object into current class
+    * @param {!Object} schema
+    */
+			value: function fromSchema(schema) {
+				//region Check the schema is valid
+				var asn1 = compareSchema(schema, schema, PBES2Params.schema({
+					names: {
+						keyDerivationFunc: {
+							names: {
+								blockName: "keyDerivationFunc"
+							}
+						},
+						encryptionScheme: {
+							names: {
+								blockName: "encryptionScheme"
+							}
+						}
+					}
+				}));
+
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for PBES2_params");
+				//endregion
+
+				//region Get internal properties from parsed schema
+				this.keyDerivationFunc = new AlgorithmIdentifier({ schema: asn1.result.keyDerivationFunc });
+				this.encryptionScheme = new AlgorithmIdentifier({ schema: asn1.result.encryptionScheme });
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convert current object to asn1js object and set correct values
+    * @returns {Object} asn1js object
+    */
+
+		}, {
+			key: "toSchema",
+			value: function toSchema() {
+				//region Construct and return new ASN.1 schema for this object
+				return new Sequence({
+					value: [this.keyDerivationFunc.toSchema(), this.encryptionScheme.toSchema()]
+				});
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convertion for the class to JSON object
+    * @returns {Object}
+    */
+
+		}, {
+			key: "toJSON",
+			value: function toJSON() {
+				return {
+					keyDerivationFunc: this.keyDerivationFunc.toJSON(),
+					encryptionScheme: this.encryptionScheme.toJSON()
+				};
+			}
+			//**********************************************************************************
+
+		}], [{
+			key: "defaultValues",
+			value: function defaultValues(memberName) {
+				switch (memberName) {
+					case "keyDerivationFunc":
+						return new AlgorithmIdentifier();
+					case "encryptionScheme":
+						return new AlgorithmIdentifier();
+					default:
+						throw new Error("Invalid member name for PBES2Params class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Return value of asn1js schema for current class
+    * @param {Object} parameters Input parameters for the schema
+    * @returns {Object} asn1js schema object
+    */
+
+		}, {
+			key: "schema",
+			value: function schema() {
+				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+				//PBES2-params ::= SEQUENCE {
+				//    keyDerivationFunc AlgorithmIdentifier {{PBES2-KDFs}},
+				//    encryptionScheme AlgorithmIdentifier {{PBES2-Encs}} }
+
+				/**
+     * @type {Object}
+     * @property {string} [blockName]
+     * @property {string} [keyDerivationFunc]
+     * @property {string} [encryptionScheme]
+     */
+				var names = getParametersValue(parameters, "names", {});
+
+				return new Sequence({
+					name: names.blockName || "",
+					value: [AlgorithmIdentifier.schema(names.keyDerivationFunc || {}), AlgorithmIdentifier.schema(names.encryptionScheme || {})]
+				});
+			}
+		}]);
+
+		return PBES2Params;
+	}();
+	//**************************************************************************************
+
+	//**************************************************************************************
+	/**
+  * Making MAC key using algorithm described in B.2 of PKCS#12 standard.
+  */
+
+
+	function makePKCS12B2Key(cryptoEngine, hashAlgorithm, keyLength, password, salt, iterationCount) {
+		//region Initial variables
+		var u = void 0;
+		var v = void 0;
+
+		var result = [];
+		//endregion
+
+		//region Get "u" and "v" values
+		switch (hashAlgorithm.toUpperCase()) {
+			case "SHA-1":
+				u = 20; // 160
+				v = 64; // 512
+				break;
+			case "SHA-256":
+				u = 32; // 256
+				v = 64; // 512
+				break;
+			case "SHA-384":
+				u = 48; // 384
+				v = 128; // 1024
+				break;
+			case "SHA-512":
+				u = 64; // 512
+				v = 128; // 1024
+				break;
+			default:
+				throw new Error("Unsupported hashing algorithm");
+		}
+		//endregion
+
+		//region Main algorithm making key
+		//region Transform password to UTF-8 like string
+		var passwordViewInitial = new Uint8Array(password);
+
+		var passwordTransformed = new ArrayBuffer(password.byteLength * 2 + 2);
+		var passwordTransformedView = new Uint8Array(passwordTransformed);
+
+		for (var i = 0; i < passwordViewInitial.length; i++) {
+			passwordTransformedView[i * 2] = 0x00;
+			passwordTransformedView[i * 2 + 1] = passwordViewInitial[i];
+		}
+
+		passwordTransformedView[passwordTransformedView.length - 2] = 0x00;
+		passwordTransformedView[passwordTransformedView.length - 1] = 0x00;
+
+		password = passwordTransformed.slice(0);
+		//endregion
+
+		//region Construct a string D (the "diversifier") by concatenating v/8 copies of ID
+		var D = new ArrayBuffer(v);
+		var dView = new Uint8Array(D);
+
+		for (var _i13 = 0; _i13 < D.byteLength; _i13++) {
+			dView[_i13] = 3;
+		} // The ID value equal to "3" for MACing (see B.3 of standard)
+		//endregion
+
+		//region Concatenate copies of the salt together to create a string S of length v * ceil(s / v) bytes (the final copy of the salt may be trunacted to create S)
+		var saltLength = salt.byteLength;
+
+		var sLen = v * Math.ceil(saltLength / v);
+		var S = new ArrayBuffer(sLen);
+		var sView = new Uint8Array(S);
+
+		var saltView = new Uint8Array(salt);
+
+		for (var _i14 = 0; _i14 < sLen; _i14++) {
+			sView[_i14] = saltView[_i14 % saltLength];
+		} //endregion
+
+		//region Concatenate copies of the password together to create a string P of length v * ceil(p / v) bytes (the final copy of the password may be truncated to create P)
+		var passwordLength = password.byteLength;
+
+		var pLen = v * Math.ceil(passwordLength / v);
+		var P = new ArrayBuffer(pLen);
+		var pView = new Uint8Array(P);
+
+		var passwordView = new Uint8Array(password);
+
+		for (var _i15 = 0; _i15 < pLen; _i15++) {
+			pView[_i15] = passwordView[_i15 % passwordLength];
+		} //endregion
+
+		//region Set I=S||P to be the concatenation of S and P
+		var sPlusPLength = S.byteLength + P.byteLength;
+
+		var I = new ArrayBuffer(sPlusPLength);
+		var iView = new Uint8Array(I);
+
+		iView.set(sView);
+		iView.set(pView, sView.length);
+		//endregion
+
+		//region Set c=ceil(n / u)
+		var c = Math.ceil((keyLength >> 3) / u);
+		//endregion
+
+		//region Initial variables
+		var internalSequence = Promise.resolve(I);
+		//endregion
+
+		//region For i=1, 2, ..., c, do the following:
+		for (var _i16 = 0; _i16 <= c; _i16++) {
+			internalSequence = internalSequence.then(function (_I) {
+				//region Create contecanetion of D and I
+				var dAndI = new ArrayBuffer(D.byteLength + _I.byteLength);
+				var dAndIView = new Uint8Array(dAndI);
+
+				dAndIView.set(dView);
+				dAndIView.set(iView, dView.length);
+				//endregion
+
+				return dAndI;
+			});
+
+			//region Make "iterationCount" rounds of hashing
+			for (var j = 0; j < iterationCount; j++) {
+				internalSequence = internalSequence.then(function (roundBuffer) {
+					return cryptoEngine.digest({ name: hashAlgorithm }, new Uint8Array(roundBuffer));
+				});
+			} //endregion
+
+			internalSequence = internalSequence.then(function (roundBuffer) {
+				//region Concatenate copies of Ai to create a string B of length v bits (the final copy of Ai may be truncated to create B)
+				var B = new ArrayBuffer(v);
+				var bView = new Uint8Array(B);
+
+				for (var _j = 0; _j < B.byteLength; _j++) {
+					bView[_j] = roundBuffer[_j % roundBuffer.length];
+				} //endregion
+
+				//region Make new I value
+				var k = Math.ceil(saltLength / v) + Math.ceil(passwordLength / v);
+				var iRound = [];
+
+				var sliceStart = 0;
+				var sliceLength = v;
+
+				for (var _j2 = 0; _j2 < k; _j2++) {
+					var chunk = Array.from(new Uint8Array(I.slice(sliceStart, sliceStart + sliceLength)));
+					sliceStart += v;
+					if (sliceStart + v > I.byteLength) sliceLength = I.byteLength - sliceStart;
+
+					var x = 0x1ff;
+
+					for (var l = B.byteLength - 1; l >= 0; l--) {
+						x = x >> 8;
+						x += bView[l] + chunk[l];
+						chunk[l] = x & 0xff;
+					}
+
+					iRound.push.apply(iRound, _toConsumableArray(chunk));
+				}
+
+				I = new ArrayBuffer(iRound.length);
+				iView = new Uint8Array(I);
+
+				iView.set(iRound);
+				//endregion
+
+				result.push.apply(result, _toConsumableArray(new Uint8Array(roundBuffer)));
+
+				return I;
+			});
+		}
+		//endregion
+
+		//region Initialize final key
+		internalSequence = internalSequence.then(function () {
+			var resultBuffer = new ArrayBuffer(keyLength >> 3);
+			var resultView = new Uint8Array(resultBuffer);
+
+			resultView.set(new Uint8Array(result).slice(0, keyLength >> 3));
+
+			return resultBuffer;
+		});
+		//endregion
+		//endregion
+
+		return internalSequence;
+	}
+	//**************************************************************************************
+	/**
+  * Default cryptographic engine for Web Cryptography API
+  */
 
 	var CryptoEngine = function () {
 		//**********************************************************************************
@@ -9150,11 +10273,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 			//region Internal properties of the object
 			/**
-    * @type {string}
-    * @description Usually here we are expecting "window.crypto.subtle" or an equivalent from custom "crypto engine"
+    * @type {Object}
+    * @description Usually here we are expecting "window.crypto" or an equivalent from custom "crypto engine"
     */
 			this.crypto = getParametersValue(parameters, "crypto", {});
-
+			/**
+    * @type {Object}
+    * @description Usually here we are expecting "window.crypto.subtle" or an equivalent from custom "crypto engine"
+    */
+			this.subtle = getParametersValue(parameters, "subtle", {});
 			/**
     * @type {string}
     * @description Name of the "crypto engine"
@@ -9189,7 +10316,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				switch (format.toLowerCase()) {
 					case "raw":
-						return this.crypto.importKey("raw", keyData, algorithm, extractable, keyUsages);
+						return this.subtle.importKey("raw", keyData, algorithm, extractable, keyUsages);
 					case "spki":
 						{
 							var asn1 = fromBER(keyData);
@@ -9258,27 +10385,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										//region Create RSA Public Key elements
 										var publicKeyJSON = publicKeyInfo.toJSON();
 
-										var _iteratorNormalCompletion7 = true;
-										var _didIteratorError7 = false;
-										var _iteratorError7 = undefined;
+										var _iteratorNormalCompletion9 = true;
+										var _didIteratorError9 = false;
+										var _iteratorError9 = undefined;
 
 										try {
-											for (var _iterator7 = Object.keys(publicKeyJSON)[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-												var key = _step7.value;
+											for (var _iterator9 = Object.keys(publicKeyJSON)[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+												var key = _step9.value;
 
 												jwk[key] = publicKeyJSON[key];
 											} //endregion
 										} catch (err) {
-											_didIteratorError7 = true;
-											_iteratorError7 = err;
+											_didIteratorError9 = true;
+											_iteratorError9 = err;
 										} finally {
 											try {
-												if (!_iteratorNormalCompletion7 && _iterator7.return) {
-													_iterator7.return();
+												if (!_iteratorNormalCompletion9 && _iterator9.return) {
+													_iterator9.return();
 												}
 											} finally {
-												if (_didIteratorError7) {
-													throw _iteratorError7;
+												if (_didIteratorError9) {
+													throw _iteratorError9;
 												}
 											}
 										}
@@ -9303,27 +10430,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										//region Create ECDSA Public Key elements
 										var _publicKeyJSON = publicKeyInfo.toJSON();
 
-										var _iteratorNormalCompletion8 = true;
-										var _didIteratorError8 = false;
-										var _iteratorError8 = undefined;
+										var _iteratorNormalCompletion10 = true;
+										var _didIteratorError10 = false;
+										var _iteratorError10 = undefined;
 
 										try {
-											for (var _iterator8 = Object.keys(_publicKeyJSON)[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-												var _key2 = _step8.value;
+											for (var _iterator10 = Object.keys(_publicKeyJSON)[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+												var _key3 = _step10.value;
 
-												jwk[_key2] = _publicKeyJSON[_key2];
+												jwk[_key3] = _publicKeyJSON[_key3];
 											} //endregion
 										} catch (err) {
-											_didIteratorError8 = true;
-											_iteratorError8 = err;
+											_didIteratorError10 = true;
+											_iteratorError10 = err;
 										} finally {
 											try {
-												if (!_iteratorNormalCompletion8 && _iterator8.return) {
-													_iterator8.return();
+												if (!_iteratorNormalCompletion10 && _iterator10.return) {
+													_iterator10.return();
 												}
 											} finally {
-												if (_didIteratorError8) {
-													throw _iteratorError8;
+												if (_didIteratorError10) {
+													throw _iteratorError10;
 												}
 											}
 										}
@@ -9357,27 +10484,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										//region Create ECDSA Public Key elements
 										var _publicKeyJSON2 = publicKeyInfo.toJSON();
 
-										var _iteratorNormalCompletion9 = true;
-										var _didIteratorError9 = false;
-										var _iteratorError9 = undefined;
+										var _iteratorNormalCompletion11 = true;
+										var _didIteratorError11 = false;
+										var _iteratorError11 = undefined;
 
 										try {
-											for (var _iterator9 = Object.keys(_publicKeyJSON2)[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-												var _key3 = _step9.value;
+											for (var _iterator11 = Object.keys(_publicKeyJSON2)[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+												var _key4 = _step11.value;
 
-												jwk[_key3] = _publicKeyJSON2[_key3];
+												jwk[_key4] = _publicKeyJSON2[_key4];
 											} //endregion
 										} catch (err) {
-											_didIteratorError9 = true;
-											_iteratorError9 = err;
+											_didIteratorError11 = true;
+											_iteratorError11 = err;
 										} finally {
 											try {
-												if (!_iteratorNormalCompletion9 && _iterator9.return) {
-													_iterator9.return();
+												if (!_iteratorNormalCompletion11 && _iterator11.return) {
+													_iterator11.return();
 												}
 											} finally {
-												if (_didIteratorError9) {
-													throw _iteratorError9;
+												if (_didIteratorError11) {
+													throw _iteratorError11;
 												}
 											}
 										}
@@ -9461,27 +10588,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										//region Create RSA Private Key elements
 										var privateKeyJSON = privateKeyInfo.toJSON();
 
-										var _iteratorNormalCompletion10 = true;
-										var _didIteratorError10 = false;
-										var _iteratorError10 = undefined;
+										var _iteratorNormalCompletion12 = true;
+										var _didIteratorError12 = false;
+										var _iteratorError12 = undefined;
 
 										try {
-											for (var _iterator10 = Object.keys(privateKeyJSON)[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-												var _key4 = _step10.value;
+											for (var _iterator12 = Object.keys(privateKeyJSON)[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+												var _key5 = _step12.value;
 
-												jwk[_key4] = privateKeyJSON[_key4];
+												jwk[_key5] = privateKeyJSON[_key5];
 											} //endregion
 										} catch (err) {
-											_didIteratorError10 = true;
-											_iteratorError10 = err;
+											_didIteratorError12 = true;
+											_iteratorError12 = err;
 										} finally {
 											try {
-												if (!_iteratorNormalCompletion10 && _iterator10.return) {
-													_iterator10.return();
+												if (!_iteratorNormalCompletion12 && _iterator12.return) {
+													_iterator12.return();
 												}
 											} finally {
-												if (_didIteratorError10) {
-													throw _iteratorError10;
+												if (_didIteratorError12) {
+													throw _iteratorError12;
 												}
 											}
 										}
@@ -9506,27 +10633,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										//region Create ECDSA Private Key elements
 										var _privateKeyJSON = privateKeyInfo.toJSON();
 
-										var _iteratorNormalCompletion11 = true;
-										var _didIteratorError11 = false;
-										var _iteratorError11 = undefined;
+										var _iteratorNormalCompletion13 = true;
+										var _didIteratorError13 = false;
+										var _iteratorError13 = undefined;
 
 										try {
-											for (var _iterator11 = Object.keys(_privateKeyJSON)[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-												var _key5 = _step11.value;
+											for (var _iterator13 = Object.keys(_privateKeyJSON)[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+												var _key6 = _step13.value;
 
-												jwk[_key5] = _privateKeyJSON[_key5];
+												jwk[_key6] = _privateKeyJSON[_key6];
 											} //endregion
 										} catch (err) {
-											_didIteratorError11 = true;
-											_iteratorError11 = err;
+											_didIteratorError13 = true;
+											_iteratorError13 = err;
 										} finally {
 											try {
-												if (!_iteratorNormalCompletion11 && _iterator11.return) {
-													_iterator11.return();
+												if (!_iteratorNormalCompletion13 && _iterator13.return) {
+													_iterator13.return();
 												}
 											} finally {
-												if (_didIteratorError11) {
-													throw _iteratorError11;
+												if (_didIteratorError13) {
+													throw _iteratorError13;
 												}
 											}
 										}
@@ -9562,27 +10689,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										//region Create RSA Private Key elements
 										var _privateKeyJSON2 = privateKeyInfo.toJSON();
 
-										var _iteratorNormalCompletion12 = true;
-										var _didIteratorError12 = false;
-										var _iteratorError12 = undefined;
+										var _iteratorNormalCompletion14 = true;
+										var _didIteratorError14 = false;
+										var _iteratorError14 = undefined;
 
 										try {
-											for (var _iterator12 = Object.keys(_privateKeyJSON2)[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
-												var _key6 = _step12.value;
+											for (var _iterator14 = Object.keys(_privateKeyJSON2)[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+												var _key7 = _step14.value;
 
-												jwk[_key6] = _privateKeyJSON2[_key6];
+												jwk[_key7] = _privateKeyJSON2[_key7];
 											} //endregion
 										} catch (err) {
-											_didIteratorError12 = true;
-											_iteratorError12 = err;
+											_didIteratorError14 = true;
+											_iteratorError14 = err;
 										} finally {
 											try {
-												if (!_iteratorNormalCompletion12 && _iterator12.return) {
-													_iterator12.return();
+												if (!_iteratorNormalCompletion14 && _iterator14.return) {
+													_iterator14.return();
 												}
 											} finally {
-												if (_didIteratorError12) {
-													throw _iteratorError12;
+												if (_didIteratorError14) {
+													throw _iteratorError14;
 												}
 											}
 										}
@@ -9604,24 +10731,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				if (this.name.toLowerCase() === "safari") {
 					// Try to use both ways - import using ArrayBuffer and pure JWK (for Safari Technology Preview)
 					return Promise.resolve().then(function () {
-						return _this52.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages);
+						return _this52.subtle.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages);
 					}).then(function (result) {
 						return result;
 					}, function (error) {
-						return _this52.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages);
-					});
-
-					return Promise.resolve().then(function () {
-						return this.crypto.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages);
-					}).then(function (result) {
-						return result;
-					}, function (error) {
-						return this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages);
+						return _this52.subtle.importKey("jwk", jwk, algorithm, extractable, keyUsages);
 					});
 				}
 				//endregion
 
-				return this.crypto.importKey("jwk", jwk, algorithm, extractable, keyUsages);
+				return this.subtle.importKey("jwk", jwk, algorithm, extractable, keyUsages);
 			}
 			//**********************************************************************************
 			/**
@@ -9634,7 +10753,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "exportKey",
 			value: function exportKey(format, key) {
-				var sequence = this.crypto.exportKey("jwk", key);
+				var sequence = this.subtle.exportKey("jwk", key);
 
 				//region Currently Safari returns ArrayBuffer as JWK thus we need an additional transformation
 				if (this.name.toLowerCase() === "safari") {
@@ -9649,7 +10768,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				switch (format.toLowerCase()) {
 					case "raw":
-						return this.crypto.exportKey("raw", key);
+						return this.subtle.exportKey("raw", key);
 					case "spki":
 						sequence = sequence.then(function (result) {
 							var publicKeyInfo = new PublicKeyInfo();
@@ -9808,9 +10927,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "encrypt",
 			value: function encrypt() {
-				var _crypto;
+				var _subtle;
 
-				return (_crypto = this.crypto).encrypt.apply(_crypto, arguments);
+				return (_subtle = this.subtle).encrypt.apply(_subtle, arguments);
 			}
 			//**********************************************************************************
 			/**
@@ -9822,9 +10941,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "decrypt",
 			value: function decrypt() {
-				var _crypto2;
+				var _subtle2;
 
-				return (_crypto2 = this.crypto).decrypt.apply(_crypto2, arguments);
+				return (_subtle2 = this.subtle).decrypt.apply(_subtle2, arguments);
 			}
 			//**********************************************************************************
 			/**
@@ -9836,9 +10955,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "sign",
 			value: function sign() {
-				var _crypto3;
+				var _subtle3;
 
-				return (_crypto3 = this.crypto).sign.apply(_crypto3, arguments);
+				return (_subtle3 = this.subtle).sign.apply(_subtle3, arguments);
 			}
 			//**********************************************************************************
 			/**
@@ -9850,9 +10969,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _crypto4;
+				var _subtle4;
 
-				return (_crypto4 = this.crypto).verify.apply(_crypto4, arguments);
+				return (_subtle4 = this.subtle).verify.apply(_subtle4, arguments);
 			}
 			//**********************************************************************************
 			/**
@@ -9864,9 +10983,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "digest",
 			value: function digest() {
-				var _crypto5;
+				var _subtle5;
 
-				return (_crypto5 = this.crypto).digest.apply(_crypto5, arguments);
+				return (_subtle5 = this.subtle).digest.apply(_subtle5, arguments);
 			}
 			//**********************************************************************************
 			/**
@@ -9878,9 +10997,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "generateKey",
 			value: function generateKey() {
-				var _crypto6;
+				var _subtle6;
 
-				return (_crypto6 = this.crypto).generateKey.apply(_crypto6, arguments);
+				return (_subtle6 = this.subtle).generateKey.apply(_subtle6, arguments);
 			}
 			//**********************************************************************************
 			/**
@@ -9892,9 +11011,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "deriveKey",
 			value: function deriveKey() {
-				var _crypto7;
+				var _subtle7;
 
-				return (_crypto7 = this.crypto).deriveKey.apply(_crypto7, arguments);
+				return (_subtle7 = this.subtle).deriveKey.apply(_subtle7, arguments);
 			}
 			//**********************************************************************************
 			/**
@@ -9906,9 +11025,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "deriveBits",
 			value: function deriveBits() {
-				var _crypto8;
+				var _subtle8;
 
-				return (_crypto8 = this.crypto).deriveBits.apply(_crypto8, arguments);
+				return (_subtle8 = this.subtle).deriveBits.apply(_subtle8, arguments);
 			}
 			//**********************************************************************************
 			/**
@@ -9920,9 +11039,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "wrapKey",
 			value: function wrapKey() {
-				var _crypto9;
+				var _subtle9;
 
-				return (_crypto9 = this.crypto).wrapKey.apply(_crypto9, arguments);
+				return (_subtle9 = this.subtle).wrapKey.apply(_subtle9, arguments);
 			}
 			//**********************************************************************************
 			/**
@@ -9934,9 +11053,1452 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "unwrapKey",
 			value: function unwrapKey() {
-				var _crypto10;
+				var _subtle10;
 
-				return (_crypto10 = this.crypto).unwrapKey.apply(_crypto10, arguments);
+				return (_subtle10 = this.subtle).unwrapKey.apply(_subtle10, arguments);
+			}
+			//**********************************************************************************
+			/**
+    * Initialize input Uint8Array by random values (with help from current "crypto engine")
+    * @param {!Uint8Array} view
+    * @returns {*}
+    */
+
+		}, {
+			key: "getRandomValues",
+			value: function getRandomValues(view) {
+				if ("getRandomValues" in this.crypto === false) throw new Error("No support for getRandomValues");
+
+				return this.crypto.getRandomValues(view);
+			}
+			//**********************************************************************************
+			/**
+    * Get WebCrypto algorithm by wel-known OID
+    * @param {string} oid well-known OID to search for
+    * @returns {Object}
+    */
+
+		}, {
+			key: "getAlgorithmByOID",
+			value: function getAlgorithmByOID(oid) {
+				switch (oid) {
+					case "1.2.840.113549.1.1.1":
+					case "1.2.840.113549.1.1.5":
+						return {
+							name: "RSASSA-PKCS1-v1_5",
+							hash: {
+								name: "SHA-1"
+							}
+						};
+					case "1.2.840.113549.1.1.11":
+						return {
+							name: "RSASSA-PKCS1-v1_5",
+							hash: {
+								name: "SHA-256"
+							}
+						};
+					case "1.2.840.113549.1.1.12":
+						return {
+							name: "RSASSA-PKCS1-v1_5",
+							hash: {
+								name: "SHA-384"
+							}
+						};
+					case "1.2.840.113549.1.1.13":
+						return {
+							name: "RSASSA-PKCS1-v1_5",
+							hash: {
+								name: "SHA-512"
+							}
+						};
+					case "1.2.840.113549.1.1.10":
+						return {
+							name: "RSA-PSS"
+						};
+					case "1.2.840.113549.1.1.7":
+						return {
+							name: "RSA-OAEP"
+						};
+					case "1.2.840.10045.2.1":
+					case "1.2.840.10045.4.1":
+						return {
+							name: "ECDSA",
+							hash: {
+								name: "SHA-1"
+							}
+						};
+					case "1.2.840.10045.4.3.2":
+						return {
+							name: "ECDSA",
+							hash: {
+								name: "SHA-256"
+							}
+						};
+					case "1.2.840.10045.4.3.3":
+						return {
+							name: "ECDSA",
+							hash: {
+								name: "SHA-384"
+							}
+						};
+					case "1.2.840.10045.4.3.4":
+						return {
+							name: "ECDSA",
+							hash: {
+								name: "SHA-512"
+							}
+						};
+					case "1.3.133.16.840.63.0.2":
+						return {
+							name: "ECDH",
+							kdf: "SHA-1"
+						};
+					case "1.3.132.1.11.1":
+						return {
+							name: "ECDH",
+							kdf: "SHA-256"
+						};
+					case "1.3.132.1.11.2":
+						return {
+							name: "ECDH",
+							kdf: "SHA-384"
+						};
+					case "1.3.132.1.11.3":
+						return {
+							name: "ECDH",
+							kdf: "SHA-512"
+						};
+					case "2.16.840.1.101.3.4.1.2":
+						return {
+							name: "AES-CBC",
+							length: 128
+						};
+					case "2.16.840.1.101.3.4.1.22":
+						return {
+							name: "AES-CBC",
+							length: 192
+						};
+					case "2.16.840.1.101.3.4.1.42":
+						return {
+							name: "AES-CBC",
+							length: 256
+						};
+					case "2.16.840.1.101.3.4.1.6":
+						return {
+							name: "AES-GCM",
+							length: 128
+						};
+					case "2.16.840.1.101.3.4.1.26":
+						return {
+							name: "AES-GCM",
+							length: 192
+						};
+					case "2.16.840.1.101.3.4.1.46":
+						return {
+							name: "AES-GCM",
+							length: 256
+						};
+					case "2.16.840.1.101.3.4.1.4":
+						return {
+							name: "AES-CFB",
+							length: 128
+						};
+					case "2.16.840.1.101.3.4.1.24":
+						return {
+							name: "AES-CFB",
+							length: 192
+						};
+					case "2.16.840.1.101.3.4.1.44":
+						return {
+							name: "AES-CFB",
+							length: 256
+						};
+					case "2.16.840.1.101.3.4.1.5":
+						return {
+							name: "AES-KW",
+							length: 128
+						};
+					case "2.16.840.1.101.3.4.1.25":
+						return {
+							name: "AES-KW",
+							length: 192
+						};
+					case "2.16.840.1.101.3.4.1.45":
+						return {
+							name: "AES-KW",
+							length: 256
+						};
+					case "1.2.840.113549.2.7":
+						return {
+							name: "HMAC",
+							hash: {
+								name: "SHA-1"
+							}
+						};
+					case "1.2.840.113549.2.9":
+						return {
+							name: "HMAC",
+							hash: {
+								name: "SHA-256"
+							}
+						};
+					case "1.2.840.113549.2.10":
+						return {
+							name: "HMAC",
+							hash: {
+								name: "SHA-384"
+							}
+						};
+					case "1.2.840.113549.2.11":
+						return {
+							name: "HMAC",
+							hash: {
+								name: "SHA-512"
+							}
+						};
+					case "1.2.840.113549.1.9.16.3.5":
+						return {
+							name: "DH"
+						};
+					case "1.3.14.3.2.26":
+						return {
+							name: "SHA-1"
+						};
+					case "2.16.840.1.101.3.4.2.1":
+						return {
+							name: "SHA-256"
+						};
+					case "2.16.840.1.101.3.4.2.2":
+						return {
+							name: "SHA-384"
+						};
+					case "2.16.840.1.101.3.4.2.3":
+						return {
+							name: "SHA-512"
+						};
+					case "1.2.840.113549.1.5.12":
+						return {
+							name: "PBKDF2"
+						};
+					//region Special case - OIDs for ECC curves
+					case "1.2.840.10045.3.1.7":
+						return {
+							name: "P-256"
+						};
+					case "1.3.132.0.34":
+						return {
+							name: "P-384"
+						};
+					case "1.3.132.0.35":
+						return {
+							name: "P-521"
+						};
+					//endregion
+					default:
+				}
+
+				return {};
+			}
+			//**********************************************************************************
+			/**
+    * Get OID for each specific algorithm
+    * @param {Object} algorithm
+    * @returns {string}
+    */
+
+		}, {
+			key: "getOIDByAlgorithm",
+			value: function getOIDByAlgorithm(algorithm) {
+				var result = "";
+
+				switch (algorithm.name.toUpperCase()) {
+					case "RSASSA-PKCS1-V1_5":
+						switch (algorithm.hash.name.toUpperCase()) {
+							case "SHA-1":
+								result = "1.2.840.113549.1.1.5";
+								break;
+							case "SHA-256":
+								result = "1.2.840.113549.1.1.11";
+								break;
+							case "SHA-384":
+								result = "1.2.840.113549.1.1.12";
+								break;
+							case "SHA-512":
+								result = "1.2.840.113549.1.1.13";
+								break;
+							default:
+						}
+						break;
+					case "RSA-PSS":
+						result = "1.2.840.113549.1.1.10";
+						break;
+					case "RSA-OAEP":
+						result = "1.2.840.113549.1.1.7";
+						break;
+					case "ECDSA":
+						switch (algorithm.hash.name.toUpperCase()) {
+							case "SHA-1":
+								result = "1.2.840.10045.4.1";
+								break;
+							case "SHA-256":
+								result = "1.2.840.10045.4.3.2";
+								break;
+							case "SHA-384":
+								result = "1.2.840.10045.4.3.3";
+								break;
+							case "SHA-512":
+								result = "1.2.840.10045.4.3.4";
+								break;
+							default:
+						}
+						break;
+					case "ECDH":
+						switch (algorithm.kdf.toUpperCase()) {// Non-standard addition - hash algorithm of KDF function
+							case "SHA-1":
+								result = "1.3.133.16.840.63.0.2"; // dhSinglePass-stdDH-sha1kdf-scheme
+								break;
+							case "SHA-256":
+								result = "1.3.132.1.11.1"; // dhSinglePass-stdDH-sha256kdf-scheme
+								break;
+							case "SHA-384":
+								result = "1.3.132.1.11.2"; // dhSinglePass-stdDH-sha384kdf-scheme
+								break;
+							case "SHA-512":
+								result = "1.3.132.1.11.3"; // dhSinglePass-stdDH-sha512kdf-scheme
+								break;
+							default:
+						}
+						break;
+					case "AES-CTR":
+						break;
+					case "AES-CBC":
+						switch (algorithm.length) {
+							case 128:
+								result = "2.16.840.1.101.3.4.1.2";
+								break;
+							case 192:
+								result = "2.16.840.1.101.3.4.1.22";
+								break;
+							case 256:
+								result = "2.16.840.1.101.3.4.1.42";
+								break;
+							default:
+						}
+						break;
+					case "AES-CMAC":
+						break;
+					case "AES-GCM":
+						switch (algorithm.length) {
+							case 128:
+								result = "2.16.840.1.101.3.4.1.6";
+								break;
+							case 192:
+								result = "2.16.840.1.101.3.4.1.26";
+								break;
+							case 256:
+								result = "2.16.840.1.101.3.4.1.46";
+								break;
+							default:
+						}
+						break;
+					case "AES-CFB":
+						switch (algorithm.length) {
+							case 128:
+								result = "2.16.840.1.101.3.4.1.4";
+								break;
+							case 192:
+								result = "2.16.840.1.101.3.4.1.24";
+								break;
+							case 256:
+								result = "2.16.840.1.101.3.4.1.44";
+								break;
+							default:
+						}
+						break;
+					case "AES-KW":
+						switch (algorithm.length) {
+							case 128:
+								result = "2.16.840.1.101.3.4.1.5";
+								break;
+							case 192:
+								result = "2.16.840.1.101.3.4.1.25";
+								break;
+							case 256:
+								result = "2.16.840.1.101.3.4.1.45";
+								break;
+							default:
+						}
+						break;
+					case "HMAC":
+						switch (algorithm.hash.name.toUpperCase()) {
+							case "SHA-1":
+								result = "1.2.840.113549.2.7";
+								break;
+							case "SHA-256":
+								result = "1.2.840.113549.2.9";
+								break;
+							case "SHA-384":
+								result = "1.2.840.113549.2.10";
+								break;
+							case "SHA-512":
+								result = "1.2.840.113549.2.11";
+								break;
+							default:
+						}
+						break;
+					case "DH":
+						result = "1.2.840.113549.1.9.16.3.5";
+						break;
+					case "SHA-1":
+						result = "1.3.14.3.2.26";
+						break;
+					case "SHA-256":
+						result = "2.16.840.1.101.3.4.2.1";
+						break;
+					case "SHA-384":
+						result = "2.16.840.1.101.3.4.2.2";
+						break;
+					case "SHA-512":
+						result = "2.16.840.1.101.3.4.2.3";
+						break;
+					case "CONCAT":
+						break;
+					case "HKDF":
+						break;
+					case "PBKDF2":
+						result = "1.2.840.113549.1.5.12";
+						break;
+					//region Special case - OIDs for ECC curves
+					case "P-256":
+						result = "1.2.840.10045.3.1.7";
+						break;
+					case "P-384":
+						result = "1.3.132.0.34";
+						break;
+					case "P-521":
+						result = "1.3.132.0.35";
+						break;
+					//endregion
+					default:
+				}
+
+				return result;
+			}
+			//**********************************************************************************
+			/**
+    * Get default algorithm parameters for each kind of operation
+    * @param {string} algorithmName Algorithm name to get common parameters for
+    * @param {string} operation Kind of operation: "sign", "encrypt", "generatekey", "importkey", "exportkey", "verify"
+    * @returns {*}
+    */
+
+		}, {
+			key: "getAlgorithmParameters",
+			value: function getAlgorithmParameters(algorithmName, operation) {
+				var result = {
+					algorithm: {},
+					usages: []
+				};
+
+				switch (algorithmName.toUpperCase()) {
+					case "RSASSA-PKCS1-V1_5":
+						switch (operation.toLowerCase()) {
+							case "generatekey":
+								result = {
+									algorithm: {
+										name: "RSASSA-PKCS1-v1_5",
+										modulusLength: 2048,
+										publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+										hash: {
+											name: "SHA-256"
+										}
+									},
+									usages: ["sign", "verify"]
+								};
+								break;
+							case "verify":
+							case "sign":
+							case "importkey":
+								result = {
+									algorithm: {
+										name: "RSASSA-PKCS1-v1_5",
+										hash: {
+											name: "SHA-256"
+										}
+									},
+									usages: ["verify"] // For importKey("pkcs8") usage must be "sign" only
+								};
+								break;
+							case "exportkey":
+							default:
+								return {
+									algorithm: {
+										name: "RSASSA-PKCS1-v1_5"
+									},
+									usages: []
+								};
+						}
+						break;
+					case "RSA-PSS":
+						switch (operation.toLowerCase()) {
+							case "sign":
+							case "verify":
+								result = {
+									algorithm: {
+										name: "RSA-PSS",
+										hash: {
+											name: "SHA-1"
+										},
+										saltLength: 20
+									},
+									usages: ["sign", "verify"]
+								};
+								break;
+							case "generatekey":
+								result = {
+									algorithm: {
+										name: "RSA-PSS",
+										modulusLength: 2048,
+										publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+										hash: {
+											name: "SHA-1"
+										}
+									},
+									usages: ["sign", "verify"]
+								};
+								break;
+							case "importkey":
+								result = {
+									algorithm: {
+										name: "RSA-PSS",
+										hash: {
+											name: "SHA-1"
+										}
+									},
+									usages: ["verify"] // For importKey("pkcs8") usage must be "sign" only
+								};
+								break;
+							case "exportkey":
+							default:
+								return {
+									algorithm: {
+										name: "RSA-PSS"
+									},
+									usages: []
+								};
+						}
+						break;
+					case "RSA-OAEP":
+						switch (operation.toLowerCase()) {
+							case "encrypt":
+							case "decrypt":
+								result = {
+									algorithm: {
+										name: "RSA-OAEP"
+									},
+									usages: ["encrypt", "decrypt"]
+								};
+								break;
+							case "generatekey":
+								result = {
+									algorithm: {
+										name: "RSA-OAEP",
+										modulusLength: 2048,
+										publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+										hash: {
+											name: "SHA-256"
+										}
+									},
+									usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+								};
+								break;
+							case "importkey":
+								result = {
+									algorithm: {
+										name: "RSA-OAEP",
+										hash: {
+											name: "SHA-256"
+										}
+									},
+									usages: ["encrypt"] // encrypt for "spki" and decrypt for "pkcs8"
+								};
+								break;
+							case "exportkey":
+							default:
+								return {
+									algorithm: {
+										name: "RSA-OAEP"
+									},
+									usages: []
+								};
+						}
+						break;
+					case "ECDSA":
+						switch (operation.toLowerCase()) {
+							case "generatekey":
+								result = {
+									algorithm: {
+										name: "ECDSA",
+										namedCurve: "P-256"
+									},
+									usages: ["sign", "verify"]
+								};
+								break;
+							case "importkey":
+								result = {
+									algorithm: {
+										name: "ECDSA",
+										namedCurve: "P-256"
+									},
+									usages: ["verify"] // "sign" for "pkcs8"
+								};
+								break;
+							case "verify":
+							case "sign":
+								result = {
+									algorithm: {
+										name: "ECDSA",
+										hash: {
+											name: "SHA-256"
+										}
+									},
+									usages: ["sign"]
+								};
+								break;
+							default:
+								return {
+									algorithm: {
+										name: "ECDSA"
+									},
+									usages: []
+								};
+						}
+						break;
+					case "ECDH":
+						switch (operation.toLowerCase()) {
+							case "exportkey":
+							case "importkey":
+							case "generatekey":
+								result = {
+									algorithm: {
+										name: "ECDH",
+										namedCurve: "P-256"
+									},
+									usages: ["deriveKey", "deriveBits"]
+								};
+								break;
+							case "derivekey":
+							case "derivebits":
+								result = {
+									algorithm: {
+										name: "ECDH",
+										namedCurve: "P-256",
+										public: [] // Must be a "publicKey"
+									},
+									usages: ["encrypt", "decrypt"]
+								};
+								break;
+							default:
+								return {
+									algorithm: {
+										name: "ECDH"
+									},
+									usages: []
+								};
+						}
+						break;
+					case "AES-CTR":
+						switch (operation.toLowerCase()) {
+							case "importkey":
+							case "exportkey":
+							case "generatekey":
+								result = {
+									algorithm: {
+										name: "AES-CTR",
+										length: 256
+									},
+									usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+								};
+								break;
+							case "decrypt":
+							case "encrypt":
+								result = {
+									algorithm: {
+										name: "AES-CTR",
+										counter: new Uint8Array(16),
+										length: 10
+									},
+									usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+								};
+								break;
+							default:
+								return {
+									algorithm: {
+										name: "AES-CTR"
+									},
+									usages: []
+								};
+						}
+						break;
+					case "AES-CBC":
+						switch (operation.toLowerCase()) {
+							case "importkey":
+							case "exportkey":
+							case "generatekey":
+								result = {
+									algorithm: {
+										name: "AES-CBC",
+										length: 256
+									},
+									usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+								};
+								break;
+							case "decrypt":
+							case "encrypt":
+								result = {
+									algorithm: {
+										name: "AES-CBC",
+										iv: this.getRandomValues(new Uint8Array(16)) // For "decrypt" the value should be replaced with value got on "encrypt" step
+									},
+									usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+								};
+								break;
+							default:
+								return {
+									algorithm: {
+										name: "AES-CBC"
+									},
+									usages: []
+								};
+						}
+						break;
+					case "AES-GCM":
+						switch (operation.toLowerCase()) {
+							case "importkey":
+							case "exportkey":
+							case "generatekey":
+								result = {
+									algorithm: {
+										name: "AES-GCM",
+										length: 256
+									},
+									usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+								};
+								break;
+							case "decrypt":
+							case "encrypt":
+								result = {
+									algorithm: {
+										name: "AES-GCM",
+										iv: this.getRandomValues(new Uint8Array(16)) // For "decrypt" the value should be replaced with value got on "encrypt" step
+									},
+									usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+								};
+								break;
+							default:
+								return {
+									algorithm: {
+										name: "AES-GCM"
+									},
+									usages: []
+								};
+						}
+						break;
+					case "AES-KW":
+						switch (operation.toLowerCase()) {
+							case "importkey":
+							case "exportkey":
+							case "generatekey":
+							case "wrapkey":
+							case "unwrapkey":
+								result = {
+									algorithm: {
+										name: "AES-KW",
+										length: 256
+									},
+									usages: ["wrapKey", "unwrapKey"]
+								};
+								break;
+							default:
+								return {
+									algorithm: {
+										name: "AES-KW"
+									},
+									usages: []
+								};
+						}
+						break;
+					case "HMAC":
+						switch (operation.toLowerCase()) {
+							case "sign":
+							case "verify":
+								result = {
+									algorithm: {
+										name: "HMAC"
+									},
+									usages: ["sign", "verify"]
+								};
+								break;
+							case "importkey":
+							case "exportkey":
+							case "generatekey":
+								result = {
+									algorithm: {
+										name: "HMAC",
+										length: 32,
+										hash: {
+											name: "SHA-256"
+										}
+									},
+									usages: ["sign", "verify"]
+								};
+								break;
+							default:
+								return {
+									algorithm: {
+										name: "HMAC"
+									},
+									usages: []
+								};
+						}
+						break;
+					case "HKDF":
+						switch (operation.toLowerCase()) {
+							case "derivekey":
+								result = {
+									algorithm: {
+										name: "HKDF",
+										hash: "SHA-256",
+										salt: new Uint8Array([]),
+										info: new Uint8Array([])
+									},
+									usages: ["encrypt", "decrypt"]
+								};
+								break;
+							default:
+								return {
+									algorithm: {
+										name: "HKDF"
+									},
+									usages: []
+								};
+						}
+						break;
+					case "PBKDF2":
+						switch (operation.toLowerCase()) {
+							case "derivekey":
+								result = {
+									algorithm: {
+										name: "PBKDF2",
+										hash: { name: "SHA-256" },
+										salt: new Uint8Array([]),
+										iterations: 10000
+									},
+									usages: ["encrypt", "decrypt"]
+								};
+								break;
+							default:
+								return {
+									algorithm: {
+										name: "PBKDF2"
+									},
+									usages: []
+								};
+						}
+						break;
+					default:
+				}
+
+				return result;
+			}
+			//**********************************************************************************
+			/**
+    * Getting hash algorithm by signature algorithm
+    * @param {AlgorithmIdentifier} signatureAlgorithm Signature algorithm
+    * @returns {string}
+    */
+
+		}, {
+			key: "getHashAlgorithm",
+			value: function getHashAlgorithm(signatureAlgorithm) {
+				var result = "";
+
+				switch (signatureAlgorithm.algorithmId) {
+					case "1.2.840.10045.4.1": // ecdsa-with-SHA1
+					case "1.2.840.113549.1.1.5":
+						result = "SHA-1";
+						break;
+					case "1.2.840.10045.4.3.2": // ecdsa-with-SHA256
+					case "1.2.840.113549.1.1.11":
+						result = "SHA-256";
+						break;
+					case "1.2.840.10045.4.3.3": // ecdsa-with-SHA384
+					case "1.2.840.113549.1.1.12":
+						result = "SHA-384";
+						break;
+					case "1.2.840.10045.4.3.4": // ecdsa-with-SHA512
+					case "1.2.840.113549.1.1.13":
+						result = "SHA-512";
+						break;
+					case "1.2.840.113549.1.1.10":
+						// RSA-PSS
+						{
+							try {
+								var params = new RSASSAPSSParams({ schema: signatureAlgorithm.algorithmParams });
+								if ("hashAlgorithm" in params) {
+									var algorithm = this.getAlgorithmByOID(params.hashAlgorithm.algorithmId);
+									if ("name" in algorithm === false) return "";
+
+									result = algorithm.name;
+								} else result = "SHA-1";
+							} catch (ex) {}
+						}
+						break;
+					default:
+				}
+
+				return result;
+			}
+			//**********************************************************************************
+			/**
+    * Specialized function encrypting "EncryptedContentInfo" object using parameters
+    * @param {Object} parameters
+    * @returns {Promise}
+    */
+
+		}, {
+			key: "encryptEncryptedContentInfo",
+			value: function encryptEncryptedContentInfo(parameters) {
+				var _this54 = this;
+
+				//region Check for input parameters
+				if (parameters instanceof Object === false) return Promise.reject("Parameters must have type \"Object\"");
+
+				if ("password" in parameters === false) return Promise.reject("Absent mandatory parameter \"password\"");
+
+				if ("contentEncryptionAlgorithm" in parameters === false) return Promise.reject("Absent mandatory parameter \"contentEncryptionAlgorithm\"");
+
+				if ("hmacHashAlgorithm" in parameters === false) return Promise.reject("Absent mandatory parameter \"hmacHashAlgorithm\"");
+
+				if ("iterationCount" in parameters === false) return Promise.reject("Absent mandatory parameter \"iterationCount\"");
+
+				if ("contentToEncrypt" in parameters === false) return Promise.reject("Absent mandatory parameter \"contentToEncrypt\"");
+
+				if ("contentType" in parameters === false) return Promise.reject("Absent mandatory parameter \"contentType\"");
+
+				var contentEncryptionOID = this.getOIDByAlgorithm(parameters.contentEncryptionAlgorithm);
+				if (contentEncryptionOID === "") return Promise.reject("Wrong \"contentEncryptionAlgorithm\" value");
+
+				var pbkdf2OID = this.getOIDByAlgorithm({
+					name: "PBKDF2"
+				});
+				if (pbkdf2OID === "") return Promise.reject("Can not find OID for PBKDF2");
+
+				var hmacOID = this.getOIDByAlgorithm({
+					name: "HMAC",
+					hash: {
+						name: parameters.hmacHashAlgorithm
+					}
+				});
+				if (hmacOID === "") return Promise.reject("Incorrect value for \"hmacHashAlgorithm\": " + parameters.hmacHashAlgorithm);
+				//endregion
+
+				//region Initial variables
+				var sequence = Promise.resolve();
+
+				var ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
+				var ivView = new Uint8Array(ivBuffer);
+				this.getRandomValues(ivView);
+
+				var saltBuffer = new ArrayBuffer(64);
+				var saltView = new Uint8Array(saltBuffer);
+				this.getRandomValues(saltView);
+
+				var contentView = new Uint8Array(parameters.contentToEncrypt);
+
+				var pbkdf2Params = new PBKDF2Params({
+					salt: new OctetString({ valueHex: saltBuffer }),
+					iterationCount: parameters.iterationCount,
+					prf: new AlgorithmIdentifier({
+						algorithmId: hmacOID,
+						algorithmParams: new Null()
+					})
+				});
+				//endregion
+
+				//region Derive PBKDF2 key from "password" buffer
+				sequence = sequence.then(function () {
+					var passwordView = new Uint8Array(parameters.password);
+
+					return _this54.importKey("raw", passwordView, "PBKDF2", false, ["deriveKey"]);
+				}, function (error) {
+					return Promise.reject(error);
+				});
+				//endregion
+
+				//region Derive key for "contentEncryptionAlgorithm"
+				sequence = sequence.then(function (result) {
+					return _this54.deriveKey({
+						name: "PBKDF2",
+						hash: {
+							name: parameters.hmacHashAlgorithm
+						},
+						salt: saltView,
+						iterations: parameters.iterationCount
+					}, result, parameters.contentEncryptionAlgorithm, false, ["encrypt"]);
+				}, function (error) {
+					return Promise.reject(error);
+				});
+				//endregion
+
+				//region Encrypt content
+				sequence = sequence.then(function (result) {
+					return _this54.encrypt({
+						name: parameters.contentEncryptionAlgorithm.name,
+						iv: ivView
+					}, result, contentView);
+				}, function (error) {
+					return Promise.reject(error);
+				});
+				//endregion
+
+				//region Store all parameters in EncryptedData object
+				sequence = sequence.then(function (result) {
+					var pbes2Parameters = new PBES2Params({
+						keyDerivationFunc: new AlgorithmIdentifier({
+							algorithmId: pbkdf2OID,
+							algorithmParams: pbkdf2Params.toSchema()
+						}),
+						encryptionScheme: new AlgorithmIdentifier({
+							algorithmId: contentEncryptionOID,
+							algorithmParams: new OctetString({ valueHex: ivBuffer })
+						})
+					});
+
+					return new EncryptedContentInfo({
+						contentType: parameters.contentType,
+						contentEncryptionAlgorithm: new AlgorithmIdentifier({
+							algorithmId: "1.2.840.113549.1.5.13", // pkcs5PBES2
+							algorithmParams: pbes2Parameters.toSchema()
+						}),
+						encryptedContent: new OctetString({ valueHex: result })
+					});
+				}, function (error) {
+					return Promise.reject(error);
+				});
+				//endregion
+
+				return sequence;
+			}
+			//**********************************************************************************
+			/**
+    * Decrypt data stored in "EncryptedContentInfo" object using parameters
+    * @param parameters
+    * @return {Promise}
+    */
+
+		}, {
+			key: "decryptEncryptedContentInfo",
+			value: function decryptEncryptedContentInfo(parameters) {
+				var _this55 = this;
+
+				//region Check for input parameters
+				if (parameters instanceof Object === false) return Promise.reject("Parameters must have type \"Object\"");
+
+				if ("password" in parameters === false) return Promise.reject("Absent mandatory parameter \"password\"");
+
+				if ("encryptedContentInfo" in parameters === false) return Promise.reject("Absent mandatory parameter \"encryptedContentInfo\"");
+
+				if (parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId !== "1.2.840.113549.1.5.13") // pkcs5PBES2
+					return Promise.reject("Unknown \"contentEncryptionAlgorithm\": " + this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
+				//endregion
+
+				//region Initial variables
+				var sequence = Promise.resolve();
+
+				var pbes2Parameters = void 0;
+
+				try {
+					pbes2Parameters = new PBES2Params({ schema: parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams });
+				} catch (ex) {
+					return Promise.reject("Incorrectly encoded \"pbes2Parameters\"");
+				}
+
+				var pbkdf2Params = void 0;
+
+				try {
+					pbkdf2Params = new PBKDF2Params({ schema: pbes2Parameters.keyDerivationFunc.algorithmParams });
+				} catch (ex) {
+					return Promise.reject("Incorrectly encoded \"pbkdf2Params\"");
+				}
+
+				var contentEncryptionAlgorithm = this.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithmId);
+				if ("name" in contentEncryptionAlgorithm === false) return Promise.reject("Incorrect OID for \"contentEncryptionAlgorithm\": " + pbes2Parameters.encryptionScheme.algorithmId);
+
+				var ivBuffer = pbes2Parameters.encryptionScheme.algorithmParams.valueBlock.valueHex;
+				var ivView = new Uint8Array(ivBuffer);
+
+				var saltBuffer = pbkdf2Params.salt.valueBlock.valueHex;
+				var saltView = new Uint8Array(saltBuffer);
+
+				var iterationCount = pbkdf2Params.iterationCount;
+
+				var hmacHashAlgorithm = "SHA-1";
+
+				if ("prf" in pbkdf2Params) {
+					var algorithm = this.getAlgorithmByOID(pbkdf2Params.prf.algorithmId);
+					if ("name" in algorithm === false) return Promise.reject("Incorrect OID for HMAC hash algorithm");
+
+					hmacHashAlgorithm = algorithm.hash.name;
+				}
+				//endregion
+
+				//region Derive PBKDF2 key from "password" buffer
+				sequence = sequence.then(function () {
+					return _this55.importKey("raw", parameters.password, "PBKDF2", false, ["deriveKey"]);
+				}, function (error) {
+					return Promise.reject(error);
+				});
+				//endregion
+
+				//region Derive key for "contentEncryptionAlgorithm"
+				sequence = sequence.then(function (result) {
+					return _this55.deriveKey({
+						name: "PBKDF2",
+						hash: {
+							name: hmacHashAlgorithm
+						},
+						salt: saltView,
+						iterations: iterationCount
+					}, result, contentEncryptionAlgorithm, false, ["decrypt"]);
+				}, function (error) {
+					return Promise.reject(error);
+				});
+				//endregion
+
+				//region Decrypt internal content using derived key
+				sequence = sequence.then(function (result) {
+					//region Create correct data block for decryption
+					var dataBuffer = new ArrayBuffer(0);
+
+					if (parameters.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false) dataBuffer = parameters.encryptedContentInfo.encryptedContent.valueBlock.valueHex;else {
+						var _iteratorNormalCompletion15 = true;
+						var _didIteratorError15 = false;
+						var _iteratorError15 = undefined;
+
+						try {
+							for (var _iterator15 = parameters.encryptedContentInfo.encryptedContent.valueBlock.value[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+								var content = _step15.value;
+
+								dataBuffer = utilConcatBuf(dataBuffer, content.valueBlock.valueHex);
+							}
+						} catch (err) {
+							_didIteratorError15 = true;
+							_iteratorError15 = err;
+						} finally {
+							try {
+								if (!_iteratorNormalCompletion15 && _iterator15.return) {
+									_iterator15.return();
+								}
+							} finally {
+								if (_didIteratorError15) {
+									throw _iteratorError15;
+								}
+							}
+						}
+					}
+					//endregion
+
+					return _this55.decrypt({
+						name: contentEncryptionAlgorithm.name,
+						iv: ivView
+					}, result, dataBuffer);
+				}, function (error) {
+					return Promise.reject(error);
+				});
+				//endregion
+
+				return sequence;
+			}
+			//**********************************************************************************
+			/**
+    * Stamping (signing) data using algorithm simular to HMAC
+    * @param {Object} parameters
+    * @return {Promise.<T>|Promise}
+    */
+
+		}, {
+			key: "stampDataWithPassword",
+			value: function stampDataWithPassword(parameters) {
+				var _this56 = this;
+
+				//region Check for input parameters
+				if (parameters instanceof Object === false) return Promise.reject("Parameters must have type \"Object\"");
+
+				if ("password" in parameters === false) return Promise.reject("Absent mandatory parameter \"password\"");
+
+				if ("hashAlgorithm" in parameters === false) return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
+
+				if ("salt" in parameters === false) return Promise.reject("Absent mandatory parameter \"iterationCount\"");
+
+				if ("iterationCount" in parameters === false) return Promise.reject("Absent mandatory parameter \"salt\"");
+
+				if ("contentToStamp" in parameters === false) return Promise.reject("Absent mandatory parameter \"contentToStamp\"");
+				//endregion
+
+				//region Initial variables
+				var _this = this;
+				//endregion
+
+				//region Choose correct length for HMAC key
+				var length = void 0;
+
+				switch (parameters.hashAlgorithm.toLowerCase()) {
+					case "sha-1":
+						length = 160;
+						break;
+					case "sha-256":
+						length = 256;
+						break;
+					case "sha-384":
+						length = 384;
+						break;
+					case "sha-512":
+						length = 512;
+						break;
+					default:
+						return Promise.reject("Incorrect \"parameters.hashAlgorithm\" parameter: " + parameters.hashAlgorithm);
+				}
+				//endregion
+
+				//region Initial variables
+				var sequence = Promise.resolve();
+
+				var hmacAlgorithm = {
+					name: "HMAC",
+					length: length,
+					hash: {
+						name: parameters.hashAlgorithm
+					}
+				};
+				//endregion
+
+				//region Create PKCS#12 key for integrity checking
+				sequence = sequence.then(function () {
+					return makePKCS12B2Key(_this56, parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount);
+				});
+				//endregion
+
+				//region Import HMAC key
+				sequence = sequence.then(function (result) {
+					return _this56.importKey("raw", new Uint8Array(result), hmacAlgorithm, false, ["sign"]);
+				});
+				//endregion
+
+				//region Make signed HMAC value
+				sequence = sequence.then(function (result) {
+					return _this56.sign(hmacAlgorithm, result, new Uint8Array(parameters.contentToStamp));
+				}, function (error) {
+					return Promise.reject(error);
+				});
+				//endregion
+
+				return sequence;
+			}
+			//**********************************************************************************
+
+		}, {
+			key: "verifyDataStampedWithPassword",
+			value: function verifyDataStampedWithPassword(parameters) {
+				var _this57 = this;
+
+				//region Check for input parameters
+				if (parameters instanceof Object === false) return Promise.reject("Parameters must have type \"Object\"");
+
+				if ("password" in parameters === false) return Promise.reject("Absent mandatory parameter \"password\"");
+
+				if ("hashAlgorithm" in parameters === false) return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
+
+				if ("salt" in parameters === false) return Promise.reject("Absent mandatory parameter \"iterationCount\"");
+
+				if ("iterationCount" in parameters === false) return Promise.reject("Absent mandatory parameter \"salt\"");
+
+				if ("contentToVerify" in parameters === false) return Promise.reject("Absent mandatory parameter \"contentToVerify\"");
+
+				if ("signatureToVerify" in parameters === false) return Promise.reject("Absent mandatory parameter \"signatureToVerify\"");
+				//endregion
+
+				//region Initial variables
+				var _this = this;
+				//endregion
+
+				//region Choose correct length for HMAC key
+				var length = void 0;
+
+				switch (parameters.hashAlgorithm.toLowerCase()) {
+					case "sha-1":
+						length = 160;
+						break;
+					case "sha-256":
+						length = 256;
+						break;
+					case "sha-384":
+						length = 384;
+						break;
+					case "sha-512":
+						length = 512;
+						break;
+					default:
+						return Promise.reject("Incorrect \"parameters.hashAlgorithm\" parameter: " + parameters.hashAlgorithm);
+				}
+				//endregion
+
+				//region Initial variables
+				var sequence = Promise.resolve();
+
+				var hmacAlgorithm = {
+					name: "HMAC",
+					length: length,
+					hash: {
+						name: parameters.hashAlgorithm
+					}
+				};
+				//endregion
+
+				//region Create PKCS#12 key for integrity checking
+				sequence = sequence.then(function () {
+					return makePKCS12B2Key(_this57, parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount);
+				});
+				//endregion
+
+				//region Import HMAC key
+				sequence = sequence.then(function (result) {
+					return _this57.importKey("raw", new Uint8Array(result), hmacAlgorithm, false, ["sign"]);
+				});
+				//endregion
+
+				//region Make signed HMAC value
+				sequence = sequence.then(function (result) {
+					return _this57.verify(hmacAlgorithm, result, new Uint8Array(parameters.signatureToVerify), new Uint8Array(parameters.contentToVerify));
+				}, function (error) {
+					return Promise.reject(error);
+				});
+				//endregion
+
+				return sequence;
+			}
+			//**********************************************************************************
+			/**
+    * Get signature parameters by analyzing private key algorithm
+    * @param {Object} privateKey The private key user would like to use
+    * @param {string} [hashAlgorithm="SHA-1"] The private key user would like to use
+    * @return {Promise.<T>|Promise}
+    */
+
+		}, {
+			key: "getSignatureParameters",
+			value: function getSignatureParameters(privateKey) {
+				var hashAlgorithm = arguments.length <= 1 || arguments[1] === undefined ? "SHA-1" : arguments[1];
+
+				//region Check hashing algorithm
+				var oid = this.getOIDByAlgorithm({ name: hashAlgorithm });
+				if (oid === "") return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
+				//endregion
+
+				//region Initial variables
+				var signatureAlgorithm = new AlgorithmIdentifier();
+				//endregion
+
+				//region Get a "default parameters" for current algorithm
+				var parameters = this.getAlgorithmParameters(privateKey.algorithm.name, "sign");
+				parameters.algorithm.hash.name = hashAlgorithm;
+				//endregion
+
+				//region Fill internal structures base on "privateKey" and "hashAlgorithm"
+				switch (privateKey.algorithm.name.toUpperCase()) {
+					case "RSASSA-PKCS1-V1_5":
+					case "ECDSA":
+						signatureAlgorithm.algorithmId = this.getOIDByAlgorithm(parameters.algorithm);
+						break;
+					case "RSA-PSS":
+						{
+							//region Set "saltLength" as a length (in octets) of hash function result
+							switch (hashAlgorithm.toUpperCase()) {
+								case "SHA-256":
+									parameters.algorithm.saltLength = 32;
+									break;
+								case "SHA-384":
+									parameters.algorithm.saltLength = 48;
+									break;
+								case "SHA-512":
+									parameters.algorithm.saltLength = 64;
+									break;
+								default:
+							}
+							//endregion
+
+							//region Fill "RSASSA_PSS_params" object
+							var paramsObject = {};
+
+							if (hashAlgorithm.toUpperCase() !== "SHA-1") {
+								var hashAlgorithmOID = this.getOIDByAlgorithm({ name: hashAlgorithm });
+								if (hashAlgorithmOID === "") return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
+
+								paramsObject.hashAlgorithm = new AlgorithmIdentifier({
+									algorithmId: hashAlgorithmOID,
+									algorithmParams: new Null()
+								});
+
+								paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
+									algorithmId: "1.2.840.113549.1.1.8", // MGF1
+									algorithmParams: paramsObject.hashAlgorithm.toSchema()
+								});
+							}
+
+							if (parameters.algorithm.saltLength !== 20) paramsObject.saltLength = parameters.algorithm.saltLength;
+
+							var pssParameters = new RSASSAPSSParams(paramsObject);
+							//endregion
+
+							//region Automatically set signature algorithm
+							signatureAlgorithm.algorithmId = "1.2.840.113549.1.1.10";
+							signatureAlgorithm.algorithmParams = pssParameters.toSchema();
+							//endregion
+						}
+						break;
+					default:
+						return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
+				}
+				//endregion
+
+				return Promise.resolve().then(function () {
+					return {
+						signatureAlgorithm: signatureAlgorithm,
+						parameters: parameters
+					};
+				});
+			}
+			//**********************************************************************************
+			/**
+    * Sign data with pre-defined private key
+    * @param {ArrayBuffer} data Data to be signed
+    * @param {Object} privateKey Private key to use
+    * @param {Object} parameters Parameters for used algorithm
+    * @return {Promise.<T>|Promise}
+    */
+
+		}, {
+			key: "signWithPrivateKey",
+			value: function signWithPrivateKey(data, privateKey, parameters) {
+				return this.sign(parameters.algorithm, privateKey, new Uint8Array(data)).then(function (result) {
+					//region Special case for ECDSA algorithm
+					if (parameters.algorithm.name === "ECDSA") result = createCMSECDSASignature(result);
+					//endregion
+
+					return result;
+				}, function (error) {
+					return Promise.reject("Signing error: " + error);
+				});
 			}
 			//**********************************************************************************
 
@@ -9963,6 +12525,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			crypto: crypto,
 			subtle: subtle
 		};
+	}
+	//**************************************************************************************
+	function getEngine$1() {
+		return engine;
 	}
 	//**************************************************************************************
 	(function initCryptoEngine() {
@@ -9994,7 +12560,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				engine = {
 					name: engineName,
 					crypto: cryptoObject,
-					subtle: new CryptoEngine({ name: engineName, crypto: subtleObject })
+					subtle: new CryptoEngine({ name: engineName, crypto: self.crypto, subtle: subtleObject })
 				};
 			}
 		}
@@ -10020,191 +12586,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   * @returns {*}
   */
 	function getRandomValues(view) {
-		if (engine.crypto !== null) return engine.crypto.getRandomValues(view);
-
-		throw new Error("No support for Web Cryptography API");
+		return engine.subtle.getRandomValues(view);
 	}
 	//**************************************************************************************
 	/**
-  * Get OID for each specific WebCrypto algorithm
-  * @param {Object} algorithm WebCrypto algorithm
+  * Get OID for each specific algorithm
+  * @param {Object} algorithm
   * @returns {string}
   */
 	function getOIDByAlgorithm(algorithm) {
-		var result = "";
-
-		switch (algorithm.name.toUpperCase()) {
-			case "RSASSA-PKCS1-V1_5":
-				switch (algorithm.hash.name.toUpperCase()) {
-					case "SHA-1":
-						result = "1.2.840.113549.1.1.5";
-						break;
-					case "SHA-256":
-						result = "1.2.840.113549.1.1.11";
-						break;
-					case "SHA-384":
-						result = "1.2.840.113549.1.1.12";
-						break;
-					case "SHA-512":
-						result = "1.2.840.113549.1.1.13";
-						break;
-					default:
-				}
-				break;
-			case "RSA-PSS":
-				result = "1.2.840.113549.1.1.10";
-				break;
-			case "RSA-OAEP":
-				result = "1.2.840.113549.1.1.7";
-				break;
-			case "ECDSA":
-				switch (algorithm.hash.name.toUpperCase()) {
-					case "SHA-1":
-						result = "1.2.840.10045.4.1";
-						break;
-					case "SHA-256":
-						result = "1.2.840.10045.4.3.2";
-						break;
-					case "SHA-384":
-						result = "1.2.840.10045.4.3.3";
-						break;
-					case "SHA-512":
-						result = "1.2.840.10045.4.3.4";
-						break;
-					default:
-				}
-				break;
-			case "ECDH":
-				switch (algorithm.kdf.toUpperCase()) {// Non-standard addition - hash algorithm of KDF function
-					case "SHA-1":
-						result = "1.3.133.16.840.63.0.2"; // dhSinglePass-stdDH-sha1kdf-scheme
-						break;
-					case "SHA-256":
-						result = "1.3.132.1.11.1"; // dhSinglePass-stdDH-sha256kdf-scheme
-						break;
-					case "SHA-384":
-						result = "1.3.132.1.11.2"; // dhSinglePass-stdDH-sha384kdf-scheme
-						break;
-					case "SHA-512":
-						result = "1.3.132.1.11.3"; // dhSinglePass-stdDH-sha512kdf-scheme
-						break;
-					default:
-				}
-				break;
-			case "AES-CTR":
-				break;
-			case "AES-CBC":
-				switch (algorithm.length) {
-					case 128:
-						result = "2.16.840.1.101.3.4.1.2";
-						break;
-					case 192:
-						result = "2.16.840.1.101.3.4.1.22";
-						break;
-					case 256:
-						result = "2.16.840.1.101.3.4.1.42";
-						break;
-					default:
-				}
-				break;
-			case "AES-CMAC":
-				break;
-			case "AES-GCM":
-				switch (algorithm.length) {
-					case 128:
-						result = "2.16.840.1.101.3.4.1.6";
-						break;
-					case 192:
-						result = "2.16.840.1.101.3.4.1.26";
-						break;
-					case 256:
-						result = "2.16.840.1.101.3.4.1.46";
-						break;
-					default:
-				}
-				break;
-			case "AES-CFB":
-				switch (algorithm.length) {
-					case 128:
-						result = "2.16.840.1.101.3.4.1.4";
-						break;
-					case 192:
-						result = "2.16.840.1.101.3.4.1.24";
-						break;
-					case 256:
-						result = "2.16.840.1.101.3.4.1.44";
-						break;
-					default:
-				}
-				break;
-			case "AES-KW":
-				switch (algorithm.length) {
-					case 128:
-						result = "2.16.840.1.101.3.4.1.5";
-						break;
-					case 192:
-						result = "2.16.840.1.101.3.4.1.25";
-						break;
-					case 256:
-						result = "2.16.840.1.101.3.4.1.45";
-						break;
-					default:
-				}
-				break;
-			case "HMAC":
-				switch (algorithm.hash.name.toUpperCase()) {
-					case "SHA-1":
-						result = "1.2.840.113549.2.7";
-						break;
-					case "SHA-256":
-						result = "1.2.840.113549.2.9";
-						break;
-					case "SHA-384":
-						result = "1.2.840.113549.2.10";
-						break;
-					case "SHA-512":
-						result = "1.2.840.113549.2.11";
-						break;
-					default:
-				}
-				break;
-			case "DH":
-				result = "1.2.840.113549.1.9.16.3.5";
-				break;
-			case "SHA-1":
-				result = "1.3.14.3.2.26";
-				break;
-			case "SHA-256":
-				result = "2.16.840.1.101.3.4.2.1";
-				break;
-			case "SHA-384":
-				result = "2.16.840.1.101.3.4.2.2";
-				break;
-			case "SHA-512":
-				result = "2.16.840.1.101.3.4.2.3";
-				break;
-			case "CONCAT":
-				break;
-			case "HKDF":
-				break;
-			case "PBKDF2":
-				result = "1.2.840.113549.1.5.12";
-				break;
-			//region Special case - OIDs for ECC curves
-			case "P-256":
-				result = "1.2.840.10045.3.1.7";
-				break;
-			case "P-384":
-				result = "1.3.132.0.34";
-				break;
-			case "P-521":
-				result = "1.3.132.0.35";
-				break;
-			//endregion
-			default:
-		}
-
-		return result;
+		return engine.subtle.getOIDByAlgorithm(algorithm);
 	}
 	//**************************************************************************************
 	/**
@@ -10214,421 +12605,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   * @returns {*}
   */
 	function getAlgorithmParameters(algorithmName, operation) {
-		var result = {
-			algorithm: {},
-			usages: []
-		};
-
-		switch (algorithmName.toUpperCase()) {
-			case "RSASSA-PKCS1-V1_5":
-				switch (operation.toLowerCase()) {
-					case "generatekey":
-						result = {
-							algorithm: {
-								name: "RSASSA-PKCS1-v1_5",
-								modulusLength: 2048,
-								publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-								hash: {
-									name: "SHA-256"
-								}
-							},
-							usages: ["sign", "verify"]
-						};
-						break;
-					case "verify":
-					case "sign":
-					case "importkey":
-						result = {
-							algorithm: {
-								name: "RSASSA-PKCS1-v1_5",
-								hash: {
-									name: "SHA-256"
-								}
-							},
-							usages: ["verify"] // For importKey("pkcs8") usage must be "sign" only
-						};
-						break;
-					case "exportkey":
-					default:
-						return {
-							algorithm: {
-								name: "RSASSA-PKCS1-v1_5"
-							},
-							usages: []
-						};
-				}
-				break;
-			case "RSA-PSS":
-				switch (operation.toLowerCase()) {
-					case "sign":
-					case "verify":
-						result = {
-							algorithm: {
-								name: "RSA-PSS",
-								hash: {
-									name: "SHA-1"
-								},
-								saltLength: 20
-							},
-							usages: ["sign", "verify"]
-						};
-						break;
-					case "generatekey":
-						result = {
-							algorithm: {
-								name: "RSA-PSS",
-								modulusLength: 2048,
-								publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-								hash: {
-									name: "SHA-1"
-								}
-							},
-							usages: ["sign", "verify"]
-						};
-						break;
-					case "importkey":
-						result = {
-							algorithm: {
-								name: "RSA-PSS",
-								hash: {
-									name: "SHA-1"
-								}
-							},
-							usages: ["verify"] // For importKey("pkcs8") usage must be "sign" only
-						};
-						break;
-					case "exportkey":
-					default:
-						return {
-							algorithm: {
-								name: "RSA-PSS"
-							},
-							usages: []
-						};
-				}
-				break;
-			case "RSA-OAEP":
-				switch (operation.toLowerCase()) {
-					case "encrypt":
-					case "decrypt":
-						result = {
-							algorithm: {
-								name: "RSA-OAEP"
-							},
-							usages: ["encrypt", "decrypt"]
-						};
-						break;
-					case "generatekey":
-						result = {
-							algorithm: {
-								name: "RSA-OAEP",
-								modulusLength: 2048,
-								publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-								hash: {
-									name: "SHA-256"
-								}
-							},
-							usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-						};
-						break;
-					case "importkey":
-						result = {
-							algorithm: {
-								name: "RSA-OAEP",
-								hash: {
-									name: "SHA-256"
-								}
-							},
-							usages: ["encrypt"] // encrypt for "spki" and decrypt for "pkcs8"
-						};
-						break;
-					case "exportkey":
-					default:
-						return {
-							algorithm: {
-								name: "RSA-OAEP"
-							},
-							usages: []
-						};
-				}
-				break;
-			case "ECDSA":
-				switch (operation.toLowerCase()) {
-					case "generatekey":
-						result = {
-							algorithm: {
-								name: "ECDSA",
-								namedCurve: "P-256"
-							},
-							usages: ["sign", "verify"]
-						};
-						break;
-					case "importkey":
-						result = {
-							algorithm: {
-								name: "ECDSA",
-								namedCurve: "P-256"
-							},
-							usages: ["verify"] // "sign" for "pkcs8"
-						};
-						break;
-					case "verify":
-					case "sign":
-						result = {
-							algorithm: {
-								name: "ECDSA",
-								hash: {
-									name: "SHA-256"
-								}
-							},
-							usages: ["sign"]
-						};
-						break;
-					default:
-						return {
-							algorithm: {
-								name: "ECDSA"
-							},
-							usages: []
-						};
-				}
-				break;
-			case "ECDH":
-				switch (operation.toLowerCase()) {
-					case "exportkey":
-					case "importkey":
-					case "generatekey":
-						result = {
-							algorithm: {
-								name: "ECDH",
-								namedCurve: "P-256"
-							},
-							usages: ["deriveKey", "deriveBits"]
-						};
-						break;
-					case "derivekey":
-					case "derivebits":
-						result = {
-							algorithm: {
-								name: "ECDH",
-								namedCurve: "P-256",
-								public: [] // Must be a "publicKey"
-							},
-							usages: ["encrypt", "decrypt"]
-						};
-						break;
-					default:
-						return {
-							algorithm: {
-								name: "ECDH"
-							},
-							usages: []
-						};
-				}
-				break;
-			case "AES-CTR":
-				switch (operation.toLowerCase()) {
-					case "importkey":
-					case "exportkey":
-					case "generatekey":
-						result = {
-							algorithm: {
-								name: "AES-CTR",
-								length: 256
-							},
-							usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-						};
-						break;
-					case "decrypt":
-					case "encrypt":
-						result = {
-							algorithm: {
-								name: "AES-CTR",
-								counter: new Uint8Array(16),
-								length: 10
-							},
-							usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-						};
-						break;
-					default:
-						return {
-							algorithm: {
-								name: "AES-CTR"
-							},
-							usages: []
-						};
-				}
-				break;
-			case "AES-CBC":
-				switch (operation.toLowerCase()) {
-					case "importkey":
-					case "exportkey":
-					case "generatekey":
-						result = {
-							algorithm: {
-								name: "AES-CBC",
-								length: 256
-							},
-							usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-						};
-						break;
-					case "decrypt":
-					case "encrypt":
-						result = {
-							algorithm: {
-								name: "AES-CBC",
-								iv: getRandomValues(new Uint8Array(16)) // For "decrypt" the value should be replaced with value got on "encrypt" step
-							},
-							usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-						};
-						break;
-					default:
-						return {
-							algorithm: {
-								name: "AES-CBC"
-							},
-							usages: []
-						};
-				}
-				break;
-			case "AES-GCM":
-				switch (operation.toLowerCase()) {
-					case "importkey":
-					case "exportkey":
-					case "generatekey":
-						result = {
-							algorithm: {
-								name: "AES-GCM",
-								length: 256
-							},
-							usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-						};
-						break;
-					case "decrypt":
-					case "encrypt":
-						result = {
-							algorithm: {
-								name: "AES-GCM",
-								iv: getRandomValues(new Uint8Array(16)) // For "decrypt" the value should be replaced with value got on "encrypt" step
-							},
-							usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
-						};
-						break;
-					default:
-						return {
-							algorithm: {
-								name: "AES-GCM"
-							},
-							usages: []
-						};
-				}
-				break;
-			case "AES-KW":
-				switch (operation.toLowerCase()) {
-					case "importkey":
-					case "exportkey":
-					case "generatekey":
-					case "wrapkey":
-					case "unwrapkey":
-						result = {
-							algorithm: {
-								name: "AES-KW",
-								length: 256
-							},
-							usages: ["wrapKey", "unwrapKey"]
-						};
-						break;
-					default:
-						return {
-							algorithm: {
-								name: "AES-KW"
-							},
-							usages: []
-						};
-				}
-				break;
-			case "HMAC":
-				switch (operation.toLowerCase()) {
-					case "sign":
-					case "verify":
-						result = {
-							algorithm: {
-								name: "HMAC"
-							},
-							usages: ["sign", "verify"]
-						};
-						break;
-					case "importkey":
-					case "exportkey":
-					case "generatekey":
-						result = {
-							algorithm: {
-								name: "HMAC",
-								length: 32,
-								hash: {
-									name: "SHA-256"
-								}
-							},
-							usages: ["sign", "verify"]
-						};
-						break;
-					default:
-						return {
-							algorithm: {
-								name: "HMAC"
-							},
-							usages: []
-						};
-				}
-				break;
-			case "HKDF":
-				switch (operation.toLowerCase()) {
-					case "derivekey":
-						result = {
-							algorithm: {
-								name: "HKDF",
-								hash: "SHA-256",
-								salt: new Uint8Array([]),
-								info: new Uint8Array([])
-							},
-							usages: ["encrypt", "decrypt"]
-						};
-						break;
-					default:
-						return {
-							algorithm: {
-								name: "HKDF"
-							},
-							usages: []
-						};
-				}
-				break;
-			case "PBKDF2":
-				switch (operation.toLowerCase()) {
-					case "derivekey":
-						result = {
-							algorithm: {
-								name: "PBKDF2",
-								hash: { name: "SHA-256" },
-								salt: new Uint8Array([]),
-								iterations: 1000
-							},
-							usages: ["encrypt", "decrypt"]
-						};
-						break;
-					default:
-						return {
-							algorithm: {
-								name: "PBKDF2"
-							},
-							usages: []
-						};
-				}
-				break;
-			default:
-		}
-
-		return result;
+		return engine.subtle.getAlgorithmParameters(algorithmName, operation);
 	}
 	//**************************************************************************************
 	/**
@@ -10694,232 +12671,79 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		var rValue = cmsSignature.valueBlock.value[0].convertFromDER();
 		var sValue = cmsSignature.valueBlock.value[1].convertFromDER();
 
+		//region Check the lengths of two parts are equal
+		switch (true) {
+			case rValue.valueBlock.valueHex.byteLength < sValue.valueBlock.valueHex.byteLength:
+				{
+					if (sValue.valueBlock.valueHex.byteLength - rValue.valueBlock.valueHex.byteLength !== 1) throw new Error("Incorrect DER integer decoding");
+
+					var correctedLength = sValue.valueBlock.valueHex.byteLength;
+
+					var rValueView = new Uint8Array(rValue.valueBlock.valueHex);
+
+					var rValueBufferCorrected = new ArrayBuffer(correctedLength);
+					var rValueViewCorrected = new Uint8Array(rValueBufferCorrected);
+
+					rValueViewCorrected.set(rValueView, 1);
+					rValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
+
+					return utilConcatBuf(rValueBufferCorrected, sValue.valueBlock.valueHex);
+				}
+			case rValue.valueBlock.valueHex.byteLength > sValue.valueBlock.valueHex.byteLength:
+				{
+					if (rValue.valueBlock.valueHex.byteLength - sValue.valueBlock.valueHex.byteLength !== 1) throw new Error("Incorrect DER integer decoding");
+
+					var _correctedLength = rValue.valueBlock.valueHex.byteLength;
+
+					var sValueView = new Uint8Array(sValue.valueBlock.valueHex);
+
+					var sValueBufferCorrected = new ArrayBuffer(_correctedLength);
+					var sValueViewCorrected = new Uint8Array(sValueBufferCorrected);
+
+					sValueViewCorrected.set(sValueView, 1);
+					sValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
+
+					return utilConcatBuf(rValue.valueBlock.valueHex, sValueBufferCorrected);
+				}
+			default:
+				{
+					//region In case we have equal length and the length is not even with 2
+					if (rValue.valueBlock.valueHex.byteLength % 2) {
+						var _correctedLength2 = rValue.valueBlock.valueHex.byteLength + 1;
+
+						var _rValueView = new Uint8Array(rValue.valueBlock.valueHex);
+
+						var _rValueBufferCorrected = new ArrayBuffer(_correctedLength2);
+						var _rValueViewCorrected = new Uint8Array(_rValueBufferCorrected);
+
+						_rValueViewCorrected.set(_rValueView, 1);
+						_rValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
+
+						var _sValueView = new Uint8Array(sValue.valueBlock.valueHex);
+
+						var _sValueBufferCorrected = new ArrayBuffer(_correctedLength2);
+						var _sValueViewCorrected = new Uint8Array(_sValueBufferCorrected);
+
+						_sValueViewCorrected.set(_sValueView, 1);
+						_sValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
+
+						return utilConcatBuf(_rValueBufferCorrected, _sValueBufferCorrected);
+					}
+					//endregion
+				}
+		}
+		//endregion
+
 		return utilConcatBuf(rValue.valueBlock.valueHex, sValue.valueBlock.valueHex);
 	}
 	//**************************************************************************************
 	/**
   * Get WebCrypto algorithm by wel-known OID
-  * @param {string} oid Wel-known OID to search for
+  * @param {string} oid well-known OID to search for
   * @returns {Object}
   */
 	function getAlgorithmByOID(oid) {
-		switch (oid) {
-			case "1.2.840.113549.1.1.1":
-			case "1.2.840.113549.1.1.5":
-				return {
-					name: "RSASSA-PKCS1-v1_5",
-					hash: {
-						name: "SHA-1"
-					}
-				};
-			case "1.2.840.113549.1.1.11":
-				return {
-					name: "RSASSA-PKCS1-v1_5",
-					hash: {
-						name: "SHA-256"
-					}
-				};
-			case "1.2.840.113549.1.1.12":
-				return {
-					name: "RSASSA-PKCS1-v1_5",
-					hash: {
-						name: "SHA-384"
-					}
-				};
-			case "1.2.840.113549.1.1.13":
-				return {
-					name: "RSASSA-PKCS1-v1_5",
-					hash: {
-						name: "SHA-512"
-					}
-				};
-			case "1.2.840.113549.1.1.10":
-				return {
-					name: "RSA-PSS"
-				};
-			case "1.2.840.113549.1.1.7":
-				return {
-					name: "RSA-OAEP"
-				};
-			case "1.2.840.10045.2.1":
-			case "1.2.840.10045.4.1":
-				return {
-					name: "ECDSA",
-					hash: {
-						name: "SHA-1"
-					}
-				};
-			case "1.2.840.10045.4.3.2":
-				return {
-					name: "ECDSA",
-					hash: {
-						name: "SHA-256"
-					}
-				};
-			case "1.2.840.10045.4.3.3":
-				return {
-					name: "ECDSA",
-					hash: {
-						name: "SHA-384"
-					}
-				};
-			case "1.2.840.10045.4.3.4":
-				return {
-					name: "ECDSA",
-					hash: {
-						name: "SHA-512"
-					}
-				};
-			case "1.3.133.16.840.63.0.2":
-				return {
-					name: "ECDH",
-					kdf: "SHA-1"
-				};
-			case "1.3.132.1.11.1":
-				return {
-					name: "ECDH",
-					kdf: "SHA-256"
-				};
-			case "1.3.132.1.11.2":
-				return {
-					name: "ECDH",
-					kdf: "SHA-384"
-				};
-			case "1.3.132.1.11.3":
-				return {
-					name: "ECDH",
-					kdf: "SHA-512"
-				};
-			case "2.16.840.1.101.3.4.1.2":
-				return {
-					name: "AES-CBC",
-					length: 128
-				};
-			case "2.16.840.1.101.3.4.1.22":
-				return {
-					name: "AES-CBC",
-					length: 192
-				};
-			case "2.16.840.1.101.3.4.1.42":
-				return {
-					name: "AES-CBC",
-					length: 256
-				};
-			case "2.16.840.1.101.3.4.1.6":
-				return {
-					name: "AES-GCM",
-					length: 128
-				};
-			case "2.16.840.1.101.3.4.1.26":
-				return {
-					name: "AES-GCM",
-					length: 192
-				};
-			case "2.16.840.1.101.3.4.1.46":
-				return {
-					name: "AES-GCM",
-					length: 256
-				};
-			case "2.16.840.1.101.3.4.1.4":
-				return {
-					name: "AES-CFB",
-					length: 128
-				};
-			case "2.16.840.1.101.3.4.1.24":
-				return {
-					name: "AES-CFB",
-					length: 192
-				};
-			case "2.16.840.1.101.3.4.1.44":
-				return {
-					name: "AES-CFB",
-					length: 256
-				};
-			case "2.16.840.1.101.3.4.1.5":
-				return {
-					name: "AES-KW",
-					length: 128
-				};
-			case "2.16.840.1.101.3.4.1.25":
-				return {
-					name: "AES-KW",
-					length: 192
-				};
-			case "2.16.840.1.101.3.4.1.45":
-				return {
-					name: "AES-KW",
-					length: 256
-				};
-			case "1.2.840.113549.2.7":
-				return {
-					name: "HMAC",
-					hash: {
-						name: "SHA-1"
-					}
-				};
-			case "1.2.840.113549.2.9":
-				return {
-					name: "HMAC",
-					hash: {
-						name: "SHA-256"
-					}
-				};
-			case "1.2.840.113549.2.10":
-				return {
-					name: "HMAC",
-					hash: {
-						name: "SHA-384"
-					}
-				};
-			case "1.2.840.113549.2.11":
-				return {
-					name: "HMAC",
-					hash: {
-						name: "SHA-512"
-					}
-				};
-			case "1.2.840.113549.1.9.16.3.5":
-				return {
-					name: "DH"
-				};
-			case "1.3.14.3.2.26":
-				return {
-					name: "SHA-1"
-				};
-			case "2.16.840.1.101.3.4.2.1":
-				return {
-					name: "SHA-256"
-				};
-			case "2.16.840.1.101.3.4.2.2":
-				return {
-					name: "SHA-384"
-				};
-			case "2.16.840.1.101.3.4.2.3":
-				return {
-					name: "SHA-512"
-				};
-			case "1.2.840.113549.1.5.12":
-				return {
-					name: "PBKDF2"
-				};
-			//region Special case - OIDs for ECC curves
-			case "1.2.840.10045.3.1.7":
-				return {
-					name: "P-256"
-				};
-			case "1.3.132.0.34":
-				return {
-					name: "P-384"
-				};
-			case "1.3.132.0.35":
-				return {
-					name: "P-521"
-				};
-			//endregion
-			default:
-		}
-
-		return {};
+		return engine.subtle.getAlgorithmByOID(oid);
 	}
 	//**************************************************************************************
 	/**
@@ -10928,43 +12752,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   * @returns {string}
   */
 	function getHashAlgorithm(signatureAlgorithm) {
-		var result = "";
-
-		switch (signatureAlgorithm.algorithmId) {
-			case "1.2.840.10045.4.1": // ecdsa-with-SHA1
-			case "1.2.840.113549.1.1.5":
-				result = "SHA-1";
-				break;
-			case "1.2.840.10045.4.3.2": // ecdsa-with-SHA256
-			case "1.2.840.113549.1.1.11":
-				result = "SHA-256";
-				break;
-			case "1.2.840.10045.4.3.3": // ecdsa-with-SHA384
-			case "1.2.840.113549.1.1.12":
-				result = "SHA-384";
-				break;
-			case "1.2.840.10045.4.3.4": // ecdsa-with-SHA512
-			case "1.2.840.113549.1.1.13":
-				result = "SHA-512";
-				break;
-			case "1.2.840.113549.1.1.10":
-				// RSA-PSS
-				{
-					try {
-						var params = new RSASSAPSSParams({ schema: signatureAlgorithm.algorithmParams });
-						if ("hashAlgorithm" in params) {
-							var algorithm = getAlgorithmByOID(params.hashAlgorithm.algorithmId);
-							if ("name" in algorithm === false) return "";
-
-							result = algorithm.name;
-						} else result = "SHA-1";
-					} catch (ex) {}
-				}
-				break;
-			default:
-		}
-
-		return result;
+		return engine.subtle.getHashAlgorithm(signatureAlgorithm);
 	}
 	//**************************************************************************************
 	/**
@@ -11096,13 +12884,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			while (found) {
 				found = false;
 
-				var _iteratorNormalCompletion13 = true;
-				var _didIteratorError13 = false;
-				var _iteratorError13 = undefined;
+				var _iteratorNormalCompletion16 = true;
+				var _didIteratorError16 = false;
+				var _iteratorError16 = undefined;
 
 				try {
-					for (var _iterator13 = incomingResult[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
-						var result = _step13.value;
+					for (var _iterator16 = incomingResult[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+						var result = _step16.value;
 
 						if (result.counter === currentCounter) {
 							combinedBuffer = utilConcatBuf(combinedBuffer, result.result);
@@ -11111,16 +12899,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						}
 					}
 				} catch (err) {
-					_didIteratorError13 = true;
-					_iteratorError13 = err;
+					_didIteratorError16 = true;
+					_iteratorError16 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion13 && _iterator13.return) {
-							_iterator13.return();
+						if (!_iteratorNormalCompletion16 && _iterator16.return) {
+							_iterator16.return();
 						}
 					} finally {
-						if (_didIteratorError13) {
-							throw _iteratorError13;
+						if (_didIteratorError16) {
+							throw _iteratorError16;
 						}
 					}
 				}
@@ -11137,8 +12925,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var newView = new Uint8Array(newBuffer);
 				var combinedView = new Uint8Array(combinedBuffer);
 
-				for (var _i11 = 0; _i11 < keydatalen; _i11++) {
-					newView[_i11] = combinedView[_i11];
+				for (var _i17 = 0; _i17 < keydatalen; _i17++) {
+					newView[_i17] = combinedView[_i17];
 				}return newBuffer;
 			}
 
@@ -11149,21 +12937,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 	}
 	//**************************************************************************************
 	/**
-  * Check that all OIDs are mapped to existing WebCrypto API algorithms
+  * Check that all OIDs are mapped to existing crypto engine algorithms
   * @param {Array.<string>} oids Array with OIDs for checking
   * @returns {{indication}}
   */
 	function checkOids$1(oids) {
-		var _iteratorNormalCompletion14 = true;
-		var _didIteratorError14 = false;
-		var _iteratorError14 = undefined;
+		var _iteratorNormalCompletion17 = true;
+		var _didIteratorError17 = false;
+		var _iteratorError17 = undefined;
 
 		try {
-			for (var _iterator14 = oids.entries()[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-				var _step14$value = _slicedToArray(_step14.value, 2);
+			for (var _iterator17 = oids.entries()[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+				var _step17$value = _slicedToArray(_step17.value, 2);
 
-				var index = _step14$value[0];
-				var oid = _step14$value[1];
+				var index = _step17$value[0];
+				var oid = _step17$value[1];
 
 				var algorithm = getAlgorithmByOID(oid);
 				if ("name" in algorithm === false) {
@@ -11174,16 +12962,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				}
 			}
 		} catch (err) {
-			_didIteratorError14 = true;
-			_iteratorError14 = err;
+			_didIteratorError17 = true;
+			_iteratorError17 = err;
 		} finally {
 			try {
-				if (!_iteratorNormalCompletion14 && _iterator14.return) {
-					_iterator14.return();
+				if (!_iteratorNormalCompletion17 && _iterator17.return) {
+					_iterator17.return();
 				}
 			} finally {
-				if (_didIteratorError14) {
-					throw _iteratorError14;
+				if (_didIteratorError17) {
+					throw _iteratorError17;
 				}
 			}
 		}
@@ -11512,30 +13300,30 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				if (compareTo instanceof RelativeDistinguishedNames) {
 					if (this.typesAndValues.length !== compareTo.typesAndValues.length) return false;
 
-					var _iteratorNormalCompletion15 = true;
-					var _didIteratorError15 = false;
-					var _iteratorError15 = undefined;
+					var _iteratorNormalCompletion18 = true;
+					var _didIteratorError18 = false;
+					var _iteratorError18 = undefined;
 
 					try {
-						for (var _iterator15 = this.typesAndValues.entries()[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
-							var _step15$value = _slicedToArray(_step15.value, 2);
+						for (var _iterator18 = this.typesAndValues.entries()[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+							var _step18$value = _slicedToArray(_step18.value, 2);
 
-							var index = _step15$value[0];
-							var typeAndValue = _step15$value[1];
+							var index = _step18$value[0];
+							var typeAndValue = _step18$value[1];
 
 							if (typeAndValue.isEqual(compareTo.typesAndValues[index]) === false) return false;
 						}
 					} catch (err) {
-						_didIteratorError15 = true;
-						_iteratorError15 = err;
+						_didIteratorError18 = true;
+						_iteratorError18 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion15 && _iterator15.return) {
-								_iterator15.return();
+							if (!_iteratorNormalCompletion18 && _iterator18.return) {
+								_iterator18.return();
 							}
 						} finally {
-							if (_didIteratorError15) {
-								throw _iteratorError15;
+							if (_didIteratorError18) {
+								throw _iteratorError18;
 							}
 						}
 					}
@@ -13126,23 +14914,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				}
 
 				if ("onlyContainsCACerts" in asn1.result) {
-					var _view2 = new Uint8Array(asn1.result.onlyContainsCACerts.valueBlock.valueHex);
-					this.onlyContainsCACerts = _view2[0] !== 0x00;
+					var _view4 = new Uint8Array(asn1.result.onlyContainsCACerts.valueBlock.valueHex);
+					this.onlyContainsCACerts = _view4[0] !== 0x00;
 				}
 
 				if ("onlySomeReasons" in asn1.result) {
-					var _view3 = new Uint8Array(asn1.result.onlySomeReasons.valueBlock.valueHex);
-					this.onlySomeReasons = _view3[0];
+					var _view5 = new Uint8Array(asn1.result.onlySomeReasons.valueBlock.valueHex);
+					this.onlySomeReasons = _view5[0];
 				}
 
 				if ("indirectCRL" in asn1.result) {
-					var _view4 = new Uint8Array(asn1.result.indirectCRL.valueBlock.valueHex);
-					this.indirectCRL = _view4[0] !== 0x00;
+					var _view6 = new Uint8Array(asn1.result.indirectCRL.valueBlock.valueHex);
+					this.indirectCRL = _view6[0] !== 0x00;
 				}
 
 				if ("onlyContainsAttributeCerts" in asn1.result) {
-					var _view5 = new Uint8Array(asn1.result.onlyContainsAttributeCerts.valueBlock.valueHex);
-					this.onlyContainsAttributeCerts = _view5[0] !== 0x00;
+					var _view7 = new Uint8Array(asn1.result.onlyContainsAttributeCerts.valueBlock.valueHex);
+					this.onlyContainsAttributeCerts = _view7[0] !== 0x00;
 				}
 				//endregion
 			}
@@ -13464,13 +15252,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     */
 			value: function fromSchema(schema) {
 				//region Check the schema is valid
-				var asn1 = compareSchema(schema, schema, GeneralNames.schema());
+				var asn1 = compareSchema(schema, schema, GeneralNames.schema({
+					names: {
+						blockName: "names",
+						generalNames: "generalNames"
+					}
+				}));
 
 				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for GeneralNames");
 				//endregion
 
 				//region Get internal properties from parsed schema
-				this.names = Array.from(asn1.result.names, function (element) {
+				this.names = Array.from(asn1.result.generalNames, function (element) {
 					return new GeneralName({ schema: element });
 				});
 				//endregion
@@ -13530,6 +15323,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			key: "schema",
 			value: function schema() {
 				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+				var optional = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
 				/**
      * @type {Object}
@@ -13539,8 +15333,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var names = getParametersValue(parameters, "names", {});
 
 				return new Sequence({
+					optional: optional,
+					name: names.blockName || "",
 					value: [new Repeated({
-						name: names.blockName || "names",
+						name: names.generalNames || "",
 						value: GeneralName.schema()
 					})]
 				});
@@ -17048,108 +18844,59 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "sign",
 			value: function sign(privateKey) {
-				var _this54 = this;
+				var _this58 = this;
 
 				var hashAlgorithm = arguments.length <= 1 || arguments[1] === undefined ? "SHA-1" : arguments[1];
 
-				//region Get hashing algorithm
-				var oid = getOIDByAlgorithm({ name: hashAlgorithm });
-				if (oid === "") return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
+				//region Initial checking
+				//region Check private key
+				if (typeof privateKey === "undefined") return Promise.reject("Need to provide a private key for signing");
+				//endregion
 				//endregion
 
-				//region Get a "default parameters" for current algorithm
-				var defParams = getAlgorithmParameters(privateKey.algorithm.name, "sign");
-				defParams.algorithm.hash.name = hashAlgorithm;
+				//region Initial variables
+				var sequence = Promise.resolve();
+				var parameters = void 0;
+
+				var engine = getEngine$1();
 				//endregion
 
-				//region Fill internal structures base on "privateKey" and "hashAlgorithm"
-				switch (privateKey.algorithm.name.toUpperCase()) {
-					case "RSASSA-PKCS1-V1_5":
-					case "ECDSA":
-						this.signature.algorithmId = getOIDByAlgorithm(defParams.algorithm);
-						this.signatureAlgorithm.algorithmId = this.signature.algorithmId;
-						break;
-					case "RSA-PSS":
-						{
-							//region Set "saltLength" as a length (in octets) of hash function result
-							switch (hashAlgorithm.toUpperCase()) {
-								case "SHA-256":
-									defParams.algorithm.saltLength = 32;
-									break;
-								case "SHA-384":
-									defParams.algorithm.saltLength = 48;
-									break;
-								case "SHA-512":
-									defParams.algorithm.saltLength = 64;
-									break;
-								default:
-							}
-							//endregion
+				//region Get a "default parameters" for current algorithm and set correct signature algorithm
+				sequence = sequence.then(function () {
+					return engine.subtle.getSignatureParameters(privateKey, hashAlgorithm);
+				});
 
-							//region Fill "RSASSA_PSS_params" object
-							var paramsObject = {};
-
-							if (hashAlgorithm.toUpperCase() !== "SHA-1") {
-								var hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
-								if (hashAlgorithmOID === "") return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
-
-								paramsObject.hashAlgorithm = new AlgorithmIdentifier({
-									algorithmId: hashAlgorithmOID,
-									algorithmParams: new Null()
-								});
-
-								paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
-									algorithmId: "1.2.840.113549.1.1.8", // MGF1
-									algorithmParams: paramsObject.hashAlgorithm.toSchema()
-								});
-							}
-
-							if (defParams.algorithm.saltLength !== 20) paramsObject.saltLength = defParams.algorithm.saltLength;
-
-							var pssParameters = new RSASSAPSSParams(paramsObject);
-							//endregion
-
-							//region Automatically set signature algorithm
-							this.signature = new AlgorithmIdentifier({
-								algorithmId: "1.2.840.113549.1.1.10",
-								algorithmParams: pssParameters.toSchema()
-							});
-							this.signatureAlgorithm = this.signature; // Must be the same
-							//endregion
-						}
-						break;
-					default:
-						return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
-				}
+				sequence = sequence.then(function (result) {
+					parameters = result.parameters;
+					_this58.signature = result.signatureAlgorithm;
+					_this58.signatureAlgorithm = result.signatureAlgorithm;
+				});
 				//endregion
 
 				//region Create TBS data for signing
-				this.tbs = this.encodeTBS().toBER(false);
-				//endregion
-
-				//region Get a "crypto" extension
-				var crypto = getCrypto();
-				if (typeof crypto === "undefined") return Promise.reject("Unable to create WebCrypto object");
+				sequence = sequence.then(function () {
+					_this58.tbs = _this58.encodeTBS().toBER(false);
+				});
 				//endregion
 
 				//region Signing TBS data on provided private key
-				return crypto.sign(defParams.algorithm, privateKey, new Uint8Array(this.tbs)).then(function (result) {
-					//region Special case for ECDSA algorithm
-					if (defParams.algorithm.name === "ECDSA") result = createCMSECDSASignature(result);
-					//endregion
+				sequence = sequence.then(function () {
+					return engine.subtle.signWithPrivateKey(_this58.tbs, privateKey, parameters);
+				});
 
-					_this54.signatureValue = new BitString({ valueHex: result });
-				}, function (error) {
-					return Promise.reject("Signing error: " + error);
+				sequence = sequence.then(function (result) {
+					_this58.signatureValue = new BitString({ valueHex: result });
 				});
 				//endregion
+
+				return sequence;
 			}
 			//**********************************************************************************
 
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this55 = this;
+				var _this59 = this;
 
 				var issuerCertificate = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
 
@@ -17185,7 +18932,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				sequence = sequence.then(function () {
 					//region Get information about public key algorithm and default parameters for import
 					var algorithmId = void 0;
-					if (_this55.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this55.signatureAlgorithm.algorithmId;else algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
+					if (_this59.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this59.signatureAlgorithm.algorithmId;else algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
 
 					var algorithmObject = getAlgorithmByOID(algorithmId);
 					if ("name" in algorithmObject === false) return Promise.reject("Unsupported public key algorithm: " + algorithmId);
@@ -17195,7 +18942,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					//region Special case for ECDSA
 					if (algorithmObject.name === "ECDSA") {
-						// #region Get information about named curve
+						//region Get information about named curve
 						var algorithmParamsChecked = false;
 
 						if ("algorithmParams" in subjectPublicKeyInfo.algorithm === true) {
@@ -17208,7 +18955,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 						var curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
 						if ("name" in curveObject === false) return Promise.reject("Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
-						// #endregion
+						//endregion
 
 						algorithm.algorithm.namedCurve = curveObject.name;
 					}
@@ -17244,7 +18991,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var pssParameters = void 0;
 
 						try {
-							pssParameters = new RSASSAPSSParams({ schema: _this55.signatureAlgorithm.algorithmParams });
+							pssParameters = new RSASSAPSSParams({ schema: _this59.signatureAlgorithm.algorithmParams });
 						} catch (ex) {
 							return Promise.reject(ex);
 						}
@@ -17327,7 +19074,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				if (algorithmsChecking.indication !== PASSED) {
 					return {
 						indication: FAILED,
-						message: "Incorrect OID in Certificate: " + algorithms[algorithmsCheckResult.message]
+						message: "Incorrect OID in Certificate: " + algorithms[algorithmsChecking.message]
 					};
 				}
 				//endregion
@@ -17350,7 +19097,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "cryptographicVerification",
 			value: function cryptographicVerification(_ref2) {
-				var _this56 = this;
+				var _this60 = this;
 
 				var _ref2$issuerCertifica = _ref2.issuerCertificate;
 				var issuerCertificate = _ref2$issuerCertifica === undefined ? null : _ref2$issuerCertifica;
@@ -17405,7 +19152,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				sequence = sequence.then(function () {
 					//region Get information about public key algorithm and default parameters for import
 					var algorithmId = void 0;
-					if (_this56.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this56.signatureAlgorithm.algorithmId;else algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
+					if (_this60.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this60.signatureAlgorithm.algorithmId;else algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
 
 					var algorithmObject = getAlgorithmByOID(algorithmId);
 					if ("name" in algorithmObject === false) {
@@ -17421,7 +19168,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					//region Special case for ECDSA
 					if (algorithmObject.name === "ECDSA") {
-						// #region Get information about named curve
+						//region Get information about named curve
 						var algorithmParamsChecked = false;
 
 						if ("algorithmParams" in subjectPublicKeyInfo.algorithm === true) {
@@ -17446,7 +19193,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								message: "Unsupported named curve algorithm: " + subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString()
 							});
 						}
-						// #endregion
+						//endregion
 
 						algorithm.algorithm.namedCurve = curveObject.name;
 					}
@@ -17482,7 +19229,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var pssParameters = void 0;
 
 						try {
-							pssParameters = new RSASSAPSSParams({ schema: _this56.signatureAlgorithm.algorithmParams });
+							pssParameters = new RSASSAPSSParams({ schema: _this60.signatureAlgorithm.algorithmParams });
 						} catch (ex) {
 							return Promise.reject(ex);
 						}
@@ -17800,640 +19547,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   */
 
 
-	var EncryptedContentInfo = function () {
-		//**********************************************************************************
-		/**
-   * Constructor for EncryptedContentInfo class
-   * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
-   */
-		function EncryptedContentInfo() {
-			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-			_classCallCheck(this, EncryptedContentInfo);
-
-			//region Internal properties of the object
-			/**
-    * @type {string}
-    * @description contentType
-    */
-			this.contentType = getParametersValue(parameters, "contentType", EncryptedContentInfo.defaultValues("contentType"));
-			/**
-    * @type {AlgorithmIdentifier}
-    * @description contentEncryptionAlgorithm
-    */
-			this.contentEncryptionAlgorithm = getParametersValue(parameters, "contentEncryptionAlgorithm", EncryptedContentInfo.defaultValues("contentEncryptionAlgorithm"));
-
-			if ("encryptedContent" in parameters) {
-				/**
-     * @type {OctetString}
-     * @description encryptedContent (!!!) could be contructive or primitive value (!!!)
-     */
-				this.encryptedContent = parameters.encryptedContent;
-
-				if (this.encryptedContent.idBlock.tagClass === 1 && this.encryptedContent.idBlock.tagNumber === 4) {
-					//region Divide OCTETSTRING value down to small pieces
-					if (this.encryptedContent.idBlock.isConstructed === false) {
-						var constrString = new OctetString({
-							idBlock: { isConstructed: true },
-							isConstructed: true
-						});
-
-						var offset = 0;
-						var length = this.encryptedContent.valueBlock.valueHex.byteLength;
-
-						while (length > 0) {
-							var pieceView = new Uint8Array(this.encryptedContent.valueBlock.valueHex, offset, offset + 1024 > this.encryptedContent.valueBlock.valueHex.byteLength ? this.encryptedContent.valueBlock.valueHex.byteLength - offset : 1024);
-							var _array = new ArrayBuffer(pieceView.length);
-							var _view = new Uint8Array(_array);
-
-							for (var i = 0; i < _view.length; i++) {
-								_view[i] = pieceView[i];
-							}constrString.valueBlock.value.push(new OctetString({ valueHex: _array }));
-
-							length -= pieceView.length;
-							offset += pieceView.length;
-						}
-
-						this.encryptedContent = constrString;
-					}
-					//endregion
-				}
-			}
-			//endregion
-
-			//region If input argument array contains "schema" for this object
-			if ("schema" in parameters) this.fromSchema(parameters.schema);
-			//endregion
-		}
-		//**********************************************************************************
-		/**
-   * Return default values for all class members
-   * @param {string} memberName String name for a class member
-   */
-
-
-		_createClass(EncryptedContentInfo, [{
-			key: "fromSchema",
-
-			//**********************************************************************************
-			/**
-    * Convert parsed asn1js object into current class
-    * @param {!Object} schema
-    */
-			value: function fromSchema(schema) {
-				//region Check the schema is valid
-				var asn1 = compareSchema(schema, schema, EncryptedContentInfo.schema({
-					names: {
-						contentType: "contentType",
-						contentEncryptionAlgorithm: {
-							names: {
-								blockName: "contentEncryptionAlgorithm"
-							}
-						},
-						encryptedContent: "encryptedContent"
-					}
-				}));
-
-				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for EncryptedContentInfo");
-				//endregion
-
-				//region Get internal properties from parsed schema
-				this.contentType = asn1.result.contentType.valueBlock.toString();
-				this.contentEncryptionAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.contentEncryptionAlgorithm });
-
-				if ("encryptedContent" in asn1.result) {
-					this.encryptedContent = asn1.result.encryptedContent;
-
-					this.encryptedContent.idBlock.tagClass = 1; // UNIVERSAL
-					this.encryptedContent.idBlock.tagNumber = 4; // OCTETSTRING (!!!) The value still has instance of "in_window.org.pkijs.asn1.ASN1_CONSTRUCTED / ASN1_PRIMITIVE"
-				}
-				//endregion
-			}
-			//**********************************************************************************
-			/**
-    * Convert current object to asn1js object and set correct values
-    * @returns {Object} asn1js object
-    */
-
-		}, {
-			key: "toSchema",
-			value: function toSchema() {
-				//region Create array for output sequence
-				var sequenceLengthBlock = {
-					isIndefiniteForm: false
-				};
-
-				var outputArray = [];
-
-				outputArray.push(new ObjectIdentifier({ value: this.contentType }));
-				outputArray.push(this.contentEncryptionAlgorithm.toSchema());
-
-				if ("encryptedContent" in this) {
-					sequenceLengthBlock.isIndefiniteForm = this.encryptedContent.idBlock.isConstructed;
-
-					var encryptedValue = this.encryptedContent;
-
-					encryptedValue.idBlock.tagClass = 3; // CONTEXT-SPECIFIC
-					encryptedValue.idBlock.tagNumber = 0; // [0]
-
-					encryptedValue.lenBlock.isIndefiniteForm = this.encryptedContent.idBlock.isConstructed;
-
-					outputArray.push(encryptedValue);
-				}
-				//endregion
-
-				//region Construct and return new ASN.1 schema for this object
-				return new Sequence({
-					lenBlock: sequenceLengthBlock,
-					value: outputArray
-				});
-				//endregion
-			}
-			//**********************************************************************************
-			/**
-    * Convertion for the class to JSON object
-    * @returns {Object}
-    */
-
-		}, {
-			key: "toJSON",
-			value: function toJSON() {
-				var _object = {
-					contentType: this.contentType,
-					contentEncryptionAlgorithm: this.contentEncryptionAlgorithm.toJSON()
-				};
-
-				if ("encryptedContent" in this) _object.encryptedContent = this.encryptedContent.toJSON();
-
-				return _object;
-			}
-			//**********************************************************************************
-
-		}], [{
-			key: "defaultValues",
-			value: function defaultValues(memberName) {
-				switch (memberName) {
-					case "contentType":
-						return "";
-					case "contentEncryptionAlgorithm":
-						return new AlgorithmIdentifier();
-					case "encryptedContent":
-						return new OctetString();
-					default:
-						throw new Error("Invalid member name for EncryptedContentInfo class: " + memberName);
-				}
-			}
-			//**********************************************************************************
-			/**
-    * Compare values with default values for all class members
-    * @param {string} memberName String name for a class member
-    * @param {*} memberValue Value to compare with default value
-    */
-
-		}, {
-			key: "compareWithDefault",
-			value: function compareWithDefault(memberName, memberValue) {
-				switch (memberName) {
-					case "contentType":
-						return memberValue === "";
-					case "contentEncryptionAlgorithm":
-						return memberValue.algorithmId === "" && "algorithmParams" in memberValue === false;
-					case "encryptedContent":
-						return memberValue.isEqual(EncryptedContentInfo.defaultValues(memberName));
-					default:
-						throw new Error("Invalid member name for EncryptedContentInfo class: " + memberName);
-				}
-			}
-			//**********************************************************************************
-			/**
-    * Return value of asn1js schema for current class
-    * @param {Object} parameters Input parameters for the schema
-    * @returns {Object} asn1js schema object
-    */
-
-		}, {
-			key: "schema",
-			value: function schema() {
-				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-				//EncryptedContentInfo ::= SEQUENCE {
-				//    contentType ContentType,
-				//    contentEncryptionAlgorithm ContentEncryptionAlgorithmIdentifier,
-				//    encryptedContent [0] IMPLICIT EncryptedContent OPTIONAL }
-				//
-				// Comment: Strange, but modern crypto engines create "encryptedContent" as "[0] EXPLICIT EncryptedContent"
-				//
-				//EncryptedContent ::= OCTET STRING
-
-				/**
-     * @type {Object}
-     * @property {string} [blockName]
-     * @property {string} [contentType]
-     * @property {string} [contentEncryptionAlgorithm]
-     * @property {string} [encryptedContent]
-     */
-				var names = getParametersValue(parameters, "names", {});
-
-				return new Sequence({
-					name: names.blockName || "",
-					value: [new ObjectIdentifier({ name: names.contentType || "" }), AlgorithmIdentifier.schema(names.contentEncryptionAlgorithm || {}),
-					// The CHOICE we need because "EncryptedContent" could have either "constructive"
-					// or "primitive" form of encoding and we need to handle both variants
-					new Choice({
-						value: [new Constructed({
-							name: names.encryptedContent || "",
-							idBlock: {
-								tagClass: 3, // CONTEXT-SPECIFIC
-								tagNumber: 0 // [0]
-							},
-							value: [new Repeated({
-								value: new OctetString()
-							})]
-						}), new Primitive({
-							name: names.encryptedContent || "",
-							idBlock: {
-								tagClass: 3, // CONTEXT-SPECIFIC
-								tagNumber: 0 // [0]
-							}
-						})]
-					})]
-				});
-			}
-		}]);
-
-		return EncryptedContentInfo;
-	}();
-	//**************************************************************************************
-
-	//**************************************************************************************
-	/**
-  * Class from RFC2898
-  */
-
-
-	var PBKDF2Params = function () {
-		//**********************************************************************************
-		/**
-   * Constructor for PBKDF2Params class
-   * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
-   */
-		function PBKDF2Params() {
-			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-			_classCallCheck(this, PBKDF2Params);
-
-			//region Internal properties of the object
-			/**
-    * @type {Object}
-    * @description salt
-    */
-			this.salt = getParametersValue(parameters, "salt", PBKDF2Params.defaultValues("salt"));
-			/**
-    * @type {number}
-    * @description iterationCount
-    */
-			this.iterationCount = getParametersValue(parameters, "iterationCount", PBKDF2Params.defaultValues("iterationCount"));
-			/**
-    * @type {number}
-    * @description keyLength
-    */
-			this.keyLength = getParametersValue(parameters, "keyLength", PBKDF2Params.defaultValues("keyLength"));
-			/**
-    * @type {AlgorithmIdentifier}
-    * @description prf
-    */
-			this.prf = getParametersValue(parameters, "prf", PBKDF2Params.defaultValues("prf"));
-			//endregion
-
-			//region If input argument array contains "schema" for this object
-			if ("schema" in parameters) this.fromSchema(parameters.schema);
-			//endregion
-		}
-		//**********************************************************************************
-		/**
-   * Return default values for all class members
-   * @param {string} memberName String name for a class member
-   */
-
-
-		_createClass(PBKDF2Params, [{
-			key: "fromSchema",
-
-			//**********************************************************************************
-			/**
-    * Convert parsed asn1js object into current class
-    * @param {!Object} schema
-    */
-			value: function fromSchema(schema) {
-				//region Check the schema is valid
-				var asn1 = compareSchema(schema, schema, PBKDF2Params.schema({
-					names: {
-						saltPrimitive: "salt",
-						saltConstructed: {
-							names: {
-								blockName: "salt"
-							}
-						},
-						iterationCount: "iterationCount",
-						keyLength: "keyLength",
-						prf: {
-							names: {
-								blockName: "prf",
-								optional: true
-							}
-						}
-					}
-				}));
-
-				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for PBKDF2_params");
-				//endregion
-
-				//region Get internal properties from parsed schema
-				this.salt = asn1.result.salt;
-				this.iterationCount = asn1.result.iterationCount.valueBlock.valueDec;
-
-				if ("keyLength" in asn1.result) this.keyLength = asn1.result.keyLength.valueBlock.valueDec;
-
-				if ("prf" in asn1.result) this.prf = new AlgorithmIdentifier({ schema: asn1.result.prf });
-				//endregion
-			}
-			//**********************************************************************************
-			/**
-    * Convert current object to asn1js object and set correct values
-    * @returns {Object} asn1js object
-    */
-
-		}, {
-			key: "toSchema",
-			value: function toSchema() {
-				//region Create array for output sequence 
-				var outputArray = [];
-
-				outputArray.push(this.salt);
-				outputArray.push(new Integer({ value: this.iterationCount }));
-
-				if (PBKDF2Params.defaultValues("keyLength") !== this.keyLength) outputArray.push(new Integer({ value: this.keyLength }));
-
-				if (PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false) outputArray.push(this.prf.toSchema());
-				//endregion 
-
-				//region Construct and return new ASN.1 schema for this object 
-				return new Sequence({
-					value: outputArray
-				});
-				//endregion 
-			}
-			//**********************************************************************************
-			/**
-    * Convertion for the class to JSON object
-    * @returns {Object}
-    */
-
-		}, {
-			key: "toJSON",
-			value: function toJSON() {
-				var _object = {
-					salt: this.salt.toJSON(),
-					iterationCount: this.iterationCount
-				};
-
-				if (PBKDF2Params.defaultValues("keyLength") !== this.keyLength) _object.keyLength = this.keyLength;
-
-				if (PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false) _object.prf = this.prf.toJSON();
-
-				return _object;
-			}
-			//**********************************************************************************
-
-		}], [{
-			key: "defaultValues",
-			value: function defaultValues(memberName) {
-				switch (memberName) {
-					case "salt":
-						return {};
-					case "iterationCount":
-						return -1;
-					case "keyLength":
-						return 0;
-					case "prf":
-						return new AlgorithmIdentifier();
-					default:
-						throw new Error("Invalid member name for PBKDF2Params class: " + memberName);
-				}
-			}
-			//**********************************************************************************
-			/**
-    * Return value of asn1js schema for current class
-    * @param {Object} parameters Input parameters for the schema
-    * @returns {Object} asn1js schema object
-    */
-
-		}, {
-			key: "schema",
-			value: function schema() {
-				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-				//PBKDF2-params ::= SEQUENCE {
-				//    salt CHOICE {
-				//        specified OCTET STRING,
-				//        otherSource AlgorithmIdentifier },
-				//  iterationCount INTEGER (1..MAX),
-				//  keyLength INTEGER (1..MAX) OPTIONAL,
-				//  prf AlgorithmIdentifier
-				//    DEFAULT { algorithm hMAC-SHA1, parameters NULL } }
-
-				/**
-     * @type {Object}
-     * @property {string} [blockName]
-     * @property {string} [saltPrimitive]
-     * @property {string} [saltConstructed]
-     * @property {string} [iterationCount]
-     * @property {string} [keyLength]
-     * @property {string} [prf]
-     */
-				var names = getParametersValue(parameters, "names", {});
-
-				return new Sequence({
-					name: names.blockName || "",
-					value: [new Choice({
-						value: [new OctetString({ name: names.saltPrimitive || "" }), AlgorithmIdentifier.schema(names.saltConstructed || {})]
-					}), new Integer({ name: names.iterationCount || "" }), new Integer({
-						name: names.keyLength || "",
-						optional: true
-					}), AlgorithmIdentifier.schema(names.prf || {
-						names: {
-							optional: true
-						}
-					})]
-				});
-			}
-		}]);
-
-		return PBKDF2Params;
-	}();
-	//**************************************************************************************
-
-	//**************************************************************************************
-	/**
-  * Class from RFC2898
-  */
-
-
-	var PBES2Params = function () {
-		//**********************************************************************************
-		/**
-   * Constructor for PBES2Params class
-   * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
-   */
-		function PBES2Params() {
-			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-			_classCallCheck(this, PBES2Params);
-
-			//region Internal properties of the object
-			/**
-    * @type {AlgorithmIdentifier}
-    * @description keyDerivationFunc
-    */
-			this.keyDerivationFunc = getParametersValue(parameters, "keyDerivationFunc", PBES2Params.defaultValues("keyDerivationFunc"));
-			/**
-    * @type {AlgorithmIdentifier}
-    * @description encryptionScheme
-    */
-			this.encryptionScheme = getParametersValue(parameters, "encryptionScheme", PBES2Params.defaultValues("encryptionScheme"));
-			//endregion
-
-			//region If input argument array contains "schema" for this object
-			if ("schema" in parameters) this.fromSchema(parameters.schema);
-			//endregion
-		}
-		//**********************************************************************************
-		/**
-   * Return default values for all class members
-   * @param {string} memberName String name for a class member
-   */
-
-
-		_createClass(PBES2Params, [{
-			key: "fromSchema",
-
-			//**********************************************************************************
-			/**
-    * Convert parsed asn1js object into current class
-    * @param {!Object} schema
-    */
-			value: function fromSchema(schema) {
-				//region Check the schema is valid
-				var asn1 = compareSchema(schema, schema, PBES2Params.schema({
-					names: {
-						keyDerivationFunc: {
-							names: {
-								blockName: "keyDerivationFunc"
-							}
-						},
-						encryptionScheme: {
-							names: {
-								blockName: "encryptionScheme"
-							}
-						}
-					}
-				}));
-
-				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for PBES2_params");
-				//endregion
-
-				//region Get internal properties from parsed schema
-				this.keyDerivationFunc = new AlgorithmIdentifier({ schema: asn1.result.keyDerivationFunc });
-				this.encryptionScheme = new AlgorithmIdentifier({ schema: asn1.result.encryptionScheme });
-				//endregion
-			}
-			//**********************************************************************************
-			/**
-    * Convert current object to asn1js object and set correct values
-    * @returns {Object} asn1js object
-    */
-
-		}, {
-			key: "toSchema",
-			value: function toSchema() {
-				//region Construct and return new ASN.1 schema for this object
-				return new Sequence({
-					value: [this.keyDerivationFunc.toSchema(), this.encryptionScheme.toSchema()]
-				});
-				//endregion
-			}
-			//**********************************************************************************
-			/**
-    * Convertion for the class to JSON object
-    * @returns {Object}
-    */
-
-		}, {
-			key: "toJSON",
-			value: function toJSON() {
-				return {
-					keyDerivationFunc: this.keyDerivationFunc.toJSON(),
-					encryptionScheme: this.encryptionScheme.toJSON()
-				};
-			}
-			//**********************************************************************************
-
-		}], [{
-			key: "defaultValues",
-			value: function defaultValues(memberName) {
-				switch (memberName) {
-					case "keyDerivationFunc":
-						return new AlgorithmIdentifier();
-					case "encryptionScheme":
-						return new AlgorithmIdentifier();
-					default:
-						throw new Error("Invalid member name for PBES2Params class: " + memberName);
-				}
-			}
-			//**********************************************************************************
-			/**
-    * Return value of asn1js schema for current class
-    * @param {Object} parameters Input parameters for the schema
-    * @returns {Object} asn1js schema object
-    */
-
-		}, {
-			key: "schema",
-			value: function schema() {
-				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-				//PBES2-params ::= SEQUENCE {
-				//    keyDerivationFunc AlgorithmIdentifier {{PBES2-KDFs}},
-				//    encryptionScheme AlgorithmIdentifier {{PBES2-Encs}} }
-
-				/**
-     * @type {Object}
-     * @property {string} [blockName]
-     * @property {string} [keyDerivationFunc]
-     * @property {string} [encryptionScheme]
-     */
-				var names = getParametersValue(parameters, "names", {});
-
-				return new Sequence({
-					name: names.blockName || "",
-					value: [AlgorithmIdentifier.schema(names.keyDerivationFunc || {}), AlgorithmIdentifier.schema(names.encryptionScheme || {})]
-				});
-			}
-		}]);
-
-		return PBES2Params;
-	}();
-	//**************************************************************************************
-
-	//**************************************************************************************
-	/**
-  * Class from RFC5652
-  */
-
-
 	var EncryptedData = function () {
 		//**********************************************************************************
 		/**
@@ -18470,7 +19583,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if ("schema" in parameters) this.fromSchema(parameters.schema);
 			//endregion
 		}
-
 		//**********************************************************************************
 		/**
    * Return default values for all class members
@@ -18480,7 +19592,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		_createClass(EncryptedData, [{
 			key: "fromSchema",
-
 
 			//**********************************************************************************
 			/**
@@ -18513,7 +19624,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convert current object to asn1js object and set correct values
@@ -18549,7 +19659,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convertion for the class to JSON object
@@ -18570,7 +19679,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return _object;
 			}
-
 			//**********************************************************************************
 			/**
     * Create a new CMS Encrypted Data content
@@ -18581,131 +19689,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "encrypt",
 			value: function encrypt(parameters) {
-				var _this57 = this;
+				var _this61 = this;
 
 				//region Check for input parameters
 				if (parameters instanceof Object === false) return Promise.reject("Parameters must have type \"Object\"");
-
-				if ("password" in parameters === false) return Promise.reject("Absent mandatory parameter \"password\"");
-
-				if ("contentEncryptionAlgorithm" in parameters === false) return Promise.reject("Absent mandatory parameter \"contentEncryptionAlgorithm\"");
-
-				if ("hmacHashAlgorithm" in parameters === false) return Promise.reject("Absent mandatory parameter \"hmacHashAlgorithm\"");
-
-				if ("iterationCount" in parameters === false) return Promise.reject("Absent mandatory parameter \"iterationCount\"");
-
-				if ("contentToEncrypt" in parameters === false) return Promise.reject("Absent mandatory parameter \"contentToEncrypt\"");
-
-				var contentEncryptionOID = getOIDByAlgorithm(parameters.contentEncryptionAlgorithm);
-				if (contentEncryptionOID === "") return Promise.reject("Wrong \"contentEncryptionAlgorithm\" value");
-
-				var pbkdf2OID = getOIDByAlgorithm({
-					name: "PBKDF2"
-				});
-				if (pbkdf2OID === "") return Promise.reject("Can not find OID for PBKDF2");
-
-				var hmacOID = getOIDByAlgorithm({
-					name: "HMAC",
-					hash: {
-						name: parameters.hmacHashAlgorithm
-					}
-				});
-				if (hmacOID === "") return Promise.reject("Incorrect value for \"hmacHashAlgorithm\": " + parameters.hmacHashAlgorithm);
 				//endregion
 
-				//region Get a "crypto" extension
-				var crypto = getCrypto();
-				if (typeof crypto === "undefined") return Promise.reject("Unable to create WebCrypto object");
+				//region Get cryptographic engine
+				var engine = getEngine$1();
+				if (typeof engine === "undefined") return Promise.reject("Unable to initialize cryptographic engine");
 				//endregion
 
-				//region Initial variables
-				var sequence = Promise.resolve();
-
-				var ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
-				var ivView = new Uint8Array(ivBuffer);
-				getRandomValues(ivView);
-
-				var saltBuffer = new ArrayBuffer(64);
-				var saltView = new Uint8Array(saltBuffer);
-				getRandomValues(saltView);
-
-				var contentView = new Uint8Array(parameters.contentToEncrypt);
-
-				var pbkdf2Params = new PBKDF2Params({
-					salt: new OctetString({ valueHex: saltBuffer }),
-					iterationCount: parameters.iterationCount,
-					prf: new AlgorithmIdentifier({
-						algorithmId: hmacOID,
-						algorithmParams: new Null()
-					})
-				});
+				//region Set "contentType" parameter
+				parameters.contentType = "1.2.840.113549.1.7.1"; // "data"
 				//endregion
 
-				//region Derive PBKDF2 key from "password" buffer
-				sequence = sequence.then(function () {
-					var passwordView = new Uint8Array(parameters.password);
-
-					return crypto.importKey("raw", passwordView, "PBKDF2", false, ["deriveKey"]);
-				}, function (error) {
-					return Promise.reject(error);
-				});
-				//endregion
-
-				//region Derive key for "contentEncryptionAlgorithm"
-				sequence = sequence.then(function (result) {
-					return crypto.deriveKey({
-						name: "PBKDF2",
-						hash: {
-							name: parameters.hmacHashAlgorithm
-						},
-						salt: saltView,
-						iterations: parameters.iterationCount
-					}, result, parameters.contentEncryptionAlgorithm, false, ["encrypt"]);
-				}, function (error) {
-					return Promise.reject(error);
-				});
-				//endregion
-
-				//region Encrypt content
-				sequence = sequence.then(function (result) {
-					return crypto.encrypt({
-						name: parameters.contentEncryptionAlgorithm.name,
-						iv: ivView
-					}, result, contentView);
-				}, function (error) {
-					return Promise.reject(error);
-				});
-				//endregion
-
-				//region Store all parameters in CMS_ENCRYPTED_DATA
-				sequence = sequence.then(function (result) {
-					var pbes2Parameters = new PBES2Params({
-						keyDerivationFunc: new AlgorithmIdentifier({
-							algorithmId: pbkdf2OID,
-							algorithmParams: pbkdf2Params.toSchema()
-						}),
-						encryptionScheme: new AlgorithmIdentifier({
-							algorithmId: contentEncryptionOID,
-							algorithmParams: new OctetString({ valueHex: ivBuffer })
-						})
+				if ("encryptEncryptedContentInfo" in engine.subtle) {
+					return engine.subtle.encryptEncryptedContentInfo(parameters).then(function (result) {
+						_this61.encryptedContentInfo = result;
 					});
+				}
 
-					_this57.encryptedContentInfo = new EncryptedContentInfo({
-						contentType: "1.2.840.113549.1.7.1", // "data"
-						contentEncryptionAlgorithm: new AlgorithmIdentifier({
-							algorithmId: "1.2.840.113549.1.5.13", // pkcs5PBES2
-							algorithmParams: pbes2Parameters.toSchema()
-						}),
-						encryptedContent: new OctetString({ valueHex: result })
-					});
-				}, function (error) {
-					return Promise.reject(error);
-				});
-				//endregion
-
-				return sequence;
+				return Promise.reject("No support for \"encryptEncryptedContentInfo\" in current crypto engine " + engine.name);
 			}
-
 			//**********************************************************************************
 			/**
     * Create a new CMS Encrypted Data content
@@ -18715,130 +19721,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "decrypt",
 			value: function decrypt(parameters) {
-				var _this58 = this;
-
-				//region Check for input parameters 
+				//region Check for input parameters
 				if (parameters instanceof Object === false) return Promise.reject("Parameters must have type \"Object\"");
+				//endregion
 
-				if ("password" in parameters === false) return Promise.reject("Absent mandatory parameter \"password\"");
+				//region Get cryptographic engine
+				var engine = getEngine$1();
+				if (typeof engine === "undefined") return Promise.reject("Unable to initialize cryptographic engine");
+				//endregion
 
-				if (this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId !== "1.2.840.113549.1.5.13") // pkcs5PBES2
-					return Promise.reject("Unknown \"contentEncryptionAlgorithm\": " + this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
-				//endregion 
+				//region Set "encryptedContentInfo" value
+				parameters.encryptedContentInfo = this.encryptedContentInfo;
+				//endregion
 
-				//region Get a "crypto" extension 
-				var crypto = getCrypto();
-				if (typeof crypto === "undefined") return Promise.reject("Unable to create WebCrypto object");
-				//endregion 
+				if ("decryptEncryptedContentInfo" in engine.subtle) return engine.subtle.decryptEncryptedContentInfo(parameters);
 
-				//region Initial variables 
-				var sequence = Promise.resolve();
-
-				var pbes2Parameters = void 0;
-
-				try {
-					pbes2Parameters = new PBES2Params({ schema: this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams });
-				} catch (ex) {
-					return Promise.reject("Incorrectly encoded \"pbes2Parameters\"");
-				}
-
-				var pbkdf2Params = void 0;
-
-				try {
-					pbkdf2Params = new PBKDF2Params({ schema: pbes2Parameters.keyDerivationFunc.algorithmParams });
-				} catch (ex) {
-					return Promise.reject("Incorrectly encoded \"pbkdf2Params\"");
-				}
-
-				var contentEncryptionAlgorithm = getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithmId);
-				if ("name" in contentEncryptionAlgorithm === false) return Promise.reject("Incorrect OID for \"contentEncryptionAlgorithm\": " + pbes2Parameters.encryptionScheme.algorithmId);
-
-				var ivBuffer = pbes2Parameters.encryptionScheme.algorithmParams.valueBlock.valueHex;
-				var ivView = new Uint8Array(ivBuffer);
-
-				var saltBuffer = pbkdf2Params.salt.valueBlock.valueHex;
-				var saltView = new Uint8Array(saltBuffer);
-
-				var iterationCount = pbkdf2Params.iterationCount;
-
-				var hmacHashAlgorithm = "SHA-1";
-
-				if ("prf" in pbkdf2Params) {
-					var algorithm = getAlgorithmByOID(pbkdf2Params.prf.algorithmId);
-					if ("name" in algorithm === false) return Promise.reject("Incorrect OID for HMAC hash algorithm");
-
-					hmacHashAlgorithm = algorithm.hash.name;
-				}
-				//endregion 
-
-				//region Derive PBKDF2 key from "password" buffer 
-				sequence = sequence.then(function () {
-					return crypto.importKey("raw", parameters.password, "PBKDF2", false, ["deriveKey"]);
-				}, function (error) {
-					return Promise.reject(error);
-				});
-				//endregion 
-
-				//region Derive key for "contentEncryptionAlgorithm" 
-				sequence = sequence.then(function (result) {
-					return crypto.deriveKey({
-						name: "PBKDF2",
-						hash: {
-							name: hmacHashAlgorithm
-						},
-						salt: saltView,
-						iterations: iterationCount
-					}, result, contentEncryptionAlgorithm, false, ["decrypt"]);
-				}, function (error) {
-					return Promise.reject(error);
-				});
-				//endregion 
-
-				//region Decrypt internal content using derived key 
-				sequence = sequence.then(function (result) {
-					//region Create correct data block for decryption
-					var dataBuffer = new ArrayBuffer(0);
-
-					if (_this58.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false) dataBuffer = _this58.encryptedContentInfo.encryptedContent.valueBlock.valueHex;else {
-						var _iteratorNormalCompletion16 = true;
-						var _didIteratorError16 = false;
-						var _iteratorError16 = undefined;
-
-						try {
-							for (var _iterator16 = _this58.encryptedContentInfo.encryptedContent.valueBlock.value[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
-								var content = _step16.value;
-
-								dataBuffer = utilConcatBuf(dataBuffer, content.valueBlock.valueHex);
-							}
-						} catch (err) {
-							_didIteratorError16 = true;
-							_iteratorError16 = err;
-						} finally {
-							try {
-								if (!_iteratorNormalCompletion16 && _iterator16.return) {
-									_iterator16.return();
-								}
-							} finally {
-								if (_didIteratorError16) {
-									throw _iteratorError16;
-								}
-							}
-						}
-					}
-					//endregion
-
-					return crypto.decrypt({
-						name: contentEncryptionAlgorithm.name,
-						iv: ivView
-					}, result, dataBuffer);
-				}, function (error) {
-					return Promise.reject(error);
-				});
-				//endregion 
-
-				return sequence;
+				return Promise.reject("No support for \"decryptEncryptedContentInfo\" in current crypto engine " + engine.name);
 			}
-
 			//**********************************************************************************
 
 		}], [{
@@ -18855,7 +19754,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						throw new Error("Invalid member name for EncryptedData class: " + memberName);
 				}
 			}
-
 			//**********************************************************************************
 			/**
     * Compare values with default values for all class members
@@ -18877,7 +19775,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						throw new Error("Invalid member name for EncryptedData class: " + memberName);
 				}
 			}
-
 			//**********************************************************************************
 			/**
     * Return value of asn1js schema for current class
@@ -19044,7 +19941,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "parseInternalValues",
 			value: function parseInternalValues(parameters) {
-				var _this59 = this;
+				var _this62 = this;
 
 				//region Initial variables 
 				var sequence = Promise.resolve();
@@ -19070,7 +19967,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					var asn1 = fromBER(result);
 					if (asn1.offset === -1) return Promise.reject("Error during parsing ASN.1 data");
 
-					_this59.parsedValue = new PrivateKeyInfo({ schema: asn1.result });
+					_this62.parsedValue = new PrivateKeyInfo({ schema: asn1.result });
 				}, function (error) {
 					return Promise.reject(error);
 				});
@@ -19084,7 +19981,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "makeInternalValues",
 			value: function makeInternalValues(parameters) {
-				var _this60 = this;
+				var _this63 = this;
 
 				//region Check that we do have "parsedValue" 
 				if ("parsedValue" in this === false) return Promise.reject("Please initialize \"parsedValue\" first");
@@ -19098,7 +19995,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Encrypt internal data 
 				sequence = sequence.then(function () {
-					parameters.contentToEncrypt = _this60.parsedValue.toSchema().toBER(false);
+					parameters.contentToEncrypt = _this63.parsedValue.toSchema().toBER(false);
 
 					return cmsEncrypted.encrypt(parameters);
 				}, function (error) {
@@ -19108,8 +20005,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Initialize internal values 
 				sequence = sequence.then(function () {
-					_this60.encryptionAlgorithm = cmsEncrypted.encryptedContentInfo.contentEncryptionAlgorithm;
-					_this60.encryptedData = cmsEncrypted.encryptedContentInfo.encryptedContent;
+					_this63.encryptionAlgorithm = cmsEncrypted.encryptedContentInfo.contentEncryptionAlgorithm;
+					_this63.encryptedData = cmsEncrypted.encryptedContentInfo.encryptedContent;
 				});
 				//endregion 
 
@@ -19208,6 +20105,1455 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 	//**************************************************************************************
 	/**
+  * Class from RFC5755
+  */
+
+
+	var AttCertValidityPeriod = function () {
+		//**********************************************************************************
+		/**
+   * Constructor for AttCertValidityPeriod class
+   * @param {Object} [parameters={}]
+   * @property {Object} [schema] asn1js parsed value
+   */
+		function AttCertValidityPeriod() {
+			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, AttCertValidityPeriod);
+
+			//region Internal properties of the object
+			/**
+    * @type {GeneralizedTime}
+    * @description notBeforeTime
+    */
+			this.notBeforeTime = getParametersValue(parameters, "notBeforeTime", AttCertValidityPeriod.defaultValues("notBeforeTime"));
+			/**
+    * @type {GeneralizedTime}
+    * @description notAfterTime
+    */
+			this.notAfterTime = getParametersValue(parameters, "notAfterTime", AttCertValidityPeriod.defaultValues("notAfterTime"));
+			//endregion
+
+			//region If input argument array contains "schema" for this object
+			if ("schema" in parameters) this.fromSchema(parameters.schema);
+			//endregion
+		}
+		//**********************************************************************************
+		/**
+   * Return default values for all class members
+   * @param {string} memberName String name for a class member
+   */
+
+
+		_createClass(AttCertValidityPeriod, [{
+			key: "fromSchema",
+
+			//**********************************************************************************
+			/**
+    * Convert parsed asn1js object into current class
+    * @param {!Object} schema
+    */
+			value: function fromSchema(schema) {
+				//region Check the schema is valid
+				var asn1 = compareSchema(schema, schema, AttCertValidityPeriod.schema({
+					names: {
+						notBeforeTime: "notBeforeTime",
+						notAfterTime: "notAfterTime"
+					}
+				}));
+
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for AttCertValidityPeriod");
+				//endregion
+
+				//region Get internal properties from parsed schema
+				this.notBeforeTime = asn1.result.notBeforeTime.toDate();
+				this.notAfterTime = asn1.result.notAfterTime.toDate();
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convert current object to asn1js object and set correct values
+    * @returns {Object} asn1js object
+    */
+
+		}, {
+			key: "toSchema",
+			value: function toSchema() {
+				//region Construct and return new ASN.1 schema for this object
+				return new Sequence({
+					value: [new GeneralizedTime({ valueDate: this.notBeforeTime }), new GeneralizedTime({ valueDate: this.notAfterTime })]
+				});
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convertion for the class to JSON object
+    * @returns {Object}
+    */
+
+		}, {
+			key: "toJSON",
+			value: function toJSON() {
+				return {
+					notBeforeTime: this.notBeforeTime,
+					notAfterTime: this.notAfterTime
+				};
+			}
+			//**********************************************************************************
+
+		}], [{
+			key: "defaultValues",
+			value: function defaultValues(memberName) {
+				switch (memberName) {
+					case "notBeforeTime":
+					case "notAfterTime":
+						return new Date(0, 0, 0);
+					default:
+						throw new Error("Invalid member name for AttCertValidityPeriod class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Return value of asn1js schema for current class
+    * @param {Object} parameters Input parameters for the schema
+    * @returns {Object} asn1js schema object
+    */
+
+		}, {
+			key: "schema",
+			value: function schema() {
+				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+				// AttCertValidityPeriod  ::= SEQUENCE {
+				//   notBeforeTime  GeneralizedTime,
+				//   notAfterTime   GeneralizedTime
+				// }
+
+				/**
+     * @type {Object}
+     * @property {string} [blockName]
+     * @property {string} [notBeforeTime]
+     * @property {string} [notAfterTime]
+     */
+				var names = getParametersValue(parameters, "names", {});
+
+				return new Sequence({
+					name: names.blockName || "",
+					value: [new GeneralizedTime({ name: names.notBeforeTime || "" }), new GeneralizedTime({ name: names.notAfterTime || "" })]
+				});
+			}
+		}]);
+
+		return AttCertValidityPeriod;
+	}();
+	//**************************************************************************************
+	/**
+  * Class from RFC5755
+  */
+
+
+	var ObjectDigestInfo = function () {
+		//**********************************************************************************
+		/**
+   * Constructor for ObjectDigestInfo class
+   * @param {Object} [parameters={}]
+   * @property {Object} [schema] asn1js parsed value
+   */
+		function ObjectDigestInfo() {
+			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, ObjectDigestInfo);
+
+			//region Internal properties of the object
+			/**
+    * @type {Enumerated}
+    * @description digestedObjectType
+    */
+			this.digestedObjectType = getParametersValue(parameters, "digestedObjectType", ObjectDigestInfo.defaultValues("digestedObjectType"));
+
+			if ("otherObjectTypeID" in parameters)
+				/**
+     * @type {ObjectIdentifier}
+     * @description otherObjectTypeID
+     */
+				this.otherObjectTypeID = getParametersValue(parameters, "otherObjectTypeID", ObjectDigestInfo.defaultValues("otherObjectTypeID"));
+
+			/**
+    * @type {AlgorithmIdentifier}
+    * @description digestAlgorithm
+    */
+			this.digestAlgorithm = getParametersValue(parameters, "digestAlgorithm", ObjectDigestInfo.defaultValues("digestAlgorithm"));
+			/**
+    * @type {BitString}
+    * @description objectDigest
+    */
+			this.objectDigest = getParametersValue(parameters, "objectDigest", ObjectDigestInfo.defaultValues("objectDigest"));
+			//endregion
+
+			//region If input argument array contains "schema" for this object
+			if ("schema" in parameters) this.fromSchema(parameters.schema);
+			//endregion
+		}
+		//**********************************************************************************
+		/**
+   * Return default values for all class members
+   * @param {string} memberName String name for a class member
+   */
+
+
+		_createClass(ObjectDigestInfo, [{
+			key: "fromSchema",
+
+			//**********************************************************************************
+			/**
+    * Convert parsed asn1js object into current class
+    * @param {!Object} schema
+    */
+			value: function fromSchema(schema) {
+				//region Check the schema is valid
+				var asn1 = compareSchema(schema, schema, ObjectDigestInfo.schema({
+					names: {
+						digestedObjectType: "digestedObjectType",
+						otherObjectTypeID: "otherObjectTypeID",
+						digestAlgorithm: {
+							names: {
+								blockName: "digestAlgorithm"
+							}
+						},
+						objectDigest: "objectDigest"
+					}
+				}));
+
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for ObjectDigestInfo");
+				//endregion
+
+				//region Get internal properties from parsed schema
+				this.digestedObjectType = asn1.result.digestedObjectType;
+
+				if ("otherObjectTypeID" in asn1.result) this.otherObjectTypeID = asn1.result.otherObjectTypeID;
+
+				this.digestAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.digestAlgorithm });
+				this.objectDigest = asn1.result.objectDigest;
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convert current object to asn1js object and set correct values
+    * @returns {Object} asn1js object
+    */
+
+		}, {
+			key: "toSchema",
+			value: function toSchema() {
+				var result = new Sequence({
+					value: [this.digestedObjectType]
+				});
+
+				if ("otherObjectTypeID" in this) result.value.push(this.otherObjectTypeID);
+
+				result.value.push(this.digestAlgorithm.toSchema());
+				result.value.push(this.objectDigest);
+
+				return result;
+			}
+			//**********************************************************************************
+			/**
+    * Convertion for the class to JSON object
+    * @returns {Object}
+    */
+
+		}, {
+			key: "toJSON",
+			value: function toJSON() {
+				var result = {
+					digestedObjectType: this.digestedObjectType.toJSON()
+				};
+
+				if ("otherObjectTypeID" in this) result.otherObjectTypeID = this.otherObjectTypeID.toJSON();
+
+				result.digestAlgorithm = this.digestAlgorithm.toJSON();
+				result.objectDigest = this.objectDigest.toJSON();
+
+				return result;
+			}
+			//**********************************************************************************
+
+		}], [{
+			key: "defaultValues",
+			value: function defaultValues(memberName) {
+				switch (memberName) {
+					case "digestedObjectType":
+						return new Enumerated();
+					case "otherObjectTypeID":
+						return new ObjectIdentifier();
+					case "digestAlgorithm":
+						return new AlgorithmIdentifier();
+					case "objectDigest":
+						return new BitString();
+					default:
+						throw new Error("Invalid member name for ObjectDigestInfo class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Return value of asn1js schema for current class
+    * @param {Object} parameters Input parameters for the schema
+    * @returns {Object} asn1js schema object
+    */
+
+		}, {
+			key: "schema",
+			value: function schema() {
+				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+				// ObjectDigestInfo ::= SEQUENCE {
+				//   digestedObjectType  ENUMERATED {
+				//     publicKey            (0),
+				//     publicKeyCert        (1),
+				//     otherObjectTypes     (2) },
+				//   -- otherObjectTypes MUST NOT
+				//   -- be used in this profile
+				//   otherObjectTypeID   OBJECT IDENTIFIER OPTIONAL,
+				//   digestAlgorithm     AlgorithmIdentifier,
+				//   objectDigest        BIT STRING
+				// }
+
+				/**
+     * @type {Object}
+     * @property {string} [blockName]
+     * @property {string} [digestedObjectType]
+     * @property {string} [otherObjectTypeID]
+     * @property {string} [digestAlgorithm]
+     * @property {string} [objectDigest]
+     */
+				var names = getParametersValue(parameters, "names", {});
+
+				return new Sequence({
+					name: names.blockName || "",
+					value: [new Enumerated({ name: names.digestedObjectType || "" }), new ObjectIdentifier({
+						optional: true,
+						name: names.otherObjectTypeID || ""
+					}), AlgorithmIdentifier.schema(names.digestAlgorithm || {}), new BitString({ name: names.objectDigest || "" })]
+				});
+			}
+		}]);
+
+		return ObjectDigestInfo;
+	}();
+	//**************************************************************************************
+	/**
+  * Class from RFC5755
+  */
+
+
+	var IssuerSerial = function () {
+		//**********************************************************************************
+		/**
+   * Constructor for IssuerSerial class
+   * @param {Object} [parameters={}]
+   * @property {Object} [schema] asn1js parsed value
+   */
+		function IssuerSerial() {
+			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, IssuerSerial);
+
+			//region Internal properties of the object
+			/**
+    * @type {RelativeDistinguishedNames}
+    * @description issuer
+    */
+			this.issuer = getParametersValue(parameters, "issuer", IssuerSerial.defaultValues("issuer"));
+			/**
+    * @type {Integer}
+    * @description serialNumber
+    */
+			this.serialNumber = getParametersValue(parameters, "serialNumber", IssuerSerial.defaultValues("serialNumber"));
+
+			if ("issuerUID" in parameters)
+				/**
+     * @type {BitString}
+     * @description issuerUID
+     */
+				this.issuerUID = getParametersValue(parameters, "issuerUID", IssuerSerial.defaultValues("issuerUID"));
+			//endregion
+
+			//region If input argument array contains "schema" for this object
+			if ("schema" in parameters) this.fromSchema(parameters.schema);
+			//endregion
+		}
+		//**********************************************************************************
+		/**
+   * Return default values for all class members
+   * @param {string} memberName String name for a class member
+   */
+
+
+		_createClass(IssuerSerial, [{
+			key: "fromSchema",
+
+			//**********************************************************************************
+			/**
+    * Convert parsed asn1js object into current class
+    * @param {!Object} schema
+    */
+			value: function fromSchema(schema) {
+				//region Check the schema is valid
+				var asn1 = compareSchema(schema, schema, IssuerSerial.schema({
+					names: {
+						issuer: {
+							names: {
+								blockName: "issuer"
+							}
+						},
+						serialNumber: "serialNumber",
+						issuerUID: "issuerUID"
+					}
+				}));
+
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for IssuerSerial");
+				//endregion
+
+				//region Get internal properties from parsed schema
+				this.issuer = new GeneralNames({ schema: asn1.result.issuer });
+				this.serialNumber = asn1.result.serialNumber;
+
+				if ("issuerUID" in asn1.result) this.issuerUID = asn1.result.issuerUID;
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convert current object to asn1js object and set correct values
+    * @returns {Object} asn1js object
+    */
+
+		}, {
+			key: "toSchema",
+			value: function toSchema() {
+				var result = new Sequence({
+					value: [this.issuer.toSchema(), this.serialNumber]
+				});
+
+				if ("issuerUID" in this) result.valueBlock.value.push(this.issuerUID);
+
+				//region Construct and return new ASN.1 schema for this object
+				return result;
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convertion for the class to JSON object
+    * @returns {Object}
+    */
+
+		}, {
+			key: "toJSON",
+			value: function toJSON() {
+				var result = {
+					issuer: this.issuer.toJSON(),
+					serialNumber: this.serialNumber.toJSON()
+				};
+
+				if ("issuerUID" in this) result.issuerUID = this.issuerUID.toJSON();
+
+				return result;
+			}
+			//**********************************************************************************
+
+		}], [{
+			key: "defaultValues",
+			value: function defaultValues(memberName) {
+				switch (memberName) {
+					case "issuer":
+						return new GeneralNames();
+					case "serialNumber":
+						return new Integer();
+					case "issuerUID":
+						return new BitString();
+					default:
+						throw new Error("Invalid member name for IssuerSerial class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Return value of asn1js schema for current class
+    * @param {Object} parameters Input parameters for the schema
+    * @returns {Object} asn1js schema object
+    */
+
+		}, {
+			key: "schema",
+			value: function schema() {
+				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+				// 	IssuerSerial  ::=  SEQUENCE {
+				//   	issuer         GeneralNames,
+				// 		serial         CertificateSerialNumber,
+				// 		issuerUID      UniqueIdentifier OPTIONAL
+				// }
+				//
+				// CertificateSerialNumber ::= INTEGER
+				// UniqueIdentifier  ::=  BIT STRING
+
+				/**
+     * @type {Object}
+     * @property {string} [blockName]
+     * @property {string} [issuer]
+     * @property {string} [serialNumber]
+     * @property {string} [issuerUID]
+     */
+				var names = getParametersValue(parameters, "names", {});
+
+				return new Sequence({
+					name: names.blockName || "",
+					value: [GeneralNames.schema(names.issuer || {}), new Integer({ name: names.serialNumber || "" }), new BitString({
+						optional: true,
+						name: names.issuerUID || ""
+					})]
+				});
+			}
+		}]);
+
+		return IssuerSerial;
+	}();
+	//**************************************************************************************
+	/**
+  * Class from RFC5755
+  */
+
+
+	var V2Form = function () {
+		//**********************************************************************************
+		/**
+   * Constructor for V2Form class
+   * @param {Object} [parameters={}]
+   * @property {Object} [schema] asn1js parsed value
+   */
+		function V2Form() {
+			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, V2Form);
+
+			//region Internal properties of the object
+			if ("issuerName" in parameters)
+				/**
+     * @type {GeneralNames}
+     * @description issuerName
+     */
+				this.issuerName = getParametersValue(parameters, "issuerName", V2Form.defaultValues("issuerName"));
+
+			if ("baseCertificateID" in parameters)
+				/**
+     * @type {IssuerSerial}
+     * @description baseCertificateID
+     */
+				this.baseCertificateID = getParametersValue(parameters, "baseCertificateID", V2Form.defaultValues("baseCertificateID"));
+
+			if ("objectDigestInfo" in parameters)
+				/**
+     * @type {ObjectDigestInfo}
+     * @description objectDigestInfo
+     */
+				this.objectDigestInfo = getParametersValue(parameters, "objectDigestInfo", V2Form.defaultValues("objectDigestInfo"));
+			//endregion
+
+			//region If input argument array contains "schema" for this object
+			if ("schema" in parameters) this.fromSchema(parameters.schema);
+			//endregion
+		}
+		//**********************************************************************************
+		/**
+   * Return default values for all class members
+   * @param {string} memberName String name for a class member
+   */
+
+
+		_createClass(V2Form, [{
+			key: "fromSchema",
+
+			//**********************************************************************************
+			/**
+    * Convert parsed asn1js object into current class
+    * @param {!Object} schema
+    */
+			value: function fromSchema(schema) {
+				//region Check the schema is valid
+				var asn1 = compareSchema(schema, schema, V2Form.schema({
+					names: {
+						issuerName: "issuerName",
+						baseCertificateID: "baseCertificateID",
+						objectDigestInfo: "objectDigestInfo"
+					}
+				}));
+
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for V2Form");
+				//endregion
+
+				//region Get internal properties from parsed schema
+				if ("issuerName" in asn1.result) this.issuerName = new GeneralNames({ schema: asn1.result.issuerName });
+
+				if ("baseCertificateID" in asn1.result) {
+					//region Making "Sequence" from "Constructed" value
+					asn1.result.baseCertificateID.idBlock.tagClass = 1;
+					asn1.result.baseCertificateID.idBlock.tagNumber = 16;
+					//endregion
+
+					this.baseCertificateID = new IssuerSerial({ schema: asn1.result.baseCertificateID });
+				}
+
+				if ("objectDigestInfo" in asn1.result) {
+					//region Making "Sequence" from "Constructed" value
+					asn1.result.objectDigestInfo.idBlock.tagClass = 1;
+					asn1.result.objectDigestInfo.idBlock.tagNumber = 16;
+					//endregion
+
+					this.objectDigestInfo = new ObjectDigestInfo({ schema: asn1.result.objectDigestInfo });
+				}
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convert current object to asn1js object and set correct values
+    * @returns {Object} asn1js object
+    */
+
+		}, {
+			key: "toSchema",
+			value: function toSchema() {
+				var result = new Sequence();
+
+				if ("issuerName" in this) result.valueBlock.value.push(this.issuerName.toSchema());
+
+				if ("baseCertificateID" in this) {
+					result.valueBlock.value.push(new Constructed({
+						idBlock: {
+							tagClass: 3,
+							tagNumber: 0 // [0]
+						},
+						value: this.baseCertificateID.toSchema().valueBlock.value
+					}));
+				}
+
+				if ("objectDigestInfo" in this) {
+					result.valueBlock.value.push(new Constructed({
+						idBlock: {
+							tagClass: 3,
+							tagNumber: 1 // [1]
+						},
+						value: this.objectDigestInfo.toSchema().valueBlock.value
+					}));
+				}
+
+				//region Construct and return new ASN.1 schema for this object
+				return result;
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convertion for the class to JSON object
+    * @returns {Object}
+    */
+
+		}, {
+			key: "toJSON",
+			value: function toJSON() {
+				var result = {};
+
+				if ("issuerName" in this) result.issuerName = this.issuerName.toJSON();
+
+				if ("baseCertificateID" in this) result.baseCertificateID = this.baseCertificateID.toJSON();
+
+				if ("objectDigestInfo" in this) result.objectDigestInfo = this.objectDigestInfo.toJSON();
+
+				return result;
+			}
+			//**********************************************************************************
+
+		}], [{
+			key: "defaultValues",
+			value: function defaultValues(memberName) {
+				switch (memberName) {
+					case "issuerName":
+						return new GeneralNames();
+					case "baseCertificateID":
+						return new IssuerSerial();
+					case "objectDigestInfo":
+						return new ObjectDigestInfo();
+					default:
+						throw new Error("Invalid member name for V2Form class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Return value of asn1js schema for current class
+    * @param {Object} parameters Input parameters for the schema
+    * @returns {Object} asn1js schema object
+    */
+
+		}, {
+			key: "schema",
+			value: function schema() {
+				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+				// V2Form ::= SEQUENCE {
+				//   issuerName            GeneralNames  OPTIONAL,
+				//   baseCertificateID     [0] IssuerSerial  OPTIONAL,
+				//   objectDigestInfo      [1] ObjectDigestInfo  OPTIONAL
+				//     -- issuerName MUST be present in this profile
+				//     -- baseCertificateID and objectDigestInfo MUST NOT
+				//     -- be present in this profile
+				// }
+
+				/**
+     * @type {Object}
+     * @property {string} [blockName]
+     * @property {string} [issuerName]
+     * @property {string} [baseCertificateID]
+     * @property {string} [objectDigestInfo]
+     */
+				var names = getParametersValue(parameters, "names", {});
+
+				return new Sequence({
+					name: names.blockName || "",
+					value: [GeneralNames.schema({
+						names: {
+							blockName: names.issuerName
+						}
+					}, true), new Constructed({
+						optional: true,
+						name: names.baseCertificateID || "",
+						idBlock: {
+							tagClass: 3,
+							tagNumber: 0 // [0]
+						},
+						value: IssuerSerial.schema().valueBlock.value
+					}), new Constructed({
+						optional: true,
+						name: names.objectDigestInfo || "",
+						idBlock: {
+							tagClass: 3,
+							tagNumber: 1 // [1]
+						},
+						value: ObjectDigestInfo.schema().valueBlock.value
+					})]
+				});
+			}
+		}]);
+
+		return V2Form;
+	}();
+	//**************************************************************************************
+	/**
+  * Class from RFC5755
+  */
+
+
+	var Holder = function () {
+		//**********************************************************************************
+		/**
+   * Constructor for Holder class
+   * @param {Object} [parameters={}]
+   * @property {Object} [schema] asn1js parsed value
+   */
+		function Holder() {
+			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, Holder);
+
+			//region Internal properties of the object
+			if ("baseCertificateID" in parameters)
+				/**
+     * @type {IssuerSerial}
+     * @description baseCertificateID
+     */
+				this.baseCertificateID = getParametersValue(parameters, "baseCertificateID", Holder.defaultValues("baseCertificateID"));
+
+			if ("entityName" in parameters)
+				/**
+     * @type {GeneralNames}
+     * @description entityName
+     */
+				this.entityName = getParametersValue(parameters, "entityName", Holder.defaultValues("entityName"));
+
+			if ("objectDigestInfo" in parameters)
+				/**
+     * @type {ObjectDigestInfo}
+     * @description objectDigestInfo
+     */
+				this.objectDigestInfo = getParametersValue(parameters, "objectDigestInfo", Holder.defaultValues("objectDigestInfo"));
+			//endregion
+
+			//region If input argument array contains "schema" for this object
+			if ("schema" in parameters) this.fromSchema(parameters.schema);
+			//endregion
+		}
+		//**********************************************************************************
+		/**
+   * Return default values for all class members
+   * @param {string} memberName String name for a class member
+   */
+
+
+		_createClass(Holder, [{
+			key: "fromSchema",
+
+			//**********************************************************************************
+			/**
+    * Convert parsed asn1js object into current class
+    * @param {!Object} schema
+    */
+			value: function fromSchema(schema) {
+				//region Check the schema is valid
+				var asn1 = compareSchema(schema, schema, Holder.schema({
+					names: {
+						baseCertificateID: "baseCertificateID",
+						entityName: "entityName",
+						objectDigestInfo: "objectDigestInfo"
+					}
+				}));
+
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for Holder");
+				//endregion
+
+				//region Get internal properties from parsed schema
+				if ("baseCertificateID" in asn1.result) {
+					//region Making "Sequence" from "Constructed" value
+					asn1.result.baseCertificateID.idBlock.tagClass = 1;
+					asn1.result.baseCertificateID.idBlock.tagNumber = 16;
+					//endregion
+
+					this.baseCertificateID = new IssuerSerial({ schema: asn1.result.baseCertificateID });
+				}
+
+				if ("entityName" in asn1.result) {
+					//region Making "Sequence" from "Constructed" value
+					asn1.result.entityName.idBlock.tagClass = 1;
+					asn1.result.entityName.idBlock.tagNumber = 16;
+					//endregion
+
+					this.entityName = new GeneralNames({ schema: asn1.result.entityName });
+				}
+
+				if ("objectDigestInfo" in asn1.result) {
+					//region Making "Sequence" from "Constructed" value
+					asn1.result.objectDigestInfo.idBlock.tagClass = 1;
+					asn1.result.objectDigestInfo.idBlock.tagNumber = 16;
+					//endregion
+
+					this.objectDigestInfo = new ObjectDigestInfo({ schema: asn1.result.objectDigestInfo });
+				}
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convert current object to asn1js object and set correct values
+    * @returns {Object} asn1js object
+    */
+
+		}, {
+			key: "toSchema",
+			value: function toSchema() {
+				var result = new Sequence();
+
+				if ("baseCertificateID" in this) {
+					result.valueBlock.value.push(new Constructed({
+						idBlock: {
+							tagClass: 3,
+							tagNumber: 0 // [0]
+						},
+						value: this.baseCertificateID.toSchema().valueBlock.value
+					}));
+				}
+
+				if ("entityName" in this) {
+					result.valueBlock.value.push(new Constructed({
+						idBlock: {
+							tagClass: 3,
+							tagNumber: 1 // [1]
+						},
+						value: this.entityName.toSchema().valueBlock.value
+					}));
+				}
+
+				if ("objectDigestInfo" in this) {
+					result.valueBlock.value.push(new Constructed({
+						idBlock: {
+							tagClass: 3,
+							tagNumber: 2 // [2]
+						},
+						value: this.objectDigestInfo.toSchema().valueBlock.value
+					}));
+				}
+
+				return result;
+			}
+			//**********************************************************************************
+			/**
+    * Convertion for the class to JSON object
+    * @returns {Object}
+    */
+
+		}, {
+			key: "toJSON",
+			value: function toJSON() {
+				var result = {};
+
+				if ("baseCertificateID" in this) result.baseCertificateID = this.baseCertificateID.toJSON();
+
+				if ("entityName" in this) result.entityName = this.entityName.toJSON();
+
+				if ("objectDigestInfo" in this) result.objectDigestInfo = this.objectDigestInfo.toJSON();
+
+				return result;
+			}
+			//**********************************************************************************
+
+		}], [{
+			key: "defaultValues",
+			value: function defaultValues(memberName) {
+				switch (memberName) {
+					case "baseCertificateID":
+						return new IssuerSerial();
+					case "entityName":
+						return new GeneralNames();
+					case "objectDigestInfo":
+						return new ObjectDigestInfo();
+					default:
+						throw new Error("Invalid member name for Holder class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Return value of asn1js schema for current class
+    * @param {Object} parameters Input parameters for the schema
+    * @returns {Object} asn1js schema object
+    */
+
+		}, {
+			key: "schema",
+			value: function schema() {
+				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+				// Holder ::= SEQUENCE {
+				//   baseCertificateID   [0] IssuerSerial OPTIONAL,
+				//       -- the issuer and serial number of
+				//       -- the holder's Public Key Certificate
+				//   entityName          [1] GeneralNames OPTIONAL,
+				//       -- the name of the claimant or role
+				//   objectDigestInfo    [2] ObjectDigestInfo OPTIONAL
+				//       -- used to directly authenticate the holder,
+				//       -- for example, an executable
+				// }
+
+				/**
+     * @type {Object}
+     * @property {string} [blockName]
+     * @property {string} [baseCertificateID]
+     * @property {string} [entityName]
+     * @property {string} [objectDigestInfo]
+     */
+				var names = getParametersValue(parameters, "names", {});
+
+				return new Sequence({
+					name: names.blockName || "",
+					value: [new Constructed({
+						optional: true,
+						name: names.baseCertificateID || "",
+						idBlock: {
+							tagClass: 3,
+							tagNumber: 0 // [0]
+						},
+						value: IssuerSerial.schema().valueBlock.value
+					}), new Constructed({
+						optional: true,
+						name: names.entityName || "",
+						idBlock: {
+							tagClass: 3,
+							tagNumber: 1 // [2]
+						},
+						value: GeneralNames.schema().valueBlock.value
+					}), new Constructed({
+						optional: true,
+						name: names.objectDigestInfo || "",
+						idBlock: {
+							tagClass: 3,
+							tagNumber: 2 // [2]
+						},
+						value: ObjectDigestInfo.schema().valueBlock.value
+					})]
+				});
+			}
+		}]);
+
+		return Holder;
+	}();
+	//**************************************************************************************
+	/**
+  * Class from RFC5755
+  */
+
+
+	var AttributeCertificateInfo = function () {
+		//**********************************************************************************
+		/**
+   * Constructor for AttributeCertificateInfo class
+   * @param {Object} [parameters={}]
+   * @property {Object} [schema] asn1js parsed value
+   */
+		function AttributeCertificateInfo() {
+			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, AttributeCertificateInfo);
+
+			//region Internal properties of the object
+			/**
+    * @type {Number}
+    * @description version
+    */
+			this.version = getParametersValue(parameters, "version", AttributeCertificateInfo.defaultValues("version"));
+			/**
+    * @type {Holder}
+    * @description holder
+    */
+			this.holder = getParametersValue(parameters, "holder", AttributeCertificateInfo.defaultValues("holder"));
+			/**
+    * @type {GeneralNames|V2Form}
+    * @description issuer
+    */
+			this.issuer = getParametersValue(parameters, "issuer", AttributeCertificateInfo.defaultValues("issuer"));
+			/**
+    * @type {AlgorithmIdentifier}
+    * @description signature
+    */
+			this.signature = getParametersValue(parameters, "signature", AttributeCertificateInfo.defaultValues("signature"));
+			/**
+    * @type {Integer}
+    * @description serialNumber
+    */
+			this.serialNumber = getParametersValue(parameters, "serialNumber", AttributeCertificateInfo.defaultValues("serialNumber"));
+			/**
+    * @type {AttCertValidityPeriod}
+    * @description attrCertValidityPeriod
+    */
+			this.attrCertValidityPeriod = getParametersValue(parameters, "attrCertValidityPeriod", AttributeCertificateInfo.defaultValues("attrCertValidityPeriod"));
+			/**
+    * @type {Array.<Attribute>}
+    * @description attributes
+    */
+			this.attributes = getParametersValue(parameters, "attributes", AttributeCertificateInfo.defaultValues("attributes"));
+
+			if ("issuerUniqueID" in parameters)
+				/**
+     * @type {BitString}
+     * @description issuerUniqueID
+     */
+				this.issuerUniqueID = getParametersValue(parameters, "issuerUniqueID", AttributeCertificateInfo.defaultValues("issuerUniqueID"));
+
+			if ("extensions" in parameters)
+				/**
+     * @type {Extensions}
+     * @description extensions
+     */
+				this.extensions = getParametersValue(parameters, "extensions", AttributeCertificateInfo.defaultValues("extensions"));
+			//endregion
+
+			//region If input argument array contains "schema" for this object
+			if ("schema" in parameters) this.fromSchema(parameters.schema);
+			//endregion
+		}
+		//**********************************************************************************
+		/**
+   * Return default values for all class members
+   * @param {string} memberName String name for a class member
+   */
+
+
+		_createClass(AttributeCertificateInfo, [{
+			key: "fromSchema",
+
+			//**********************************************************************************
+			/**
+    * Convert parsed asn1js object into current class
+    * @param {!Object} schema
+    */
+			value: function fromSchema(schema) {
+				//region Check the schema is valid
+				var asn1 = compareSchema(schema, schema, AttributeCertificateInfo.schema({
+					names: {
+						version: "version",
+						holder: {
+							names: {
+								blockName: "holder"
+							}
+						},
+						issuer: "issuer",
+						signature: {
+							names: {
+								blockName: "signature"
+							}
+						},
+						serialNumber: "serialNumber",
+						attrCertValidityPeriod: {
+							names: {
+								blockName: "attrCertValidityPeriod"
+							}
+						},
+						attributes: "attributes",
+						issuerUniqueID: "issuerUniqueID",
+						extensions: {
+							names: {
+								blockName: "extensions"
+							}
+						}
+					}
+				}));
+
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for AttributeCertificateInfo");
+				//endregion
+
+				//region Get internal properties from parsed schema
+				this.version = asn1.result.version.valueBlock.valueDec;
+				this.holder = new Holder({ schema: asn1.result.holder });
+
+				switch (asn1.result.issuer.idBlock.tagClass) {
+					case 3:
+						// V2Form
+						//region Change type to "Sequence"
+						asn1.result.issuer.idBlock.tagClass = 1;
+						asn1.result.issuer.idBlock.tagNumber = 16;
+						//endregion
+
+						this.issuer = new V2Form({ schema: asn1.result.issuer });
+						break;
+					case 1: // GeneralNames (should not be used)
+					default:
+						throw new Error("Incorect value for 'issuer' in AttributeCertificateInfo");
+				}
+
+				this.signature = new AlgorithmIdentifier({ schema: asn1.result.signature });
+				this.serialNumber = asn1.result.serialNumber;
+				this.attrCertValidityPeriod = new AttCertValidityPeriod({ schema: asn1.result.attrCertValidityPeriod });
+				this.attributes = Array.from(asn1.result.attributes.valueBlock.value, function (element) {
+					return new Attribute({ schema: element });
+				});
+
+				if ("issuerUniqueID" in asn1.result) this.issuerUniqueID = asn1.result.issuerUniqueID;
+
+				if ("extensions" in asn1.result) this.extensions = new Extensions({ schema: asn1.result.extensions });
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convert current object to asn1js object and set correct values
+    * @returns {Object} asn1js object
+    */
+
+		}, {
+			key: "toSchema",
+			value: function toSchema() {
+				var result = new Sequence({
+					value: [new Integer({ value: this.version }), this.holder.toSchema(), new Constructed({
+						idBlock: {
+							tagClass: 3, // CONTEXT-SPECIFIC
+							tagNumber: 0 // [0]
+						},
+						value: this.issuer.toSchema().valueBlock.value
+					}), this.signature.toSchema(), this.serialNumber, this.attrCertValidityPeriod.toSchema(), new Sequence({
+						value: Array.from(this.attributes, function (element) {
+							return element.toSchema();
+						})
+					})]
+				});
+
+				if ("issuerUniqueID" in this) result.valueBlock.value.push(this.issuerUniqueID);
+
+				if ("extensions" in this) result.valueBlock.value.push(this.extensions.toSchema());
+
+				return result;
+			}
+			//**********************************************************************************
+			/**
+    * Convertion for the class to JSON object
+    * @returns {Object}
+    */
+
+		}, {
+			key: "toJSON",
+			value: function toJSON() {
+				var result = {
+					version: this.version,
+					holder: this.holder.toJSON(),
+					issuer: this.issuer.toJSON(),
+					signature: this.signature.toJSON(),
+					serialNumber: this.serialNumber.toJSON(),
+					attrCertValidityPeriod: this.attrCertValidityPeriod.toJSON(),
+					attributes: Array.from(this.attributes, function (element) {
+						return element.toJSON();
+					})
+				};
+
+				if ("issuerUniqueID" in this) result.issuerUniqueID = this.issuerUniqueID.toJSON();
+
+				if ("extensions" in this) result.extensions = this.extensions.toJSON();
+
+				return result;
+			}
+			//**********************************************************************************
+
+		}], [{
+			key: "defaultValues",
+			value: function defaultValues(memberName) {
+				switch (memberName) {
+					case "version":
+						return 1;
+					case "holder":
+						return new Holder();
+					case "issuer":
+						return {};
+					case "signature":
+						return new AlgorithmIdentifier();
+					case "serialNumber":
+						return new Integer();
+					case "attrCertValidityPeriod":
+						return new AttCertValidityPeriod();
+					case "attributes":
+						return [];
+					case "issuerUniqueID":
+						return new BitString();
+					case "extensions":
+						return new Extensions();
+					default:
+						throw new Error("Invalid member name for AttributeCertificateInfo class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Return value of asn1js schema for current class
+    * @param {Object} parameters Input parameters for the schema
+    * @returns {Object} asn1js schema object
+    */
+
+		}, {
+			key: "schema",
+			value: function schema() {
+				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+				// AttributeCertificateInfo ::= SEQUENCE {
+				//   version                 AttCertVersion, -- version is v2
+				//   holder                  Holder,
+				//   issuer                  AttCertIssuer,
+				//   signature               AlgorithmIdentifier,
+				//   serialNumber            CertificateSerialNumber,
+				//   attrCertValidityPeriod  AttCertValidityPeriod,
+				//   attributes              SEQUENCE OF Attribute,
+				//   issuerUniqueID          UniqueIdentifier OPTIONAL,
+				//   extensions              Extensions OPTIONAL
+				// }
+
+				/**
+     * @type {Object}
+     * @property {string} [blockName]
+     * @property {string} [issuer]
+     * @property {string} [serialNumber]
+     */
+				var names = getParametersValue(parameters, "names", {});
+
+				return new Sequence({
+					name: names.blockName || "",
+					value: [new Integer({ name: names.version || "" }), Holder.schema(names.holder || {}), new Choice({
+						value: [GeneralNames.schema({
+							names: {
+								blockName: names.issuer || ""
+							}
+						}), new Constructed({
+							name: names.issuer || "",
+							idBlock: {
+								tagClass: 3, // CONTEXT-SPECIFIC
+								tagNumber: 0 // [0]
+							},
+							value: V2Form.schema().valueBlock.value
+						})]
+					}), AlgorithmIdentifier.schema(names.signature || {}), new Integer({ name: names.serialNumber || "" }), AttCertValidityPeriod.schema(names.attrCertValidityPeriod || {}), new Sequence({
+						name: names.attributes || "",
+						value: [new Repeated({
+							value: Attribute.schema()
+						})]
+					}), new BitString({
+						optional: true,
+						name: names.issuerUniqueID || ""
+					}), Extensions.schema(names.extensions || {}, true)]
+				});
+			}
+		}]);
+
+		return AttributeCertificateInfo;
+	}();
+	//**************************************************************************************
+	/**
+  * Class from RFC5755
+  */
+
+
+	var AttributeCertificateV1 = function () {
+		//**********************************************************************************
+		/**
+   * Constructor for AttributeCertificateV1 class
+   * @param {Object} [parameters={}]
+   * @property {Object} [schema] asn1js parsed value
+   */
+		function AttributeCertificateV1() {
+			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+			_classCallCheck(this, AttributeCertificateV1);
+
+			//region Internal properties of the object
+			/**
+    * @type {AttributeCertificateInfo}
+    * @description acinfo
+    */
+			this.acinfo = getParametersValue(parameters, "acinfo", AttributeCertificateV1.defaultValues("acinfo"));
+			/**
+    * @type {AlgorithmIdentifier}
+    * @description signatureAlgorithm
+    */
+			this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", AttributeCertificateV1.defaultValues("signatureAlgorithm"));
+			/**
+    * @type {BitString}
+    * @description signatureValue
+    */
+			this.signatureValue = getParametersValue(parameters, "signatureValue", AttributeCertificateV1.defaultValues("signatureValue"));
+			//endregion
+
+			//region If input argument array contains "schema" for this object
+			if ("schema" in parameters) this.fromSchema(parameters.schema);
+			//endregion
+		}
+		//**********************************************************************************
+		/**
+   * Return default values for all class members
+   * @param {string} memberName String name for a class member
+   */
+
+
+		_createClass(AttributeCertificateV1, [{
+			key: "fromSchema",
+
+			//**********************************************************************************
+			/**
+    * Convert parsed asn1js object into current class
+    * @param {!Object} schema
+    */
+			value: function fromSchema(schema) {
+				//region Check the schema is valid
+				var asn1 = compareSchema(schema, schema, AttributeCertificateV1.schema({
+					names: {
+						acinfo: {
+							names: {
+								blockName: "acinfo"
+							}
+						},
+						signatureAlgorithm: {
+							names: {
+								blockName: "signatureAlgorithm"
+							}
+						},
+						signatureValue: "signatureValue"
+					}
+				}));
+
+				if (asn1.verified === false) throw new Error("Object's schema was not verified against input data for AttributeCertificateV1");
+				//endregion
+
+				//region Get internal properties from parsed schema
+				this.acinfo = new AttributeCertificateInfo({ schema: asn1.result.acinfo });
+				this.signatureAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.signatureAlgorithm });
+				this.signatureValue = asn1.result.signatureValue;
+				//endregion
+			}
+			//**********************************************************************************
+			/**
+    * Convert current object to asn1js object and set correct values
+    * @returns {Object} asn1js object
+    */
+
+		}, {
+			key: "toSchema",
+			value: function toSchema() {
+				return new Sequence({
+					value: [this.acinfo.toSchema(), this.signatureAlgorithm.toSchema(), this.signatureValue]
+				});
+			}
+			//**********************************************************************************
+			/**
+    * Convertion for the class to JSON object
+    * @returns {Object}
+    */
+
+		}, {
+			key: "toJSON",
+			value: function toJSON() {
+				return {
+					acinfo: this.acinfo.toJSON(),
+					signatureAlgorithm: this.signatureAlgorithm.toJSON(),
+					signatureValue: this.signatureValue.toJSON()
+				};
+			}
+			//**********************************************************************************
+
+		}], [{
+			key: "defaultValues",
+			value: function defaultValues(memberName) {
+				switch (memberName) {
+					case "acinfo":
+						return new AttributeCertificateInfo();
+					case "signatureAlgorithm":
+						return new AlgorithmIdentifier();
+					case "signatureValue":
+						return new BitString();
+					default:
+						throw new Error("Invalid member name for AttributeCertificateV1 class: " + memberName);
+				}
+			}
+			//**********************************************************************************
+			/**
+    * Return value of asn1js schema for current class
+    * @param {Object} parameters Input parameters for the schema
+    * @returns {Object} asn1js schema object
+    */
+
+		}, {
+			key: "schema",
+			value: function schema() {
+				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+				// AttributeCertificate ::= SEQUENCE {
+				//   acinfo               AttributeCertificateInfo,
+				//   signatureAlgorithm   AlgorithmIdentifier,
+				//   signatureValue       BIT STRING
+				// }
+
+				/**
+     * @type {Object}
+     * @property {string} [blockName]
+     * @property {Object} [acinfo]
+     * @property {Object} [signatureAlgorithm]
+     * @property {string} [signatureValue]
+     */
+				var names = getParametersValue(parameters, "names", {});
+
+				return new Sequence({
+					name: names.blockName || "",
+					value: [AttributeCertificateInfo.schema(names.acinfo || {}), AlgorithmIdentifier.schema(names.signatureAlgorithm || {}), new BitString({ name: names.signatureValue || "" })]
+				});
+			}
+		}]);
+
+		return AttributeCertificateV1;
+	}();
+	//**************************************************************************************
+
+	//**************************************************************************************
+	/**
   * Class from RFC7292
   */
 
@@ -19284,7 +21630,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						// x509Certificate
 						{
 							var asn1Inner = fromBER(this.certValue.valueBlock.valueHex);
-							this.parsedValue = new Certificate({ schema: asn1Inner.result });
+
+							try {
+								this.parsedValue = new Certificate({ schema: asn1Inner.result });
+							} catch (ex) // In some realizations the same OID used for attribute certificates
+							{
+								this.parsedValue = new AttributeCertificateV1({ schema: asn1Inner.result });
+							}
+						}
+						break;
+					case "1.2.840.113549.1.9.22.3":
+						// attributeCertificate - (!!!) THIS OID IS SUBJECT FOR CHANGE IN FUTURE (!!!)
+						{
+							var _asn1Inner = fromBER(this.certValue.valueBlock.valueHex);
+							this.parsedValue = new AttributeCertificateV1({ schema: _asn1Inner.result });
 						}
 						break;
 					case "1.2.840.113549.1.9.22.2": // sdsiCertificate
@@ -19304,7 +21663,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			value: function toSchema() {
 				//region Construct and return new ASN.1 schema for this object
 				if ("parsedValue" in this) {
-					this.certId = "1.2.840.113549.1.9.22.1";
+					if ("acinfo" in this.parsedValue) // attributeCertificate
+						this.certId = "1.2.840.113549.1.9.22.3";else // x509Certificate
+						this.certId = "1.2.840.113549.1.9.22.1";
+
 					this.certValue = new OctetString({ valueHex: this.parsedValue.toSchema().toBER(false) });
 				}
 
@@ -19898,28 +22260,28 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//endregion
 
 				//region Search for input certificate in revoked certificates array
-				var _iteratorNormalCompletion17 = true;
-				var _didIteratorError17 = false;
-				var _iteratorError17 = undefined;
+				var _iteratorNormalCompletion19 = true;
+				var _didIteratorError19 = false;
+				var _iteratorError19 = undefined;
 
 				try {
-					for (var _iterator17 = this.revokedCertificates[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-						var revokedCertificate = _step17.value;
+					for (var _iterator19 = this.revokedCertificates[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+						var revokedCertificate = _step19.value;
 
 						if (revokedCertificate.userCertificate.isEqual(certificate.serialNumber)) return true;
 					}
 					//endregion
 				} catch (err) {
-					_didIteratorError17 = true;
-					_iteratorError17 = err;
+					_didIteratorError19 = true;
+					_iteratorError19 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion17 && _iterator17.return) {
-							_iterator17.return();
+						if (!_iteratorNormalCompletion19 && _iterator19.return) {
+							_iterator19.return();
 						}
 					} finally {
-						if (_didIteratorError17) {
-							throw _iteratorError17;
+						if (_didIteratorError19) {
+							throw _iteratorError19;
 						}
 					}
 				}
@@ -19936,105 +22298,52 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "sign",
 			value: function sign(privateKey) {
-				var _this61 = this;
+				var _this64 = this;
 
 				var hashAlgorithm = arguments.length <= 1 || arguments[1] === undefined ? "SHA-1" : arguments[1];
 
+				//region Initial checking
 				//region Get a private key from function parameter
 				if (typeof privateKey === "undefined") return Promise.reject("Need to provide a private key for signing");
 				//endregion
-
-				//region Get hashing algorithm
-				var oid = getOIDByAlgorithm({ name: hashAlgorithm });
-				if (oid === "") return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
 				//endregion
 
-				//region Get a "default parameters" for current algorithm
-				var defParams = getAlgorithmParameters(privateKey.algorithm.name, "sign");
-				defParams.algorithm.hash.name = hashAlgorithm;
+				//region Initial variables
+				var sequence = Promise.resolve();
+				var parameters = void 0;
+
+				var engine = getEngine();
 				//endregion
 
-				//region Fill internal structures base on "privateKey" and "hashAlgorithm"
-				switch (privateKey.algorithm.name.toUpperCase()) {
-					case "RSASSA-PKCS1-V1_5":
-					case "ECDSA":
-						this.signature.algorithmId = getOIDByAlgorithm(defParams.algorithm);
-						this.signatureAlgorithm.algorithmId = this.signature.algorithmId;
-						break;
-					case "RSA-PSS":
-						{
-							//region Set "saltLength" as a length (in octets) of hash function result
-							switch (hashAlgorithm.toUpperCase()) {
-								case "SHA-256":
-									defParams.algorithm.saltLength = 32;
-									break;
-								case "SHA-384":
-									defParams.algorithm.saltLength = 48;
-									break;
-								case "SHA-512":
-									defParams.algorithm.saltLength = 64;
-									break;
-								default:
-							}
-							//endregion
+				//region Get a "default parameters" for current algorithm and set correct signature algorithm
+				sequence = sequence.then(function () {
+					return engine.subtle.getSignatureParameters(privateKey, hashAlgorithm);
+				});
 
-							//region Fill "RSASSA_PSS_params" object
-							var paramsObject = {};
-
-							if (hashAlgorithm.toUpperCase() !== "SHA-1") {
-								var hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
-								if (hashAlgorithmOID === "") return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
-
-								paramsObject.hashAlgorithm = new AlgorithmIdentifier({
-									algorithmId: hashAlgorithmOID,
-									algorithmParams: new Null()
-								});
-
-								paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
-									algorithmId: "1.2.840.113549.1.1.8", // MGF1
-									algorithmParams: paramsObject.hashAlgorithm.toSchema()
-								});
-							}
-
-							if (defParams.algorithm.saltLength !== 20) paramsObject.saltLength = defParams.algorithm.saltLength;
-
-							var pssParameters = new RSASSAPSSParams(paramsObject);
-							//endregion
-
-							//region Automatically set signature algorithm
-							this.signature = new AlgorithmIdentifier({
-								algorithmId: "1.2.840.113549.1.1.10",
-								algorithmParams: pssParameters.toSchema()
-							});
-							this.signatureAlgorithm = this.signature; // Must be the same
-							//endregion
-						}
-						break;
-					default:
-						return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
-				}
+				sequence = sequence.then(function (result) {
+					parameters = result.parameters;
+					_this64.signature = result.signatureAlgorithm;
+					_this64.signatureAlgorithm = result.signatureAlgorithm;
+				});
 				//endregion
 
 				//region Create TBS data for signing
-				this.tbs = this.encodeTBS().toBER(false);
-				//endregion
-
-				//region Get a "crypto" extension
-				var crypto = getCrypto();
-				if (typeof crypto === "undefined") return Promise.reject("Unable to create WebCrypto object");
+				sequence = sequence.then(function () {
+					_this64.tbs = _this64.encodeTBS().toBER(false);
+				});
 				//endregion
 
 				//region Signing TBS data on provided private key
-				return crypto.sign(defParams.algorithm, privateKey, new Uint8Array(this.tbs)).then(function (result) {
-					//region Special case for ECDSA algorithm
-					if (defParams.algorithm.name === "ECDSA") result = createCMSECDSASignature(result);
-					//endregion
+				sequence = sequence.then(function () {
+					return engine.subtle.signWithPrivateKey(_this64.tbs, privateKey, parameters);
+				});
 
-					_this61.signatureValue = new BitString({ valueHex: result });
-				}, function (error) {
-					return Promise.reject("Signing error: " + error);
+				sequence = sequence.then(function (result) {
+					_this64.signatureValue = new BitString({ valueHex: result });
 				});
 				//endregion
+
+				return sequence;
 			}
 			//**********************************************************************************
 			/**
@@ -20046,7 +22355,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this62 = this;
+				var _this65 = this;
 
 				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -20077,13 +22386,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Check the CRL for unknown critical extensions
 				if ("crlExtensions" in this) {
-					var _iteratorNormalCompletion18 = true;
-					var _didIteratorError18 = false;
-					var _iteratorError18 = undefined;
+					var _iteratorNormalCompletion20 = true;
+					var _didIteratorError20 = false;
+					var _iteratorError20 = undefined;
 
 					try {
-						for (var _iterator18 = this.crlExtensions.extensions[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
-							var extension = _step18.value;
+						for (var _iterator20 = this.crlExtensions.extensions[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
+							var extension = _step20.value;
 
 							if (extension.critical) {
 								// We can not be sure that unknown extension has no value for CRL signature
@@ -20091,16 +22400,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							}
 						}
 					} catch (err) {
-						_didIteratorError18 = true;
-						_iteratorError18 = err;
+						_didIteratorError20 = true;
+						_iteratorError20 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion18 && _iterator18.return) {
-								_iterator18.return();
+							if (!_iteratorNormalCompletion20 && _iterator20.return) {
+								_iterator20.return();
 							}
 						} finally {
-							if (_didIteratorError18) {
-								throw _iteratorError18;
+							if (_didIteratorError20) {
+								throw _iteratorError20;
 							}
 						}
 					}
@@ -20120,8 +22429,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//region Import public key
 				sequence = sequence.then(function () {
 					//region Get information about public key algorithm and default parameters for import
-					var algorithmObject = getAlgorithmByOID(_this62.signature.algorithmId);
-					if ("name" in algorithmObject === "") return Promise.reject("Unsupported public key algorithm: " + _this62.signature.algorithmId);
+					var algorithmObject = getAlgorithmByOID(_this65.signature.algorithmId);
+					if ("name" in algorithmObject === "") return Promise.reject("Unsupported public key algorithm: " + _this65.signature.algorithmId);
 
 					var algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
 					if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = shaAlgorithm;
@@ -20177,7 +22486,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var pssParameters = void 0;
 
 						try {
-							pssParameters = new RSASSAPSSParams({ schema: _this62.signatureAlgorithm.algorithmParams });
+							pssParameters = new RSASSAPSSParams({ schema: _this65.signatureAlgorithm.algorithmParams });
 						} catch (ex) {
 							return Promise.reject(ex);
 						}
@@ -20355,7 +22664,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						}
 						break;
 					default:
-						throw new Error("Incorrect \"crlId\" value in CertBag: " + this.crlId);
+						throw new Error("Incorrect \"crlId\" value in CRLBag: " + this.crlId);
 				}
 				//endregion
 			}
@@ -21459,29 +23768,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//endregion
 
 				//region Get internal properties from parsed schema
-				var _iteratorNormalCompletion19 = true;
-				var _didIteratorError19 = false;
-				var _iteratorError19 = undefined;
+				var _iteratorNormalCompletion21 = true;
+				var _didIteratorError21 = false;
+				var _iteratorError21 = undefined;
 
 				try {
-					for (var _iterator19 = asn1.result.crls[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
-						var element = _step19.value;
+					for (var _iterator21 = asn1.result.crls[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
+						var element = _step21.value;
 
 						if (element.idBlock.tagClass === 1) this.crls.push(new CertificateRevocationList({ schema: element }));else this.otherRevocationInfos.push(new OtherRevocationInfoFormat({ schema: element }));
 					}
 
 					//endregion
 				} catch (err) {
-					_didIteratorError19 = true;
-					_iteratorError19 = err;
+					_didIteratorError21 = true;
+					_iteratorError21 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion19 && _iterator19.return) {
-							_iterator19.return();
+						if (!_iteratorNormalCompletion21 && _iterator21.return) {
+							_iterator21.return();
 						}
 					} finally {
-						if (_didIteratorError19) {
-							throw _iteratorError19;
+						if (_didIteratorError21) {
+							throw _iteratorError21;
 						}
 					}
 				}
@@ -25555,7 +27864,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if ("schema" in parameters) this.fromSchema(parameters.schema);
 			//endregion
 		}
-
 		//**********************************************************************************
 		/**
    * Return default values for all class members
@@ -25565,7 +27873,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		_createClass(EnvelopedData, [{
 			key: "fromSchema",
-
 
 			//**********************************************************************************
 			/**
@@ -25611,7 +27918,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convert current object to asn1js object and set correct values
@@ -25665,7 +27971,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convertion for the class to JSON object
@@ -25692,7 +27997,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return _object;
 			}
-
 			//**********************************************************************************
 			/**
     * Helpers function for filling "RecipientInfo" based on recipient's certificate.
@@ -25855,7 +28159,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return true;
 			}
-
 			//**********************************************************************************
 			/**
     * Add recipient based on pre-defined data like password or KEK
@@ -25919,7 +28222,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								keyEncryptionAlgorithm: new AlgorithmIdentifier({
 									algorithmId: kekOID,
 									/*
-          For AES-KW params are NULL, but for other algorithm could another situation.
+          For AES-KW params are NULL, but for other algorithm could be another situation.
           */
 									algorithmParams: encryptionParameters.keyEncryptionAlgorithmParams
 								}),
@@ -26010,7 +28313,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				}
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Create a new CMS Enveloped Data content with encrypted data
@@ -26022,7 +28324,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "encrypt",
 			value: function encrypt(contentEncryptionAlgorithm, contentToEncrypt) {
-				var _this63 = this;
+				var _this66 = this;
 
 				//region Initial variables
 				var sequence = Promise.resolve();
@@ -26057,6 +28359,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					return crypto.generateKey(contentEncryptionAlgorithm, true, ["encrypt"]);
 				});
 				//endregion
+
 				//region Encrypt content
 				sequence = sequence.then(function (result) {
 					sessionKey = result;
@@ -26069,6 +28372,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					return Promise.reject(error);
 				});
 				//endregion
+
 				//region Export raw content of content encryption key
 				sequence = sequence.then(function (result) {
 					//region Create output OCTETSTRING with encrypted content
@@ -26086,10 +28390,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					return Promise.reject(error);
 				});
 				//endregion
+
 				//region Append common information to CMS_ENVELOPED_DATA
 				sequence = sequence.then(function () {
-					_this63.version = 2;
-					_this63.encryptedContentInfo = new EncryptedContentInfo({
+					_this66.version = 2;
+					_this66.encryptedContentInfo = new EncryptedContentInfo({
 						contentType: "1.2.840.113549.1.7.1", // "data"
 						contentEncryptionAlgorithm: new AlgorithmIdentifier({
 							algorithmId: contentEncryptionOID,
@@ -26146,6 +28451,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Generate ephemeral ECDH key
 					currentSequence = currentSequence.then(function (result) {
 						return crypto.generateKey({
@@ -26156,6 +28462,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Export public key of ephemeral ECDH key pair
 					currentSequence = currentSequence.then(function (result) {
 						ecdhPublicKey = result.publicKey;
@@ -26166,6 +28473,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Import recipient's public key
 					currentSequence = currentSequence.then(function (result) {
 						exportedECDHPublicKey = result;
@@ -26183,6 +28491,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Create shared secret
 					currentSequence = currentSequence.then(function (result) {
 						return crypto.deriveBits({
@@ -26193,6 +28502,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Apply KDF function to shared secret
 					currentSequence = currentSequence.then(function (result) {
 						//region Get length of used AES-KW algorithm
@@ -26242,6 +28552,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Import AES-KW key from result of KDF function
 					currentSequence = currentSequence.then(function (result) {
 						return crypto.importKey("raw", result, { name: "AES-KW" }, true, ["wrapKey"]);
@@ -26249,6 +28560,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Finally wrap session key by using AES-KW algorithm
 					currentSequence = currentSequence.then(function (result) {
 						return crypto.wrapKey("raw", sessionKey, result, { name: "AES-KW" });
@@ -26256,6 +28568,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Append all neccessary data to current CMS_RECIPIENT_INFO object
 					currentSequence = currentSequence.then(function (result) {
 						//region OriginatorIdentifierOrKey
@@ -26264,6 +28577,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var originator = new OriginatorIdentifierOrKey();
 						originator.variant = 3;
 						originator.value = new OriginatorPublicKey({ schema: asn1.result });
+
 						// There is option when we can stay with ECParameters, but here index prefer to avoid the params
 						if ("algorithmParams" in originator.value.algorithm) delete originator.value.algorithm.algorithmParams;
 
@@ -26314,6 +28628,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Encrypt early exported session key on recipient's public key
 					currentSequence = currentSequence.then(function (result) {
 						return crypto.encrypt(result.algorithm, result, exportedSessionKey);
@@ -26321,6 +28636,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Append all neccessary data to current CMS_RECIPIENT_INFO object
 					currentSequence = currentSequence.then(function (result) {
 						//region RecipientEncryptedKey
@@ -26396,6 +28712,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Derive PBKDF2 key from "password" buffer
 					currentSequence = currentSequence.then(function () {
 						var passwordView = new Uint8Array(_this.recipientInfos[index].value.password);
@@ -26405,6 +28722,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Derive key for "keyEncryptionAlgorithm"
 					currentSequence = currentSequence.then(function (result) {
 						//region Get WebCrypto form of "keyEncryptionAlgorithm"
@@ -26443,6 +28761,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Wrap previously exported session key (Also too specific for KEK algorithm)
 					currentSequence = currentSequence.then(function (result) {
 						return crypto.wrapKey("raw", sessionKey, result, kekAlgorithm);
@@ -26450,6 +28769,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Append all neccessary data to current CMS_RECIPIENT_INFO object
 					currentSequence = currentSequence.then(function (result) {
 						//region RecipientEncryptedKey
@@ -26462,17 +28782,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					return currentSequence;
 				}
-
 				//endregion
 
 				//region Create special routines for each "recipient"
 				sequence = sequence.then(function () {
-					for (var i = 0; i < _this63.recipientInfos.length; i++) {
+					for (var i = 0; i < _this66.recipientInfos.length; i++) {
 						//region Initial variables
 						var currentSequence = Promise.resolve();
 						//endregion
 
-						switch (_this63.recipientInfos[i].variant) {
+						switch (_this66.recipientInfos[i].variant) {
 							case 1:
 								// KeyTransRecipientInfo
 								currentSequence = SubKeyTransRecipientInfo(i);
@@ -26504,7 +28823,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return sequence;
 			}
-
 			//**********************************************************************************
 			/**
     * Decrypt existing CMS Enveloped Data content
@@ -26516,7 +28834,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "decrypt",
 			value: function decrypt(recipientIndex, parameters) {
-				var _this64 = this;
+				var _this67 = this;
 
 				//region Initial variables
 				var sequence = Promise.resolve();
@@ -26585,6 +28903,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Import sender's ephemeral public key
 					currentSequence = currentSequence.then(function (result) {
 						ecdhPrivateKey = result;
@@ -26605,6 +28924,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Create shared secret
 					currentSequence = currentSequence.then(function (result) {
 						return crypto.deriveBits({
@@ -26615,6 +28935,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Apply KDF function to shared secret
 					currentSequence = currentSequence.then(function (result) {
 						//region Get length of used AES-KW algorithm
@@ -26664,6 +28985,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Import AES-KW key from result of KDF function
 					currentSequence = currentSequence.then(function (result) {
 						return crypto.importKey("raw", result, { name: "AES-KW" }, true, ["unwrapKey"]);
@@ -26671,6 +28993,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Finally unwrap session key
 					currentSequence = currentSequence.then(function (result) {
 						//region Get WebCrypto form of content encryption algorithm
@@ -26714,6 +29037,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Decrypt encrypted session key
 					currentSequence = currentSequence.then(function (result) {
 						return crypto.decrypt(result.algorithm, result, _this.recipientInfos[index].value.encryptedKey.valueBlock.valueHex);
@@ -26721,6 +29045,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Import decrypted session key
 					currentSequence = currentSequence.then(function (result) {
 						//region Get WebCrypto form of content encryption algorithm
@@ -26757,6 +29082,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Unwrap previously exported session key
 					currentSequence = currentSequence.then(function (result) {
 						//region Get WebCrypto form of content encryption algorithm
@@ -26799,6 +29125,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Derive key for "keyEncryptionAlgorithm"
 					currentSequence = currentSequence.then(function (result) {
 						//region Get WebCrypto form of "keyEncryptionAlgorithm"
@@ -26837,6 +29164,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						return Promise.reject(error);
 					});
 					//endregion
+
 					//region Unwrap previously exported session key
 					currentSequence = currentSequence.then(function (result) {
 						//region Get WebCrypto form of content encryption algorithm
@@ -26861,7 +29189,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					var currentSequence = Promise.resolve();
 					//endregion
 
-					switch (_this64.recipientInfos[recipientIndex].variant) {
+					switch (_this67.recipientInfos[recipientIndex].variant) {
 						case 1:
 							// KeyTransRecipientInfo
 							currentSequence = SubKeyTransRecipientInfo(recipientIndex);
@@ -26891,40 +29219,40 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//region Finally decrypt data by session key
 				sequence = sequence.then(function (result) {
 					//region Get WebCrypto form of content encryption algorithm
-					var contentEncryptionAlgorithm = getAlgorithmByOID(_this64.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
-					if ("name" in contentEncryptionAlgorithm === false) return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this64.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
+					var contentEncryptionAlgorithm = getAlgorithmByOID(_this67.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
+					if ("name" in contentEncryptionAlgorithm === false) return Promise.reject("Incorrect \"contentEncryptionAlgorithm\": " + _this67.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
 					//endregion
 
 					//region Get "intialization vector" for content encryption algorithm
-					var ivBuffer = _this64.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
+					var ivBuffer = _this67.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
 					var ivView = new Uint8Array(ivBuffer);
 					//endregion
 
 					//region Create correct data block for decryption
 					var dataBuffer = new ArrayBuffer(0);
 
-					if (_this64.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false) dataBuffer = _this64.encryptedContentInfo.encryptedContent.valueBlock.valueHex;else {
-						var _iteratorNormalCompletion20 = true;
-						var _didIteratorError20 = false;
-						var _iteratorError20 = undefined;
+					if (_this67.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false) dataBuffer = _this67.encryptedContentInfo.encryptedContent.valueBlock.valueHex;else {
+						var _iteratorNormalCompletion22 = true;
+						var _didIteratorError22 = false;
+						var _iteratorError22 = undefined;
 
 						try {
-							for (var _iterator20 = _this64.encryptedContentInfo.encryptedContent.valueBlock.value[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
-								var content = _step20.value;
+							for (var _iterator22 = _this67.encryptedContentInfo.encryptedContent.valueBlock.value[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
+								var content = _step22.value;
 
 								dataBuffer = utilConcatBuf(dataBuffer, content.valueBlock.valueHex);
 							}
 						} catch (err) {
-							_didIteratorError20 = true;
-							_iteratorError20 = err;
+							_didIteratorError22 = true;
+							_iteratorError22 = err;
 						} finally {
 							try {
-								if (!_iteratorNormalCompletion20 && _iterator20.return) {
-									_iterator20.return();
+								if (!_iteratorNormalCompletion22 && _iterator22.return) {
+									_iterator22.return();
 								}
 							} finally {
-								if (_didIteratorError20) {
-									throw _iteratorError20;
+								if (_didIteratorError22) {
+									throw _iteratorError22;
 								}
 							}
 						}
@@ -26942,7 +29270,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return sequence;
 			}
-
 			//**********************************************************************************
 
 		}], [{
@@ -26963,7 +29290,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						throw new Error("Invalid member name for EnvelopedData class: " + memberName);
 				}
 			}
-
 			//**********************************************************************************
 			/**
     * Compare values with default values for all class members
@@ -26988,7 +29314,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						throw new Error("Invalid member name for EnvelopedData class: " + memberName);
 				}
 			}
-
 			//**********************************************************************************
 			/**
     * Return value of asn1js schema for current class
@@ -27159,7 +29484,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "parseInternalValues",
 			value: function parseInternalValues(parameters) {
-				var _this65 = this;
+				var _this68 = this;
 
 				//region Check input data from "parameters" 
 				if (parameters instanceof Object === false) return Promise.reject("The \"parameters\" must has \"Object\" type");
@@ -27180,16 +29505,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					safeContents: []
 				};
 
-				var _iteratorNormalCompletion21 = true;
-				var _didIteratorError21 = false;
-				var _iteratorError21 = undefined;
+				var _iteratorNormalCompletion23 = true;
+				var _didIteratorError23 = false;
+				var _iteratorError23 = undefined;
 
 				try {
-					for (var _iterator21 = this.safeContents.entries()[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
-						var _step21$value = _slicedToArray(_step21.value, 2);
+					for (var _iterator23 = this.safeContents.entries()[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
+						var _step23$value = _slicedToArray(_step23.value, 2);
 
-						var index = _step21$value[0];
-						var content = _step21$value[1];
+						var index = _step23$value[0];
+						var content = _step23$value[1];
 
 						switch (content.contentType) {
 							//region data 
@@ -27247,7 +29572,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 											var asn1 = fromBER(result);
 											if (asn1.offset === -1) return Promise.reject("Error during parsing of decrypted data");
 
-											_this65.parsedValue.safeContents.push({
+											_this68.parsedValue.safeContents.push({
 												privacyMode: 2, // Public-key privacy mode
 												value: new SafeContents({ schema: asn1.result })
 											});
@@ -27292,7 +29617,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 											var asn1 = fromBER(result);
 											if (asn1.offset === -1) return Promise.reject("Error during parsing of decrypted data");
 
-											_this65.parsedValue.safeContents.push({
+											_this68.parsedValue.safeContents.push({
 												privacyMode: 1, // Password-based privacy mode
 												value: new SafeContents({ schema: asn1.result })
 											});
@@ -27316,16 +29641,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					}
 					//endregion 
 				} catch (err) {
-					_didIteratorError21 = true;
-					_iteratorError21 = err;
+					_didIteratorError23 = true;
+					_iteratorError23 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion21 && _iterator21.return) {
-							_iterator21.return();
+						if (!_iteratorNormalCompletion23 && _iterator23.return) {
+							_iterator23.return();
 						}
 					} finally {
-						if (_didIteratorError21) {
-							throw _iteratorError21;
+						if (_didIteratorError23) {
+							throw _iteratorError23;
 						}
 					}
 				}
@@ -27337,7 +29662,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "makeInternalValues",
 			value: function makeInternalValues(parameters) {
-				var _this66 = this;
+				var _this69 = this;
 
 				//region Check data in "parsedValue" 
 				if ("parsedValue" in this === false) return Promise.reject("Please run \"parseValues\" first or add \"parsedValue\" manually");
@@ -27364,16 +29689,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//region Create internal values from already parsed values 
 				this.safeContents = [];
 
-				var _iteratorNormalCompletion22 = true;
-				var _didIteratorError22 = false;
-				var _iteratorError22 = undefined;
+				var _iteratorNormalCompletion24 = true;
+				var _didIteratorError24 = false;
+				var _iteratorError24 = undefined;
 
 				try {
-					for (var _iterator22 = this.parsedValue.safeContents.entries()[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
-						var _step22$value = _slicedToArray(_step22.value, 2);
+					for (var _iterator24 = this.parsedValue.safeContents.entries()[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
+						var _step24$value = _slicedToArray(_step24.value, 2);
 
-						var index = _step22$value[0];
-						var content = _step22$value[1];
+						var index = _step24$value[0];
+						var content = _step24$value[1];
 
 						//region Check current "content" value
 						if ("privacyMode" in content === false) return Promise.reject("The \"privacyMode\" is a mandatory parameter for \"content\"");
@@ -27391,7 +29716,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										var contentBuffer = content.value.toSchema().toBER(false);
 
 										sequence = sequence.then(function () {
-											_this66.safeContents.push(new ContentInfo({
+											_this69.safeContents.push(new ContentInfo({
 												contentType: "1.2.840.113549.1.7.1",
 												content: new OctetString({ valueHex: contentBuffer })
 											}));
@@ -27421,7 +29746,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 										//region Store result content in CMS_CONTENT_INFO type
 										sequence = sequence.then(function () {
-											_this66.safeContents.push(new ContentInfo({
+											_this69.safeContents.push(new ContentInfo({
 												contentType: "1.2.840.113549.1.7.6",
 												content: cmsEncrypted.toSchema()
 											}));
@@ -27487,7 +29812,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										});
 
 										sequence = sequence.then(function () {
-											_this66.safeContents.push(new ContentInfo({
+											_this69.safeContents.push(new ContentInfo({
 												contentType: "1.2.840.113549.1.7.3",
 												content: cmsEnveloped.toSchema()
 											}));
@@ -27509,22 +29834,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					//region Return result of the function 
 				} catch (err) {
-					_didIteratorError22 = true;
-					_iteratorError22 = err;
+					_didIteratorError24 = true;
+					_iteratorError24 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion22 && _iterator22.return) {
-							_iterator22.return();
+						if (!_iteratorNormalCompletion24 && _iterator24.return) {
+							_iterator24.return();
 						}
 					} finally {
-						if (_didIteratorError22) {
-							throw _iteratorError22;
+						if (_didIteratorError24) {
+							throw _iteratorError24;
 						}
 					}
 				}
 
 				return sequence.then(function () {
-					return _this66;
+					return _this69;
 				}, function (error) {
 					return Promise.reject("Error during parsing: " + error);
 				});
@@ -28514,13 +30839,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			value: function searchForOID(oid) {
 				var result = null;
 
-				var _iteratorNormalCompletion23 = true;
-				var _didIteratorError23 = false;
-				var _iteratorError23 = undefined;
+				var _iteratorNormalCompletion25 = true;
+				var _didIteratorError25 = false;
+				var _iteratorError25 = undefined;
 
 				try {
-					for (var _iterator23 = this.attributes[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
-						var attribute = _step23.value;
+					for (var _iterator25 = this.attributes[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
+						var attribute = _step25.value;
 
 						if (attribute.type === oid) {
 							if (result === null) result = [];
@@ -28529,16 +30854,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						}
 					}
 				} catch (err) {
-					_didIteratorError23 = true;
-					_iteratorError23 = err;
+					_didIteratorError25 = true;
+					_iteratorError25 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion23 && _iterator23.return) {
-							_iterator23.return();
+						if (!_iteratorNormalCompletion25 && _iterator25.return) {
+							_iterator25.return();
 						}
 					} finally {
-						if (_didIteratorError23) {
-							throw _iteratorError23;
+						if (_didIteratorError25) {
+							throw _iteratorError25;
 						}
 					}
 				}
@@ -28830,13 +31155,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					var foundContentType = false;
 					var foundMessageDigest = false;
 
-					var _iteratorNormalCompletion24 = true;
-					var _didIteratorError24 = false;
-					var _iteratorError24 = undefined;
+					var _iteratorNormalCompletion26 = true;
+					var _didIteratorError26 = false;
+					var _iteratorError26 = undefined;
 
 					try {
-						for (var _iterator24 = this.signedAttrs.attributes[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
-							var attribute = _step24.value;
+						for (var _iterator26 = this.signedAttrs.attributes[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
+							var attribute = _step26.value;
 
 							//region Check that "content-type" attribute exists
 							if (attribute.type === "1.2.840.113549.1.9.3") foundContentType = true;
@@ -28851,16 +31176,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							//endregion
 						}
 					} catch (err) {
-						_didIteratorError24 = true;
-						_iteratorError24 = err;
+						_didIteratorError26 = true;
+						_iteratorError26 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion24 && _iterator24.return) {
-								_iterator24.return();
+							if (!_iteratorNormalCompletion26 && _iterator26.return) {
+								_iterator26.return();
 							}
 						} finally {
-							if (_didIteratorError24) {
-								throw _iteratorError24;
+							if (_didIteratorError26) {
+								throw _iteratorError26;
 							}
 						}
 					}
@@ -28883,16 +31208,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Perform format checking for all signed and unsigned attributes
 				if ("signedAttrs" in this) {
-					var _iteratorNormalCompletion25 = true;
-					var _didIteratorError25 = false;
-					var _iteratorError25 = undefined;
+					var _iteratorNormalCompletion27 = true;
+					var _didIteratorError27 = false;
+					var _iteratorError27 = undefined;
 
 					try {
-						for (var _iterator25 = this.signedAttrs.attributes.entries()[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
-							var _step25$value = _slicedToArray(_step25.value, 2);
+						for (var _iterator27 = this.signedAttrs.attributes.entries()[Symbol.iterator](), _step27; !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
+							var _step27$value = _slicedToArray(_step27.value, 2);
 
-							var index = _step25$value[0];
-							var _attribute = _step25$value[1];
+							var index = _step27$value[0];
+							var _attribute = _step27$value[1];
 
 							var formatCheckingResult = _attribute.formatChecking();
 							if (formatCheckingResult.indication !== PASSED) {
@@ -28903,32 +31228,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							}
 						}
 					} catch (err) {
-						_didIteratorError25 = true;
-						_iteratorError25 = err;
+						_didIteratorError27 = true;
+						_iteratorError27 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion25 && _iterator25.return) {
-								_iterator25.return();
+							if (!_iteratorNormalCompletion27 && _iterator27.return) {
+								_iterator27.return();
 							}
 						} finally {
-							if (_didIteratorError25) {
-								throw _iteratorError25;
+							if (_didIteratorError27) {
+								throw _iteratorError27;
 							}
 						}
 					}
 				}
 
 				if ("unsignedAttrs" in this) {
-					var _iteratorNormalCompletion26 = true;
-					var _didIteratorError26 = false;
-					var _iteratorError26 = undefined;
+					var _iteratorNormalCompletion28 = true;
+					var _didIteratorError28 = false;
+					var _iteratorError28 = undefined;
 
 					try {
-						for (var _iterator26 = this.unsignedAttrs.attributes.entries()[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
-							var _step26$value = _slicedToArray(_step26.value, 2);
+						for (var _iterator28 = this.unsignedAttrs.attributes.entries()[Symbol.iterator](), _step28; !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
+							var _step28$value = _slicedToArray(_step28.value, 2);
 
-							var index = _step26$value[0];
-							var _attribute2 = _step26$value[1];
+							var index = _step28$value[0];
+							var _attribute2 = _step28$value[1];
 
 							var _formatCheckingResult = _attribute2.formatChecking();
 							if (_formatCheckingResult.indication !== PASSED) {
@@ -28939,16 +31264,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							}
 						}
 					} catch (err) {
-						_didIteratorError26 = true;
-						_iteratorError26 = err;
+						_didIteratorError28 = true;
+						_iteratorError28 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion26 && _iterator26.return) {
-								_iterator26.return();
+							if (!_iteratorNormalCompletion28 && _iterator28.return) {
+								_iterator28.return();
 							}
 						} finally {
-							if (_didIteratorError26) {
-								throw _iteratorError26;
+							if (_didIteratorError28) {
+								throw _iteratorError28;
 							}
 						}
 					}
@@ -29735,7 +32060,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this67 = this;
+				var _this70 = this;
 
 				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -29780,7 +32105,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				sequence = sequence.then(function () {
 					return crypto.digest(shaAlgorithm.name, new Uint8Array(data));
 				}).then(function (result) {
-					return isEqualBuffer(result, _this67.messageImprint.hashedMessage.valueBlock.valueHex);
+					return isEqualBuffer(result, _this70.messageImprint.hashedMessage.valueBlock.valueHex);
 				});
 				//endregion
 
@@ -30083,7 +32408,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Building certificate path
 				function buildPath(certificate, index) {
-					var result, checkUnique, findIssuerResult, buildPathResult, i, copy, _i12, _buildPathResult, j, _copy;
+					var result, checkUnique, findIssuerResult, buildPathResult, i, copy, _i18, _buildPathResult, j, _copy;
 
 					return regeneratorRuntime.wrap(function buildPath$(_context2) {
 						while (1) {
@@ -30123,7 +32448,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										break;
 									}
 
-									throw new Error("Incorrect result");
+									throw new Error("No valid certificate paths found");
 
 								case 7:
 									if (!(findIssuerResult.length === 1)) {
@@ -30158,25 +32483,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									break;
 
 								case 17:
-									_i12 = 0;
+									_i18 = 0;
 
 								case 18:
-									if (!(_i12 < findIssuerResult.length)) {
+									if (!(_i18 < findIssuerResult.length)) {
 										_context2.next = 29;
 										break;
 									}
 
-									if (!(findIssuerResult[_i12] === index)) {
+									if (!(findIssuerResult[_i18] === index)) {
 										_context2.next = 22;
 										break;
 									}
 
-									result.push([findIssuerResult[_i12]]);
+									result.push([findIssuerResult[_i18]]);
 									return _context2.abrupt("continue", 26);
 
 								case 22:
 									_context2.next = 24;
-									return buildPath(localCerts[findIssuerResult[_i12]], findIssuerResult[_i12]);
+									return buildPath(localCerts[findIssuerResult[_i18]], findIssuerResult[_i18]);
 
 								case 24:
 									_buildPathResult = _context2.sent;
@@ -30185,13 +32510,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									for (j = 0; j < _buildPathResult.length; j++) {
 										_copy = _buildPathResult[j].slice();
 
-										_copy.splice(0, 0, findIssuerResult[_i12]);
+										_copy.splice(0, 0, findIssuerResult[_i18]);
 
 										if (checkUnique(_copy)) result.push(_copy);else result.push(_buildPathResult[j]);
 									}
 
 								case 26:
-									_i12++;
+									_i18++;
 									_context2.next = 18;
 									break;
 
@@ -30548,7 +32873,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Basic check for certificate path
 				function basicCheck(path, checkDate) {
-					var i, _i13, _i14, ocspResult, crlResult, j, isCertificateRevoked, isCertificateCA, _i15, result;
+					var i, _i19, _i20, ocspResult, crlResult, j, isCertificateRevoked, isCertificateCA, _i21, result;
 
 					return regeneratorRuntime.wrap(function basicCheck$(_context6) {
 						while (1) {
@@ -30591,20 +32916,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									});
 
 								case 9:
-									_i13 = path.length - 2;
+									_i19 = path.length - 2;
 
 								case 10:
-									if (!(_i13 >= 0)) {
+									if (!(_i19 >= 0)) {
 										_context6.next = 17;
 										break;
 									}
 
-									if (!(path[_i13].issuer.isEqual(path[_i13].subject) === false)) {
+									if (!(path[_i19].issuer.isEqual(path[_i19].subject) === false)) {
 										_context6.next = 14;
 										break;
 									}
 
-									if (!(path[_i13].issuer.isEqual(path[_i13 + 1].subject) === false)) {
+									if (!(path[_i19].issuer.isEqual(path[_i19 + 1].subject) === false)) {
 										_context6.next = 14;
 										break;
 									}
@@ -30616,7 +32941,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									});
 
 								case 14:
-									_i13--;
+									_i19--;
 									_context6.next = 10;
 									break;
 
@@ -30626,10 +32951,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										break;
 									}
 
-									_i14 = 0;
+									_i20 = 0;
 
 								case 19:
-									if (!(_i14 < path.length - 2)) {
+									if (!(_i20 < path.length - 2)) {
 										_context6.next = 58;
 										break;
 									}
@@ -30647,7 +32972,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									}
 
 									_context6.next = 25;
-									return findOCSP(path[_i14], path[_i14 + 1]);
+									return findOCSP(path[_i20], path[_i20 + 1]);
 
 								case 25:
 									ocspResult = _context6.sent;
@@ -30675,7 +33000,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									}
 
 									_context6.next = 35;
-									return findCRL(path[_i14]);
+									return findCRL(path[_i20]);
 
 								case 35:
 									crlResult = _context6.sent;
@@ -30685,11 +33010,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										break;
 									}
 
-									return _context6.abrupt("return", {
+									throw {
 										result: false,
 										resultCode: 11,
-										resultMessage: "No revocation values found for one of certificates"
-									});
+										resultMessage: "No revocation values found for one of certificates: " + crlResult.statusMessage
+									};
 
 								case 38:
 									j = 0;
@@ -30701,7 +33026,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									}
 
 									//region Check that the CRL issuer certificate have not been revoked
-									isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked(path[_i14]);
+									isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked(path[_i20]);
 
 									if (!isCertificateRevoked) {
 										_context6.next = 43;
@@ -30754,21 +33079,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									});
 
 								case 55:
-									_i14++;
+									_i20++;
 									_context6.next = 19;
 									break;
 
 								case 58:
-									_i15 = 1;
+									_i21 = 1;
 
 								case 59:
-									if (!(_i15 < path.length)) {
+									if (!(_i21 < path.length)) {
 										_context6.next = 68;
 										break;
 									}
 
 									_context6.next = 62;
-									return checkForCA(path[_i15]);
+									return checkForCA(path[_i21]);
 
 								case 62:
 									result = _context6.sent;
@@ -30785,7 +33110,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									});
 
 								case 65:
-									_i15++;
+									_i21++;
 									_context6.next = 59;
 									break;
 
@@ -30804,7 +33129,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//endregion
 
 				return generatorsDriver(regeneratorRuntime.mark(function generatorFunction() {
-					var i, j, result, certificatePath, _i16, found, _j, certificate, k, shortestLength, shortestIndex, _i17, _i18;
+					var i, j, result, certificatePath, _i22, found, _j3, certificate, k, shortestLength, shortestIndex, _i23, _i24;
 
 					return regeneratorRuntime.wrap(function generatorFunction$(_context7) {
 						while (1) {
@@ -30887,24 +33212,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									});
 
 								case 25:
-									_i16 = 0;
+									_i22 = 0;
 
 								case 26:
-									if (!(_i16 < result.length)) {
+									if (!(_i22 < result.length)) {
 										_context7.next = 48;
 										break;
 									}
 
 									found = false;
-									_j = 0;
+									_j3 = 0;
 
 								case 29:
-									if (!(_j < result[_i16].length)) {
+									if (!(_j3 < result[_i22].length)) {
 										_context7.next = 44;
 										break;
 									}
 
-									certificate = localCerts[result[_i16][_j]];
+									certificate = localCerts[result[_i22][_j3]];
 									k = 0;
 
 								case 32:
@@ -30935,19 +33260,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									return _context7.abrupt("break", 44);
 
 								case 41:
-									_j++;
+									_j3++;
 									_context7.next = 29;
 									break;
 
 								case 44:
 
 									if (!found) {
-										result.splice(_i16, 1);
-										_i16 = 0;
+										result.splice(_i22, 1);
+										_i22 = 0;
 									}
 
 								case 45:
-									_i16++;
+									_i22++;
 									_context7.next = 26;
 									break;
 
@@ -30971,17 +33296,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									shortestIndex = 0;
 
 
-									for (_i17 = 0; _i17 < result.length; _i17++) {
-										if (result[_i17].length < shortestLength) {
-											shortestLength = result[_i17].length;
-											shortestIndex = _i17;
+									for (_i23 = 0; _i23 < result.length; _i23++) {
+										if (result[_i23].length < shortestLength) {
+											shortestLength = result[_i23].length;
+											shortestIndex = _i23;
 										}
 									}
 									//endregion
 
 									//region Create certificate path for basic check
-									for (_i18 = 0; _i18 < result[shortestIndex].length; _i18++) {
-										certificatePath.push(localCerts[result[shortestIndex][_i18]]);
+									for (_i24 = 0; _i24 < result[shortestIndex].length; _i24++) {
+										certificatePath.push(localCerts[result[shortestIndex][_i24]]);
 									} //endregion
 
 									//region Perform basic checking for all certificates in the path
@@ -31019,7 +33344,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this68 = this;
+				var _this71 = this;
 
 				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -31079,7 +33404,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Sorting certificates in the chain array
 				sequence = this.sort().then(function (sortedCerts) {
-					_this68.certs = sortedCerts;
+					_this71.certs = sortedCerts;
 				});
 				//endregion
 
@@ -31091,25 +33416,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					var policiesAndCerts = []; // In fact "array of array" where rows are for each specific policy, column for each certificate and value is "true/false"
 
-					var anyPolicyArray = new Array(_this68.certs.length - 1); // Minus "trusted anchor"
-					for (var ii = 0; ii < _this68.certs.length - 1; ii++) {
+					var anyPolicyArray = new Array(_this71.certs.length - 1); // Minus "trusted anchor"
+					for (var ii = 0; ii < _this71.certs.length - 1; ii++) {
 						anyPolicyArray[ii] = true;
 					}policiesAndCerts.push(anyPolicyArray);
 
-					var policyMappings = new Array(_this68.certs.length - 1); // Array of "PolicyMappings" for each certificate
-					var certPolicies = new Array(_this68.certs.length - 1); // Array of "CertificatePolicies" for each certificate
+					var policyMappings = new Array(_this71.certs.length - 1); // Array of "PolicyMappings" for each certificate
+					var certPolicies = new Array(_this71.certs.length - 1); // Array of "CertificatePolicies" for each certificate
 
-					var explicitPolicyStart = explicitPolicyIndicator ? _this68.certs.length - 1 : -1;
+					var explicitPolicyStart = explicitPolicyIndicator ? _this71.certs.length - 1 : -1;
 					//endregion
 
 					//region Gather all neccessary information from certificate chain
-					for (var i = _this68.certs.length - 2; i >= 0; i--, pathDepth++) {
-						if ("extensions" in _this68.certs[i]) {
+					for (var i = _this71.certs.length - 2; i >= 0; i--, pathDepth++) {
+						if ("extensions" in _this71.certs[i]) {
 							//region Get information about certificate extensions
-							for (var j = 0; j < _this68.certs[i].extensions.length; j++) {
+							for (var j = 0; j < _this71.certs[i].extensions.length; j++) {
 								//region CertificatePolicies
-								if (_this68.certs[i].extensions[j].extnID === "2.5.29.32") {
-									certPolicies[i] = _this68.certs[i].extensions[j].parsedValue;
+								if (_this71.certs[i].extensions[j].extnID === "2.5.29.32") {
+									certPolicies[i] = _this71.certs[i].extensions[j].parsedValue;
 
 									//region Remove entry from "anyPolicies" for the certificate
 									for (var s = 0; s < allPolicies.length; s++) {
@@ -31120,12 +33445,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									}
 									//endregion
 
-									for (var k = 0; k < _this68.certs[i].extensions[j].parsedValue.certificatePolicies.length; k++) {
+									for (var k = 0; k < _this71.certs[i].extensions[j].parsedValue.certificatePolicies.length; k++) {
 										var policyIndex = -1;
 
 										//region Try to find extension in "allPolicies" array
 										for (var _s = 0; _s < allPolicies.length; _s++) {
-											if (_this68.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier === allPolicies[_s]) {
+											if (_this71.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier === allPolicies[_s]) {
 												policyIndex = _s;
 												break;
 											}
@@ -31133,9 +33458,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										//endregion
 
 										if (policyIndex === -1) {
-											allPolicies.push(_this68.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier);
+											allPolicies.push(_this71.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier);
 
-											var certArray = new Array(_this68.certs.length - 1);
+											var certArray = new Array(_this71.certs.length - 1);
 											certArray[i] = true;
 
 											policiesAndCerts.push(certArray);
@@ -31145,7 +33470,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								//endregion
 
 								//region PolicyMappings
-								if (_this68.certs[i].extensions[j].extnID === "2.5.29.33") {
+								if (_this71.certs[i].extensions[j].extnID === "2.5.29.33") {
 									if (policyMappingInhibitIndicator) {
 										return {
 											result: false,
@@ -31154,31 +33479,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										};
 									}
 
-									policyMappings[i] = _this68.certs[i].extensions[j].parsedValue;
+									policyMappings[i] = _this71.certs[i].extensions[j].parsedValue;
 								}
 								//endregion
 
 								//region PolicyConstraints
-								if (_this68.certs[i].extensions[j].extnID === "2.5.29.36") {
+								if (_this71.certs[i].extensions[j].extnID === "2.5.29.36") {
 									if (explicitPolicyIndicator === false) {
 										//region requireExplicitPolicy
-										if (_this68.certs[i].extensions[j].parsedValue.requireExplicitPolicy === 0) {
+										if (_this71.certs[i].extensions[j].parsedValue.requireExplicitPolicy === 0) {
 											explicitPolicyIndicator = true;
 											explicitPolicyStart = i;
 										} else {
 											if (pendingConstraints[0] === false) {
 												pendingConstraints[0] = true;
-												explicitPolicyPending = _this68.certs[i].extensions[j].parsedValue.requireExplicitPolicy;
-											} else explicitPolicyPending = explicitPolicyPending > _this68.certs[i].extensions[j].parsedValue.requireExplicitPolicy ? _this68.certs[i].extensions[j].parsedValue.requireExplicitPolicy : explicitPolicyPending;
+												explicitPolicyPending = _this71.certs[i].extensions[j].parsedValue.requireExplicitPolicy;
+											} else explicitPolicyPending = explicitPolicyPending > _this71.certs[i].extensions[j].parsedValue.requireExplicitPolicy ? _this71.certs[i].extensions[j].parsedValue.requireExplicitPolicy : explicitPolicyPending;
 										}
 										//endregion
 
 										//region inhibitPolicyMapping
-										if (_this68.certs[i].extensions[j].parsedValue.inhibitPolicyMapping === 0) policyMappingInhibitIndicator = true;else {
+										if (_this71.certs[i].extensions[j].parsedValue.inhibitPolicyMapping === 0) policyMappingInhibitIndicator = true;else {
 											if (pendingConstraints[1] === false) {
 												pendingConstraints[1] = true;
-												policyMappingInhibitPending = _this68.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1;
-											} else policyMappingInhibitPending = policyMappingInhibitPending > _this68.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 ? _this68.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 : policyMappingInhibitPending;
+												policyMappingInhibitPending = _this71.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1;
+											} else policyMappingInhibitPending = policyMappingInhibitPending > _this71.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 ? _this71.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 : policyMappingInhibitPending;
 										}
 										//endregion
 									}
@@ -31186,13 +33511,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								//endregion
 
 								//region InhibitAnyPolicy
-								if (_this68.certs[i].extensions[j].extnID === "2.5.29.54") {
+								if (_this71.certs[i].extensions[j].extnID === "2.5.29.54") {
 									if (inhibitAnyPolicyIndicator === false) {
-										if (_this68.certs[i].extensions[j].parsedValue.valueBlock.valueDec === 0) inhibitAnyPolicyIndicator = true;else {
+										if (_this71.certs[i].extensions[j].parsedValue.valueBlock.valueDec === 0) inhibitAnyPolicyIndicator = true;else {
 											if (pendingConstraints[2] === false) {
 												pendingConstraints[2] = true;
-												inhibitAnyPolicyPending = _this68.certs[i].extensions[j].parsedValue.valueBlock.valueDec;
-											} else inhibitAnyPolicyPending = inhibitAnyPolicyPending > _this68.certs[i].extensions[j].parsedValue.valueBlock.valueDec ? _this68.certs[i].extensions[j].parsedValue.valueBlock.valueDec : inhibitAnyPolicyPending;
+												inhibitAnyPolicyPending = _this71.certs[i].extensions[j].parsedValue.valueBlock.valueDec;
+											} else inhibitAnyPolicyPending = inhibitAnyPolicyPending > _this71.certs[i].extensions[j].parsedValue.valueBlock.valueDec ? _this71.certs[i].extensions[j].parsedValue.valueBlock.valueDec : inhibitAnyPolicyPending;
 										}
 									}
 								}
@@ -31255,12 +33580,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//endregion
 
 					//region Working with policy mappings
-					for (var _i19 = 0; _i19 < _this68.certs.length - 1; _i19++) {
+					for (var _i25 = 0; _i25 < _this71.certs.length - 1; _i25++) {
 						//region Check that there is "policy mapping" for level "i + 1"
-						if (_i19 < _this68.certs.length - 2 && typeof policyMappings[_i19 + 1] !== "undefined") {
-							for (var _k = 0; _k < policyMappings[_i19 + 1].mappings.length; _k++) {
+						if (_i25 < _this71.certs.length - 2 && typeof policyMappings[_i25 + 1] !== "undefined") {
+							for (var _k = 0; _k < policyMappings[_i25 + 1].mappings.length; _k++) {
 								//region Check that we do not have "anyPolicy" in current mapping
-								if (policyMappings[_i19 + 1].mappings[_k].issuerDomainPolicy === "2.5.29.32.0" || policyMappings[_i19 + 1].mappings[_k].subjectDomainPolicy === "2.5.29.32.0") {
+								if (policyMappings[_i25 + 1].mappings[_k].issuerDomainPolicy === "2.5.29.32.0" || policyMappings[_i25 + 1].mappings[_k].subjectDomainPolicy === "2.5.29.32.0") {
 									return {
 										result: false,
 										resultCode: 99,
@@ -31276,22 +33601,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 								//region Search for index of policies indedes
 								for (var n = 0; n < allPolicies.length; n++) {
-									if (allPolicies[n] === policyMappings[_i19 + 1].mappings[_k].issuerDomainPolicy) issuerDomainPolicyIndex = n;
+									if (allPolicies[n] === policyMappings[_i25 + 1].mappings[_k].issuerDomainPolicy) issuerDomainPolicyIndex = n;
 
-									if (allPolicies[n] === policyMappings[_i19 + 1].mappings[_k].subjectDomainPolicy) subjectDomainPolicyIndex = n;
+									if (allPolicies[n] === policyMappings[_i25 + 1].mappings[_k].subjectDomainPolicy) subjectDomainPolicyIndex = n;
 								}
 								//endregion
 
 								//region Delete existing "issuerDomainPolicy" because on the level we mapped the policy to another one
-								if (typeof policiesAndCerts[issuerDomainPolicyIndex][_i19] !== "undefined") delete policiesAndCerts[issuerDomainPolicyIndex][_i19];
+								if (typeof policiesAndCerts[issuerDomainPolicyIndex][_i25] !== "undefined") delete policiesAndCerts[issuerDomainPolicyIndex][_i25];
 								//endregion
 
 								//region Check all policies for the certificate
-								for (var _j2 = 0; _j2 < certPolicies[_i19].certificatePolicies.length; _j2++) {
-									if (policyMappings[_i19 + 1].mappings[_k].subjectDomainPolicy === certPolicies[_i19].certificatePolicies[_j2].policyIdentifier) {
+								for (var _j4 = 0; _j4 < certPolicies[_i25].certificatePolicies.length; _j4++) {
+									if (policyMappings[_i25 + 1].mappings[_k].subjectDomainPolicy === certPolicies[_i25].certificatePolicies[_j4].policyIdentifier) {
 										//region Set mapped policy for current certificate
 										if (issuerDomainPolicyIndex !== -1 && subjectDomainPolicyIndex !== -1) {
-											for (var m = 0; m <= _i19; m++) {
+											for (var m = 0; m <= _i25; m++) {
 												if (typeof policiesAndCerts[subjectDomainPolicyIndex][m] !== "undefined") {
 													policiesAndCerts[issuerDomainPolicyIndex][m] = true;
 													delete policiesAndCerts[subjectDomainPolicyIndex][m];
@@ -31309,10 +33634,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//endregion
 
 					//region Working with "explicitPolicyIndicator" and "anyPolicy"
-					for (var _i20 = 0; _i20 < allPolicies.length; _i20++) {
-						if (allPolicies[_i20] === "2.5.29.32.0") {
-							for (var _j3 = 0; _j3 < explicitPolicyStart; _j3++) {
-								delete policiesAndCerts[_i20][_j3];
+					for (var _i26 = 0; _i26 < allPolicies.length; _i26++) {
+						if (allPolicies[_i26] === "2.5.29.32.0") {
+							for (var _j5 = 0; _j5 < explicitPolicyStart; _j5++) {
+								delete policiesAndCerts[_i26][_j5];
 							}
 						}
 					}
@@ -31321,23 +33646,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//region Create "set of authorities-constrained policies"
 					var authConstrPolicies = [];
 
-					for (var _i21 = 0; _i21 < policiesAndCerts.length; _i21++) {
+					for (var _i27 = 0; _i27 < policiesAndCerts.length; _i27++) {
 						var found = true;
 
-						for (var _j4 = 0; _j4 < _this68.certs.length - 1; _j4++) {
+						for (var _j6 = 0; _j6 < _this71.certs.length - 1; _j6++) {
 							var anyPolicyFound = false;
 
-							if (_j4 < explicitPolicyStart && allPolicies[_i21] === "2.5.29.32.0" && allPolicies.length > 1) {
+							if (_j6 < explicitPolicyStart && allPolicies[_i27] === "2.5.29.32.0" && allPolicies.length > 1) {
 								found = false;
 								break;
 							}
 
-							if (typeof policiesAndCerts[_i21][_j4] === "undefined") {
-								if (_j4 >= explicitPolicyStart) {
+							if (typeof policiesAndCerts[_i27][_j6] === "undefined") {
+								if (_j6 >= explicitPolicyStart) {
 									//region Search for "anyPolicy" in the policy set
 									for (var _k2 = 0; _k2 < allPolicies.length; _k2++) {
 										if (allPolicies[_k2] === "2.5.29.32.0") {
-											if (policiesAndCerts[_k2][_j4] === true) anyPolicyFound = true;
+											if (policiesAndCerts[_k2][_j6] === true) anyPolicyFound = true;
 
 											break;
 										}
@@ -31352,7 +33677,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							}
 						}
 
-						if (found === true) authConstrPolicies.push(allPolicies[_i21]);
+						if (found === true) authConstrPolicies.push(allPolicies[_i27]);
 					}
 					//endregion
 
@@ -31361,10 +33686,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					if (initialPolicySet.length === 1 && initialPolicySet[0] === "2.5.29.32.0" && explicitPolicyIndicator === false) userConstrPolicies = initialPolicySet;else {
 						if (authConstrPolicies.length === 1 && authConstrPolicies[0] === "2.5.29.32.0") userConstrPolicies = initialPolicySet;else {
-							for (var _i22 = 0; _i22 < authConstrPolicies.length; _i22++) {
-								for (var _j5 = 0; _j5 < initialPolicySet.length; _j5++) {
-									if (initialPolicySet[_j5] === authConstrPolicies[_i22] || initialPolicySet[_j5] === "2.5.29.32.0") {
-										userConstrPolicies.push(authConstrPolicies[_i22]);
+							for (var _i28 = 0; _i28 < authConstrPolicies.length; _i28++) {
+								for (var _j7 = 0; _j7 < initialPolicySet.length; _j7++) {
+									if (initialPolicySet[_j7] === authConstrPolicies[_i28] || initialPolicySet[_j7] === "2.5.29.32.0") {
+										userConstrPolicies.push(authConstrPolicies[_i28]);
 										break;
 									}
 								}
@@ -31420,9 +33745,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						//endregion
 
 						//region Check that no part of "constraint" has zero length
-						for (var _i23 = 0; _i23 < constrLen; _i23++) {
-							if (constraintSplitted[_i23].length === 0) {
-								if (_i23 === 0) {
+						for (var _i29 = 0; _i29 < constrLen; _i29++) {
+							if (constraintSplitted[_i29].length === 0) {
+								if (_i29 === 0) {
 									if (constrLen === 1) return false;
 
 									continue;
@@ -31435,10 +33760,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 						//region Check that "name" has a tail as "constraint"
 
-						for (var _i24 = 0; _i24 < constrLen; _i24++) {
-							if (constraintSplitted[constrLen - 1 - _i24].length === 0) continue;
+						for (var _i30 = 0; _i30 < constrLen; _i30++) {
+							if (constraintSplitted[constrLen - 1 - _i30].length === 0) continue;
 
-							if (nameSplitted[nameLen - 1 - _i24].localeCompare(constraintSplitted[constrLen - 1 - _i24]) !== 0) return false;
+							if (nameSplitted[nameLen - 1 - _i30].localeCompare(constraintSplitted[constrLen - 1 - _i30]) !== 0) return false;
 						}
 						//endregion
 
@@ -31554,8 +33879,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 						//region Work with IPv6 addresses
 						if (nameView.length === 16 && constraintView.length === 32) {
-							for (var _i25 = 0; _i25 < 16; _i25++) {
-								if ((nameView[_i25] ^ constraintView[_i25]) & constraintView[_i25 + 16]) return false;
+							for (var _i31 = 0; _i31 < 16; _i31++) {
+								if ((nameView[_i31] ^ constraintView[_i31]) & constraintView[_i31 + 16]) return false;
 							}
 
 							return true;
@@ -31615,7 +33940,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//region Check all certificates, excluding "trust anchor"
 					pathDepth = 1;
 
-					for (var i = _this68.certs.length - 2; i >= 0; i--, pathDepth++) {
+					for (var i = _this71.certs.length - 2; i >= 0; i--, pathDepth++) {
 						//region Support variables
 						var subjectAltNames = [];
 
@@ -31623,18 +33948,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var certExcludedSubtrees = [];
 						//endregion
 
-						if ("extensions" in _this68.certs[i]) {
-							for (var j = 0; j < _this68.certs[i].extensions.length; j++) {
+						if ("extensions" in _this71.certs[i]) {
+							for (var j = 0; j < _this71.certs[i].extensions.length; j++) {
 								//region NameConstraints
-								if (_this68.certs[i].extensions[j].extnID === "2.5.29.30") {
-									if ("permittedSubtrees" in _this68.certs[i].extensions[j].parsedValue) certPermittedSubtrees = certPermittedSubtrees.concat(_this68.certs[i].extensions[j].parsedValue.permittedSubtrees);
+								if (_this71.certs[i].extensions[j].extnID === "2.5.29.30") {
+									if ("permittedSubtrees" in _this71.certs[i].extensions[j].parsedValue) certPermittedSubtrees = certPermittedSubtrees.concat(_this71.certs[i].extensions[j].parsedValue.permittedSubtrees);
 
-									if ("excludedSubtrees" in _this68.certs[i].extensions[j].parsedValue) certExcludedSubtrees = certExcludedSubtrees.concat(_this68.certs[i].extensions[j].parsedValue.excludedSubtrees);
+									if ("excludedSubtrees" in _this71.certs[i].extensions[j].parsedValue) certExcludedSubtrees = certExcludedSubtrees.concat(_this71.certs[i].extensions[j].parsedValue.excludedSubtrees);
 								}
 								//endregion
 
 								//region SubjectAltName
-								if (_this68.certs[i].extensions[j].extnID === "2.5.29.17") subjectAltNames = subjectAltNames.concat(_this68.certs[i].extensions[j].parsedValue.altNames);
+								if (_this71.certs[i].extensions[j].extnID === "2.5.29.17") subjectAltNames = subjectAltNames.concat(_this71.certs[i].extensions[j].parsedValue.altNames);
 								//endregion
 							}
 						}
@@ -31642,17 +33967,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						//region Checking for "required name forms"
 						var formFound = requiredNameForms.length <= 0;
 
-						for (var _j6 = 0; _j6 < requiredNameForms.length; _j6++) {
-							switch (requiredNameForms[_j6].base.type) {
+						for (var _j8 = 0; _j8 < requiredNameForms.length; _j8++) {
+							switch (requiredNameForms[_j8].base.type) {
 								case 4:
 									// directoryName
 									{
-										if (requiredNameForms[_j6].base.value.typesAndValues.length !== _this68.certs[i].subject.typesAndValues.length) continue;
+										if (requiredNameForms[_j8].base.value.typesAndValues.length !== _this71.certs[i].subject.typesAndValues.length) continue;
 
 										formFound = true;
 
-										for (var k = 0; k < _this68.certs[i].subject.typesAndValues.length; k++) {
-											if (_this68.certs[i].subject.typesAndValues[k].type !== requiredNameForms[_j6].base.value.typesAndValues[k].type) {
+										for (var k = 0; k < _this71.certs[i].subject.typesAndValues.length; k++) {
+											if (_this71.certs[i].subject.typesAndValues[k].type !== requiredNameForms[_j8].base.value.typesAndValues[k].type) {
 												formFound = false;
 												break;
 											}
@@ -31683,31 +34008,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						constrGroups[3] = []; // uniformResourceIdentifier
 						constrGroups[4] = []; // iPAddress
 
-						for (var _j7 = 0; _j7 < permittedSubtrees.length; _j7++) {
-							switch (permittedSubtrees[_j7].base.type) {
+						for (var _j9 = 0; _j9 < permittedSubtrees.length; _j9++) {
+							switch (permittedSubtrees[_j9].base.type) {
 								//region rfc822Name
 								case 1:
-									constrGroups[0].push(permittedSubtrees[_j7]);
+									constrGroups[0].push(permittedSubtrees[_j9]);
 									break;
 								//endregion
 								//region dNSName
 								case 2:
-									constrGroups[1].push(permittedSubtrees[_j7]);
+									constrGroups[1].push(permittedSubtrees[_j9]);
 									break;
 								//endregion
 								//region directoryName
 								case 4:
-									constrGroups[2].push(permittedSubtrees[_j7]);
+									constrGroups[2].push(permittedSubtrees[_j9]);
 									break;
 								//endregion
 								//region uniformResourceIdentifier
 								case 6:
-									constrGroups[3].push(permittedSubtrees[_j7]);
+									constrGroups[3].push(permittedSubtrees[_j9]);
 									break;
 								//endregion
 								//region iPAddress
 								case 7:
-									constrGroups[4].push(permittedSubtrees[_j7]);
+									constrGroups[4].push(permittedSubtrees[_j9]);
 									break;
 								//endregion
 								//region default
@@ -31723,7 +34048,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							var valueExists = false;
 							var group = constrGroups[p];
 
-							for (var _j8 = 0; _j8 < group.length; _j8++) {
+							for (var _j10 = 0; _j10 < group.length; _j10++) {
 								switch (p) {
 									//region rfc822Name
 									case 0:
@@ -31732,17 +34057,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 												if (subjectAltNames[_k3].type === 1) // rfc822Name
 													{
 														valueExists = true;
-														groupPermitted = groupPermitted || compareRFC822Name(subjectAltNames[_k3].value, group[_j8].base.value);
+														groupPermitted = groupPermitted || compareRFC822Name(subjectAltNames[_k3].value, group[_j10].base.value);
 													}
 											}
 										} else // Try to find out "emailAddress" inside "subject"
 											{
-												for (var _k4 = 0; _k4 < _this68.certs[i].subject.typesAndValues.length; _k4++) {
-													if (_this68.certs[i].subject.typesAndValues[_k4].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
-													_this68.certs[i].subject.typesAndValues[_k4].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
+												for (var _k4 = 0; _k4 < _this71.certs[i].subject.typesAndValues.length; _k4++) {
+													if (_this71.certs[i].subject.typesAndValues[_k4].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
+													_this71.certs[i].subject.typesAndValues[_k4].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
 														{
 															valueExists = true;
-															groupPermitted = groupPermitted || compareRFC822Name(_this68.certs[i].subject.typesAndValues[_k4].value.valueBlock.value, group[_j8].base.value);
+															groupPermitted = groupPermitted || compareRFC822Name(_this71.certs[i].subject.typesAndValues[_k4].value.valueBlock.value, group[_j10].base.value);
 														}
 												}
 											}
@@ -31755,7 +34080,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 												if (subjectAltNames[_k5].type === 2) // dNSName
 													{
 														valueExists = true;
-														groupPermitted = groupPermitted || compareDNSName(subjectAltNames[_k5].value, group[_j8].base.value);
+														groupPermitted = groupPermitted || compareDNSName(subjectAltNames[_k5].value, group[_j10].base.value);
 													}
 											}
 										}
@@ -31764,7 +34089,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									//region directoryName
 									case 2:
 										valueExists = true;
-										groupPermitted = compareDirectoryName(_this68.certs[i].subject, group[_j8].base.value);
+										groupPermitted = compareDirectoryName(_this71.certs[i].subject, group[_j10].base.value);
 										break;
 									//endregion
 									//region uniformResourceIdentifier
@@ -31774,7 +34099,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 												if (subjectAltNames[_k6].type === 6) // uniformResourceIdentifier
 													{
 														valueExists = true;
-														groupPermitted = groupPermitted || compareUniformResourceIdentifier(subjectAltNames[_k6].value, group[_j8].base.value);
+														groupPermitted = groupPermitted || compareUniformResourceIdentifier(subjectAltNames[_k6].value, group[_j10].base.value);
 													}
 											}
 										}
@@ -31787,7 +34112,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 												if (subjectAltNames[_k7].type === 7) // iPAddress
 													{
 														valueExists = true;
-														groupPermitted = groupPermitted || compareIPAddress(subjectAltNames[_k7].value, group[_j8].base.value);
+														groupPermitted = groupPermitted || compareIPAddress(subjectAltNames[_k7].value, group[_j10].base.value);
 													}
 											}
 										}
@@ -31815,21 +34140,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						//region Checking for "excluded sub-trees"
 						var excluded = false;
 
-						for (var _j9 = 0; _j9 < excludedSubtrees.length; _j9++) {
-							switch (excludedSubtrees[_j9].base.type) {
+						for (var _j11 = 0; _j11 < excludedSubtrees.length; _j11++) {
+							switch (excludedSubtrees[_j11].base.type) {
 								//region rfc822Name
 								case 1:
 									if (subjectAltNames.length >= 0) {
 										for (var _k8 = 0; _k8 < subjectAltNames.length; _k8++) {
 											if (subjectAltNames[_k8].type === 1) // rfc822Name
-												excluded = excluded || compareRFC822Name(subjectAltNames[_k8].value, excludedSubtrees[_j9].base.value);
+												excluded = excluded || compareRFC822Name(subjectAltNames[_k8].value, excludedSubtrees[_j11].base.value);
 										}
 									} else // Try to find out "emailAddress" inside "subject"
 										{
-											for (var _k9 = 0; _k9 < _this68.subject.typesAndValues.length; _k9++) {
-												if (_this68.subject.typesAndValues[_k9].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
-												_this68.subject.typesAndValues[_k9].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
-													excluded = excluded || compareRFC822Name(_this68.subject.typesAndValues[_k9].value.valueBlock.value, excludedSubtrees[_j9].base.value);
+											for (var _k9 = 0; _k9 < _this71.subject.typesAndValues.length; _k9++) {
+												if (_this71.subject.typesAndValues[_k9].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
+												_this71.subject.typesAndValues[_k9].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
+													excluded = excluded || compareRFC822Name(_this71.subject.typesAndValues[_k9].value.valueBlock.value, excludedSubtrees[_j11].base.value);
 											}
 										}
 									break;
@@ -31839,14 +34164,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									if (subjectAltNames.length > 0) {
 										for (var _k10 = 0; _k10 < subjectAltNames.length; _k10++) {
 											if (subjectAltNames[_k10].type === 2) // dNSName
-												excluded = excluded || compareDNSName(subjectAltNames[_k10].value, excludedSubtrees[_j9].base.value);
+												excluded = excluded || compareDNSName(subjectAltNames[_k10].value, excludedSubtrees[_j11].base.value);
 										}
 									}
 									break;
 								//endregion
 								//region directoryName
 								case 4:
-									excluded = excluded || compareDirectoryName(_this68.certs[i].subject, excludedSubtrees[_j9].base.value);
+									excluded = excluded || compareDirectoryName(_this71.certs[i].subject, excludedSubtrees[_j11].base.value);
 									break;
 								//endregion
 								//region uniformResourceIdentifier
@@ -31854,7 +34179,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									if (subjectAltNames.length > 0) {
 										for (var _k11 = 0; _k11 < subjectAltNames.length; _k11++) {
 											if (subjectAltNames[_k11].type === 6) // uniformResourceIdentifier
-												excluded = excluded || compareUniformResourceIdentifier(subjectAltNames[_k11].value, excludedSubtrees[_j9].base.value);
+												excluded = excluded || compareUniformResourceIdentifier(subjectAltNames[_k11].value, excludedSubtrees[_j11].base.value);
 										}
 									}
 									break;
@@ -31864,7 +34189,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									if (subjectAltNames.length > 0) {
 										for (var _k12 = 0; _k12 < subjectAltNames.length; _k12++) {
 											if (subjectAltNames[_k12].type === 7) // iPAddress
-												excluded = excluded || compareIPAddress(subjectAltNames[_k12].value, excludedSubtrees[_j9].base.value);
+												excluded = excluded || compareIPAddress(subjectAltNames[_k12].value, excludedSubtrees[_j11].base.value);
 										}
 									}
 									break;
@@ -31901,10 +34226,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				sequence = sequence.then(function (result) {
 					return result;
 				}, function (error) {
+					if (error instanceof Object) {
+						if ("resultMessage" in error) return error;
+
+						if ("message" in error) {
+							return {
+								result: false,
+								resultCode: -1,
+								resultMessage: error.message
+							};
+						}
+					}
+
 					return {
 						result: false,
 						resultCode: -1,
-						resultMessage: error.message
+						resultMessage: error
 					};
 				});
 				//endregion
@@ -32094,7 +34431,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "createForCertificate",
 			value: function createForCertificate(certificate, parameters) {
-				var _this69 = this;
+				var _this72 = this;
 
 				//region Initial variables
 				var sequence = Promise.resolve();
@@ -32135,7 +34472,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Create "issuerKeyHash"
 				sequence = sequence.then(function (result) {
-					_this69.issuerNameHash = new OctetString({ valueHex: result });
+					_this72.issuerNameHash = new OctetString({ valueHex: result });
 
 					var issuerKeyBuffer = issuerCertificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex;
 
@@ -32143,7 +34480,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				}, function (error) {
 					return Promise.reject(error);
 				}).then(function (result) {
-					_this69.issuerKeyHash = new OctetString({ valueHex: result });
+					_this72.issuerKeyHash = new OctetString({ valueHex: result });
 				}, function (error) {
 					return Promise.reject(error);
 				});
@@ -33011,7 +35348,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "getCertificateStatus",
 			value: function getCertificateStatus(certificate, issuerCertificate) {
-				var _this70 = this;
+				var _this73 = this;
 
 				//region Initial variables
 				var sequence = Promise.resolve();
@@ -33028,13 +35365,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//endregion
 
 				//region Create all "certIDs" for input certificates
-				var _iteratorNormalCompletion27 = true;
-				var _didIteratorError27 = false;
-				var _iteratorError27 = undefined;
+				var _iteratorNormalCompletion29 = true;
+				var _didIteratorError29 = false;
+				var _iteratorError29 = undefined;
 
 				try {
-					for (var _iterator27 = this.tbsResponseData.responses[Symbol.iterator](), _step27; !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
-						var response = _step27.value;
+					for (var _iterator29 = this.tbsResponseData.responses[Symbol.iterator](), _step29; !(_iteratorNormalCompletion29 = (_step29 = _iterator29.next()).done); _iteratorNormalCompletion29 = true) {
+						var response = _step29.value;
 
 						var hashAlgorithm = getAlgorithmByOID(response.certID.hashAlgorithm.algorithmId);
 						if ("name" in hashAlgorithm === false) return Promise.reject("Wrong CertID hashing algorithm: " + response.certID.hashAlgorithm.algorithmId);
@@ -33052,16 +35389,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						}
 					}
 				} catch (err) {
-					_didIteratorError27 = true;
-					_iteratorError27 = err;
+					_didIteratorError29 = true;
+					_iteratorError29 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion27 && _iterator27.return) {
-							_iterator27.return();
+						if (!_iteratorNormalCompletion29 && _iterator29.return) {
+							_iterator29.return();
 						}
 					} finally {
-						if (_didIteratorError27) {
-							throw _iteratorError27;
+						if (_didIteratorError29) {
+							throw _iteratorError29;
 						}
 					}
 				}
@@ -33073,20 +35410,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Compare all response's "certIDs" with identifiers for input certificate
 				sequence = sequence.then(function () {
-					var _iteratorNormalCompletion28 = true;
-					var _didIteratorError28 = false;
-					var _iteratorError28 = undefined;
+					var _iteratorNormalCompletion30 = true;
+					var _didIteratorError30 = false;
+					var _iteratorError30 = undefined;
 
 					try {
-						for (var _iterator28 = _this70.tbsResponseData.responses[Symbol.iterator](), _step28; !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
-							var response = _step28.value;
-							var _iteratorNormalCompletion29 = true;
-							var _didIteratorError29 = false;
-							var _iteratorError29 = undefined;
+						for (var _iterator30 = _this73.tbsResponseData.responses[Symbol.iterator](), _step30; !(_iteratorNormalCompletion30 = (_step30 = _iterator30.next()).done); _iteratorNormalCompletion30 = true) {
+							var response = _step30.value;
+							var _iteratorNormalCompletion31 = true;
+							var _didIteratorError31 = false;
+							var _iteratorError31 = undefined;
 
 							try {
-								for (var _iterator29 = certIDs[Symbol.iterator](), _step29; !(_iteratorNormalCompletion29 = (_step29 = _iterator29.next()).done); _iteratorNormalCompletion29 = true) {
-									var id = _step29.value;
+								for (var _iterator31 = certIDs[Symbol.iterator](), _step31; !(_iteratorNormalCompletion31 = (_step31 = _iterator31.next()).done); _iteratorNormalCompletion31 = true) {
+									var id = _step31.value;
 
 									if (response.certID.isEqual(id)) {
 										result.isForCertificate = true;
@@ -33119,31 +35456,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									}
 								}
 							} catch (err) {
-								_didIteratorError29 = true;
-								_iteratorError29 = err;
+								_didIteratorError31 = true;
+								_iteratorError31 = err;
 							} finally {
 								try {
-									if (!_iteratorNormalCompletion29 && _iterator29.return) {
-										_iterator29.return();
+									if (!_iteratorNormalCompletion31 && _iterator31.return) {
+										_iterator31.return();
 									}
 								} finally {
-									if (_didIteratorError29) {
-										throw _iteratorError29;
+									if (_didIteratorError31) {
+										throw _iteratorError31;
 									}
 								}
 							}
 						}
 					} catch (err) {
-						_didIteratorError28 = true;
-						_iteratorError28 = err;
+						_didIteratorError30 = true;
+						_iteratorError30 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion28 && _iterator28.return) {
-								_iterator28.return();
+							if (!_iteratorNormalCompletion30 && _iterator30.return) {
+								_iterator30.return();
 							}
 						} finally {
-							if (_didIteratorError28) {
-								throw _iteratorError28;
+							if (_didIteratorError30) {
+								throw _iteratorError30;
 							}
 						}
 					}
@@ -33158,112 +35495,58 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			/**
     * Make signature for current OCSP Basic Response
     * @param {Object} privateKey Private key for "subjectPublicKeyInfo" structure
-    * @param {string} [hashAlgorithm] Hashing algorithm. Default SHA-1
+    * @param {string} [hashAlgorithm="SHA-1"] Hashing algorithm. Default SHA-1
     * @returns {Promise}
     */
 
 		}, {
 			key: "sign",
-			value: function sign(privateKey, hashAlgorithm) {
-				var _this71 = this;
+			value: function sign(privateKey) {
+				var _this74 = this;
 
+				var hashAlgorithm = arguments.length <= 1 || arguments[1] === undefined ? "SHA-1" : arguments[1];
+
+				//region Initial checking
 				//region Get a private key from function parameter
 				if (typeof privateKey === "undefined") return Promise.reject("Need to provide a private key for signing");
 				//endregion
-
-				//region Get hashing algorithm
-				if (typeof hashAlgorithm === "undefined") hashAlgorithm = "SHA-1";else {
-					//region Simple check for supported algorithm
-					var oid = getOIDByAlgorithm({ name: hashAlgorithm });
-					if (oid === "") return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
-					//endregion
-				}
 				//endregion
 
-				//region Get a "default parameters" for current algorithm
-				var defParams = getAlgorithmParameters(privateKey.algorithm.name, "sign");
-				defParams.algorithm.hash.name = hashAlgorithm;
+				//region Initial variables
+				var sequence = Promise.resolve();
+				var parameters = void 0;
+
+				var engine = getEngine$1();
 				//endregion
 
-				//region Fill internal structures base on "privateKey" and "hashAlgorithm"
-				switch (privateKey.algorithm.name.toUpperCase()) {
-					case "RSASSA-PKCS1-V1_5":
-					case "ECDSA":
-						this.signatureAlgorithm.algorithmId = getOIDByAlgorithm(defParams.algorithm);
-						break;
-					case "RSA-PSS":
-						{
-							//region Set "saltLength" as a length (in octets) of hash function result
-							switch (hashAlgorithm.toUpperCase()) {
-								case "SHA-256":
-									defParams.algorithm.saltLength = 32;
-									break;
-								case "SHA-384":
-									defParams.algorithm.saltLength = 48;
-									break;
-								case "SHA-512":
-									defParams.algorithm.saltLength = 64;
-									break;
-								default:
-							}
-							//endregion
+				//region Get a "default parameters" for current algorithm and set correct signature algorithm
+				sequence = sequence.then(function () {
+					return engine.subtle.getSignatureParameters(privateKey, hashAlgorithm);
+				});
 
-							//region Fill "RSASSA_PSS_params" object
-							var paramsObject = {};
-
-							if (hashAlgorithm.toUpperCase() !== "SHA-1") {
-								var hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
-								if (hashAlgorithmOID === "") return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
-
-								paramsObject.hashAlgorithm = new AlgorithmIdentifier({
-									algorithmId: hashAlgorithmOID,
-									algorithmParams: new Null()
-								});
-
-								paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
-									algorithmId: "1.2.840.113549.1.1.8", // MGF1
-									algorithmParams: paramsObject.hashAlgorithm.toSchema()
-								});
-							}
-
-							if (defParams.algorithm.saltLength !== 20) paramsObject.saltLength = defParams.algorithm.saltLength;
-
-							var pssParameters = new RSASSAPSSParams(paramsObject);
-							//endregion
-
-							//region Automatically set signature algorithm
-							this.signatureAlgorithm = new AlgorithmIdentifier({
-								algorithmId: "1.2.840.113549.1.1.10",
-								algorithmParams: pssParameters.toSchema()
-							});
-							//endregion
-						}
-						break;
-					default:
-						return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
-				}
+				sequence = sequence.then(function (result) {
+					parameters = result.parameters;
+					_this74.signatureAlgorithm = result.signatureAlgorithm;
+				});
 				//endregion
 
 				//region Create TBS data for signing
-				this.tbsResponseData.tbs = this.tbsResponseData.toSchema(true).toBER(false);
-				//endregion
-
-				//region Get a "crypto" extension
-				var crypto = getCrypto();
-				if (typeof crypto === "undefined") return Promise.reject("Unable to create WebCrypto object");
+				sequence = sequence.then(function () {
+					_this74.tbsResponseData.tbs = _this74.tbsResponseData.toSchema(true).toBER(false);
+				});
 				//endregion
 
 				//region Signing TBS data on provided private key
-				return crypto.sign(defParams.algorithm, privateKey, new Uint8Array(this.tbsResponseData.tbs)).then(function (result) {
-					//region Special case for ECDSA algorithm
-					if (defParams.algorithm.name === "ECDSA") result = createCMSECDSASignature(result);
-					//endregion
+				sequence = sequence.then(function () {
+					return engine.subtle.signWithPrivateKey(_this74.tbsResponseData.tbs, privateKey, parameters);
+				});
 
-					_this71.signature = new BitString({ valueHex: result });
-				}, function (error) {
-					return Promise.reject("Signing error: " + error);
+				sequence = sequence.then(function (result) {
+					_this74.signature = new BitString({ valueHex: result });
 				});
 				//endregion
+
+				return sequence;
 			}
 			//**********************************************************************************
 			/**
@@ -33275,7 +35558,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this72 = this;
+				var _this75 = this;
 
 				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -33332,16 +35615,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				if (responderType === 0) // By Name
 					{
 						sequence = sequence.then(function () {
-							var _iteratorNormalCompletion30 = true;
-							var _didIteratorError30 = false;
-							var _iteratorError30 = undefined;
+							var _iteratorNormalCompletion32 = true;
+							var _didIteratorError32 = false;
+							var _iteratorError32 = undefined;
 
 							try {
-								for (var _iterator30 = _this72.certs.entries()[Symbol.iterator](), _step30; !(_iteratorNormalCompletion30 = (_step30 = _iterator30.next()).done); _iteratorNormalCompletion30 = true) {
-									var _step30$value = _slicedToArray(_step30.value, 2);
+								for (var _iterator32 = _this75.certs.entries()[Symbol.iterator](), _step32; !(_iteratorNormalCompletion32 = (_step32 = _iterator32.next()).done); _iteratorNormalCompletion32 = true) {
+									var _step32$value = _slicedToArray(_step32.value, 2);
 
-									var index = _step30$value[0];
-									var certificate = _step30$value[1];
+									var index = _step32$value[0];
+									var certificate = _step32$value[1];
 
 									if (certificate.subject.isEqual(responderId)) {
 										certIndex = index;
@@ -33349,16 +35632,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									}
 								}
 							} catch (err) {
-								_didIteratorError30 = true;
-								_iteratorError30 = err;
+								_didIteratorError32 = true;
+								_iteratorError32 = err;
 							} finally {
 								try {
-									if (!_iteratorNormalCompletion30 && _iterator30.return) {
-										_iterator30.return();
+									if (!_iteratorNormalCompletion32 && _iterator32.return) {
+										_iterator32.return();
 									}
 								} finally {
-									if (_didIteratorError30) {
-										throw _iteratorError30;
+									if (_didIteratorError32) {
+										throw _iteratorError32;
 									}
 								}
 							}
@@ -33366,19 +35649,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					} else // By KeyHash
 					{
 						sequence = sequence.then(function () {
-							return Promise.all(Array.from(_this72.certs, function (element) {
+							return Promise.all(Array.from(_this75.certs, function (element) {
 								return crypto.digest({ name: "sha-1" }, new Uint8Array(element.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
 							})).then(function (results) {
-								var _iteratorNormalCompletion31 = true;
-								var _didIteratorError31 = false;
-								var _iteratorError31 = undefined;
+								var _iteratorNormalCompletion33 = true;
+								var _didIteratorError33 = false;
+								var _iteratorError33 = undefined;
 
 								try {
-									for (var _iterator31 = _this72.certs.entries()[Symbol.iterator](), _step31; !(_iteratorNormalCompletion31 = (_step31 = _iterator31.next()).done); _iteratorNormalCompletion31 = true) {
-										var _step31$value = _slicedToArray(_step31.value, 2);
+									for (var _iterator33 = _this75.certs.entries()[Symbol.iterator](), _step33; !(_iteratorNormalCompletion33 = (_step33 = _iterator33.next()).done); _iteratorNormalCompletion33 = true) {
+										var _step33$value = _slicedToArray(_step33.value, 2);
 
-										var index = _step31$value[0];
-										var certificate = _step31$value[1];
+										var index = _step33$value[0];
+										var certificate = _step33$value[1];
 
 										if (isEqualBuffer(results[index], responderId.valueBlock.valueHex)) {
 											certIndex = index;
@@ -33386,16 +35669,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										}
 									}
 								} catch (err) {
-									_didIteratorError31 = true;
-									_iteratorError31 = err;
+									_didIteratorError33 = true;
+									_iteratorError33 = err;
 								} finally {
 									try {
-										if (!_iteratorNormalCompletion31 && _iterator31.return) {
-											_iterator31.return();
+										if (!_iteratorNormalCompletion33 && _iterator33.return) {
+											_iterator33.return();
 										}
 									} finally {
-										if (_didIteratorError31) {
-											throw _iteratorError31;
+										if (_didIteratorError33) {
+											throw _iteratorError33;
 										}
 									}
 								}
@@ -33417,13 +35700,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					var isCA = false;
 
-					var _iteratorNormalCompletion32 = true;
-					var _didIteratorError32 = false;
-					var _iteratorError32 = undefined;
+					var _iteratorNormalCompletion34 = true;
+					var _didIteratorError34 = false;
+					var _iteratorError34 = undefined;
 
 					try {
-						for (var _iterator32 = cert.extensions[Symbol.iterator](), _step32; !(_iteratorNormalCompletion32 = (_step32 = _iterator32.next()).done); _iteratorNormalCompletion32 = true) {
-							var extension = _step32.value;
+						for (var _iterator34 = cert.extensions[Symbol.iterator](), _step34; !(_iteratorNormalCompletion34 = (_step34 = _iterator34.next()).done); _iteratorNormalCompletion34 = true) {
+							var extension = _step34.value;
 
 							if (extension.extnID === "2.5.29.19") // BasicConstraints
 								{
@@ -33433,16 +35716,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								}
 						}
 					} catch (err) {
-						_didIteratorError32 = true;
-						_iteratorError32 = err;
+						_didIteratorError34 = true;
+						_iteratorError34 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion32 && _iterator32.return) {
-								_iterator32.return();
+							if (!_iteratorNormalCompletion34 && _iterator34.return) {
+								_iterator34.return();
 							}
 						} finally {
-							if (_didIteratorError32) {
-								throw _iteratorError32;
+							if (_didIteratorError34) {
+								throw _iteratorError34;
 							}
 						}
 					}
@@ -33455,35 +35738,35 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				sequence = sequence.then(function () {
 					if (certIndex === -1) return Promise.reject("Correct certificate was not found in OCSP response");
 
-					signerCert = _this72.certs[certIndex];
+					signerCert = _this75.certs[certIndex];
 
-					return Promise.all(Array.from(_this72.certs, function (element) {
+					return Promise.all(Array.from(_this75.certs, function (element) {
 						return checkCA(element);
 					})).then(function (promiseResults) {
 						var additionalCerts = [];
 						additionalCerts.push(signerCert);
 
-						var _iteratorNormalCompletion33 = true;
-						var _didIteratorError33 = false;
-						var _iteratorError33 = undefined;
+						var _iteratorNormalCompletion35 = true;
+						var _didIteratorError35 = false;
+						var _iteratorError35 = undefined;
 
 						try {
-							for (var _iterator33 = promiseResults[Symbol.iterator](), _step33; !(_iteratorNormalCompletion33 = (_step33 = _iterator33.next()).done); _iteratorNormalCompletion33 = true) {
-								var promiseResult = _step33.value;
+							for (var _iterator35 = promiseResults[Symbol.iterator](), _step35; !(_iteratorNormalCompletion35 = (_step35 = _iterator35.next()).done); _iteratorNormalCompletion35 = true) {
+								var promiseResult = _step35.value;
 
 								if (promiseResult !== null) additionalCerts.push(promiseResult);
 							}
 						} catch (err) {
-							_didIteratorError33 = true;
-							_iteratorError33 = err;
+							_didIteratorError35 = true;
+							_iteratorError35 = err;
 						} finally {
 							try {
-								if (!_iteratorNormalCompletion33 && _iterator33.return) {
-									_iterator33.return();
+								if (!_iteratorNormalCompletion35 && _iterator35.return) {
+									_iterator35.return();
 								}
 							} finally {
-								if (_didIteratorError33) {
-									throw _iteratorError33;
+								if (_didIteratorError35) {
+									throw _iteratorError35;
 								}
 							}
 						}
@@ -33510,7 +35793,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				sequence = sequence.then(function () {
 					//region Get information about public key algorithm and default parameters for import
 					var algorithmId = void 0;
-					if (_this72.certs[certIndex].signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this72.certs[certIndex].signatureAlgorithm.algorithmId;else algorithmId = _this72.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmId;
+					if (_this75.certs[certIndex].signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10") algorithmId = _this75.certs[certIndex].signatureAlgorithm.algorithmId;else algorithmId = _this75.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmId;
 
 					var algorithmObject = getAlgorithmByOID(algorithmId);
 					if ("name" in algorithmObject === false) return Promise.reject("Unsupported public key algorithm: " + algorithmId);
@@ -33523,10 +35806,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//region Special case for ECDSA
 					if (algorithmName === "ECDSA") {
 						//region Get information about named curve
-						if (_this72.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmParams instanceof ObjectIdentifier === false) return Promise.reject("Incorrect type for ECDSA public key parameters");
+						if (_this75.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmParams instanceof ObjectIdentifier === false) return Promise.reject("Incorrect type for ECDSA public key parameters");
 
-						var curveObject = getAlgorithmByOID(_this72.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
-						if ("name" in curveObject === false) return Promise.reject("Unsupported named curve algorithm: " + _this72.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						var curveObject = getAlgorithmByOID(_this75.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+						if ("name" in curveObject === false) return Promise.reject("Unsupported named curve algorithm: " + _this75.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
 						//endregion
 
 						algorithm.algorithm.namedCurve = curveObject.name;
@@ -33534,7 +35817,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//endregion
 					//endregion
 
-					var publicKeyInfoSchema = _this72.certs[certIndex].subjectPublicKeyInfo.toSchema();
+					var publicKeyInfoSchema = _this75.certs[certIndex].subjectPublicKeyInfo.toSchema();
 					var publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
 					var publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
 
@@ -33550,7 +35833,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//endregion
 
 					//region Special case for ECDSA signatures
-					var signatureValue = _this72.signature.valueBlock.valueHex;
+					var signatureValue = _this75.signature.valueBlock.valueHex;
 
 					if (publicKey.algorithm.name === "ECDSA") {
 						var asn1 = fromBER(signatureValue);
@@ -33563,7 +35846,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var pssParameters = void 0;
 
 						try {
-							pssParameters = new RSASSAPSSParams({ schema: _this72.signatureAlgorithm.algorithmParams });
+							pssParameters = new RSASSAPSSParams({ schema: _this75.signatureAlgorithm.algorithmParams });
 						} catch (ex) {
 							return Promise.reject(ex);
 						}
@@ -33692,69 +35975,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}]);
 
 		return BasicOCSPResponse;
-	}();
-	//**************************************************************************************
-
-	//**************************************************************************************
-	/**
-  * Class from X.509-1997
-  */
-
-
-	var AttributeCertificateV1 = function () {
-		//**********************************************************************************
-		/**
-   * Constructor for AttributeCertificateV1 class
-   * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
-   */
-		function AttributeCertificateV1() {
-			var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-			_classCallCheck(this, AttributeCertificateV1);
-
-			// Fake constructor for now
-			this.acinfo = {};
-			this.signatureAlgorithm = {};
-			this.signatureValue = {};
-		}
-		//**********************************************************************************
-		/**
-   * Convert parsed asn1js object into current class
-   * @param {!Object} schema
-   */
-
-
-		_createClass(AttributeCertificateV1, [{
-			key: "fromSchema",
-			value: function fromSchema(schema) {}
-			//**********************************************************************************
-			/**
-    * Convert current object to asn1js object and set correct values
-    * @returns {Object} asn1js object
-    */
-
-		}, {
-			key: "toSchema",
-			value: function toSchema() {
-				return new Any();
-			}
-			//**********************************************************************************
-			/**
-    * Convertion for the class to JSON object
-    * @returns {Object}
-    */
-
-		}, {
-			key: "toJSON",
-			value: function toJSON() {
-				return {};
-			}
-			//**********************************************************************************
-
-		}]);
-
-		return AttributeCertificateV1;
 	}();
 	//**************************************************************************************
 
@@ -34114,7 +36334,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "verify",
 			value: function verify() {
-				var _this73 = this;
+				var _this76 = this;
 
 				var _ref4 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -34189,32 +36409,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				//region Find a certificate for specified signer 
 				if (this.signerInfos[signer].sid instanceof IssuerAndSerialNumber) {
 					sequence = sequence.then(function () {
-						var _iteratorNormalCompletion34 = true;
-						var _didIteratorError34 = false;
-						var _iteratorError34 = undefined;
+						var _iteratorNormalCompletion36 = true;
+						var _didIteratorError36 = false;
+						var _iteratorError36 = undefined;
 
 						try {
-							for (var _iterator34 = _this73.certificates[Symbol.iterator](), _step34; !(_iteratorNormalCompletion34 = (_step34 = _iterator34.next()).done); _iteratorNormalCompletion34 = true) {
-								var certificate = _step34.value;
+							for (var _iterator36 = _this76.certificates[Symbol.iterator](), _step36; !(_iteratorNormalCompletion36 = (_step36 = _iterator36.next()).done); _iteratorNormalCompletion36 = true) {
+								var certificate = _step36.value;
 
 								if (certificate instanceof Certificate === false) continue;
 
-								if (certificate.issuer.isEqual(_this73.signerInfos[signer].sid.issuer) && certificate.serialNumber.isEqual(_this73.signerInfos[signer].sid.serialNumber)) {
+								if (certificate.issuer.isEqual(_this76.signerInfos[signer].sid.issuer) && certificate.serialNumber.isEqual(_this76.signerInfos[signer].sid.serialNumber)) {
 									signerCertificate = certificate;
 									return Promise.resolve();
 								}
 							}
 						} catch (err) {
-							_didIteratorError34 = true;
-							_iteratorError34 = err;
+							_didIteratorError36 = true;
+							_iteratorError36 = err;
 						} finally {
 							try {
-								if (!_iteratorNormalCompletion34 && _iterator34.return) {
-									_iterator34.return();
+								if (!_iteratorNormalCompletion36 && _iterator36.return) {
+									_iterator36.return();
 								}
 							} finally {
-								if (_didIteratorError34) {
-									throw _iteratorError34;
+								if (_didIteratorError36) {
+									throw _iteratorError36;
 								}
 							}
 						}
@@ -34235,40 +36455,40 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				} else // Find by SubjectKeyIdentifier
 					{
 						sequence = sequence.then(function () {
-							return Promise.all(Array.from(_this73.certificates.filter(function (certificate) {
+							return Promise.all(Array.from(_this76.certificates.filter(function (certificate) {
 								return certificate instanceof Certificate;
 							}), function (certificate) {
 								return crypto.digest({ name: "sha-1" }, new Uint8Array(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
 							})).then(function (results) {
-								var _iteratorNormalCompletion35 = true;
-								var _didIteratorError35 = false;
-								var _iteratorError35 = undefined;
+								var _iteratorNormalCompletion37 = true;
+								var _didIteratorError37 = false;
+								var _iteratorError37 = undefined;
 
 								try {
-									for (var _iterator35 = _this73.certificates.entries()[Symbol.iterator](), _step35; !(_iteratorNormalCompletion35 = (_step35 = _iterator35.next()).done); _iteratorNormalCompletion35 = true) {
-										var _step35$value = _slicedToArray(_step35.value, 2);
+									for (var _iterator37 = _this76.certificates.entries()[Symbol.iterator](), _step37; !(_iteratorNormalCompletion37 = (_step37 = _iterator37.next()).done); _iteratorNormalCompletion37 = true) {
+										var _step37$value = _slicedToArray(_step37.value, 2);
 
-										var index = _step35$value[0];
-										var certificate = _step35$value[1];
+										var index = _step37$value[0];
+										var certificate = _step37$value[1];
 
 										if (certificate instanceof Certificate === false) continue;
 
-										if (isEqualBuffer(results[index], _this73.signerInfos[signer].sid.valueBlock.valueHex)) {
+										if (isEqualBuffer(results[index], _this76.signerInfos[signer].sid.valueBlock.valueHex)) {
 											signerCertificate = certificate;
 											return Promise.resolve();
 										}
 									}
 								} catch (err) {
-									_didIteratorError35 = true;
-									_iteratorError35 = err;
+									_didIteratorError37 = true;
+									_iteratorError37 = err;
 								} finally {
 									try {
-										if (!_iteratorNormalCompletion35 && _iterator35.return) {
-											_iterator35.return();
+										if (!_iteratorNormalCompletion37 && _iterator37.return) {
+											_iterator37.return();
 										}
 									} finally {
-										if (_didIteratorError35) {
-											throw _iteratorError35;
+										if (_didIteratorError37) {
+											throw _iteratorError37;
 										}
 									}
 								}
@@ -34305,13 +36525,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Verify internal digest in case of "tSTInfo" content type 
 				sequence = sequence.then(function () {
-					if (_this73.encapContentInfo.eContentType === "1.2.840.113549.1.9.16.1.4") {
+					if (_this76.encapContentInfo.eContentType === "1.2.840.113549.1.9.16.1.4") {
 						//region Check "eContent" precense
-						if ("eContent" in _this73.encapContentInfo === false) return false;
+						if ("eContent" in _this76.encapContentInfo === false) return false;
 						//endregion
 
 						//region Initialize TST_INFO value
-						var asn1 = fromBER(_this73.encapContentInfo.eContent.valueBlock.valueHex);
+						var asn1 = fromBER(_this76.encapContentInfo.eContent.valueBlock.valueHex);
 						var tstInfo = void 0;
 
 						try {
@@ -34360,32 +36580,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					var isCA = false;
 
-					var _iteratorNormalCompletion36 = true;
-					var _didIteratorError36 = false;
-					var _iteratorError36 = undefined;
+					if ("extensions" in cert) {
+						var _iteratorNormalCompletion38 = true;
+						var _didIteratorError38 = false;
+						var _iteratorError38 = undefined;
 
-					try {
-						for (var _iterator36 = cert.extensions[Symbol.iterator](), _step36; !(_iteratorNormalCompletion36 = (_step36 = _iterator36.next()).done); _iteratorNormalCompletion36 = true) {
-							var extension = _step36.value;
-
-							if (extension.extnID === "2.5.29.19") // BasicConstraints
-								{
-									if ("cA" in extension.parsedValue) {
-										if (extension.parsedValue.cA === true) isCA = true;
-									}
-								}
-						}
-					} catch (err) {
-						_didIteratorError36 = true;
-						_iteratorError36 = err;
-					} finally {
 						try {
-							if (!_iteratorNormalCompletion36 && _iterator36.return) {
-								_iterator36.return();
+							for (var _iterator38 = cert.extensions[Symbol.iterator](), _step38; !(_iteratorNormalCompletion38 = (_step38 = _iterator38.next()).done); _iteratorNormalCompletion38 = true) {
+								var extension = _step38.value;
+
+								if (extension.extnID === "2.5.29.19") // BasicConstraints
+									{
+										if ("cA" in extension.parsedValue) {
+											if (extension.parsedValue.cA === true) isCA = true;
+										}
+									}
 							}
+						} catch (err) {
+							_didIteratorError38 = true;
+							_iteratorError38 = err;
 						} finally {
-							if (_didIteratorError36) {
-								throw _iteratorError36;
+							try {
+								if (!_iteratorNormalCompletion38 && _iterator38.return) {
+									_iterator38.return();
+								}
+							} finally {
+								if (_didIteratorError38) {
+									throw _iteratorError38;
+								}
 							}
 						}
 					}
@@ -34401,7 +36623,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						if (result === false) return false;
 						//endregion
 
-						return Promise.all(Array.from(_this73.certificates.filter(function (certificate) {
+						return Promise.all(Array.from(_this76.certificates.filter(function (certificate) {
 							return certificate instanceof Certificate;
 						}), function (certificate) {
 							return checkCA(certificate);
@@ -34418,14 +36640,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 							certificateChainEngine.certs.push(signerCertificate);
 
-							if ("crls" in _this73) {
-								var _iteratorNormalCompletion37 = true;
-								var _didIteratorError37 = false;
-								var _iteratorError37 = undefined;
+							if ("crls" in _this76) {
+								var _iteratorNormalCompletion39 = true;
+								var _didIteratorError39 = false;
+								var _iteratorError39 = undefined;
 
 								try {
-									for (var _iterator37 = _this73.crls[Symbol.iterator](), _step37; !(_iteratorNormalCompletion37 = (_step37 = _iterator37.next()).done); _iteratorNormalCompletion37 = true) {
-										var crl = _step37.value;
+									for (var _iterator39 = _this76.crls[Symbol.iterator](), _step39; !(_iteratorNormalCompletion39 = (_step39 = _iterator39.next()).done); _iteratorNormalCompletion39 = true) {
+										var crl = _step39.value;
 
 										if (crl instanceof CertificateRevocationList) certificateChainEngine.crls.push(crl);else // Assumed "revocation value" has "OtherRevocationInfoFormat"
 											{
@@ -34434,22 +36656,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 											}
 									}
 								} catch (err) {
-									_didIteratorError37 = true;
-									_iteratorError37 = err;
+									_didIteratorError39 = true;
+									_iteratorError39 = err;
 								} finally {
 									try {
-										if (!_iteratorNormalCompletion37 && _iterator37.return) {
-											_iterator37.return();
+										if (!_iteratorNormalCompletion39 && _iterator39.return) {
+											_iterator39.return();
 										}
 									} finally {
-										if (_didIteratorError37) {
-											throw _iteratorError37;
+										if (_didIteratorError39) {
+											throw _iteratorError39;
 										}
 									}
 								}
 							}
 
-							if ("ocsps" in _this73) (_certificateChainEngi = certificateChainEngine.ocsps).push.apply(_certificateChainEngi, _toConsumableArray(_this73.ocsps));
+							if ("ocsps" in _this76) (_certificateChainEngi = certificateChainEngine.ocsps).push.apply(_certificateChainEngi, _toConsumableArray(_this76.ocsps));
 
 							return certificateChainEngine.verify().then(function (verificationResult) {
 								if (verificationResult.result === true) return Promise.resolve(true);
@@ -34458,7 +36680,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									return Promise.reject({
 										date: checkDate,
 										code: 5,
-										message: "Validation of signer's certificate failed",
+										message: "Validation of signer's certificate failed: " + verificationResult.resultMessage,
 										signatureVerified: null,
 										signerCertificate: signerCertificate,
 										signerCertificateVerified: false
@@ -34504,20 +36726,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					if (result === false) return false;
 					//endregion
 
-					var signerInfoHashAlgorithm = getAlgorithmByOID(_this73.signerInfos[signer].digestAlgorithm.algorithmId);
+					var signerInfoHashAlgorithm = getAlgorithmByOID(_this76.signerInfos[signer].digestAlgorithm.algorithmId);
 					if ("name" in signerInfoHashAlgorithm === false) {
 						if (extendedMode) {
 							return Promise.reject({
 								date: checkDate,
 								code: 7,
-								message: "Unsupported signature algorithm: " + _this73.signerInfos[signer].digestAlgorithm.algorithmId,
+								message: "Unsupported signature algorithm: " + _this76.signerInfos[signer].digestAlgorithm.algorithmId,
 								signatureVerified: null,
 								signerCertificate: signerCertificate,
 								signerCertificateVerified: true
 							});
 						}
 
-						return Promise.reject("Unsupported signature algorithm: " + _this73.signerInfos[signer].digestAlgorithm.algorithmId);
+						return Promise.reject("Unsupported signature algorithm: " + _this76.signerInfos[signer].digestAlgorithm.algorithmId);
 					}
 
 					shaAlgorithm = signerInfoHashAlgorithm.name;
@@ -34532,36 +36754,36 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					if (result === false) return false;
 					//endregion
 
-					if ("eContent" in _this73.encapContentInfo) // Attached data
+					if ("eContent" in _this76.encapContentInfo) // Attached data
 						{
-							if (_this73.encapContentInfo.eContent.idBlock.tagClass === 1 && _this73.encapContentInfo.eContent.idBlock.tagNumber === 4) {
-								if (_this73.encapContentInfo.eContent.idBlock.isConstructed === false) data = _this73.encapContentInfo.eContent.valueBlock.valueHex;else {
-									var _iteratorNormalCompletion38 = true;
-									var _didIteratorError38 = false;
-									var _iteratorError38 = undefined;
+							if (_this76.encapContentInfo.eContent.idBlock.tagClass === 1 && _this76.encapContentInfo.eContent.idBlock.tagNumber === 4) {
+								if (_this76.encapContentInfo.eContent.idBlock.isConstructed === false) data = _this76.encapContentInfo.eContent.valueBlock.valueHex;else {
+									var _iteratorNormalCompletion40 = true;
+									var _didIteratorError40 = false;
+									var _iteratorError40 = undefined;
 
 									try {
-										for (var _iterator38 = _this73.encapContentInfo.eContent.valueBlock.value[Symbol.iterator](), _step38; !(_iteratorNormalCompletion38 = (_step38 = _iterator38.next()).done); _iteratorNormalCompletion38 = true) {
-											var contentValue = _step38.value;
+										for (var _iterator40 = _this76.encapContentInfo.eContent.valueBlock.value[Symbol.iterator](), _step40; !(_iteratorNormalCompletion40 = (_step40 = _iterator40.next()).done); _iteratorNormalCompletion40 = true) {
+											var contentValue = _step40.value;
 
 											data = utilConcatBuf(data, contentValue.valueBlock.valueHex);
 										}
 									} catch (err) {
-										_didIteratorError38 = true;
-										_iteratorError38 = err;
+										_didIteratorError40 = true;
+										_iteratorError40 = err;
 									} finally {
 										try {
-											if (!_iteratorNormalCompletion38 && _iterator38.return) {
-												_iterator38.return();
+											if (!_iteratorNormalCompletion40 && _iterator40.return) {
+												_iterator40.return();
 											}
 										} finally {
-											if (_didIteratorError38) {
-												throw _iteratorError38;
+											if (_didIteratorError40) {
+												throw _iteratorError40;
 											}
 										}
 									}
 								}
-							} else data = _this73.encapContentInfo.eContent.valueBlock.valueHex;
+							} else data = _this76.encapContentInfo.eContent.valueBlock.valueHex;
 						} else // Detached data
 						{
 							if (data.byteLength === 0) // Check that "data" already provided by function parameter
@@ -34581,18 +36803,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								}
 						}
 
-					if ("signedAttrs" in _this73.signerInfos[signer]) {
+					if ("signedAttrs" in _this76.signerInfos[signer]) {
 						//region Check mandatory attributes
 						var foundContentType = false;
 						var foundMessageDigest = false;
 
-						var _iteratorNormalCompletion39 = true;
-						var _didIteratorError39 = false;
-						var _iteratorError39 = undefined;
+						var _iteratorNormalCompletion41 = true;
+						var _didIteratorError41 = false;
+						var _iteratorError41 = undefined;
 
 						try {
-							for (var _iterator39 = _this73.signerInfos[signer].signedAttrs.attributes[Symbol.iterator](), _step39; !(_iteratorNormalCompletion39 = (_step39 = _iterator39.next()).done); _iteratorNormalCompletion39 = true) {
-								var attribute = _step39.value;
+							for (var _iterator41 = _this76.signerInfos[signer].signedAttrs.attributes[Symbol.iterator](), _step41; !(_iteratorNormalCompletion41 = (_step41 = _iterator41.next()).done); _iteratorNormalCompletion41 = true) {
+								var attribute = _step41.value;
 
 								//region Check that "content-type" attribute exists
 								if (attribute.type === "1.2.840.113549.1.9.3") foundContentType = true;
@@ -34610,16 +36832,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								//endregion
 							}
 						} catch (err) {
-							_didIteratorError39 = true;
-							_iteratorError39 = err;
+							_didIteratorError41 = true;
+							_iteratorError41 = err;
 						} finally {
 							try {
-								if (!_iteratorNormalCompletion39 && _iterator39.return) {
-									_iterator39.return();
+								if (!_iteratorNormalCompletion41 && _iterator41.return) {
+									_iterator41.return();
 								}
 							} finally {
-								if (_didIteratorError39) {
-									throw _iteratorError39;
+								if (_didIteratorError41) {
+									throw _iteratorError41;
 								}
 							}
 						}
@@ -34721,25 +36943,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Verify signer's signature 
 				sequence = sequence.then(function (result) {
-					// #region Veify result of previous operation
+					//region Veify result of previous operation
 					if (typeof result === "boolean") return false;
-					// #endregion
+					//endregion
 
 					publicKey = result;
 
-					// #region Verify "message-digest" attribute in case of "signedAttrs"
-					if ("signedAttrs" in _this73.signerInfos[signer]) return crypto.digest(shaAlgorithm, new Uint8Array(data));
+					//region Verify "message-digest" attribute in case of "signedAttrs"
+					if ("signedAttrs" in _this76.signerInfos[signer]) return crypto.digest(shaAlgorithm, new Uint8Array(data));
 
 					return true;
-					// #endregion
+					//endregion
 				}).then(function (result) {
-					// #region Verify result of previous operation
+					//region Verify result of previous operation
 					if (result === false) return false;
-					// #endregion
+					//endregion
 
-					if ("signedAttrs" in _this73.signerInfos[signer]) {
+					if ("signedAttrs" in _this76.signerInfos[signer]) {
 						if (isEqualBuffer(result, messageDigestValue)) {
-							data = _this73.signerInfos[signer].signedAttrs.encodedValue;
+							data = _this76.signerInfos[signer].signedAttrs.encodedValue;
 							return true;
 						}
 
@@ -34762,7 +36984,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var pssParameters = void 0;
 
 						try {
-							pssParameters = new RSASSAPSSParams({ schema: _this73.signerInfos[signer].signatureAlgorithm.algorithmParams });
+							pssParameters = new RSASSAPSSParams({ schema: _this76.signerInfos[signer].signatureAlgorithm.algorithmParams });
 						} catch (ex) {
 							if (extendedMode) {
 								return Promise.reject({
@@ -34807,7 +37029,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//endregion
 
 					//region Special case for ECDSA signatures
-					var signatureValue = _this73.signerInfos[signer].signature.valueBlock.valueHex;
+					var signatureValue = _this76.signerInfos[signer].signature.valueBlock.valueHex;
 
 					if (publicKey.algorithm.name === "ECDSA") {
 						var asn1 = fromBER(signatureValue);
@@ -34859,30 +37081,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     * Signing current SignedData
     * @param {key} privateKey Private key for "subjectPublicKeyInfo" structure
     * @param {number} signerIndex Index number (starting from 0) of signer index to make signature for
-    * @param {string} [hashAlgorithm] Hashing algorithm. Default SHA-1
+    * @param {string} [hashAlgorithm="SHA-1"] Hashing algorithm. Default SHA-1
     * @param {ArrayBuffer} [data] Detached data
     * @returns {*}
     */
 
 		}, {
 			key: "sign",
-			value: function sign(privateKey, signerIndex, hashAlgorithm, data) {
-				var _this74 = this;
+			value: function sign(privateKey, signerIndex) {
+				var _this77 = this;
 
-				//region Initial variables
-				data = data || new ArrayBuffer(0);
-				var hashAlgorithmOID = "";
-				//endregion
+				var hashAlgorithm = arguments.length <= 2 || arguments[2] === undefined ? "SHA-1" : arguments[2];
+				var data = arguments.length <= 3 || arguments[3] === undefined ? new ArrayBuffer(0) : arguments[3];
 
-				//region Get a private key from function parameter
+				//region Initial checking
 				if (typeof privateKey === "undefined") return Promise.reject("Need to provide a private key for signing");
 				//endregion
 
-				//region Get hashing algorithm
-				if (typeof hashAlgorithm === "undefined") hashAlgorithm = "SHA-1";
+				//region Initial variables
+				var sequence = Promise.resolve();
+				var parameters = void 0;
+
+				var engine = getEngine$1();
+				//endregion
 
 				//region Simple check for supported algorithm
-				hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
+				var hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
 				if (hashAlgorithmOID === "") return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
 				//endregion
 				//endregion
@@ -34903,137 +37127,83 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 
-				//region Get a "default parameters" for current algorithm
-				var defParams = getAlgorithmParameters(privateKey.algorithm.name, "sign");
-				defParams.algorithm.hash.name = hashAlgorithm;
-				//endregion
+				//region Get a "default parameters" for current algorithm and set correct signature algorithm
+				sequence = sequence.then(function () {
+					return engine.subtle.getSignatureParameters(privateKey, hashAlgorithm);
+				});
 
-				//region Fill internal structures base on "privateKey" and "hashAlgorithm"
-				switch (privateKey.algorithm.name.toUpperCase()) {
-					case "RSASSA-PKCS1-V1_5":
-					case "ECDSA":
-						this.signerInfos[signerIndex].signatureAlgorithm.algorithmId = getOIDByAlgorithm(defParams.algorithm);
-						break;
-					case "RSA-PSS":
-						{
-							//region Set "saltLength" as a length (in octets) of hash function result
-							switch (hashAlgorithm.toUpperCase()) {
-								case "SHA-256":
-									defParams.algorithm.saltLength = 32;
-									break;
-								case "SHA-384":
-									defParams.algorithm.saltLength = 48;
-									break;
-								case "SHA-512":
-									defParams.algorithm.saltLength = 64;
-									break;
-								default:
-							}
-							//endregion
-
-							//region Fill "RSASSA_PSS_params" object
-							var paramsObject = {};
-
-							if (hashAlgorithm.toUpperCase() !== "SHA-1") {
-								hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
-								if (hashAlgorithmOID === "") return Promise.reject("Unsupported hash algorithm: " + hashAlgorithm);
-
-								paramsObject.hashAlgorithm = new AlgorithmIdentifier({
-									algorithmId: hashAlgorithmOID,
-									algorithmParams: new Null()
-								});
-
-								paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
-									algorithmId: "1.2.840.113549.1.1.8", // MGF1
-									algorithmParams: paramsObject.hashAlgorithm.toSchema()
-								});
-							}
-
-							if (defParams.algorithm.saltLength !== 20) paramsObject.saltLength = defParams.algorithm.saltLength;
-
-							var pssParameters = new RSASSAPSSParams(paramsObject);
-							//endregion
-
-							//region Automatically set signature algorithm
-							this.signerInfos[signerIndex].signatureAlgorithm = new AlgorithmIdentifier({
-								algorithmId: "1.2.840.113549.1.1.10",
-								algorithmParams: pssParameters.toSchema()
-							});
-							//endregion
-						}
-						break;
-					default:
-						return Promise.reject("Unsupported signature algorithm: " + privateKey.algorithm.name);
-				}
+				sequence = sequence.then(function (result) {
+					parameters = result.parameters;
+					_this77.signerInfos[signerIndex].signatureAlgorithm = result.signatureAlgorithm;
+				});
 				//endregion
 
 				//region Create TBS data for signing
-				if ("signedAttrs" in this.signerInfos[signerIndex]) {
-					if (this.signerInfos[signerIndex].signedAttrs.encodedValue.byteLength !== 0) data = this.signerInfos[signerIndex].signedAttrs.encodedValue;else {
-						data = this.signerInfos[signerIndex].signedAttrs.toSchema(true).toBER(false);
+				sequence = sequence.then(function () {
+					if ("signedAttrs" in _this77.signerInfos[signerIndex]) {
+						if (_this77.signerInfos[signerIndex].signedAttrs.encodedValue.byteLength !== 0) data = _this77.signerInfos[signerIndex].signedAttrs.encodedValue;else {
+							data = _this77.signerInfos[signerIndex].signedAttrs.toSchema(true).toBER(false);
 
-						//region Change type from "[0]" to "SET" acordingly to standard
-						var view = new Uint8Array(data);
-						view[0] = 0x31;
-						//endregion
-					}
-				} else {
-					if ("eContent" in this.encapContentInfo) // Attached data
-						{
-							if (this.encapContentInfo.eContent.idBlock.tagClass === 1 && this.encapContentInfo.eContent.idBlock.tagNumber === 4) {
-								if (this.encapContentInfo.eContent.idBlock.isConstructed === false) data = this.encapContentInfo.eContent.valueBlock.valueHex;else {
-									var _iteratorNormalCompletion40 = true;
-									var _didIteratorError40 = false;
-									var _iteratorError40 = undefined;
+							//region Change type from "[0]" to "SET" acordingly to standard
+							var view = new Uint8Array(data);
+							view[0] = 0x31;
+							//endregion
+						}
+					} else {
+						if ("eContent" in _this77.encapContentInfo) // Attached data
+							{
+								if (_this77.encapContentInfo.eContent.idBlock.tagClass === 1 && _this77.encapContentInfo.eContent.idBlock.tagNumber === 4) {
+									if (_this77.encapContentInfo.eContent.idBlock.isConstructed === false) data = _this77.encapContentInfo.eContent.valueBlock.valueHex;else {
+										var _iteratorNormalCompletion42 = true;
+										var _didIteratorError42 = false;
+										var _iteratorError42 = undefined;
 
-									try {
-										for (var _iterator40 = this.encapContentInfo.eContent.valueBlock.value[Symbol.iterator](), _step40; !(_iteratorNormalCompletion40 = (_step40 = _iterator40.next()).done); _iteratorNormalCompletion40 = true) {
-											var content = _step40.value;
-
-											data = utilConcatBuf(data, content.valueBlock.valueHex);
-										}
-									} catch (err) {
-										_didIteratorError40 = true;
-										_iteratorError40 = err;
-									} finally {
 										try {
-											if (!_iteratorNormalCompletion40 && _iterator40.return) {
-												_iterator40.return();
+											for (var _iterator42 = _this77.encapContentInfo.eContent.valueBlock.value[Symbol.iterator](), _step42; !(_iteratorNormalCompletion42 = (_step42 = _iterator42.next()).done); _iteratorNormalCompletion42 = true) {
+												var content = _step42.value;
+
+												data = utilConcatBuf(data, content.valueBlock.valueHex);
 											}
+										} catch (err) {
+											_didIteratorError42 = true;
+											_iteratorError42 = err;
 										} finally {
-											if (_didIteratorError40) {
-												throw _iteratorError40;
+											try {
+												if (!_iteratorNormalCompletion42 && _iterator42.return) {
+													_iterator42.return();
+												}
+											} finally {
+												if (_didIteratorError42) {
+													throw _iteratorError42;
+												}
 											}
 										}
 									}
-								}
-							} else data = this.encapContentInfo.eContent.valueBlock.valueHex;
-						} else // Detached data
-						{
-							if (data.byteLength === 0) // Check that "data" already provided by function parameter
-								return Promise.reject("Missed detached data input array");
-						}
-				}
-				//endregion
+								} else data = _this77.encapContentInfo.eContent.valueBlock.valueHex;
+							} else // Detached data
+							{
+								if (data.byteLength === 0) // Check that "data" already provided by function parameter
+									return Promise.reject("Missed detached data input array");
+							}
+					}
 
-				//region Get a "crypto" extension
-				var crypto = getCrypto();
-				if (typeof crypto === "undefined") return Promise.reject("Unable to create WebCrypto object");
+					return Promise.resolve();
+				});
 				//endregion
 
 				//region Signing TBS data on provided private key
-				return crypto.sign(defParams.algorithm, privateKey, new Uint8Array(data)).then(function (result) {
-					//region Special case for ECDSA algorithm
-					if (defParams.algorithm.name === "ECDSA") result = createCMSECDSASignature(result);
-					//endregion
+				sequence = sequence.then(function () {
+					return engine.subtle.signWithPrivateKey(data, privateKey, parameters);
+				});
 
-					_this74.signerInfos[signerIndex].signature = new OctetString({ valueHex: result });
+				sequence = sequence.then(function (result) {
+					_this77.signerInfos[signerIndex].signature = new OctetString({ valueHex: result });
 
 					return result;
-				}, function (error) {
-					return Promise.reject("Signing error: " + error);
 				});
 				//endregion
+
+				return sequence;
 			}
 			//**********************************************************************************
 			//region Basic Building Blocks for Verification Engine
@@ -35052,13 +37222,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var hasAttributeCertificateV2 = false;
 
 				if (hasCertificates) {
-					var _iteratorNormalCompletion41 = true;
-					var _didIteratorError41 = false;
-					var _iteratorError41 = undefined;
+					var _iteratorNormalCompletion43 = true;
+					var _didIteratorError43 = false;
+					var _iteratorError43 = undefined;
 
 					try {
-						for (var _iterator41 = this.certificates[Symbol.iterator](), _step41; !(_iteratorNormalCompletion41 = (_step41 = _iterator41.next()).done); _iteratorNormalCompletion41 = true) {
-							var certificate = _step41.value;
+						for (var _iterator43 = this.certificates[Symbol.iterator](), _step43; !(_iteratorNormalCompletion43 = (_step43 = _iterator43.next()).done); _iteratorNormalCompletion43 = true) {
+							var certificate = _step43.value;
 
 							if ("otherCertFormat" in certificate) hasOtherCertificates = true;
 
@@ -35067,16 +37237,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							if ("acinfo" in certificate) hasAttributeCertificateV1 = true;
 						}
 					} catch (err) {
-						_didIteratorError41 = true;
-						_iteratorError41 = err;
+						_didIteratorError43 = true;
+						_iteratorError43 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion41 && _iterator41.return) {
-								_iterator41.return();
+							if (!_iteratorNormalCompletion43 && _iterator43.return) {
+								_iterator43.return();
 							}
 						} finally {
-							if (_didIteratorError41) {
-								throw _iteratorError41;
+							if (_didIteratorError43) {
+								throw _iteratorError43;
 							}
 						}
 					}
@@ -35086,13 +37256,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var hasOtherCrls = false;
 
 				if (hasCrls) {
-					var _iteratorNormalCompletion42 = true;
-					var _didIteratorError42 = false;
-					var _iteratorError42 = undefined;
+					var _iteratorNormalCompletion44 = true;
+					var _didIteratorError44 = false;
+					var _iteratorError44 = undefined;
 
 					try {
-						for (var _iterator42 = this.crls[Symbol.iterator](), _step42; !(_iteratorNormalCompletion42 = (_step42 = _iterator42.next()).done); _iteratorNormalCompletion42 = true) {
-							var crl = _step42.value;
+						for (var _iterator44 = this.crls[Symbol.iterator](), _step44; !(_iteratorNormalCompletion44 = (_step44 = _iterator44.next()).done); _iteratorNormalCompletion44 = true) {
+							var crl = _step44.value;
 
 							if ("otherRevInfoFormat" in crl) {
 								hasOtherCrls = true;
@@ -35100,16 +37270,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							}
 						}
 					} catch (err) {
-						_didIteratorError42 = true;
-						_iteratorError42 = err;
+						_didIteratorError44 = true;
+						_iteratorError44 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion42 && _iterator42.return) {
-								_iterator42.return();
+							if (!_iteratorNormalCompletion44 && _iterator44.return) {
+								_iterator44.return();
 							}
 						} finally {
-							if (_didIteratorError42) {
-								throw _iteratorError42;
+							if (_didIteratorError44) {
+								throw _iteratorError44;
 							}
 						}
 					}
@@ -35117,13 +37287,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				var hasSignerInfoV3 = false;
 
-				var _iteratorNormalCompletion43 = true;
-				var _didIteratorError43 = false;
-				var _iteratorError43 = undefined;
+				var _iteratorNormalCompletion45 = true;
+				var _didIteratorError45 = false;
+				var _iteratorError45 = undefined;
 
 				try {
-					for (var _iterator43 = this.signerInfos[Symbol.iterator](), _step43; !(_iteratorNormalCompletion43 = (_step43 = _iterator43.next()).done); _iteratorNormalCompletion43 = true) {
-						var signerInfo = _step43.value;
+					for (var _iterator45 = this.signerInfos[Symbol.iterator](), _step45; !(_iteratorNormalCompletion45 = (_step45 = _iterator45.next()).done); _iteratorNormalCompletion45 = true) {
+						var signerInfo = _step45.value;
 
 						if (signerInfo.version === 3) {
 							hasSignerInfoV3 = true;
@@ -35132,16 +37302,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					}
 					//endregion
 				} catch (err) {
-					_didIteratorError43 = true;
-					_iteratorError43 = err;
+					_didIteratorError45 = true;
+					_iteratorError45 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion43 && _iterator43.return) {
-							_iterator43.return();
+						if (!_iteratorNormalCompletion45 && _iterator45.return) {
+							_iterator45.return();
 						}
 					} finally {
-						if (_didIteratorError43) {
-							throw _iteratorError43;
+						if (_didIteratorError45) {
+							throw _iteratorError45;
 						}
 					}
 				}
@@ -35185,16 +37355,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				}
 
 				//region Check all SignerInfos
-				var _iteratorNormalCompletion44 = true;
-				var _didIteratorError44 = false;
-				var _iteratorError44 = undefined;
+				var _iteratorNormalCompletion46 = true;
+				var _didIteratorError46 = false;
+				var _iteratorError46 = undefined;
 
 				try {
-					for (var _iterator44 = this.signerInfos.entries()[Symbol.iterator](), _step44; !(_iteratorNormalCompletion44 = (_step44 = _iterator44.next()).done); _iteratorNormalCompletion44 = true) {
-						var _step44$value = _slicedToArray(_step44.value, 2);
+					for (var _iterator46 = this.signerInfos.entries()[Symbol.iterator](), _step46; !(_iteratorNormalCompletion46 = (_step46 = _iterator46.next()).done); _iteratorNormalCompletion46 = true) {
+						var _step46$value = _slicedToArray(_step46.value, 2);
 
-						var index = _step44$value[0];
-						var _signerInfo = _step44$value[1];
+						var index = _step46$value[0];
+						var _signerInfo = _step46$value[1];
 
 						var _formatCheckingResult3 = _signerInfo.formatChecking();
 						if (_formatCheckingResult3.indication !== PASSED) {
@@ -35208,31 +37378,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 					//region Perform format checking for all certificates
 				} catch (err) {
-					_didIteratorError44 = true;
-					_iteratorError44 = err;
+					_didIteratorError46 = true;
+					_iteratorError46 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion44 && _iterator44.return) {
-							_iterator44.return();
+						if (!_iteratorNormalCompletion46 && _iterator46.return) {
+							_iterator46.return();
 						}
 					} finally {
-						if (_didIteratorError44) {
-							throw _iteratorError44;
+						if (_didIteratorError46) {
+							throw _iteratorError46;
 						}
 					}
 				}
 
 				if (hasCertificates) {
-					var _iteratorNormalCompletion45 = true;
-					var _didIteratorError45 = false;
-					var _iteratorError45 = undefined;
+					var _iteratorNormalCompletion47 = true;
+					var _didIteratorError47 = false;
+					var _iteratorError47 = undefined;
 
 					try {
-						for (var _iterator45 = this.certificates.entries()[Symbol.iterator](), _step45; !(_iteratorNormalCompletion45 = (_step45 = _iterator45.next()).done); _iteratorNormalCompletion45 = true) {
-							var _step45$value = _slicedToArray(_step45.value, 2);
+						for (var _iterator47 = this.certificates.entries()[Symbol.iterator](), _step47; !(_iteratorNormalCompletion47 = (_step47 = _iterator47.next()).done); _iteratorNormalCompletion47 = true) {
+							var _step47$value = _slicedToArray(_step47.value, 2);
 
-							var index = _step45$value[0];
-							var _certificate = _step45$value[1];
+							var index = _step47$value[0];
+							var _certificate = _step47$value[1];
 
 							var formatCheckingResult = _certificate.formatChecking();
 							if (formatCheckingResult.indication !== PASSED) {
@@ -35243,16 +37413,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							}
 						}
 					} catch (err) {
-						_didIteratorError45 = true;
-						_iteratorError45 = err;
+						_didIteratorError47 = true;
+						_iteratorError47 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion45 && _iterator45.return) {
-								_iterator45.return();
+							if (!_iteratorNormalCompletion47 && _iterator47.return) {
+								_iterator47.return();
 							}
 						} finally {
-							if (_didIteratorError45) {
-								throw _iteratorError45;
+							if (_didIteratorError47) {
+								throw _iteratorError47;
 							}
 						}
 					}
@@ -35261,16 +37431,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Perform format checking for all CRLs
 				if (hasCrls) {
-					var _iteratorNormalCompletion46 = true;
-					var _didIteratorError46 = false;
-					var _iteratorError46 = undefined;
+					var _iteratorNormalCompletion48 = true;
+					var _didIteratorError48 = false;
+					var _iteratorError48 = undefined;
 
 					try {
-						for (var _iterator46 = this.crls.entries()[Symbol.iterator](), _step46; !(_iteratorNormalCompletion46 = (_step46 = _iterator46.next()).done); _iteratorNormalCompletion46 = true) {
-							var _step46$value = _slicedToArray(_step46.value, 2);
+						for (var _iterator48 = this.crls.entries()[Symbol.iterator](), _step48; !(_iteratorNormalCompletion48 = (_step48 = _iterator48.next()).done); _iteratorNormalCompletion48 = true) {
+							var _step48$value = _slicedToArray(_step48.value, 2);
 
-							var index = _step46$value[0];
-							var _crl = _step46$value[1];
+							var index = _step48$value[0];
+							var _crl = _step48$value[1];
 
 							var _formatCheckingResult2 = _crl.formatChecking();
 							if (_formatCheckingResult2.indication !== PASSED) {
@@ -35281,16 +37451,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							}
 						}
 					} catch (err) {
-						_didIteratorError46 = true;
-						_iteratorError46 = err;
+						_didIteratorError48 = true;
+						_iteratorError48 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion46 && _iterator46.return) {
-								_iterator46.return();
+							if (!_iteratorNormalCompletion48 && _iterator48.return) {
+								_iterator48.return();
 							}
 						} finally {
-							if (_didIteratorError46) {
-								throw _iteratorError46;
+							if (_didIteratorError48) {
+								throw _iteratorError48;
 							}
 						}
 					}
@@ -35318,7 +37488,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "identificationOfSigningCertificate",
 			value: function identificationOfSigningCertificate(_ref6) {
-				var _this75 = this;
+				var _this78 = this;
 
 				var _ref6$signer = _ref6.signer;
 				var signer = _ref6$signer === undefined ? 0 : _ref6$signer;
@@ -35349,17 +37519,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				if (this.signerInfos[signer].sid instanceof IssuerAndSerialNumber) {
 					sequence = sequence.then(function () {
-						var _iteratorNormalCompletion47 = true;
-						var _didIteratorError47 = false;
-						var _iteratorError47 = undefined;
+						var _iteratorNormalCompletion49 = true;
+						var _didIteratorError49 = false;
+						var _iteratorError49 = undefined;
 
 						try {
-							for (var _iterator47 = _this75.certificates[Symbol.iterator](), _step47; !(_iteratorNormalCompletion47 = (_step47 = _iterator47.next()).done); _iteratorNormalCompletion47 = true) {
-								var certificate = _step47.value;
+							for (var _iterator49 = _this78.certificates[Symbol.iterator](), _step49; !(_iteratorNormalCompletion49 = (_step49 = _iterator49.next()).done); _iteratorNormalCompletion49 = true) {
+								var certificate = _step49.value;
 
 								if (certificate instanceof Certificate === false) continue;
 
-								if (certificate.issuer.isEqual(_this75.signerInfos[signer].sid.issuer) && certificate.serialNumber.isEqual(_this75.signerInfos[signer].sid.serialNumber)) {
+								if (certificate.issuer.isEqual(_this78.signerInfos[signer].sid.issuer) && certificate.serialNumber.isEqual(_this78.signerInfos[signer].sid.serialNumber)) {
 									return Promise.resolve({
 										indication: PASSED,
 										message: certificate
@@ -35367,16 +37537,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								}
 							}
 						} catch (err) {
-							_didIteratorError47 = true;
-							_iteratorError47 = err;
+							_didIteratorError49 = true;
+							_iteratorError49 = err;
 						} finally {
 							try {
-								if (!_iteratorNormalCompletion47 && _iterator47.return) {
-									_iterator47.return();
+								if (!_iteratorNormalCompletion49 && _iterator49.return) {
+									_iterator49.return();
 								}
 							} finally {
-								if (_didIteratorError47) {
-									throw _iteratorError47;
+								if (_didIteratorError49) {
+									throw _iteratorError49;
 								}
 							}
 						}
@@ -35386,25 +37556,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				} else // Find by SubjectKeyIdentifier
 					{
 						sequence = sequence.then(function () {
-							return Promise.all(Array.from(_this75.certificates.filter(function (certificate) {
+							return Promise.all(Array.from(_this78.certificates.filter(function (certificate) {
 								return certificate instanceof Certificate;
 							}), function (certificate) {
 								return crypto.digest({ name: "sha-1" }, new Uint8Array(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
 							})).then(function (results) {
-								var _iteratorNormalCompletion48 = true;
-								var _didIteratorError48 = false;
-								var _iteratorError48 = undefined;
+								var _iteratorNormalCompletion50 = true;
+								var _didIteratorError50 = false;
+								var _iteratorError50 = undefined;
 
 								try {
-									for (var _iterator48 = _this75.certificates.entries()[Symbol.iterator](), _step48; !(_iteratorNormalCompletion48 = (_step48 = _iterator48.next()).done); _iteratorNormalCompletion48 = true) {
-										var _step48$value = _slicedToArray(_step48.value, 2);
+									for (var _iterator50 = _this78.certificates.entries()[Symbol.iterator](), _step50; !(_iteratorNormalCompletion50 = (_step50 = _iterator50.next()).done); _iteratorNormalCompletion50 = true) {
+										var _step50$value = _slicedToArray(_step50.value, 2);
 
-										var index = _step48$value[0];
-										var certificate = _step48$value[1];
+										var index = _step50$value[0];
+										var certificate = _step50$value[1];
 
 										if (certificate instanceof Certificate === false) continue;
 
-										if (isEqualBuffer(results[index], _this75.signerInfos[signer].sid.valueBlock.valueHex)) {
+										if (isEqualBuffer(results[index], _this78.signerInfos[signer].sid.valueBlock.valueHex)) {
 											return Promise.resolve({
 												indication: PASSED,
 												message: certificate
@@ -35412,16 +37582,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 										}
 									}
 								} catch (err) {
-									_didIteratorError48 = true;
-									_iteratorError48 = err;
+									_didIteratorError50 = true;
+									_iteratorError50 = err;
 								} finally {
 									try {
-										if (!_iteratorNormalCompletion48 && _iterator48.return) {
-											_iterator48.return();
+										if (!_iteratorNormalCompletion50 && _iterator50.return) {
+											_iterator50.return();
 										}
 									} finally {
-										if (_didIteratorError48) {
-											throw _iteratorError48;
+										if (_didIteratorError50) {
+											throw _iteratorError50;
 										}
 									}
 								}
@@ -35455,7 +37625,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "cryptographicVerification",
 			value: function cryptographicVerification(_ref7) {
-				var _this76 = this;
+				var _this79 = this;
 
 				var _ref7$signer = _ref7.signer;
 				var signer = _ref7$signer === undefined ? 0 : _ref7$signer;
@@ -35477,27 +37647,27 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				if ("eContent" in this.encapContentInfo) {
 					if (this.encapContentInfo.eContent.idBlock.tagClass === 1 && this.encapContentInfo.eContent.idBlock.tagNumber === 4) {
 						if (this.encapContentInfo.eContent.idBlock.isConstructed === false) data = this.encapContentInfo.eContent.valueBlock.valueHex;else {
-							var _iteratorNormalCompletion49 = true;
-							var _didIteratorError49 = false;
-							var _iteratorError49 = undefined;
+							var _iteratorNormalCompletion51 = true;
+							var _didIteratorError51 = false;
+							var _iteratorError51 = undefined;
 
 							try {
-								for (var _iterator49 = this.encapContentInfo.eContent.valueBlock.value[Symbol.iterator](), _step49; !(_iteratorNormalCompletion49 = (_step49 = _iterator49.next()).done); _iteratorNormalCompletion49 = true) {
-									var contentValue = _step49.value;
+								for (var _iterator51 = this.encapContentInfo.eContent.valueBlock.value[Symbol.iterator](), _step51; !(_iteratorNormalCompletion51 = (_step51 = _iterator51.next()).done); _iteratorNormalCompletion51 = true) {
+									var contentValue = _step51.value;
 
 									data = utilConcatBuf(data, contentValue.valueBlock.valueHex);
 								}
 							} catch (err) {
-								_didIteratorError49 = true;
-								_iteratorError49 = err;
+								_didIteratorError51 = true;
+								_iteratorError51 = err;
 							} finally {
 								try {
-									if (!_iteratorNormalCompletion49 && _iterator49.return) {
-										_iterator49.return();
+									if (!_iteratorNormalCompletion51 && _iterator51.return) {
+										_iterator51.return();
 									}
 								} finally {
-									if (_didIteratorError49) {
-										throw _iteratorError49;
+									if (_didIteratorError51) {
+										throw _iteratorError51;
 									}
 								}
 							}
@@ -35531,12 +37701,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Find signer's hashing algorithm
 				sequence = sequence.then(function () {
-					var signerInfoHashAlgorithm = getAlgorithmByOID(_this76.signerInfos[signer].digestAlgorithm.algorithmId);
+					var signerInfoHashAlgorithm = getAlgorithmByOID(_this79.signerInfos[signer].digestAlgorithm.algorithmId);
 					if ("name" in signerInfoHashAlgorithm === false) {
 						return Promise.resolve({
 							indication: FAILED,
 							subIndication: SIG_CRYPTO_FAILURE,
-							message: "Unsupported signature algorithm: " + _this76.signerInfos[signer].digestAlgorithm.algorithmId
+							message: "Unsupported signature algorithm: " + _this79.signerInfos[signer].digestAlgorithm.algorithmId
 						});
 					}
 
@@ -35602,29 +37772,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				sequence = sequence.then(function (result) {
 					publicKey = result;
 
-					// #region Verify "message-digest" attribute in case of "signedAttrs"
-					if ("signedAttrs" in _this76.signerInfos[signer]) return crypto.digest(shaAlgorithm, new Uint8Array(data));
+					//region Verify "message-digest" attribute in case of "signedAttrs"
+					if ("signedAttrs" in _this79.signerInfos[signer]) return crypto.digest(shaAlgorithm, new Uint8Array(data));
 
 					return true;
-					// #endregion
+					//endregion
 				}).then(function (result) {
-					// #region Verify result of previous operation
+					//region Verify result of previous operation
 					if (result === false) return false;
-					// #endregion
+					//endregion
 
-					if ("signedAttrs" in _this76.signerInfos[signer]) {
+					if ("signedAttrs" in _this79.signerInfos[signer]) {
 						//region Initial variables
 						var messageDigestValue = null;
 						//endregion
 
 						//region Find correct message digest value in attributes
-						var _iteratorNormalCompletion50 = true;
-						var _didIteratorError50 = false;
-						var _iteratorError50 = undefined;
+						var _iteratorNormalCompletion52 = true;
+						var _didIteratorError52 = false;
+						var _iteratorError52 = undefined;
 
 						try {
-							for (var _iterator50 = _this76.signerInfos[signer].signedAttrs.attributes[Symbol.iterator](), _step50; !(_iteratorNormalCompletion50 = (_step50 = _iterator50.next()).done); _iteratorNormalCompletion50 = true) {
-								var attribute = _step50.value;
+							for (var _iterator52 = _this79.signerInfos[signer].signedAttrs.attributes[Symbol.iterator](), _step52; !(_iteratorNormalCompletion52 = (_step52 = _iterator52.next()).done); _iteratorNormalCompletion52 = true) {
+								var attribute = _step52.value;
 
 								//region Check that "message-digest" attribute exists
 								if (attribute.type === "1.2.840.113549.1.9.4") // We SHOULD have such attribute becase check for existing was made during "FormatChecking" step
@@ -35635,16 +37805,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								//endregion
 							}
 						} catch (err) {
-							_didIteratorError50 = true;
-							_iteratorError50 = err;
+							_didIteratorError52 = true;
+							_iteratorError52 = err;
 						} finally {
 							try {
-								if (!_iteratorNormalCompletion50 && _iterator50.return) {
-									_iterator50.return();
+								if (!_iteratorNormalCompletion52 && _iterator52.return) {
+									_iterator52.return();
 								}
 							} finally {
-								if (_didIteratorError50) {
-									throw _iteratorError50;
+								if (_didIteratorError52) {
+									throw _iteratorError52;
 								}
 							}
 						}
@@ -35653,7 +37823,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						//endregion
 
 						if (isEqualBuffer(result, messageDigestValue)) {
-							data = _this76.signerInfos[signer].signedAttrs.encodedValue;
+							data = _this79.signerInfos[signer].signedAttrs.encodedValue;
 							return true;
 						}
 
@@ -35676,7 +37846,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						var pssParameters = void 0;
 
 						try {
-							pssParameters = new RSASSAPSSParams({ schema: _this76.signerInfos[signer].signatureAlgorithm.algorithmParams });
+							pssParameters = new RSASSAPSSParams({ schema: _this79.signerInfos[signer].signatureAlgorithm.algorithmParams });
 						} catch (ex) {
 							return Promise.reject(ex);
 						}
@@ -35697,7 +37867,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 					//endregion
 
 					//region Special case for ECDSA signatures
-					var signatureValue = _this76.signerInfos[signer].signature.valueBlock.valueHex;
+					var signatureValue = _this79.signerInfos[signer].signature.valueBlock.valueHex;
 
 					if (publicKey.algorithm.name === "ECDSA") {
 						var asn1 = fromBER(signatureValue);
@@ -35743,7 +37913,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "getRevocationInformation",
 			value: function getRevocationInformation() {
-				var _this77 = this;
+				var _this80 = this;
 
 				//region Initial variables
 				var sequence = Promise.resolve();
@@ -35756,14 +37926,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Get information about all CRLs and OCSPs for particular SignedData
 				sequence = sequence.then(function () {
-					if ("crls" in _this77) {
-						var _iteratorNormalCompletion51 = true;
-						var _didIteratorError51 = false;
-						var _iteratorError51 = undefined;
+					if ("crls" in _this80) {
+						var _iteratorNormalCompletion53 = true;
+						var _didIteratorError53 = false;
+						var _iteratorError53 = undefined;
 
 						try {
-							for (var _iterator51 = _this77.crls[Symbol.iterator](), _step51; !(_iteratorNormalCompletion51 = (_step51 = _iterator51.next()).done); _iteratorNormalCompletion51 = true) {
-								var crl = _step51.value;
+							for (var _iterator53 = _this80.crls[Symbol.iterator](), _step53; !(_iteratorNormalCompletion53 = (_step53 = _iterator53.next()).done); _iteratorNormalCompletion53 = true) {
+								var crl = _step53.value;
 
 								if (crl instanceof CertificateRevocationList) result.crls.push(crl);else // Assumed "revocation value" has "OtherRevocationInfoFormat"
 									{
@@ -35772,16 +37942,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 									}
 							}
 						} catch (err) {
-							_didIteratorError51 = true;
-							_iteratorError51 = err;
+							_didIteratorError53 = true;
+							_iteratorError53 = err;
 						} finally {
 							try {
-								if (!_iteratorNormalCompletion51 && _iterator51.return) {
-									_iterator51.return();
+								if (!_iteratorNormalCompletion53 && _iterator53.return) {
+									_iterator53.return();
 								}
 							} finally {
-								if (_didIteratorError51) {
-									throw _iteratorError51;
+								if (_didIteratorError53) {
+									throw _iteratorError53;
 								}
 							}
 						}
@@ -35974,7 +38144,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			if ("schema" in parameters) this.fromSchema(parameters.schema);
 			//endregion
 		}
-
 		//**********************************************************************************
 		/**
    * Return default values for all class members
@@ -35984,7 +38153,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 		_createClass(PFX, [{
 			key: "fromSchema",
-
 
 			//**********************************************************************************
 			/**
@@ -36019,7 +38187,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				if ("macData" in asn1.result) this.macData = new MacData({ schema: asn1.result.macData });
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convert current object to asn1js object and set correct values
@@ -36039,7 +38206,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				});
 				//endregion
 			}
-
 			//**********************************************************************************
 			/**
     * Convertion for the class to JSON object
@@ -36058,7 +38224,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return output;
 			}
-
 			//**********************************************************************************
 			/**
     * Making ContentInfo from "parsedValue" object
@@ -36068,7 +38233,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		}, {
 			key: "makeInternalValues",
 			value: function makeInternalValues() {
-				var _this78 = this;
+				var _this81 = this;
 
 				var parameters = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -36123,85 +38288,36 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 								getRandomValues(saltView);
 
-								var length = void 0;
+								var data = _this81.parsedValue.authenticatedSafe.toSchema().toBER(false);
+								var view = new Uint8Array(data);
 
-								//region Choose correct length for HMAC key
-								switch (parameters.hmacHashAlgorithm.toLowerCase()) {
-									case "sha-1":
-										length = 160;
-										break;
-									case "sha-256":
-										length = 256;
-										break;
-									case "sha-384":
-										length = 384;
-										break;
-									case "sha-512":
-										length = 512;
-										break;
-									default:
-										return {
-											v: Promise.reject("Incorrect \"parameters.hmacHashAlgorithm\" parameter: " + parameters.hmacHashAlgorithm)
-										};
-								}
+								_this81.authSafe = new ContentInfo({
+									contentType: "1.2.840.113549.1.7.1",
+									content: new OctetString({ valueHex: data })
+								});
 								//endregion
 
-								var hmacAlgorithm = {
-									name: "HMAC",
-									length: length,
-									hash: {
-										name: parameters.hmacHashAlgorithm
-									}
-								};
-								//endregion
+								//region Call current crypto engine for making HMAC-based data stamp
+								var engine = getEngine$1();
 
-								//region Generate HMAC key using PBKDF2
-								//region Derive PBKDF2 key from "password" buffer
+								if ("stampDataWithPassword" in engine.subtle === false) return {
+										v: Promise.reject("No support for \"stampDataWithPassword\" in current engine \"" + engine.name + "\"")
+									};
+
 								sequence = sequence.then(function () {
-									var passwordView = new Uint8Array(parameters.password);
-
-									return crypto.importKey("raw", passwordView, "PBKDF2", false, ["deriveKey"]);
-								}, function (error) {
-									return Promise.reject(error);
-								});
-								//endregion
-
-								//region Derive key for HMAC
-								sequence = sequence.then(function (result) {
-									return crypto.deriveKey({
-										name: "PBKDF2",
-										hash: {
-											name: parameters.pbkdf2HashAlgorithm
-										},
-										salt: saltView,
-										iterations: parameters.iterations
-									}, result, hmacAlgorithm, false, ["sign"]);
-								}, function (error) {
-									return Promise.reject(error);
-								});
-								//endregion
-								//endregion
-
-								//region Make final "MacData" value
-								//region Make signed HMAC value
-								sequence = sequence.then(function (result) {
-									_this78.authSafe = new ContentInfo({
-										contentType: "1.2.840.113549.1.7.1",
-										content: new OctetString({ valueHex: _this78.parsedValue.authenticatedSafe.toSchema().toBER(false) })
+									return engine.subtle.stampDataWithPassword({
+										password: parameters.password,
+										hashAlgorithm: parameters.hmacHashAlgorithm,
+										salt: saltBuffer,
+										iterationCount: parameters.iterations,
+										contentToStamp: data
 									});
-
-									var data = _this78.authSafe.content.toBER(false);
-									var view = new Uint8Array(data);
-
-									return crypto.sign(hmacAlgorithm, result, view);
-								}, function (error) {
-									return Promise.reject(error);
 								});
 								//endregion
 
 								//region Make "MacData" values
 								sequence = sequence.then(function (result) {
-									_this78.macData = new MacData({
+									_this81.macData = new MacData({
 										mac: new DigestInfo({
 											digestAlgorithm: new AlgorithmIdentifier({
 												algorithmId: getOIDByAlgorithm({ name: parameters.hmacHashAlgorithm })
@@ -36245,7 +38361,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								// Thus user must call "makeValues" for all internal "SafeContent" value with appropriate parameters.
 								// Or user can choose to use values from initial parsing of existing PKCS#12 data.
 
-								var toBeSigned = _this78.parsedValue.authenticatedSafe.toSchema().toBER(false);
+								var toBeSigned = _this81.parsedValue.authenticatedSafe.toSchema().toBER(false);
 								//endregion
 
 								//region Initial variables
@@ -36318,7 +38434,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 								//region Making final CMS_CONTENT_INFO type
 								sequence = sequence.then(function () {
-									_this78.authSafe = new ContentInfo({
+									_this81.authSafe = new ContentInfo({
 										contentType: "1.2.840.113549.1.7.2",
 										content: cmsSigned.toSchema(true)
 									});
@@ -36341,13 +38457,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				return sequence;
 			}
-
 			//**********************************************************************************
 
 		}, {
 			key: "parseInternalValues",
 			value: function parseInternalValues(parameters) {
-				var _this79 = this;
+				var _this82 = this;
 
 				//region Check input data from "parameters" 
 				if (parameters instanceof Object === false) return Promise.reject("The \"parameters\" must has \"Object\" type");
@@ -36396,86 +38511,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 							if (parameters.checkIntegrity) {
 								var _ret8 = function () {
 									//region Check that "MacData" exists
-									if ("macData" in _this79 === false) return {
-											v: Promise.reject("Absent \"macData\" value, can not check PKCS# data integrity")
+									if ("macData" in _this82 === false) return {
+											v: Promise.reject("Absent \"macData\" value, can not check PKCS#12 data integrity")
 										};
 									//endregion
 
 									//region Initial variables
-									var hashAlgorithm = getAlgorithmByOID(_this79.macData.mac.digestAlgorithm.algorithmId);
+									var hashAlgorithm = getAlgorithmByOID(_this82.macData.mac.digestAlgorithm.algorithmId);
 									if ("name" in hashAlgorithm === false) return {
-											v: Promise.reject("Unsupported digest algorithm: " + _this79.macData.mac.digestAlgorithm.algorithmId)
+											v: Promise.reject("Unsupported digest algorithm: " + _this82.macData.mac.digestAlgorithm.algorithmId)
 										};
-
-									var length = void 0;
-
-									//region Choose correct length for HMAC key
-									switch (hashAlgorithm.name.toLowerCase()) {
-										case "sha-1":
-											length = 160;
-											break;
-										case "sha-256":
-											length = 256;
-											break;
-										case "sha-384":
-											length = 384;
-											break;
-										case "sha-512":
-											length = 512;
-											break;
-										default:
-											return {
-												v: Promise.reject("Incorrect \"hashAlgorithm\": " + hashAlgorithm.name)
-											};
-									}
 									//endregion
 
-									var hmacAlgorithm = {
-										name: "HMAC",
-										length: length,
-										hash: {
-											name: hashAlgorithm.name
-										}
-									};
-									//endregion
+									//region Call current crypto engine for verifying HMAC-based data stamp
+									var engine = getEngine$1();
 
-									//region Generate HMAC key using PBKDF2
-									//region Derive PBKDF2 key from "password" buffer
 									sequence = sequence.then(function () {
-										var passwordView = new Uint8Array(parameters.password);
-
-										return crypto.importKey("raw", passwordView, "PBKDF2", false, ["deriveKey"]);
-									}, function (error) {
-										return Promise.reject(error);
+										return engine.subtle.verifyDataStampedWithPassword({
+											password: parameters.password,
+											hashAlgorithm: hashAlgorithm.name,
+											salt: _this82.macData.macSalt.valueBlock.valueHex,
+											iterationCount: _this82.macData.iterations,
+											contentToVerify: _this82.authSafe.content.valueBlock.valueHex,
+											signatureToVerify: _this82.macData.mac.digest.valueBlock.valueHex
+										});
 									});
-									//endregion
-
-									//region Derive key for HMAC
-									sequence = sequence.then(function (result) {
-										return crypto.deriveKey({
-											name: "PBKDF2",
-											hash: {
-												name: hashAlgorithm.name
-											},
-											salt: new Uint8Array(_this79.macData.macSalt.valueBlock.valueHex),
-											iterations: _this79.macData.iterations
-										}, result, hmacAlgorithm, false, ["verify"]);
-									}, function (error) {
-										return Promise.reject(error);
-									});
-									//endregion
 									//endregion
 
 									//region Verify HMAC signature
-									sequence = sequence.then(function (result) {
-										var data = _this79.authSafe.content.toBER(false);
-										var view = new Uint8Array(data);
-
-										return crypto.verify(hmacAlgorithm, result, new Uint8Array(_this79.macData.mac.digest.valueBlock.valueHex), view);
-									}, function (error) {
-										return Promise.reject(error);
-									});
-
 									sequence = sequence.then(function (result) {
 										if (result === false) return Promise.reject("Integrity for the PKCS#12 data is broken!");
 									}, function (error) {
@@ -36495,11 +38558,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						{
 							var _ret9 = function () {
 								//region Integrity based on signature using public key
-								_this79.parsedValue.integrityMode = 1;
+								_this82.parsedValue.integrityMode = 1;
 								//endregion
 
 								//region Parse CMS Signed Data
-								var cmsSigned = new SignedData({ schema: _this79.authSafe.content });
+								var cmsSigned = new SignedData({ schema: _this82.authSafe.content });
 								//endregion
 
 								//region Check that we do have OCTETSTRING as "content"
@@ -36530,7 +38593,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 								//endregion
 
 								//region Set "authenticatedSafe" value
-								_this79.parsedValue.authenticatedSafe = new AuthenticatedSafe({ schema: asn1.result });
+								_this82.parsedValue.authenticatedSafe = new AuthenticatedSafe({ schema: asn1.result });
 								//endregion
 
 								//region Check integrity
@@ -36557,13 +38620,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Return result of the function 
 				return sequence.then(function () {
-					return _this79;
+					return _this82;
 				}, function (error) {
 					return Promise.reject("Error during parsing: " + error);
 				});
 				//endregion   
 			}
-
 			//**********************************************************************************
 
 		}], [{
@@ -36582,7 +38644,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						throw new Error("Invalid member name for PFX class: " + memberName);
 				}
 			}
-
 			//**********************************************************************************
 			/**
     * Compare values with default values for all class members
@@ -36606,7 +38667,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 						throw new Error("Invalid member name for PFX class: " + memberName);
 				}
 			}
-
 			//**********************************************************************************
 			/**
     * Return value of asn1js schema for current class
@@ -37256,7 +39316,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		sequence = sequence.then(function () {
 			return pkcs12.parseInternalValues({
 				password: passwordConverted,
-				checkIntegrity: false // Do not check an integrity since OpenSSL produce HMAC using old PBKDF1 function
+				checkIntegrity: true // Do not check an integrity since OpenSSL produce HMAC using old PBKDF1 function
 			});
 		});
 		//endregion
