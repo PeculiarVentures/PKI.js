@@ -16,10 +16,11 @@
   },
   "devDependencies": {
     "mocha": "^3.0.2",
-    "rollup": "0.34.7",
-    "rollup-plugin-node-resolve": "^1.7.1",
     "node-webcrypto-ossl": "latest",
-    "rollem": "git+https://github.com/PeculiarVentures/rollem.git"
+    "rollem": "git+https://github.com/PeculiarVentures/rollem.git",
+    "rollup": "0.34.7",
+    "rollup-plugin-commonjs": "^8.2.6",
+    "rollup-plugin-node-resolve": "^1.7.1"
   },
   "dependencies": {
     "asn1js": "^2.0.0",
