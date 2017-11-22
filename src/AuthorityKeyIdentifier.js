@@ -195,9 +195,7 @@ export default class AuthorityKeyIdentifier
 					tagClass: 3, // CONTEXT-SPECIFIC
 					tagNumber: 1 // [1]
 				},
-				value: [new asn1js.Sequence({
-					value: Array.from(this.authorityCertIssuer, element => element.toSchema())
-				})]
+				value: Array.from(this.authorityCertIssuer, element => element.toSchema())
 			}));
 		}
 		
