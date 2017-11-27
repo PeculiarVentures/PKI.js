@@ -20,13 +20,13 @@
     "rollem": "git+https://github.com/PeculiarVentures/rollem.git",
     "rollup": "0.34.7",
     "rollup-plugin-commonjs": "^8.2.6",
-    "rollup-plugin-node-resolve": "^1.7.1"
+    "rollup-plugin-node-resolve": "^1.7.1",
+    "babel-cli": "latest",
+    "babel-preset-es2015": "latest"
   },
   "dependencies": {
     "asn1js": "^2.0.0",
-    "pvutils": "latest",
-    "babel-cli": "latest",
-    "babel-preset-es2015": "latest"
+    "pvutils": "latest"
   },
   "scripts": {
     "build": "babel src --compact=false --out-dir build --source-maps",
@@ -51,7 +51,7 @@
     "build:examples": "npm run ex1; npm run ex2; npm run ex3; npm run ex4; npm run ex5; npm run ex6; npm run ex7; npm run ex8; npm run ex9; npm run ex10; npm run ex11; npm run ex12; npm run ex13; npm run ex14; npm run ex15; npm run ex16; npm run ex17;",
     "build:tests": "npm run build:examples",
     "test": "mocha --timeout 40000",
-    "postinstall": "npm run build"
+    "prepublish": "npm run build"
   },
   "keywords": [
     "ES6",
