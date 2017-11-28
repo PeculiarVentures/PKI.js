@@ -1,3 +1,4 @@
+import "babel-polyfill";
 import { setEngine, getEngine, getCrypto, getRandomValues, getOIDByAlgorithm, getAlgorithmParameters, createCMSECDSASignature, stringPrep, createECDSASignatureFromCMS, getAlgorithmByOID, getHashAlgorithm, kdfWithCounter, kdf } from "./common";
 export { setEngine, getEngine, getCrypto, getRandomValues, getOIDByAlgorithm, getAlgorithmParameters, createCMSECDSASignature, stringPrep, createECDSASignatureFromCMS, getAlgorithmByOID, getHashAlgorithm, kdfWithCounter, kdf };
 import AccessDescription from "./AccessDescription";
