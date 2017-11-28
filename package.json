@@ -20,7 +20,8 @@
     "rollem": "git+https://github.com/PeculiarVentures/rollem.git",
     "rollup": "0.34.7",
     "rollup-plugin-commonjs": "^8.2.6",
-    "rollup-plugin-node-resolve": "^1.7.1"
+    "rollup-plugin-node-resolve": "^1.7.1",
+    "babel-polyfill": "6.26.0"
   },
   "dependencies": {
     "asn1js": "^2.0.0",
