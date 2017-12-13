@@ -220,8 +220,8 @@ function parseCRL()
 	//region Put information about CRL issuer
 	const rdnmap = {
 		"2.5.4.6": "C",
-		"2.5.4.10": "OU",
-		"2.5.4.11": "O",
+		"2.5.4.10": "O",
+		"2.5.4.11": "OU",
 		"2.5.4.3": "CN",
 		"2.5.4.7": "L",
 		"2.5.4.8": "S",
