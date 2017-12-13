@@ -810,7 +810,7 @@ export default class SignedData
 					}
 				}
 				else
-					data = this.encapContentInfo.eContent.valueBlock.valueHex;
+					data = this.encapContentInfo.eContent.valueBlock.valueBeforeDecode;
 			}
 			else // Detached data
 			{
@@ -1224,7 +1224,7 @@ export default class SignedData
 						}
 					}
 					else
-						data = this.encapContentInfo.eContent.valueBlock.valueHex;
+						data = this.encapContentInfo.eContent.valueBlock.valueBeforeDecode;
 				}
 				else // Detached data
 				{

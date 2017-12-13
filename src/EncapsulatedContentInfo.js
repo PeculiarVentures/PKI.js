@@ -31,7 +31,7 @@ export default class EncapsulatedContentInfo
 			if((this.eContent.idBlock.tagClass === 1) &&
 				(this.eContent.idBlock.tagNumber === 4))
 			{
-				// #region Divide OCTETSTRING value down to small pieces
+				//region Divide OCTETSTRING value down to small pieces
 				if(this.eContent.idBlock.isConstructed === false)
 				{
 					const constrString = new asn1js.OctetString({
@@ -59,7 +59,7 @@ export default class EncapsulatedContentInfo
 					
 					this.eContent = constrString;
 				}
-				// #endregion
+				//endregion
 			}
 		}
 		//endregion
@@ -99,7 +99,12 @@ export default class EncapsulatedContentInfo
 			case "eContentType":
 				return (memberValue === "");
 			case "eContent":
-				return (memberValue.isEqual(EncapsulatedContentInfo.defaultValues("eContent")));
+				{
+					if((memberValue.idBlock.tagClass === 1) && (memberValue.idBlock.tagNumber === 4))
+						return (memberValue.isEqual(EncapsulatedContentInfo.defaultValues("eContent")));
+					
+					return false;
+				}
 			default:
 				throw new Error(`Invalid member name for EncapsulatedContentInfo class: ${memberName}`);
 		}
