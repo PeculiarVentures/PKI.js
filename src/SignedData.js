@@ -248,7 +248,14 @@ export default class SignedData
 						return new Certificate({ schema: certificate });
 					case 3:
 						{
-							switch(certificate.idBlock.tagNumber)
+							const tagNumber = certificate.idBlock.tagNumber;
+							
+							//region Create SEQUENCE from [x]
+							certificate.idBlock.tagClass = 1; // UNIVERSAL
+							certificate.idBlock.tagNumber = 16; // SEQUENCE
+							//endregion
+							
+							switch(tagNumber)
 							{
 								//region ExtendedCertificate
 								case 0:
@@ -264,14 +271,7 @@ export default class SignedData
 								//endregion
 								//region OtherCertificateFormat
 								case 3:
-									{
-										//region Create SEQUENCE from [3]
-										certificate.idBlock.tagClass = 1; // UNIVERSAL
-										certificate.idBlock.tagNumber = 16; // SEQUENCE
-										//endregion
-										
-										return new OtherCertificateFormat({ schema: certificate });
-									}
+									return new OtherCertificateFormat({ schema: certificate });
 								//endregion
 								//region default
 								default:
