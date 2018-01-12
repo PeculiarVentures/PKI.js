@@ -12373,7 +12373,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 				//region Import HMAC key
 				sequence = sequence.then(function (result) {
-					return _this57.importKey("raw", new Uint8Array(result), hmacAlgorithm, false, ["sign"]);
+					return _this57.importKey("raw", new Uint8Array(result), hmacAlgorithm, false, ["verify"]);
 				});
 				//endregion
 
@@ -39350,7 +39350,43 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 		return sequence;
 	}
 	//*********************************************************************************
-	function parsePKCS12(buffer) {
+	function parsePKCS12(buffer)
+	{
+		let sequence = Promise.resolve();
+		
+		sequence = sequence.then(function () {
+			return parsePKCS12Internal(buffer, document.getElementById("password").value);
+		}).then(function (pkcs12) {
+			//region Initial variables
+			var result = "";
+			//endregion
+			
+			//region Store X.509 certificate value
+			var certificateBuffer = pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.parsedValue.toSchema().toBER(false);
+			
+			result += "-----BEGIN CERTIFICATE-----\r\n";
+			result += formatPEM(toBase64(arrayBufferToString(certificateBuffer)));
+			result += "\r\n-----END CERTIFICATE-----\r\n";
+			//endregion
+			
+			//endregion Store PKCS#8 (private key) value
+			var pkcs8Buffer = pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.parsedValue.toSchema().toBER(false);
+			
+			result += "\r\n-----BEGIN PRIVATE KEY-----\r\n";
+			result += formatPEM(toBase64(arrayBufferToString(pkcs8Buffer)));
+			result += "\r\n-----END PRIVATE KEY-----\r\n";
+			//endregion
+			
+			document.getElementById("parsing_result").innerHTML = result;
+		});
+		
+		sequence = sequence.then(result => result, error =>
+		{
+			const i = 0;
+		});
+		
+		return sequence;
+		
 		return Promise.resolve().then(function () {
 			return parsePKCS12Internal(buffer, document.getElementById("password").value);
 		}).then(function (pkcs12) {
