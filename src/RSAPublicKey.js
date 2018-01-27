@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64 } from "pvutils";
+import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64, nearestPowerOf2 } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC3447
@@ -146,7 +146,10 @@ export default class RSAPublicKey
 	fromJSON(json)
 	{
 		if("n" in json)
-			this.modulus = new asn1js.Integer({ valueHex: stringToArrayBuffer(fromBase64(json.n, true)).slice(0, 256) });
+		{
+			const array = stringToArrayBuffer(fromBase64(json.n, true));
+			this.modulus = new asn1js.Integer({ valueHex: array.slice(0, Math.pow(2, nearestPowerOf2(array.byteLength))) });
+		}
 		else
 			throw new Error("Absent mandatory parameter \"n\"");
 
