@@ -1127,6 +1127,7 @@ export default class SignedData
 					message: `Error during verification: ${error.message}`,
 					signatureVerified: null,
 					signerCertificate,
+					timestampSerial,
 					signerCertificateVerified: true
 				});
 			}
