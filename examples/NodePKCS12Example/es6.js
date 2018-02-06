@@ -29,7 +29,7 @@ let pkcs8Simpl;
 //*********************************************************************************
 //endregion 
 //*********************************************************************************
-function openSSLLike(password, inputAlgorithm)
+function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 {
 	//region Initial variables
 	let sequence = Promise.resolve();
@@ -65,7 +65,7 @@ function openSSLLike(password, inputAlgorithm)
 	const makeInternalValuesParameters = {
 		password: passwordConverted,
 		contentEncryptionAlgorithm,
-		hmacHashAlgorithm: "SHA-256",
+		hmacHashAlgorithm: inputHashAlgorithm,
 		iterationCount: 2048
 	};
 	//endregion
@@ -185,8 +185,178 @@ function openSSLLike(password, inputAlgorithm)
 		() => pkcs12.makeInternalValues({
 			password: passwordConverted,
 			iterations: 2048,
-			pbkdf2HashAlgorithm: "SHA-256", // OpenSSL can not handle usage of PBKDF2, only PBKDF1
-			hmacHashAlgorithm: "SHA-256"
+			pbkdf2HashAlgorithm: inputHashAlgorithm, // OpenSSL can not handle usage of PBKDF2, only PBKDF1
+			hmacHashAlgorithm: inputHashAlgorithm
+		})
+	);
+	//endregion
+	
+	//region Save encoded data
+	sequence = sequence.then(() => pkcs12.toSchema().toBER(false));
+	//endregion
+	
+	return sequence;
+}
+//*********************************************************************************
+function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
+{
+	//region Initial variables
+	let sequence = Promise.resolve();
+	
+	const keyLocalIDBuffer = new ArrayBuffer(4);
+	const keyLocalIDView = new Uint8Array(keyLocalIDBuffer);
+	
+	getRandomValues(keyLocalIDView);
+	
+	const certLocalIDBuffer = new ArrayBuffer(4);
+	const certLocalIDView = new Uint8Array(certLocalIDBuffer);
+	
+	getRandomValues(certLocalIDView);
+	
+	//region "KeyUsage" attribute
+	const bitArray = new ArrayBuffer(1);
+	const bitView = new Uint8Array(bitArray);
+	
+	bitView[0] = bitView[0] | 0x80;
+	
+	const keyUsage = new asn1js.BitString({
+		valueHex: bitArray,
+		unusedBits: 7
+	});
+	//endregion
+	
+	const passwordConverted = stringToArrayBuffer(password);
+	
+	const contentEncryptionAlgorithm = (getAlgorithmParameters(inputAlgorithm, "encrypt")).algorithm;
+	if(("name" in contentEncryptionAlgorithm) === false)
+		return Promise.reject("No support for selected algorithm");
+	
+	const makeInternalValuesParameters = {
+		password: passwordConverted,
+		contentEncryptionAlgorithm,
+		hmacHashAlgorithm: inputHashAlgorithm,
+		pbeSchema: "PBES1",
+		iterationCount: 2048
+	};
+	//endregion
+	
+	//region Add "keyUsage" attribute
+	pkcs8Simpl.attributes = [
+		new Attribute({
+			type: "2.5.29.15",
+			values: [
+				keyUsage
+			]
+		})
+	];
+	//endregion
+	
+	//region Put initial values for PKCS#12 structures
+	const pkcs12 = new PFX({
+		parsedValue: {
+			integrityMode: 0, // Password-Based Integrity Mode
+			authenticatedSafe: new AuthenticatedSafe({
+				parsedValue: {
+					safeContents: [
+						{
+							privacyMode: 1, // Password-Based Privacy Protection Mode
+							value: new SafeContents({
+								safeBags: [
+									new SafeBag({
+										bagId: "1.2.840.113549.1.12.10.1.3",
+										bagValue: new CertBag({
+											parsedValue: certSimpl
+										}),
+										bagAttributes: [
+											new Attribute({
+												type: "1.2.840.113549.1.9.20", // friendlyName
+												values: [
+													new asn1js.BmpString({ value: "CertBag from PKIjs" })
+												]
+											}),
+											new Attribute({
+												type: "1.2.840.113549.1.9.21", // localKeyID
+												values: [
+													new asn1js.OctetString({ valueHex: certLocalIDBuffer })
+												]
+											}),
+											new Attribute({
+												type: "1.3.6.1.4.1.311.17.1", // pkcs12KeyProviderNameAttr
+												values: [
+													new asn1js.BmpString({ value: "http://www.pkijs.org" })
+												]
+											})
+										]
+									})
+								]
+							})
+						},
+						{
+							privacyMode: 0, // "No-privacy" Protection Mode
+							value: new SafeContents({
+								safeBags: [
+									new SafeBag({
+										bagId: "1.2.840.113549.1.12.10.1.2",
+										bagValue: new PKCS8ShroudedKeyBag({
+											parsedValue: pkcs8Simpl
+										}),
+										bagAttributes: [
+											new Attribute({
+												type: "1.2.840.113549.1.9.20", // friendlyName
+												values: [
+													new asn1js.BmpString({ value: "PKCS8ShroudedKeyBag from PKIjs" })
+												]
+											}),
+											new Attribute({
+												type: "1.2.840.113549.1.9.21", // localKeyID
+												values: [
+													new asn1js.OctetString({ valueHex: keyLocalIDBuffer })
+												]
+											}),
+											new Attribute({
+												type: "1.3.6.1.4.1.311.17.1", // pkcs12KeyProviderNameAttr
+												values: [
+													new asn1js.BmpString({ value: "http://www.pkijs.org" })
+												]
+											})
+										]
+									})
+								]
+							})
+						}
+					]
+				}
+			})
+		}
+	});
+	//endregion
+	
+	//region Encode internal values for "PKCS8ShroudedKeyBag"
+	sequence = sequence.then(
+		() => pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.makeInternalValues(makeInternalValuesParameters)
+	);
+	//endregion
+	
+	//region Encode internal values for all "SafeContents" firts (create all "Privacy Protection" envelopes)
+	sequence = sequence.then(
+		() => pkcs12.parsedValue.authenticatedSafe.makeInternalValues({
+			safeContents: [
+				makeInternalValuesParameters,
+				{
+					// Empty parameters for first SafeContent since "No Privacy" protection mode there
+				},
+			]
+		})
+	);
+	//endregion
+	
+	//region Encode internal values for "Integrity Protection" envelope
+	sequence = sequence.then(
+		() => pkcs12.makeInternalValues({
+			password: passwordConverted,
+			iterations: 2048,
+			pbkdf2HashAlgorithm: inputHashAlgorithm,
+			hmacHashAlgorithm: inputHashAlgorithm
 		})
 	);
 	//endregion
@@ -215,7 +385,7 @@ function parsePKCS12(buffer, password)
 	sequence = sequence.then(
 		() => pkcs12.parseInternalValues({
 			password: passwordConverted,
-			checkIntegrity: true
+			checkIntegrity: false
 		})
 	);
 	//endregion
@@ -228,19 +398,29 @@ function parsePKCS12(buffer, password)
 					password: passwordConverted
 				},
 				{
-					// Empty parameters since for first "SafeContent" OpenSSL uses "no privacy" protection mode
-				},
+					password: passwordConverted
+				}
 			]
 		})
 	);
 	//endregion
 	
 	//region Parse "PKCS8ShroudedKeyBag" value
-	sequence = sequence.then(
-		() => pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.parseInternalValues({
-			password: passwordConverted
-		})
-	);
+	sequence = sequence.then(() =>
+	{
+		try
+		{
+			pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.parseInternalValues({
+				password: passwordConverted
+			});
+		}
+		catch(ex)
+		{
+			pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.parseInternalValues({
+				password: passwordConverted
+			});
+		}
+	});
 	//endregion
 	
 	//region Store parsed value to Web page
@@ -258,6 +438,42 @@ context("Node.js PKCS#12 Example", () =>
 	const password = "Demo";
 	//endregion
 	
+	it("Parse Windows-like PKCS#12 data", () =>
+	{
+		let sequence = Promise.resolve();
+		
+		sequence = sequence.then(() =>
+		{
+			// Windows RC2
+			const windowsP12 = "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";
+			return parsePKCS12(stringToArrayBuffer(fromBase64(windowsP12)), "12");
+		});
+
+		sequence = sequence.then(() =>
+		{
+			// Forge 3DES
+			const windowsP12 = "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";
+			return parsePKCS12(stringToArrayBuffer(fromBase64(windowsP12)), "password");
+		});
+		
+		return sequence;
+	});
+	
+	it("X.509 Certificate, RC2-CBC algorithm", () =>
+	{
+		let asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509CertificateBASE64)));
+		certSimpl = new Certificate({ schema: asn1.result });
+		
+		asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509PrivateKeyBASE64)));
+		pkcs8Simpl = new PrivateKeyInfo({ schema: asn1.result });
+		
+		return windowsLike(password, "RC2-CBC", "SHA-1").then(result =>
+		{
+			console.log(`X.509 Certificate, RC2-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			return parsePKCS12(result, password);
+		});
+	});
+
 	it("X.509 Certificate, DES-EDE3-CBC algorithm", () =>
 	{
 		let asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509CertificateBASE64)));
