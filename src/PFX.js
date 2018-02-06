@@ -493,9 +493,21 @@ export default class PFX
 					if((this.authSafe.content instanceof asn1js.OctetString) === false)
 						return Promise.reject("Wrong type of \"this.authSafe.content\"");
 					//endregion
-				
+					
+					//region Check we have "constructive encoding" for AuthSafe content
+					let authSafeContent = new ArrayBuffer(0);
+					
+					if(this.authSafe.content.valueBlock.isConstructed)
+					{
+						for(const contentValue of this.authSafe.content.valueBlock.value)
+							authSafeContent = utilConcatBuf(authSafeContent, contentValue.valueBlock.valueHex);
+					}
+					else
+						authSafeContent = this.authSafe.content.valueBlock.valueHex;
+					//endregion
+					
 					//region Parse internal ASN.1 data
-					const asn1 = asn1js.fromBER(this.authSafe.content.valueBlock.valueHex);
+					const asn1 = asn1js.fromBER(authSafeContent);
 					if(asn1.offset === (-1))
 						return Promise.reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\"");
 					//endregion

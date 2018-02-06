@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, utilConcatBuf } from "pvutils";
 import ContentInfo from "./ContentInfo";
 import SafeContents from "./SafeContents";
 import EnvelopedData from "./EnvelopedData";
@@ -190,8 +190,20 @@ export default class AuthenticatedSafe
 							return Promise.reject("Wrong type of \"this.safeContents[j].content\"");
 						//endregion
 						
+						//region Check we have "constructive encoding" for AuthSafe content
+						let authSafeContent = new ArrayBuffer(0);
+						
+						if(content.content.valueBlock.isConstructed)
+						{
+							for(const contentValue of content.content.valueBlock.value)
+								authSafeContent = utilConcatBuf(authSafeContent, contentValue.valueBlock.valueHex);
+						}
+						else
+							authSafeContent = content.content.valueBlock.valueHex;
+						//endregion
+						
 						//region Parse internal ASN.1 data
-						const asn1 = asn1js.fromBER(content.content.valueBlock.valueHex);
+						const asn1 = asn1js.fromBER(authSafeContent);
 						if(asn1.offset === (-1))
 							return Promise.reject("Error during parsing of ASN.1 data inside \"content.content\"");
 						//endregion
