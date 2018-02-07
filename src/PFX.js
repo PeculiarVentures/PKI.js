@@ -539,7 +539,7 @@ export default class PFX
 								hashAlgorithm: hashAlgorithm.name,
 								salt: this.macData.macSalt.valueBlock.valueHex,
 								iterationCount: this.macData.iterations,
-								contentToVerify: this.authSafe.content.valueBlock.valueHex,
+								contentToVerify: authSafeContent,
 								signatureToVerify: this.macData.mac.digest.valueBlock.valueHex
 							})
 						);
