@@ -385,7 +385,7 @@ function parsePKCS12(buffer, password)
 	sequence = sequence.then(
 		() => pkcs12.parseInternalValues({
 			password: passwordConverted,
-			checkIntegrity: false
+			checkIntegrity: true
 		})
 	);
 	//endregion
