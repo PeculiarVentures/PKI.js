@@ -2,7 +2,6 @@ import { getParametersValue, isEqualBuffer } from "pvutils";
 import { getAlgorithmByOID, stringPrep } from "./common";
 import CertificateRevocationList from "./CertificateRevocationList";
 import Certificate from "./Certificate";
-import generatorsDriver from "./GeneratorsDriver";
 //**************************************************************************************
 export default class CertificateChainValidationEngine
 {
@@ -71,7 +70,7 @@ export default class CertificateChainValidationEngine
 		}
 	}
 	//**********************************************************************************
-	sort()
+	async sort()
 	{
 		//region Initial variables
 		const localCerts = [];
@@ -79,7 +78,7 @@ export default class CertificateChainValidationEngine
 		//endregion
 		
 		//region Finding certificate issuer
-		function *findIssuer(certificate, index)
+		async function findIssuer(certificate, index)
 		{
 			const result = [];
 			
@@ -88,7 +87,7 @@ export default class CertificateChainValidationEngine
 			{
 				try
 				{
-					const verificationResult = yield certificate.verify();
+					const verificationResult = await certificate.verify();
 					if(verificationResult === true)
 						return [index];
 				}
@@ -102,7 +101,7 @@ export default class CertificateChainValidationEngine
 			{
 				try
 				{
-					const verificationResult = yield certificate.verify(localCerts[i]);
+					const verificationResult = await certificate.verify(localCerts[i]);
 					if(verificationResult === true)
 						result.push(i);
 				}
@@ -116,7 +115,7 @@ export default class CertificateChainValidationEngine
 		//endregion
 		
 		//region Building certificate path
-		function *buildPath(certificate, index)
+		async function buildPath(certificate, index)
 		{
 			const result = [];
 			
@@ -148,7 +147,7 @@ export default class CertificateChainValidationEngine
 			
 			//endregion
 			
-			const findIssuerResult = yield findIssuer(certificate, index);
+			const findIssuerResult = await findIssuer(certificate, index);
 			if((findIssuerResult.length === 1) && (findIssuerResult[0] === (-1)))
 				throw new Error("No valid certificate paths found");
 			
@@ -160,7 +159,7 @@ export default class CertificateChainValidationEngine
 					return result;
 				}
 				
-				const buildPathResult = yield buildPath(localCerts[findIssuerResult[0]], findIssuerResult[0]);
+				const buildPathResult = await buildPath(localCerts[findIssuerResult[0]], findIssuerResult[0]);
 				
 				for(let i = 0; i < buildPathResult.length; i++)
 				{
@@ -183,7 +182,7 @@ export default class CertificateChainValidationEngine
 						continue;
 					}
 					
-					const buildPathResult = yield buildPath(localCerts[findIssuerResult[i]], findIssuerResult[i]);
+					const buildPathResult = await buildPath(localCerts[findIssuerResult[i]], findIssuerResult[i]);
 					
 					for(let j = 0; j < buildPathResult.length; j++)
 					{
@@ -200,11 +199,10 @@ export default class CertificateChainValidationEngine
 			
 			return result;
 		}
-		
 		//endregion
 		
 		//region Find CRL for specific certificate
-		function *findCRL(certificate)
+		async function findCRL(certificate)
 		{
 			//region Initial variables
 			const issuerCertificates = [];
@@ -249,7 +247,7 @@ export default class CertificateChainValidationEngine
 				{
 					try
 					{
-						const result = yield crls[i].verify({ issuerCertificate: issuerCertificates[j] });
+						const result = await crls[i].verify({ issuerCertificate: issuerCertificates[j] });
 						if(result)
 						{
 							crlsAndCertificates.push({
@@ -281,11 +279,10 @@ export default class CertificateChainValidationEngine
 				statusMessage: "No valid CRLs found"
 			};
 		}
-		
 		//endregion
 		
 		//region Find OCSP for specific certificate
-		function *findOCSP(certificate, issuerCertificate)
+		async function findOCSP(certificate, issuerCertificate)
 		{
 			//region Get hash algorithm from certificate
 			const hashAlgorithm = getAlgorithmByOID(certificate.signatureAlgorithm.algorithmId);
@@ -298,7 +295,7 @@ export default class CertificateChainValidationEngine
 			//region Search for OCSP response for the certificate
 			for(let i = 0; i < _this.ocsps.length; i++)
 			{
-				const result = yield _this.ocsps[i].getCertificateStatus(certificate, issuerCertificate);
+				const result = await _this.ocsps[i].getCertificateStatus(certificate, issuerCertificate);
 				if(result.isForCertificate)
 				{
 					if(result.status === 0)
@@ -311,11 +308,10 @@ export default class CertificateChainValidationEngine
 			
 			return 2;
 		}
-		
 		//endregion
 		
 		//region Check for certificate to be CA
-		function *checkForCA(certificate, needToCheckCRL = false)
+		async function checkForCA(certificate, needToCheckCRL = false)
 		{
 			//region Initial variables
 			let isCA = false;
@@ -404,11 +400,10 @@ export default class CertificateChainValidationEngine
 				resultMessage: ""
 			};
 		}
-		
 		//endregion
 		
 		//region Basic check for certificate path
-		function *basicCheck(path, checkDate)
+		async function basicCheck(path, checkDate)
 		{
 			//region Check that all dates are valid
 			for(let i = 0; i < path.length; i++)
@@ -468,7 +463,7 @@ export default class CertificateChainValidationEngine
 					//region Check OCSPs first
 					if(_this.ocsps.length !== 0)
 					{
-						ocspResult = yield findOCSP(path[i], path[i + 1]);
+						ocspResult = await findOCSP(path[i], path[i + 1]);
 						
 						switch(ocspResult)
 						{
@@ -490,7 +485,7 @@ export default class CertificateChainValidationEngine
 					//region Check CRLs
 					if(_this.crls.length !== 0)
 					{
-						crlResult = yield findCRL(path[i]);
+						crlResult = await findCRL(path[i]);
 						if(crlResult.status)
 						{
 							throw {
@@ -515,7 +510,7 @@ export default class CertificateChainValidationEngine
 							//endregion
 							
 							//region Check that the CRL issuer certificate is a CA certificate
-							const isCertificateCA = yield checkForCA(crlResult.result[j].certificate, true);
+							const isCertificateCA = await checkForCA(crlResult.result[j].certificate, true);
 							if(isCertificateCA.result === false)
 							{
 								return {
@@ -546,7 +541,7 @@ export default class CertificateChainValidationEngine
 			//region Check each certificate (except "end entity") in the path to be a CA certificate
 			for(let i = 1; i < path.length; i++)
 			{
-				const result = yield checkForCA(path[i]);
+				const result = await checkForCA(path[i]);
 				if(result.result === false)
 				{
 					return {
@@ -564,114 +559,113 @@ export default class CertificateChainValidationEngine
 		}
 		//endregion
 		
-		return generatorsDriver(function *generatorFunction()
+		//region Do main work
+		//region Initialize "localCerts" by value of "_this.certs" + "_this.trustedCerts" arrays
+		localCerts.push(..._this.trustedCerts);
+		localCerts.push(..._this.certs);
+		//endregion
+		
+		//region Check all certificates for been unique
+		for(let i = 0; i < localCerts.length; i++)
 		{
-			//region Initialize "localCerts" by value of "_this.certs" + "_this.trustedCerts" arrays
-			localCerts.push(..._this.trustedCerts);
-			localCerts.push(..._this.certs);
-			//endregion
-			
-			//region Check all certificates for been unique
-			for(let i = 0; i < localCerts.length; i++)
+			for(let j = 0; j < localCerts.length; j++)
 			{
-				for(let j = 0; j < localCerts.length; j++)
-				{
-					if(i === j)
-						continue;
-					
-					if(isEqualBuffer(localCerts[i].tbs, localCerts[j].tbs))
-					{
-						localCerts.splice(j, 1);
-						i = 0;
-						break;
-					}
-				}
-			}
-			//endregion
-			
-			//region Initial variables
-			let result;
-			const certificatePath = [localCerts[localCerts.length - 1]]; // The "end entity" certificate must be the least in "certs" array
-			//endregion
-			
-			//region Build path for "end entity" certificate
-			result = yield buildPath(localCerts[localCerts.length - 1], localCerts.length - 1);
-			if(result.length === 0)
-			{
-				return {
-					result: false,
-					resultCode: 60,
-					resultMessage: "Unable to find certificate path"
-				};
-			}
-			//endregion
-			
-			//region Exclude certificate paths not ended with "trusted roots"
-			for(let i = 0; i < result.length; i++)
-			{
-				let found = false;
+				if(i === j)
+					continue;
 				
-				for(let j = 0; j < (result[i]).length; j++)
+				if(isEqualBuffer(localCerts[i].tbs, localCerts[j].tbs))
 				{
-					const certificate = localCerts[(result[i])[j]];
-					
-					for(let k = 0; k < _this.trustedCerts.length; k++)
-					{
-						if(isEqualBuffer(certificate.tbs, _this.trustedCerts[k].tbs))
-						{
-							found = true;
-							break;
-						}
-					}
-					
-					if(found)
-						break;
-				}
-				
-				if(!found)
-				{
-					result.splice(i, 1);
+					localCerts.splice(j, 1);
 					i = 0;
+					break;
 				}
 			}
+		}
+		//endregion
+		
+		//region Initial variables
+		let result;
+		const certificatePath = [localCerts[localCerts.length - 1]]; // The "end entity" certificate must be the least in "certs" array
+		//endregion
+		
+		//region Build path for "end entity" certificate
+		result = await buildPath(localCerts[localCerts.length - 1], localCerts.length - 1);
+		if(result.length === 0)
+		{
+			return {
+				result: false,
+				resultCode: 60,
+				resultMessage: "Unable to find certificate path"
+			};
+		}
+		//endregion
+		
+		//region Exclude certificate paths not ended with "trusted roots"
+		for(let i = 0; i < result.length; i++)
+		{
+			let found = false;
 			
-			if(result.length === 0)
+			for(let j = 0; j < (result[i]).length; j++)
 			{
-				throw {
-					result: false,
-					resultCode: 97,
-					resultMessage: "No valid certificate paths found"
-				};
-			}
-			//endregion
-			
-			//region Find shortest certificate path (for the moment it is the only criteria)
-			let shortestLength = result[0].length;
-			let shortestIndex = 0;
-			
-			for(let i = 0; i < result.length; i++)
-			{
-				if(result[i].length < shortestLength)
+				const certificate = localCerts[(result[i])[j]];
+				
+				for(let k = 0; k < _this.trustedCerts.length; k++)
 				{
-					shortestLength = result[i].length;
-					shortestIndex = i;
+					if(isEqualBuffer(certificate.tbs, _this.trustedCerts[k].tbs))
+					{
+						found = true;
+						break;
+					}
 				}
+				
+				if(found)
+					break;
 			}
-			//endregion
 			
-			//region Create certificate path for basic check
-			for(let i = 0; i < result[shortestIndex].length; i++)
-				certificatePath.push(localCerts[(result[shortestIndex])[i]]);
-			//endregion
-			
-			//region Perform basic checking for all certificates in the path
-			result = yield basicCheck(certificatePath, _this.checkDate);
-			if(result.result === false)
-				throw result;
-			//endregion
-			
-			return certificatePath;
-		});
+			if(!found)
+			{
+				result.splice(i, 1);
+				i = 0;
+			}
+		}
+		
+		if(result.length === 0)
+		{
+			throw {
+				result: false,
+				resultCode: 97,
+				resultMessage: "No valid certificate paths found"
+			};
+		}
+		//endregion
+		
+		//region Find shortest certificate path (for the moment it is the only criteria)
+		let shortestLength = result[0].length;
+		let shortestIndex = 0;
+		
+		for(let i = 0; i < result.length; i++)
+		{
+			if(result[i].length < shortestLength)
+			{
+				shortestLength = result[i].length;
+				shortestIndex = i;
+			}
+		}
+		//endregion
+		
+		//region Create certificate path for basic check
+		for(let i = 0; i < result[shortestIndex].length; i++)
+			certificatePath.push(localCerts[(result[shortestIndex])[i]]);
+		//endregion
+		
+		//region Perform basic checking for all certificates in the path
+		result = await basicCheck(certificatePath, _this.checkDate);
+		if(result.result === false)
+			throw result;
+		//endregion
+		
+		return certificatePath;
+		//endregion
 	}
 	//**********************************************************************************
 	/**
@@ -679,80 +673,73 @@ export default class CertificateChainValidationEngine
 	 * @param {{initialPolicySet, initialExplicitPolicy, initialPolicyMappingInhibit, initialInhibitPolicy, initialPermittedSubtreesSet, initialExcludedSubtreesSet, initialRequiredNameForms}} [parameters]
 	 * @returns {Promise}
 	 */
-	verify(parameters = {})
+	async verify(parameters = {})
 	{
-		//region Initial checks
-		if(this.certs.length === 0)
-			return Promise.reject("Empty certificate array");
-		//endregion
-		
-		//region Initial variables
-		let sequence = Promise.resolve();
-		//endregion
-		
-		//region Get input variables
-		let initialPolicySet = [];
-		initialPolicySet.push("2.5.29.32.0"); // "anyPolicy"
-		
-		let initialExplicitPolicy = false;
-		let initialPolicyMappingInhibit = false;
-		let initialInhibitPolicy = false;
-		
-		let initialPermittedSubtreesSet = []; // Array of "simpl.x509.GeneralSubtree"
-		let initialExcludedSubtreesSet = [];  // Array of "simpl.x509.GeneralSubtree"
-		let initialRequiredNameForms = [];    // Array of "simpl.x509.GeneralSubtree"
-		
-		if("initialPolicySet" in parameters)
-			initialPolicySet = parameters.initialPolicySet;
-		
-		if("initialExplicitPolicy" in parameters)
-			initialExplicitPolicy = parameters.initialExplicitPolicy;
-		
-		if("initialPolicyMappingInhibit" in parameters)
-			initialPolicyMappingInhibit = parameters.initialPolicyMappingInhibit;
-		
-		if("initialInhibitPolicy" in parameters)
-			initialInhibitPolicy = parameters.initialInhibitPolicy;
-		
-		if("initialPermittedSubtreesSet" in parameters)
-			initialPermittedSubtreesSet = parameters.initialPermittedSubtreesSet;
-		
-		if("initialExcludedSubtreesSet" in parameters)
-			initialExcludedSubtreesSet = parameters.initialExcludedSubtreesSet;
-		
-		if("initialRequiredNameForms" in parameters)
-			initialRequiredNameForms = parameters.initialRequiredNameForms;
-		
-		let explicitPolicyIndicator = initialExplicitPolicy;
-		let policyMappingInhibitIndicator = initialPolicyMappingInhibit;
-		let inhibitAnyPolicyIndicator = initialInhibitPolicy;
-		
-		const pendingConstraints = new Array(3);
-		pendingConstraints[0] = false; // For "explicitPolicyPending"
-		pendingConstraints[1] = false; // For "policyMappingInhibitPending"
-		pendingConstraints[2] = false; // For "inhibitAnyPolicyPending"
-		
-		let explicitPolicyPending = 0;
-		let policyMappingInhibitPending = 0;
-		let inhibitAnyPolicyPending = 0;
-		
-		let permittedSubtrees = initialPermittedSubtreesSet;
-		let excludedSubtrees = initialExcludedSubtreesSet;
-		const requiredNameForms = initialRequiredNameForms;
-		
-		let pathDepth = 1;
-		//endregion
-		
-		//region Sorting certificates in the chain array
-		sequence = this.sort().then(sortedCerts =>
+		try
 		{
-			this.certs = sortedCerts;
-		});
-		//endregion
-		
-		//region Work with policies
-		sequence = sequence.then(() =>
-		{
+			//region Initial checks
+			if(this.certs.length === 0)
+				throw "Empty certificate array";
+			//endregion
+			
+			//region Get input variables
+			let initialPolicySet = [];
+			initialPolicySet.push("2.5.29.32.0"); // "anyPolicy"
+			
+			let initialExplicitPolicy = false;
+			let initialPolicyMappingInhibit = false;
+			let initialInhibitPolicy = false;
+			
+			let initialPermittedSubtreesSet = []; // Array of "simpl.x509.GeneralSubtree"
+			let initialExcludedSubtreesSet = [];  // Array of "simpl.x509.GeneralSubtree"
+			let initialRequiredNameForms = [];    // Array of "simpl.x509.GeneralSubtree"
+			
+			if("initialPolicySet" in parameters)
+				initialPolicySet = parameters.initialPolicySet;
+			
+			if("initialExplicitPolicy" in parameters)
+				initialExplicitPolicy = parameters.initialExplicitPolicy;
+			
+			if("initialPolicyMappingInhibit" in parameters)
+				initialPolicyMappingInhibit = parameters.initialPolicyMappingInhibit;
+			
+			if("initialInhibitPolicy" in parameters)
+				initialInhibitPolicy = parameters.initialInhibitPolicy;
+			
+			if("initialPermittedSubtreesSet" in parameters)
+				initialPermittedSubtreesSet = parameters.initialPermittedSubtreesSet;
+			
+			if("initialExcludedSubtreesSet" in parameters)
+				initialExcludedSubtreesSet = parameters.initialExcludedSubtreesSet;
+			
+			if("initialRequiredNameForms" in parameters)
+				initialRequiredNameForms = parameters.initialRequiredNameForms;
+			
+			let explicitPolicyIndicator = initialExplicitPolicy;
+			let policyMappingInhibitIndicator = initialPolicyMappingInhibit;
+			let inhibitAnyPolicyIndicator = initialInhibitPolicy;
+			
+			const pendingConstraints = new Array(3);
+			pendingConstraints[0] = false; // For "explicitPolicyPending"
+			pendingConstraints[1] = false; // For "policyMappingInhibitPending"
+			pendingConstraints[2] = false; // For "inhibitAnyPolicyPending"
+			
+			let explicitPolicyPending = 0;
+			let policyMappingInhibitPending = 0;
+			let inhibitAnyPolicyPending = 0;
+			
+			let permittedSubtrees = initialPermittedSubtreesSet;
+			let excludedSubtrees = initialExcludedSubtreesSet;
+			const requiredNameForms = initialRequiredNameForms;
+			
+			let pathDepth = 1;
+			//endregion
+			
+			//region Sorting certificates in the chain array
+			this.certs = await this.sort();
+			//endregion
+			
+			//region Work with policies
 			//region Support variables
 			const allPolicies = []; // Array of all policies (string values)
 			allPolicies.push("2.5.29.32.0"); // Put "anyPolicy" at first place
@@ -1125,22 +1112,23 @@ export default class CertificateChainValidationEngine
 			//endregion
 			
 			//region Combine output object
-			return {
+			const policyResult = {
 				result: (userConstrPolicies.length > 0),
 				resultCode: 0,
 				resultMessage: (userConstrPolicies.length > 0) ? "" : "Zero \"userConstrPolicies\" array, no intersections with \"authConstrPolicies\"",
 				authConstrPolicies,
 				userConstrPolicies,
 				explicitPolicyIndicator,
-				policyMappings
+				policyMappings,
+				certificatePath: this.certs
 			};
+			
+			if(userConstrPolicies.length === 0)
+				return policyResult;
 			//endregion
-		});
-		//endregion
-		
-		//region Work with name constraints
-		sequence = sequence.then(policyResult =>
-		{
+			//endregion
+			
+			//region Work with name constraints
 			//region Auxiliary functions for name constraints checking
 			function compareDNSName(name, constraint)
 			{
@@ -1445,24 +1433,24 @@ export default class CertificateChainValidationEngine
 					switch(requiredNameForms[j].base.type)
 					{
 						case 4: // directoryName
+						{
+							if(requiredNameForms[j].base.value.typesAndValues.length !== this.certs[i].subject.typesAndValues.length)
+								continue;
+							
+							formFound = true;
+							
+							for(let k = 0; k < this.certs[i].subject.typesAndValues.length; k++)
 							{
-								if(requiredNameForms[j].base.value.typesAndValues.length !== this.certs[i].subject.typesAndValues.length)
-									continue;
-								
-								formFound = true;
-								
-								for(let k = 0; k < this.certs[i].subject.typesAndValues.length; k++)
+								if(this.certs[i].subject.typesAndValues[k].type !== requiredNameForms[j].base.value.typesAndValues[k].type)
 								{
-									if(this.certs[i].subject.typesAndValues[k].type !== requiredNameForms[j].base.value.typesAndValues[k].type)
-									{
-										formFound = false;
-										break;
-									}
-								}
-								
-								if(formFound === true)
+									formFound = false;
 									break;
+								}
 							}
+							
+							if(formFound === true)
+								break;
+						}
 							break;
 						default: // ??? Probably here we should reject the certificate ???
 					}
@@ -1474,7 +1462,7 @@ export default class CertificateChainValidationEngine
 					policyResult.resultCode = 21;
 					policyResult.resultMessage = "No neccessary name form found";
 					
-					return Promise.reject(policyResult);
+					throw policyResult;
 				}
 				//endregion
 				
@@ -1627,7 +1615,7 @@ export default class CertificateChainValidationEngine
 						policyResult.resultCode = 41;
 						policyResult.resultMessage = "Failed to meet \"permitted sub-trees\" name constraint";
 						
-						return Promise.reject(policyResult);
+						throw policyResult;
 					}
 				}
 				//endregion
@@ -1717,7 +1705,7 @@ export default class CertificateChainValidationEngine
 					policyResult.resultCode = 42;
 					policyResult.resultMessage = "Failed to meet \"excluded sub-trees\" name constraint";
 					
-					return Promise.reject(policyResult);
+					throw policyResult;
 				}
 				//endregion
 				
@@ -1729,11 +1717,9 @@ export default class CertificateChainValidationEngine
 			//endregion
 			
 			return policyResult;
-		});
-		//endregion
-		
-		//region Error handling stub
-		sequence = sequence.then(result => result, error =>
+			//endregion
+		}
+		catch(error)
 		{
 			if(error instanceof Object)
 			{
@@ -1755,10 +1741,7 @@ export default class CertificateChainValidationEngine
 				resultCode: -1,
 				resultMessage: error
 			};
-		});
-		//endregion
-		
-		return sequence;
+		}
 	}
 	//**********************************************************************************
 }
