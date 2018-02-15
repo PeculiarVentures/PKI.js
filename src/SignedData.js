@@ -671,7 +671,7 @@ export default class SignedData
 		{
 			sequence = sequence.then(result =>
 			{
-				//region Veify result of previous operation
+				//region Verify result of previous operation
 				if(result === false)
 					return false;
 				//endregion
@@ -747,7 +747,7 @@ export default class SignedData
 		//region Find signer's hashing algorithm
 		sequence = sequence.then(result =>
 		{
-			//region Veify result of previous operation
+			//region Verify result of previous operation
 			if(result === false)
 				return false;
 			//endregion
@@ -779,7 +779,7 @@ export default class SignedData
 		//region Create correct data block for verification
 		sequence = sequence.then(result =>
 		{
-			//region Veify result of previous operation
+			//region Verify result of previous operation
 			if(result === false)
 				return false;
 			//endregion
@@ -798,7 +798,7 @@ export default class SignedData
 					}
 				}
 				else
-					data = this.encapContentInfo.eContent.valueBlock.valueHex;
+					data = this.encapContentInfo.eContent.valueBlock.valueBeforeDecode;
 			}
 			else // Detached data
 			{
@@ -890,7 +890,7 @@ export default class SignedData
 		//region Import public key from signer's certificate
 		sequence = sequence.then(result =>
 		{
-			//region Veify result of previous operation
+			//region Verify result of previous operation
 			if(result === false)
 				return false;
 			//endregion
@@ -963,7 +963,7 @@ export default class SignedData
 		//region Verify signer's signature
 		sequence = sequence.then(result =>
 		{
-			//region Veify result of previous operation
+			//region Verify result of previous operation
 			if(typeof result === "boolean")
 				return false;
 			//endregion
@@ -1116,6 +1116,7 @@ export default class SignedData
 					message: `Error during verification: ${error.message}`,
 					signatureVerified: null,
 					signerCertificate,
+					timestampSerial,
 					signerCertificateVerified: true
 				});
 			}
