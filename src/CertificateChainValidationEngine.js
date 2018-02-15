@@ -18,27 +18,37 @@ export default class CertificateChainValidationEngine
 		 * @type {Array.<Certificate>}
 		 * @description Array of pre-defined trusted (by user) certificates
 		 */
-		this.trustedCerts = getParametersValue(parameters, "trustedCerts", CertificateChainValidationEngine.defaultValues("trustedCerts"));
+		this.trustedCerts = getParametersValue(parameters, "trustedCerts", this.defaultValues("trustedCerts"));
 		/**
 		 * @type {Array.<Certificate>}
 		 * @description Array with certificate chain. Could be only one end-user certificate in there!
 		 */
-		this.certs = getParametersValue(parameters, "certs", CertificateChainValidationEngine.defaultValues("certs"));
+		this.certs = getParametersValue(parameters, "certs", this.defaultValues("certs"));
 		/**
 		 * @type {Array.<CertificateRevocationList>}
 		 * @description Array of all CRLs for all certificates from certificate chain
 		 */
-		this.crls = getParametersValue(parameters, "crls", CertificateChainValidationEngine.defaultValues("crls"));
+		this.crls = getParametersValue(parameters, "crls", this.defaultValues("crls"));
 		/**
 		 * @type {Array}
 		 * @description Array of all OCSP responses
 		 */
-		this.ocsps = getParametersValue(parameters, "ocsps", CertificateChainValidationEngine.defaultValues("ocsps"));
+		this.ocsps = getParametersValue(parameters, "ocsps", this.defaultValues("ocsps"));
 		/**
 		 * @type {Date}
 		 * @description The date at which the check would be
 		 */
-		this.checkDate = getParametersValue(parameters, "checkDate", CertificateChainValidationEngine.defaultValues("checkDate"));
+		this.checkDate = getParametersValue(parameters, "checkDate", this.defaultValues("checkDate"));
+		/**
+		 * @type {Function}
+		 * @description The date at which the check would be
+		 */
+		this.findOrigin = getParametersValue(parameters, "findOrigin", this.defaultValues("findOrigin"));
+		/**
+		 * @type {Function}
+		 * @description The date at which the check would be
+		 */
+		this.findIssuer = getParametersValue(parameters, "findIssuer", this.defaultValues("findIssuer"));
 		//endregion
 		
 		//region If input argument array contains "schema" for this object
@@ -47,11 +57,180 @@ export default class CertificateChainValidationEngine
 		//endregion
 	}
 	//**********************************************************************************
+	defaultFindOrigin(certificate, validationEngine)
+	{
+		//region Firstly encode TBS for certificate
+		if(certificate.tbs.byteLength === 0)
+			certificate.tbs = certificate.encodeTBS();
+		//endregion
+		
+		//region Search in Intermediate Certificates
+		for(const localCert of this.certs)
+		{
+			//region Firstly encode TBS for certificate
+			if(localCert.tbs.byteLength === 0)
+				localCert.tbs = localCert.encodeTBS();
+			//endregion
+			
+			if(isEqualBuffer(certificate.tbs, localCert.tbs))
+				return "Intermediate Certificates";
+		}
+		//endregion
+		
+		//region Search in Trusted Certificates
+		for(const trustedCert of this.trustedCerts)
+		{
+			//region Firstly encode TBS for certificate
+			if(trustedCert.tbs.byteLength === 0)
+				trustedCert.tbs = trustedCert.encodeTBS();
+			//endregion
+			
+			if(isEqualBuffer(certificate.tbs, trustedCert.tbs))
+				return "Trusted Certificates";
+		}
+		//endregion
+		
+		return "Unknown";
+	}
+	//**********************************************************************************
+	async defaultFindIssuer(certificate, validationEngine)
+	{
+		//region Initial variables
+		let result = [];
+		
+		let keyIdentifier = null;
+		
+		let authorityCertIssuer = null;
+		let authorityCertSerialNumber = null;
+		//endregion
+		
+		//region Speed-up searching in case of self-signed certificates
+		if(certificate.subject.isEqual(certificate.issuer))
+		{
+			try
+			{
+				const verificationResult = await certificate.verify();
+				if(verificationResult === true)
+					return [certificate];
+			}
+			catch(ex)
+			{
+			}
+		}
+		//endregion
+		
+		//region Find values to speed-up search
+		if("extensions" in certificate)
+		{
+			for(const extension of certificate.extensions)
+			{
+				if(extension.extnID === "2.5.29.35") // AuthorityKeyIdentifier
+				{
+					if("keyIdentifier" in extension.parsedValue)
+						keyIdentifier = extension.parsedValue.keyIdentifier;
+					else
+					{
+						if("authorityCertIssuer" in extension.parsedValue)
+							authorityCertIssuer = extension.parsedValue.authorityCertIssuer;
+						
+						if("authorityCertSerialNumber" in extension.parsedValue)
+							authorityCertSerialNumber = extension.parsedValue.authorityCertSerialNumber;
+					}
+					
+					break;
+				}
+			}
+		}
+		//endregion
+		
+		//region Aux function
+		function checkCertificate(possibleIssuer)
+		{
+			//region Firstly search for appropriate extensions
+			if(keyIdentifier !== null)
+			{
+				if("extensions" in possibleIssuer)
+				{
+					let extensionFound = false;
+					
+					for(const extension of possibleIssuer.extensions)
+					{
+						if(extension.extnID === "2.5.29.14") // SubjectKeyIdentifier
+						{
+							extensionFound = true;
+							
+							if(isEqualBuffer(extension.parsedValue.valueBlock.valueHex, keyIdentifier.valueBlock.valueHex))
+								result.push(possibleIssuer);
+							
+							break;
+						}
+					}
+					
+					if(extensionFound)
+						return;
+				}
+			}
+			//endregion
+			
+			//region Now search for authorityCertSerialNumber
+			let authorityCertSerialNumberEqual = false;
+			
+			if(authorityCertSerialNumber !== null)
+				authorityCertSerialNumberEqual = possibleIssuer.serialNumber.isEqual(authorityCertSerialNumber);
+			//endregion
+			
+			//region And at least search for Issuer data
+			if(authorityCertIssuer !== null)
+			{
+				if(possibleIssuer.subject.isEqual(authorityCertIssuer))
+				{
+					if(authorityCertSerialNumberEqual)
+						result.push(possibleIssuer);
+				}
+			}
+			else
+			{
+				if(certificate.issuer.isEqual(possibleIssuer.subject))
+					result.push(possibleIssuer);
+			}
+			//endregion
+		}
+		//endregion
+		
+		//region Search in Trusted Certificates
+		for(const trustedCert of validationEngine.trustedCerts)
+			checkCertificate(trustedCert);
+		//endregion
+		
+		//region Search in Intermediate Certificates
+		for(const intermediateCert of validationEngine.certs)
+			checkCertificate(intermediateCert);
+		//endregion
+		
+		//region Now perform certificate verification checking
+		for(let i = 0; i < result.length; i++)
+		{
+			try
+			{
+				const verificationResult = await certificate.verify(result[i]);
+				if(verificationResult === false)
+					result.splice(i, 1);
+			}
+			catch(ex)
+			{
+				result.splice(i, 1); // Something wrong, remove the certificate
+			}
+		}
+		//endregion
+		
+		return result;
+	}
+	//**********************************************************************************
 	/**
 	 * Return default values for all class members
 	 * @param {string} memberName String name for a class member
 	 */
-	static defaultValues(memberName)
+	defaultValues(memberName)
 	{
 		switch(memberName)
 		{
@@ -65,6 +244,10 @@ export default class CertificateChainValidationEngine
 				return [];
 			case "checkDate":
 				return new Date();
+			case "findOrigin":
+				return this.defaultFindOrigin;
+			case "findIssuer":
+				return this.defaultFindIssuer;
 			default:
 				throw new Error(`Invalid member name for CertificateChainValidationEngine class: ${memberName}`);
 		}
@@ -77,45 +260,8 @@ export default class CertificateChainValidationEngine
 		const _this = this;
 		//endregion
 		
-		//region Finding certificate issuer
-		async function findIssuer(certificate, index)
-		{
-			const result = [];
-			
-			//region Speed-up searching in case of self-signed certificates
-			if(certificate.subject.isEqual(certificate.issuer))
-			{
-				try
-				{
-					const verificationResult = await certificate.verify();
-					if(verificationResult === true)
-						return [index];
-				}
-				catch(ex)
-				{
-				}
-			}
-			//endregion
-			
-			for(let i = 0; i < localCerts.length; i++)
-			{
-				try
-				{
-					const verificationResult = await certificate.verify(localCerts[i]);
-					if(verificationResult === true)
-						result.push(i);
-				}
-				catch(ex)
-				{
-				}
-			}
-			
-			return ((result.length) ? result : [-1]);
-		}
-		//endregion
-		
 		//region Building certificate path
-		async function buildPath(certificate, index)
+		async function buildPath(certificate)
 		{
 			const result = [];
 			
@@ -147,53 +293,29 @@ export default class CertificateChainValidationEngine
 			
 			//endregion
 			
-			const findIssuerResult = await findIssuer(certificate, index);
-			if((findIssuerResult.length === 1) && (findIssuerResult[0] === (-1)))
+			const findIssuerResult = await _this.findIssuer(certificate, _this);
+			if(findIssuerResult.length === 0)
 				throw new Error("No valid certificate paths found");
 			
-			if(findIssuerResult.length === 1)
+			for(let i = 0; i < findIssuerResult.length; i++)
 			{
-				if(findIssuerResult[0] === index)
+				if(isEqualBuffer(findIssuerResult[i].tbs, certificate.tbs))
 				{
-					result.push(findIssuerResult);
-					return result;
+					result.push([findIssuerResult[i]]);
+					continue;
 				}
 				
-				const buildPathResult = await buildPath(localCerts[findIssuerResult[0]], findIssuerResult[0]);
+				const buildPathResult = await buildPath(findIssuerResult[i]);
 				
-				for(let i = 0; i < buildPathResult.length; i++)
+				for(let j = 0; j < buildPathResult.length; j++)
 				{
-					const copy = buildPathResult[i].slice();
-					copy.splice(0, 0, findIssuerResult[0]);
+					const copy = buildPathResult[j].slice();
+					copy.splice(0, 0, findIssuerResult[i]);
 					
 					if(checkUnique(copy))
 						result.push(copy);
 					else
-						result.push(buildPathResult[i]);
-				}
-			}
-			else
-			{
-				for(let i = 0; i < findIssuerResult.length; i++)
-				{
-					if(findIssuerResult[i] === index)
-					{
-						result.push([findIssuerResult[i]]);
-						continue;
-					}
-					
-					const buildPathResult = await buildPath(localCerts[findIssuerResult[i]], findIssuerResult[i]);
-					
-					for(let j = 0; j < buildPathResult.length; j++)
-					{
-						const copy = buildPathResult[j].slice();
-						copy.splice(0, 0, findIssuerResult[i]);
-						
-						if(checkUnique(copy))
-							result.push(copy);
-						else
-							result.push(buildPathResult[j]);
-					}
+						result.push(buildPathResult[j]);
 				}
 			}
 			
@@ -589,7 +711,7 @@ export default class CertificateChainValidationEngine
 		//endregion
 		
 		//region Build path for "end entity" certificate
-		result = await buildPath(localCerts[localCerts.length - 1], localCerts.length - 1);
+		result = await buildPath(localCerts[localCerts.length - 1]);
 		if(result.length === 0)
 		{
 			return {
@@ -607,7 +729,7 @@ export default class CertificateChainValidationEngine
 			
 			for(let j = 0; j < (result[i]).length; j++)
 			{
-				const certificate = localCerts[(result[i])[j]];
+				const certificate = (result[i])[j];
 				
 				for(let k = 0; k < _this.trustedCerts.length; k++)
 				{
@@ -655,7 +777,7 @@ export default class CertificateChainValidationEngine
 		
 		//region Create certificate path for basic check
 		for(let i = 0; i < result[shortestIndex].length; i++)
-			certificatePath.push(localCerts[(result[shortestIndex])[i]]);
+			certificatePath.push((result[shortestIndex])[i]);
 		//endregion
 		
 		//region Perform basic checking for all certificates in the path
