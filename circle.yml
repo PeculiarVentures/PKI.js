@@ -6,6 +6,7 @@ dependencies:
   pre:
     - npm install -g typescript rollup
   post:
+    - npm install node-webcrypto-ossl
     - npm install rollup-plugin-node-resolve
     - npm install rollup-plugin-commonjs
 
