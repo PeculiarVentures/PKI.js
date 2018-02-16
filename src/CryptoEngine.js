@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, stringToArrayBuffer, arrayBufferToString, utilConcatBuf } from "pvutils";
-import { createCMSECDSASignature } from "./common";
+import { createCMSECDSASignature, createECDSASignatureFromCMS } from "./common";
 import PublicKeyInfo from "./PublicKeyInfo";
 import PrivateKeyInfo from "./PrivateKeyInfo";
 import AlgorithmIdentifier from "./AlgorithmIdentifier";
@@ -1940,7 +1940,7 @@ export default class CryptoEngine
 			return Promise.reject("Absent mandatory parameter \"encryptedContentInfo\"");
 
 		if(parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId !== "1.2.840.113549.1.5.13") // pkcs5PBES2
-			return Promise.reject(`Unknown \"contentEncryptionAlgorithm\": ${this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
+			return Promise.reject(`Unknown \"contentEncryptionAlgorithm\": ${parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 		//endregion
 		
 		//region Initial variables
@@ -2079,10 +2079,6 @@ export default class CryptoEngine
 			return Promise.reject("Absent mandatory parameter \"contentToStamp\"");
 		//endregion
 		
-		//region Initial variables
-		const _this = this;
-		//endregion
-		
 		//region Choose correct length for HMAC key
 		let length;
 		
@@ -2165,10 +2161,6 @@ export default class CryptoEngine
 		
 		if(("signatureToVerify" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"signatureToVerify\"");
-		//endregion
-		
-		//region Initial variables
-		const _this = this;
 		//endregion
 		
 		//region Choose correct length for HMAC key
@@ -2344,6 +2336,135 @@ export default class CryptoEngine
 			}, error =>
 				Promise.reject(`Signing error: ${error}`)
 		);
+	}
+	//**********************************************************************************
+	verifyWithPublicKey(data, signature, publicKeyInfo, signatureAlgorithm)
+	{
+		//region Initial variables
+		let sequence = Promise.resolve();
+		//endregion
+		
+		//region Find signer's hashing algorithm
+		const shaAlgorithm = this.getHashAlgorithm(signatureAlgorithm);
+		if(shaAlgorithm === "")
+			return Promise.reject(`Unsupported signature algorithm: ${signatureAlgorithm.algorithmId}`);
+		//endregion
+		
+		//region Import public key
+		sequence = sequence.then(() =>
+		{
+			//region Get information about public key algorithm and default parameters for import
+			const algorithmObject = this.getAlgorithmByOID(signatureAlgorithm.algorithmId);
+			if(("name" in algorithmObject) === "")
+				return Promise.reject(`Unsupported public key algorithm: ${signatureAlgorithm.algorithmId}`);
+			
+			const algorithm = this.getAlgorithmParameters(algorithmObject.name, "importkey");
+			if("hash" in algorithm.algorithm)
+				algorithm.algorithm.hash.name = shaAlgorithm;
+			
+			//region Special case for ECDSA
+			if(algorithmObject.name === "ECDSA")
+			{
+				//region Get information about named curve
+				let algorithmParamsChecked = false;
+				
+				if(("algorithmParams" in publicKeyInfo.algorithm) === true)
+				{
+					if("idBlock" in publicKeyInfo.algorithm.algorithmParams)
+					{
+						if((publicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (publicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
+							algorithmParamsChecked = true;
+					}
+				}
+				
+				if(algorithmParamsChecked === false)
+					return Promise.reject("Incorrect type for ECDSA public key parameters");
+				
+				const curveObject = this.getAlgorithmByOID(publicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+				if(("name" in curveObject) === false)
+					return Promise.reject(`Unsupported named curve algorithm: ${publicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
+				//endregion
+				
+				algorithm.algorithm.namedCurve = curveObject.name;
+			}
+			//endregion
+			//endregion
+			
+			const publicKeyInfoSchema = publicKeyInfo.toSchema();
+			const publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
+			const publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
+			
+			return this.importKey("spki",
+				publicKeyInfoView,
+				algorithm.algorithm,
+				true,
+				algorithm.usages
+			);
+		});
+		//endregion
+		
+		//region Verify signature
+		sequence = sequence.then(publicKey =>
+		{
+			//region Get default algorithm parameters for verification
+			const algorithm = this.getAlgorithmParameters(publicKey.algorithm.name, "verify");
+			if("hash" in algorithm.algorithm)
+				algorithm.algorithm.hash.name = shaAlgorithm;
+			//endregion
+			
+			//region Special case for ECDSA signatures
+			let signatureValue = signature.valueBlock.valueHex;
+			
+			if(publicKey.algorithm.name === "ECDSA")
+			{
+				const asn1 = asn1js.fromBER(signatureValue);
+				signatureValue = createECDSASignatureFromCMS(asn1.result);
+			}
+			//endregion
+			
+			//region Special case for RSA-PSS
+			if(publicKey.algorithm.name === "RSA-PSS")
+			{
+				let pssParameters;
+				
+				try
+				{
+					pssParameters = new RSASSAPSSParams({ schema: signatureAlgorithm.algorithmParams });
+				}
+				catch(ex)
+				{
+					return Promise.reject(ex);
+				}
+				
+				if("saltLength" in pssParameters)
+					algorithm.algorithm.saltLength = pssParameters.saltLength;
+				else
+					algorithm.algorithm.saltLength = 20;
+				
+				let hashAlgo = "SHA-1";
+				
+				if("hashAlgorithm" in pssParameters)
+				{
+					const hashAlgorithm = this.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithmId);
+					if(("name" in hashAlgorithm) === false)
+						return Promise.reject(`Unrecognized hash algorithm: ${pssParameters.hashAlgorithm.algorithmId}`);
+					
+					hashAlgo = hashAlgorithm.name;
+				}
+				
+				algorithm.algorithm.hash.name = hashAlgo;
+			}
+			//endregion
+			
+			return this.verify(algorithm.algorithm,
+				publicKey,
+				new Uint8Array(signatureValue),
+				new Uint8Array(data)
+			);
+		});
+		//endregion
+		
+		return sequence;
 	}
 	//**********************************************************************************
 }

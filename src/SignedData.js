@@ -446,13 +446,15 @@ export default class SignedData
 		let signerCertificate = {};
 		
 		let timestampSerial = null;
+		
+		let certificatePath = [];
 		//endregion
 		
-		//region Get a "crypto" extension 
+		//region Get a "crypto" extension
 		const crypto = getCrypto();
 		if(typeof crypto === "undefined")
 			return Promise.reject("Unable to create WebCrypto object");
-		//endregion 
+		//endregion
 		
 		//region Get a signer number
 		if(signer === (-1))
@@ -471,9 +473,9 @@ export default class SignedData
 			
 			return Promise.reject("Unable to get signer index from input parameters");
 		}
-		//endregion 
+		//endregion
 		
-		//region Check that certificates field was included in signed data 
+		//region Check that certificates field was included in signed data
 		if(("certificates" in this) === false)
 		{
 			if(extendedMode)
@@ -490,9 +492,9 @@ export default class SignedData
 			
 			return Promise.reject("No certificates attached to this signed data");
 		}
-		//endregion 
+		//endregion
 		
-		//region Find a certificate for specified signer 
+		//region Find a certificate for specified signer
 		if(this.signerInfos[signer].sid instanceof IssuerAndSerialNumber)
 		{
 			sequence = sequence.then(() =>
@@ -575,9 +577,9 @@ export default class SignedData
 				})
 			);
 		}
-		//endregion 
+		//endregion
 		
-		//region Verify internal digest in case of "tSTInfo" content type 
+		//region Verify internal digest in case of "tSTInfo" content type
 		sequence = sequence.then(() =>
 		{
 			if(this.encapContentInfo.eContentType === "1.2.840.113549.1.9.16.1.4")
@@ -630,17 +632,17 @@ export default class SignedData
 			
 			return true;
 		});
-		//endregion 
+		//endregion
 		
-		//region Make additional verification for signer's certificate 
+		//region Make additional verification for signer's certificate
 		function checkCA(cert)
 		{
 			/// <param name="cert" type="in_window.org.pkijs.simpl.CERT">Certificate to find CA flag for</param>
 			
-			//region Do not include signer's certificate 
+			//region Do not include signer's certificate
 			if((cert.issuer.isEqual(signerCertificate.issuer) === true) && (cert.serialNumber.isEqual(signerCertificate.serialNumber) === true))
 				return null;
-			//endregion 
+			//endregion
 			
 			let isCA = false;
 			
@@ -674,89 +676,75 @@ export default class SignedData
 					return false;
 				//endregion
 				
-				return Promise.all(Array.from(this.certificates.filter(certificate => (certificate instanceof Certificate)), certificate => checkCA(certificate)))
-					.then(promiseResults =>
+				const promiseResults = Array.from(this.certificates.filter(certificate => (certificate instanceof Certificate)), certificate => checkCA(certificate));
+				
+				const certificateChainEngine = new CertificateChainValidationEngine({
+					checkDate,
+					certs: Array.from(promiseResults.filter(_result => (_result !== null))),
+					trustedCerts
+				});
+				
+				certificateChainEngine.certs.push(signerCertificate);
+				
+				if("crls" in this)
+				{
+					for(const crl of this.crls)
 					{
-						const certificateChainEngine = new CertificateChainValidationEngine({
-							checkDate,
-							certs: Array.from(promiseResults.filter(_result => (_result !== null))),
-							trustedCerts
-						});
-						
-						certificateChainEngine.certs.push(signerCertificate);
-						
-						if("crls" in this)
+						if(crl instanceof CertificateRevocationList)
+							certificateChainEngine.crls.push(crl);
+						else // Assumed "revocation value" has "OtherRevocationInfoFormat"
 						{
-							for(const crl of this.crls)
-							{
-								if(crl instanceof CertificateRevocationList)
-									certificateChainEngine.crls.push(crl);
-								else // Assumed "revocation value" has "OtherRevocationInfoFormat"
-								{
-									if(crl.otherRevInfoFormat === "1.3.6.1.5.5.7.48.1.1") // Basic OCSP response
-										certificateChainEngine.ocsps.push(new BasicOCSPResponse({ schema: crl.otherRevInfo }));
-								}
-							}
+							if(crl.otherRevInfoFormat === "1.3.6.1.5.5.7.48.1.1") // Basic OCSP response
+								certificateChainEngine.ocsps.push(new BasicOCSPResponse({ schema: crl.otherRevInfo }));
 						}
-						
-						if("ocsps" in this)
-							certificateChainEngine.ocsps.push(...(this.ocsps));
-						
-						return certificateChainEngine.verify().then(verificationResult =>
-						{
-							if(verificationResult.result === true)
-								return Promise.resolve(true);
-							
-							if(extendedMode)
-							{
-								return Promise.reject({
-									date: checkDate,
-									code: 5,
-									message: `Validation of signer's certificate failed: ${verificationResult.resultMessage}`,
-									signatureVerified: null,
-									signerCertificate,
-									signerCertificateVerified: false
-								});
-							}
-							
-							return Promise.reject("Validation of signer's certificate failed");
-						}, error =>
-						{
-							if(extendedMode)
-							{
-								return Promise.reject({
-									date: checkDate,
-									code: 5,
-									message: `Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`,
-									signatureVerified: null,
-									signerCertificate,
-									signerCertificateVerified: false
-								});
-							}
-							
-							return Promise.reject(`Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`);
-						});
-					}, promiseError =>
+					}
+				}
+				
+				if("ocsps" in this)
+					certificateChainEngine.ocsps.push(...(this.ocsps));
+				
+				return certificateChainEngine.verify().then(verificationResult =>
+				{
+					if("certificatePath" in verificationResult)
+						certificatePath = verificationResult.certificatePath;
+					
+					if(verificationResult.result === true)
+						return Promise.resolve(true);
+					
+					if(extendedMode)
 					{
-						if(extendedMode)
-						{
-							return Promise.reject({
-								date: checkDate,
-								code: 6,
-								message: `Error during checking certificates for CA flag: ${promiseError}`,
-								signatureVerified: null,
-								signerCertificate,
-								signerCertificateVerified: null
-							});
-						}
-						
-						return Promise.reject(`Error during checking certificates for CA flag: ${promiseError}`);
-					});
+						return Promise.reject({
+							date: checkDate,
+							code: 5,
+							message: `Validation of signer's certificate failed: ${verificationResult.resultMessage}`,
+							signatureVerified: null,
+							signerCertificate,
+							signerCertificateVerified: false
+						});
+					}
+					
+					return Promise.reject("Validation of signer's certificate failed");
+				}, error =>
+				{
+					if(extendedMode)
+					{
+						return Promise.reject({
+							date: checkDate,
+							code: 5,
+							message: `Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`,
+							signatureVerified: null,
+							signerCertificate,
+							signerCertificateVerified: false
+						});
+					}
+					
+					return Promise.reject(`Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`);
+				});
 			});
 		}
-		//endregion 
+		//endregion
 		
-		//region Find signer's hashing algorithm 
+		//region Find signer's hashing algorithm
 		sequence = sequence.then(result =>
 		{
 			//region Verify result of previous operation
@@ -786,9 +774,9 @@ export default class SignedData
 			
 			return true;
 		});
-		//endregion 
+		//endregion
 		
-		//region Create correct data block for verification 
+		//region Create correct data block for verification
 		sequence = sequence.then(result =>
 		{
 			//region Verify result of previous operation
@@ -897,9 +885,9 @@ export default class SignedData
 			
 			return true;
 		});
-		//endregion 
+		//endregion
 		
-		//region Import public key from signer's certificate 
+		//region Import public key from signer's certificate
 		sequence = sequence.then(result =>
 		{
 			//region Verify result of previous operation
@@ -970,9 +958,9 @@ export default class SignedData
 			
 			return crypto.importKey("spki", publicKeyInfoView, algorithm.algorithm, true, algorithm.usages);
 		});
-		//endregion 
+		//endregion
 		
-		//region Verify signer's signature 
+		//region Verify signer's signature
 		sequence = sequence.then(result =>
 		{
 			//region Verify result of previous operation
@@ -1095,9 +1083,9 @@ export default class SignedData
 				new Uint8Array(signatureValue),
 				new Uint8Array(data));
 		});
-		//endregion 
+		//endregion
 		
-		//region Make a final result 
+		//region Make a final result
 		sequence = sequence.then(result =>
 		{
 			if(extendedMode)
@@ -1109,7 +1097,8 @@ export default class SignedData
 					signatureVerified: result,
 					signerCertificate,
 					timestampSerial,
-					signerCertificateVerified: true
+					signerCertificateVerified: true,
+					certificatePath
 				};
 			}
 			

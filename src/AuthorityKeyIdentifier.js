@@ -148,23 +148,13 @@ export default class AuthorityKeyIdentifier
 
 		//region Get internal properties from parsed schema
 		if("keyIdentifier" in asn1.result)
-		{
-			asn1.result.keyIdentifier.idBlock.tagClass = 1; // UNIVERSAL
-			asn1.result.keyIdentifier.idBlock.tagNumber = 4; // OCTETSTRING
-
-			this.keyIdentifier = asn1.result.keyIdentifier;
-		}
+			this.keyIdentifier = new asn1js.OctetString({ valueHex: asn1.result.keyIdentifier.valueBlock.valueHex });
 
 		if("authorityCertIssuer" in asn1.result)
 			this.authorityCertIssuer = Array.from(asn1.result.authorityCertIssuer, element => new GeneralName({ schema: element }));
 
 		if("authorityCertSerialNumber" in asn1.result)
-		{
-			asn1.result.authorityCertSerialNumber.idBlock.tagClass = 1; // UNIVERSAL
-			asn1.result.authorityCertSerialNumber.idBlock.tagNumber = 2; // INTEGER
-
-			this.authorityCertSerialNumber = asn1.result.authorityCertSerialNumber;
-		}
+			this.authorityCertSerialNumber = new asn1js.Integer({ valueHex: asn1.result.authorityCertSerialNumber.valueBlock.valueHex });
 		//endregion
 	}
 	//**********************************************************************************

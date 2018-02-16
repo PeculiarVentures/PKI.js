@@ -34,16 +34,16 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
 ### Parse a X.509 certificate
 
 ```javascript
-    // #region Parsing raw data as a X.509 certificate object
+    //region Parsing raw data as a X.509 certificate object
     const asn1 = asn1js.fromBER(buffer);
     const certificate = new Certificate({ schema: asn1.result });
-    // #endregion
+    //endregion
 ```
 
 ### Create a X.509 certificate
 
 ```javascript
-    // #region Creation of a new X.509 certificate
+    //region Creation of a new X.509 certificate
     certificate.serialNumber = new asn1js.Integer({ value: 1 });
     certificate.issuer.typesAndValues.push(new AttributeTypeAndValue({
         type: "2.5.4.6", // Country name
@@ -62,12 +62,12 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
         value: new asn1js.PrintableString({ value: "Test" })
     }));
 
-    certificate.notBefore.value = new Date(2013, 01, 01);
-    certificate.notAfter.value = new Date(2016, 01, 01);
+    certificate.notBefore.value = new Date(2013, 1, 1);
+    certificate.notAfter.value = new Date(2016, 1, 1);
 
     certificate.extensions = new Array(); // Extensions are not a part of certificate by default, it's an optional array
 
-    // #region "BasicConstraints" extension
+    //region "BasicConstraints" extension
     var basicConstr = new BasicConstraints({
         cA: true,
         pathLenConstraint: 3
@@ -79,9 +79,9 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
         extnValue: basicConstr.toSchema().toBER(false),
         parsedValue: basicConstr // Parsed value for well-known extensions
     }));
-    // #endregion
+    //endregion
 
-    // #region "KeyUsage" extension
+    //region "KeyUsage" extension
     var bitArray = new ArrayBuffer(1);
     var bitView = new Uint8Array(bitArray);
 
@@ -96,14 +96,14 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
         extnValue: keyUsage.toBER(false),
         parsedValue: keyUsage // Parsed value for well-known extensions
     }));
-    // #endregion
-    // #endregion
+    //endregion
+    //endregion
 ```
 
 ### Create signed CMS message
 
 ```javascript
-    // #region Creation of a new CMS Signed Data
+    //region Creation of a new CMS Signed Data
     cmsSigned = new SignedData({
         encapContentInfo: new EncapsulatedContentInfo({
             eContentType: "1.2.840.113549.1.7.1", // "data" content type
@@ -121,7 +121,7 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
     });
 
     return cms_signed_simpl.sign(privateKey, 0, hashAlgorithm);
-    // #endregion
+    //endregion
 
 ```
 
@@ -154,10 +154,10 @@ Please report bugs either as pull requests or as issues in the issue tracker. PK
 
 ## License
 
-Copyright (c) 2016-2017, [Peculiar Ventures](http://peculiarventures.com/)
+Copyright (c) 2016-2018, [Peculiar Ventures](http://peculiarventures.com/)
 All rights reserved.
 
-Author 2016, 2017 [Yury Strozhevsky](http://www.strozhevsky.com/).
+Author 2016-2018 [Yury Strozhevsky](http://www.strozhevsky.com/).
 
 Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:

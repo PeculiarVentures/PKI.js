@@ -74,8 +74,6 @@ import GeneralNames from "./GeneralNames";
 export { GeneralNames };
 import GeneralSubtree from "./GeneralSubtree";
 export { GeneralSubtree };
-import GeneratorsDriver from "./GeneratorsDriver";
-export { GeneratorsDriver };
 import InfoAccess from "./InfoAccess";
 export { InfoAccess };
 import IssuerAndSerialNumber from "./IssuerAndSerialNumber";

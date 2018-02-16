@@ -1,4 +1,4 @@
 {
 	"compact": "false",
-	"presets": ["es2015"]
+	"presets": ["env"]
 }

@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
 import { utilConcatBuf } from "pvutils";
-import AlgorithmIdentifier from "pkijs/src/AlgorithmIdentifier";
-import EncryptedContentInfo from "pkijs/src/EncryptedContentInfo";
-import PBKDF2Params from "pkijs/src/PBKDF2Params";
-import PBES2Params from "pkijs/src/PBES2Params";
-import CryptoEngine from "pkijs/src/CryptoEngine";
+import AlgorithmIdentifier from "../../src/AlgorithmIdentifier";
+import EncryptedContentInfo from "../../src/EncryptedContentInfo";
+import PBKDF2Params from "../../src/PBKDF2Params";
+import PBES2Params from "../../src/PBES2Params";
+import CryptoEngine from "../../src/CryptoEngine";
 import * as nodeSpecificCrypto from "./NodeEngineNodeSpecific";
 //**************************************************************************************
 export default class NodeEngine extends CryptoEngine
