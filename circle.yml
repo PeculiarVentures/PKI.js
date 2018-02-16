@@ -1,10 +1,10 @@
 machine:
   node:
-    version: 6.9.1
+    version: 8.7.0
 
 dependencies:
   pre:
-    - npm install -g typescript rollup@0.34.7 https://github.com/PeculiarVentures/rollem.git
+    - npm install -g typescript rollup
   post:
     - npm install rollup-plugin-node-resolve
     - npm install rollup-plugin-commonjs

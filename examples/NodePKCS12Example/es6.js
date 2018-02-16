@@ -60,7 +60,7 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 	
 	const contentEncryptionAlgorithm = (getAlgorithmParameters(inputAlgorithm, "encrypt")).algorithm;
 	if(("name" in contentEncryptionAlgorithm) === false)
-		return Promise.reject("No support for selected algorithm");
+		return Promise.reject(`No support for selected algorithm: ${inputAlgorithm}`);
 	
 	const makeInternalValuesParameters = {
 		password: passwordConverted,
@@ -229,7 +229,7 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 	
 	const contentEncryptionAlgorithm = (getAlgorithmParameters(inputAlgorithm, "encrypt")).algorithm;
 	if(("name" in contentEncryptionAlgorithm) === false)
-		return Promise.reject("No support for selected algorithm");
+		return Promise.reject(`No support for selected algorithm: ${inputAlgorithm}`);
 	
 	const makeInternalValuesParameters = {
 		password: passwordConverted,
@@ -459,7 +459,7 @@ context("Node.js PKCS#12 Example", () =>
 		return sequence;
 	});
 	
-	it("X.509 Certificate, RC2-CBC algorithm", () =>
+	it("X.509 Certificate, RC2-40-CBC algorithm", () =>
 	{
 		let asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509CertificateBASE64)));
 		certSimpl = new Certificate({ schema: asn1.result });
@@ -467,9 +467,9 @@ context("Node.js PKCS#12 Example", () =>
 		asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509PrivateKeyBASE64)));
 		pkcs8Simpl = new PrivateKeyInfo({ schema: asn1.result });
 		
-		return windowsLike(password, "RC2-CBC", "SHA-1").then(result =>
+		return windowsLike(password, "RC2-40-CBC", "SHA-1").then(result =>
 		{
-			console.log(`X.509 Certificate, RC2-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			console.log(`X.509 Certificate, RC2-40-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		});
 	});
