@@ -2,12 +2,12 @@ let pkg = require("./package.json");
 let external = Object.keys(pkg.dependencies);
 
 export default {
-    entry: pkg["jsnext:main"],
+    input: pkg["jsnext:main"],
     plugins: [],
     external: external,
-    targets: [
+    output: [
         {
-            dest: pkg.main,
+            file: pkg.main,
             format: "cjs"
         }
     ]
