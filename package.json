@@ -52,7 +52,7 @@
     "build:examples": "npm run ex1 && npm run ex2 && npm run ex3 && npm run ex4 && npm run ex5 && npm run ex6 && npm run ex7 && npm run ex8 && npm run ex9 && npm run ex10 && npm run ex11 && npm run ex12 && npm run ex13 && npm run ex14 && npm run ex15 && npm run ex16 && npm run ex17",
     "build:tests": "npm run build:examples",
     "test": "mocha --timeout 40000",
-    "prepublishOnly": "npm run build"
+    "prepare": "npm run build"
   },
   "keywords": [
     "ES6",
