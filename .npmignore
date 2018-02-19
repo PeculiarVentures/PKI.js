@@ -1,3 +1,5 @@
 .idea
 /examples
 /test
+circle.yml
+rollup.config.js
