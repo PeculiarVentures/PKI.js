@@ -14,23 +14,24 @@
     "type": "git",
     "url": "git://github.com/PeculiarVentures/PKI.js.git"
   },
+  "engines": {
+    "node": ">=8"
+  },
   "devDependencies": {
     "mocha": "^3.0.2",
     "node-webcrypto-ossl": "latest",
     "rollem": "git+https://github.com/PeculiarVentures/rollem.git",
     "rollup": "latest",
     "rollup-plugin-commonjs": "^8.2.6",
-    "rollup-plugin-node-resolve": "^1.7.1",
-    "babel-cli": "latest",
-    "babel-preset-env": "latest"
+    "rollup-plugin-node-resolve": "^1.7.1"
   },
   "dependencies": {
     "asn1js": "^2.0.0",
     "pvutils": "latest"
   },
   "scripts": {
-    "build": "babel src --compact=false --out-dir build --source-maps",
-    "watch": "babel src --compact=false --out-dir build --source-maps --watch",
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
     "ex1": "cd examples/CMSSignedComplexExample && rollup -c && cd ../..",
     "ex2": "cd examples/CertificateComplexExample && rollup -c && cd ../..",
     "ex3": "cd examples/NISTPKITS && rollup -c && cd ../..",
@@ -51,7 +52,7 @@
     "build:examples": "npm run ex1 && npm run ex2 && npm run ex3 && npm run ex4 && npm run ex5 && npm run ex6 && npm run ex7 && npm run ex8 && npm run ex9 && npm run ex10 && npm run ex11 && npm run ex12 && npm run ex13 && npm run ex14 && npm run ex15 && npm run ex16 && npm run ex17",
     "build:tests": "npm run build:examples",
     "test": "mocha --timeout 40000",
-    "prepublishOnly": "npm run build"
+    "prepare": "npm run build"
   },
   "keywords": [
     "ES6",
