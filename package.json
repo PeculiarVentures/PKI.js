@@ -71,6 +71,6 @@
   "jsnext:main": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.22",
+  "version": "2.1.23",
   "license": "MIT"
 }

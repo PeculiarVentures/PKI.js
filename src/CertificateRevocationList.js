@@ -546,7 +546,7 @@ export default class CertificateRevocationList {
 			//region Special case for ECDSA
 			if(algorithmObject.name === "ECDSA")
 			{
-				// #region Get information about named curve
+				//region Get information about named curve
 				let algorithmParamsChecked = false;
 				
 				if(("algorithmParams" in subjectPublicKeyInfo.algorithm) === true)
@@ -564,7 +564,7 @@ export default class CertificateRevocationList {
 				const curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
 				if(("name" in curveObject) === false)
 					return Promise.reject(`Unsupported named curve algorithm: ${subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
-				// #endregion
+				//endregion
 				
 				algorithm.algorithm.namedCurve = curveObject.name;
 			}

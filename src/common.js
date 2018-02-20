@@ -122,12 +122,12 @@ export function getAlgorithmParameters(algorithmName, operation)
  */
 export function createCMSECDSASignature(signatureBuffer)
 {
-	// #region Initial check for correct length
+	//region Initial check for correct length
 	if((signatureBuffer.byteLength % 2) !== 0)
 		return new ArrayBuffer(0);
-	// #endregion
+	//endregion
 	
-	// #region Initial variables
+	//region Initial variables
 	const length = signatureBuffer.byteLength / 2; // There are two equal parts inside incoming ArrayBuffer
 	
 	const rBuffer = new ArrayBuffer(length);
@@ -141,7 +141,7 @@ export function createCMSECDSASignature(signatureBuffer)
 	sView.set(new Uint8Array(signatureBuffer, length, length));
 	
 	const sInteger = new asn1js.Integer({ valueHex: sBuffer });
-	// #endregion
+	//endregion
 	
 	return (new asn1js.Sequence({
 		value: [
@@ -158,11 +158,35 @@ export function createCMSECDSASignature(signatureBuffer)
  */
 export function stringPrep(inputString)
 {
-	let result = inputString.replace(/^\s+|\s+$/g, ""); // Trim input string
-	result = result.replace(/\s+/g, " "); // Change all sequence of SPACE down to SPACE char
-	result = result.toLowerCase();
+	//region Initial variables
+	let isSpace = false;
+	let cuttedResult = "";
+	//endregion
 	
-	return result;
+	const result = inputString.trim(); // Trim input string
+	
+	//region Change all sequence of SPACE down to SPACE char
+	for(let i = 0; i < result.length; i++)
+	{
+		if(result.charCodeAt(i) === 32)
+		{
+			if(isSpace === false)
+				isSpace = true;
+		}
+		else
+		{
+			if(isSpace)
+			{
+				cuttedResult += " ";
+				isSpace = false;
+			}
+			
+			cuttedResult += result[i];
+		}
+	}
+	//endregion
+	
+	return cuttedResult.toLowerCase();
 }
 //**************************************************************************************
 /**
@@ -172,7 +196,7 @@ export function stringPrep(inputString)
  */
 export function createECDSASignatureFromCMS(cmsSignature)
 {
-	// #region Check input variables
+	//region Check input variables
 	if((cmsSignature instanceof asn1js.Sequence) === false)
 		return new ArrayBuffer(0);
 	
@@ -184,7 +208,7 @@ export function createECDSASignatureFromCMS(cmsSignature)
 	
 	if((cmsSignature.valueBlock.value[1] instanceof asn1js.Integer) === false)
 		return new ArrayBuffer(0);
-	// #endregion 
+	//endregion 
 	
 	const rValue = cmsSignature.valueBlock.value[0].convertFromDER();
 	const sValue = cmsSignature.valueBlock.value[1].convertFromDER();

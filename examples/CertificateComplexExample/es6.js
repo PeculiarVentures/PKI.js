@@ -368,38 +368,38 @@ function verifyCertificateInternal()
 	//region Major activities
 	sequence = sequence.then(() =>
 	{
-		// #region Initial check
+		//region Initial check
 		if(certificateBuffer.byteLength === 0)
 			return Promise.resolve({ result: false });
-		// #endregion
+		//endregion
 		
-		// #region Decode existing CERT
+		//region Decode existing CERT
 		const asn1 = asn1js.fromBER(certificateBuffer);
 		const certificate = new Certificate({ schema: asn1.result });
-		// #endregion
+		//endregion
 		
-		// #region Create certificate's array (end-user certificate + intermediate certificates)
+		//region Create certificate's array (end-user certificate + intermediate certificates)
 		const certificates = [];
 		certificates.push(certificate);
 		certificates.push(...intermadiateCertificates);
-		// #endregion
+		//endregion
 		
-		// #region Make a copy of trusted certificates array
+		//region Make a copy of trusted certificates array
 		const trustedCerts = [];
 		trustedCerts.push(...trustedCertificates);
-		// #endregion
+		//endregion
 		
-		// #region Create new X.509 certificate chain object
+		//region Create new X.509 certificate chain object
 		const certChainVerificationEngine = new CertificateChainValidationEngine({
 			trustedCerts,
 			certs: certificates,
 			crls
 		});
-		// #endregion
+		//endregion
 		
-		// #region Verify CERT
+		//region Verify CERT
 		return certChainVerificationEngine.verify();
-		// #endregion
+		//endregion
 	});
 	//endregion
 	
@@ -423,7 +423,7 @@ function verifyCertificate()
 //*********************************************************************************
 function parseCAbundle(buffer)
 {
-	// #region Initial variables
+	//region Initial variables
 	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 	
 	const startChars = "-----BEGIN CERTIFICATE-----";
@@ -439,7 +439,7 @@ function parseCAbundle(buffer)
 	let started = false;
 	
 	let certBodyEncoded = "";
-	// #endregion
+	//endregion
 	
 	for(let i = 0; i < view.length; i++)
 	{
@@ -451,7 +451,7 @@ function parseCAbundle(buffer)
 			{
 				if(String.fromCharCode(view[i]) === "-")
 				{
-					// #region Decoded trustedCertificates
+					//region Decoded trustedCertificates
 					const asn1 = asn1js.fromBER(stringToArrayBuffer(window.atob(certBodyEncoded)));
 					try
 					{
@@ -462,14 +462,14 @@ function parseCAbundle(buffer)
 						alert("Wrong certificate format");
 						return;
 					}
-					// #endregion
+					//endregion
 					
-					// #region Set all "flag variables"
+					//region Set all "flag variables"
 					certBodyEncoded = "";
 					
 					started = false;
 					waitForEnd = true;
-					// #endregion
+					//endregion
 				}
 			}
 		}
