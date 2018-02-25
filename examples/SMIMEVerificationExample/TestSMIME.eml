@@ -13,7 +13,7 @@ Content-Transfer-Encoding: 7bit
 This is a Test Mail!
 
 ------=_Part_0_10440721.1157362574277
-Content-Type: application/pkcs7-signature; name=smime.p7s; smime-type=signed-data
+Content-Type: application/pkcs7-signature; name=smime.p7s; smime-type=signed-data; charset=binary
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
 Content-Description: S/MIME Cryptographic Signature

@@ -1,9 +1,17 @@
 import rollupNodeResolve from "rollup-plugin-node-resolve";
+import commonjs from "rollup-plugin-commonjs";
+import nodeBuiltins from "rollup-plugin-node-builtins";
 
 export default {
 	input: "es6.js",
 	plugins: [
-		rollupNodeResolve({ jsnext: true, main: true })
+		rollupNodeResolve({
+			jsnext: true,
+			main: true,
+			preferBuiltins: false
+		}),
+		commonjs(),
+		nodeBuiltins()
 	],
 	output: {
 		file: "bundle.js",

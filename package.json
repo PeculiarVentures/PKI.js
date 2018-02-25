@@ -21,6 +21,9 @@
     "rollup": "latest",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-node-resolve": "^1.7.1",
+    "rollup-plugin-node-builtins": "latest",
+    "emailjs-mime-builder": "latest",
+    "emailjs-mime-parser": "latest",
     "babel-cli": "latest",
     "babel-preset-env": "latest"
   },

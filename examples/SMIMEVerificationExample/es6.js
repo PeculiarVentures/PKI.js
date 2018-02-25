@@ -1,8 +1,10 @@
 import * as asn1js from "asn1js";
-import { stringToArrayBuffer, utilConcatBuf } from "pvutils";
+import { stringToArrayBuffer, utilConcatBuf, fromBase64 } from "pvutils";
 import Certificate from "../../src/Certificate";
 import SignedData from "../../src/SignedData";
 import ContentInfo from "../../src/ContentInfo";
+
+import parse from "emailjs-mime-parser";
 //*********************************************************************************
 const trustedCertificates = []; // Array of root certificates from "CA Bundle"
 //*********************************************************************************
@@ -10,7 +12,7 @@ const trustedCertificates = []; // Array of root certificates from "CA Bundle"
 //*********************************************************************************
 function parseCAbundle(buffer)
 {
-	//region Initial variables
+	// #region Initial variables
 	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 	
 	const startChars = "-----BEGIN CERTIFICATE-----";
@@ -26,7 +28,7 @@ function parseCAbundle(buffer)
 	let started = false;
 	
 	let certBodyEncoded = "";
-	//endregion
+	// #endregion
 	
 	for(let i = 0; i < view.length; i++)
 	{
@@ -38,7 +40,7 @@ function parseCAbundle(buffer)
 			{
 				if(String.fromCharCode(view[i]) === "-")
 				{
-					//region Decoded trustedCertificates
+					// #region Decoded trustedCertificates
 					const asn1 = asn1js.fromBER(stringToArrayBuffer(window.atob(certBodyEncoded)));
 					try
 					{
@@ -49,14 +51,14 @@ function parseCAbundle(buffer)
 						alert("Wrong certificate format");
 						return;
 					}
-					//endregion
+					// #endregion
 					
-					//region Set all "flag variables"
+					// #region Set all "flag variables"
 					certBodyEncoded = "";
 					
 					started = false;
 					waitForEnd = true;
-					//endregion
+					// #endregion
 				}
 			}
 		}
@@ -130,21 +132,16 @@ function parseCAbundle(buffer)
 function verifySMIME()
 {
 	//region Parse MIME contents to find signature and detached data
-	const parser = new MimeParser();
-	parser.write(document.getElementById("smime_message").value);
-	parser.end();
+	const parser = parse(document.getElementById("smime_message").value);
 	//endregion
 	
-	if(("_childNodes" in parser.node) || (parser.node._childNodes.length !== 2))
+	if(("childNodes" in parser) || (parser.childNodes.length !== 2))
 	{
-		const lastNode = parser.getNode("2");
+		const lastNode = parser.childNodes[1];
 		if((lastNode.contentType.value === "application/x-pkcs7-signature") || (lastNode.contentType.value === "application/pkcs7-signature"))
 		{
-			// Get signature buffer
-			const signedBuffer = utilConcatBuf(new ArrayBuffer(0), lastNode.content);
-			
 			// Parse into pkijs types
-			const asn1 = asn1js.fromBER(signedBuffer);
+			const asn1 = asn1js.fromBER(lastNode.content.buffer);
 			if(asn1.offset === (-1))
 			{
 				alert("Incorrect message format!");
@@ -166,7 +163,7 @@ function verifySMIME()
 			}
 			
 			// Get signed data buffer
-			const signedDataBuffer = stringToArrayBuffer(parser.nodes.node1.raw.replace(/\n/g, "\r\n"));
+			const signedDataBuffer = stringToArrayBuffer(parser.childNodes[0].raw.replace(/\n/g, "\r\n"));
 			
 			// Verify the signed data
 			let sequence = Promise.resolve();

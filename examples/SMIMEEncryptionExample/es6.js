@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { arrayBufferToString, stringToArrayBuffer, utilConcatBuf } from "pvutils";
+import { arrayBufferToString, stringToArrayBuffer } from "pvutils";
 import { getCrypto, getAlgorithmParameters } from "../../src/common";
 import Certificate from "../../src/Certificate";
 import EnvelopedData from "../../src/EnvelopedData";
@@ -7,6 +7,9 @@ import ContentInfo from "../../src/ContentInfo";
 import AttributeTypeAndValue from "../../src/AttributeTypeAndValue";
 import BasicConstraints from "../../src/BasicConstraints";
 import Extension from "../../src/Extension";
+
+import MimeNode from "emailjs-mime-builder";
+import parse from "emailjs-mime-parser";
 //*********************************************************************************
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT 
 const trustedCertificates = []; // Array of root certificates from "CA Bundle"
@@ -230,7 +233,7 @@ function smimeEncrypt()
 	
 	cmsEnveloped.addRecipientByCertificate(certSimpl);
 	
-	cmsEnveloped.encrypt(encAlg, stringToArrayBuffer(document.getElementById("content").value)).then(
+	return cmsEnveloped.encrypt(encAlg, stringToArrayBuffer(document.getElementById("content").value)).then(
 		() =>
 		{
 			const cmsContentSimpl = new ContentInfo();
@@ -241,8 +244,7 @@ function smimeEncrypt()
 			const ber = schema.toBER(false);
 			
 			// Insert enveloped data into new Mime message
-			const Mimebuilder = window["emailjs-mime-builder"];
-			const mimeBuilder = new Mimebuilder("application/pkcs7-mime; name=smime.p7m; smime-type=enveloped-data")
+			const mimeBuilder = new MimeNode("application/pkcs7-mime; name=smime.p7m; smime-type=enveloped-data; charset=binary")
 				.setHeader("content-description", "Enveloped Data")
 				.setHeader("content-disposition", "attachment; filename=smime.p7m")
 				.setHeader("content-transfer-encoding", "base64")
@@ -267,7 +269,7 @@ function smimeEncrypt()
 function smimeDecrypt()
 {
 	//region Decode input certificate 
-	const encodedCertificate = document.getElementById("new_signed_data").innerHTML;
+	const encodedCertificate = document.getElementById("new_signed_data").value;
 	const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 	certificateBuffer = stringToArrayBuffer(window.atob(clearEncodedCertificate));
 	
@@ -276,30 +278,22 @@ function smimeDecrypt()
 	//endregion 
 	
 	//region Decode input private key 
-	const encodedPrivateKey = document.getElementById("pkcs8_key").innerHTML;
+	const encodedPrivateKey = document.getElementById("pkcs8_key").value;
 	const clearPrivateKey = encodedPrivateKey.replace(/(-----(BEGIN|END)( NEW)? PRIVATE KEY-----|\n)/g, "");
 	const privateKeyBuffer = stringToArrayBuffer(window.atob(clearPrivateKey));
 	//endregion 
 	
 	//region Parse S/MIME message to get CMS enveloped content 
-	
-	// Parse MIME message and extract the envelope data
-	const parser = new MimeParser();
-	
-	const mimeMessage = document.getElementById("encrypted_content").innerHTML;
-	parser.write(mimeMessage);
-	parser.end();
+	const parser = parse(document.getElementById("encrypted_content").value);
 	//endregion
 	
-	// Note: MimeParser handles the base64 decoding to get us back a buffer
-	const cmsEnvelopedBuffer = utilConcatBuf(new ArrayBuffer(0), parser.node.content);
-	
-	asn1 = asn1js.fromBER(cmsEnvelopedBuffer);
+	//region Make all CMS data
+	asn1 = asn1js.fromBER(parser.content.buffer);
 	const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
 	const cmsEnvelopedSimp = new EnvelopedData({ schema: cmsContentSimpl.content });
 	//endregion 
 	
-	cmsEnvelopedSimp.decrypt(0,
+	return cmsEnvelopedSimp.decrypt(0,
 		{
 			recipientCertificate: certSimpl,
 			recipientPrivateKey: privateKeyBuffer
