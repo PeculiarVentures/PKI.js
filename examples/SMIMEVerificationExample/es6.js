@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { stringToArrayBuffer, utilConcatBuf, fromBase64 } from "pvutils";
+import { stringToArrayBuffer } from "pvutils";
 import Certificate from "../../src/Certificate";
 import SignedData from "../../src/SignedData";
 import ContentInfo from "../../src/ContentInfo";
@@ -12,7 +12,7 @@ const trustedCertificates = []; // Array of root certificates from "CA Bundle"
 //*********************************************************************************
 function parseCAbundle(buffer)
 {
-	// #region Initial variables
+	//region Initial variables
 	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 	
 	const startChars = "-----BEGIN CERTIFICATE-----";
@@ -28,7 +28,7 @@ function parseCAbundle(buffer)
 	let started = false;
 	
 	let certBodyEncoded = "";
-	// #endregion
+	//endregion
 	
 	for(let i = 0; i < view.length; i++)
 	{
@@ -40,7 +40,7 @@ function parseCAbundle(buffer)
 			{
 				if(String.fromCharCode(view[i]) === "-")
 				{
-					// #region Decoded trustedCertificates
+					//region Decoded trustedCertificates
 					const asn1 = asn1js.fromBER(stringToArrayBuffer(window.atob(certBodyEncoded)));
 					try
 					{
@@ -51,14 +51,14 @@ function parseCAbundle(buffer)
 						alert("Wrong certificate format");
 						return;
 					}
-					// #endregion
+					//endregion
 					
-					// #region Set all "flag variables"
+					//region Set all "flag variables"
 					certBodyEncoded = "";
 					
 					started = false;
 					waitForEnd = true;
-					// #endregion
+					//endregion
 				}
 			}
 		}
