@@ -431,7 +431,9 @@ export default class SignedData
 		checkDate = (new Date()),
 		checkChain = false,
 		includeSignerCertificate = false,
-		extendedMode = false
+		extendedMode = false,
+		findOrigin = null,
+		findIssuer = null
 	} = {})
 	{
 		//region Global variables 
@@ -678,11 +680,19 @@ export default class SignedData
 				
 				const promiseResults = Array.from(this.certificates.filter(certificate => (certificate instanceof Certificate)), certificate => checkCA(certificate));
 				
-				const certificateChainEngine = new CertificateChainValidationEngine({
+				const certificateChainValidationEngineParameters = {
 					checkDate,
 					certs: Array.from(promiseResults.filter(_result => (_result !== null))),
 					trustedCerts
-				});
+				};
+				
+				if(findIssuer !== null)
+					certificateChainValidationEngineParameters.findIssuer = findIssuer;
+				
+				if(findOrigin !== null)
+					certificateChainValidationEngineParameters.findOrigin = findOrigin;
+
+				const certificateChainEngine = new CertificateChainValidationEngine(certificateChainValidationEngineParameters);
 				
 				certificateChainEngine.certs.push(signerCertificate);
 				

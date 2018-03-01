@@ -65,7 +65,7 @@ export default class CertificateChainValidationEngine
 		//endregion
 		
 		//region Search in Intermediate Certificates
-		for(const localCert of this.certs)
+		for(const localCert of validationEngine.certs)
 		{
 			//region Firstly encode TBS for certificate
 			if(localCert.tbs.byteLength === 0)
@@ -78,7 +78,7 @@ export default class CertificateChainValidationEngine
 		//endregion
 		
 		//region Search in Trusted Certificates
-		for(const trustedCert of this.trustedCerts)
+		for(const trustedCert of validationEngine.trustedCerts)
 		{
 			//region Firstly encode TBS for certificate
 			if(trustedCert.tbs.byteLength === 0)
