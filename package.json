@@ -15,21 +15,24 @@
     "url": "git://github.com/PeculiarVentures/PKI.js.git"
   },
   "devDependencies": {
+    "babel-cli": "latest",
+    "babel-preset-env": "latest",
+    "emailjs-mime-builder": "latest",
+    "emailjs-mime-parser": "^2.0.1",
     "mocha": "^3.0.2",
     "node-webcrypto-ossl": "latest",
-    "rollem": "git+https://github.com/PeculiarVentures/rollem.git",
     "rollup": "latest",
     "rollup-plugin-commonjs": "^8.2.6",
-    "rollup-plugin-node-resolve": "^1.7.1",
     "rollup-plugin-node-builtins": "latest",
-    "emailjs-mime-builder": "latest",
-    "emailjs-mime-parser": "latest",
-    "babel-cli": "latest",
-    "babel-preset-env": "latest"
+    "rollup-plugin-node-resolve": "^1.7.1",
+    "babel-polyfill": "^6.26.0"
   },
   "dependencies": {
-    "asn1js": "^2.0.0",
+    "asn1js": "latest",
     "pvutils": "latest"
+  },
+  "engines": {
+    "node": ">=8.0.0"
   },
   "scripts": {
     "build": "babel src --compact=false --out-dir build --source-maps",
@@ -74,6 +77,6 @@
   "jsnext:main": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.25",
+  "version": "2.1.26",
   "license": "MIT"
 }

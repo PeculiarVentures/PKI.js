@@ -268,7 +268,7 @@ function smimeEncrypt()
 //*********************************************************************************
 function smimeDecrypt()
 {
-	//region Decode input certificate 
+	//region Decode input certificate
 	const encodedCertificate = document.getElementById("new_signed_data").value;
 	const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 	certificateBuffer = stringToArrayBuffer(window.atob(clearEncodedCertificate));
