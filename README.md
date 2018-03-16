@@ -125,7 +125,7 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
 
 ```
 
-### Use in node.js
+### Use in Node.js
 
 ``` javascript
     require("babel-polyfill");
