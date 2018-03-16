@@ -125,6 +125,22 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
 
 ```
 
+### Use in Node.js
+
+``` javascript
+    require("babel-polyfill");
+    const asn1js = require("asn1js");
+    const pkijs = require("pkijs");
+    const Certificate = pkijs.Certificate;
+
+    const buffer = new Uint8Array([
+        // ... cert hex bytes ...
+    ]).buffer;
+
+    const asn1 = asn1js.fromBER(buffer);
+    const certificate = new Certificate({ schema: asn1.result });
+```
+
 More examples could be found in [**examples**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples) folder. To run these samples you must compile them, for example you would run:
 
 ```
