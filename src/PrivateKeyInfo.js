@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import Attribute from "./Attribute";
-import ECPrivateKey from "./ECPrivateKey";
-import RSAPrivateKey from "./RSAPrivateKey";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import Attribute from "./Attribute.js";
+import ECPrivateKey from "./ECPrivateKey.js";
+import RSAPrivateKey from "./RSAPrivateKey.js";
 //**************************************************************************************
 /**
  * Class from RFC5208

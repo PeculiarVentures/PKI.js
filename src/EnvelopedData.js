@@ -1,25 +1,25 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, utilConcatBuf } from "pvutils";
-import { getOIDByAlgorithm, getRandomValues, getCrypto, getAlgorithmByOID, kdf } from "./common";
-import OriginatorInfo from "./OriginatorInfo";
-import RecipientInfo from "./RecipientInfo";
-import EncryptedContentInfo from "./EncryptedContentInfo";
-import Attribute from "./Attribute";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import RSAESOAEPParams from "./RSAESOAEPParams";
-import KeyTransRecipientInfo from "./KeyTransRecipientInfo";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
-import RecipientEncryptedKey from "./RecipientEncryptedKey";
-import KeyAgreeRecipientIdentifier from "./KeyAgreeRecipientIdentifier";
-import KeyAgreeRecipientInfo from "./KeyAgreeRecipientInfo";
-import RecipientEncryptedKeys from "./RecipientEncryptedKeys";
-import KEKRecipientInfo from "./KEKRecipientInfo";
-import KEKIdentifier from "./KEKIdentifier";
-import PBKDF2Params from "./PBKDF2Params";
-import PasswordRecipientinfo from "./PasswordRecipientinfo";
-import ECCCMSSharedInfo from "./ECCCMSSharedInfo";
-import OriginatorIdentifierOrKey from "./OriginatorIdentifierOrKey";
-import OriginatorPublicKey from "./OriginatorPublicKey";
+import { getOIDByAlgorithm, getRandomValues, getCrypto, getAlgorithmByOID, kdf } from "./common.js";
+import OriginatorInfo from "./OriginatorInfo.js";
+import RecipientInfo from "./RecipientInfo.js";
+import EncryptedContentInfo from "./EncryptedContentInfo.js";
+import Attribute from "./Attribute.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import RSAESOAEPParams from "./RSAESOAEPParams.js";
+import KeyTransRecipientInfo from "./KeyTransRecipientInfo.js";
+import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
+import RecipientEncryptedKey from "./RecipientEncryptedKey.js";
+import KeyAgreeRecipientIdentifier from "./KeyAgreeRecipientIdentifier.js";
+import KeyAgreeRecipientInfo from "./KeyAgreeRecipientInfo.js";
+import RecipientEncryptedKeys from "./RecipientEncryptedKeys.js";
+import KEKRecipientInfo from "./KEKRecipientInfo.js";
+import KEKIdentifier from "./KEKIdentifier.js";
+import PBKDF2Params from "./PBKDF2Params.js";
+import PasswordRecipientinfo from "./PasswordRecipientinfo.js";
+import ECCCMSSharedInfo from "./ECCCMSSharedInfo.js";
+import OriginatorIdentifierOrKey from "./OriginatorIdentifierOrKey.js";
+import OriginatorPublicKey from "./OriginatorPublicKey.js";
 //**************************************************************************************
 /**
  * Class from RFC5652

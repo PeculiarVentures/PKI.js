@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import DigestInfo from "./DigestInfo";
+import DigestInfo from "./DigestInfo.js";
 //**************************************************************************************
 /**
  * Class from RFC7292

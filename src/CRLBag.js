@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import CertificateRevocationList from "./CertificateRevocationList";
+import CertificateRevocationList from "./CertificateRevocationList.js";
 //**************************************************************************************
 /**
  * Class from RFC7292

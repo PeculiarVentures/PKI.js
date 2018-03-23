@@ -7,14 +7,14 @@ import {
 	getEngine,
 	createECDSASignatureFromCMS,
 	getHashAlgorithm
-} from "./common";
-import ResponseData from "./ResponseData";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import Certificate from "./Certificate";
-import CertID from "./CertID";
-import RSASSAPSSParams from "./RSASSAPSSParams";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
-import CertificateChainValidationEngine from "./CertificateChainValidationEngine";
+} from "./common.js";
+import ResponseData from "./ResponseData.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import Certificate from "./Certificate.js";
+import CertID from "./CertID.js";
+import RSASSAPSSParams from "./RSASSAPSSParams.js";
+import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import CertificateChainValidationEngine from "./CertificateChainValidationEngine.js";
 //**************************************************************************************
 /**
  * Class from RFC6960

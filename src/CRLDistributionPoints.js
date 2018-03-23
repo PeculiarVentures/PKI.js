@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import DistributionPoint from "./DistributionPoint";
+import DistributionPoint from "./DistributionPoint.js";
 //**************************************************************************************
 /**
  * Class from RFC5280

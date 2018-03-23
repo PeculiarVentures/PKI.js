@@ -7,23 +7,23 @@ import {
 	getAlgorithmByOID,
 	createECDSASignatureFromCMS,
 	getAlgorithmParameters
-} from "./common";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import EncapsulatedContentInfo from "./EncapsulatedContentInfo";
-import Certificate from "./Certificate";
-import OtherCertificateFormat from "./OtherCertificateFormat";
-import CertificateRevocationList from "./CertificateRevocationList";
-import OtherRevocationInfoFormat from "./OtherRevocationInfoFormat";
-import SignerInfo from "./SignerInfo";
-import CertificateSet from "./CertificateSet";
-import RevocationInfoChoices from "./RevocationInfoChoices";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
-import TSTInfo from "./TSTInfo";
-import CertificateChainValidationEngine from "./CertificateChainValidationEngine";
-import BasicOCSPResponse from "./BasicOCSPResponse";
-import RSASSAPSSParams from "./RSASSAPSSParams";
-import AttributeCertificateV1 from "./AttributeCertificateV1";
-import AttributeCertificateV2 from "./AttributeCertificateV2";
+} from "./common.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import EncapsulatedContentInfo from "./EncapsulatedContentInfo.js";
+import Certificate from "./Certificate.js";
+import OtherCertificateFormat from "./OtherCertificateFormat.js";
+import CertificateRevocationList from "./CertificateRevocationList.js";
+import OtherRevocationInfoFormat from "./OtherRevocationInfoFormat.js";
+import SignerInfo from "./SignerInfo.js";
+import CertificateSet from "./CertificateSet.js";
+import RevocationInfoChoices from "./RevocationInfoChoices.js";
+import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
+import TSTInfo from "./TSTInfo.js";
+import CertificateChainValidationEngine from "./CertificateChainValidationEngine.js";
+import BasicOCSPResponse from "./BasicOCSPResponse.js";
+import RSASSAPSSParams from "./RSASSAPSSParams.js";
+import AttributeCertificateV1 from "./AttributeCertificateV1.js";
+import AttributeCertificateV2 from "./AttributeCertificateV2.js";
 //**************************************************************************************
 /**
  * Class from RFC5652

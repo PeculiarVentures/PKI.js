@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
-import RecipientKeyIdentifier from "./RecipientKeyIdentifier";
+import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
+import RecipientKeyIdentifier from "./RecipientKeyIdentifier.js";
 //**************************************************************************************
 /**
  * Class from RFC5652

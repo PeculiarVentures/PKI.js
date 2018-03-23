@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, isEqualBuffer } from "pvutils";
-import { getCrypto, getAlgorithmByOID } from "./common";
-import MessageImprint from "./MessageImprint";
-import Accuracy from "./Accuracy";
-import GeneralName from "./GeneralName";
-import Extension from "./Extension";
+import { getCrypto, getAlgorithmByOID } from "./common.js";
+import MessageImprint from "./MessageImprint.js";
+import Accuracy from "./Accuracy.js";
+import GeneralName from "./GeneralName.js";
+import Extension from "./Extension.js";
 //**************************************************************************************
 /**
  * Class from RFC3161

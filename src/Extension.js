@@ -1,19 +1,19 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import SubjectDirectoryAttributes from "./SubjectDirectoryAttributes";
-import PrivateKeyUsagePeriod from "./PrivateKeyUsagePeriod";
-import AltName from "./AltName";
-import BasicConstraints from "./BasicConstraints";
-import IssuingDistributionPoint from "./IssuingDistributionPoint";
-import GeneralNames from "./GeneralNames";
-import NameConstraints from "./NameConstraints";
-import CRLDistributionPoints from "./CRLDistributionPoints";
-import CertificatePolicies from "./CertificatePolicies";
-import PolicyMappings from "./PolicyMappings";
-import AuthorityKeyIdentifier from "./AuthorityKeyIdentifier";
-import PolicyConstraints from "./PolicyConstraints";
-import ExtKeyUsage from "./ExtKeyUsage";
-import InfoAccess from "./InfoAccess";
+import SubjectDirectoryAttributes from "./SubjectDirectoryAttributes.js";
+import PrivateKeyUsagePeriod from "./PrivateKeyUsagePeriod.js";
+import AltName from "./AltName.js";
+import BasicConstraints from "./BasicConstraints.js";
+import IssuingDistributionPoint from "./IssuingDistributionPoint.js";
+import GeneralNames from "./GeneralNames.js";
+import NameConstraints from "./NameConstraints.js";
+import CRLDistributionPoints from "./CRLDistributionPoints.js";
+import CertificatePolicies from "./CertificatePolicies.js";
+import PolicyMappings from "./PolicyMappings.js";
+import AuthorityKeyIdentifier from "./AuthorityKeyIdentifier.js";
+import PolicyConstraints from "./PolicyConstraints.js";
+import ExtKeyUsage from "./ExtKeyUsage.js";
+import InfoAccess from "./InfoAccess.js";
 //**************************************************************************************
 /**
  * Class from RFC5280

@@ -7,14 +7,14 @@ import {
 	getAlgorithmByOID,
 	createECDSASignatureFromCMS,
 	getHashAlgorithm
-} from "./common";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
-import Time from "./Time";
-import RevokedCertificate from "./RevokedCertificate";
-import Extensions from "./Extensions";
-import RSASSAPSSParams from "./RSASSAPSSParams";
-import PublicKeyInfo from "./PublicKeyInfo";
+} from "./common.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import Time from "./Time.js";
+import RevokedCertificate from "./RevokedCertificate.js";
+import Extensions from "./Extensions.js";
+import RSASSAPSSParams from "./RSASSAPSSParams.js";
+import PublicKeyInfo from "./PublicKeyInfo.js";
 //**************************************************************************************
 function tbsCertList(parameters = {})
 {

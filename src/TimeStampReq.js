@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import MessageImprint from "./MessageImprint";
-import Extension from "./Extension";
+import MessageImprint from "./MessageImprint.js";
+import Extension from "./Extension.js";
 //**************************************************************************************
 /**
  * Class from RFC3161

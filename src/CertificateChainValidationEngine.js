@@ -1,7 +1,7 @@
 import { getParametersValue, isEqualBuffer } from "pvutils";
-import { getAlgorithmByOID, stringPrep } from "./common";
-import CertificateRevocationList from "./CertificateRevocationList";
-import Certificate from "./Certificate";
+import { getAlgorithmByOID, stringPrep } from "./common.js";
+import CertificateRevocationList from "./CertificateRevocationList.js";
+import Certificate from "./Certificate.js";
 //**************************************************************************************
 export default class CertificateChainValidationEngine
 {

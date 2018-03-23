@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
-import OriginatorPublicKey from "./OriginatorPublicKey";
+import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
+import OriginatorPublicKey from "./OriginatorPublicKey.js";
 //**************************************************************************************
 /**
  * Class from RFC5652

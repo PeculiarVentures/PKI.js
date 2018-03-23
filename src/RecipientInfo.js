@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import KeyTransRecipientInfo from "./KeyTransRecipientInfo";
-import KeyAgreeRecipientInfo from "./KeyAgreeRecipientInfo";
-import KEKRecipientInfo from "./KEKRecipientInfo";
-import PasswordRecipientinfo from "./PasswordRecipientinfo";
-import OtherRecipientInfo from "./OtherRecipientInfo";
+import KeyTransRecipientInfo from "./KeyTransRecipientInfo.js";
+import KeyAgreeRecipientInfo from "./KeyAgreeRecipientInfo.js";
+import KEKRecipientInfo from "./KEKRecipientInfo.js";
+import PasswordRecipientinfo from "./PasswordRecipientinfo.js";
+import OtherRecipientInfo from "./OtherRecipientInfo.js";
 //**************************************************************************************
 /**
  * Class from RFC5652

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import PolicyMapping from "./PolicyMapping";
+import PolicyMapping from "./PolicyMapping.js";
 //**************************************************************************************
 /**
  * Class from RFC5280

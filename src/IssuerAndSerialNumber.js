@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
+import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 //**************************************************************************************
 /**
  * Class from RFC5652

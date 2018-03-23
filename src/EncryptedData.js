@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import { getEngine } from "./common";
-import EncryptedContentInfo from "./EncryptedContentInfo";
-import Attribute from "./Attribute";
+import { getEngine } from "./common.js";
+import EncryptedContentInfo from "./EncryptedContentInfo.js";
+import Attribute from "./Attribute.js";
 //**************************************************************************************
 /**
  * Class from RFC5652

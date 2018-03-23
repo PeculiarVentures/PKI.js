@@ -1,17 +1,17 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, utilConcatBuf } from "pvutils";
-import { getCrypto, getEngine, getRandomValues, getOIDByAlgorithm, getAlgorithmByOID } from "./common";
-import ContentInfo from "./ContentInfo";
-import MacData from "./MacData";
-import DigestInfo from "./DigestInfo";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import SignedData from "./SignedData";
-import EncapsulatedContentInfo from "./EncapsulatedContentInfo";
-import Attribute from "./Attribute";
-import SignerInfo from "./SignerInfo";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
-import SignedAndUnsignedAttributes from "./SignedAndUnsignedAttributes";
-import AuthenticatedSafe from "./AuthenticatedSafe";
+import { getCrypto, getEngine, getRandomValues, getOIDByAlgorithm, getAlgorithmByOID } from "./common.js";
+import ContentInfo from "./ContentInfo.js";
+import MacData from "./MacData.js";
+import DigestInfo from "./DigestInfo.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import SignedData from "./SignedData.js";
+import EncapsulatedContentInfo from "./EncapsulatedContentInfo.js";
+import Attribute from "./Attribute.js";
+import SignerInfo from "./SignerInfo.js";
+import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
+import SignedAndUnsignedAttributes from "./SignedAndUnsignedAttributes.js";
+import AuthenticatedSafe from "./AuthenticatedSafe.js";
 //**************************************************************************************
 /**
  * Class from RFC7292

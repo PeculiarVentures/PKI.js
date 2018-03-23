@@ -1,13 +1,13 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, stringToArrayBuffer, arrayBufferToString, utilConcatBuf } from "pvutils";
-import { createCMSECDSASignature, createECDSASignatureFromCMS } from "./common";
-import PublicKeyInfo from "./PublicKeyInfo";
-import PrivateKeyInfo from "./PrivateKeyInfo";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import EncryptedContentInfo from "./EncryptedContentInfo";
-import RSASSAPSSParams from "./RSASSAPSSParams";
-import PBKDF2Params from "./PBKDF2Params";
-import PBES2Params from "./PBES2Params";
+import { createCMSECDSASignature, createECDSASignatureFromCMS } from "./common.js";
+import PublicKeyInfo from "./PublicKeyInfo.js";
+import PrivateKeyInfo from "./PrivateKeyInfo.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import EncryptedContentInfo from "./EncryptedContentInfo.js";
+import RSASSAPSSParams from "./RSASSAPSSParams.js";
+import PBKDF2Params from "./PBKDF2Params.js";
+import PBES2Params from "./PBES2Params.js";
 //**************************************************************************************
 /**
  * Making MAC key using algorithm described in B.2 of PKCS#12 standard.

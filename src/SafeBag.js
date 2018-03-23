@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import Attribute from "./Attribute";
-import PrivateKeyInfo from "./PrivateKeyInfo";
-import PKCS8ShroudedKeyBag from "./PKCS8ShroudedKeyBag";
-import CertBag from "./CertBag";
-import CRLBag from "./CRLBag";
-import SecretBag from "./SecretBag";
-import SafeContents from "./SafeContents";
+import Attribute from "./Attribute.js";
+import PrivateKeyInfo from "./PrivateKeyInfo.js";
+import PKCS8ShroudedKeyBag from "./PKCS8ShroudedKeyBag.js";
+import CertBag from "./CertBag.js";
+import CRLBag from "./CRLBag.js";
+import SecretBag from "./SecretBag.js";
+import SafeContents from "./SafeContents.js";
 //**************************************************************************************
 /**
  * Class from RFC7292

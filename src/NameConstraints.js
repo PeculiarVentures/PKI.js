@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import GeneralSubtree from "./GeneralSubtree";
+import GeneralSubtree from "./GeneralSubtree.js";
 //**************************************************************************************
 /**
  * Class from RFC5280

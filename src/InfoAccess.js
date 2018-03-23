@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import AccessDescription from "./AccessDescription";
+import AccessDescription from "./AccessDescription.js";
 //**************************************************************************************
 /**
  * Class from RFC5280

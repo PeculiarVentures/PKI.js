@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import ResponseBytes from "./ResponseBytes";
-import BasicOCSPResponse from "./BasicOCSPResponse";
+import ResponseBytes from "./ResponseBytes.js";
+import BasicOCSPResponse from "./BasicOCSPResponse.js";
 //**************************************************************************************
 /**
  * Class from RFC6960

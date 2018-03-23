@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import Extension from "./Extension";
+import Extension from "./Extension.js";
 //**************************************************************************************
 /**
  * Class from RFC5280

@@ -1,11 +1,11 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import { getEngine } from "./common";
-import TBSRequest from "./TBSRequest";
-import Signature from "./Signature";
-import Request from "./Request";
-import CertID from "./CertID";
-import Certificate from "./Certificate";
+import { getEngine } from "./common.js";
+import TBSRequest from "./TBSRequest.js";
+import Signature from "./Signature.js";
+import Request from "./Request.js";
+import CertID from "./CertID.js";
+import Certificate from "./Certificate.js";
 //**************************************************************************************
 /**
  * Class from RFC6960

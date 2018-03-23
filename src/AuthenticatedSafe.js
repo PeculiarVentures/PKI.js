@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, utilConcatBuf } from "pvutils";
-import ContentInfo from "./ContentInfo";
-import SafeContents from "./SafeContents";
-import EnvelopedData from "./EnvelopedData";
-import EncryptedData from "./EncryptedData";
+import ContentInfo from "./ContentInfo.js";
+import SafeContents from "./SafeContents.js";
+import EnvelopedData from "./EnvelopedData.js";
+import EncryptedData from "./EncryptedData.js";
 //**************************************************************************************
 /**
  * Class from RFC7292

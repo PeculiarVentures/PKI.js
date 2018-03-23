@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import Time from "./Time";
-import Extensions from "./Extensions";
+import Time from "./Time.js";
+import Extensions from "./Extensions.js";
 //**************************************************************************************
 /**
  * Class from RFC5280

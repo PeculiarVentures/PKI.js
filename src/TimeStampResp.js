@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import PKIStatusInfo from "./PKIStatusInfo";
-import ContentInfo from "./ContentInfo";
-import SignedData from "./SignedData";
+import PKIStatusInfo from "./PKIStatusInfo.js";
+import ContentInfo from "./ContentInfo.js";
+import SignedData from "./SignedData.js";
 //**************************************************************************************
 /**
  * Class from RFC3161

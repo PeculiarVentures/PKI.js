@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import { getCrypto } from "./common";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import ECPublicKey from "./ECPublicKey";
-import RSAPublicKey from "./RSAPublicKey";
+import { getCrypto } from "./common.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import ECPublicKey from "./ECPublicKey.js";
+import RSAPublicKey from "./RSAPublicKey.js";
 //**************************************************************************************
 /**
  * Class from RFC5280

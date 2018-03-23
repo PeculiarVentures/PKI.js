@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import Attribute from "./Attribute";
+import Attribute from "./Attribute.js";
 //**************************************************************************************
 /**
  * Class from RFC5652

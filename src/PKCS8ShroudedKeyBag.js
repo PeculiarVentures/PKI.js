@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import EncryptedData from "./EncryptedData";
-import EncryptedContentInfo from "./EncryptedContentInfo";
-import PrivateKeyInfo from "./PrivateKeyInfo";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import EncryptedData from "./EncryptedData.js";
+import EncryptedContentInfo from "./EncryptedContentInfo.js";
+import PrivateKeyInfo from "./PrivateKeyInfo.js";
 //**************************************************************************************
 /**
  * Class from RFC7292

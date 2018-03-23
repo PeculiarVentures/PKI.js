@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import GeneralName from "./GeneralName";
-import Request from "./Request";
-import Extension from "./Extension";
-import Extensions from "./Extensions";
+import GeneralName from "./GeneralName.js";
+import Request from "./Request.js";
+import Extension from "./Extension.js";
+import Extensions from "./Extensions.js";
 //**************************************************************************************
 /**
  * Class from RFC6960

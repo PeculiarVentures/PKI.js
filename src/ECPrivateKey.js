@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64 } from "pvutils";
-import ECPublicKey from "./ECPublicKey";
+import ECPublicKey from "./ECPublicKey.js";
 //**************************************************************************************
 /**
  * Class from RFC5915

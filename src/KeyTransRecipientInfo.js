@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import Certificate from "./Certificate";
-import RecipientIdentifier from "./RecipientIdentifier";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import Certificate from "./Certificate.js";
+import RecipientIdentifier from "./RecipientIdentifier.js";
+import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
 //**************************************************************************************
 /**
  * Class from RFC5652

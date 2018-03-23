@@ -1,4 +1,4 @@
-import PrivateKeyInfo from "./PrivateKeyInfo";
+import PrivateKeyInfo from "./PrivateKeyInfo.js";
 //**************************************************************************************
 /**
  * Class from RFC5208

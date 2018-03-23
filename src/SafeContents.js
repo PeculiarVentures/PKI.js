@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import SafeBag from "./SafeBag";
+import SafeBag from "./SafeBag.js";
 //**************************************************************************************
 /**
  * Class from RFC7292

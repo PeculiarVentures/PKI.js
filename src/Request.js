@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import CertID from "./CertID";
-import Extension from "./Extension";
+import CertID from "./CertID.js";
+import Extension from "./Extension.js";
 //**************************************************************************************
 /**
  * Class from RFC6960

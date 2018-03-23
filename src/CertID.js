@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, isEqualBuffer } from "pvutils";
-import { getCrypto, getOIDByAlgorithm } from "./common";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import Certificate from "./Certificate";
+import { getCrypto, getOIDByAlgorithm } from "./common.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import Certificate from "./Certificate.js";
 //**************************************************************************************
 /**
  * Class from RFC6960

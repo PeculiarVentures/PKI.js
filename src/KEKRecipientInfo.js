@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
-import KEKIdentifier from "./KEKIdentifier";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
+import KEKIdentifier from "./KEKIdentifier.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 //**************************************************************************************
 /**
  * Class from RFC5652

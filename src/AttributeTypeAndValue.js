@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, isEqualBuffer } from "pvutils";
-import { stringPrep } from "./common";
+import { stringPrep } from "./common.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
