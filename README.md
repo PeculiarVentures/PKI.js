@@ -127,7 +127,7 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
 
 ### Use in Node.js
 
-``` javascript
+```javascript
     require("babel-polyfill");
     const asn1js = require("asn1js");
     const pkijs = require("pkijs");
@@ -140,6 +140,49 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
     const asn1 = asn1js.fromBER(buffer);
     const certificate = new Certificate({ schema: asn1.result });
 ```
+
+### How to use PKI.js ES6 files directly in browser
+
+Currently there is a posibility to use ES6 modules directly from Web pages, without any transpilations (Babel, Rollup etc.). In order to do this all used files must point to direct or relative names and should be achivable via browser.
+ 
+You could use PKI.js code by this way, but before you need to perform some additional steps:
+- Replace all occurences of `import * as asn1js from "asn1js"` and `import { <something> } from "pvutils"` inside `pkijs/src` directory with correct paths to `asn1js` and `pvutils` files. Usually you would have something like `import * as asn1js from "../../asn1js/src/asn1.js"` and `import { <something> } from "./pvutils/src/utils.js"`. Correct paths depends on your project structure. Also you would need to replace path to `pvutils` inside used `asn1js/src/asn1.js` file. How to replace - usually it is done via `sed "s/<what_to_find>/<replacement>/g" *` inside target directory;
+- Make a correct main ES6 file (initial application). It could be not a separate ES6 file, but a script on your page, but anyway it must has exports inside `windows` namespace in order to communicate with Web page:
+```javascript 1.8
+window.handleFileBrowseParseEncrypted = handleFileBrowseParseEncrypted;
+window.handleFileBrowseCreateEncrypted = handleFileBrowseCreateEncrypted;
+```
+- Next part is your main Web page. In short, it should looks like this one:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Testing</title>
+
+    <script type="module" src="es6.js"></script>
+
+    <script>
+        function onload()
+        {
+	        document.getElementById('parseEncrypted').addEventListener('change', handleFileBrowseParseEncrypted, false);
+	        document.getElementById('createEncrypted').addEventListener('change', handleFileBrowseCreateEncrypted, false);
+        }
+    </script>
+</head>
+<body onload="onload()">
+    <p>
+        <label for="parseEncrypted">PDF file to parse:</label>
+        <input type="file" id="parseEncrypted" title="Input file for parsing" />
+    </p>
+    <p>
+        <label for="createEncrypted">PDF file to create encrypted:</label>
+        <input type="file" id="createEncrypted" title="Input file for making encrypted" />
+    </p>
+</body>
+</html>
+```
+OK, now you are ready to launch your favorite Node.js Web Server and have fun with direct links to your wounderful PKI.js application!
 
 More examples could be found in [**examples**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples) folder. To run these samples you must compile them, for example you would run:
 
