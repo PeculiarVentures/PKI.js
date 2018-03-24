@@ -143,7 +143,9 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
 
 ### How to use PKI.js ES6 files directly in browser
 
-Currently there is a posibility to use ES6 modules directly from Web pages, without any transpilations (Babel, Rollup etc.). In order to do this all used files must point to direct or relative names and should be achivable via browser.
+Currently there is a posibility to use ES6 modules directly from Web pages, without any transpilations (Babel, Rollup etc.). In order to do this all used files must point to direct or relative names and should be achivable via browser. Almost all moder browsers would support the "native ES6 modules". You could check [**this link to caniuse site**](https://caniuse.com/#feat=es6-module) for current status.
+ 
+You could check [**full-featured example here**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser). And please carefully read [**this README**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser/README.md) before run it.
  
 You could use PKI.js code by this way, but before you need to perform some additional steps:
 - Replace all occurences of `import * as asn1js from "asn1js"` and `import { <something> } from "pvutils"` inside `pkijs/src` directory with correct paths to `asn1js` and `pvutils` files. Usually you would have something like `import * as asn1js from "../../asn1js/src/asn1.js"` and `import { <something> } from "./pvutils/src/utils.js"`. Correct paths depends on your project structure. Also you would need to replace path to `pvutils` inside used `asn1js/src/asn1.js` file. How to replace - usually it is done via `sed "s/<what_to_find>/<replacement>/g" *` inside target directory;
@@ -182,7 +184,11 @@ window.handleFileBrowseCreateEncrypted = handleFileBrowseCreateEncrypted;
 </body>
 </html>
 ```
-OK, now you are ready to launch your favorite Node.js Web Server and have fun with direct links to your wounderful PKI.js application!
+- Now you need to run your application as Node.js application. It is necessary just because modern CORS would prevent you from loading files from local filesystem;
+
+OK, now you are ready to launch your favorite Node.js Web Server and have fun with direct links to your wounderful PKI.js application! You could check [**full-featured example here**](). And please carefully read [**this README**]() before run it.
+
+### More examples
 
 More examples could be found in [**examples**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples) folder. To run these samples you must compile them, for example you would run:
 
