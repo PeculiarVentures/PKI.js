@@ -7,6 +7,7 @@ In fact the example build "on-top" of another example "CertificateComplexExample
 In order to successfully run the example user need to run these commands in console:
 ```
 cd ./examples/HowToUseES6DirectlyInBrowser
+npm install
 npm run build
 node app.js
 ```
