@@ -4,7 +4,7 @@ machine:
 
 dependencies:
   pre:
-    - npm install -g typescript rollup
+    - npm install -g typescript rollup nyc coveralls
   post:
     - npm install node-webcrypto-ossl
     - npm install rollup-plugin-node-resolve
@@ -13,6 +13,10 @@ dependencies:
 test:
   pre:
     - npm run build:tests
+  post:
+    - cat ./coverage/lcov.info | coveralls
+    - mkdir $CIRCLE_ARTIFACTS/coverage
+    - mv ./coverage/lcov.info $CIRCLE_ARTIFACTS/coverage
 
 general:
   branches:

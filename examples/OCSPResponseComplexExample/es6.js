@@ -10,6 +10,7 @@ import ResponseBytes from "../../src/ResponseBytes";
 import SingleResponse from "../../src/SingleResponse";
 import RelativeDistinguishedNames from "../../src/RelativeDistinguishedNames";
 import BasicConstraints from "../../src/BasicConstraints";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let ocspResponseBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created OCSP response
 let certificateBuffer = new ArrayBuffer(0);

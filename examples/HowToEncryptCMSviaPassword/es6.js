@@ -3,6 +3,7 @@ import { arrayBufferToString, stringToArrayBuffer, fromBase64, toBase64, isEqual
 import { setEngine } from "../../src/common";
 import EnvelopedData from "../../src/EnvelopedData";
 import ContentInfo from "../../src/ContentInfo";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let encryptionVariant = 2;
 const encryptionAlgorithm = {

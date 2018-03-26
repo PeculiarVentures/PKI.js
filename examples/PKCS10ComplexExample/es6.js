@@ -7,7 +7,7 @@ import Attribute from "../../src/Attribute";
 import Extension from "../../src/Extension";
 import Extensions from "../../src/Extensions";
 import RSAPublicKey from "../../src/RSAPublicKey";
-
+//<nodewebcryptoossl>
 //*********************************************************************************
 let pkcs10Buffer = new ArrayBuffer(0);
 

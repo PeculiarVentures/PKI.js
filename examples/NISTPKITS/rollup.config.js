@@ -7,14 +7,6 @@ export default {
 	],
 	output: [
 		{
-			file: "../../test/NISTPKITS.js",
-			format: "es",
-			intro: `const WebCrypto = require("node-webcrypto-ossl");
-const webcrypto = new WebCrypto();`,
-			outro: `const assert = require("assert");
-setEngine("newEngine", webcrypto, new CryptoEngine({ name: "", crypto: webcrypto, subtle: webcrypto.subtle }));`,
-		},
-		{
 			file: "../../test/browser/NISTPKITS.js",
 			format: "es"
 		}

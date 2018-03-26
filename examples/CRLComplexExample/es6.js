@@ -9,7 +9,7 @@ import RevokedCertificate from "../../src/RevokedCertificate";
 import Extension from "../../src/Extension";
 import Extensions from "../../src/Extensions";
 import PublicKeyInfo from "../../src/PublicKeyInfo";
-
+//<nodewebcryptoossl>
 //*********************************************************************************
 let crlBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CRL
 let privateKeyBuffer = new ArrayBuffer(0);

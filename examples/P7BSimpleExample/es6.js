@@ -7,6 +7,7 @@ import Extension from "../../src/Extension";
 import SignedData from "../../src/SignedData";
 import EncapsulatedContentInfo from "../../src/EncapsulatedContentInfo";
 import ContentInfo from "../../src/ContentInfo";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let cmsSignedBuffer = new ArrayBuffer(0);
 

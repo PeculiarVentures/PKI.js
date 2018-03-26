@@ -50,11 +50,6 @@ export default class CertificateChainValidationEngine
 		 */
 		this.findIssuer = getParametersValue(parameters, "findIssuer", this.defaultValues("findIssuer"));
 		//endregion
-		
-		//region If input argument array contains "schema" for this object
-		if("schema" in parameters)
-			this.fromSchema(parameters.schema);
-		//endregion
 	}
 	//**********************************************************************************
 	defaultFindOrigin(certificate, validationEngine)

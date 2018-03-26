@@ -10,6 +10,7 @@ import CertBag from "../../src/CertBag";
 import PFX from "../../src/PFX";
 import Attribute from "../../src/Attribute";
 import PKCS8ShroudedKeyBag from "../../src/PKCS8ShroudedKeyBag";
+//<nodewebcryptoossl>
 //*********************************************************************************
 //region Global variables
 //*********************************************************************************

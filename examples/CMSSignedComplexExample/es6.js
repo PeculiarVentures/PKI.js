@@ -11,6 +11,7 @@ import SignerInfo from "../../src/SignerInfo";
 import IssuerAndSerialNumber from "../../src/IssuerAndSerialNumber";
 import SignedAndUnsignedAttributes from "../../src/SignedAndUnsignedAttributes";
 import ContentInfo from "../../src/ContentInfo";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let cmsSignedBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CMS_Signed
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT

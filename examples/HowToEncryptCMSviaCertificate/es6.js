@@ -7,6 +7,7 @@ import ContentInfo from "../../src/ContentInfo";
 import AttributeTypeAndValue from "../../src/AttributeTypeAndValue";
 import BasicConstraints from "../../src/BasicConstraints";
 import Extension from "../../src/Extension";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT 
 let privateKeyBuffer = new ArrayBuffer(0);

@@ -16,6 +16,7 @@ import ContentInfo from "../../src/ContentInfo";
 import TimeStampResp from "../../src/TimeStampResp";
 import PKIStatusInfo from "../../src/PKIStatusInfo";
 import BasicConstraints from "../../src/BasicConstraints";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let tspResponseBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created TSP response
 let certificateBuffer = new ArrayBuffer(0);

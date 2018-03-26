@@ -9,6 +9,7 @@ import Request from "../../src/Request";
 import CertID from "../../src/CertID";
 import AlgorithmIdentifier from "../../src/AlgorithmIdentifier";
 import Extension from "../../src/Extension";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let ocspReqBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created OCSP request
 //*********************************************************************************
