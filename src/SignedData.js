@@ -179,16 +179,13 @@ export default class SignedData
 					}
 				}),
 				new asn1js.Constructed({
+					name: (names.certificates || "SignedData.certificates"),
 					optional: true,
 					idBlock: {
 						tagClass: 3, // CONTEXT-SPECIFIC
 						tagNumber: 0 // [0]
 					},
-					value: CertificateSet.schema(names.certificates || {
-						names: {
-							certificates: "SignedData.certificates"
-						}
-					}).valueBlock.value
+					value: CertificateSet.schema().valueBlock.value
 				}), // IMPLICIT CertificateSet
 				new asn1js.Constructed({
 					optional: true,
@@ -240,52 +237,11 @@ export default class SignedData
 		
 		if("SignedData.certificates" in asn1.result)
 		{
-			this.certificates = Array.from(asn1.result["SignedData.certificates"], certificate =>
-			{
-				switch(certificate.idBlock.tagClass)
-				{
-					case 1:
-						return new Certificate({ schema: certificate });
-					case 3:
-						{
-							const tagNumber = certificate.idBlock.tagNumber;
-							
-							//region Create SEQUENCE from [x]
-							certificate.idBlock.tagClass = 1; // UNIVERSAL
-							certificate.idBlock.tagNumber = 16; // SEQUENCE
-							//endregion
-							
-							switch(tagNumber)
-							{
-								//region ExtendedCertificate
-								case 0:
-									break;
-								//endregion
-								//region AttributeCertificateV1
-								case 1:
-									return new AttributeCertificateV1({ schema: certificate });
-								//endregion
-								//region AttributeCertificateV2
-								case 2:
-									return new AttributeCertificateV2({ schema: certificate });
-								//endregion
-								//region OtherCertificateFormat
-								case 3:
-									return new OtherCertificateFormat({ schema: certificate });
-								//endregion
-								//region default
-								default:
-									throw new Error("Object's schema was not verified against input data for SignedData");
-								//endregion
-							}
-						}
-						break;
-					default:
-						throw new Error("Object's schema was not verified against input data for SignedData");
-				}
-				
-				return new Certificate();
-			});
+			asn1.result["SignedData.certificates"].idBlock.tagClass = 1; // UNIVERSAL
+			asn1.result["SignedData.certificates"].idBlock.tagNumber = 17; // SET
+
+			const certificateSet = new CertificateSet({ schema: asn1.result["SignedData.certificates"] });
+			this.certificates = certificateSet.certificates.slice(0); // Copy all just for making comfortable access
 		}
 		
 		if("SignedData.crls" in asn1.result)
@@ -330,26 +286,13 @@ export default class SignedData
 		
 		if("certificates" in this)
 		{
-			outputArray.push(new asn1js.Constructed({
-				idBlock: {
-					tagClass: 3, // CONTEXT-SPECIFIC
-					tagNumber: 0 // [0]
-				},
-				value: Array.from(this.certificates, certificate =>
-				{
-					if(certificate instanceof OtherCertificateFormat)
-					{
-						const certificateSchema = certificate.toSchema(encodeFlag);
-						
-						certificateSchema.idBlock.tagClass = 3;
-						certificateSchema.idBlock.tagNumber = 3;
-						
-						return certificateSchema;
-					}
-					
-					return certificate.toSchema(encodeFlag);
-				})
-			}));
+			const certificateSet = new CertificateSet({ certificates: this.certificates });
+			const certificateSetSchema = certificateSet.toSchema();
+			
+			certificateSetSchema.idBlock.tagClass = 3;
+			certificateSetSchema.idBlock.tagNumber = 0;
+			
+			outputArray.push(certificateSetSchema);
 		}
 		
 		if("crls" in this)

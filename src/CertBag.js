@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue } from "pvutils";
 import Certificate from "./Certificate.js";
-import AttributeCertificateV1 from "./AttributeCertificateV1.js";
+import AttributeCertificateV2 from "./AttributeCertificateV2.js";
 //**************************************************************************************
 /**
  * Class from RFC7292
@@ -153,14 +153,14 @@ export default class CertBag
 					}
 					catch(ex) // In some realizations the same OID used for attribute certificates
 					{
-						this.parsedValue = new AttributeCertificateV1({ schema: asn1Inner.result });
+						this.parsedValue = new AttributeCertificateV2({ schema: asn1Inner.result });
 					}
 				}
 				break;
 			case "1.2.840.113549.1.9.22.3": // attributeCertificate - (!!!) THIS OID IS SUBJECT FOR CHANGE IN FUTURE (!!!)
 				{
 					const asn1Inner = asn1js.fromBER(this.certValue.valueBlock.valueHex);
-					this.parsedValue = new AttributeCertificateV1({ schema: asn1Inner.result });
+					this.parsedValue = new AttributeCertificateV2({ schema: asn1Inner.result });
 				}
 				break;
 			case "1.2.840.113549.1.9.22.2": // sdsiCertificate

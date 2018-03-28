@@ -2,7 +2,7 @@ import * as asn1js from "asn1js";
 import { stringToArrayBuffer, arrayBufferToString, fromBase64, toBase64 } from "pvutils";
 import { getAlgorithmParameters, getRandomValues, setEngine } from "../../src/common";
 import Certificate from "../../src/Certificate";
-import AttributeCertificateV1 from "../../src/AttributeCertificateV1";
+import AttributeCertificateV2 from "../../src/AttributeCertificateV2";
 import PrivateKeyInfo from "../../src/PrivateKeyInfo";
 import AuthenticatedSafe from "../../src/AuthenticatedSafe";
 import SafeContents from "../../src/SafeContents";
@@ -492,7 +492,7 @@ context("Node.js PKCS#12 Example", () =>
 	it("Attribute Certificate, DES-EDE3-CBC algorithm", () =>
 	{
 		let asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(attributeCertificateBASE64)));
-		certSimpl = new AttributeCertificateV1({ schema: asn1.result });
+		certSimpl = new AttributeCertificateV2({ schema: asn1.result });
 		
 		asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(attributePrivateKeyBASE64)));
 		pkcs8Simpl = new PrivateKeyInfo({ schema: asn1.result });
@@ -522,7 +522,7 @@ context("Node.js PKCS#12 Example", () =>
 	it("Attribute Certificate, AES-256-CBC algorithm", () =>
 	{
 		let asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(attributeCertificateBASE64)));
-		certSimpl = new AttributeCertificateV1({ schema: asn1.result });
+		certSimpl = new AttributeCertificateV2({ schema: asn1.result });
 		
 		asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(attributePrivateKeyBASE64)));
 		pkcs8Simpl = new PrivateKeyInfo({ schema: asn1.result });
