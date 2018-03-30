@@ -662,12 +662,7 @@ export default class Certificate
 	verify(issuerCertificate = null)
 	{
 		//region Global variables
-		let sequence = Promise.resolve();
-		
 		let subjectPublicKeyInfo = {};
-		
-		const signature = this.signatureValue;
-		const tbs = this.tbs;
 		//endregion
 		
 		//region Set correct "subjectPublicKeyInfo" value
@@ -683,134 +678,7 @@ export default class Certificate
 			return Promise.reject("Please provide issuer certificate as a parameter");
 		//endregion
 		
-		//region Get a "crypto" extension
-		const crypto = getCrypto();
-		if(typeof crypto === "undefined")
-			return Promise.reject("Unable to create WebCrypto object");
-		//endregion
-		
-		//region Find signer's hashing algorithm
-		const shaAlgorithm = getHashAlgorithm(this.signatureAlgorithm);
-		if(shaAlgorithm === "")
-			return Promise.reject(`Unsupported signature algorithm: ${this.signatureAlgorithm.algorithmId}`);
-		//endregion
-		
-		//region Importing public key
-		sequence = sequence.then(() =>
-		{
-			//region Get information about public key algorithm and default parameters for import
-			let algorithmId;
-			if(this.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
-				algorithmId = this.signatureAlgorithm.algorithmId;
-			else
-				algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
-			
-			const algorithmObject = getAlgorithmByOID(algorithmId);
-			if(("name" in algorithmObject) === false)
-				return Promise.reject(`Unsupported public key algorithm: ${algorithmId}`);
-			
-			const algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
-			if("hash" in algorithm.algorithm)
-				algorithm.algorithm.hash.name = shaAlgorithm;
-			
-			//region Special case for ECDSA
-			if(algorithmObject.name === "ECDSA")
-			{
-				//region Get information about named curve
-				let algorithmParamsChecked = false;
-				
-				if(("algorithmParams" in subjectPublicKeyInfo.algorithm) === true)
-				{
-					if("idBlock" in subjectPublicKeyInfo.algorithm.algorithmParams)
-					{
-						if((subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
-							algorithmParamsChecked = true;
-					}
-				}
-				
-				if(algorithmParamsChecked === false)
-					return Promise.reject("Incorrect type for ECDSA public key parameters");
-				
-				const curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
-				if(("name" in curveObject) === false)
-					return Promise.reject(`Unsupported named curve algorithm: ${subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
-				//endregion
-				
-				algorithm.algorithm.namedCurve = curveObject.name;
-			}
-			//endregion
-			//endregion
-			
-			const publicKeyInfoSchema = subjectPublicKeyInfo.toSchema();
-			const publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
-			const publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
-			
-			return crypto.importKey("spki", publicKeyInfoView, algorithm.algorithm, true, algorithm.usages);
-		});
-		//endregion
-		
-		//region Verify signature for the certificate
-		sequence = sequence.then(publicKey =>
-		{
-			//region Get default algorithm parameters for verification
-			const algorithm = getAlgorithmParameters(publicKey.algorithm.name, "verify");
-			if("hash" in algorithm.algorithm)
-				algorithm.algorithm.hash.name = shaAlgorithm;
-			//endregion
-			
-			//region Special case for ECDSA signatures
-			let signatureValue = signature.valueBlock.valueHex;
-			
-			if(publicKey.algorithm.name === "ECDSA")
-			{
-				const asn1 = asn1js.fromBER(signatureValue);
-				signatureValue = createECDSASignatureFromCMS(asn1.result);
-			}
-			//endregion
-			
-			//region Special case for RSA-PSS
-			if(publicKey.algorithm.name === "RSA-PSS")
-			{
-				let pssParameters;
-				
-				try
-				{
-					pssParameters = new RSASSAPSSParams({ schema: this.signatureAlgorithm.algorithmParams });
-				}
-				catch(ex)
-				{
-					return Promise.reject(ex);
-				}
-				
-				if("saltLength" in pssParameters)
-					algorithm.algorithm.saltLength = pssParameters.saltLength;
-				else
-					algorithm.algorithm.saltLength = 20;
-				
-				let hashAlgo = "SHA-1";
-				
-				if("hashAlgorithm" in pssParameters)
-				{
-					const hashAlgorithm = getAlgorithmByOID(pssParameters.hashAlgorithm.algorithmId);
-					if(("name" in hashAlgorithm) === false)
-						return Promise.reject(`Unrecognized hash algorithm: ${pssParameters.hashAlgorithm.algorithmId}`);
-					
-					hashAlgo = hashAlgorithm.name;
-				}
-				
-				algorithm.algorithm.hash.name = hashAlgo;
-			}
-			//endregion
-			
-			return crypto.verify(algorithm.algorithm,
-				publicKey,
-				new Uint8Array(signatureValue),
-				new Uint8Array(tbs)
-			);
-		});
-		//endregion
-		
-		return sequence;
+		return getEngine().subtle.verifyWithPublicKey(this.tbs, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
 	}
 	//**********************************************************************************
 }

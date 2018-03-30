@@ -482,9 +482,21 @@ context("Node.js PKCS#12 Example", () =>
 		asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509PrivateKeyBASE64)));
 		pkcs8Simpl = new PrivateKeyInfo({ schema: asn1.result });
 		
-		return openSSLLike(password, "DES-EDE3-CBC").then(result =>
+		return openSSLLike(password, "DES-EDE3-CBC", "SHA-1").then(result =>
 		{
-			console.log(`X.509 Certificate, DES-EDE3-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-1 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			return parsePKCS12(result, password);
+		}).then(() => openSSLLike(password, "DES-EDE3-CBC", "SHA-256")).then(result =>
+		{
+			console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-256 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			return parsePKCS12(result, password);
+		}).then(() => openSSLLike(password, "DES-EDE3-CBC", "SHA-384")).then(result =>
+		{
+			console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-384 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			return parsePKCS12(result, password);
+		}).then(() => openSSLLike(password, "DES-EDE3-CBC", "SHA-512")).then(result =>
+		{
+			console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-512 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		});
 	});

@@ -165,7 +165,7 @@ function makePKCS12B2Key(cryptoEngine, hashAlgorithm, keyLength, password, salt,
 				
 				for(let l = (B.byteLength - 1); l >= 0; l--)
 				{
-					x = x >> 8;
+					x >>= 8;
 					x += bView[l] + chunk[l];
 					chunk[l] = (x & 0xff);
 				}
@@ -237,7 +237,7 @@ export default class CryptoEngine
 	/**
 	 * Import WebCrypto keys from different formats
 	 * @param {string} format
-	 * @param {ArrayBuffer|Object} keyData
+	 * @param {ArrayBuffer|Uint8Array} keyData
 	 * @param {Object} algorithm
 	 * @param {boolean} extractable
 	 * @param {Array} keyUsages
@@ -2354,7 +2354,13 @@ export default class CryptoEngine
 		sequence = sequence.then(() =>
 		{
 			//region Get information about public key algorithm and default parameters for import
-			const algorithmObject = this.getAlgorithmByOID(signatureAlgorithm.algorithmId);
+			let algorithmId;
+			if(signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
+				algorithmId = signatureAlgorithm.algorithmId;
+			else
+				algorithmId = publicKeyInfo.algorithm.algorithmId;
+
+			const algorithmObject = this.getAlgorithmByOID(algorithmId);
 			if(("name" in algorithmObject) === "")
 				return Promise.reject(`Unsupported public key algorithm: ${signatureAlgorithm.algorithmId}`);
 			

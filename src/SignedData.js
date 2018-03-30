@@ -365,9 +365,11 @@ export default class SignedData
 	 * @param checkChain
 	 * @param includeSignerCertificate
 	 * @param extendedMode
+	 * @param findOrigin
+	 * @param findIssuer
 	 * @returns {*}
 	 */
-	verify({
+	verify_old({
 		signer = (-1),
 		data = (new ArrayBuffer(0)),
 		trustedCerts = [],
@@ -1077,6 +1079,581 @@ export default class SignedData
 			return Promise.reject(error);
 		});
 		//endregion 
+		
+		return sequence;
+	}
+	//**********************************************************************************
+	/**
+	 * Verify current SignedData value
+	 * @param signer
+	 * @param data
+	 * @param trustedCerts
+	 * @param checkDate
+	 * @param checkChain
+	 * @param includeSignerCertificate
+	 * @param extendedMode
+	 * @param findOrigin
+	 * @param findIssuer
+	 * @returns {*}
+	 */
+	verify({
+		       signer = (-1),
+		       data = (new ArrayBuffer(0)),
+		       trustedCerts = [],
+		       checkDate = (new Date()),
+		       checkChain = false,
+		       includeSignerCertificate = false,
+		       extendedMode = false,
+		       findOrigin = null,
+		       findIssuer = null
+	       } = {})
+	{
+		//region Global variables
+		let sequence = Promise.resolve();
+		
+		let messageDigestValue = new ArrayBuffer(0);
+		
+		let publicKey;
+		
+		let shaAlgorithm = "";
+		
+		let signerCertificate = {};
+		
+		let timestampSerial = null;
+		
+		let certificatePath = [];
+		
+		const engine = getEngine();
+		//endregion
+		
+		//region Get a "crypto" extension
+		const crypto = getCrypto();
+		if(typeof crypto === "undefined")
+			return Promise.reject("Unable to create WebCrypto object");
+		//endregion
+		
+		//region Get a signer number
+		if(signer === (-1))
+		{
+			if(extendedMode)
+			{
+				return Promise.reject({
+					date: checkDate,
+					code: 1,
+					message: "Unable to get signer index from input parameters",
+					signatureVerified: null,
+					signerCertificate: null,
+					signerCertificateVerified: null
+				});
+			}
+			
+			return Promise.reject("Unable to get signer index from input parameters");
+		}
+		//endregion
+		
+		//region Check that certificates field was included in signed data
+		if(("certificates" in this) === false)
+		{
+			if(extendedMode)
+			{
+				return Promise.reject({
+					date: checkDate,
+					code: 2,
+					message: "No certificates attached to this signed data",
+					signatureVerified: null,
+					signerCertificate: null,
+					signerCertificateVerified: null
+				});
+			}
+			
+			return Promise.reject("No certificates attached to this signed data");
+		}
+		//endregion
+		
+		//region Find a certificate for specified signer
+		if(this.signerInfos[signer].sid instanceof IssuerAndSerialNumber)
+		{
+			sequence = sequence.then(() =>
+			{
+				for(const certificate of this.certificates)
+				{
+					if((certificate instanceof Certificate) === false)
+						continue;
+					
+					if((certificate.issuer.isEqual(this.signerInfos[signer].sid.issuer)) &&
+						(certificate.serialNumber.isEqual(this.signerInfos[signer].sid.serialNumber)))
+					{
+						signerCertificate = certificate;
+						return Promise.resolve();
+					}
+				}
+				
+				if(extendedMode)
+				{
+					return Promise.reject({
+						date: checkDate,
+						code: 3,
+						message: "Unable to find signer certificate",
+						signatureVerified: null,
+						signerCertificate: null,
+						signerCertificateVerified: null
+					});
+				}
+				
+				return Promise.reject("Unable to find signer certificate");
+			});
+		}
+		else // Find by SubjectKeyIdentifier
+		{
+			sequence = sequence.then(() =>
+				Promise.all(Array.from(this.certificates.filter(certificate => (certificate instanceof Certificate)), certificate =>
+					crypto.digest({ name: "sha-1" }, new Uint8Array(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex)))
+				).then(results =>
+				{
+					for(const [index, certificate] of this.certificates.entries())
+					{
+						if((certificate instanceof Certificate) === false)
+							continue;
+						
+						if(isEqualBuffer(results[index], this.signerInfos[signer].sid.valueBlock.valueHex))
+						{
+							signerCertificate = certificate;
+							return Promise.resolve();
+						}
+					}
+					
+					if(extendedMode)
+					{
+						return Promise.reject({
+							date: checkDate,
+							code: 3,
+							message: "Unable to find signer certificate",
+							signatureVerified: null,
+							signerCertificate: null,
+							signerCertificateVerified: null
+						});
+					}
+					
+					return Promise.reject("Unable to find signer certificate");
+				}, () =>
+				{
+					if(extendedMode)
+					{
+						return Promise.reject({
+							date: checkDate,
+							code: 3,
+							message: "Unable to find signer certificate",
+							signatureVerified: null,
+							signerCertificate: null,
+							signerCertificateVerified: null
+						});
+					}
+					
+					return Promise.reject("Unable to find signer certificate");
+				})
+			);
+		}
+		//endregion
+		
+		//region Verify internal digest in case of "tSTInfo" content type
+		sequence = sequence.then(() =>
+		{
+			if(this.encapContentInfo.eContentType === "1.2.840.113549.1.9.16.1.4")
+			{
+				//region Check "eContent" precense
+				if(("eContent" in this.encapContentInfo) === false)
+					return false;
+				//endregion
+				
+				//region Initialize TST_INFO value
+				const asn1 = asn1js.fromBER(this.encapContentInfo.eContent.valueBlock.valueHex);
+				let tstInfo;
+				
+				try
+				{
+					tstInfo = new TSTInfo({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					return false;
+				}
+				//endregion
+				
+				//region Change "checkDate" and append "timestampSerial"
+				checkDate = tstInfo.genTime;
+				timestampSerial = tstInfo.serialNumber.valueBlock.valueHex;
+				//endregion
+				
+				//region Check that we do have detached data content
+				if(data.byteLength === 0)
+				{
+					if(extendedMode)
+					{
+						return Promise.reject({
+							date: checkDate,
+							code: 4,
+							message: "Missed detached data input array",
+							signatureVerified: null,
+							signerCertificate,
+							signerCertificateVerified: null
+						});
+					}
+					
+					return Promise.reject("Missed detached data input array");
+				}
+				//endregion
+				
+				return tstInfo.verify({ data });
+			}
+			
+			return true;
+		});
+		//endregion
+		
+		//region Make additional verification for signer's certificate
+		function checkCA(cert)
+		{
+			/// <param name="cert" type="in_window.org.pkijs.simpl.CERT">Certificate to find CA flag for</param>
+			
+			//region Do not include signer's certificate
+			if((cert.issuer.isEqual(signerCertificate.issuer) === true) && (cert.serialNumber.isEqual(signerCertificate.serialNumber) === true))
+				return null;
+			//endregion
+			
+			let isCA = false;
+			
+			if("extensions" in cert)
+			{
+				for(const extension of cert.extensions)
+				{
+					if(extension.extnID === "2.5.29.19") // BasicConstraints
+					{
+						if("cA" in extension.parsedValue)
+						{
+							if(extension.parsedValue.cA === true)
+								isCA = true;
+						}
+					}
+				}
+			}
+			
+			if(isCA)
+				return cert;
+			
+			return null;
+		}
+		
+		if(checkChain)
+		{
+			sequence = sequence.then(result =>
+			{
+				//region Verify result of previous operation
+				if(result === false)
+					return false;
+				//endregion
+				
+				const promiseResults = Array.from(this.certificates.filter(certificate => (certificate instanceof Certificate)), certificate => checkCA(certificate));
+				
+				const certificateChainValidationEngineParameters = {
+					checkDate,
+					certs: Array.from(promiseResults.filter(_result => (_result !== null))),
+					trustedCerts
+				};
+				
+				if(findIssuer !== null)
+					certificateChainValidationEngineParameters.findIssuer = findIssuer;
+				
+				if(findOrigin !== null)
+					certificateChainValidationEngineParameters.findOrigin = findOrigin;
+				
+				const certificateChainEngine = new CertificateChainValidationEngine(certificateChainValidationEngineParameters);
+				
+				certificateChainEngine.certs.push(signerCertificate);
+				
+				if("crls" in this)
+				{
+					for(const crl of this.crls)
+					{
+						if(crl instanceof CertificateRevocationList)
+							certificateChainEngine.crls.push(crl);
+						else // Assumed "revocation value" has "OtherRevocationInfoFormat"
+						{
+							if(crl.otherRevInfoFormat === "1.3.6.1.5.5.7.48.1.1") // Basic OCSP response
+								certificateChainEngine.ocsps.push(new BasicOCSPResponse({ schema: crl.otherRevInfo }));
+						}
+					}
+				}
+				
+				if("ocsps" in this)
+					certificateChainEngine.ocsps.push(...(this.ocsps));
+				
+				return certificateChainEngine.verify().then(verificationResult =>
+				{
+					if("certificatePath" in verificationResult)
+						certificatePath = verificationResult.certificatePath;
+					
+					if(verificationResult.result === true)
+						return Promise.resolve(true);
+					
+					if(extendedMode)
+					{
+						return Promise.reject({
+							date: checkDate,
+							code: 5,
+							message: `Validation of signer's certificate failed: ${verificationResult.resultMessage}`,
+							signatureVerified: null,
+							signerCertificate,
+							signerCertificateVerified: false
+						});
+					}
+					
+					return Promise.reject("Validation of signer's certificate failed");
+				}, error =>
+				{
+					if(extendedMode)
+					{
+						return Promise.reject({
+							date: checkDate,
+							code: 5,
+							message: `Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`,
+							signatureVerified: null,
+							signerCertificate,
+							signerCertificateVerified: false
+						});
+					}
+					
+					return Promise.reject(`Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`);
+				});
+			});
+		}
+		//endregion
+		
+		//region Find signer's hashing algorithm
+		sequence = sequence.then(result =>
+		{
+			//region Verify result of previous operation
+			if(result === false)
+				return false;
+			//endregion
+			
+			const signerInfoHashAlgorithm = getAlgorithmByOID(this.signerInfos[signer].digestAlgorithm.algorithmId);
+			if(("name" in signerInfoHashAlgorithm) === false)
+			{
+				if(extendedMode)
+				{
+					return Promise.reject({
+						date: checkDate,
+						code: 7,
+						message: `Unsupported signature algorithm: ${this.signerInfos[signer].digestAlgorithm.algorithmId}`,
+						signatureVerified: null,
+						signerCertificate,
+						signerCertificateVerified: true
+					});
+				}
+				
+				return Promise.reject(`Unsupported signature algorithm: ${this.signerInfos[signer].digestAlgorithm.algorithmId}`);
+			}
+			
+			shaAlgorithm = signerInfoHashAlgorithm.name;
+			
+			return true;
+		});
+		//endregion
+		
+		//region Create correct data block for verification
+		sequence = sequence.then(result =>
+		{
+			//region Verify result of previous operation
+			if(result === false)
+				return false;
+			//endregion
+			
+			if("eContent" in this.encapContentInfo) // Attached data
+			{
+				if((this.encapContentInfo.eContent.idBlock.tagClass === 1) &&
+					(this.encapContentInfo.eContent.idBlock.tagNumber === 4))
+				{
+					if(this.encapContentInfo.eContent.idBlock.isConstructed === false)
+						data = this.encapContentInfo.eContent.valueBlock.valueHex;
+					else
+					{
+						for(const contentValue of this.encapContentInfo.eContent.valueBlock.value)
+							data = utilConcatBuf(data, contentValue.valueBlock.valueHex);
+					}
+				}
+				else
+					data = this.encapContentInfo.eContent.valueBlock.valueBeforeDecode;
+			}
+			else // Detached data
+			{
+				if(data.byteLength === 0) // Check that "data" already provided by function parameter
+				{
+					if(extendedMode)
+					{
+						return Promise.reject({
+							date: checkDate,
+							code: 8,
+							message: "Missed detached data input array",
+							signatureVerified: null,
+							signerCertificate,
+							signerCertificateVerified: true
+						});
+					}
+					
+					return Promise.reject("Missed detached data input array");
+				}
+			}
+			
+			if("signedAttrs" in this.signerInfos[signer])
+			{
+				//region Check mandatory attributes
+				let foundContentType = false;
+				let foundMessageDigest = false;
+				
+				for(const attribute of this.signerInfos[signer].signedAttrs.attributes)
+				{
+					//region Check that "content-type" attribute exists
+					if(attribute.type === "1.2.840.113549.1.9.3")
+						foundContentType = true;
+					//endregion
+					
+					//region Check that "message-digest" attribute exists
+					if(attribute.type === "1.2.840.113549.1.9.4")
+					{
+						foundMessageDigest = true;
+						messageDigestValue = attribute.values[0].valueBlock.valueHex;
+					}
+					//endregion
+					
+					//region Speed-up searching
+					if(foundContentType && foundMessageDigest)
+						break;
+					//endregion
+				}
+				
+				if(foundContentType === false)
+				{
+					if(extendedMode)
+					{
+						return Promise.reject({
+							date: checkDate,
+							code: 9,
+							message: "Attribute \"content-type\" is a mandatory attribute for \"signed attributes\"",
+							signatureVerified: null,
+							signerCertificate,
+							signerCertificateVerified: true
+						});
+					}
+					
+					return Promise.reject("Attribute \"content-type\" is a mandatory attribute for \"signed attributes\"");
+				}
+				
+				if(foundMessageDigest === false)
+				{
+					if(extendedMode)
+					{
+						return Promise.reject({
+							date: checkDate,
+							code: 10,
+							message: "Attribute \"message-digest\" is a mandatory attribute for \"signed attributes\"",
+							signatureVerified: null,
+							signerCertificate,
+							signerCertificateVerified: true
+						});
+					}
+					
+					return Promise.reject("Attribute \"message-digest\" is a mandatory attribute for \"signed attributes\"");
+				}
+				//endregion
+			}
+			
+			return true;
+		});
+		//endregion
+		
+		//region Verify "message-digest" attribute in case of "signedAttrs"
+		sequence = sequence.then(result =>
+		{
+			//region Verify result of previous operation
+			if(result === false)
+				return false;
+			//endregion
+			
+			if("signedAttrs" in this.signerInfos[signer])
+				return crypto.digest(shaAlgorithm, new Uint8Array(data));
+			
+			return true;
+		}).then(result =>
+		{
+			//region Verify result of previous operation
+			if(result === false)
+				return false;
+			//endregion
+			
+			if("signedAttrs" in this.signerInfos[signer])
+			{
+				if(isEqualBuffer(result, messageDigestValue))
+				{
+					data = this.signerInfos[signer].signedAttrs.encodedValue;
+					return true;
+				}
+				
+				return false;
+			}
+			
+			return true;
+		});
+		//endregion
+		
+		sequence = sequence.then(result =>
+		{
+			//region Verify result of previous operation
+			if(result === false)
+				return false;
+			//endregion
+			
+			return engine.subtle.verifyWithPublicKey(data, this.signerInfos[signer].signature, signerCertificate.subjectPublicKeyInfo, signerCertificate.signatureAlgorithm);
+		});
+		
+		//region Make a final result
+		sequence = sequence.then(result =>
+		{
+			if(extendedMode)
+			{
+				return {
+					date: checkDate,
+					code: 14,
+					message: "",
+					signatureVerified: result,
+					signerCertificate,
+					timestampSerial,
+					signerCertificateVerified: true,
+					certificatePath
+				};
+			}
+			
+			return result;
+		}, error =>
+		{
+			if(extendedMode)
+			{
+				if("code" in error)
+					return Promise.reject(error);
+				
+				return Promise.reject({
+					date: checkDate,
+					code: 15,
+					message: `Error during verification: ${error.message}`,
+					signatureVerified: null,
+					signerCertificate,
+					timestampSerial,
+					signerCertificateVerified: true
+				});
+			}
+			
+			return Promise.reject(error);
+		});
+		//endregion
 		
 		return sequence;
 	}

@@ -48,7 +48,7 @@ function destroyClickedElement(event)
 //*********************************************************************************
 //endregion 
 //*********************************************************************************
-function passwordBasedIntegrityInternal(password)
+function passwordBasedIntegrityInternal(password, hash = "SHA-256")
 {
 	//region Initial variables
 	let sequence = Promise.resolve();
@@ -110,8 +110,8 @@ function passwordBasedIntegrityInternal(password)
 		() => pkcs12.makeInternalValues({
 			password: stringToArrayBuffer(password),
 			iterations: 100000,
-			pbkdf2HashAlgorithm: "SHA-256", // Least two parameters are equal because at the moment it is not clear how to use PBMAC1 schema with PKCS#12 integrity protection
-			hmacHashAlgorithm: "SHA-256"
+			pbkdf2HashAlgorithm: hash, // Least two parameters are equal because at the moment it is not clear how to use PBMAC1 schema with PKCS#12 integrity protection
+			hmacHashAlgorithm: hash
 		})
 	);
 	//endregion
@@ -684,7 +684,7 @@ function parsePKCS12Internal(buffer, password)
 	sequence = sequence.then(
 		() => pkcs12.parseInternalValues({
 			password: passwordConverted,
-			checkIntegrity: false
+			checkIntegrity: true
 		})
 	);
 	//endregion
@@ -782,11 +782,14 @@ context("Hack for Rollup.js", () =>
 context("PKCS#12 Simple Example", () =>
 {
 	//region Initial variables
-	let sequence = Promise.resolve();
 	const password = "12345567890";
 	//endregion
 	
-	it("Password-based Integrity", () => passwordBasedIntegrityInternal(password));
+	it("Password-based Integrity, SHA-1", () => passwordBasedIntegrityInternal(password, "SHA-1"));
+	it("Password-based Integrity, SHA-256", () => passwordBasedIntegrityInternal(password, "SHA-256"));
+	it("Password-based Integrity, SHA-384", () => passwordBasedIntegrityInternal(password, "SHA-384"));
+	it("Password-based Integrity, SHA-512", () => passwordBasedIntegrityInternal(password, "SHA-512"));
+	it("Password-based Integrity, incorrect algorithm", () => passwordBasedIntegrityInternal(password, "SHA-5122").then(result => Promise.reject("Error must be here"), error => Promise.resolve()));
 	
 	it("Certificate-based Integrity", () => certificateBasedIntegrityInternal());
 	
@@ -797,7 +800,5 @@ context("PKCS#12 Simple Example", () =>
 	it("Certificate Privacy", () => certificatePrivacyInternal(password));
 	
 	it("Making OpenSSL-like PKCS#12 Data", () => openSSLLikeInternal(password).then(result => parsePKCS12Internal(result, password)));
-	
-	return sequence;
 });
 //**********************************************************************************
