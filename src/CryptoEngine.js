@@ -2340,6 +2340,12 @@ export default class CryptoEngine
 	//**********************************************************************************
 	getPublicKey(publicKeyInfo, signatureAlgorithm)
 	{
+        //region Find signer's hashing algorithm
+        const shaAlgorithm = this.getHashAlgorithm(signatureAlgorithm);
+        if(shaAlgorithm === "")
+            return Promise.reject(`Unsupported signature algorithm: ${signatureAlgorithm.algorithmId}`);
+        //endregion
+
 		//region Get information about public key algorithm and default parameters for import
 		let algorithmId;
 		if(signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
