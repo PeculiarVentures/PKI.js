@@ -359,73 +359,9 @@ export default class CertificationRequest
 	/**
 	 * Importing public key for current certificate request
 	 */
-	getPublicKey(parameters = null)
+	getPublicKey()
 	{
-		//region Get a "crypto" extension
-		const crypto = getCrypto();
-		if(typeof crypto === "undefined")
-			return Promise.reject("Unable to create WebCrypto object");
-		//endregion
-		
-		//region Find correct algorithm for imported public key
-		if(parameters === null)
-		{
-			//region Initial variables
-			parameters = {};
-			//endregion
-			
-			//region Find signer's hashing algorithm
-			const shaAlgorithm = getHashAlgorithm(this.signatureAlgorithm);
-			if(shaAlgorithm === "")
-				return Promise.reject(`Unsupported signature algorithm: ${this.signatureAlgorithm.algorithmId}`);
-			//endregion
-			
-			//region Get information about public key algorithm and default parameters for import
-			const algorithmObject = getAlgorithmByOID(this.subjectPublicKeyInfo.algorithm.algorithmId);
-			if(("name" in algorithmObject) === false)
-				return Promise.reject(`Unsupported public key algorithm: ${this.subjectPublicKeyInfo.algorithm.algorithmId}`);
-			
-			parameters.algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
-			if("hash" in parameters.algorithm.algorithm)
-				parameters.algorithm.algorithm.hash.name = shaAlgorithm;
-			
-			//region Special case for ECDSA
-			if(algorithmObject.name === "ECDSA")
-			{
-				//region Get information about named curve
-				let algorithmParamsChecked = false;
-				
-				if(("algorithmParams" in this.subjectPublicKeyInfo.algorithm) === true)
-				{
-					if("idBlock" in this.subjectPublicKeyInfo.algorithm.algorithmParams)
-					{
-						if((this.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (this.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
-							algorithmParamsChecked = true;
-					}
-				}
-				
-				if(algorithmParamsChecked === false)
-					return Promise.reject("Incorrect type for ECDSA public key parameters");
-				
-				const curveObject = getAlgorithmByOID(this.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
-				if(("name" in curveObject) === false)
-					return Promise.reject(`Unsupported named curve algorithm: ${this.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
-				//endregion
-				
-				parameters.algorithm.algorithm.namedCurve = curveObject.name;
-			}
-			//endregion
-			//endregion
-		}
-		//endregion
-		
-		//region Get neccessary values from internal fields for current certificate
-		const publicKeyInfoSchema = this.subjectPublicKeyInfo.toSchema();
-		const publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
-		const publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
-		//endregion
-		
-		return crypto.importKey("spki", publicKeyInfoView, parameters.algorithm.algorithm, true, parameters.algorithm.usages);
+		return getEngine().getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm);
 	}
 	//**********************************************************************************
 }
