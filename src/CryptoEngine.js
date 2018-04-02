@@ -2338,14 +2338,16 @@ export default class CryptoEngine
 		);
 	}
 	//**********************************************************************************
-	getPublicKey(publicKeyInfo, signatureAlgorithm)
+	fillPublicKeyParameters(publicKeyInfo, signatureAlgorithm)
 	{
-        //region Find signer's hashing algorithm
-        const shaAlgorithm = this.getHashAlgorithm(signatureAlgorithm);
-        if(shaAlgorithm === "")
-            return Promise.reject(`Unsupported signature algorithm: ${signatureAlgorithm.algorithmId}`);
-        //endregion
-
+		const parameters = {};
+		
+		//region Find signer's hashing algorithm
+		const shaAlgorithm = this.getHashAlgorithm(signatureAlgorithm);
+		if(shaAlgorithm === "")
+			return Promise.reject(`Unsupported signature algorithm: ${signatureAlgorithm.algorithmId}`);
+		//endregion
+		
 		//region Get information about public key algorithm and default parameters for import
 		let algorithmId;
 		if(signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
@@ -2357,9 +2359,9 @@ export default class CryptoEngine
 		if(("name" in algorithmObject) === "")
 			return Promise.reject(`Unsupported public key algorithm: ${signatureAlgorithm.algorithmId}`);
 		
-		const algorithm = this.getAlgorithmParameters(algorithmObject.name, "importkey");
-		if("hash" in algorithm.algorithm)
-			algorithm.algorithm.hash.name = shaAlgorithm;
+		parameters.algorithm = this.getAlgorithmParameters(algorithmObject.name, "importkey");
+		if("hash" in parameters.algorithm.algorithm)
+			parameters.algorithm.algorithm.hash.name = shaAlgorithm;
 		
 		//region Special case for ECDSA
 		if(algorithmObject.name === "ECDSA")
@@ -2384,10 +2386,18 @@ export default class CryptoEngine
 				return Promise.reject(`Unsupported named curve algorithm: ${publicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
 			//endregion
 			
-			algorithm.algorithm.namedCurve = curveObject.name;
+			parameters.algorithm.algorithm.namedCurve = curveObject.name;
 		}
 		//endregion
 		//endregion
+		
+		return parameters;
+	}
+	//**********************************************************************************
+	getPublicKey(publicKeyInfo, signatureAlgorithm, parameters = null)
+	{
+		if(parameters === null)
+			parameters = this.fillPublicKeyParameters(publicKeyInfo, signatureAlgorithm);
 		
 		const publicKeyInfoSchema = publicKeyInfo.toSchema();
 		const publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
@@ -2395,9 +2405,9 @@ export default class CryptoEngine
 		
 		return this.importKey("spki",
 			publicKeyInfoView,
-			algorithm.algorithm,
+			parameters.algorithm.algorithm,
 			true,
-			algorithm.usages
+			parameters.algorithm.usages
 		);
 	}
 	//**********************************************************************************
@@ -2414,7 +2424,8 @@ export default class CryptoEngine
 		//endregion
 		
 		//region Import public key
-		sequence = sequence.then(() => this.getPublicKey(publicKeyInfo, signatureAlgorithm));
+		sequence = sequence.then(() =>
+			this.getPublicKey(publicKeyInfo, signatureAlgorithm));
 		//endregion
 		
 		//region Verify signature

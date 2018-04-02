@@ -525,9 +525,9 @@ export default class Certificate
 	/**
 	 * Importing public key for current certificate
 	 */
-	getPublicKey()
+	getPublicKey(parameters = null)
 	{
-		return getEngine().getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm);
+		return getEngine().subtle.getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
 	}
 	//**********************************************************************************
 	/**
