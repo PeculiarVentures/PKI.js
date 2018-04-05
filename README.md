@@ -201,6 +201,22 @@ npm run build:examples
 
 Live examples can be found at [pkijs.org](https://pkijs.org).
 
+## Tests using Node environment
+
+**WARNING:** 
+!!! in order to test PKIjs in Node environment you would need to install additional package `node-webcrypto-ossl` !!!
+
+The `node-webcrypto-ossl` is not referenced in PKIjs dependencies anymore because we were noticed users have a problems with the package installation, especially on Windows platform.
+
+The `node-webcrypto-ossl` is NOT a mandatory for testing PKIjs - you could visit test/browser subdir and run all the same tests in your favorite browser.
+
+Also you could check [CircleCI](https://circleci.com/gh/PeculiarVentures/PKI.js) - for each build the service runs all tests and results could be easily observed.
+
+If you do need to run PKIjs tests locally using Node please use
+```command
+npm run test:node
+```
+
 ## Limitations
 
 * Safari, Edge, and IE do not have complete, or correct implementations of Web Crypto. To work around these limitations you will probably need [`webcrypto-liner`](https://github.com/PeculiarVentures/webcrypto-liner/).

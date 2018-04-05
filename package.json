@@ -23,7 +23,6 @@
     "emailjs-mime-builder": "latest",
     "emailjs-mime-parser": "^2.0.1",
     "mocha": "^3.0.2",
-    "node-webcrypto-ossl": "^1.0.36",
     "nyc": "^11.6.0",
     "rollup": "latest",
     "rollup-plugin-commonjs": "^8.2.6",
@@ -59,7 +58,8 @@
     "ex17": "cd examples/NodePKCS12Example && npm run build && cd ../..",
     "build:examples": "npm run ex1 && npm run ex2 && npm run ex3 && npm run ex4 && npm run ex5 && npm run ex6 && npm run ex7 && npm run ex8 && npm run ex9 && npm run ex10 && npm run ex11 && npm run ex12 && npm run ex13 && npm run ex14 && npm run ex15 && npm run ex16 && npm run ex17",
     "build:tests": "npm run build:examples",
-    "test": "cross-env NODE_ENV=test nyc mocha --timeout 40000 --require babel-register --require babel-polyfill test/s_*.js && cross-env NODE_ENV=test nyc --clean=false mocha --timeout 40000 --require babel-register --require babel-polyfill test/n_*.js",
+    "test:node": "cross-env NODE_ENV=test nyc mocha --timeout 40000 --require babel-register --require babel-polyfill test/s_*.js && cross-env NODE_ENV=test nyc --clean=false mocha --timeout 40000 --require babel-register --require babel-polyfill test/n_*.js",
+    "test": "node -e \"console.log('\\nWARNING: !!! in order to test PKIjs in Node environment you\\nwould need to install additional package node-webcrypto-ossl !!!\\n\\nThe node-webcrypto-ossl is not referenced in PKIjs dependencies\\nanymore because we were noticed users have a problems with\\nthe package installation, especially on Windows platform.\\n\\nThe node-webcrypto-ossl is NOT a mandatory for testing PKIjs -\\nyou could visit test/browser subdir and run all the same tests\\nin your favorite browser.\\n\\nAlso you could check CircleCI - for each build the service runs\\nall tests and results could be easily observed.\\n\\nIf you do need to run PKIjs tests locally using Node please use\\nnpm run test:node')\"",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -81,6 +81,6 @@
   "module": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.39",
+  "version": "2.1.40",
   "license": "MIT"
 }
