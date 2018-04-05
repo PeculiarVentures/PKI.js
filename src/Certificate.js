@@ -2,11 +2,7 @@ import * as asn1js from "asn1js";
 import { getParametersValue, bufferToHexCodes } from "pvutils";
 import {
 	getCrypto,
-	getEngine,
-	getHashAlgorithm,
-	getAlgorithmByOID,
-	createECDSASignatureFromCMS,
-	getAlgorithmParameters
+	getEngine
 } from "./common.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
@@ -14,7 +10,6 @@ import Time from "./Time.js";
 import PublicKeyInfo from "./PublicKeyInfo.js";
 import Extension from "./Extension.js";
 import Extensions from "./Extensions.js";
-import RSASSAPSSParams from "./RSASSAPSSParams.js";
 //**************************************************************************************
 function tbsCertificate(parameters = {})
 {

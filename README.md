@@ -1,8 +1,11 @@
 # PKIjs
 
-[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://raw.githubusercontent.com/PeculiarVentures/pki.js/master/LICENSE)  [![NPM version](https://badge.fury.io/js/pkijs.svg)](http://badge.fury.io/js/pkijs)  [![CircleCI](https://circleci.com/gh/PeculiarVentures/PKI.js.svg?style=svg)](https://circleci.com/gh/PeculiarVentures/PKI.js) [![Known Vulnerabilities](https://snyk.io/test/github/PeculiarVentures/PKI.js/badge.svg)](https://snyk.io/test/github/PeculiarVentures/PKI.js) [![Coverage Status](https://coveralls.io/repos/github/PeculiarVentures/PKI.js/badge.svg?branch=master)](https://coveralls.io/github/PeculiarVentures/PKI.js?branch=master)
+[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/PeculiarVentures/PKI.js/blob/master/LICENSE) 
+[![CircleCI](https://img.shields.io/circleci/project/github/PeculiarVentures/PKI.js.svg)](https://circleci.com/gh/PeculiarVentures/PKI.js)
+ [![Known Vulnerabilities](https://snyk.io/test/github/PeculiarVentures/PKI.js/badge.svg)](https://snyk.io/test/github/PeculiarVentures/PKI.js) [![Coverage Status](https://coveralls.io/repos/github/PeculiarVentures/PKI.js/badge.svg)](https://coveralls.io/github/PeculiarVentures/PKI.js) 
 
-[![NPM](https://nodei.co/npm-dl/pkijs.png?months=3&height=2)](https://nodei.co/npm/pkijs/)
+
+[![NPM](https://nodei.co/npm/pkijs.png?downloads=true&downloadRank=true)](https://nodei.co/npm/pkijs/)
 
 
 
@@ -21,7 +24,6 @@ In the new version of library we have some new features:
 
 * New version of "certificate chaing verification engine" passed almost all tests from NIST PKITS. Tests are also shipped with the library;
 * Internal "WebCrypto shim" making it possible to work with "spki/pkcs8" formats in any environment;
-* Internal realization of special routine working with ES2015 generators;
 
 Full detailed information about all PKI.js features could be found [in separate file](FEATURES.md).
 Description of PKI.js code structure could be found [in separate file](https://github.com/PeculiarVentures/PKI.js/tree/master/src/README.md).

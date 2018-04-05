@@ -76,6 +76,8 @@ export default class PrivateKeyInfo
 				return new asn1js.OctetString();
 			case "attributes":
 				return [];
+			case "parsedKey":
+				return {};
 			default:
 				throw new Error(`Invalid member name for PrivateKeyInfo class: ${memberName}`);
 		}

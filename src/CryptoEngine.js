@@ -425,6 +425,9 @@ export default class CryptoEngine
 					{
 						return Promise.reject("Incorrect keyData");
 					}
+					
+					if(("parsedKey" in privateKeyInfo) === false)
+						return Promise.reject("Incorrect keyData");
 					//endregion
 
 					switch(algorithm.name.toUpperCase())
