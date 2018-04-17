@@ -531,7 +531,7 @@ export default class CertificateChainValidationEngine
 					return {
 						result: false,
 						resultCode: 8,
-						resultMessage: "Certificate validity period is out of checking date"
+						resultMessage: "The certificate is either not yet valid or expired"
 					};
 				}
 			}
