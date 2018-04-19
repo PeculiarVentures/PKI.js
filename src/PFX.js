@@ -321,7 +321,7 @@ export default class PFX
 								iterations: parameters.iterations
 							});
 						},
-					error => Promise.reject(error)
+						error => Promise.reject(error)
 					);
 					//endregion
 					//endregion

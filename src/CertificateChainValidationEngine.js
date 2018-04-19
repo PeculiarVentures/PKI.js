@@ -1,7 +1,5 @@
 import { getParametersValue, isEqualBuffer } from "pvutils";
 import { getAlgorithmByOID, stringPrep } from "./common.js";
-import CertificateRevocationList from "./CertificateRevocationList.js";
-import Certificate from "./Certificate.js";
 //**************************************************************************************
 export default class CertificateChainValidationEngine
 {
@@ -792,6 +790,262 @@ export default class CertificateChainValidationEngine
 	 */
 	async verify(parameters = {})
 	{
+		//region Auxiliary functions for name constraints checking
+		function compareDNSName(name, constraint)
+		{
+			/// <summary>Compare two dNSName values</summary>
+			/// <param name="name" type="String">DNS from name</param>
+			/// <param name="constraint" type="String">Constraint for DNS from name</param>
+			/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+			
+			//region Make a "string preparation" for both name and constrain
+			const namePrepared = stringPrep(name);
+			const constraintPrepared = stringPrep(constraint);
+			//endregion
+			
+			//region Make a "splitted" versions of "constraint" and "name"
+			const nameSplitted = namePrepared.split(".");
+			const constraintSplitted = constraintPrepared.split(".");
+			//endregion
+			
+			//region Length calculation and additional check
+			const nameLen = nameSplitted.length;
+			const constrLen = constraintSplitted.length;
+			
+			if((nameLen === 0) || (constrLen === 0) || (nameLen < constrLen))
+				return false;
+			//endregion
+			
+			//region Check that no part of "name" has zero length
+			for(let i = 0; i < nameLen; i++)
+			{
+				if(nameSplitted[i].length === 0)
+					return false;
+			}
+			//endregion
+			
+			//region Check that no part of "constraint" has zero length
+			for(let i = 0; i < constrLen; i++)
+			{
+				if(constraintSplitted[i].length === 0)
+				{
+					if(i === 0)
+					{
+						if(constrLen === 1)
+							return false;
+						
+						continue;
+					}
+					
+					return false;
+				}
+			}
+			//endregion
+			
+			//region Check that "name" has a tail as "constraint"
+			
+			for(let i = 0; i < constrLen; i++)
+			{
+				if(constraintSplitted[constrLen - 1 - i].length === 0)
+					continue;
+				
+				if(nameSplitted[nameLen - 1 - i].localeCompare(constraintSplitted[constrLen - 1 - i]) !== 0)
+					return false;
+			}
+			//endregion
+			
+			return true;
+		}
+		
+		function compareRFC822Name(name, constraint)
+		{
+			/// <summary>Compare two rfc822Name values</summary>
+			/// <param name="name" type="String">E-mail address from name</param>
+			/// <param name="constraint" type="String">Constraint for e-mail address from name</param>
+			/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+			
+			//region Make a "string preparation" for both name and constrain
+			const namePrepared = stringPrep(name);
+			const constraintPrepared = stringPrep(constraint);
+			//endregion
+			
+			//region Make a "splitted" versions of "constraint" and "name"
+			const nameSplitted = namePrepared.split("@");
+			const constraintSplitted = constraintPrepared.split("@");
+			//endregion
+			
+			//region Splitted array length checking
+			if((nameSplitted.length === 0) || (constraintSplitted.length === 0) || (nameSplitted.length < constraintSplitted.length))
+				return false;
+			//endregion
+			
+			if(constraintSplitted.length === 1)
+			{
+				const result = compareDNSName(nameSplitted[1], constraintSplitted[0]);
+				
+				if(result)
+				{
+					//region Make a "splitted" versions of domain name from "constraint" and "name"
+					const ns = nameSplitted[1].split(".");
+					const cs = constraintSplitted[0].split(".");
+					//endregion
+					
+					if(cs[0].length === 0)
+						return true;
+					
+					return ns.length === cs.length;
+				}
+				
+				return false;
+			}
+			
+			return (namePrepared.localeCompare(constraintPrepared) === 0);
+		}
+		
+		function compareUniformResourceIdentifier(name, constraint)
+		{
+			/// <summary>Compare two uniformResourceIdentifier values</summary>
+			/// <param name="name" type="String">uniformResourceIdentifier from name</param>
+			/// <param name="constraint" type="String">Constraint for uniformResourceIdentifier from name</param>
+			/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+			
+			//region Make a "string preparation" for both name and constrain
+			let namePrepared = stringPrep(name);
+			const constraintPrepared = stringPrep(constraint);
+			//endregion
+			
+			//region Find out a major URI part to compare with
+			const ns = namePrepared.split("/");
+			const cs = constraintPrepared.split("/");
+			
+			if(cs.length > 1) // Malformed constraint
+				return false;
+			
+			if(ns.length > 1) // Full URI string
+			{
+				for(let i = 0; i < ns.length; i++)
+				{
+					if((ns[i].length > 0) && (ns[i].charAt(ns[i].length - 1) !== ":"))
+					{
+						const nsPort = ns[i].split(":");
+						namePrepared = nsPort[0];
+						break;
+					}
+				}
+			}
+			//endregion
+			
+			const result = compareDNSName(namePrepared, constraintPrepared);
+			
+			if(result)
+			{
+				//region Make a "splitted" versions of "constraint" and "name"
+				const nameSplitted = namePrepared.split(".");
+				const constraintSplitted = constraintPrepared.split(".");
+				//endregion
+				
+				if(constraintSplitted[0].length === 0)
+					return true;
+				
+				return nameSplitted.length === constraintSplitted.length;
+			}
+			
+			return false;
+		}
+		
+		function compareIPAddress(name, constraint)
+		{
+			/// <summary>Compare two iPAddress values</summary>
+			/// <param name="name" type="in_window.org.pkijs.asn1.OCTETSTRING">iPAddress from name</param>
+			/// <param name="constraint" type="in_window.org.pkijs.asn1.OCTETSTRING">Constraint for iPAddress from name</param>
+			/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+			
+			//region Common variables
+			const nameView = new Uint8Array(name.valueBlock.valueHex);
+			const constraintView = new Uint8Array(constraint.valueBlock.valueHex);
+			//endregion
+			
+			//region Work with IPv4 addresses
+			if((nameView.length === 4) && (constraintView.length === 8))
+			{
+				for(let i = 0; i < 4; i++)
+				{
+					if((nameView[i] ^ constraintView[i]) & constraintView[i + 4])
+						return false;
+				}
+				
+				return true;
+			}
+			//endregion
+			
+			//region Work with IPv6 addresses
+			if((nameView.length === 16) && (constraintView.length === 32))
+			{
+				for(let i = 0; i < 16; i++)
+				{
+					if((nameView[i] ^ constraintView[i]) & constraintView[i + 16])
+						return false;
+				}
+				
+				return true;
+			}
+			//endregion
+			
+			return false;
+		}
+		
+		function compareDirectoryName(name, constraint)
+		{
+			/// <summary>Compare two directoryName values</summary>
+			/// <param name="name" type="in_window.org.pkijs.simpl.RDN">directoryName from name</param>
+			/// <param name="constraint" type="in_window.org.pkijs.simpl.RDN">Constraint for directoryName from name</param>
+			/// <param name="any" type="Boolean">Boolean flag - should be comparision interrupted after first match or we need to match all "constraints" parts</param>
+			/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+			
+			//region Initial check
+			if((name.typesAndValues.length === 0) || (constraint.typesAndValues.length === 0))
+				return true;
+			
+			if(name.typesAndValues.length < constraint.typesAndValues.length)
+				return false;
+			//endregion
+			
+			//region Initial variables
+			let result = true;
+			let nameStart = 0;
+			//endregion
+			
+			for(let i = 0; i < constraint.typesAndValues.length; i++)
+			{
+				let localResult = false;
+				
+				for(let j = nameStart; j < name.typesAndValues.length; j++)
+				{
+					localResult = name.typesAndValues[j].isEqual(constraint.typesAndValues[i]);
+					
+					if(name.typesAndValues[j].type === constraint.typesAndValues[i].type)
+						result = result && localResult;
+					
+					if(localResult === true)
+					{
+						if((nameStart === 0) || (nameStart === j))
+						{
+							nameStart = j + 1;
+							break;
+						}
+						else // Structure of "name" must be the same with "constraint"
+							return false;
+					}
+				}
+				
+				if(localResult === false)
+					return false;
+			}
+			
+			return (nameStart === 0) ? false : result;
+		}
+		//endregion
+
 		try
 		{
 			//region Initial checks
@@ -1246,263 +1500,6 @@ export default class CertificateChainValidationEngine
 			//endregion
 			
 			//region Work with name constraints
-			//region Auxiliary functions for name constraints checking
-			function compareDNSName(name, constraint)
-			{
-				/// <summary>Compare two dNSName values</summary>
-				/// <param name="name" type="String">DNS from name</param>
-				/// <param name="constraint" type="String">Constraint for DNS from name</param>
-				/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
-				
-				//region Make a "string preparation" for both name and constrain
-				const namePrepared = stringPrep(name);
-				const constraintPrepared = stringPrep(constraint);
-				//endregion
-				
-				//region Make a "splitted" versions of "constraint" and "name"
-				const nameSplitted = namePrepared.split(".");
-				const constraintSplitted = constraintPrepared.split(".");
-				//endregion
-				
-				//region Length calculation and additional check
-				const nameLen = nameSplitted.length;
-				const constrLen = constraintSplitted.length;
-				
-				if((nameLen === 0) || (constrLen === 0) || (nameLen < constrLen))
-					return false;
-				//endregion
-				
-				//region Check that no part of "name" has zero length
-				for(let i = 0; i < nameLen; i++)
-				{
-					if(nameSplitted[i].length === 0)
-						return false;
-				}
-				//endregion
-				
-				//region Check that no part of "constraint" has zero length
-				for(let i = 0; i < constrLen; i++)
-				{
-					if(constraintSplitted[i].length === 0)
-					{
-						if(i === 0)
-						{
-							if(constrLen === 1)
-								return false;
-							
-							continue;
-						}
-						
-						return false;
-					}
-				}
-				//endregion
-				
-				//region Check that "name" has a tail as "constraint"
-				
-				for(let i = 0; i < constrLen; i++)
-				{
-					if(constraintSplitted[constrLen - 1 - i].length === 0)
-						continue;
-					
-					if(nameSplitted[nameLen - 1 - i].localeCompare(constraintSplitted[constrLen - 1 - i]) !== 0)
-						return false;
-				}
-				//endregion
-				
-				return true;
-			}
-			
-			function compareRFC822Name(name, constraint)
-			{
-				/// <summary>Compare two rfc822Name values</summary>
-				/// <param name="name" type="String">E-mail address from name</param>
-				/// <param name="constraint" type="String">Constraint for e-mail address from name</param>
-				/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
-				
-				//region Make a "string preparation" for both name and constrain
-				const namePrepared = stringPrep(name);
-				const constraintPrepared = stringPrep(constraint);
-				//endregion
-				
-				//region Make a "splitted" versions of "constraint" and "name"
-				const nameSplitted = namePrepared.split("@");
-				const constraintSplitted = constraintPrepared.split("@");
-				//endregion
-				
-				//region Splitted array length checking
-				if((nameSplitted.length === 0) || (constraintSplitted.length === 0) || (nameSplitted.length < constraintSplitted.length))
-					return false;
-				//endregion
-				
-				if(constraintSplitted.length === 1)
-				{
-					const result = compareDNSName(nameSplitted[1], constraintSplitted[0]);
-					
-					if(result)
-					{
-						//region Make a "splitted" versions of domain name from "constraint" and "name"
-						const ns = nameSplitted[1].split(".");
-						const cs = constraintSplitted[0].split(".");
-						//endregion
-						
-						if(cs[0].length === 0)
-							return true;
-						
-						return ns.length === cs.length;
-					}
-					
-					return false;
-				}
-				
-				return (namePrepared.localeCompare(constraintPrepared) === 0);
-			}
-			
-			function compareUniformResourceIdentifier(name, constraint)
-			{
-				/// <summary>Compare two uniformResourceIdentifier values</summary>
-				/// <param name="name" type="String">uniformResourceIdentifier from name</param>
-				/// <param name="constraint" type="String">Constraint for uniformResourceIdentifier from name</param>
-				/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
-				
-				//region Make a "string preparation" for both name and constrain
-				let namePrepared = stringPrep(name);
-				const constraintPrepared = stringPrep(constraint);
-				//endregion
-				
-				//region Find out a major URI part to compare with
-				const ns = namePrepared.split("/");
-				const cs = constraintPrepared.split("/");
-				
-				if(cs.length > 1) // Malformed constraint
-					return false;
-				
-				if(ns.length > 1) // Full URI string
-				{
-					for(let i = 0; i < ns.length; i++)
-					{
-						if((ns[i].length > 0) && (ns[i].charAt(ns[i].length - 1) !== ":"))
-						{
-							const nsPort = ns[i].split(":");
-							namePrepared = nsPort[0];
-							break;
-						}
-					}
-				}
-				//endregion
-				
-				const result = compareDNSName(namePrepared, constraintPrepared);
-				
-				if(result)
-				{
-					//region Make a "splitted" versions of "constraint" and "name"
-					const nameSplitted = namePrepared.split(".");
-					const constraintSplitted = constraintPrepared.split(".");
-					//endregion
-					
-					if(constraintSplitted[0].length === 0)
-						return true;
-					
-					return nameSplitted.length === constraintSplitted.length;
-				}
-				
-				return false;
-			}
-			
-			function compareIPAddress(name, constraint)
-			{
-				/// <summary>Compare two iPAddress values</summary>
-				/// <param name="name" type="in_window.org.pkijs.asn1.OCTETSTRING">iPAddress from name</param>
-				/// <param name="constraint" type="in_window.org.pkijs.asn1.OCTETSTRING">Constraint for iPAddress from name</param>
-				/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
-				
-				//region Common variables
-				const nameView = new Uint8Array(name.valueBlock.valueHex);
-				const constraintView = new Uint8Array(constraint.valueBlock.valueHex);
-				//endregion
-				
-				//region Work with IPv4 addresses
-				if((nameView.length === 4) && (constraintView.length === 8))
-				{
-					for(let i = 0; i < 4; i++)
-					{
-						if((nameView[i] ^ constraintView[i]) & constraintView[i + 4])
-							return false;
-					}
-					
-					return true;
-				}
-				//endregion
-				
-				//region Work with IPv6 addresses
-				if((nameView.length === 16) && (constraintView.length === 32))
-				{
-					for(let i = 0; i < 16; i++)
-					{
-						if((nameView[i] ^ constraintView[i]) & constraintView[i + 16])
-							return false;
-					}
-					
-					return true;
-				}
-				//endregion
-				
-				return false;
-			}
-			
-			function compareDirectoryName(name, constraint)
-			{
-				/// <summary>Compare two directoryName values</summary>
-				/// <param name="name" type="in_window.org.pkijs.simpl.RDN">directoryName from name</param>
-				/// <param name="constraint" type="in_window.org.pkijs.simpl.RDN">Constraint for directoryName from name</param>
-				/// <param name="any" type="Boolean">Boolean flag - should be comparision interrupted after first match or we need to match all "constraints" parts</param>
-				/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
-				
-				//region Initial check
-				if((name.typesAndValues.length === 0) || (constraint.typesAndValues.length === 0))
-					return true;
-				
-				if(name.typesAndValues.length < constraint.typesAndValues.length)
-					return false;
-				//endregion
-				
-				//region Initial variables
-				let result = true;
-				let nameStart = 0;
-				//endregion
-				
-				for(let i = 0; i < constraint.typesAndValues.length; i++)
-				{
-					let localResult = false;
-					
-					for(let j = nameStart; j < name.typesAndValues.length; j++)
-					{
-						localResult = name.typesAndValues[j].isEqual(constraint.typesAndValues[i]);
-						
-						if(name.typesAndValues[j].type === constraint.typesAndValues[i].type)
-							result = result && localResult;
-						
-						if(localResult === true)
-						{
-							if((nameStart === 0) || (nameStart === j))
-							{
-								nameStart = j + 1;
-								break;
-							}
-							else // Structure of "name" must be the same with "constraint"
-								return false;
-						}
-					}
-					
-					if(localResult === false)
-						return false;
-				}
-				
-				return (nameStart === 0) ? false : result;
-			}
-			
-			//endregion
-			
 			//region Check a result from "policy checking" part
 			if(policyResult.result === false)
 				return policyResult;

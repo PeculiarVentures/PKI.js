@@ -22,13 +22,13 @@
     "cross-env": "^5.1.4",
     "emailjs-mime-builder": "latest",
     "emailjs-mime-parser": "^2.0.1",
+    "eslint": "^4.19.1",
     "mocha": "^3.0.2",
     "nyc": "^11.6.0",
     "rollup": "latest",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-node-builtins": "latest",
-    "rollup-plugin-node-resolve": "^1.7.1",
-    "eslint": "latest"
+    "rollup-plugin-node-resolve": "^1.7.1"
   },
   "dependencies": {
     "asn1js": "latest",
@@ -82,6 +82,6 @@
   "module": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.43",
+  "version": "2.1.44",
   "license": "MIT"
 }

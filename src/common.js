@@ -361,14 +361,14 @@ export function kdfWithCounter(hashFunction, Zbuffer, Counter, SharedInfo)
 	
 	//region Return digest of combined ArrayBuffer and information about current counter
 	return crypto.digest({
-			name: hashFunction
-		},
-		combinedBuffer)
+		name: hashFunction
+	},
+	combinedBuffer)
 		.then(result =>
-		({
-			counter: Counter,
-			result
-		}));
+			({
+				counter: Counter,
+				result
+			}));
 	//endregion
 }
 //**************************************************************************************

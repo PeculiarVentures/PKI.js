@@ -299,6 +299,7 @@ export default class CryptoEngine
 								}
 								//endregion
 							}
+							// break omitted
 						case "RSASSA-PKCS1-V1_5":
 							{
 								keyUsages = ["verify"]; // Override existing keyUsages value since the key is a public key
@@ -343,6 +344,7 @@ export default class CryptoEngine
 							break;
 						case "ECDSA":
 							keyUsages = ["verify"]; // Override existing keyUsages value since the key is a public key
+							// break omitted
 						case "ECDH":
 							{
 								//region Initial variables
@@ -454,6 +456,7 @@ export default class CryptoEngine
 								}
 								//endregion
 							}
+							// break omitted
 						case "RSASSA-PKCS1-V1_5":
 							{
 								keyUsages = ["sign"]; // Override existing keyUsages value since the key is a private key
@@ -500,6 +503,7 @@ export default class CryptoEngine
 							break;
 						case "ECDSA":
 							keyUsages = ["sign"]; // Override existing keyUsages value since the key is a private key
+							// break omitted
 						case "ECDH":
 							{
 								//region Initial variables
@@ -1877,8 +1881,8 @@ export default class CryptoEngine
 			parameters.contentEncryptionAlgorithm,
 			false,
 			["encrypt"]),
-			error =>
-				Promise.reject(error)
+		error =>
+			Promise.reject(error)
 		);
 		//endregion
 		
@@ -1890,8 +1894,8 @@ export default class CryptoEngine
 			},
 			result,
 			contentView),
-			error =>
-				Promise.reject(error)
+		error =>
+			Promise.reject(error)
 		);
 		//endregion
 		
@@ -2002,8 +2006,8 @@ export default class CryptoEngine
 				"PBKDF2",
 				false,
 				["deriveKey"]),
-			error =>
-				Promise.reject(error)
+		error =>
+			Promise.reject(error)
 		);
 		//endregion
 		
@@ -2021,8 +2025,8 @@ export default class CryptoEngine
 			contentEncryptionAlgorithm,
 			false,
 			["decrypt"]),
-			error =>
-				Promise.reject(error)
+		error =>
+			Promise.reject(error)
 		);
 		//endregion
 		
@@ -2338,7 +2342,7 @@ export default class CryptoEngine
 				return result;
 			}, error =>
 				Promise.reject(`Signing error: ${error}`)
-		);
+			);
 	}
 	//**********************************************************************************
 	fillPublicKeyParameters(publicKeyInfo, signatureAlgorithm)

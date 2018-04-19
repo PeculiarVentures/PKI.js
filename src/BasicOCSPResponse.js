@@ -513,32 +513,32 @@ export default class BasicOCSPResponse
 			signerCert = this.certs[certIndex];
 			
 			return Promise.all(Array.from(_this.certs, element => checkCA(element))).then(promiseResults =>
+			{
+				const additionalCerts = [];
+				additionalCerts.push(signerCert);
+				
+				for(const promiseResult of promiseResults)
 				{
-					const additionalCerts = [];
-					additionalCerts.push(signerCert);
+					if(promiseResult !== null)
+						additionalCerts.push(promiseResult);
+				}
+				
+				const certChain = new CertificateChainValidationEngine({
+					certs: additionalCerts,
+					trustedCerts
+				});
+				
+				return certChain.verify().then(verificationResult =>
+				{
+					if(verificationResult.result === true)
+						return Promise.resolve();
 					
-					for(const promiseResult of promiseResults)
-					{
-						if(promiseResult !== null)
-							additionalCerts.push(promiseResult);
-					}
-					
-					const certChain = new CertificateChainValidationEngine({
-						certs: additionalCerts,
-						trustedCerts
-					});
-					
-					return certChain.verify().then(verificationResult =>
-						{
-							if(verificationResult.result === true)
-								return Promise.resolve();
-							
-							return Promise.reject("Validation of signer's certificate failed");
-						}, error =>
-							Promise.reject(`Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`)
-					);
-				}, promiseError =>
-					Promise.reject(`Error during checking certificates for CA flag: ${promiseError}`)
+					return Promise.reject("Validation of signer's certificate failed");
+				}, error =>
+					Promise.reject(`Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`)
+				);
+			}, promiseError =>
+				Promise.reject(`Error during checking certificates for CA flag: ${promiseError}`)
 			);
 		});
 		//endregion

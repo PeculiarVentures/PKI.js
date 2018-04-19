@@ -211,7 +211,7 @@ export default class OCSPRequest
 		
 		//region Make final request data
 		sequence = sequence.then(() =>
-			{
+		{
 			this.tbsRequest = new TBSRequest({
 				requestList: [
 					new Request({
@@ -220,7 +220,7 @@ export default class OCSPRequest
 				]
 			});
 		}, error =>
-				Promise.reject(error)
+			Promise.reject(error)
 		);
 		//endregion
 		

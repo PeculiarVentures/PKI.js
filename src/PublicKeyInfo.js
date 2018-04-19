@@ -282,13 +282,13 @@ export default class PublicKeyInfo
 		{
 			const asn1 = asn1js.fromBER(exportedKey);
 			try
-				{
-					_this.fromSchema(asn1.result);
-				}
-				catch(exception)
-				{
-					return Promise.reject("Error during initializing object from schema");
-				}
+			{
+				_this.fromSchema(asn1.result);
+			}
+			catch(exception)
+			{
+				return Promise.reject("Error during initializing object from schema");
+			}
 				
 			return undefined;
 		}, error => Promise.reject(`Error during exporting public key: ${error}`)

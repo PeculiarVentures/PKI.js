@@ -6,13 +6,14 @@ module.exports = {
     },
     "extends": "eslint:recommended",
     "parserOptions": {
-        "sourceType": "module"
+        "sourceType": "module",
+	    "ecmaVersion": 2017
     },
     "rules": {
         "indent": [
             "error",
             "tab",
-	        {"SwitchCase": 1}
+	        {"SwitchCase": 1, "ignoredNodes": ["SwitchCase > BlockStatement"]}
         ],
         "linebreak-style": [
             "error",
@@ -25,6 +26,18 @@ module.exports = {
         "semi": [
             "error",
             "always"
+        ],
+	    "no-empty": [
+	        "error",
+            {"allowEmptyCatch": true}
+        ],
+        "no-fallthrough": [
+            "error",
+	        {"commentPattern": "break[\\s\\w]*omitted"}
+        ],
+        "no-unused-vars": [
+            "error",
+	        {"args": "none"}
         ]
     }
 };
