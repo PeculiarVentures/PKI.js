@@ -1757,11 +1757,11 @@ export default class CertificateChainValidationEngine
 							}
 							else // Try to find out "emailAddress" inside "subject"
 							{
-								for(let k = 0; k < this.subject.typesAndValues.length; k++)
+								for(let k = 0; k < this.certs[i].subject.typesAndValues.length; k++)
 								{
-									if((this.subject.typesAndValues[k].type === "1.2.840.113549.1.9.1") ||    // PKCS#9 e-mail address
-										(this.subject.typesAndValues[k].type === "0.9.2342.19200300.100.1.3")) // RFC1274 "rfc822Mailbox" e-mail address
-										excluded = excluded || compareRFC822Name(this.subject.typesAndValues[k].value.valueBlock.value, excludedSubtrees[j].base.value);
+									if((this.certs[i].subject.typesAndValues[k].type === "1.2.840.113549.1.9.1") ||    // PKCS#9 e-mail address
+										(this.certs[i].subject.typesAndValues[k].type === "0.9.2342.19200300.100.1.3")) // RFC1274 "rfc822Mailbox" e-mail address
+										excluded = excluded || compareRFC822Name(this.certs[i].subject.typesAndValues[k].value.valueBlock.value, excludedSubtrees[j].base.value);
 								}
 							}
 							break;

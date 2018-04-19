@@ -246,7 +246,7 @@ export default class PublicKeyInfo
 					});
 					break;
 				default:
-					throw new Error(`Invalid value for \"kty\" parameter: ${json.kty}`);
+					throw new Error(`Invalid value for "kty" parameter: ${json.kty}`);
 			}
 			
 			this.subjectPublicKey = new asn1js.BitString({ valueHex: this.parsedKey.toSchema().toBER(false) });

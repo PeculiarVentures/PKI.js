@@ -2,7 +2,6 @@ import * as asn1js from "asn1js";
 import { getParametersValue, isEqualBuffer } from "pvutils";
 import { getCrypto, getOIDByAlgorithm } from "./common.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
-import Certificate from "./Certificate.js";
 //**************************************************************************************
 /**
  * Class from RFC6960
@@ -252,7 +251,7 @@ export default class CertID
 		
 		const hashOID = getOIDByAlgorithm({ name: parameters.hashAlgorithm });
 		if(hashOID === "")
-			return Promise.reject(`Incorrect \"hashAlgorithm\": ${this.hashAlgorithm}`);
+			return Promise.reject(`Incorrect "hashAlgorithm": ${this.hashAlgorithm}`);
 		
 		this.hashAlgorithm = new AlgorithmIdentifier({
 			algorithmId: hashOID,
@@ -271,9 +270,9 @@ export default class CertID
 		
 		//region Create "issuerNameHash"
 		sequence = sequence.then(() =>
-				crypto.digest({ name: parameters.hashAlgorithm }, issuerCertificate.subject.toSchema().toBER(false)),
-			error =>
-				Promise.reject(error)
+			crypto.digest({ name: parameters.hashAlgorithm }, issuerCertificate.subject.toSchema().toBER(false)),
+		error =>
+			Promise.reject(error)
 		);
 		//endregion
 		

@@ -225,6 +225,8 @@ export default class PKCS8ShroudedKeyBag
 					return Promise.reject("Error during parsing ASN.1 data");
 				
 				this.parsedValue = new PrivateKeyInfo({ schema: asn1.result });
+				
+				return Promise.resolve();
 			},
 			error => Promise.reject(error)
 		);

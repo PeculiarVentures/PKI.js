@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { utilConcatBuf } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import CryptoEngine from "./CryptoEngine.js";
 //**************************************************************************************
 //region Crypto engine related function

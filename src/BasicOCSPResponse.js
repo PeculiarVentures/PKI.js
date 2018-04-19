@@ -2,17 +2,13 @@ import * as asn1js from "asn1js";
 import { getParametersValue, isEqualBuffer } from "pvutils";
 import {
 	getAlgorithmByOID,
-	getAlgorithmParameters,
 	getCrypto,
-	getEngine,
-	createECDSASignatureFromCMS,
-	getHashAlgorithm
+	getEngine
 } from "./common.js";
 import ResponseData from "./ResponseData.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import Certificate from "./Certificate.js";
 import CertID from "./CertID.js";
-import RSASSAPSSParams from "./RSASSAPSSParams.js";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 import CertificateChainValidationEngine from "./CertificateChainValidationEngine.js";
 //**************************************************************************************

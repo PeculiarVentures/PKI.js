@@ -212,7 +212,7 @@ export default class ECPublicKey
 				this.x = new ArrayBuffer(coodinateLength);
 				const view = new Uint8Array(this.x);
 				const convertBufferView = new Uint8Array(convertBuffer);
-				view.set(1, convertBufferView);
+				view.set(convertBufferView, 1);
 			}
 			else
 				this.x = convertBuffer.slice(0, coodinateLength);
@@ -229,7 +229,7 @@ export default class ECPublicKey
 				this.y = new ArrayBuffer(coodinateLength);
 				const view = new Uint8Array(this.y);
 				const convertBufferView = new Uint8Array(convertBuffer);
-				view.set(1, convertBufferView);
+				view.set(convertBufferView, 1);
 			}
 			else
 				this.y = convertBuffer.slice(0, coodinateLength);

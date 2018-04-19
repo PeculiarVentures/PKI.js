@@ -244,7 +244,7 @@ export default class EncryptedData
 			});
 		}
 		
-		return Promise.reject(`No support for \"encryptEncryptedContentInfo\" in current crypto engine ${engine.name}`);
+		return Promise.reject(`No support for "encryptEncryptedContentInfo" in current crypto engine ${engine.name}`);
 	}
 	//**********************************************************************************
 	/**
@@ -271,7 +271,7 @@ export default class EncryptedData
 		if("decryptEncryptedContentInfo" in engine.subtle)
 			return engine.subtle.decryptEncryptedContentInfo(parameters);
 		
-		return Promise.reject(`No support for \"decryptEncryptedContentInfo\" in current crypto engine ${engine.name}`);
+		return Promise.reject(`No support for "decryptEncryptedContentInfo" in current crypto engine ${engine.name}`);
 	}
 	//**********************************************************************************
 }

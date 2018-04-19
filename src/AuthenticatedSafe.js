@@ -309,7 +309,7 @@ export default class AuthenticatedSafe
 				//endregion   
 				//region default 
 				default:
-					throw new Error(`Unknown \"contentType\" for AuthenticatedSafe: " ${content.contentType}`);
+					throw new Error(`Unknown "contentType" for AuthenticatedSafe: " ${content.contentType}`);
 				//endregion 
 			}
 		}
@@ -436,7 +436,7 @@ export default class AuthenticatedSafe
 							case (parameters.safeContents[index].encryptionAlgorithm.name.toLowerCase() === "aes-gcm"):
 								break;
 							default:
-								return Promise.reject(`Incorrect parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\": ${parameters.safeContents[index].encryptionAlgorithm}`);
+								return Promise.reject(`Incorrect parameter "encryptionAlgorithm" in "parameters.safeContents[i]": ${parameters.safeContents[index].encryptionAlgorithm}`);
 						}
 						
 						switch(true)
@@ -446,7 +446,7 @@ export default class AuthenticatedSafe
 							case (parameters.safeContents[index].encryptionAlgorithm.length === 256):
 								break;
 							default:
-								return Promise.reject(`Incorrect parameter \"encryptionAlgorithm.length\" in \"parameters.safeContents[i]\": ${parameters.safeContents[index].encryptionAlgorithm.length}`);
+								return Promise.reject(`Incorrect parameter "encryptionAlgorithm.length" in "parameters.safeContents[i]": ${parameters.safeContents[index].encryptionAlgorithm.length}`);
 						}
 						//endregion
 						
@@ -478,7 +478,7 @@ export default class AuthenticatedSafe
 				//endregion 
 				//region default 
 				default:
-					return Promise.reject(`Incorrect value for \"content.privacyMode\": ${content.privacyMode}`);
+					return Promise.reject(`Incorrect value for "content.privacyMode": ${content.privacyMode}`);
 				//endregion 
 			}
 		}

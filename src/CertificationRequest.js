@@ -1,11 +1,10 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, bufferToHexCodes } from "pvutils";
-import { getAlgorithmParameters, getCrypto, getEngine, getHashAlgorithm, getAlgorithmByOID, createECDSASignatureFromCMS } from "./common.js";
+import { getEngine } from "./common.js";
 import PublicKeyInfo from "./PublicKeyInfo.js";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import Attribute from "./Attribute.js";
-import RSASSAPSSParams from "./RSASSAPSSParams.js";
 //**************************************************************************************
 function CertificationRequestInfo(parameters = {})
 {

@@ -305,7 +305,7 @@ export default class PrivateKeyInfo
 					});
 					break;
 				default:
-					throw new Error(`Invalid value for \"kty\" parameter: ${json.kty}`);
+					throw new Error(`Invalid value for "kty" parameter: ${json.kty}`);
 			}
 
 			this.privateKey = new asn1js.OctetString({ valueHex: this.parsedKey.toSchema().toBER(false) });

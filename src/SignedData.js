@@ -4,14 +4,11 @@ import {
 	getCrypto,
 	getEngine,
 	getOIDByAlgorithm,
-	getAlgorithmByOID,
-	createECDSASignatureFromCMS,
-	getAlgorithmParameters
+	getAlgorithmByOID
 } from "./common.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import EncapsulatedContentInfo from "./EncapsulatedContentInfo.js";
 import Certificate from "./Certificate.js";
-import OtherCertificateFormat from "./OtherCertificateFormat.js";
 import CertificateRevocationList from "./CertificateRevocationList.js";
 import OtherRevocationInfoFormat from "./OtherRevocationInfoFormat.js";
 import SignerInfo from "./SignerInfo.js";
@@ -21,9 +18,6 @@ import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
 import TSTInfo from "./TSTInfo.js";
 import CertificateChainValidationEngine from "./CertificateChainValidationEngine.js";
 import BasicOCSPResponse from "./BasicOCSPResponse.js";
-import RSASSAPSSParams from "./RSASSAPSSParams.js";
-import AttributeCertificateV1 from "./AttributeCertificateV1.js";
-import AttributeCertificateV2 from "./AttributeCertificateV2.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -69,6 +63,13 @@ export default class SignedData
 			 */
 			this.crls = getParametersValue(parameters, "crls", SignedData.defaultValues("crls"));
 		
+		if("ocsps" in parameters)
+			/**
+			 * @type {Array.<BasicOCSPResponse>}
+			 * @description crls
+			 */
+			this.ocsps = getParametersValue(parameters, "ocsps", SignedData.defaultValues("ocsps"));
+
 		/**
 		 * @type {Array.<SignerInfo>}
 		 * @description signerInfos
@@ -100,6 +101,8 @@ export default class SignedData
 				return [];
 			case "crls":
 				return [];
+			case "ocsps":
+				return [];
 			case "signerInfos":
 				return [];
 			default:
@@ -123,6 +126,7 @@ export default class SignedData
 			case "digestAlgorithms":
 			case "certificates":
 			case "crls":
+			case "ocsps":
 			case "signerInfos":
 				return (memberValue.length === 0);
 			default:
@@ -370,23 +374,20 @@ export default class SignedData
 	 * @returns {*}
 	 */
 	verify({
-		       signer = (-1),
-		       data = (new ArrayBuffer(0)),
-		       trustedCerts = [],
-		       checkDate = (new Date()),
-		       checkChain = false,
-		       includeSignerCertificate = false,
-		       extendedMode = false,
-		       findOrigin = null,
-		       findIssuer = null
-	       } = {})
+		signer = (-1),
+		data = (new ArrayBuffer(0)),
+		trustedCerts = [],
+		checkDate = (new Date()),
+		checkChain = false,
+		extendedMode = false,
+		findOrigin = null,
+		findIssuer = null
+	} = {})
 	{
 		//region Global variables
 		let sequence = Promise.resolve();
 		
 		let messageDigestValue = new ArrayBuffer(0);
-		
-		let publicKey;
 		
 		let shaAlgorithm = "";
 		

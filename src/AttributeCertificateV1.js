@@ -60,10 +60,10 @@ export class AttCertValidityPeriod
 	 */
 	static schema(parameters = {})
 	{
-        // AttCertValidityPeriod  ::= SEQUENCE {
-        //   notBeforeTime  GeneralizedTime,
-        //   notAfterTime   GeneralizedTime
-        // }
+		// AttCertValidityPeriod  ::= SEQUENCE {
+		//   notBeforeTime  GeneralizedTime,
+		//   notAfterTime   GeneralizedTime
+		// }
 		
 		/**
 		 * @type {Object}
@@ -281,7 +281,7 @@ export class IssuerSerial
 				this.issuer.toSchema(),
 				this.serialNumber
 			]
-		})
+		});
 		
 		if("issuerUID" in this)
 			result.valueBlock.value.push(this.issuerUID);
@@ -303,7 +303,7 @@ export class IssuerSerial
 		};
 		
 		if("issuerUID" in this)
-			result.issuerUID = this.issuerUID.toJSON()
+			result.issuerUID = this.issuerUID.toJSON();
 		
 		return result;
 	}
@@ -725,11 +725,11 @@ export default class AttributeCertificateV1
 	 */
 	static schema(parameters = {})
 	{
-        // AttributeCertificate ::= SEQUENCE {
-        //   acinfo               AttributeCertificateInfoV1,
-        //   signatureAlgorithm   AlgorithmIdentifier,
-        //   signatureValue       BIT STRING
-        // }
+		// AttributeCertificate ::= SEQUENCE {
+		//   acinfo               AttributeCertificateInfoV1,
+		//   signatureAlgorithm   AlgorithmIdentifier,
+		//   signatureValue       BIT STRING
+		// }
 		
 		/**
 		 * @type {Object}

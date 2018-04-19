@@ -197,7 +197,7 @@ export default class SafeBag
 				this.bagValue = new SafeContents({ schema: asn1.result.bagValue });
 				break;
 			default:
-				throw new Error(`Invalid \"bagId\" for SafeBag: ${this.bagId}`);
+				throw new Error(`Invalid "bagId" for SafeBag: ${this.bagId}`);
 		}
 		
 		if("bagAttributes" in asn1.result)

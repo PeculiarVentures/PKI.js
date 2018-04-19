@@ -66,7 +66,7 @@ export default class DigestInfo
 				return ((AlgorithmIdentifier.compareWithDefault("algorithmId", memberValue.algorithmId)) &&
 				(("algorithmParams" in memberValue) === false));
 			case "digest":
-				return (memberValue.isEqual(this.constructor.defaultValues(memberName)));
+				return (memberValue.isEqual(DigestInfo.defaultValues(memberName)));
 			default:
 				throw new Error(`Invalid member name for DigestInfo class: ${memberName}`);
 		}

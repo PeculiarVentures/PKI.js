@@ -579,7 +579,7 @@ export default class CryptoEngine
 		{
 			// Try to use both ways - import using ArrayBuffer and pure JWK (for Safari Technology Preview)
 			return Promise.resolve().then(() => this.subtle.importKey("jwk", stringToArrayBuffer(JSON.stringify(jwk)), algorithm, extractable, keyUsages))
-				.then(result => result, error => this.subtle.importKey("jwk", jwk, algorithm, extractable, keyUsages));
+				.then(result => result, () => this.subtle.importKey("jwk", jwk, algorithm, extractable, keyUsages));
 		}
 		//endregion
 		
@@ -1822,7 +1822,7 @@ export default class CryptoEngine
 			}
 		});
 		if(hmacOID === "")
-			return Promise.reject(`Incorrect value for \"hmacHashAlgorithm\": ${parameters.hmacHashAlgorithm}`);
+			return Promise.reject(`Incorrect value for "hmacHashAlgorithm": ${parameters.hmacHashAlgorithm}`);
 		//endregion
 		
 		//region Initial variables
@@ -1943,7 +1943,7 @@ export default class CryptoEngine
 			return Promise.reject("Absent mandatory parameter \"encryptedContentInfo\"");
 
 		if(parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId !== "1.2.840.113549.1.5.13") // pkcs5PBES2
-			return Promise.reject(`Unknown \"contentEncryptionAlgorithm\": ${parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
+			return Promise.reject(`Unknown "contentEncryptionAlgorithm": ${parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 		//endregion
 		
 		//region Initial variables
@@ -1973,7 +1973,7 @@ export default class CryptoEngine
 		
 		const contentEncryptionAlgorithm = this.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithmId);
 		if(("name" in contentEncryptionAlgorithm) === false)
-			return Promise.reject(`Incorrect OID for \"contentEncryptionAlgorithm\": ${pbes2Parameters.encryptionScheme.algorithmId}`);
+			return Promise.reject(`Incorrect OID for "contentEncryptionAlgorithm": ${pbes2Parameters.encryptionScheme.algorithmId}`);
 		
 		const ivBuffer = pbes2Parameters.encryptionScheme.algorithmParams.valueBlock.valueHex;
 		const ivView = new Uint8Array(ivBuffer);
@@ -2100,7 +2100,7 @@ export default class CryptoEngine
 				length = 512;
 				break;
 			default:
-				return Promise.reject(`Incorrect \"parameters.hashAlgorithm\" parameter: ${parameters.hashAlgorithm}`);
+				return Promise.reject(`Incorrect "parameters.hashAlgorithm" parameter: ${parameters.hashAlgorithm}`);
 		}
 		//endregion
 		
@@ -2184,7 +2184,7 @@ export default class CryptoEngine
 				length = 512;
 				break;
 			default:
-				return Promise.reject(`Incorrect \"parameters.hashAlgorithm\" parameter: ${parameters.hashAlgorithm}`);
+				return Promise.reject(`Incorrect "parameters.hashAlgorithm" parameter: ${parameters.hashAlgorithm}`);
 		}
 		//endregion
 		

@@ -473,7 +473,7 @@ export default class EnvelopedData
 				}
 				break;
 			default:
-				throw new Error(`Unknown \"variant\" value: ${variant}`);
+				throw new Error(`Unknown "variant" value: ${variant}`);
 		}
 		//endregion 
 		
@@ -590,7 +590,7 @@ export default class EnvelopedData
 						}
 					});
 					if(hmacOID === "")
-						throw new Error(`Incorrect value for \"hmacHashAlgorithm\": ${encryptionParameters.hmacHashAlgorithm}`);
+						throw new Error(`Incorrect value for "hmacHashAlgorithm": ${encryptionParameters.hmacHashAlgorithm}`);
 				//endregion
 				
 				//region PBKDF2-params
@@ -638,7 +638,7 @@ export default class EnvelopedData
 				}
 				break;
 			default:
-				throw new Error(`Unknown value for \"variant\": ${variant}`);
+				throw new Error(`Unknown value for "variant": ${variant}`);
 		}
 		//endregion
 	}
@@ -755,7 +755,7 @@ export default class EnvelopedData
 				const curveObject = _this.recipientInfos[index].value.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
 				
 				if((curveObject instanceof asn1js.ObjectIdentifier) === false)
-					return Promise.reject(`Incorrect \"recipientCertificate\" for index ${index}`);
+					return Promise.reject(`Incorrect "recipientCertificate" for index ${index}`);
 				
 				const curveOID = curveObject.valueBlock.toString();
 				
@@ -992,7 +992,7 @@ export default class EnvelopedData
 					//region Get WebCrypto form of "keyEncryptionAlgorithm"
 				kekAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
 				if(("name" in kekAlgorithm) === false)
-					return Promise.reject(`Incorrect OID for \"keyEncryptionAlgorithm\": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+					return Promise.reject(`Incorrect OID for "keyEncryptionAlgorithm": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
 					//endregion
 					
 				return crypto.importKey("raw",
@@ -1076,7 +1076,7 @@ export default class EnvelopedData
 					//region Get WebCrypto form of "keyEncryptionAlgorithm"
 				kekAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
 				if(("name" in kekAlgorithm) === false)
-					return Promise.reject(`Incorrect OID for \"keyEncryptionAlgorithm\": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+					return Promise.reject(`Incorrect OID for "keyEncryptionAlgorithm": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
 					//endregion
 					
 					//region Get HMAC hash algorithm
@@ -1197,7 +1197,7 @@ export default class EnvelopedData
 		
 		//region Check for input parameters
 		if((recipientIndex + 1) > this.recipientInfos.length)
-			return Promise.reject(`Maximum value for \"index\" is: ${this.recipientInfos.length - 1}`);
+			return Promise.reject(`Maximum value for "index" is: ${this.recipientInfos.length - 1}`);
 		//endregion
 		
 		//region Get a "crypto" extension
@@ -1232,7 +1232,7 @@ export default class EnvelopedData
 				const curveObject = decryptionParameters.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
 					
 				if((curveObject instanceof asn1js.ObjectIdentifier) === false)
-					return Promise.reject(`Incorrect \"recipientCertificate\" for index ${index}`);
+					return Promise.reject(`Incorrect "recipientCertificate" for index ${index}`);
 					
 				curveOID = curveObject.valueBlock.toString();
 					
@@ -1374,7 +1374,7 @@ export default class EnvelopedData
 					//region Get WebCrypto form of content encryption algorithm
 				const contentEncryptionAlgorithm = getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
 				if(("name" in contentEncryptionAlgorithm) === false)
-					return Promise.reject(`Incorrect \"contentEncryptionAlgorithm\": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
+					return Promise.reject(`Incorrect "contentEncryptionAlgorithm": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 					//endregion
 					
 				return crypto.unwrapKey("raw",
@@ -1442,7 +1442,7 @@ export default class EnvelopedData
 					//region Get WebCrypto form of content encryption algorithm
 				const contentEncryptionAlgorithm = getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
 				if(("name" in contentEncryptionAlgorithm) === false)
-					return Promise.reject(`Incorrect \"contentEncryptionAlgorithm\": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
+					return Promise.reject(`Incorrect "contentEncryptionAlgorithm": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 					//endregion
 					
 				return crypto.importKey("raw",
@@ -1475,7 +1475,7 @@ export default class EnvelopedData
 					//region Get WebCrypto form of "keyEncryptionAlgorithm"
 				kekAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
 				if(("name" in kekAlgorithm) === false)
-					return Promise.reject(`Incorrect OID for \"keyEncryptionAlgorithm\": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+					return Promise.reject(`Incorrect OID for "keyEncryptionAlgorithm": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
 					//endregion
 					
 				return crypto.importKey("raw",
@@ -1493,7 +1493,7 @@ export default class EnvelopedData
 					//region Get WebCrypto form of content encryption algorithm
 				const contentEncryptionAlgorithm = getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
 				if(("name" in contentEncryptionAlgorithm) === false)
-					return Promise.reject(`Incorrect \"contentEncryptionAlgorithm\": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
+					return Promise.reject(`Incorrect "contentEncryptionAlgorithm": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 					//endregion
 					
 				return crypto.unwrapKey("raw",
@@ -1555,7 +1555,7 @@ export default class EnvelopedData
 					//region Get WebCrypto form of "keyEncryptionAlgorithm"
 				kekAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
 				if(("name" in kekAlgorithm) === false)
-					return Promise.reject(`Incorrect OID for \"keyEncryptionAlgorithm\": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+					return Promise.reject(`Incorrect OID for "keyEncryptionAlgorithm": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
 					//endregion
 					
 					//region Get HMAC hash algorithm
@@ -1601,7 +1601,7 @@ export default class EnvelopedData
 					//region Get WebCrypto form of content encryption algorithm
 				const contentEncryptionAlgorithm = getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
 				if(("name" in contentEncryptionAlgorithm) === false)
-					return Promise.reject(`Incorrect \"contentEncryptionAlgorithm\": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
+					return Promise.reject(`Incorrect "contentEncryptionAlgorithm": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 					//endregion
 					
 				return crypto.unwrapKey("raw",
@@ -1658,7 +1658,7 @@ export default class EnvelopedData
 				//region Get WebCrypto form of content encryption algorithm
 			const contentEncryptionAlgorithm = getAlgorithmByOID(this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
 			if(("name" in contentEncryptionAlgorithm) === false)
-				return Promise.reject(`Incorrect \"contentEncryptionAlgorithm\": ${this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
+				return Promise.reject(`Incorrect "contentEncryptionAlgorithm": ${this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 				//endregion
 				
 				//region Get "intialization vector" for content encryption algorithm

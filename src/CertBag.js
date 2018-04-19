@@ -165,7 +165,7 @@ export default class CertBag
 				break;
 			case "1.2.840.113549.1.9.22.2": // sdsiCertificate
 			default:
-				throw new Error(`Incorrect \"certId\" value in CertBag: ${this.certId}`);
+				throw new Error(`Incorrect "certId" value in CertBag: ${this.certId}`);
 		}
 		//endregion 
 	}

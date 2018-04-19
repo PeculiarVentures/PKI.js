@@ -47,6 +47,7 @@ export default class GeneralNames
 	/**
 	 * Return value of asn1js schema for current class
 	 * @param {Object} parameters Input parameters for the schema
+	 * @param {boolean} [optional=false] Flag would be element optional or not
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {}, optional = false)

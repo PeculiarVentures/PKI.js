@@ -198,7 +198,7 @@ export default class KEKRecipientInfo
 	{
 		return {
 			version: this.version,
-			kekid: this.originator.toJSON(),
+			kekid: this.kekid.toJSON(),
 			keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
 			encryptedKey: this.encryptedKey.toJSON()
 		};

@@ -5,7 +5,6 @@ import TBSRequest from "./TBSRequest.js";
 import Signature from "./Signature.js";
 import Request from "./Request.js";
 import CertID from "./CertID.js";
-import Certificate from "./Certificate.js";
 //**************************************************************************************
 /**
  * Class from RFC6960

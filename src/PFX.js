@@ -282,7 +282,6 @@ export default class PFX
 					getRandomValues(saltView);
 					
 					const data = this.parsedValue.authenticatedSafe.toSchema().toBER(false);
-					const view = new Uint8Array(data);
 
 					this.authSafe = new ContentInfo({
 						contentType: "1.2.840.113549.1.7.1",
@@ -294,7 +293,7 @@ export default class PFX
 					const engine = getEngine();
 					
 					if(("stampDataWithPassword" in engine.subtle) === false)
-						return Promise.reject(`No support for \"stampDataWithPassword\" in current engine \"${engine.name}\"`);
+						return Promise.reject(`No support for "stampDataWithPassword" in current engine "${engine.name}"`);
 					
 					sequence = sequence.then(() =>
 						engine.subtle.stampDataWithPassword({
@@ -444,7 +443,7 @@ export default class PFX
 			//endregion
 			//region default
 			default:
-				return Promise.reject(`Parameter \"integrityMode\" has unknown value: ${parameters.integrityMode}`);
+				return Promise.reject(`Parameter "integrityMode" has unknown value: ${parameters.integrityMode}`);
 			//endregion
 		}
 		//endregion
@@ -551,6 +550,8 @@ export default class PFX
 							{
 								if(result === false)
 									return Promise.reject("Integrity for the PKCS#12 data is broken!");
+								
+								return Promise.resolve();
 							},
 							error => Promise.reject(error)
 						);
@@ -609,6 +610,8 @@ export default class PFX
 						{
 							if(result === false)
 								return Promise.reject("Integrity for the PKCS#12 data is broken!");
+							
+							return Promise.resolve();
 						},
 						error => Promise.reject(`Error during integrity verification: ${error}`)
 					);
@@ -618,7 +621,7 @@ export default class PFX
 			//endregion   
 			//region default 
 			default:
-				return Promise.reject(`Incorrect value for \"this.authSafe.contentType\": ${this.authSafe.contentType}`);
+				return Promise.reject(`Incorrect value for "this.authSafe.contentType": ${this.authSafe.contentType}`);
 			//endregion 
 		}
 		//endregion 

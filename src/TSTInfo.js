@@ -377,8 +377,8 @@ export default class TSTInfo
 
 		let data;
 
-		let notBefore;
-		let notAfter;
+		let notBefore = null;
+		let notAfter = null;
 		//endregion
 
 		//region Get a "crypto" extension
@@ -400,6 +400,20 @@ export default class TSTInfo
 			notAfter = parameters.notAfter;
 		//endregion
 
+		//region Check date
+		if(notBefore !== null)
+		{
+			if(this.genTime < notBefore)
+				return Promise.reject("Generation time for TSTInfo object is less than notBefore value");
+		}
+		
+		if(notAfter !== null)
+		{
+			if(this.genTime > notAfter)
+				return Promise.reject("Generation time for TSTInfo object is more than notAfter value");
+		}
+		//endregion
+		
 		//region Find hashing algorithm
 		const shaAlgorithm = getAlgorithmByOID(this.messageImprint.hashAlgorithm.algorithmId);
 		if(("name" in shaAlgorithm) === false)

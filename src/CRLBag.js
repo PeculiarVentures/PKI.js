@@ -149,7 +149,7 @@ export default class CRLBag
 				}
 				break;
 			default:
-				throw new Error(`Incorrect \"crlId\" value in CRLBag: ${this.crlId}`);
+				throw new Error(`Incorrect "crlId" value in CRLBag: ${this.crlId}`);
 		}
 		//endregion
 	}

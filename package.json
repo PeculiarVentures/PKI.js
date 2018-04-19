@@ -27,7 +27,8 @@
     "rollup": "latest",
     "rollup-plugin-commonjs": "^8.2.6",
     "rollup-plugin-node-builtins": "latest",
-    "rollup-plugin-node-resolve": "^1.7.1"
+    "rollup-plugin-node-resolve": "^1.7.1",
+    "eslint": "latest"
   },
   "dependencies": {
     "asn1js": "latest",
@@ -81,6 +82,6 @@
   "module": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.42",
+  "version": "2.1.43",
   "license": "MIT"
 }

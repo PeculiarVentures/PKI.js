@@ -183,7 +183,7 @@ export class ObjectDigestInfo
 		};
 		
 		if("otherObjectTypeID" in this)
-			result.otherObjectTypeID = this.otherObjectTypeID.toJSON()
+			result.otherObjectTypeID = this.otherObjectTypeID.toJSON();
 		
 		result.digestAlgorithm = this.digestAlgorithm.toJSON();
 		result.objectDigest = this.objectDigest.toJSON();
