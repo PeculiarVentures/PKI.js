@@ -313,7 +313,7 @@ export default class ECPrivateKey
 				const buffer = new ArrayBuffer(coodinateLength);
 				const view = new Uint8Array(buffer);
 				const convertBufferView = new Uint8Array(convertBuffer);
-				view.set(1, convertBufferView);
+				view.set(convertBufferView, 1);
 				
 				this.privateKey = new asn1js.OctetString({ valueHex: buffer });
 			}
