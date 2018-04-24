@@ -159,6 +159,7 @@ export default class AttributeTypeAndValue
 			if(this.type !== compareTo.type)
 				return false;
 			
+			// noinspection OverlyComplexBooleanExpressionJS
 			if(((this.value instanceof asn1js.Utf8String) && (compareTo.value instanceof asn1js.Utf8String)) ||
 				((this.value instanceof asn1js.BmpString) && (compareTo.value instanceof asn1js.BmpString)) ||
 				((this.value instanceof asn1js.UniversalString) && (compareTo.value instanceof asn1js.UniversalString)) ||

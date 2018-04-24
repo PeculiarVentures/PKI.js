@@ -73,6 +73,7 @@ export default class KEKIdentifier
 			case "keyIdentifier":
 				return (memberValue.isEqual(KEKIdentifier.defaultValues("keyIdentifier")));
 			case "date":
+				// noinspection OverlyComplexBooleanExpressionJS
 				return ((memberValue.year === 0) &&
 						(memberValue.month === 0) &&
 						(memberValue.day === 0) &&

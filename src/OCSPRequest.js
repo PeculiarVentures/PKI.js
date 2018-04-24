@@ -39,7 +39,6 @@ export default class OCSPRequest
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -57,7 +56,6 @@ export default class OCSPRequest
 				throw new Error(`Invalid member name for OCSPRequest class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -69,6 +67,7 @@ export default class OCSPRequest
 		switch(memberName)
 		{
 			case "tbsRequest":
+				// noinspection OverlyComplexBooleanExpressionJS
 				return ((TBSRequest.compareWithDefault("tbs", memberValue.tbs)) &&
 				(TBSRequest.compareWithDefault("version", memberValue.version)) &&
 				(TBSRequest.compareWithDefault("requestorName", memberValue.requestorName)) &&

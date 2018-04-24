@@ -50,7 +50,7 @@ export default class CertificateChainValidationEngine
 		//endregion
 	}
 	//**********************************************************************************
-	defaultFindOrigin(certificate, validationEngine)
+	static defaultFindOrigin(certificate, validationEngine)
 	{
 		//region Firstly encode TBS for certificate
 		if(certificate.tbs.byteLength === 0)
@@ -238,7 +238,7 @@ export default class CertificateChainValidationEngine
 			case "checkDate":
 				return new Date();
 			case "findOrigin":
-				return this.defaultFindOrigin;
+				return CertificateChainValidationEngine.defaultFindOrigin;
 			case "findIssuer":
 				return this.defaultFindIssuer;
 			default:
@@ -490,6 +490,7 @@ export default class CertificateChainValidationEngine
 					};
 				}
 				
+				// noinspection OverlyComplexBooleanExpressionJS
 				if((isCA === true) && (keyUsagePresent === true) && ((needToCheckCRL) && (cRLSign === false)))
 				{
 					return {

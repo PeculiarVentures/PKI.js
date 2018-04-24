@@ -857,26 +857,30 @@ export default class SignedData
 				return crypto.digest(shaAlgorithm, new Uint8Array(data));
 			
 			return true;
-		}).then(result =>
-		{
-			//region Verify result of previous operation
-			if(result === false)
-				return false;
-			//endregion
-			
-			if("signedAttrs" in this.signerInfos[signer])
+		}).then(
+			/**
+			 * @param {ArrayBuffer} result
+			 */
+			result =>
 			{
-				if(isEqualBuffer(result, messageDigestValue))
+				//region Verify result of previous operation
+				if(result === false)
+					return false;
+				//endregion
+				
+				if("signedAttrs" in this.signerInfos[signer])
 				{
-					data = this.signerInfos[signer].signedAttrs.encodedValue;
-					return true;
+					if(isEqualBuffer(result, messageDigestValue))
+					{
+						data = this.signerInfos[signer].signedAttrs.encodedValue;
+						return true;
+					}
+					
+					return false;
 				}
 				
-				return false;
-			}
-			
-			return true;
-		});
+				return true;
+			});
 		//endregion
 		
 		sequence = sequence.then(result =>

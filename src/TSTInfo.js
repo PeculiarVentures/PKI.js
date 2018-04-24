@@ -421,10 +421,11 @@ export default class TSTInfo
 		//endregion
 
 		//region Calculate message digest for input "data" buffer
+		// noinspection JSCheckFunctionSignatures
 		sequence = sequence.then(() =>
 			crypto.digest(shaAlgorithm.name, new Uint8Array(data))
-		).then(result =>
-			isEqualBuffer(result, this.messageImprint.hashedMessage.valueBlock.valueHex)
+		).then(
+			result => isEqualBuffer(result, this.messageImprint.hashedMessage.valueBlock.valueHex)
 		);
 		//endregion
 

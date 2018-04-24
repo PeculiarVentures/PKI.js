@@ -88,6 +88,7 @@ export default class BasicOCSPResponse
 		{
 			case "type":
 				{
+					// noinspection OverlyComplexBooleanExpressionJS
 					let comparisonResult = ((ResponseData.compareWithDefault("tbs", memberValue.tbs)) &&
 					(ResponseData.compareWithDefault("responderID", memberValue.responderID)) &&
 					(ResponseData.compareWithDefault("producedAt", memberValue.producedAt)) &&

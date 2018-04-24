@@ -33,7 +33,6 @@ export default class DigestInfo
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -51,7 +50,6 @@ export default class DigestInfo
 				throw new Error(`Invalid member name for DigestInfo class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -71,7 +69,6 @@ export default class DigestInfo
 				throw new Error(`Invalid member name for DigestInfo class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -138,7 +135,6 @@ export default class DigestInfo
 		this.digest = asn1.result.digest;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -155,7 +151,6 @@ export default class DigestInfo
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -168,7 +163,6 @@ export default class DigestInfo
 			digest: this.digest.toJSON()
 		};
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

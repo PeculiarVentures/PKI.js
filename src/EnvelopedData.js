@@ -72,7 +72,6 @@ export default class EnvelopedData
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -96,7 +95,6 @@ export default class EnvelopedData
 				throw new Error(`Invalid member name for EnvelopedData class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -122,7 +120,6 @@ export default class EnvelopedData
 				throw new Error(`Invalid member name for EnvelopedData class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -187,7 +184,6 @@ export default class EnvelopedData
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -235,7 +231,6 @@ export default class EnvelopedData
 			this.unprotectedAttrs = Array.from(asn1.result.unprotectedAttrs, element => new Attribute({ schema: element }));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -285,7 +280,6 @@ export default class EnvelopedData
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -308,7 +302,6 @@ export default class EnvelopedData
 		
 		return _object;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Helpers function for filling "RecipientInfo" based on recipient's certificate.
@@ -479,7 +472,6 @@ export default class EnvelopedData
 		
 		return true;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Add recipient based on pre-defined data like password or KEK
@@ -642,7 +634,6 @@ export default class EnvelopedData
 		}
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Create a new CMS Enveloped Data content with encrypted data
@@ -835,56 +826,61 @@ export default class EnvelopedData
 			//endregion
 			
 			//region Apply KDF function to shared secret
-			currentSequence = currentSequence.then(result =>
-			{
-				//region Get length of used AES-KW algorithm
-				const aesKWAlgorithm = new AlgorithmIdentifier({ schema: _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams });
-				
-				const KWalgorithm = getAlgorithmByOID(aesKWAlgorithm.algorithmId);
-				if(("name" in KWalgorithm) === false)
-					return Promise.reject(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
-				//endregion
-				
-				//region Translate AES-KW length to ArrayBuffer
-				let kwLength = KWalgorithm.length;
-				
-				const kwLengthBuffer = new ArrayBuffer(4);
-				const kwLengthView = new Uint8Array(kwLengthBuffer);
-				
-				for(let j = 3; j >= 0; j--)
+			currentSequence = currentSequence.then(
+				/**
+				 * @param {ArrayBuffer} result
+				 */
+				result =>
 				{
-					kwLengthView[j] = kwLength;
-					kwLength >>= 8;
-				}
-				//endregion
-				
-				//region Create and encode "ECC-CMS-SharedInfo" structure
-				const eccInfo = new ECCCMSSharedInfo({
-					keyInfo: new AlgorithmIdentifier({
-						algorithmId: aesKWAlgorithm.algorithmId,
-						/*
-						 Initially RFC5753 says that AES algorithms have absent parameters.
-						 But since early implementations all put NULL here. Thus, in order to be
-						 "backward compatible", index also put NULL here.
-						 */
-						algorithmParams: new asn1js.Null()
-					}),
-					entityUInfo: _this.recipientInfos[index].value.ukm,
-					suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
-				});
-				
-				const encodedInfo = eccInfo.toSchema().toBER(false);
-				//endregion
-				
-				//region Get SHA algorithm used together with ECDH
-				const ecdhAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
-				if(("name" in ecdhAlgorithm) === false)
-					return Promise.reject(`Incorrect OID for key encryption algorithm: ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
-				//endregion
-				
-				return kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
-			}, error =>
-				Promise.reject(error));
+					//region Get length of used AES-KW algorithm
+					const aesKWAlgorithm = new AlgorithmIdentifier({ schema: _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams });
+					
+					const KWalgorithm = getAlgorithmByOID(aesKWAlgorithm.algorithmId);
+					if(("name" in KWalgorithm) === false)
+						return Promise.reject(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
+					//endregion
+					
+					//region Translate AES-KW length to ArrayBuffer
+					let kwLength = KWalgorithm.length;
+					
+					const kwLengthBuffer = new ArrayBuffer(4);
+					const kwLengthView = new Uint8Array(kwLengthBuffer);
+					
+					for(let j = 3; j >= 0; j--)
+					{
+						kwLengthView[j] = kwLength;
+						kwLength >>= 8;
+					}
+					//endregion
+					
+					//region Create and encode "ECC-CMS-SharedInfo" structure
+					const eccInfo = new ECCCMSSharedInfo({
+						keyInfo: new AlgorithmIdentifier({
+							algorithmId: aesKWAlgorithm.algorithmId,
+							/*
+							 Initially RFC5753 says that AES algorithms have absent parameters.
+							 But since early implementations all put NULL here. Thus, in order to be
+							 "backward compatible", index also put NULL here.
+							 */
+							algorithmParams: new asn1js.Null()
+						}),
+						entityUInfo: _this.recipientInfos[index].value.ukm,
+						suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
+					});
+					
+					const encodedInfo = eccInfo.toSchema().toBER(false);
+					//endregion
+					
+					//region Get SHA algorithm used together with ECDH
+					const ecdhAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
+					if(("name" in ecdhAlgorithm) === false)
+						return Promise.reject(`Incorrect OID for key encryption algorithm: ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+					//endregion
+					
+					return kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
+				},
+				error =>
+					Promise.reject(error));
 			//endregion
 			//region Import AES-KW key from result of KDF function
 			currentSequence = currentSequence.then(result =>
@@ -1182,7 +1178,6 @@ export default class EnvelopedData
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Decrypt existing CMS Enveloped Data content
@@ -1311,56 +1306,61 @@ export default class EnvelopedData
 			);
 			//endregion
 			//region Apply KDF function to shared secret
-			currentSequence = currentSequence.then(result =>
-			{
-				//region Get length of used AES-KW algorithm
-				const aesKWAlgorithm = new AlgorithmIdentifier({ schema: _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams });
-					
-				const KWalgorithm = getAlgorithmByOID(aesKWAlgorithm.algorithmId);
-				if(("name" in KWalgorithm) === false)
-					return Promise.reject(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
-					//endregion
-					
-					//region Translate AES-KW length to ArrayBuffer
-				let kwLength = KWalgorithm.length;
-					
-				const kwLengthBuffer = new ArrayBuffer(4);
-				const kwLengthView = new Uint8Array(kwLengthBuffer);
-					
-				for(let j = 3; j >= 0; j--)
+			currentSequence = currentSequence.then(
+				/**
+				 * @param {ArrayBuffer} result
+				 */
+				result =>
 				{
-					kwLengthView[j] = kwLength;
-					kwLength >>= 8;
-				}
-				//endregion
-				
-				//region Create and encode "ECC-CMS-SharedInfo" structure
-				const eccInfo = new ECCCMSSharedInfo({
-					keyInfo: new AlgorithmIdentifier({
-						algorithmId: aesKWAlgorithm.algorithmId,
-						/*
-						 Initially RFC5753 says that AES algorithms have absent parameters.
-						 But since early implementations all put NULL here. Thus, in order to be
-						 "backward compatible", index also put NULL here.
-						 */
-						algorithmParams: new asn1js.Null()
-					}),
-					entityUInfo: _this.recipientInfos[index].value.ukm,
-					suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
-				});
+					//region Get length of used AES-KW algorithm
+					const aesKWAlgorithm = new AlgorithmIdentifier({ schema: _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams });
 					
-				const encodedInfo = eccInfo.toSchema().toBER(false);
-				//endregion
-				
-				//region Get SHA algorithm used together with ECDH
-				const ecdhAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
-				if(("name" in ecdhAlgorithm) === false)
-					return Promise.reject(`Incorrect OID for key encryption algorithm: ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+					const KWalgorithm = getAlgorithmByOID(aesKWAlgorithm.algorithmId);
+					if(("name" in KWalgorithm) === false)
+						return Promise.reject(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
+						//endregion
+						
+						//region Translate AES-KW length to ArrayBuffer
+					let kwLength = KWalgorithm.length;
+					
+					const kwLengthBuffer = new ArrayBuffer(4);
+					const kwLengthView = new Uint8Array(kwLengthBuffer);
+					
+					for(let j = 3; j >= 0; j--)
+					{
+						kwLengthView[j] = kwLength;
+						kwLength >>= 8;
+					}
 					//endregion
 					
-				return kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
-			}, error =>
-				Promise.reject(error)
+					//region Create and encode "ECC-CMS-SharedInfo" structure
+					const eccInfo = new ECCCMSSharedInfo({
+						keyInfo: new AlgorithmIdentifier({
+							algorithmId: aesKWAlgorithm.algorithmId,
+							/*
+							 Initially RFC5753 says that AES algorithms have absent parameters.
+							 But since early implementations all put NULL here. Thus, in order to be
+							 "backward compatible", index also put NULL here.
+							 */
+							algorithmParams: new asn1js.Null()
+						}),
+						entityUInfo: _this.recipientInfos[index].value.ukm,
+						suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
+					});
+					
+					const encodedInfo = eccInfo.toSchema().toBER(false);
+					//endregion
+					
+					//region Get SHA algorithm used together with ECDH
+					const ecdhAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
+					if(("name" in ecdhAlgorithm) === false)
+						return Promise.reject(`Incorrect OID for key encryption algorithm: ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+						//endregion
+						
+					return kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
+				},
+				error =>
+					Promise.reject(error)
 			);
 			//endregion
 			//region Import AES-KW key from result of KDF function
@@ -1696,7 +1696,6 @@ export default class EnvelopedData
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

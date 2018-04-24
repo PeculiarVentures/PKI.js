@@ -74,6 +74,7 @@ export default class RecipientKeyIdentifier
 			case "subjectKeyIdentifier":
 				return (memberValue.isEqual(RecipientKeyIdentifier.defaultValues("subjectKeyIdentifier")));
 			case "date":
+				// noinspection OverlyComplexBooleanExpressionJS
 				return ((memberValue.year === 0) &&
 				(memberValue.month === 0) &&
 				(memberValue.day === 0) &&

@@ -31,7 +31,6 @@ export default class Attribute {
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -49,7 +48,6 @@ export default class Attribute {
 				throw new Error(`Invalid member name for Attribute class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -68,7 +66,6 @@ export default class Attribute {
 				throw new Error(`Invalid member name for Attribute class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -134,7 +131,6 @@ export default class Attribute {
 		this.values = asn1.result.values;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -153,7 +149,6 @@ export default class Attribute {
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -166,7 +161,6 @@ export default class Attribute {
 			values: Array.from(this.values, element => element.toJSON())
 		};
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

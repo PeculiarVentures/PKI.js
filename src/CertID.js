@@ -44,7 +44,6 @@ export default class CertID
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -65,7 +64,6 @@ export default class CertID
 				throw new Error(`Invalid member name for CertID class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -86,7 +84,6 @@ export default class CertID
 				throw new Error(`Invalid member name for CertID class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -126,7 +123,6 @@ export default class CertID
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -158,7 +154,6 @@ export default class CertID
 		this.serialNumber = asn1.result.serialNumber;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -177,7 +172,6 @@ export default class CertID
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -192,7 +186,6 @@ export default class CertID
 			serialNumber: this.serialNumber.toJSON()
 		};
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Check that two "CertIDs" are equal
@@ -223,7 +216,6 @@ export default class CertID
 		
 		return true;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Making OCSP certificate identifier for specific certificate
@@ -296,7 +288,6 @@ export default class CertID
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

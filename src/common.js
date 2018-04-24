@@ -216,45 +216,11 @@ export function createECDSASignatureFromCMS(cmsSignature)
 	switch(true)
 	{
 		case (rValue.valueBlock.valueHex.byteLength < sValue.valueBlock.valueHex.byteLength):
-		{
-			if((sValue.valueBlock.valueHex.byteLength - rValue.valueBlock.valueHex.byteLength) !== 1)
-				throw new Error("Incorrect DER integer decoding");
-			
-			const correctedLength = sValue.valueBlock.valueHex.byteLength;
-			
-			const rValueView = new Uint8Array(rValue.valueBlock.valueHex);
-			
-			const rValueBufferCorrected = new ArrayBuffer(correctedLength);
-			const rValueViewCorrected = new Uint8Array(rValueBufferCorrected);
-			
-			rValueViewCorrected.set(rValueView, 1);
-			rValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
-			
-			return utilConcatBuf(rValueBufferCorrected, sValue.valueBlock.valueHex);
-		}
-		case (rValue.valueBlock.valueHex.byteLength > sValue.valueBlock.valueHex.byteLength):
-		{
-			if((rValue.valueBlock.valueHex.byteLength - sValue.valueBlock.valueHex.byteLength) !== 1)
-				throw new Error("Incorrect DER integer decoding");
-			
-			const correctedLength = rValue.valueBlock.valueHex.byteLength;
-			
-			const sValueView = new Uint8Array(sValue.valueBlock.valueHex);
-			
-			const sValueBufferCorrected = new ArrayBuffer(correctedLength);
-			const sValueViewCorrected = new Uint8Array(sValueBufferCorrected);
-			
-			sValueViewCorrected.set(sValueView, 1);
-			sValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
-			
-			return utilConcatBuf(rValue.valueBlock.valueHex, sValueBufferCorrected);
-		}
-		default:
-		{
-			//region In case we have equal length and the length is not even with 2
-			if(rValue.valueBlock.valueHex.byteLength % 2)
 			{
-				const correctedLength = (rValue.valueBlock.valueHex.byteLength + 1);
+				if((sValue.valueBlock.valueHex.byteLength - rValue.valueBlock.valueHex.byteLength) !== 1)
+					throw new Error("Incorrect DER integer decoding");
+				
+				const correctedLength = sValue.valueBlock.valueHex.byteLength;
 				
 				const rValueView = new Uint8Array(rValue.valueBlock.valueHex);
 				
@@ -264,6 +230,15 @@ export function createECDSASignatureFromCMS(cmsSignature)
 				rValueViewCorrected.set(rValueView, 1);
 				rValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
 				
+				return utilConcatBuf(rValueBufferCorrected, sValue.valueBlock.valueHex);
+			}
+		case (rValue.valueBlock.valueHex.byteLength > sValue.valueBlock.valueHex.byteLength):
+			{
+				if((rValue.valueBlock.valueHex.byteLength - sValue.valueBlock.valueHex.byteLength) !== 1)
+					throw new Error("Incorrect DER integer decoding");
+				
+				const correctedLength = rValue.valueBlock.valueHex.byteLength;
+				
 				const sValueView = new Uint8Array(sValue.valueBlock.valueHex);
 				
 				const sValueBufferCorrected = new ArrayBuffer(correctedLength);
@@ -272,10 +247,35 @@ export function createECDSASignatureFromCMS(cmsSignature)
 				sValueViewCorrected.set(sValueView, 1);
 				sValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
 				
-				return utilConcatBuf(rValueBufferCorrected, sValueBufferCorrected);
+				return utilConcatBuf(rValue.valueBlock.valueHex, sValueBufferCorrected);
 			}
-			//endregion
-		}
+		default:
+			{
+				//region In case we have equal length and the length is not even with 2
+				if(rValue.valueBlock.valueHex.byteLength % 2)
+				{
+					const correctedLength = (rValue.valueBlock.valueHex.byteLength + 1);
+					
+					const rValueView = new Uint8Array(rValue.valueBlock.valueHex);
+					
+					const rValueBufferCorrected = new ArrayBuffer(correctedLength);
+					const rValueViewCorrected = new Uint8Array(rValueBufferCorrected);
+					
+					rValueViewCorrected.set(rValueView, 1);
+					rValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
+					
+					const sValueView = new Uint8Array(sValue.valueBlock.valueHex);
+					
+					const sValueBufferCorrected = new ArrayBuffer(correctedLength);
+					const sValueViewCorrected = new Uint8Array(sValueBufferCorrected);
+					
+					sValueViewCorrected.set(sValueView, 1);
+					sValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
+					
+					return utilConcatBuf(rValueBufferCorrected, sValueBufferCorrected);
+				}
+				//endregion
+			}
 	}
 	//endregion
 	

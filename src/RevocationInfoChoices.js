@@ -34,7 +34,6 @@ export default class RevocationInfoChoices
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -52,7 +51,6 @@ export default class RevocationInfoChoices
 				throw new Error(`Invalid member name for RevocationInfoChoices class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -98,7 +96,6 @@ export default class RevocationInfoChoices
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -131,7 +128,6 @@ export default class RevocationInfoChoices
 		
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -161,7 +157,6 @@ export default class RevocationInfoChoices
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -174,7 +169,6 @@ export default class RevocationInfoChoices
 			otherRevocationInfos: Array.from(this.otherRevocationInfos, element => element.toJSON())
 		};
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

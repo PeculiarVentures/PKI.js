@@ -233,6 +233,7 @@ export default class AuthenticatedSafe
 						if(("recipientKey" in parameters.safeContents[index]) === false)
 							return Promise.reject("Absent mandatory parameter \"recipientKey\" in \"parameters.safeContents[j]\"");
 						
+						// noinspection JSUnresolvedVariable
 						const recipientKey = parameters.safeContents[index].recipientKey;
 						//endregion
 						
@@ -245,6 +246,9 @@ export default class AuthenticatedSafe
 						);
 						
 						sequence = sequence.then(
+							/**
+							 * @param {ArrayBuffer} result
+							 */
 							result =>
 							{
 								const asn1 = asn1js.fromBER(result);
@@ -288,6 +292,9 @@ export default class AuthenticatedSafe
 						
 						//region Initialize internal data
 						sequence = sequence.then(
+							/**
+							 * @param {ArrayBuffer} result
+							 */
 							result =>
 							{
 								const asn1 = asn1js.fromBER(result);

@@ -40,7 +40,6 @@ export default class MacData
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -60,7 +59,6 @@ export default class MacData
 				throw new Error(`Invalid member name for MacData class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -82,7 +80,6 @@ export default class MacData
 				throw new Error(`Invalid member name for MacData class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -161,7 +158,6 @@ export default class MacData
 			this.iterations = asn1.result.iterations.valueBlock.valueDec;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -183,7 +179,6 @@ export default class MacData
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -201,7 +196,6 @@ export default class MacData
 		
 		return output;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

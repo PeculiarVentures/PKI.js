@@ -275,6 +275,7 @@ export default class CryptoEngine
 					}
 
 
+					// noinspection FallThroughInSwitchStatementJS
 					switch(algorithm.name.toUpperCase())
 					{
 						case "RSA-PSS":
@@ -432,6 +433,8 @@ export default class CryptoEngine
 						return Promise.reject("Incorrect keyData");
 					//endregion
 
+					// noinspection FallThroughInSwitchStatementJS
+					// noinspection FallThroughInSwitchStatementJS
 					switch(algorithm.name.toUpperCase())
 					{
 						case "RSA-PSS":
@@ -2125,12 +2128,14 @@ export default class CryptoEngine
 		//endregion
 		
 		//region Import HMAC key
-		sequence = sequence.then(result =>
-			this.importKey("raw",
-				new Uint8Array(result),
-				hmacAlgorithm,
-				false,
-				["sign"])
+		// noinspection JSCheckFunctionSignatures
+		sequence = sequence.then(
+			result =>
+				this.importKey("raw",
+					new Uint8Array(result),
+					hmacAlgorithm,
+					false,
+					["sign"])
 		);
 		//endregion
 		
@@ -2209,6 +2214,7 @@ export default class CryptoEngine
 		//endregion
 		
 		//region Import HMAC key
+		// noinspection JSCheckFunctionSignatures
 		sequence = sequence.then(result =>
 			this.importKey("raw",
 				new Uint8Array(result),

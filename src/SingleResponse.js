@@ -87,6 +87,7 @@ export default class SingleResponse
 		switch(memberName)
 		{
 			case "certID":
+				// noinspection OverlyComplexBooleanExpressionJS
 				return ((CertID.compareWithDefault("hashAlgorithm", memberValue.hashAlgorithm)) &&
 						(CertID.compareWithDefault("issuerNameHash", memberValue.issuerNameHash)) &&
 						(CertID.compareWithDefault("issuerKeyHash", memberValue.issuerKeyHash)) &&

@@ -264,6 +264,7 @@ export default class CertificateRevocationList {
 		//endregion
 		
 		//region Get internal properties from parsed schema
+		// noinspection JSUnresolvedVariable
 		this.tbs = asn1.result.tbsCertList.valueBeforeDecode;
 		
 		if("tbsCertList.version" in asn1.result)

@@ -47,7 +47,6 @@ export default class PublicKeyInfo
 			this.fromJSON(parameters.json);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -65,7 +64,6 @@ export default class PublicKeyInfo
 				throw new Error(`Invalid member name for PublicKeyInfo class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -94,7 +92,6 @@ export default class PublicKeyInfo
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -160,7 +157,6 @@ export default class PublicKeyInfo
 		}
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -177,7 +173,6 @@ export default class PublicKeyInfo
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -217,7 +212,6 @@ export default class PublicKeyInfo
 		return jwk;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert JSON value into current object
@@ -252,7 +246,6 @@ export default class PublicKeyInfo
 			this.subjectPublicKey = new asn1js.BitString({ valueHex: this.parsedKey.toSchema().toBER(false) });
 		}
 	}
-	
 	//**********************************************************************************
 	importKey(publicKey)
 	{
@@ -278,26 +271,30 @@ export default class PublicKeyInfo
 		//endregion
 		
 		//region Initialize internal variables by parsing exported value
-		sequence = sequence.then(exportedKey =>
-		{
-			const asn1 = asn1js.fromBER(exportedKey);
-			try
+		sequence = sequence.then(
+			/**
+			 * @param {ArrayBuffer} exportedKey
+			 */
+			exportedKey =>
 			{
-				_this.fromSchema(asn1.result);
-			}
-			catch(exception)
-			{
-				return Promise.reject("Error during initializing object from schema");
-			}
+				const asn1 = asn1js.fromBER(exportedKey);
+				try
+				{
+					_this.fromSchema(asn1.result);
+				}
+				catch(exception)
+				{
+					return Promise.reject("Error during initializing object from schema");
+				}
 				
-			return undefined;
-		}, error => Promise.reject(`Error during exporting public key: ${error}`)
+				return undefined;
+			},
+			error => Promise.reject(`Error during exporting public key: ${error}`)
 		);
 		//endregion
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

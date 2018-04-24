@@ -43,7 +43,6 @@ export default class PKCS8ShroudedKeyBag
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -63,7 +62,6 @@ export default class PKCS8ShroudedKeyBag
 				throw new Error(`Invalid member name for PKCS8ShroudedKeyBag class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -85,7 +83,6 @@ export default class PKCS8ShroudedKeyBag
 				throw new Error(`Invalid member name for PKCS8ShroudedKeyBag class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return value of asn1js schema for current class
@@ -133,7 +130,6 @@ export default class PKCS8ShroudedKeyBag
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -165,7 +161,6 @@ export default class PKCS8ShroudedKeyBag
 		this.encryptedData = asn1.result.encryptedData;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -182,7 +177,6 @@ export default class PKCS8ShroudedKeyBag
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -218,6 +212,9 @@ export default class PKCS8ShroudedKeyBag
 		
 		//region Initialize "parsedValue" with decrypted PKCS#8 private key 
 		sequence = sequence.then(
+			/**
+			 * @param {ArrayBuffer} result
+			 */
 			result =>
 			{
 				const asn1 = asn1js.fromBER(result);
@@ -234,7 +231,6 @@ export default class PKCS8ShroudedKeyBag
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 	makeInternalValues(parameters)
 	{
@@ -273,7 +269,6 @@ export default class PKCS8ShroudedKeyBag
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************
