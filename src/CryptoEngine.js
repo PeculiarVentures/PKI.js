@@ -2424,21 +2424,76 @@ export default class CryptoEngine
 		);
 	}
 	//**********************************************************************************
-	verifyWithPublicKey(data, signature, publicKeyInfo, signatureAlgorithm)
+	verifyWithPublicKey(data, signature, publicKeyInfo, signatureAlgorithm, shaAlgorithm = null)
 	{
 		//region Initial variables
 		let sequence = Promise.resolve();
 		//endregion
 		
 		//region Find signer's hashing algorithm
-		const shaAlgorithm = this.getHashAlgorithm(signatureAlgorithm);
-		if(shaAlgorithm === "")
-			return Promise.reject(`Unsupported signature algorithm: ${signatureAlgorithm.algorithmId}`);
-		//endregion
-		
-		//region Import public key
-		sequence = sequence.then(() =>
-			this.getPublicKey(publicKeyInfo, signatureAlgorithm));
+		if(shaAlgorithm === null)
+		{
+			shaAlgorithm = this.getHashAlgorithm(signatureAlgorithm);
+			if(shaAlgorithm === "")
+				return Promise.reject(`Unsupported signature algorithm: ${signatureAlgorithm.algorithmId}`);
+			
+			//region Import public key
+			sequence = sequence.then(() =>
+				this.getPublicKey(publicKeyInfo, signatureAlgorithm));
+			//endregion
+		}
+		else
+		{
+			const parameters = {};
+			
+			//region Get information about public key algorithm and default parameters for import
+			let algorithmId;
+			if(signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
+				algorithmId = signatureAlgorithm.algorithmId;
+			else
+				algorithmId = publicKeyInfo.algorithm.algorithmId;
+			
+			const algorithmObject = this.getAlgorithmByOID(algorithmId);
+			if(("name" in algorithmObject) === "")
+				return Promise.reject(`Unsupported public key algorithm: ${signatureAlgorithm.algorithmId}`);
+			
+			parameters.algorithm = this.getAlgorithmParameters(algorithmObject.name, "importkey");
+			if("hash" in parameters.algorithm.algorithm)
+				parameters.algorithm.algorithm.hash.name = shaAlgorithm;
+			
+			//region Special case for ECDSA
+			if(algorithmObject.name === "ECDSA")
+			{
+				//region Get information about named curve
+				let algorithmParamsChecked = false;
+				
+				if(("algorithmParams" in publicKeyInfo.algorithm) === true)
+				{
+					if("idBlock" in publicKeyInfo.algorithm.algorithmParams)
+					{
+						if((publicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (publicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
+							algorithmParamsChecked = true;
+					}
+				}
+				
+				if(algorithmParamsChecked === false)
+					return Promise.reject("Incorrect type for ECDSA public key parameters");
+				
+				const curveObject = this.getAlgorithmByOID(publicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+				if(("name" in curveObject) === false)
+					return Promise.reject(`Unsupported named curve algorithm: ${publicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
+				//endregion
+				
+				parameters.algorithm.algorithm.namedCurve = curveObject.name;
+			}
+			//endregion
+			//endregion
+
+			//region Import public key
+			sequence = sequence.then(() =>
+				this.getPublicKey(publicKeyInfo, null, parameters));
+			//endregion
+		}
 		//endregion
 		
 		//region Verify signature

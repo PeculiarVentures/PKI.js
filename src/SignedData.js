@@ -890,7 +890,7 @@ export default class SignedData
 				return false;
 			//endregion
 			
-			return engine.subtle.verifyWithPublicKey(data, this.signerInfos[signer].signature, signerCertificate.subjectPublicKeyInfo, signerCertificate.signatureAlgorithm);
+			return engine.subtle.verifyWithPublicKey(data, this.signerInfos[signer].signature, signerCertificate.subjectPublicKeyInfo, signerCertificate.signatureAlgorithm, shaAlgorithm);
 		});
 		
 		//region Make a final result

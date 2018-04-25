@@ -253,7 +253,7 @@ export default class CertificationRequest
 		
 		if(encodeFlag === false)
 		{
-			if(this.tbs.length === 0) // No stored TBS part
+			if(this.tbs.byteLength === 0) // No stored TBS part
 				return CertificationRequest.schema();
 			
 			tbsSchema = asn1js.fromBER(this.tbs).result;
