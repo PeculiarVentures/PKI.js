@@ -1,5 +1,6 @@
+/* eslint-disable no-undef,no-unreachable,no-unused-vars */
 import * as asn1js from "asn1js";
-import { bufferToHexCodes, stringToArrayBuffer, arrayBufferToString, fromBase64, toBase64 } from "pvutils";
+import { bufferToHexCodes, stringToArrayBuffer, arrayBufferToString, toBase64 } from "pvutils";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
 import OCSPResponse from "../../src/OCSPResponse";
 import BasicOCSPResponse from "../../src/BasicOCSPResponse";
@@ -35,7 +36,7 @@ function formatPEM(pemString)
 			count = 0;
 		}
 		
-		resultString = resultString + pemString[i];
+		resultString += pemString[i];
 	}
 	
 	return resultString;
@@ -108,8 +109,8 @@ function createOCSPRespInternal()
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
-	bitView[0] = bitView[0] | 0x02; // Key usage "cRLSign" flag
-	bitView[0] = bitView[0] | 0x04; // Key usage "keyCertSign" flag
+	bitView[0] |= 0x02; // Key usage "cRLSign" flag
+	bitView[0] |= 0x04; // Key usage "keyCertSign" flag
 	
 	const keyUsage = new asn1js.BitString({ valueHex: bitArray });
 	
@@ -259,6 +260,7 @@ function createOCSPResp()
 		resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(ocspResponseBuffer)))}`;
 		resultString = `${resultString}\r\n-----END OCSP RESPONSE-----\r\n\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("new_signed_data").innerHTML = resultString;
 		
 		parseOCSPResp();
@@ -331,6 +333,7 @@ function parseOCSPResp()
 			return;
 	}
 	
+	// noinspection InnerHTMLJS
 	document.getElementById("resp-status").innerHTML = status;
 	//endregion 
 	
@@ -370,6 +373,7 @@ function parseOCSPResp()
 	else
 		signatureAlgorithm = `${signatureAlgorithm} (${ocspBasicResp.signatureAlgorithm.algorithmId})`;
 	
+	// noinspection InnerHTMLJS
 	document.getElementById("sig-algo").innerHTML = signatureAlgorithm;
 	//endregion 
 	
@@ -400,8 +404,10 @@ function parseOCSPResp()
 			
 			const row = respIDTable.insertRow(respIDTable.rows.length);
 			const cell0 = row.insertCell(0);
+			// noinspection InnerHTMLJS
 			cell0.innerHTML = typeval;
 			const cell1 = row.insertCell(1);
+			// noinspection InnerHTMLJS
 			cell1.innerHTML = subjval;
 		}
 		
@@ -411,6 +417,7 @@ function parseOCSPResp()
 	{
 		if(ocspBasicResp.tbsResponseData.responderID instanceof asn1js.OctetString)
 		{
+			// noinspection InnerHTMLJS
 			document.getElementById("ocsp-resp-respid-simpl").innerHTML = bufferToHexCodes(ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHex, 0, ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHex.byteLength);
 			document.getElementById("ocsp-resp-rspid-simpl").style.display = "block";
 		}
@@ -423,6 +430,7 @@ function parseOCSPResp()
 	//endregion 
 	
 	//region Put information about a time when the response was produced 
+	// noinspection InnerHTMLJS
 	document.getElementById("prod-at").innerHTML = ocspBasicResp.tbsResponseData.producedAt.toString();
 	//endregion 
 	
@@ -451,6 +459,7 @@ function parseOCSPResp()
 			
 			const row = extensionTable.insertRow(extensionTable.rows.length);
 			const cell0 = row.insertCell(0);
+			// noinspection InnerHTMLJS
 			cell0.innerHTML = typeval;
 		}
 		
@@ -464,7 +473,7 @@ function parseOCSPResp()
 		const typeval = bufferToHexCodes(ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHex);
 		let subjval = "";
 		
-		switch(ocspBasicResp.tbsResponseData.responses[i].certStatus.idBlock.tag_number)
+		switch(ocspBasicResp.tbsResponseData.responses[i].certStatus.idBlock.tagNumber)
 		{
 			case 0:
 				subjval = "good";
@@ -479,8 +488,10 @@ function parseOCSPResp()
 		
 		const row = responsesTable.insertRow(responsesTable.rows.length);
 		const cell0 = row.insertCell(0);
+		// noinspection InnerHTMLJS
 		cell0.innerHTML = typeval;
 		const cell1 = row.insertCell(1);
+		// noinspection InnerHTMLJS
 		cell1.innerHTML = subjval;
 	}
 	//endregion 
@@ -559,7 +570,7 @@ function parseCAbundle(buffer)
 		if(started === true)
 		{
 			if(base64Chars.indexOf(String.fromCharCode(view[i])) !== (-1))
-				certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+				certBodyEncoded += String.fromCharCode(view[i]);
 			else
 			{
 				if(String.fromCharCode(view[i]) === "-")
@@ -606,7 +617,7 @@ function parseCAbundle(buffer)
 							waitForStart = false;
 							started = true;
 							
-							certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+							certBodyEncoded += String.fromCharCode(view[i]);
 						}
 						else
 							middleStage = true;
@@ -657,9 +668,11 @@ function handleFileBrowse(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		event =>
 		{
+			// noinspection JSUnresolvedVariable
 			ocspResponseBuffer = event.target.result;
 			parseOCSPResp();
 		};
@@ -673,8 +686,8 @@ function handleCABundle(evt)
 	
 	const currentFiles = evt.target.files;
 	
-	tempReader.onload =
-		event => parseCAbundle(event.target.result);
+	// noinspection AnonymousFunctionJS, JSUnresolvedVariable
+	tempReader.onload = event => parseCAbundle(event.target.result);
 	
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
@@ -722,6 +735,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	createOCSPResp();
 	verifyOCSPResp();
 	parseCAbundle();
@@ -753,6 +767,7 @@ context("OCSP Response Complex Example", () =>
 				return createOCSPRespInternal().then(() =>
 				{
 					const asn1 = asn1js.fromBER(ocspResponseBuffer);
+					// noinspection JSUnusedLocalSymbols
 					const ocspResponse = new OCSPResponse({ schema: asn1.result });
 					
 					return verifyOCSPRespInternal().then(result =>

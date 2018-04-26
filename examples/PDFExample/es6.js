@@ -1,3 +1,4 @@
+/* eslint-disable no-console,no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import { getCrypto, setEngine } from "../../src/common";
 import { stringToArrayBuffer } from "pvutils";
@@ -8,6 +9,7 @@ import Certificate from "../../src/Certificate";
 //*********************************************************************************
 const trustedCertificates = []; // Array of Certificates
 //*********************************************************************************
+// noinspection FunctionWithInconsistentReturnsJS
 function verifyPDFSignature(buffer)
 {
 	try
@@ -99,7 +101,7 @@ function verifyPDFSignature(buffer)
 				return crypto.digest({ name: shaAlgorithm }, new Uint8Array(signedDataBuffer));
 			});
 			
-			sequence = sequence.then((result) =>
+			sequence = sequence.then(result =>
 			{
 				let messageDigest = new ArrayBuffer(0);
 				
@@ -116,6 +118,7 @@ function verifyPDFSignature(buffer)
 					return Promise.reject(new Error("No signed attribute 'MessageDigest'"));
 				
 				const view1 = new Uint8Array(messageDigest);
+				// noinspection JSCheckFunctionSignatures
 				const view2 = new Uint8Array(result);
 				
 				if(view1.length !== view2.length)
@@ -126,6 +129,8 @@ function verifyPDFSignature(buffer)
 					if(view1[i] !== view2[i])
 						return Promise.reject(new Error("Hash is not correct"));
 				}
+				
+				return Promise.resolve();
 			});
 		}
 		
@@ -179,7 +184,7 @@ function parseCAbundle(buffer)
 		if(started === true)
 		{
 			if(base64Chars.indexOf(String.fromCharCode(view[i])) !== (-1))
-				certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+				certBodyEncoded += String.fromCharCode(view[i]);
 			else
 			{
 				if(String.fromCharCode(view[i]) === "-")
@@ -226,7 +231,7 @@ function parseCAbundle(buffer)
 							waitForStart = false;
 							started = true;
 							
-							certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+							certBodyEncoded += String.fromCharCode(view[i]);
 						}
 						else
 							middleStage = true;
@@ -275,7 +280,8 @@ function handleFileBrowse(evt)
 	
 	const currentFiles = evt.target.files;
 	
-	tempReader.onload = (event) => verifyPDFSignature(event.target.result);
+	// noinspection AnonymousFunctionJS, JSUnresolvedVariable
+	tempReader.onload = event => verifyPDFSignature(event.target.result);
 	
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
@@ -286,7 +292,8 @@ function handleCABundle(evt)
 	
 	const currentFiles = evt.target.files;
 	
-	tempReader.onload = (event) => parseCAbundle(event.target.result);
+	// noinspection AnonymousFunctionJS, JSUnresolvedVariable
+	tempReader.onload = event => parseCAbundle(event.target.result);
 	
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
@@ -295,6 +302,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	handleFileBrowse();
 	handleCABundle();
 	setEngine();

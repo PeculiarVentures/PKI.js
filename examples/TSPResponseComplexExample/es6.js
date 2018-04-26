@@ -1,3 +1,4 @@
+/* eslint-disable no-undef,no-unreachable,no-unused-vars */
 import * as asn1js from "asn1js";
 import { stringToArrayBuffer, arrayBufferToString, bufferToHexCodes, toBase64 } from "pvutils";
 import { getCrypto, getAlgorithmParameters, setEngine, getOIDByAlgorithm } from "../../src/common";
@@ -43,7 +44,7 @@ function formatPEM(pemString)
 			count = 0;
 		}
 		
-		resultString = resultString + pemString[i];
+		resultString += pemString[i];
 	}
 	
 	return resultString;
@@ -114,8 +115,8 @@ function createTSPRespInternal()
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
-	bitView[0] = bitView[0] | 0x02; // Key usage "cRLSign" flag
-	bitView[0] = bitView[0] | 0x04; // Key usage "keyCertSign" flag
+	bitView[0] |= 0x02; // Key usage "cRLSign" flag
+	bitView[0] |= 0x04; // Key usage "keyCertSign" flag
 	
 	const keyUsage = new asn1js.BitString({ valueHex: bitArray });
 	
@@ -273,7 +274,7 @@ function createTSPRespInternal()
 				content: cmsSignedSchema
 			});
 			
-			return cmsContentSimp.toSchema(true);
+			return cmsContentSimp.toSchema();
 		},
 		error => Promise.reject(`Erorr during signing of CMS Signed Data: ${error}`)
 	);
@@ -314,6 +315,7 @@ function createTSPResp()
 		resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(tspResponseBuffer)))}`;
 		resultString = `${resultString}\r\n-----END TSP RESPONSE-----\r\n\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("new_signed_data").innerHTML = resultString;
 		
 		parseTSPResp();
@@ -384,6 +386,7 @@ function parseTSPResp()
 		default:
 	}
 	
+	// noinspection InnerHTMLJS
 	document.getElementById("resp-status").innerHTML = status;
 	//endregion
 	
@@ -401,6 +404,7 @@ function parseTSPResp()
 	//endregion
 	
 	//region Put information about policy
+	// noinspection InnerHTMLJS
 	document.getElementById("resp-policy").innerHTML = tstInfoSimpl.policy;
 	//endregion
 	
@@ -420,16 +424,20 @@ function parseTSPResp()
 	
 	const row = imprintTable.insertRow(imprintTable.rows.length);
 	const cell0 = row.insertCell(0);
+	// noinspection InnerHTMLJS
 	cell0.innerHTML = hashAlgorithm;
 	const cell1 = row.insertCell(1);
+	// noinspection InnerHTMLJS
 	cell1.innerHTML = bufferToHexCodes(tstInfoSimpl.messageImprint.hashedMessage.valueBlock.valueHex);
 	//endregion
 	
 	//region Put information about TST info serial number
+	// noinspection InnerHTMLJS
 	document.getElementById("resp-serial").innerHTML = bufferToHexCodes(tstInfoSimpl.serialNumber.valueBlock.valueHex);
 	//endregion
 	
 	//region Put information about the time when TST info was generated
+	// noinspection InnerHTMLJS
 	document.getElementById("resp-time").innerHTML = tstInfoSimpl.genTime.toString();
 	//endregion
 	
@@ -440,11 +448,14 @@ function parseTSPResp()
 		
 		const rowInner = accuracyTable.insertRow(accuracyTable.rows.length);
 		const cell0Inner = rowInner.insertCell(0);
-		cell0Inner.innerHTML = ("seconds" in tstInfoSimpl.accuracy) ? tstInfoSimpl.accuracy.seconds : 0;
+		// noinspection InnerHTMLJS
+		cell0Inner.innerHTML = (("seconds" in tstInfoSimpl.accuracy) ? tstInfoSimpl.accuracy.seconds : 0).toString();
 		const cell1Inner = rowInner.insertCell(1);
-		cell1Inner.innerHTML = ("millis" in tstInfoSimpl.accuracy) ? tstInfoSimpl.accuracy.millis : 0;
+		// noinspection InnerHTMLJS
+		cell1Inner.innerHTML = (("millis" in tstInfoSimpl.accuracy) ? tstInfoSimpl.accuracy.millis : 0).toString();
 		const cell2 = rowInner.insertCell(2);
-		cell2.innerHTML = ("micros" in tstInfoSimpl.accuracy) ? tstInfoSimpl.accuracy.micros : 0;
+		// noinspection InnerHTMLJS
+		cell2.innerHTML = (("micros" in tstInfoSimpl.accuracy) ? tstInfoSimpl.accuracy.micros : 0).toString();
 		
 		document.getElementById("resp-accur").style.display = "block";
 	}
@@ -453,6 +464,7 @@ function parseTSPResp()
 	//region Put information about TST info ordering
 	if("ordering" in tstInfoSimpl)
 	{
+		// noinspection InnerHTMLJS
 		document.getElementById("resp-ordering").innerHTML = tstInfoSimpl.ordering.toString();
 		document.getElementById("resp-ord").style.display = "block";
 	}
@@ -461,6 +473,7 @@ function parseTSPResp()
 	//region Put information about TST info nonce value
 	if("nonce" in tstInfoSimpl)
 	{
+		// noinspection InnerHTMLJS
 		document.getElementById("resp-nonce").innerHTML = bufferToHexCodes(tstInfoSimpl.nonce.valueBlock.valueHex);
 		document.getElementById("resp-non").style.display = "block";
 	}
@@ -474,6 +487,7 @@ function parseTSPResp()
 			case 1: // rfc822Name
 			case 2: // dNSName
 			case 6: // uniformResourceIdentifier
+				// noinspection InnerHTMLJS
 				document.getElementById("resp-tsa-simpl").innerHTML = tstInfoSimpl.tsa.value.valueBlock.value;
 				document.getElementById("resp-ts-simpl").style.display = "block";
 				break;
@@ -481,12 +495,14 @@ function parseTSPResp()
 				{
 					const view = new Uint8Array(tstInfoSimpl.tsa.value.valueBlock.valueHex);
 					
+					// noinspection InnerHTMLJS
 					document.getElementById("resp-tsa-simpl").innerHTML = `${view[0].toString()}.${view[1].toString()}.${view[2].toString()}.${view[3].toString()}`;
 					document.getElementById("resp-ts-simpl").style.display = "block";
 				}
 				break;
 			case 3: // x400Address
 			case 5: // ediPartyName
+				// noinspection InnerHTMLJS
 				document.getElementById("resp-tsa-simpl").innerHTML = (tstInfoSimpl.tsa.type === 3) ? "<type \"x400Address\">" : "<type \"ediPartyName\">";
 				document.getElementById("resp-ts-simpl").style.display = "block";
 				break;
@@ -518,8 +534,10 @@ function parseTSPResp()
 						
 						const rowInner = rdnTable.insertRow(rdnTable.rows.length);
 						const cell0Inner = rowInner.insertCell(0);
+						// noinspection InnerHTMLJS
 						cell0Inner.innerHTML = typeval;
 						const cell1Inner = rowInner.insertCell(1);
+						// noinspection InnerHTMLJS
 						cell1Inner.innerHTML = subjval;
 					}
 					
@@ -540,6 +558,7 @@ function parseTSPResp()
 		{
 			const rowInner = extensionTable.insertRow(extensionTable.rows.length);
 			const cell0Inner = rowInner.insertCell(0);
+			// noinspection InnerHTMLJS
 			cell0Inner.innerHTML = tstInfoSimpl.extensions[i].extnID;
 		}
 		
@@ -607,7 +626,7 @@ function parseCAbundle(buffer)
 		if(started === true)
 		{
 			if(base64Chars.indexOf(String.fromCharCode(view[i])) !== (-1))
-				certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+				certBodyEncoded += String.fromCharCode(view[i]);
 			else
 			{
 				if(String.fromCharCode(view[i]) === "-")
@@ -654,7 +673,7 @@ function parseCAbundle(buffer)
 							waitForStart = false;
 							started = true;
 							
-							certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+							certBodyEncoded += String.fromCharCode(view[i]);
 						}
 						else
 							middleStage = true;
@@ -705,9 +724,11 @@ function handleFileBrowse(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		event =>
 		{
+			// noinspection JSUnresolvedVariable
 			tspResponseBuffer = event.target.result;
 			parseTSPResp();
 		};
@@ -721,9 +742,11 @@ function handleCABundle(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		event =>
 		{
+			// noinspection JSUnresolvedVariable
 			parseCAbundle(event.target.result);
 		};
 	
@@ -773,6 +796,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	createTSPResp();
 	parseTSPResp();
 	verifyTSPResp();
@@ -804,6 +828,7 @@ context("TSP Response Complex Example", () =>
 				return createTSPRespInternal().then(() =>
 				{
 					const asn1 = asn1js.fromBER(tspResponseBuffer);
+					// noinspection JSUnusedLocalSymbols
 					const tspResponse = new TimeStampResp({ schema: asn1.result });
 					
 					return verifyTSPRespInternal().then(result =>

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import { stringToArrayBuffer } from "pvutils";
 import Certificate from "../../src/Certificate";
@@ -35,7 +36,7 @@ function parseCAbundle(buffer)
 		if(started === true)
 		{
 			if(base64Chars.indexOf(String.fromCharCode(view[i])) !== (-1))
-				certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+				certBodyEncoded += String.fromCharCode(view[i]);
 			else
 			{
 				if(String.fromCharCode(view[i]) === "-")
@@ -82,7 +83,7 @@ function parseCAbundle(buffer)
 							waitForStart = false;
 							started = true;
 							
-							certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+							certBodyEncoded += String.fromCharCode(view[i]);
 						}
 						else
 							middleStage = true;
@@ -135,8 +136,10 @@ function verifySMIME()
 	const parser = parse(document.getElementById("smime_message").value);
 	//endregion
 	
+	// noinspection JSUnresolvedVariable
 	if(("childNodes" in parser) || (parser.childNodes.length !== 2))
 	{
+		// noinspection JSUnresolvedVariable
 		const lastNode = parser.childNodes[1];
 		if((lastNode.contentType.value === "application/x-pkcs7-signature") || (lastNode.contentType.value === "application/pkcs7-signature"))
 		{
@@ -163,6 +166,7 @@ function verifySMIME()
 			}
 			
 			// Get signed data buffer
+			// noinspection JSUnresolvedVariable
 			const signedDataBuffer = stringToArrayBuffer(parser.childNodes[0].raw.replace(/\n/g, "\r\n"));
 			
 			// Verify the signed data
@@ -202,7 +206,12 @@ function handleMIMEFile(evt)
 	
 	const currentFiles = evt.target.files;
 	
-	tempReader.onload = event => document.getElementById("smime_message").value = String.fromCharCode.apply(null, new Uint8Array(event.target.result));
+	// noinspection AnonymousFunctionJS
+	tempReader.onload = event =>
+	{
+		// noinspection JSUnresolvedVariable
+		document.getElementById("smime_message").value = String.fromCharCode.apply(null, new Uint8Array(event.target.result));
+	};
 	
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
@@ -213,6 +222,7 @@ function handleCABundle(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS, JSUnresolvedVariable
 	tempReader.onload = event => parseCAbundle(event.target.result);
 	
 	tempReader.readAsArrayBuffer(currentFiles[0]);
@@ -224,9 +234,9 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	verifySMIME();
 	handleMIMEFile();
 	handleCABundle();
-	setEngine();
 });
 //*********************************************************************************

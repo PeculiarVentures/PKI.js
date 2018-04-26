@@ -1,3 +1,4 @@
+/* eslint-disable no-undef,no-console */
 import * as asn1js from "asn1js";
 import { stringToArrayBuffer, arrayBufferToString, fromBase64, toBase64 } from "pvutils";
 import { getAlgorithmParameters, getRandomValues, setEngine } from "../../src/common";
@@ -48,7 +49,7 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
-	bitView[0] = bitView[0] | 0x80;
+	bitView[0] |= 0x80;
 	
 	const keyUsage = new asn1js.BitString({
 		valueHex: bitArray,
@@ -217,7 +218,7 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
-	bitView[0] = bitView[0] | 0x80;
+	bitView[0] |= 0x80;
 	
 	const keyUsage = new asn1js.BitString({
 		valueHex: bitArray,

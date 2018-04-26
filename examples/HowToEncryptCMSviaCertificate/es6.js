@@ -1,3 +1,4 @@
+/* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import { arrayBufferToString, stringToArrayBuffer, toBase64, fromBase64, isEqualBuffer } from "pvutils";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
@@ -112,8 +113,8 @@ function createCertificateInternal()
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
-	bitView[0] = bitView[0] | 0x02; // Key usage "cRLSign" flag
-	bitView[0] = bitView[0] | 0x04; // Key usage "keyCertSign" flag
+	bitView[0] |= 0x02; // Key usage "cRLSign" flag
+	bitView[0] |= 0x04; // Key usage "keyCertSign" flag
 	
 	const keyUsage = new asn1js.BitString({ valueHex: bitArray });
 	
@@ -155,8 +156,8 @@ function createCertificateInternal()
 	
 	//region Signing final certificate
 	sequence = sequence.then(() =>
-			certificate.sign(privateKey, hashAlg),
-		error => Promise.reject(`Error during exporting public key: ${error}`));
+		certificate.sign(privateKey, hashAlg),
+	error => Promise.reject(`Error during exporting public key: ${error}`));
 	//endregion
 	
 	//region Encode and store certificate
@@ -193,16 +194,18 @@ function createCertificate()
 		resultString = `${resultString}${formatPEM(toBase64(certificateString))}`;
 		resultString = `${resultString}\r\n-----END CERTIFICATE-----\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("new_signed_data").innerHTML = resultString;
 
 		alert("Certificate created successfully!");
 		
 		const privateKeyString = String.fromCharCode.apply(null, new Uint8Array(privateKeyBuffer));
 		
-		resultString = `-----BEGIN PRIVATE KEY-----\r\n`;
+		resultString = "-----BEGIN PRIVATE KEY-----\r\n";
 		resultString = `${resultString}${formatPEM(toBase64(privateKeyString))}`;
 		resultString = `${resultString}\r\n-----END PRIVATE KEY-----\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("pkcs8_key").innerHTML = resultString;
 		
 		alert("Private key exported successfully!");
@@ -231,23 +234,24 @@ function envelopedEncryptInternal()
 	cmsEnveloped.addRecipientByCertificate(certSimpl);
 	
 	return cmsEnveloped.encrypt(encAlg, valueBuffer).
-	then(
-		() =>
-		{
-			const cmsContentSimpl = new ContentInfo();
-			cmsContentSimpl.contentType = "1.2.840.113549.1.7.3";
-			cmsContentSimpl.content = cmsEnveloped.toSchema();
-			
-			cmsEnvelopedBuffer = cmsContentSimpl.toSchema().toBER(false);
-		},
-		error => Promise.reject(`ERROR DURING ENCRYPTION PROCESS: ${error}`)
-	);
+		then(
+			() =>
+			{
+				const cmsContentSimpl = new ContentInfo();
+				cmsContentSimpl.contentType = "1.2.840.113549.1.7.3";
+				cmsContentSimpl.content = cmsEnveloped.toSchema();
+				
+				cmsEnvelopedBuffer = cmsContentSimpl.toSchema().toBER(false);
+			},
+			error => Promise.reject(`ERROR DURING ENCRYPTION PROCESS: ${error}`)
+		);
 }
 //*********************************************************************************
 function envelopedEncrypt()
 {
 	return Promise.resolve().then(() =>
 	{
+		// noinspection InnerHTMLJS
 		const encodedCertificate = document.getElementById("new_signed_data").innerHTML;
 		const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 		certificateBuffer = stringToArrayBuffer(fromBase64(clearEncodedCertificate));
@@ -259,6 +263,7 @@ function envelopedEncrypt()
 		resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(cmsEnvelopedBuffer)))}`;
 		resultString = `${resultString}\r\n-----END CMS-----\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("encrypted_content").innerHTML = resultString;
 		
 		alert("Encryption process finished successfully");
@@ -296,19 +301,23 @@ function envelopedDecrypt()
 {
 	return Promise.resolve().then(() =>
 	{
+		// noinspection InnerHTMLJS
 		const encodedCertificate = document.getElementById("new_signed_data").innerHTML;
 		const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 		certificateBuffer = stringToArrayBuffer(window.atob(clearEncodedCertificate));
 		
+		// noinspection InnerHTMLJS
 		const encodedPrivateKey = document.getElementById("pkcs8_key").innerHTML;
 		const clearPrivateKey = encodedPrivateKey.replace(/(-----(BEGIN|END)( NEW)? PRIVATE KEY-----|\n)/g, "");
 		privateKeyBuffer = stringToArrayBuffer(window.atob(clearPrivateKey));
 		
+		// noinspection InnerHTMLJS
 		const encodedCMSEnveloped = document.getElementById("encrypted_content").innerHTML;
 		const clearEncodedCMSEnveloped = encodedCMSEnveloped.replace(/(-----(BEGIN|END)( NEW)? CMS-----|\n)/g, "");
 		cmsEnvelopedBuffer = stringToArrayBuffer(window.atob(clearEncodedCMSEnveloped));
 	}).then(() => envelopedDecryptInternal()).then(result =>
 	{
+		// noinspection InnerHTMLJS
 		document.getElementById("decrypted_content").innerHTML = arrayBufferToString(result);
 	});
 }
@@ -391,6 +400,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	createCertificate();
 	envelopedEncrypt();
 	envelopedDecrypt();

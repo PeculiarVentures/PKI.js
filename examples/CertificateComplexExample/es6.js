@@ -1,3 +1,4 @@
+/* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import Certificate from "../../src/Certificate";
 import AttributeTypeAndValue from "../../src/AttributeTypeAndValue";
@@ -97,8 +98,10 @@ function parseCertificate()
 		
 		const row = issuerTable.insertRow(issuerTable.rows.length);
 		const cell0 = row.insertCell(0);
+		// noinspection InnerHTMLJS
 		cell0.innerHTML = typeval;
 		const cell1 = row.insertCell(1);
+		// noinspection InnerHTMLJS
 		cell1.innerHTML = subjval;
 	}
 	//endregion
@@ -114,21 +117,26 @@ function parseCertificate()
 		
 		const row = subjectTable.insertRow(subjectTable.rows.length);
 		const cell0 = row.insertCell(0);
+		// noinspection InnerHTMLJS
 		cell0.innerHTML = typeval;
 		const cell1 = row.insertCell(1);
+		// noinspection InnerHTMLJS
 		cell1.innerHTML = subjval;
 	}
 	//endregion
 	
 	//region Put information about X.509 certificate serial number
+	// noinspection InnerHTMLJS
 	document.getElementById("cert-serial-number").innerHTML = bufferToHexCodes(certificate.serialNumber.valueBlock.valueHex);
 	//endregion
 	
 	//region Put information about issuance date
+	// noinspection InnerHTMLJS
 	document.getElementById("cert-not-before").innerHTML = certificate.notBefore.value.toString();
 	//endregion
 	
 	//region Put information about expiration date
+	// noinspection InnerHTMLJS
 	document.getElementById("cert-not-after").innerHTML = certificate.notAfter.value.toString();
 	//endregion
 	
@@ -151,6 +159,7 @@ function parseCertificate()
 		publicKeySize = modulusBitLength.toString();
 	}
 	
+	// noinspection InnerHTMLJS
 	document.getElementById("cert-keysize").innerHTML = publicKeySize;
 	//endregion
 	
@@ -177,6 +186,7 @@ function parseCertificate()
 	else
 		signatureAlgorithm = `${signatureAlgorithm} (${certificate.signatureAlgorithm.algorithmId})`;
 	
+	// noinspection InnerHTMLJS
 	document.getElementById("cert-sign-algo").innerHTML = signatureAlgorithm;
 	//endregion
 	
@@ -187,6 +197,7 @@ function parseCertificate()
 		{
 			const row = extensionTable.insertRow(extensionTable.rows.length);
 			const cell0 = row.insertCell(0);
+			// noinspection InnerHTMLJS
 			cell0.innerHTML = certificate.extensions[i].extnID;
 		}
 		
@@ -257,8 +268,8 @@ function createCertificateInternal()
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
-	bitView[0] = bitView[0] | 0x02; // Key usage "cRLSign" flag
-	bitView[0] = bitView[0] | 0x04; // Key usage "keyCertSign" flag
+	bitView[0] |= 0x02; // Key usage "cRLSign" flag
+	bitView[0] |= 0x04; // Key usage "keyCertSign" flag
 	
 	const keyUsage = new asn1js.BitString({ valueHex: bitArray });
 	
@@ -300,8 +311,8 @@ function createCertificateInternal()
 	
 	//region Signing final certificate 
 	sequence = sequence.then(() =>
-			certificate.sign(privateKey, hashAlg),
-		error => Promise.reject(`Error during exporting public key: ${error}`));
+		certificate.sign(privateKey, hashAlg),
+	error => Promise.reject(`Error during exporting public key: ${error}`));
 	//endregion 
 	
 	//region Encode and store certificate 
@@ -348,6 +359,7 @@ function createCertificate()
 		resultString = `${resultString}${formatPEM(window.btoa(privateKeyString))}`;
 		resultString = `${resultString}\r\n-----END PRIVATE KEY-----\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("new_signed_data").innerHTML = resultString;
 		
 		alert("Private key exported successfully!");
@@ -405,7 +417,7 @@ function verifyCertificateInternal()
 	//endregion
 	
 	//region Error handling stub
-	sequence = sequence.then(result => result, error => Promise.resolve(false));
+	sequence = sequence.then(result => result, () => Promise.resolve(false));
 	//endregion
 	
 	return sequence;
@@ -447,7 +459,7 @@ function parseCAbundle(buffer)
 		if(started === true)
 		{
 			if(base64Chars.indexOf(String.fromCharCode(view[i])) !== (-1))
-				certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+				certBodyEncoded += String.fromCharCode(view[i]);
 			else
 			{
 				if(String.fromCharCode(view[i]) === "-")
@@ -494,7 +506,7 @@ function parseCAbundle(buffer)
 							waitForStart = false;
 							started = true;
 							
-							certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+							certBodyEncoded += String.fromCharCode(view[i]);
 						}
 						else
 							middleStage = true;
@@ -543,9 +555,11 @@ function handleFileBrowse(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		function(event)
 		{
+			// noinspection JSUnresolvedVariable
 			certificateBuffer = event.target.result;
 			parseCertificate();
 		};
@@ -560,11 +574,13 @@ function handleTrustedCertsFile(evt)
 	const currentFiles = evt.target.files;
 	let currentIndex = 0;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		function(event)
 		{
 			try
 			{
+				// noinspection JSUnresolvedVariable
 				const asn1 = asn1js.fromBER(event.target.result);
 				const certificate = new Certificate({ schema: asn1.result });
 				
@@ -575,9 +591,11 @@ function handleTrustedCertsFile(evt)
 			}
 		};
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onloadend =
 		function(event)
 		{
+			// noinspection JSUnresolvedVariable
 			if(event.target.readyState === FileReader.DONE)
 			{
 				currentIndex++;
@@ -597,11 +615,13 @@ function handleInterCertsFile(evt)
 	const currentFiles = evt.target.files;
 	let currentIndex = 0;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		function(event)
 		{
 			try
 			{
+				// noinspection JSUnresolvedVariable
 				const asn1 = asn1js.fromBER(event.target.result);
 				const certificate = new Certificate({ schema: asn1.result });
 				
@@ -612,9 +632,11 @@ function handleInterCertsFile(evt)
 			}
 		};
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onloadend =
 		function(event)
 		{
+			// noinspection JSUnresolvedVariable
 			if(event.target.readyState === FileReader.DONE)
 			{
 				currentIndex++;
@@ -634,11 +656,13 @@ function handleCRLsFile(evt)
 	const currentFiles = evt.target.files;
 	let currentIndex = 0;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		function(event)
 		{
 			try
 			{
+				// noinspection JSUnresolvedVariable
 				const asn1 = asn1js.fromBER(event.target.result);
 				const crl = new CertificateRevocationList({ schema: asn1.result });
 				
@@ -649,9 +673,11 @@ function handleCRLsFile(evt)
 			}
 		};
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onloadend =
 		function(event)
 		{
+			// noinspection JSUnresolvedVariable
 			if(event.target.readyState === FileReader.DONE)
 			{
 				currentIndex++;
@@ -670,9 +696,11 @@ function handleCABundle(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		function(event)
 		{
+			// noinspection JSUnresolvedVariable
 			parseCAbundle(event.target.result);
 		};
 	
@@ -722,6 +750,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	parseCertificate();
 	createCertificate();
 	verifyCertificate();

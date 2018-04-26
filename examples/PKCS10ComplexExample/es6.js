@@ -1,3 +1,4 @@
+/* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import { arrayBufferToString, stringToArrayBuffer, toBase64, fromBase64 } from "pvutils";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common.js";
@@ -98,25 +99,24 @@ function createPKCS10Internal()
 	
 	//region Create a new key pair
 	sequence = sequence.then(() =>
-		{
-			//region Get default algorithm parameters for key generation
-			const algorithm = getAlgorithmParameters(signAlg, "generatekey");
-			if("hash" in algorithm.algorithm)
-				algorithm.algorithm.hash.name = hashAlg;
-			//endregion
-			
-			return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
-		}
-	);
+	{
+		//region Get default algorithm parameters for key generation
+		const algorithm = getAlgorithmParameters(signAlg, "generatekey");
+		if("hash" in algorithm.algorithm)
+			algorithm.algorithm.hash.name = hashAlg;
+		//endregion
+		
+		return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
+	});
 	//endregion
 	
 	//region Store new key in an interim variables
 	sequence = sequence.then(keyPair =>
-		{
-			publicKey = keyPair.publicKey;
-			privateKey = keyPair.privateKey;
-		},
-		error => Promise.reject((`Error during key generation: ${error}`))
+	{
+		publicKey = keyPair.publicKey;
+		privateKey = keyPair.privateKey;
+	},
+	error => Promise.reject((`Error during key generation: ${error}`))
 	);
 	//endregion
 	
@@ -127,25 +127,25 @@ function createPKCS10Internal()
 	//region SubjectKeyIdentifier
 	sequence = sequence.then(() => crypto.digest({ name: "SHA-1" }, pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex))
 		.then(result =>
-			{
-				pkcs10.attributes.push(new Attribute({
-					type: "1.2.840.113549.1.9.14", // pkcs-9-at-extensionRequest
-					values: [(new Extensions({
-						extensions: [
-							new Extension({
-								extnID: "2.5.29.14",
-								critical: false,
-								extnValue: (new asn1js.OctetString({ valueHex: result })).toBER(false)
-							}),
-							new Extension({
-								extnID: "2.5.29.17",
-								critical: false,
-								extnValue: altNames.toSchema().toBER(false)
-							})
-						]
-					})).toSchema()]
-				}));
-			}
+		{
+			pkcs10.attributes.push(new Attribute({
+				type: "1.2.840.113549.1.9.14", // pkcs-9-at-extensionRequest
+				values: [(new Extensions({
+					extensions: [
+						new Extension({
+							extnID: "2.5.29.14",
+							critical: false,
+							extnValue: (new asn1js.OctetString({ valueHex: result })).toBER(false)
+						}),
+						new Extension({
+							extnID: "2.5.29.17",
+							critical: false,
+							extnValue: altNames.toSchema().toBER(false)
+						})
+					]
+				})).toSchema()]
+			}));
+		}
 		);
 	//endregion
 	
@@ -181,7 +181,9 @@ function createPKCS10()
 function parsePKCS10()
 {
 	//region Initial activities
+	// noinspection InnerHTMLJS
 	document.getElementById("pkcs10-subject").innerHTML = "";
+	// noinspection InnerHTMLJS
 	document.getElementById("pkcs10-exten").innerHTML = "";
 	
 	document.getElementById("pkcs10-data-block").style.display = "none";
@@ -219,9 +221,13 @@ function parsePKCS10()
 		const subjval = pkcs10.subject.typesAndValues[i].value.valueBlock.value;
 		const ulrow = `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("pkcs10-subject").innerHTML = document.getElementById("pkcs10-subject").innerHTML + ulrow;
 		if(typeval === "CN")
+		{
+			// noinspection InnerHTMLJS
 			document.getElementById("pkcs10-subject-cn").innerHTML = subjval;
+		}
 	}
 	//endregion
 	
@@ -243,6 +249,7 @@ function parsePKCS10()
 		publicKeySize = modulusBitLength.toString();
 	}
 	
+	// noinspection InnerHTMLJS
 	document.getElementById("keysize").innerHTML = publicKeySize;
 	//endregion
 	
@@ -268,6 +275,7 @@ function parsePKCS10()
 	else
 		signatureAlgorithm = `${signatureAlgorithm} (${pkcs10.signatureAlgorithm.algorithmId})`;
 	
+	// noinspection InnerHTMLJS
 	document.getElementById("sig-algo").innerHTML = signatureAlgorithm;
 	//endregion
 	
@@ -281,6 +289,7 @@ function parsePKCS10()
 			
 			for(let j = 0; j < pkcs10.attributes[i].values.length; j++)
 			{
+				// noinspection OverlyComplexBooleanExpressionJS
 				if((pkcs10.attributes[i].values[j] instanceof asn1js.Utf8String) ||
 					(pkcs10.attributes[i].values[j] instanceof asn1js.BmpString) ||
 					(pkcs10.attributes[i].values[j] instanceof asn1js.UniversalString) ||
@@ -301,6 +310,7 @@ function parsePKCS10()
 			}
 			
 			const ulrow = `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
+			// noinspection InnerHTMLJS
 			document.getElementById("pkcs10-exten").innerHTML = document.getElementById("pkcs10-exten").innerHTML + ulrow;
 		}
 		
@@ -386,6 +396,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	createPKCS10();
 	parsePKCS10();
 	verifyPKCS10();

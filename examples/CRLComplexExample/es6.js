@@ -1,4 +1,5 @@
-import { stringToArrayBuffer, arrayBufferToString, bufferToHexCodes, toBase64, fromBase64 } from "pvutils";
+/* eslint-disable no-unused-vars,no-undef,no-unreachable */
+import { arrayBufferToString, bufferToHexCodes, toBase64 } from "pvutils";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
 import * as asn1js from "asn1js";
 import Certificate from "../../src/Certificate";
@@ -167,15 +168,16 @@ function createCRL()
 	return Promise.resolve().then(() => createCRLInternal()).then(() =>
 	{
 		let resultString = "-----BEGIN X509 CRL-----\r\n";
-		resultString = resultString + formatPEM(toBase64(arrayBufferToString(crlBuffer)));
+		resultString += formatPEM(toBase64(arrayBufferToString(crlBuffer)));
 		resultString = `${resultString}\r\n-----END X509 CRL-----\r\n`;
 		
 		parseCRL();
 		
 		resultString = `${resultString}\r\n-----BEGIN PRIVATE KEY-----\r\n`;
-		resultString = resultString + formatPEM(toBase64(arrayBufferToString(privateKeyBuffer)));
+		resultString += formatPEM(toBase64(arrayBufferToString(privateKeyBuffer)));
 		resultString = `${resultString}\r\n-----END PRIVATE KEY-----\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("newSignedData").innerHTML = resultString;
 	});
 }
@@ -244,19 +246,23 @@ function parseCRL()
 		
 		const row = issuerTable.insertRow(issuerTable.rows.length);
 		const cell0 = row.insertCell(0);
+		// noinspection InnerHTMLJS
 		cell0.innerHTML = typeval;
 		const cell1 = row.insertCell(1);
+		// noinspection InnerHTMLJS
 		cell1.innerHTML = subjval;
 	}
 	//endregion
 	
 	//region Put information about issuance date
+	// noinspection InnerHTMLJS
 	document.getElementById("crl-this-update").innerHTML = crlSimpl.thisUpdate.value.toString();
 	//endregion
 	
 	//region Put information about expiration date
 	if("nextUpdate" in crlSimpl)
 	{
+		// noinspection InnerHTMLJS
 		document.getElementById("crl-next-update").innerHTML = crlSimpl.nextUpdate.value.toString();
 		document.getElementById("crl-next-update-div").style.display = "block";
 	}
@@ -288,6 +294,7 @@ function parseCRL()
 	else
 		signatureAlgorithm = `${signatureAlgorithm} (${crlSimpl.signature.algorithmId})`;
 	
+	// noinspection InnerHTMLJS
 	document.getElementById("crl-sign-algo").innerHTML = signatureAlgorithm;
 	//endregion
 	
@@ -298,8 +305,10 @@ function parseCRL()
 		{
 			const row = revokedTable.insertRow(revokedTable.rows.length);
 			const cell0 = row.insertCell(0);
+			// noinspection InnerHTMLJS
 			cell0.innerHTML = bufferToHexCodes(crlSimpl.revokedCertificates[i].userCertificate.valueBlock.valueHex);
 			const cell1 = row.insertCell(1);
+			// noinspection InnerHTMLJS
 			cell1.innerHTML = crlSimpl.revokedCertificates[i].revocationDate.value.toString();
 		}
 		
@@ -313,6 +322,7 @@ function parseCRL()
 		{
 			const row = extensionTable.insertRow(extensionTable.rows.length);
 			const cell0 = row.insertCell(0);
+			// noinspection InnerHTMLJS
 			cell0.innerHTML = crlSimpl.crlExtensions.extensions[i].extnID;
 		}
 		
@@ -374,8 +384,10 @@ function handleFileBrowse(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload = event =>
 	{
+		// noinspection JSUnresolvedVariable
 		crlBuffer = event.target.result;
 		parseCRL();
 	};
@@ -389,10 +401,12 @@ function handleIssuerCert(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS, JSUnresolvedVariable
 	tempReader.onload = event =>
 	{
 		issuerPublicKey = null;
 		
+		// noinspection JSUnresolvedVariable
 		const asn1 = asn1js.fromBER(event.target.result);
 		issuerCertificate = new Certificate({
 			schema: asn1.result
@@ -402,6 +416,7 @@ function handleIssuerCert(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
+// noinspection JSUnusedLocalSymbols
 function handleHashAlgOnChange()
 {
 	const hashOption = document.getElementById("hashAlg").value;
@@ -423,6 +438,7 @@ function handleHashAlgOnChange()
 	}
 }
 //*********************************************************************************
+// noinspection JSUnusedLocalSymbols
 function handleSignAlgOnChange()
 {
 	const signOption = document.getElementById("signAlg").value;
@@ -445,6 +461,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	createCRL();
 	verifyCRL();
 	handleFileBrowse();
