@@ -9,7 +9,7 @@
 
 
 
-Public Key Infrastructure (PKI) is the basis of how identity and key management is performed on the web today. PKIjs is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto ([Web Cryptography API](http://www.w3.org/TR/WebCryptoAPI/)) and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins.
+Public Key Infrastructure (PKI) is the basis of how identity and key management is performed on the web today. PKIjs is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto ([**Web Cryptography API**](http://www.w3.org/TR/WebCryptoAPI/)) and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins.
 
 New version of the PKIjs based on using ES6 (ES2015) and was designed with these aims in mind:
 
@@ -25,11 +25,11 @@ In the new version of library we have some new features:
 * New version of "certificate chaing verification engine" passed almost all tests from NIST PKITS. Tests are also shipped with the library;
 * Internal "WebCrypto shim" making it possible to work with "spki/pkcs8" formats in any environment;
 
-Full detailed information about all PKI.js features could be found [in separate file](FEATURES.md).
-Description of PKI.js code structure could be found [in separate file](https://github.com/PeculiarVentures/PKI.js/tree/master/src/README.md).
+Full detailed information about all PKI.js features could be found [**in separate file**](FEATURES.md).
+Description of PKI.js code structure could be found [**in separate file**](https://github.com/PeculiarVentures/PKI.js/tree/master/src/README.md).
 
 ## Important Information for PKI.js V1 Users
-PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to make it easier to move from PKIjs V1 code to PKIjs V2 code we made a file that provides a [mapping](MAPPING.md) between old and new class names.
+PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to make it easier to move from PKIjs V1 code to PKIjs V2 code we made a file that provides a [**mapping**](MAPPING.md) between old and new class names.
 
 ## Examples
 
@@ -67,10 +67,10 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
     certificate.notBefore.value = new Date(2013, 1, 1);
     certificate.notAfter.value = new Date(2016, 1, 1);
 
-    certificate.extensions = new Array(); // Extensions are not a part of certificate by default, it's an optional array
+    certificate.extensions = []; // Extensions are not a part of certificate by default, it's an optional array
 
     //region "BasicConstraints" extension
-    var basicConstr = new BasicConstraints({
+    const basicConstr = new BasicConstraints({
         cA: true,
         pathLenConstraint: 3
     });
@@ -84,13 +84,13 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
     //endregion
 
     //region "KeyUsage" extension
-    var bitArray = new ArrayBuffer(1);
-    var bitView = new Uint8Array(bitArray);
+    const bitArray = new ArrayBuffer(1);
+    const bitView = new Uint8Array(bitArray);
 
-    bitView[0] = bitView[0] | 0x02; // Key usage "cRLSign" flag
-    bitView[0] = bitView[0] | 0x04; // Key usage "keyCertSign" flag
+    bitView[0] |= 0x02; // Key usage "cRLSign" flag
+    bitView[0] |= 0x04; // Key usage "keyCertSign" flag
 
-    var keyUsage = new asn1js.BitString({ valueHex: bitArray });
+    const keyUsage = new asn1js.BitString({ valueHex: bitArray });
 
     certificate.extensions.push(new Extension({
         extnID: "2.5.29.15",
@@ -122,7 +122,7 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
         certificates: [certificate]
     });
 
-    return cms_signed_simpl.sign(privateKey, 0, hashAlgorithm);
+    return cmsSigned.sign(privateKey, 0, hashAlgorithm);
     //endregion
 
 ```
@@ -152,7 +152,7 @@ You could check [**full-featured example here**](https://github.com/PeculiarVent
 You could use PKI.js code by this way, but before you need to perform some additional steps:
 - Replace all occurences of `import * as asn1js from "asn1js"` and `import { <something> } from "pvutils"` inside `pkijs/src` directory with correct paths to `asn1js` and `pvutils` files. Usually you would have something like `import * as asn1js from "../../asn1js/src/asn1.js"` and `import { <something> } from "./pvutils/src/utils.js"`. Correct paths depends on your project structure. Also you would need to replace path to `pvutils` inside used `asn1js/src/asn1.js` file. How to replace - usually it is done via `sed "s/<what_to_find>/<replacement>/g" *` inside target directory;
 - Make a correct main ES6 file (initial application). It could be not a separate ES6 file, but a script on your page, but anyway it must has exports inside `windows` namespace in order to communicate with Web page:
-```javascript 1.8
+```javascript
 window.handleFileBrowseParseEncrypted = handleFileBrowseParseEncrypted;
 window.handleFileBrowseCreateEncrypted = handleFileBrowseCreateEncrypted;
 ```
@@ -194,34 +194,36 @@ OK, now you are ready to launch your favorite Node.js Web Server and have fun wi
 
 More examples could be found in [**examples**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples) folder. To run these samples you must compile them, for example you would run:
 
-```
+```command
 npm install
 npm run build:examples
 ```
 
-Live examples can be found at [pkijs.org](https://pkijs.org).
+Live examples can be found at [**pkijs.org**](https://pkijs.org).
 
 ## Tests using Node environment
 
 **WARNING:** 
-!!! in order to test PKIjs in Node environment you would need to install additional package `node-webcrypto-ossl` !!!
+
+**!!!** in order to test PKIjs in Node environment you would need to install additional package `node-webcrypto-ossl` **!!!**
 
 The `node-webcrypto-ossl` is not referenced in PKIjs dependencies anymore because we were noticed users have a problems with the package installation, especially on Windows platform.
 
-The `node-webcrypto-ossl` is NOT a mandatory for testing PKIjs - you could visit test/browser subdir and run all the same tests in your favorite browser.
+The `node-webcrypto-ossl` is NOT a mandatory for testing PKIjs - you could visit `test/browser` subdir and run all the same tests in your favorite browser.
 
-Also you could check [CircleCI](https://circleci.com/gh/PeculiarVentures/PKI.js) - for each build the service runs all tests and results could be easily observed.
+Also you could check [**CircleCI**](https://circleci.com/gh/PeculiarVentures/PKI.js) - for each build the service runs all tests and results could be easily observed.
 
 If you do need to run PKIjs tests locally using Node please use
 ```command
+npm run build:examples
 npm run test:node
 ```
 
 ## Limitations
 
-* Safari, Edge, and IE do not have complete, or correct implementations of Web Crypto. To work around these limitations you will probably need [`webcrypto-liner`](https://github.com/PeculiarVentures/webcrypto-liner/).
-* You can check the capabilities of your browser's Web Crypto implementation [here](https://peculiarventures.github.io/pv-webcrypto-tests/).
-* Web Crypto support in browsers is always improving. Please check [this page](http://caniuse.com/#feat=cryptography) for information about Web Cryptography API browser support.
+* Safari, Edge, and IE do not have complete, or correct implementations of Web Crypto. To work around these limitations you will probably need [**webcrypto-liner**](https://github.com/PeculiarVentures/webcrypto-liner/).
+* You can check the capabilities of your browser's Web Crypto implementation [**here**](https://peculiarventures.github.io/pv-webcrypto-tests/).
+* Web Crypto support in browsers is always improving. Please check [**this page**](http://caniuse.com/#feat=cryptography) for information about Web Cryptography API browser support.
 
 ## Suitability
 There are several commercial products, enterprise solitions as well as open source project based on versions of PKIjs. You should, however, do your own code and security review before utilization in a production application before utilizing any open source library to ensure it will meet your needs.
@@ -231,16 +233,16 @@ Please report bugs either as pull requests or as issues in the issue tracker. PK
 
 ## Related source code
 
-* [ASN1js project](https://github.com/PeculiarVentures/ASN1.js) - in fact [PKIjs][] will not work without [ASN1js][], it's neccessary part of the [PKIjs][] project;
-* [C++ ASN1:2008 BER coder/decoder](https://github.com/YuryStrozhevsky/C-plus-plus-ASN.1-2008-coder-decoder) - the "father" of [ASN1js][] project;
-* [Freely available ASN.1:2008 test suite](https://github.com/YuryStrozhevsky/ASN1-2008-free-test-suite) - the suite which can help you to validate (and better understand) any ASN.1 coder/decoder;
+* [**ASN1js project**](https://github.com/PeculiarVentures/ASN1.js) - in fact **[PKIjs][]** will not work without **[ASN1js][]**, it's neccessary part of the **[PKIjs][]** project;
+* [**C++ ASN1:2008 BER coder/decoder**](https://github.com/YuryStrozhevsky/C-plus-plus-ASN.1-2008-coder-decoder) - the "father" of **[ASN1js][]** project;
+* [**Freely available ASN.1:2008 test suite**](https://github.com/YuryStrozhevsky/ASN1-2008-free-test-suite) - the suite which can help you to validate (and better understand) any ASN.1 coder/decoder;
 
 ## License
 
-Copyright (c) 2016-2018, [Peculiar Ventures](http://peculiarventures.com/)
+Copyright (c) 2016-2018, [**Peculiar Ventures**](http://peculiarventures.com/)
 All rights reserved.
 
-Author 2016-2018 [Yury Strozhevsky](http://www.strozhevsky.com/).
+Author 2014-2018 [**Yury Strozhevsky**](http://www.strozhevsky.com/).
 
 Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -280,7 +282,7 @@ OF SUCH DAMAGE.
 
 This distribution includes cryptographic software. The country in which you currently reside may have restrictions on the import, possession, use, and/or re-export to another country, of encryption software.
 BEFORE using any encryption software, please check your country's laws, regulations and policies concerning the import, possession, or use, and re-export of encryption software, to see if this is permitted.
-See <http://www.wassenaar.org/> for more information.
+See **<http://www.wassenaar.org/>** for more information.
 
 The U.S. Government Department of Commerce, Bureau of Industry and Security (BIS), has classified this software as Export Commodity Control Number (ECCN) 5D002.C.1, which includes information security software using or performing cryptographic functions with asymmetric algorithms.
 The form and manner of this distribution makes it eligible for export under the License Exception ENC Technology Software Unrestricted (TSU) exception (see the BIS Export Administration Regulations, Section 740.13) for both object code and source code.
