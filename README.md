@@ -239,8 +239,8 @@ Please report bugs either as pull requests or as issues in the issue tracker. PK
 
 ## License
 
-*Copyright (c) 2016-2018, [**Peculiar Ventures**](http://peculiarventures.com/)*
-All rights reserved.
+*Copyright (c) 2016-2018, [**Peculiar Ventures**](http://peculiarventures.com/)* 
+*All rights reserved.*
 
 *Author 2014-2018 [**Yury Strozhevsky**](http://www.strozhevsky.com/).*
 

@@ -9,6 +9,7 @@ import CertificateRevocationList from "../../src/CertificateRevocationList";
 import { stringToArrayBuffer, bufferToHexCodes } from "pvutils";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
 import BasicConstraints from "../../src/BasicConstraints";
+import ExtKeyUsage from "../../src/ExtKeyUsage";
 //<nodewebcryptoossl>
 //*********************************************************************************
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT
@@ -279,7 +280,26 @@ function createCertificateInternal()
 		extnValue: keyUsage.toBER(false),
 		parsedValue: keyUsage // Parsed value for well-known extensions
 	}));
-	//endregion 
+	//endregion
+	
+	//region "ExtendedKeyUsage" extension
+	const extKeyUsage = new ExtKeyUsage({
+		keyPurposes: [
+			"1.3.6.1.5.5.7.3.1", // id-kp-serverAuth
+			"1.3.6.1.5.5.7.3.2", // id-kp-clientAuth
+			"1.3.6.1.5.5.7.3.3", // id-kp-codeSigning
+			"1.3.6.1.5.5.7.3.4", // id-kp-emailProtection
+			"1.3.6.1.5.5.7.3.8"  // id-kp-timeStamping
+		]
+	});
+	
+	certificate.extensions.push(new Extension({
+		extnID: "2.5.29.37",
+		critical: false,
+		extnValue: extKeyUsage.toSchema().toBER(false),
+		parsedValue: extKeyUsage // Parsed value for well-known extensions
+	}));
+	//endregion
 	//endregion 
 	
 	//region Create a new key pair 
