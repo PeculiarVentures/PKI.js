@@ -285,11 +285,15 @@ function createCertificateInternal()
 	//region "ExtendedKeyUsage" extension
 	const extKeyUsage = new ExtKeyUsage({
 		keyPurposes: [
+			"2.5.29.37.0",       // anyExtendedKeyUsage
 			"1.3.6.1.5.5.7.3.1", // id-kp-serverAuth
 			"1.3.6.1.5.5.7.3.2", // id-kp-clientAuth
 			"1.3.6.1.5.5.7.3.3", // id-kp-codeSigning
 			"1.3.6.1.5.5.7.3.4", // id-kp-emailProtection
-			"1.3.6.1.5.5.7.3.8"  // id-kp-timeStamping
+			"1.3.6.1.5.5.7.3.8", // id-kp-timeStamping
+			"1.3.6.1.5.5.7.3.9", // id-kp-OCSPSigning
+			"1.3.6.1.4.1.311.10.3.1", // Microsoft Certificate Trust List signing
+			"1.3.6.1.4.1.311.10.3.4"  // Microsoft Encrypted File System
 		]
 	});
 	
