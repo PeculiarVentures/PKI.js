@@ -12,15 +12,84 @@ let engine = {
 //**************************************************************************************
 export function setEngine(name, crypto, subtle)
 {
-	engine = {
-		name,
-		crypto,
-		subtle
-	};
+	//region We are in Node
+	// noinspection JSUnresolvedVariable
+	if(typeof process !== "undefined")
+	{
+		// noinspection ES6ModulesDependencies, JSUnresolvedVariable
+		if(typeof global[process.pid] === "undefined")
+		{
+			// noinspection JSUnresolvedVariable
+			global[process.pid] = {};
+		}
+		else
+		{
+			// noinspection JSUnresolvedVariable
+			if(typeof global[process.pid] !== "object")
+			{
+				// noinspection JSUnresolvedVariable
+				throw new Error(`Name global.${process.pid} already exists and it is not an object`);
+			}
+		}
+		
+		// noinspection JSUnresolvedVariable
+		if(typeof global[process.pid].pkijs === "undefined")
+		{
+			// noinspection JSUnresolvedVariable
+			global[process.pid].pkijs = {};
+		}
+		else
+		{
+			// noinspection JSUnresolvedVariable
+			if(typeof global[process.pid].pkijs !== "object")
+			{
+				// noinspection JSUnresolvedVariable
+				throw new Error(`Name global.${process.pid}.pkijs already exists and it is not an object`);
+			}
+		}
+		
+		// noinspection JSUnresolvedVariable
+		global[process.pid].pkijs.engine = {
+			name: name,
+			crypto: crypto,
+			subtle: subtle
+		};
+	}
+	//endregion
+	//region We are in browser
+	else
+	{
+		engine = {
+			name: name,
+			crypto: crypto,
+			subtle: subtle
+		};
+	}
+	//endregion
 }
 //**************************************************************************************
 export function getEngine()
 {
+	//region We are in Node
+	// noinspection JSUnresolvedVariable
+	if(typeof process !== "undefined")
+	{
+		let _engine;
+		
+		try
+		{
+			// noinspection JSUnresolvedVariable
+			_engine = global[process.pid].pkijs.engine;
+		}
+		catch(ex)
+		{
+			throw new Error("Please call \"setEngine\" before call to \"getEngine\"");
+		}
+		
+		return _engine;
+	}
+	//endregion
+	
 	return engine;
 }
 //**************************************************************************************
@@ -31,7 +100,7 @@ export function getEngine()
 		if("crypto" in self)
 		{
 			let engineName = "webcrypto";
-				
+			
 			/**
 			 * Standard crypto object
 			 * @type {Object}
@@ -39,7 +108,7 @@ export function getEngine()
 			 */
 			const cryptoObject = self.crypto;
 			let subtleObject = null;
-				
+			
 			// Apple Safari support
 			if("webkitSubtle" in self.crypto)
 			{
@@ -54,10 +123,10 @@ export function getEngine()
 				
 				engineName = "safari";
 			}
-				
+			
 			if("subtle" in self.crypto)
 				subtleObject = self.crypto.subtle;
-				
+			
 			engine = {
 				name: engineName,
 				crypto: cryptoObject,
@@ -77,8 +146,10 @@ export function getEngine()
  */
 export function getCrypto()
 {
-	if(engine.subtle !== null)
-		return engine.subtle;
+	const _engine = getEngine();
+	
+	if(_engine.subtle !== null)
+		return _engine.subtle;
 	
 	return undefined;
 }
@@ -90,7 +161,7 @@ export function getCrypto()
  */
 export function getRandomValues(view)
 {
-	return engine.subtle.getRandomValues(view);
+	return getEngine().subtle.getRandomValues(view);
 }
 //**************************************************************************************
 /**
@@ -100,7 +171,7 @@ export function getRandomValues(view)
  */
 export function getOIDByAlgorithm(algorithm)
 {
-	return engine.subtle.getOIDByAlgorithm(algorithm);
+	return getEngine().subtle.getOIDByAlgorithm(algorithm);
 }
 //**************************************************************************************
 /**
@@ -111,7 +182,7 @@ export function getOIDByAlgorithm(algorithm)
  */
 export function getAlgorithmParameters(algorithmName, operation)
 {
-	return engine.subtle.getAlgorithmParameters(algorithmName, operation);
+	return getEngine().subtle.getAlgorithmParameters(algorithmName, operation);
 }
 //**************************************************************************************
 /**
@@ -207,7 +278,7 @@ export function createECDSASignatureFromCMS(cmsSignature)
 	
 	if((cmsSignature.valueBlock.value[1] instanceof asn1js.Integer) === false)
 		return new ArrayBuffer(0);
-	//endregion 
+	//endregion
 	
 	const rValue = cmsSignature.valueBlock.value[0].convertFromDER();
 	const sValue = cmsSignature.valueBlock.value[1].convertFromDER();
@@ -289,7 +360,7 @@ export function createECDSASignatureFromCMS(cmsSignature)
  */
 export function getAlgorithmByOID(oid)
 {
-	return engine.subtle.getAlgorithmByOID(oid);
+	return getEngine().subtle.getAlgorithmByOID(oid);
 }
 //**************************************************************************************
 /**
@@ -299,7 +370,7 @@ export function getAlgorithmByOID(oid)
  */
 export function getHashAlgorithm(signatureAlgorithm)
 {
-	return engine.subtle.getHashAlgorithm(signatureAlgorithm);
+	return getEngine().subtle.getHashAlgorithm(signatureAlgorithm);
 }
 //**************************************************************************************
 /**
