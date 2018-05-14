@@ -198,7 +198,7 @@ export default class ResponseData
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for ocsp.ResponseData");
+			throw new Error("Object's schema was not verified against input data for ResponseData");
 		//endregion
 
 		//region Get internal properties from parsed schema

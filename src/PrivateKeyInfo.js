@@ -159,7 +159,7 @@ export default class PrivateKeyInfo
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for PKCS8");
+			throw new Error("Object's schema was not verified against input data for PrivateKeyInfo");
 		//endregion
 
 		//region Get internal properties from parsed schema

@@ -105,7 +105,7 @@ export default class PBES2Params
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for PBES2_params");
+			throw new Error("Object's schema was not verified against input data for PBES2Params");
 		//endregion
 
 		//region Get internal properties from parsed schema

@@ -478,7 +478,7 @@ export default class GeneralName
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for GENERAL_NAME");
+			throw new Error("Object's schema was not verified against input data for GeneralName");
 		//endregion
 
 		//region Get internal properties from parsed schema

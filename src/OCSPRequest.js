@@ -140,7 +140,7 @@ export default class OCSPRequest
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for OCSP_REQUEST");
+			throw new Error("Object's schema was not verified against input data for OCSPRequest");
 		//endregion
 		
 		//region Get internal properties from parsed schema

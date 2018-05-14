@@ -109,7 +109,7 @@ export default class RevokedCertificate
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for REV_CERT");
+			throw new Error("Object's schema was not verified against input data for RevokedCertificate");
 		//endregion
 
 		//region Get internal properties from parsed schema

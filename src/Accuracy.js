@@ -146,7 +146,7 @@ export default class Accuracy
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for tsp.Accuracy");
+			throw new Error("Object's schema was not verified against input data for Accuracy");
 		//endregion
 
 		//region Get internal properties from parsed schema

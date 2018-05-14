@@ -330,7 +330,7 @@ export default class Certificate
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CERT");
+			throw new Error("Object's schema was not verified against input data for Certificate");
 		//endregion
 		
 		//region Get internal properties from parsed schema

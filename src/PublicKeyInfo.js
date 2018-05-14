@@ -115,7 +115,7 @@ export default class PublicKeyInfo
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for PUBLIC_KEY_INFO");
+			throw new Error("Object's schema was not verified against input data for PublicKeyInfo");
 		//endregion
 		
 		//region Get internal properties from parsed schema

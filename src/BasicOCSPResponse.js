@@ -179,7 +179,7 @@ export default class BasicOCSPResponse
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for OCSP_BASIC_RESPONSE");
+			throw new Error("Object's schema was not verified against input data for BasicOCSPResponse");
 		//endregion
 		
 		//region Get internal properties from parsed schema

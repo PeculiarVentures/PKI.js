@@ -153,7 +153,7 @@ export default class EncryptedData
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CMS_ENCRYPTED_DATA");
+			throw new Error("Object's schema was not verified against input data for EncryptedData");
 		//endregion
 		
 		//region Get internal properties from parsed schema

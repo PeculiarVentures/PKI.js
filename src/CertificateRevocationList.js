@@ -260,7 +260,7 @@ export default class CertificateRevocationList {
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CRL");
+			throw new Error("Object's schema was not verified against input data for CertificateRevocationList");
 		//endregion
 		
 		//region Get internal properties from parsed schema

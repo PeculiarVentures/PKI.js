@@ -92,7 +92,7 @@ export default class Time
 		}));
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for TIME");
+			throw new Error("Object's schema was not verified against input data for Time");
 		//endregion
 
 		//region Get internal properties from parsed schema

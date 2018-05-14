@@ -148,7 +148,7 @@ export default class ECCCMSSharedInfo
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for ECC_CMS_SharedInfo");
+			throw new Error("Object's schema was not verified against input data for ECCCMSSharedInfo");
 		//endregion
 
 		//region Get internal properties from parsed schema

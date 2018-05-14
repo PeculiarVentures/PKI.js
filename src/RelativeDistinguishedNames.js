@@ -131,7 +131,7 @@ export default class RelativeDistinguishedNames
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for RDN");
+			throw new Error("Object's schema was not verified against input data for RelativeDistinguishedNames");
 		//endregion
 
 		//region Get internal properties from parsed schema

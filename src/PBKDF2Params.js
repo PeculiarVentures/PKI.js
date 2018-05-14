@@ -152,7 +152,7 @@ export default class PBKDF2Params
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for PBKDF2_params");
+			throw new Error("Object's schema was not verified against input data for PBKDF2Params");
 		//endregion
 
 		//region Get internal properties from parsed schema

@@ -229,7 +229,7 @@ export default class SignerInfo
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CMS_SIGNER_INFO");
+			throw new Error("Object's schema was not verified against input data for SignerInfo");
 		//endregion
 
 		//region Get internal properties from parsed schema

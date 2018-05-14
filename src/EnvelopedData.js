@@ -210,7 +210,7 @@ export default class EnvelopedData
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CMS_ENVELOPED_DATA");
+			throw new Error("Object's schema was not verified against input data for EnvelopedData");
 		//endregion
 		
 		//region Get internal properties from parsed schema

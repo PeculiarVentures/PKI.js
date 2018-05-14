@@ -257,7 +257,7 @@ export default class TSTInfo
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for TST_INFO");
+			throw new Error("Object's schema was not verified against input data for TSTInfo");
 		//endregion
 
 		//region Get internal properties from parsed schema

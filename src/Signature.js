@@ -149,7 +149,7 @@ export default class Signature
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for ocsp.Signature");
+			throw new Error("Object's schema was not verified against input data for Signature");
 		//endregion
 
 		//region Get internal properties from parsed schema

@@ -158,7 +158,7 @@ export default class RecipientInfo
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CMS_RECIPIENT_INFO");
+			throw new Error("Object's schema was not verified against input data for RecipientInfo");
 		//endregion
 
 		//region Get internal properties from parsed schema

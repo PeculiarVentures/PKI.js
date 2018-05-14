@@ -91,7 +91,7 @@ export default class Extensions
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for EXTENSIONS");
+			throw new Error("Object's schema was not verified against input data for Extensions");
 		//endregion
 
 		//region Get internal properties from parsed schema

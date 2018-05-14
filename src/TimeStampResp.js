@@ -126,7 +126,7 @@ export default class TimeStampResp
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for TSP_RESPONSE");
+			throw new Error("Object's schema was not verified against input data for TimeStampResp");
 		//endregion
 
 		//region Get internal properties from parsed schema

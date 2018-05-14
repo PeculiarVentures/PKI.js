@@ -104,7 +104,7 @@ export default class AttributeTypeAndValue
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for ATTR_TYPE_AND_VALUE");
+			throw new Error("Object's schema was not verified against input data for AttributeTypeAndValue");
 		//endregion
 
 		//region Get internal properties from parsed schema

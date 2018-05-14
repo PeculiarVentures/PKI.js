@@ -164,7 +164,7 @@ export default class RSASSAPSSParams
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for RSASSA_PSS_params");
+			throw new Error("Object's schema was not verified against input data for RSASSAPSSParams");
 		//endregion
 
 		//region Get internal properties from parsed schema

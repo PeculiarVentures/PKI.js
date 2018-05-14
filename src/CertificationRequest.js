@@ -195,7 +195,7 @@ export default class CertificationRequest
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for PKCS10");
+			throw new Error("Object's schema was not verified against input data for CertificationRequest");
 		//endregion
 		
 		//region Get internal properties from parsed schema

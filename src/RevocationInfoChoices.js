@@ -114,7 +114,7 @@ export default class RevocationInfoChoices
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CSM_REVOCATION_INFO_CHOICES");
+			throw new Error("Object's schema was not verified against input data for RevocationInfoChoices");
 		//endregion
 		
 		//region Get internal properties from parsed schema

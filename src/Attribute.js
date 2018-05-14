@@ -123,7 +123,7 @@ export default class Attribute {
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for ATTRIBUTE");
+			throw new Error("Object's schema was not verified against input data for Attribute");
 		//endregion
 		
 		//region Get internal properties from parsed schema
