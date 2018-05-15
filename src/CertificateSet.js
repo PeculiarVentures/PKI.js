@@ -141,18 +141,19 @@ export default class CertificateSet
 				return new Certificate({ schema: element });
 			
 			//region Making "Sequence" from "Constructed" value
-			element.idBlock.tagClass = 1;
-			element.idBlock.tagNumber = 16;
+			const elementSequence = new asn1js.Sequence({
+				value: element.valueBlock.value
+			});
 			//endregion
 
 			switch(initialTagNumber)
 			{
 				case 1:
-					return new AttributeCertificateV1({ schema: element });
+					return new AttributeCertificateV1({ schema: elementSequence });
 				case 2:
-					return new AttributeCertificateV2({ schema: element });
+					return new AttributeCertificateV2({ schema: elementSequence });
 				case 3:
-					return new OtherCertificateFormat({ schema: element });
+					return new OtherCertificateFormat({ schema: elementSequence });
 				case 0:
 				default:
 			}

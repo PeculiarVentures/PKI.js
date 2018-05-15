@@ -7,3 +7,4 @@ circle.yml
 .eslintrc.js
 .babelrc
 coverage
+.vs

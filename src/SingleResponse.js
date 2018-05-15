@@ -151,7 +151,7 @@ export default class SingleResponse
 								tagNumber: 0 // [0]
 							},
 							lenBlockLength: 1 // The length contains one byte 0x00
-						}), // IMPLICIT NULL (no "value_block")
+						}), // IMPLICIT NULL (no "valueBlock")
 						new asn1js.Constructed({
 							name: (names.certStatus || ""),
 							idBlock: {
@@ -177,7 +177,7 @@ export default class SingleResponse
 								tagNumber: 2 // [2]
 							},
 							lenBlock: { length: 1 }
-						}) // IMPLICIT NULL (no "value_block")
+						}) // IMPLICIT NULL (no "valueBlock")
 					]
 				}),
 				new asn1js.GeneralizedTime({ name: (names.thisUpdate || "") }),

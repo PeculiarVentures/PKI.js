@@ -337,22 +337,20 @@ export class V2Form
 		
 		if("baseCertificateID" in asn1.result)
 		{
-			//region Making "Sequence" from "Constructed" value
-			asn1.result.baseCertificateID.idBlock.tagClass = 1;
-			asn1.result.baseCertificateID.idBlock.tagNumber = 16;
-			//endregion
-			
-			this.baseCertificateID = new IssuerSerial({ schema: asn1.result.baseCertificateID });
+			this.baseCertificateID = new IssuerSerial({
+				schema: new asn1js.Sequence({
+					value: asn1.result.baseCertificateID.valueBlock.value
+				})
+			});
 		}
 		
 		if("objectDigestInfo" in asn1.result)
 		{
-			//region Making "Sequence" from "Constructed" value
-			asn1.result.objectDigestInfo.idBlock.tagClass = 1;
-			asn1.result.objectDigestInfo.idBlock.tagNumber = 16;
-			//endregion
-			
-			this.objectDigestInfo = new ObjectDigestInfo({ schema: asn1.result.objectDigestInfo });
+			this.objectDigestInfo = new ObjectDigestInfo({
+				schema: new asn1js.Sequence({
+					value: asn1.result.objectDigestInfo.valueBlock.value
+				})
+			});
 		}
 		//endregion
 	}
@@ -564,32 +562,29 @@ export class Holder
 		//region Get internal properties from parsed schema
 		if("baseCertificateID" in asn1.result)
 		{
-			//region Making "Sequence" from "Constructed" value
-			asn1.result.baseCertificateID.idBlock.tagClass = 1;
-			asn1.result.baseCertificateID.idBlock.tagNumber = 16;
-			//endregion
-			
-			this.baseCertificateID = new IssuerSerial({ schema: asn1.result.baseCertificateID });
+			this.baseCertificateID = new IssuerSerial({
+				schema: new asn1js.Sequence({
+					value: asn1.result.baseCertificateID.valueBlock.value
+				})
+			});
 		}
 		
 		if("entityName" in asn1.result)
 		{
-			//region Making "Sequence" from "Constructed" value
-			asn1.result.entityName.idBlock.tagClass = 1;
-			asn1.result.entityName.idBlock.tagNumber = 16;
-			//endregion
-			
-			this.entityName = new GeneralNames({ schema: asn1.result.entityName });
+			this.entityName = new GeneralNames({
+				schema: new asn1js.Sequence({
+					value: asn1.result.entityName.valueBlock.value
+				})
+			});
 		}
 		
 		if("objectDigestInfo" in asn1.result)
 		{
-			//region Making "Sequence" from "Constructed" value
-			asn1.result.objectDigestInfo.idBlock.tagClass = 1;
-			asn1.result.objectDigestInfo.idBlock.tagNumber = 16;
-			//endregion
-			
-			this.objectDigestInfo = new ObjectDigestInfo({ schema: asn1.result.objectDigestInfo });
+			this.objectDigestInfo = new ObjectDigestInfo({
+				schema: new asn1js.Sequence({
+					value: asn1.result.objectDigestInfo.valueBlock.value
+				})
+			});
 		}
 		//endregion
 	}
@@ -882,12 +877,11 @@ export class AttributeCertificateInfoV2
 		switch(asn1.result.issuer.idBlock.tagClass)
 		{
 			case 3: // V2Form
-				//region Change type to "Sequence"
-				asn1.result.issuer.idBlock.tagClass = 1;
-				asn1.result.issuer.idBlock.tagNumber = 16;
-				//endregion
-				
-				this.issuer = new V2Form({ schema: asn1.result.issuer });
+				this.issuer = new V2Form({
+					schema: new asn1js.Sequence({
+						value: asn1.result.issuer.valueBlock.value
+					})
+				});
 				break;
 			case 1: // GeneralNames (should not be used)
 			default:

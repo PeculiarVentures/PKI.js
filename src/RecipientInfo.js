@@ -170,29 +170,28 @@ export default class RecipientInfo
 		else
 		{
 			//region Create "SEQUENCE" from "ASN1_CONSTRUCTED"
-			const tagNumber = asn1.result.blockName.idBlock.tagNumber;
-
-			asn1.result.blockName.idBlock.tagClass = 1; // UNIVERSAL
-			asn1.result.blockName.idBlock.tagNumber = 16; // SEQUENCE
+			const blockSequence = new asn1js.Sequence({
+				value: asn1.result.blockName.valueBlock.value
+			});
 			//endregion
 
-			switch(tagNumber)
+			switch(asn1.result.blockName.idBlock.tagNumber)
 			{
 				case 1:
 					this.variant = 2;
-					this.value = new KeyAgreeRecipientInfo({ schema: asn1.result.blockName });
+					this.value = new KeyAgreeRecipientInfo({ schema: blockSequence });
 					break;
 				case 2:
 					this.variant = 3;
-					this.value = new KEKRecipientInfo({ schema: asn1.result.blockName });
+					this.value = new KEKRecipientInfo({ schema: blockSequence });
 					break;
 				case 3:
 					this.variant = 4;
-					this.value = new PasswordRecipientinfo({ schema: asn1.result.blockName });
+					this.value = new PasswordRecipientinfo({ schema: blockSequence });
 					break;
 				case 4:
 					this.variant = 5;
-					this.value = new OtherRecipientInfo({ schema: asn1.result.blockName });
+					this.value = new OtherRecipientInfo({ schema: blockSequence });
 					break;
 				default:
 					throw new Error("Incorrect structure of RecipientInfo block");

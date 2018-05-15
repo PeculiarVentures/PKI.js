@@ -136,15 +136,17 @@ export default class OriginatorInfo
 		//endregion
 
 		//region Get internal properties from parsed schema
-		asn1.result.certs.idBlock.tagClass = 1; // UNIVERSAL
-		asn1.result.certs.idBlock.tagNumber = 17; // SET
+		this.certs = new CertificateSet({
+			schema: new asn1js.Set({
+				value: asn1.result.certs.valueBlock.value
+			})
+		});
 
-		this.certs = new CertificateSet({ schema: asn1.result.certs });
-
-		asn1.result.crls.idBlock.tagClass = 1; // UNIVERSAL
-		asn1.result.crls.idBlock.tagNumber = 17; // SET
-
-		this.crls = new RevocationInfoChoices({ schema: asn1.result.crls });
+		this.crls = new RevocationInfoChoices({
+			schema: new asn1js.Set({
+				value: asn1.result.crls.valueBlock.value
+			})
+		});
 		//endregion
 	}
 	//**********************************************************************************

@@ -548,22 +548,20 @@ export class AttributeCertificateInfoV1
 		
 		if("baseCertificateID" in asn1.result)
 		{
-			//region Making "Sequence" from "Constructed" value
-			asn1.result.baseCertificateID.idBlock.tagClass = 1;
-			asn1.result.baseCertificateID.idBlock.tagNumber = 16;
-			//endregion
-			
-			this.baseCertificateID = new IssuerSerial({ schema: asn1.result.baseCertificateID });
+			this.baseCertificateID = new IssuerSerial({
+				schema: new asn1js.Sequence({
+					value: asn1.result.baseCertificateID.valueBlock.value
+				})
+			});
 		}
 		
 		if("subjectName" in asn1.result)
 		{
-			//region Making "Sequence" from "Constructed" value
-			asn1.result.subjectName.idBlock.tagClass = 1;
-			asn1.result.subjectName.idBlock.tagNumber = 16;
-			//endregion
-			
-			this.subjectName = new GeneralNames({ schema: asn1.result.subjectName });
+			this.subjectName = new GeneralNames({
+				schema: new asn1js.Sequence({
+					value: asn1.result.subjectName.valueBlock.value
+				})
+			});
 		}
 		
 		this.issuer = asn1.result.issuer;

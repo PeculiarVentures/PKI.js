@@ -218,10 +218,11 @@ export default class EnvelopedData
 		
 		if("originatorInfo" in asn1.result)
 		{
-			asn1.result.originatorInfo.idBlock.tagClass = 1; // UNIVERSAL
-			asn1.result.originatorInfo.idBlock.tagNumber = 16; // SEQUENCE
-			
-			this.originatorInfo = new OriginatorInfo({ schema: asn1.result.originatorInfo });
+			this.originatorInfo = new OriginatorInfo({
+				schema: new asn1js.Sequence({
+					value: asn1.result.originatorInfo.valueBlock.value
+				})
+			});
 		}
 		
 		this.recipientInfos = Array.from(asn1.result.recipientInfos, element => new RecipientInfo({ schema: element }));

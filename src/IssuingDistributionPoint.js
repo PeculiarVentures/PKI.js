@@ -245,10 +245,11 @@ export default class IssuingDistributionPoint
 					break;
 				case (asn1.result.distributionPoint.idBlock.tagNumber === 1): // RDN variant
 					{
-						asn1.result.distributionPoint.idBlock.tagClass = 1; // UNIVERSAL
-						asn1.result.distributionPoint.idBlock.tagNumber = 16; // SEQUENCE
-
-						this.distributionPoint = new RelativeDistinguishedNames({ schema: asn1.result.distributionPoint });
+						this.distributionPoint = new RelativeDistinguishedNames({
+							schema: new asn1js.Sequence({
+								value: asn1.result.distributionPoint.valueBlock.value
+							})
+						});
 					}
 					break;
 				default:

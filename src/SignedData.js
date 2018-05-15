@@ -160,7 +160,7 @@ export default class SignedData
 		 * @property {string} [signerInfos]
 		 */
 		const names = getParametersValue(parameters, "names", {});
-		
+
 		if(("optional" in names) === false)
 			names.optional = false;
 		
@@ -241,10 +241,11 @@ export default class SignedData
 		
 		if("SignedData.certificates" in asn1.result)
 		{
-			asn1.result["SignedData.certificates"].idBlock.tagClass = 1; // UNIVERSAL
-			asn1.result["SignedData.certificates"].idBlock.tagNumber = 17; // SET
-
-			const certificateSet = new CertificateSet({ schema: asn1.result["SignedData.certificates"] });
+			const certificateSet = new CertificateSet({
+				schema: new asn1js.Set({
+					value: asn1.result["SignedData.certificates"].valueBlock.value
+				})
+			});
 			this.certificates = certificateSet.certificates.slice(0); // Copy all just for making comfortable access
 		}
 		
@@ -293,10 +294,13 @@ export default class SignedData
 			const certificateSet = new CertificateSet({ certificates: this.certificates });
 			const certificateSetSchema = certificateSet.toSchema();
 			
-			certificateSetSchema.idBlock.tagClass = 3;
-			certificateSetSchema.idBlock.tagNumber = 0;
-			
-			outputArray.push(certificateSetSchema);
+			outputArray.push(new asn1js.Constructed({
+				idBlock: {
+					tagClass: 3,
+					tagNumber: 0
+				},
+				value: certificateSetSchema.valueBlock.value
+			}));
 		}
 		
 		if("crls" in this)

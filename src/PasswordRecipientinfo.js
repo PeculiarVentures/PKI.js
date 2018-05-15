@@ -171,10 +171,11 @@ export default class PasswordRecipientinfo
 
 		if("keyDerivationAlgorithm" in asn1.result)
 		{
-			asn1.result.keyDerivationAlgorithm.idBlock.tagClass = 1; // UNIVERSAL
-			asn1.result.keyDerivationAlgorithm.idBlock.tagNumber = 16; // SEQUENCE
-
-			this.keyDerivationAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.keyDerivationAlgorithm });
+			this.keyDerivationAlgorithm = new AlgorithmIdentifier({
+				schema: new asn1js.Sequence({
+					value: asn1.result.keyDerivationAlgorithm.valueBlock.value
+				})
+			});
 		}
 
 		this.keyEncryptionAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.keyEncryptionAlgorithm });

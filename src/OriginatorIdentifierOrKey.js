@@ -156,13 +156,12 @@ export default class OriginatorIdentifierOrKey
 			}
 			else
 			{
-				//region Create "SEQUENCE" from "ASN1_CONSTRUCTED"
-				asn1.result.blockName.idBlock.tagClass = 1; // UNIVERSAL
-				asn1.result.blockName.idBlock.tagNumber = 16; // SEQUENCE
-				//endregion
-
 				this.variant = 3;
-				this.value = new OriginatorPublicKey({ schema: asn1.result.blockName });
+				this.value = new OriginatorPublicKey({
+					schema: new asn1js.Sequence({
+						value: asn1.result.blockName.valueBlock.value
+					})
+				});
 			}
 		}
 		//endregion

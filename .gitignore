@@ -4,3 +4,4 @@
 build
 .nyc_output
 coverage
+.vs

@@ -169,18 +169,18 @@ export default class AuthorityKeyIdentifier
 		
 		if("keyIdentifier" in this)
 		{
-			const value = this.keyIdentifier;
-			
-			value.idBlock.tagClass = 3; // CONTEXT-SPECIFIC
-			value.idBlock.tagNumber = 0; // [0]
-			
-			outputArray.push(value);
+			outputArray.push(new asn1js.Constructed({
+				idBlock: {
+					tagClass: 3, // CONTEXT-SPECIFIC
+					tagNumber: 0 // [0]
+				},
+				value: this.keyIdentifier.valueBlock.value
+			}));
 		}
 		
 		if("authorityCertIssuer" in this)
 		{
 			outputArray.push(new asn1js.Constructed({
-				optional: true,
 				idBlock: {
 					tagClass: 3, // CONTEXT-SPECIFIC
 					tagNumber: 1 // [1]
@@ -191,12 +191,13 @@ export default class AuthorityKeyIdentifier
 		
 		if("authorityCertSerialNumber" in this)
 		{
-			const value = this.authorityCertSerialNumber;
-			
-			value.idBlock.tagClass = 3; // CONTEXT-SPECIFIC
-			value.idBlock.tagNumber = 2; // [2]
-			
-			outputArray.push(value);
+			outputArray.push(new asn1js.Constructed({
+				idBlock: {
+					tagClass: 3, // CONTEXT-SPECIFIC
+					tagNumber: 2 // [2]
+				},
+				value: this.authorityCertSerialNumber.valueBlock.value
+			}));
 		}
 		//endregion
 		
