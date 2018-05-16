@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, bufferToHexCodes } from "pvutils";
+import { getParametersValue, bufferToHexCodes, clearProps } from "pvutils";
 import { getEngine } from "./common.js";
 import PublicKeyInfo from "./PublicKeyInfo.js";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
@@ -188,6 +188,18 @@ export default class CertificationRequest
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"CertificationRequestInfo",
+			"CertificationRequestInfo.version",
+			"CertificationRequestInfo.subject",
+			"CertificationRequestInfo.subjectPublicKeyInfo",
+			"CertificationRequestInfo.attributes",
+			"signatureAlgorithm",
+			"signatureValue"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

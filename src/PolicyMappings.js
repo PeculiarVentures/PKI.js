@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import PolicyMapping from "./PolicyMapping.js";
 //**************************************************************************************
 /**
@@ -80,6 +80,12 @@ export default class PolicyMappings
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"mappings"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

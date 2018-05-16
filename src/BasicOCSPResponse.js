@@ -1,10 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, isEqualBuffer } from "pvutils";
-import {
-	getAlgorithmByOID,
-	getCrypto,
-	getEngine
-} from "./common.js";
+import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
+import { getAlgorithmByOID, getCrypto, getEngine } from "./common.js";
 import ResponseData from "./ResponseData.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import Certificate from "./Certificate.js";
@@ -172,6 +168,15 @@ export default class BasicOCSPResponse
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"BasicOCSPResponse.tbsResponseData",
+			"BasicOCSPResponse.signatureAlgorithm",
+			"BasicOCSPResponse.signature",
+			"BasicOCSPResponse.certs"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

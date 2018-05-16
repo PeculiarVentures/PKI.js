@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import Certificate from "./Certificate.js";
 import AttributeCertificateV2 from "./AttributeCertificateV2.js";
 //**************************************************************************************
@@ -122,7 +122,14 @@ export default class CertBag
 	 */
 	fromSchema(schema)
 	{
-		//region Check the schema is valid 
+		//region Clear input data first
+		clearProps(schema, [
+			"certId",
+			"certValue"
+		]);
+		//endregion
+		
+		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
 			CertBag.schema({

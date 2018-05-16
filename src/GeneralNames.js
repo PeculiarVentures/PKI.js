@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import GeneralName from "./GeneralName.js";
 //**************************************************************************************
 /**
@@ -77,6 +77,13 @@ export default class GeneralNames
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"names",
+			"generalNames"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

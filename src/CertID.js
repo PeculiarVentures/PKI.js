@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, isEqualBuffer } from "pvutils";
+import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
 import { getCrypto, getOIDByAlgorithm } from "./common.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 //**************************************************************************************
@@ -130,6 +130,15 @@ export default class CertID
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"hashAlgorithm",
+			"issuerNameHash",
+			"issuerKeyHash",
+			"serialNumber"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

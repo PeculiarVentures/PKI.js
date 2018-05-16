@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, utilConcatBuf } from "pvutils";
+import { getParametersValue, utilConcatBuf, clearProps } from "pvutils";
 import { getOIDByAlgorithm, getRandomValues, getCrypto, getAlgorithmByOID, kdf } from "./common.js";
 import OriginatorInfo from "./OriginatorInfo.js";
 import RecipientInfo from "./RecipientInfo.js";
@@ -191,6 +191,16 @@ export default class EnvelopedData
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"version",
+			"originatorInfo",
+			"recipientInfos",
+			"encryptedContentInfo",
+			"unprotectedAttrs"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

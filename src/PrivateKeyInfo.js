@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import Attribute from "./Attribute.js";
 import ECPrivateKey from "./ECPrivateKey.js";
@@ -141,6 +141,15 @@ export default class PrivateKeyInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"version",
+			"privateKeyAlgorithm",
+			"privateKey",
+			"attributes"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

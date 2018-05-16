@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import GeneralName from "./GeneralName.js";
 import Request from "./Request.js";
 import Extension from "./Extension.js";
@@ -184,6 +184,16 @@ export default class TBSRequest
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"TBSRequest",
+			"TBSRequest.version",
+			"TBSRequest.requestorName",
+			"TBSRequest.requests",
+			"TBSRequest.requestExtensions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

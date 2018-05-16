@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 //**************************************************************************************
 //region Additional asn1js schema elements existing inside GENERAL_NAME schema
@@ -454,6 +454,21 @@ export default class GeneralName
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"blockName",
+			"otherName",
+			"rfc822Name",
+			"dNSName",
+			"x400Address",
+			"directoryName",
+			"ediPartyName",
+			"uniformResourceIdentifier",
+			"iPAddress",
+			"registeredID"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

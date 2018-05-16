@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import Certificate from "./Certificate.js";
 //**************************************************************************************
@@ -132,6 +132,14 @@ export default class Signature
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"signatureAlgorithm",
+			"signature",
+			"certs"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

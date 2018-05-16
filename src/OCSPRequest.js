@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import { getEngine } from "./common.js";
 import TBSRequest from "./TBSRequest.js";
 import Signature from "./Signature.js";
@@ -133,6 +133,13 @@ export default class OCSPRequest
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"tbsRequest",
+			"optionalSignature"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

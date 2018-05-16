@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import CertificateSet from "./CertificateSet.js";
 import RevocationInfoChoices from "./RevocationInfoChoices.js";
 //**************************************************************************************
@@ -120,6 +120,13 @@ export default class OriginatorInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"certs",
+			"crls"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, utilConcatBuf } from "pvutils";
+import { getParametersValue, utilConcatBuf, clearProps } from "pvutils";
 import { getCrypto, getEngine, getRandomValues, getOIDByAlgorithm, getAlgorithmByOID } from "./common.js";
 import ContentInfo from "./ContentInfo.js";
 import MacData from "./MacData.js";
@@ -152,6 +152,14 @@ export default class PFX
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"version",
+			"authSafe",
+			"macData"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64, nearestPowerOf2 } from "pvutils";
+import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64, nearestPowerOf2, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC3447
@@ -90,6 +90,13 @@ export default class RSAPublicKey
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"modulus",
+			"publicExponent"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

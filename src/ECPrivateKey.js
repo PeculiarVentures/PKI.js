@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64 } from "pvutils";
+import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64, clearProps } from "pvutils";
 import ECPublicKey from "./ECPublicKey.js";
 //**************************************************************************************
 /**
@@ -156,6 +156,15 @@ export default class ECPrivateKey
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"version",
+			"privateKey",
+			"namedCurve",
+			"publicKey"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

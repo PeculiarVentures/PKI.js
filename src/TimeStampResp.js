@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import PKIStatusInfo from "./PKIStatusInfo.js";
 import ContentInfo from "./ContentInfo.js";
 import SignedData from "./SignedData.js";
@@ -119,6 +119,13 @@ export default class TimeStampResp
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"TimeStampResp.status",
+			"TimeStampResp.timeStampToken"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import GeneralSubtree from "./GeneralSubtree.js";
 //**************************************************************************************
 /**
@@ -114,6 +114,13 @@ export default class NameConstraints
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"permittedSubtrees",
+			"excludedSubtrees"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, isEqualBuffer } from "pvutils";
+import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
 import { getCrypto, getAlgorithmByOID } from "./common.js";
 import MessageImprint from "./MessageImprint.js";
 import Accuracy from "./Accuracy.js";
@@ -250,6 +250,21 @@ export default class TSTInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"TSTInfo.version",
+			"TSTInfo.policy",
+			"TSTInfo.messageImprint",
+			"TSTInfo.serialNumber",
+			"TSTInfo.genTime",
+			"TSTInfo.accuracy",
+			"TSTInfo.ordering",
+			"TSTInfo.nonce",
+			"TSTInfo.tsa",
+			"TSTInfo.extensions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

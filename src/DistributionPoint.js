@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import GeneralName from "./GeneralName.js";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 //**************************************************************************************
@@ -176,6 +176,16 @@ export default class DistributionPoint
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"distributionPoint",
+			"distributionPointNames",
+			"reasons",
+			"cRLIssuer",
+			"cRLIssuerNames"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

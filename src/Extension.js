@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import SubjectDirectoryAttributes from "./SubjectDirectoryAttributes.js";
 import PrivateKeyUsagePeriod from "./PrivateKeyUsagePeriod.js";
 import AltName from "./AltName.js";
@@ -124,6 +124,14 @@ export default class Extension
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"extnID",
+			"critical",
+			"extnValue"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		let asn1 = asn1js.compareSchema(schema,
 			schema,

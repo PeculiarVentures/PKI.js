@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 //**************************************************************************************
 /**
@@ -103,6 +103,13 @@ export default class MessageImprint
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"hashAlgorithm",
+			"hashedMessage"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

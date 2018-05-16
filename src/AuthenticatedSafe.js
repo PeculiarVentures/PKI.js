@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, utilConcatBuf } from "pvutils";
+import { getParametersValue, utilConcatBuf, clearProps } from "pvutils";
 import ContentInfo from "./ContentInfo.js";
 import SafeContents from "./SafeContents.js";
 import EnvelopedData from "./EnvelopedData.js";
@@ -110,6 +110,12 @@ export default class AuthenticatedSafe
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"contentInfos"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

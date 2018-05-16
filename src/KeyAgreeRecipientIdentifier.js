@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
 import RecipientKeyIdentifier from "./RecipientKeyIdentifier.js";
 //**************************************************************************************
@@ -118,6 +118,12 @@ export default class KeyAgreeRecipientIdentifier
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"blockName"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

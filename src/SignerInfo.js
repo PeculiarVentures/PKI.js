@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import SignedAndUnsignedAttributes from "./SignedAndUnsignedAttributes.js";
 import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
@@ -222,6 +222,18 @@ export default class SignerInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"SignerInfo.version",
+			"SignerInfo.sid",
+			"SignerInfo.digestAlgorithm",
+			"SignerInfo.signedAttrs",
+			"SignerInfo.signatureAlgorithm",
+			"SignerInfo.signature",
+			"SignerInfo.unsignedAttrs"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

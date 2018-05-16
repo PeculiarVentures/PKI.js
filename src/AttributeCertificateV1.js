@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import GeneralNames from "./GeneralNames.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import Attribute from "./Attribute.js";
@@ -88,6 +88,13 @@ export class AttCertValidityPeriod
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"notBeforeTime",
+			"notAfterTime"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -241,6 +248,14 @@ export class IssuerSerial
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"issuer",
+			"serialNumber",
+			"issuerUID"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -508,6 +523,21 @@ export class AttributeCertificateInfoV1
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"version",
+			"baseCertificateID",
+			"subjectName",
+			"issuer",
+			"signature",
+			"serialNumber",
+			"attrCertValidityPeriod",
+			"attributes",
+			"issuerUniqueID",
+			"extensions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -754,6 +784,14 @@ export default class AttributeCertificateV1
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"acinfo",
+			"signatureValue",
+			"signatureAlgorithm"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import ResponseBytes from "./ResponseBytes.js";
 import BasicOCSPResponse from "./BasicOCSPResponse.js";
 //**************************************************************************************
@@ -130,6 +130,13 @@ export default class OCSPResponse
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"responseStatus",
+			"responseBytes"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

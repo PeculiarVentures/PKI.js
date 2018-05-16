@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import GeneralNames from "./GeneralNames.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import Attribute from "./Attribute.js";
@@ -121,6 +121,15 @@ export class ObjectDigestInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"digestedObjectType",
+			"otherObjectTypeID",
+			"digestAlgorithm",
+			"objectDigest"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -315,6 +324,14 @@ export class V2Form
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"issuerName",
+			"baseCertificateID",
+			"objectDigestInfo"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -543,6 +560,14 @@ export class Holder
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"baseCertificateID",
+			"entityName",
+			"objectDigestInfo"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -832,6 +857,20 @@ export class AttributeCertificateInfoV2
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"version",
+			"holder",
+			"issuer",
+			"signature",
+			"serialNumber",
+			"attrCertValidityPeriod",
+			"attributes",
+			"issuerUniqueID",
+			"extensions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -1057,6 +1096,14 @@ export default class AttributeCertificateV2
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"acinfo",
+			"signatureAlgorithm",
+			"signatureValue"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

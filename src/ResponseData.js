@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 import SingleResponse from "./SingleResponse.js";
 import Extension from "./Extension.js";
@@ -191,6 +191,17 @@ export default class ResponseData
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"ResponseData",
+			"ResponseData.version",
+			"ResponseData.responderID",
+			"ResponseData.producedAt",
+			"ResponseData.responses",
+			"ResponseData.responseExtensions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

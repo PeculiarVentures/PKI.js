@@ -1,9 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, bufferToHexCodes } from "pvutils";
-import {
-	getCrypto,
-	getEngine
-} from "./common.js";
+import { getParametersValue, bufferToHexCodes, clearProps } from "pvutils";
+import { getCrypto, getEngine } from "./common.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 import Time from "./Time.js";
@@ -311,6 +308,25 @@ export default class Certificate
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"tbsCertificate",
+			"tbsCertificate.extensions",
+			"tbsCertificate.version",
+			"tbsCertificate.serialNumber",
+			"tbsCertificate.signature",
+			"tbsCertificate.issuer",
+			"tbsCertificate.notBefore",
+			"tbsCertificate.notAfter",
+			"tbsCertificate.subject",
+			"tbsCertificate.subjectPublicKeyInfo",
+			"tbsCertificate.issuerUniqueID",
+			"tbsCertificate.subjectUniqueID",
+			"signatureAlgorithm",
+			"signatureValue"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

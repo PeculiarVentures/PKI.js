@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import MessageImprint from "./MessageImprint.js";
 import Extension from "./Extension.js";
 //**************************************************************************************
@@ -181,6 +181,17 @@ export default class TimeStampReq
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"TimeStampReq.version",
+			"TimeStampReq.messageImprint",
+			"TimeStampReq.reqPolicy",
+			"TimeStampReq.nonce",
+			"TimeStampReq.certReq",
+			"TimeStampReq.extensions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

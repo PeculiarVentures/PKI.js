@@ -1,11 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, utilConcatBuf, isEqualBuffer } from "pvutils";
-import {
-	getCrypto,
-	getEngine,
-	getOIDByAlgorithm,
-	getAlgorithmByOID
-} from "./common.js";
+import { getParametersValue, utilConcatBuf, isEqualBuffer, clearProps } from "pvutils";
+import { getCrypto, getEngine, getOIDByAlgorithm, getAlgorithmByOID } from "./common.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import EncapsulatedContentInfo from "./EncapsulatedContentInfo.js";
 import Certificate from "./Certificate.js";
@@ -221,6 +216,17 @@ export default class SignedData
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"SignedData.version",
+			"SignedData.digestAlgorithms",
+			"SignedData.encapContentInfo",
+			"SignedData.certificates",
+			"SignedData.crls",
+			"SignedData.signerInfos"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

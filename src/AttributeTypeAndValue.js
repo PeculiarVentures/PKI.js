@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, isEqualBuffer } from "pvutils";
+import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
 import { stringPrep } from "./common.js";
 //**************************************************************************************
 /**
@@ -89,10 +89,14 @@ export default class AttributeTypeAndValue
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"type",
+			"typeValue"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
-		/**
-		 * @type {{verified: boolean}|{verified: boolean, result: {type: Object, typeValue: Object}}}
-		 */
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
 			AttributeTypeAndValue.schema({
@@ -109,6 +113,7 @@ export default class AttributeTypeAndValue
 
 		//region Get internal properties from parsed schema
 		this.type = asn1.result.type.valueBlock.toString();
+		// noinspection JSUnresolvedVariable
 		this.value = asn1.result.typeValue;
 		//endregion
 	}

@@ -1,8 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, bufferToHexCodes } from "pvutils";
-import {
-	getEngine
-} from "./common.js";
+import { getParametersValue, bufferToHexCodes, clearProps } from "pvutils";
+import { getEngine } from "./common.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 import Time from "./Time.js";
@@ -253,6 +251,21 @@ export default class CertificateRevocationList {
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"tbsCertList",
+			"tbsCertList.version",
+			"tbsCertList.signature",
+			"tbsCertList.issuer",
+			"tbsCertList.thisUpdate",
+			"tbsCertList.nextUpdate",
+			"tbsCertList.revokedCertificates",
+			"tbsCertList.extensions",
+			"signatureAlgorithm",
+			"signatureValue"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

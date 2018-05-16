@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64 } from "pvutils";
+import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC3447
@@ -98,6 +98,14 @@ export default class OtherPrimeInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"prime",
+			"exponent",
+			"coefficient"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

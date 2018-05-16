@@ -2511,6 +2511,7 @@ export default class CryptoEngine
 			if(publicKey.algorithm.name === "ECDSA")
 			{
 				const asn1 = asn1js.fromBER(signatureValue);
+				// noinspection JSCheckFunctionSignatures
 				signatureValue = createECDSASignatureFromCMS(asn1.result);
 			}
 			//endregion

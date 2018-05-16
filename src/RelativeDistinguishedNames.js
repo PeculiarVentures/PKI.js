@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, isEqualBuffer } from "pvutils";
+import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
 import AttributeTypeAndValue from "./AttributeTypeAndValue.js";
 //**************************************************************************************
 /**
@@ -116,10 +116,14 @@ export default class RelativeDistinguishedNames
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"RDN",
+			"typesAndValues"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
-		/**
-		 * @type {{verified: boolean}|{verified: boolean, result: {RDN: Object, typesAndValues: Array.<Object>}}}
-		 */
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
 			RelativeDistinguishedNames.schema({
@@ -138,6 +142,7 @@ export default class RelativeDistinguishedNames
 		if("typesAndValues" in asn1.result) // Could be a case when there is no "types and values"
 			this.typesAndValues = Array.from(asn1.result.typesAndValues, element => new AttributeTypeAndValue({ schema: element }));
 
+		// noinspection JSUnresolvedVariable
 		this.valueBeforeDecode = asn1.result.RDN.valueBeforeDecode;
 		//endregion
 	}

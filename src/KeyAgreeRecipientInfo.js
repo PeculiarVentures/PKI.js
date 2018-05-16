@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 import OriginatorIdentifierOrKey from "./OriginatorIdentifierOrKey.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import RecipientEncryptedKeys from "./RecipientEncryptedKeys.js";
@@ -169,6 +169,16 @@ export default class KeyAgreeRecipientInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"version",
+			"originator",
+			"ukm",
+			"keyEncryptionAlgorithm",
+			"recipientEncryptedKeys"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
