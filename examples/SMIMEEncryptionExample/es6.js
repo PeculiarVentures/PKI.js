@@ -17,6 +17,7 @@ const trustedCertificates = []; // Array of root certificates from "CA Bundle"
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-v1_5";
+let oaepHashAlg = "SHA-1";
 
 const encAlg = {
 	name: "AES-CBC",
@@ -237,7 +238,7 @@ function smimeEncrypt()
 	
 	const cmsEnveloped = new EnvelopedData();
 	
-	cmsEnveloped.addRecipientByCertificate(certSimpl);
+	cmsEnveloped.addRecipientByCertificate(certSimpl, { oaepHashAlgorithm: oaepHashAlg });
 	
 	return cmsEnveloped.encrypt(encAlg, stringToArrayBuffer(document.getElementById("content").value)).then(
 		() =>
@@ -389,6 +390,27 @@ function handleEncLenOnChange()
 	}
 }
 //*********************************************************************************
+function handleOAEPHashAlgOnChange()
+{
+	const hashOption = document.getElementById("oaep_hash_alg").value;
+	switch(hashOption)
+	{
+		case "alg_SHA1":
+			oaepHashAlg = "sha-1";
+			break;
+		case "alg_SHA256":
+			oaepHashAlg = "sha-256";
+			break;
+		case "alg_SHA384":
+			oaepHashAlg = "sha-384";
+			break;
+		case "alg_SHA512":
+			oaepHashAlg = "sha-512";
+			break;
+		default:
+	}
+}
+//*********************************************************************************
 context("Hack for Rollup.js", () =>
 {
 	return;
@@ -401,5 +423,6 @@ context("Hack for Rollup.js", () =>
 	handleSignAlgOnChange();
 	handleEncAlgOnChange();
 	handleEncLenOnChange();
+	handleOAEPHashAlgOnChange();
 });
 //*********************************************************************************
