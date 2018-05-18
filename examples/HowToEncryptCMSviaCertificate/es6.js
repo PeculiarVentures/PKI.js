@@ -20,6 +20,7 @@ let trustedCertificates = []; // Array of root certificates from "CA Bundle"
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-v1_5";
+let oaepHashAlg = "SHA-1";
 
 const encAlg = {
 	name: "AES-CBC",
@@ -231,7 +232,7 @@ function envelopedEncryptInternal()
 	
 	const cmsEnveloped = new EnvelopedData();
 	
-	cmsEnveloped.addRecipientByCertificate(certSimpl);
+	cmsEnveloped.addRecipientByCertificate(certSimpl, { oaepHashAlgorithm: oaepHashAlg });
 	
 	return cmsEnveloped.encrypt(encAlg, valueBuffer).
 		then(
@@ -396,6 +397,27 @@ function handleEncLenOnChange()
 	}
 }
 //*********************************************************************************
+function handleOAEPHashAlgOnChange()
+{
+	const hashOption = document.getElementById("oaep_hash_alg").value;
+	switch(hashOption)
+	{
+		case "alg_SHA1":
+			oaepHashAlg = "sha-1";
+			break;
+		case "alg_SHA256":
+			oaepHashAlg = "sha-256";
+			break;
+		case "alg_SHA384":
+			oaepHashAlg = "sha-384";
+			break;
+		case "alg_SHA512":
+			oaepHashAlg = "sha-512";
+			break;
+		default:
+	}
+}
+//*********************************************************************************
 context("Hack for Rollup.js", () =>
 {
 	return;
@@ -408,12 +430,14 @@ context("Hack for Rollup.js", () =>
 	handleSignAlgOnChange();
 	handleEncAlgOnChange();
 	handleEncLenOnChange();
+	handleOAEPHashAlgOnChange();
 	setEngine();
 });
 //*********************************************************************************
 context("How To Encrypt CMS via Certificate", () => {
 	//region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
+	const oaepHashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
 	const encAlgs = ["AES-CBC", "AES-GCM"];
 	const encLens = [128, 192, 256];
@@ -429,19 +453,23 @@ context("How To Encrypt CMS via Certificate", () => {
 			{
 				hashAlgs.forEach(_hashAlg =>
 				{
-					const testName = `${_encAlg} with ${_encLen}, ${_hashAlg} + ${_signAlg}`;
-					
-					it(testName, () =>
+					oaepHashAlgs.forEach(_oaepHashAlg =>
 					{
-						hashAlg = _hashAlg;
-						signAlg = _signAlg;
+						const testName = `${_encAlg} with ${_encLen}, ${_hashAlg} + ${_signAlg}, OAEP hash: ${_oaepHashAlg}`;
 						
-						encAlg.name = _encAlg;
-						encAlg.length = _encLen;
-						
-						return createCertificateInternal().then(() => envelopedEncryptInternal()).then(() => envelopedDecryptInternal()).then(result =>
+						it(testName, () =>
 						{
-							assert.equal(isEqualBuffer(result, valueBuffer), true, "Decrypted value must be equal with initially encrypted value");
+							hashAlg = _hashAlg;
+							signAlg = _signAlg;
+							oaepHashAlg = _oaepHashAlg;
+							
+							encAlg.name = _encAlg;
+							encAlg.length = _encLen;
+							
+							return createCertificateInternal().then(() => envelopedEncryptInternal()).then(() => envelopedDecryptInternal()).then(result =>
+							{
+								assert.equal(isEqualBuffer(result, valueBuffer), true, "Decrypted value must be equal with initially encrypted value");
+							});
 						});
 					});
 				});

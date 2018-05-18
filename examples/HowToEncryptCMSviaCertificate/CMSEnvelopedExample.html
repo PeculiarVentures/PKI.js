@@ -176,6 +176,15 @@
                 </select>
             </p>
             <p>
+                <label for="oaep_hash_alg" style="font-weight:bold">RSA-OAEP Hashing Algorithm:</label>
+                <select id="oaep_hash_alg" onchange="handleOAEPHashAlgOnChange()">
+                    <option value="alg_SHA1">SHA-1</option>
+                    <option value="alg_SHA256">SHA-256</option>
+                    <option value="alg_SHA384">SHA-384</option>
+                    <option value="alg_SHA512">SHA-512</option>
+                </select>
+            </p>
+            <p>
                 <a onclick="envelopedEncrypt();">Encrypt</a>
             </p>
             <label for="encrypted_content" style="font-weight:bold;float:left;">BASE-64 encoded encrypted content:</label>

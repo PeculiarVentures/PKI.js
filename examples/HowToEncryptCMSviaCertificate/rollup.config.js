@@ -17,6 +17,7 @@ window.handleHashAlgOnChange = handleHashAlgOnChange;
 window.handleSignAlgOnChange = handleSignAlgOnChange;
 window.handleEncAlgOnChange = handleEncAlgOnChange;
 window.handleEncLenOnChange = handleEncLenOnChange;
+window.handleOAEPHashAlgOnChange = handleOAEPHashAlgOnChange;
 
 function context(name, func) {}`
 		},
