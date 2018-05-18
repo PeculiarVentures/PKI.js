@@ -298,6 +298,12 @@ function smimeDecrypt()
 	//region Make all CMS data
 	// noinspection JSUnresolvedVariable
 	asn1 = asn1js.fromBER(parser.content.buffer);
+	if(asn1.offset === (-1))
+	{
+		alert("Unable to parse your data. Please check you have \"Content-Type: charset=binary\" in your S/MIME message");
+		return;
+	}
+	
 	const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
 	const cmsEnvelopedSimp = new EnvelopedData({ schema: cmsContentSimpl.content });
 	//endregion 
