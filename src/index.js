@@ -204,3 +204,6 @@ import TimeStampReq from "./TimeStampReq.js";
 export { TimeStampReq };
 import TimeStampResp from "./TimeStampResp.js";
 export { TimeStampResp };
+import SignedCertificateTimestampList from "./SignedCertificateTimestampList.js";
+import { SignedCertificateTimestamp } from "./SignedCertificateTimestampList.js";
+export { SignedCertificateTimestampList, SignedCertificateTimestamp };
