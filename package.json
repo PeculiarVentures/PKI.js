@@ -32,7 +32,8 @@
   },
   "dependencies": {
     "asn1js": "latest",
-    "pvutils": "latest"
+    "bytestreamjs": "^1.0.13",
+    "pvutils": "^1.0.14"
   },
   "engines": {
     "node": ">=8.0.0"
@@ -82,6 +83,6 @@
   "module": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.51",
+  "version": "2.1.52",
   "license": "MIT"
 }

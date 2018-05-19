@@ -14,6 +14,7 @@ import AuthorityKeyIdentifier from "./AuthorityKeyIdentifier.js";
 import PolicyConstraints from "./PolicyConstraints.js";
 import ExtKeyUsage from "./ExtKeyUsage.js";
 import InfoAccess from "./InfoAccess.js";
+import SignedCertificateTimestampList from "./SignedCertificateTimestampList.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -224,6 +225,9 @@ export default class Extension
 			case "1.3.6.1.5.5.7.1.1": // AuthorityInfoAccess
 			case "1.3.6.1.5.5.7.1.11": // SubjectInfoAccess
 				this.parsedValue = new InfoAccess({ schema: asn1.result });
+				break;
+			case "1.3.6.1.4.1.11129.2.4.2": // SignedCertificateTimestampList
+				this.parsedValue = new SignedCertificateTimestampList({ schema: asn1.result });
 				break;
 			default:
 		}
