@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, utilFromBase, utilToBase } from "pvutils";
+import { getParametersValue, utilFromBase, utilToBase, bufferToHexCodes } from "pvutils";
 import { ByteStream, SeqStream } from "bytestreamjs";
 //**************************************************************************************
 export class SignedCertificateTimestamp
@@ -80,7 +80,7 @@ export class SignedCertificateTimestamp
 			case "signatureAlgorithm":
 				return "";
 			case "signature":
-				return {};
+				return new asn1js.Any();
 			default:
 				throw new Error(`Invalid member name for SignedCertificateTimestamp class: ${memberName}`);
 		}
@@ -281,6 +281,23 @@ export class SignedCertificateTimestamp
 		return stream;
 	}
 	//**********************************************************************************
+	/**
+	 * Convertion for the class to JSON object
+	 * @returns {Object}
+	 */
+	toJSON()
+	{
+		return {
+			version: this.version,
+			logID: bufferToHexCodes(this.logID),
+			timestamp: this.timestamp,
+			extensions: bufferToHexCodes(this.extensions),
+			hashAlgorithm: this.hashAlgorithm,
+			signatureAlgorithm: this.signatureAlgorithm,
+			signature: this.signature.toJSON()
+		};
+	}
+	//**********************************************************************************
 }
 //**************************************************************************************
 /**
@@ -424,6 +441,17 @@ export default class SignedCertificateTimestampList
 		//endregion
 		
 		return new asn1js.OctetString({ valueHex: stream.stream.buffer.slice(0) });
+	}
+	//**********************************************************************************
+	/**
+	 * Convertion for the class to JSON object
+	 * @returns {Object}
+	 */
+	toJSON()
+	{
+		return {
+			timestamps: Array.from(this.timestamps, element => element.toJSON())
+		};
 	}
 	//**********************************************************************************
 }

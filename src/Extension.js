@@ -274,7 +274,10 @@ export default class Extension
 			object.critical = this.critical;
 
 		if("parsedValue" in this)
-			object.parsedValue = this.parsedValue.toJSON();
+		{
+			if("toJSON" in this.parsedValue)
+				object.parsedValue = this.parsedValue.toJSON();
+		}
 
 		return object;
 	}
