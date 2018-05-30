@@ -14,7 +14,7 @@ export function setEngine(name, crypto, subtle)
 {
 	//region We are in Node
 	// noinspection JSUnresolvedVariable
-	if(typeof process !== "undefined")
+	if((typeof process !== "undefined") && ("pid" in process) && (typeof global !== "undefined"))
 	{
 		// noinspection ES6ModulesDependencies, JSUnresolvedVariable
 		if(typeof global[process.pid] === "undefined")
@@ -72,7 +72,7 @@ export function getEngine()
 {
 	//region We are in Node
 	// noinspection JSUnresolvedVariable
-	if(typeof process !== "undefined")
+	if((typeof process !== "undefined") && ("pid" in process) && (typeof global !== "undefined"))
 	{
 		let _engine;
 		
@@ -134,6 +134,8 @@ export function getEngine()
 			};
 		}
 	}
+	
+	setEngine(engine.name, engine.crypto, engine.subtle);
 })();
 //**************************************************************************************
 //endregion
