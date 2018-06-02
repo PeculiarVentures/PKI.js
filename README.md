@@ -9,7 +9,7 @@
 
 
 
-Public Key Infrastructure (PKI) is the basis of how identity and key management is performed on the web today. PKIjs is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto ([**Web Cryptography API**](http://www.w3.org/TR/WebCryptoAPI/)) and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins.
+Public Key Infrastructure (PKI) is the basis of how identity and key management is performed on the web today. PKIjs is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto ([_**Web Cryptography API**_](http://www.w3.org/TR/WebCryptoAPI/)) and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins.
 
 New version of the PKIjs based on using ES6 (ES2015) and was designed with these aims in mind:
 
@@ -25,11 +25,11 @@ In the new version of library we have some new features:
 * New version of "certificate chaing verification engine" passed almost all tests from NIST PKITS. Tests are also shipped with the library;
 * Internal "WebCrypto shim" making it possible to work with "spki/pkcs8" formats in any environment;
 
-Full detailed information about all PKI.js features could be found [**in separate file**](FEATURES.md).
-Description of PKI.js code structure could be found [**in separate file**](https://github.com/PeculiarVentures/PKI.js/tree/master/src/README.md).
+Full detailed information about all PKI.js features could be found [_**in separate file**_](FEATURES.md).
+Description of PKI.js code structure could be found [_**in separate file**_](https://github.com/PeculiarVentures/PKI.js/tree/master/src/README.md).
 
 ## Important Information for PKI.js V1 Users
-PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to make it easier to move from PKIjs V1 code to PKIjs V2 code we made a file that provides a [**mapping**](MAPPING.md) between old and new class names.
+PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to make it easier to move from PKIjs V1 code to PKIjs V2 code we made a file that provides a [_**mapping**_](MAPPING.md) between old and new class names.
 
 ## Examples
 
@@ -109,7 +109,7 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
     cmsSigned = new SignedData({
         encapContentInfo: new EncapsulatedContentInfo({
             eContentType: "1.2.840.113549.1.7.1", // "data" content type
-            eContent: new asn1js.OctetString({ value_hex: buffer })
+            eContent: new asn1js.OctetString({ valueHex: buffer })
         }),
         signerInfos: [
             new SignerInfo({
@@ -129,8 +129,12 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
 
 ### Use in Node.js
 
+At the moment PKI.js code is compiled for Node v6 version. But in fact initially PKI.js code is a pure ES6 code and you could build it for any Node version by changing [_**this line**_](https://github.com/PeculiarVentures/PKI.js/blob/master/.babelrc#L8) and run `npm run build` again.
+
+_**WARNING**_: if you would try to build PKI.js code for Node version <= 4 then you would need to have `require("babel-polyfill")` once per entire project.
+
 ```javascript
-    require("babel-polyfill");
+    //require("babel-polyfill"); // Would be required only if you compiled PKI.js for Node <= v4
     const asn1js = require("asn1js");
     const pkijs = require("pkijs");
     const Certificate = pkijs.Certificate;
@@ -145,9 +149,9 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
 
 ### How to use PKI.js ES6 files directly in browser
 
-Currently there is a posibility to use ES6 modules directly from Web pages, without any transpilations (Babel, Rollup etc.). In order to do this all used files must point to direct or relative names and should be achivable via browser. Almost all moder browsers would support the "native ES6 modules". You could check [**this link to caniuse site**](https://caniuse.com/#feat=es6-module) for current status.
+Currently there is a posibility to use ES6 modules directly from Web pages, without any transpilations (Babel, Rollup etc.). In order to do this all used files must point to direct or relative names and should be achivable via browser. Almost all moder browsers would support the "native ES6 modules". You could check [_**this link to caniuse site**_](https://caniuse.com/#feat=es6-module) for current status.
  
-You could check [**full-featured example here**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser). And please carefully read [**this README**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser/README.md) before run it.
+You could check [_**full-featured example here**_](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser). And please carefully read [_**this README**_](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser/README.md) before run it.
  
 You could use PKI.js code by this way, but before you need to perform some additional steps:
 - Replace all occurences of `import * as asn1js from "asn1js"` and `import { <something> } from "pvutils"` inside `pkijs/src` directory with correct paths to `asn1js` and `pvutils` files. Usually you would have something like `import * as asn1js from "../../asn1js/src/asn1.js"` and `import { <something> } from "./pvutils/src/utils.js"`. Correct paths depends on your project structure. Also you would need to replace path to `pvutils` inside used `asn1js/src/asn1.js` file. How to replace - usually it is done via `sed "s/<what_to_find>/<replacement>/g" *` inside target directory;
@@ -188,22 +192,22 @@ window.handleFileBrowseCreateEncrypted = handleFileBrowseCreateEncrypted;
 ```
 - Now you need to run your application as Node.js application. It is necessary just because modern CORS would prevent you from loading files from local filesystem;
 
-OK, now you are ready to launch your favorite Node.js Web Server and have fun with direct links to your wounderful PKI.js application! You could check [**full-featured example here**](). And please carefully read [**this README**]() before run it.
+OK, now you are ready to launch your favorite Node.js Web Server and have fun with direct links to your wounderful PKI.js application! You could check [_**full-featured example here**_](). And please carefully read [_**this README**_]() before run it.
 
 ### More examples
 
-More examples could be found in [**examples**](https://github.com/PeculiarVentures/PKI.js/tree/master/examples) folder. To run these samples you must compile them, for example you would run:
+More examples could be found in [_**examples**_](https://github.com/PeculiarVentures/PKI.js/tree/master/examples) folder. To run these samples you must compile them, for example you would run:
 
 ```command
 npm install
 npm run build:examples
 ```
 
-Live examples can be found at [**pkijs.org**](https://pkijs.org).
+Live examples can be found at [_**pkijs.org**_](https://pkijs.org).
 
 ## Tests using Node environment
 
-**WARNING:** 
+_**WARNING:**_ 
 
 **!!!** in order to test PKIjs in Node environment you would need to install additional package `node-webcrypto-ossl` **!!!**
 
@@ -211,7 +215,7 @@ The `node-webcrypto-ossl` is not referenced in PKIjs dependencies anymore becaus
 
 The `node-webcrypto-ossl` is NOT a mandatory for testing PKIjs - you could visit `test/browser` subdir and run all the same tests in your favorite browser.
 
-Also you could check [**CircleCI**](https://circleci.com/gh/PeculiarVentures/PKI.js) - for each build the service runs all tests and results could be easily observed.
+Also you could check [_**CircleCI**_](https://circleci.com/gh/PeculiarVentures/PKI.js) - for each build the service runs all tests and results could be easily observed.
 
 If you do need to run PKIjs tests locally using Node please use
 ```command
@@ -221,9 +225,9 @@ npm run test:node
 
 ## Limitations
 
-* Safari, Edge, and IE do not have complete, or correct implementations of Web Crypto. To work around these limitations you will probably need [**webcrypto-liner**](https://github.com/PeculiarVentures/webcrypto-liner/).
-* You can check the capabilities of your browser's Web Crypto implementation [**here**](https://peculiarventures.github.io/pv-webcrypto-tests/).
-* Web Crypto support in browsers is always improving. Please check [**this page**](http://caniuse.com/#feat=cryptography) for information about Web Cryptography API browser support.
+* Safari, Edge, and IE do not have complete, or correct implementations of Web Crypto. To work around these limitations you will probably need [_**webcrypto-liner**_](https://github.com/PeculiarVentures/webcrypto-liner/).
+* You can check the capabilities of your browser's Web Crypto implementation [_**here**_](https://peculiarventures.github.io/pv-webcrypto-tests/).
+* Web Crypto support in browsers is always improving. Please check [_**this page**_](http://caniuse.com/#feat=cryptography) for information about Web Cryptography API browser support.
 
 ## Suitability
 There are several commercial products, enterprise solitions as well as open source project based on versions of PKIjs. You should, however, do your own code and security review before utilization in a production application before utilizing any open source library to ensure it will meet your needs.
@@ -233,16 +237,16 @@ Please report bugs either as pull requests or as issues in the issue tracker. PK
 
 ## Related source code
 
-* [**ASN1js project**](https://github.com/PeculiarVentures/ASN1.js) - in fact **[PKIjs][]** will not work without **[ASN1js][]**, it's neccessary part of the **[PKIjs][]** project;
-* [**C++ ASN1:2008 BER coder/decoder**](https://github.com/YuryStrozhevsky/C-plus-plus-ASN.1-2008-coder-decoder) - the "father" of **[ASN1js][]** project;
-* [**Freely available ASN.1:2008 test suite**](https://github.com/YuryStrozhevsky/ASN1-2008-free-test-suite) - the suite which can help you to validate (and better understand) any ASN.1 coder/decoder;
+* [_**ASN1js project**_](https://github.com/PeculiarVentures/ASN1.js) - in fact **[PKIjs][]** will not work without **[ASN1js][]**, it's neccessary part of the **[PKIjs][]** project;
+* [_**C++ ASN1:2008 BER coder/decoder**_](https://github.com/YuryStrozhevsky/C-plus-plus-ASN.1-2008-coder-decoder) - the "father" of **[ASN1js][]** project;
+* [_**Freely available ASN.1:2008 test suite**_](https://github.com/YuryStrozhevsky/ASN1-2008-free-test-suite) - the suite which can help you to validate (and better understand) any ASN.1 coder/decoder;
 
 ## License
 
-*Copyright (c) 2016-2018, [**Peculiar Ventures**](http://peculiarventures.com/)* 
+*Copyright (c) 2016-2018, [_**Peculiar Ventures**_](http://peculiarventures.com/)* 
 *All rights reserved.*
 
-*Author 2014-2018 [**Yury Strozhevsky**](http://www.strozhevsky.com/).*
+*Author 2014-2018 [_**Yury Strozhevsky**_](http://www.strozhevsky.com/).*
 
 Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:

@@ -1,9 +1,20 @@
 {
-	"compact": "false",
-	"presets": ["env"],
-    "env": {
-      "test": {
-        "plugins": ["istanbul"]
+  "compact": "false",
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "node": "6.0"
+        }
       }
+    ]
+  ],
+  "env": {
+    "test": {
+      "plugins": [
+        "istanbul"
+      ]
     }
+  }
 }

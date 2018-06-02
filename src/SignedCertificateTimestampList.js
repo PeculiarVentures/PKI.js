@@ -113,76 +113,80 @@ export class SignedCertificateTimestamp
 		const blockLength = stream.getUint16();
 		
 		this.version = (stream.getBlock(1))[0];
-		this.logID = (new Uint8Array(stream.getBlock(32))).buffer.slice(0);
-		this.timestamp = new Date(utilFromBase(new Uint8Array(stream.getBlock(8)), 8));
 		
-		//region Extensions
-		const extensionsLength = stream.getUint16();
-		this.extensions = (new Uint8Array(stream.getBlock(extensionsLength))).buffer.slice(0);
-		//endregion
-		
-		//region Hash algorithm
-		switch((stream.getBlock(1))[0])
+		if(this.version === 0)
 		{
-			case 0:
-				this.hashAlgorithm = "none";
-				break;
-			case 1:
-				this.hashAlgorithm = "md5";
-				break;
-			case 2:
-				this.hashAlgorithm = "sha1";
-				break;
-			case 3:
-				this.hashAlgorithm = "sha224";
-				break;
-			case 4:
-				this.hashAlgorithm = "sha256";
-				break;
-			case 5:
-				this.hashAlgorithm = "sha384";
-				break;
-			case 6:
-				this.hashAlgorithm = "sha512";
-				break;
-			default:
+			this.logID = (new Uint8Array(stream.getBlock(32))).buffer.slice(0);
+			this.timestamp = new Date(utilFromBase(new Uint8Array(stream.getBlock(8)), 8));
+			
+			//region Extensions
+			const extensionsLength = stream.getUint16();
+			this.extensions = (new Uint8Array(stream.getBlock(extensionsLength))).buffer.slice(0);
+			//endregion
+			
+			//region Hash algorithm
+			switch((stream.getBlock(1))[0])
+			{
+				case 0:
+					this.hashAlgorithm = "none";
+					break;
+				case 1:
+					this.hashAlgorithm = "md5";
+					break;
+				case 2:
+					this.hashAlgorithm = "sha1";
+					break;
+				case 3:
+					this.hashAlgorithm = "sha224";
+					break;
+				case 4:
+					this.hashAlgorithm = "sha256";
+					break;
+				case 5:
+					this.hashAlgorithm = "sha384";
+					break;
+				case 6:
+					this.hashAlgorithm = "sha512";
+					break;
+				default:
+					throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
+			}
+			//endregion
+			
+			//region Signature algorithm
+			switch((stream.getBlock(1))[0])
+			{
+				case 0:
+					this.signatureAlgorithm = "anonymous";
+					break;
+				case 1:
+					this.signatureAlgorithm = "rsa";
+					break;
+				case 2:
+					this.signatureAlgorithm = "dsa";
+					break;
+				case 3:
+					this.signatureAlgorithm = "ecdsa";
+					break;
+				default:
+					throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
+			}
+			//endregion
+			
+			//region Signature
+			const signatureLength = stream.getUint16();
+			const signatureData = (new Uint8Array(stream.getBlock(signatureLength))).buffer.slice(0);
+			
+			const asn1 = asn1js.fromBER(signatureData);
+			if(asn1.offset === (-1))
+				throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
+			
+			this.signature = asn1.result;
+			//endregion
+			
+			if(blockLength !== (47 + extensionsLength + signatureLength))
 				throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
 		}
-		//endregion
-		
-		//region Signature algorithm
-		switch((stream.getBlock(1))[0])
-		{
-			case 0:
-				this.signatureAlgorithm = "anonymous";
-				break;
-			case 1:
-				this.signatureAlgorithm = "rsa";
-				break;
-			case 2:
-				this.signatureAlgorithm = "dsa";
-				break;
-			case 3:
-				this.signatureAlgorithm = "ecdsa";
-				break;
-			default:
-				throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
-		}
-		//endregion
-		
-		//region Signature
-		const signatureLength = stream.getUint16();
-		const signatureData = (new Uint8Array(stream.getBlock(signatureLength))).buffer.slice(0);
-		
-		const asn1 = asn1js.fromBER(signatureData);
-		if(asn1.offset === (-1))
-			throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
-		
-		this.signature = asn1.result;
-		//endregion
-		
-		if(blockLength !== (47 + extensionsLength + signatureLength))
-			throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
 	}
 	//**********************************************************************************
 	/**

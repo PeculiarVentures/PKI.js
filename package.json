@@ -17,7 +17,6 @@
   "devDependencies": {
     "babel-cli": "latest",
     "babel-plugin-istanbul": "^4.1.5",
-    "babel-polyfill": "^6.26.0",
     "babel-preset-env": "latest",
     "cross-env": "^5.1.4",
     "emailjs-mime-builder": "latest",
@@ -32,35 +31,51 @@
   },
   "dependencies": {
     "asn1js": "latest",
-    "bytestreamjs": "^1.0.13",
-    "pvutils": "^1.0.14"
+    "bytestreamjs": "latest",
+    "pvutils": "latest"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=6.0.0"
   },
   "scripts": {
     "build": "babel src --compact=false --out-dir build --source-maps",
     "watch": "babel src --compact=false --out-dir build --source-maps --watch",
     "ex1": "cd examples/CMSSignedComplexExample && npm run build && cd ../..",
+    "ex1:es5": "cd examples/CMSSignedComplexExample && npm run build:es5 && cd ../..",
     "ex2": "cd examples/CertificateComplexExample && npm run build && cd ../..",
+    "ex2:es5": "cd examples/CertificateComplexExample && npm run build:es5 && cd ../..",
     "ex3": "cd examples/NISTPKITS && npm run build && cd ../..",
     "ex4": "cd examples/HowToEncryptCMSviaCertificate && npm run build && cd ../..",
+    "ex4:es5": "cd examples/HowToEncryptCMSviaCertificate && npm run build:es5 && cd ../..",
     "ex5": "cd examples/HowToEncryptCMSviaPassword && npm run build && cd ../..",
+    "ex5:es5": "cd examples/HowToEncryptCMSviaPassword && npm run build:es5 && cd ../..",
     "ex6": "cd examples/CRLComplexExample && npm run build && cd ../..",
+    "ex6:es5": "cd examples/CRLComplexExample && npm run build:es5 && cd ../..",
     "ex7": "cd examples/PKCS10ComplexExample && npm run build && cd ../..",
+    "ex7:es5": "cd examples/PKCS10ComplexExample && npm run build:es5 && cd ../..",
     "ex8": "cd examples/OCSPRequestComplexExample && npm run build && cd ../..",
+    "ex8:es5": "cd examples/OCSPRequestComplexExample && npm run build:es5 && cd ../..",
     "ex9": "cd examples/OCSPResponseComplexExample && npm run build && cd ../..",
+    "ex9:es5": "cd examples/OCSPResponseComplexExample && npm run build:es5 && cd ../..",
     "ex10": "cd examples/TSPRequestComplexExample && npm run build && cd ../..",
+    "ex10:es5": "cd examples/TSPRequestComplexExample && npm run build:es5 && cd ../..",
     "ex11": "cd examples/TSPResponseComplexExample && npm run build && cd ../..",
+    "ex11:es5": "cd examples/TSPResponseComplexExample && npm run build:es5 && cd ../..",
     "ex12": "cd examples/P7BSimpleExample && npm run build && cd ../..",
+    "ex12:es5": "cd examples/P7BSimpleExample && npm run build:es5 && cd ../..",
     "ex13": "cd examples/PKCS12SimpleExample && npm run build && cd ../..",
+    "ex13:es5": "cd examples/PKCS12SimpleExample && npm run build:es5 && cd ../..",
     "ex14": "cd examples/PDFExample && npm run build && cd ../..",
+    "ex14:es5": "cd examples/PDFExample && npm run build:es5 && cd ../..",
     "ex15": "cd examples/SMIMEVerificationExample && npm run build && cd ../..",
+    "ex15:es5": "cd examples/SMIMEVerificationExample && npm run build:es5 && cd ../..",
     "ex16": "cd examples/SMIMEEncryptionExample && npm run build && cd ../..",
+    "ex16:es5": "cd examples/SMIMEEncryptionExample && npm run build:es5 && cd ../..",
     "ex17": "cd examples/NodePKCS12Example && npm run build && cd ../..",
     "build:examples": "npm run ex1 && npm run ex2 && npm run ex3 && npm run ex4 && npm run ex5 && npm run ex6 && npm run ex7 && npm run ex8 && npm run ex9 && npm run ex10 && npm run ex11 && npm run ex12 && npm run ex13 && npm run ex14 && npm run ex15 && npm run ex16 && npm run ex17",
+    "build:examples:es5": "npm run ex1:es5 && npm run ex2:es5 && npm run ex3 && npm run ex4:es5 && npm run ex5:es5 && npm run ex6:es5 && npm run ex7:es5 && npm run ex8:es5 && npm run ex9:es5 && npm run ex10:es5 && npm run ex11:es5 && npm run ex12:es5 && npm run ex13:es5 && npm run ex14:es5 && npm run ex15:es5 && npm run ex16:es5 && npm run ex17",
     "build:tests": "npm run build:examples",
-    "test:node": "cross-env NODE_ENV=test nyc mocha --timeout 40000 --require babel-register --require babel-polyfill test/s_*.js && cross-env NODE_ENV=test nyc --clean=false mocha --timeout 40000 --require babel-register --require babel-polyfill test/n_*.js",
+    "test:node": "cross-env NODE_ENV=test nyc mocha --timeout 40000 --require babel-register test/s_*.js && cross-env NODE_ENV=test nyc --clean=false mocha --timeout 40000 --require babel-register test/n_*.js",
     "test": "node -e \"console.log('\\nWARNING: !!! in order to test PKIjs in Node environment you\\nwould need to install additional package node-webcrypto-ossl !!!\\n\\nThe node-webcrypto-ossl is not referenced in PKIjs dependencies\\nanymore because we were noticed users have a problems with\\nthe package installation, especially on Windows platform.\\n\\nThe node-webcrypto-ossl is NOT a mandatory for testing PKIjs -\\nyou could visit test/browser subdir and run all the same tests\\nin your favorite browser.\\n\\nAlso you could check CircleCI - for each build the service runs\\nall tests and results could be easily observed.\\n\\nIf you do need to run PKIjs tests locally using Node please use\\nnpm run test:node')\"",
     "prepublishOnly": "npm run build"
   },
@@ -83,6 +98,6 @@
   "module": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.55",
+  "version": "2.1.56",
   "license": "MIT"
 }
