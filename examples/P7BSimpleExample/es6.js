@@ -161,9 +161,7 @@ function createP7B()
 	return Promise.resolve().then(() => createP7BInternal()).then(() =>
 	{
 		// noinspection InnerHTMLJS
-		let resultString = document.getElementById("newSignedData").innerHTML;
-		
-		resultString += "\r\n-----BEGIN CMS-----\r\n";
+		let resultString = "\r\n-----BEGIN CMS-----\r\n";
 		resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(cmsSignedBuffer)))}`;
 		resultString = `${resultString}\r\n-----END CMS-----\r\n\r\n`;
 		

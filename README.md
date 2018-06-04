@@ -1,7 +1,7 @@
 # PKIjs
 
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/PeculiarVentures/PKI.js/blob/master/LICENSE) 
-[![CircleCI](https://img.shields.io/circleci/project/github/PeculiarVentures/PKI.js.svg)](https://circleci.com/gh/PeculiarVentures/PKI.js)
+[![CircleCI](https://circleci.com/gh/PeculiarVentures/PKI.js/tree/master.svg?style=svg)](https://circleci.com/gh/PeculiarVentures/PKI.js/tree/master)
  [![Known Vulnerabilities](https://snyk.io/test/github/PeculiarVentures/PKI.js/badge.svg)](https://snyk.io/test/github/PeculiarVentures/PKI.js) [![Coverage Status](https://coveralls.io/repos/github/PeculiarVentures/PKI.js/badge.svg)](https://coveralls.io/github/PeculiarVentures/PKI.js) 
 
 
