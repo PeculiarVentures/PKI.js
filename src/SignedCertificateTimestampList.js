@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, utilFromBase, utilToBase, bufferToHexCodes } from "pvutils";
+import { getParametersValue, utilFromBase, utilToBase, bufferToHexCodes, toBase64, fromBase64, arrayBufferToString, stringToArrayBuffer } from "pvutils";
 import { ByteStream, SeqStream } from "bytestreamjs";
+import { getCrypto, getEngine } from "./common.js";
+import PublicKeyInfo from "./PublicKeyInfo.js";
 //**************************************************************************************
 export class SignedCertificateTimestamp
 {
@@ -302,6 +304,82 @@ export class SignedCertificateTimestamp
 		};
 	}
 	//**********************************************************************************
+	/**
+	 * Verify SignedCertificateTimestamp for specific input data
+	 * @param {Object[]} logs Array of objects with information about each CT Log (like here: https://ct.grahamedgecombe.com/logs.json)
+	 * @param {String} logs.log_id Identifier of the CT Log encoded in BASE-64 format
+	 * @param {String} logs.key Public key of the CT Log encoded in BASE-64 format
+	 * @param {ArrayBuffer} data Data to verify signature against. Could be encoded Certificate or encoded PreCert
+	 * @param {Number} [dataType=0] Type = 0 (data is encoded Certificate), type = 1 (data is encoded PreCert)
+	 * @return {Promise<void>}
+	 */
+	async verify(logs, data, dataType = 0)
+	{
+		//region Initial variables
+		let logId = toBase64(arrayBufferToString(this.logID));
+		
+		let publicKeyBase64 = null;
+		let publicKeyInfo;
+		
+		let stream = new SeqStream();
+		//endregion
+		
+		//region Found and init public key
+		for(const log of logs)
+		{
+			if(log.log_id === logId)
+			{
+				publicKeyBase64 = log.key;
+				break;
+			}
+		}
+		
+		if(publicKeyBase64 === null)
+			throw new Error(`Public key not found for CT with logId: ${logId}`);
+		
+		const asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(publicKeyBase64)));
+		if(asn1.offset === (-1))
+			throw new Error(`Incorrect key value for CT Log with logId: ${logId}`);
+		
+		publicKeyInfo = new PublicKeyInfo({ schema: asn1.result });
+		//endregion
+		
+		//region Initialize signed data block
+		stream.appendChar(0x00); // sct_version
+		stream.appendChar(0x00); // signature_type = certificate_timestamp
+		
+		const timeBuffer = new ArrayBuffer(8);
+		const timeView = new Uint8Array(timeBuffer);
+		
+		const baseArray = utilToBase(this.timestamp.valueOf(), 8);
+		timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
+		
+		stream.appendView(timeView);
+		
+		stream.appendUint16(dataType);
+		
+		if(dataType === 0)
+			stream.appendUint24(data.byteLength);
+		
+		stream.appendView(new Uint8Array(data));
+		
+		stream.appendUint16(this.extensions.byteLength);
+		
+		if(this.extensions.byteLength !== 0)
+			stream.appendView(new Uint8Array(this.extensions));
+		//endregion
+		
+		//region Perform verification
+		return getEngine().subtle.verifyWithPublicKey(
+			stream._stream._buffer.slice(0, stream._length),
+			{ valueBlock: { valueHex: this.signature.toBER(false) } },
+			publicKeyInfo,
+			{ algorithmId: "" },
+			"SHA-256"
+		);
+		//endregion
+	}
+	//**********************************************************************************
 }
 //**************************************************************************************
 /**
@@ -370,7 +448,7 @@ export default class SignedCertificateTimestampList
 	static schema(parameters = {})
 	{
 		//SignedCertificateTimestampList ::= OCTET STRING
-
+		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -460,3 +538,93 @@ export default class SignedCertificateTimestampList
 	//**********************************************************************************
 }
 //**************************************************************************************
+/**
+ * Verify SignedCertificateTimestamp for specific certificate content
+ * @param {Certificate} certificate Certificate for which verification would be performed
+ * @param {Certificate} issuerCertificate Certificate of the issuer of target certificate
+ * @param {Object[]} logs Array of objects with information about each CT Log (like here: https://ct.grahamedgecombe.com/logs.json)
+ * @param {String} logs.log_id Identifier of the CT Log encoded in BASE-64 format
+ * @param {String} logs.key Public key of the CT Log encoded in BASE-64 format
+ * @param {Number} [index=-1] Index of SignedCertificateTimestamp inside SignedCertificateTimestampList (for -1 would verify all)
+ * @return {Array} Array of verification results
+ */
+export async function verifySCTsForCertificate(certificate, issuerCertificate, logs, index = (-1))
+{
+	//region Initial variables
+	let parsedValue = null;
+	let tbs;
+	let issuerId;
+	
+	const stream = new SeqStream();
+	
+	let preCert;
+	//endregion
+	
+	//region Get a "crypto" extension
+	const crypto = getCrypto();
+	if(typeof crypto === "undefined")
+		return Promise.reject("Unable to create WebCrypto object");
+	//endregion
+	
+	//region Remove certificate extension
+	for(let i = 0; i < certificate.extensions.length; i++)
+	{
+		switch(certificate.extensions[i].extnID)
+		{
+			case "1.3.6.1.4.1.11129.2.4.2":
+			{
+				parsedValue = certificate.extensions[i].parsedValue;
+				
+				if(parsedValue.timestamps.length === 0)
+					throw new Error("Nothing to verify in the certificate");
+				
+				certificate.extensions.splice(i, 1);
+			}
+				break;
+			default:
+		}
+	}
+	//endregion
+	
+	//region Check we do have what to verify
+	if(parsedValue === null)
+		throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
+	//endregion
+	
+	//region Prepare modifier TBS value
+	tbs = certificate.encodeTBS().toBER(false);
+	//endregion
+	
+	//region Initialize "issuer_key_hash" value
+	issuerId = await crypto.digest({ name: "SHA-256" }, new Uint8Array(issuerCertificate.subjectPublicKeyInfo.toSchema().toBER(false)));
+	//endregion
+	
+	//region Make final "PreCert" value
+	stream.appendView(new Uint8Array(issuerId));
+	stream.appendUint24(tbs.byteLength);
+	stream.appendView(new Uint8Array(tbs));
+	
+	preCert = stream._stream._buffer.slice(0, stream._length);
+	//endregion
+	
+	//region Call verification function for specified index
+	if(index === (-1))
+	{
+		const verifyArray = [];
+		
+		for(const timestamp of parsedValue.timestamps)
+		{
+			const verifyResult = await timestamp.verify(logs, preCert, 1);
+			verifyArray.push(verifyResult);
+		}
+		
+		return verifyArray;
+	}
+	
+	if(index >= parsedValue.timestamps.length)
+		index = (parsedValue.timestamps.length - 1);
+	
+	return [await parsedValue.timestamps[index].verify(logs, preCert, 1)];
+	//endregion
+}
+//**********************************************************************************
