@@ -572,14 +572,14 @@ export async function verifySCTsForCertificate(certificate, issuerCertificate, l
 		switch(certificate.extensions[i].extnID)
 		{
 			case "1.3.6.1.4.1.11129.2.4.2":
-			{
-				parsedValue = certificate.extensions[i].parsedValue;
-				
-				if(parsedValue.timestamps.length === 0)
-					throw new Error("Nothing to verify in the certificate");
-				
-				certificate.extensions.splice(i, 1);
-			}
+				{
+					parsedValue = certificate.extensions[i].parsedValue;
+					
+					if(parsedValue.timestamps.length === 0)
+						throw new Error("Nothing to verify in the certificate");
+					
+					certificate.extensions.splice(i, 1);
+				}
 				break;
 			default:
 		}
