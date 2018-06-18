@@ -218,7 +218,7 @@ export class SignedCertificateTimestamp
 		const timeView = new Uint8Array(timeBuffer);
 		
 		const baseArray = utilToBase(this.timestamp.valueOf(), 8);
-		timeView.set(baseArray, 8 - baseArray.byteLength);
+		timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
 		
 		stream.appendView(timeView);
 		stream.appendUint16(this.extensions.byteLength);
