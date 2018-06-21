@@ -13,7 +13,7 @@ export default class NodeEngine extends CryptoEngine
 	constructor(parameters)
 	{
 		super(parameters);
-		
+
 		//region Internal properties of the object
 		/**
 		 * @type {Object}
@@ -123,14 +123,14 @@ export default class NodeEngine extends CryptoEngine
 				};
 			default:
 		}
-		
+
 		return {};
 	}
 	//**********************************************************************************
 	getOIDByAlgorithm(algorithm)
 	{
 		let result = "";
-		
+
 		switch(algorithm.name.toUpperCase())
 		{
 			case "RC2-40-CBC":
@@ -183,7 +183,7 @@ export default class NodeEngine extends CryptoEngine
 				break;
 			default:
 		}
-		
+
 		return result;
 	}
 	//**********************************************************************************
@@ -193,7 +193,7 @@ export default class NodeEngine extends CryptoEngine
 			algorithm: {},
 			usages: []
 		};
-		
+
 		switch(algorithmName.toUpperCase())
 		{
 			case "RC2-40-CBC":
@@ -394,7 +394,7 @@ export default class NodeEngine extends CryptoEngine
 				break;
 			default:
 		}
-		
+
 		return result;
 	}
 	//**********************************************************************************
@@ -408,42 +408,42 @@ export default class NodeEngine extends CryptoEngine
 		//region Initial variables
 		let sequence = Promise.resolve();
 		//endregion
-		
+
 		//region Check for input parameters
 		if((parameters instanceof Object) === false)
 			return Promise.reject("Parameters must have type \"Object\"");
-		
+
 		if(("password" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"password\"");
-		
+
 		if(("contentEncryptionAlgorithm" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"contentEncryptionAlgorithm\"");
-		
+
 		if(("hmacHashAlgorithm" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"hmacHashAlgorithm\"");
-		
+
 		if(("iterationCount" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"iterationCount\"");
-		
+
 		if(("contentToEncrypt" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"contentToEncrypt\"");
-		
+
 		if(("contentType" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"contentType\"");
-		
+
 		if(("pbeSchema" in parameters) === false)
 			parameters.pbeSchema = "PBES2";
 
 		const contentEncryptionOID = this.getOIDByAlgorithm(parameters.contentEncryptionAlgorithm);
 		if(contentEncryptionOID === "")
 			return Promise.reject("Wrong \"contentEncryptionAlgorithm\" value");
-		
+
 		const pbkdf2OID = this.getOIDByAlgorithm({
 			name: "PBKDF2"
 		});
 		if(pbkdf2OID === "")
 			return Promise.reject("Can not find OID for PBKDF2");
-		
+
 		const hmacOID = this.getOIDByAlgorithm({
 			name: "HMAC",
 			hash: {
@@ -453,21 +453,21 @@ export default class NodeEngine extends CryptoEngine
 		if(hmacOID === "")
 			return Promise.reject(`Incorrect value for \"hmacHashAlgorithm\": ${parameters.hmacHashAlgorithm}`);
 		//endregion
-		
+
 		//region Special case for PBES1
 		if(parameters.pbeSchema.toUpperCase() !== "PBES2")  // Assume we have PBES1 here
 		{
 			//region Initial variables
 			const saltBuffer = new ArrayBuffer(20);
-			const saltView = new Uint8Array(saltBuffer);
+			let saltView = new Uint8Array(saltBuffer);
 			this.getRandomValues(saltView);
-			
+
 			const ivLength = 8; // (in bytes) For current algorithms (3DES and RC2) IV length has the same value
 			//endregion
 
 			//region Check we have correct encryption algorithm
 			let pbeAlgorithm;
-			
+
 			switch(parameters.contentEncryptionAlgorithm.name.toUpperCase())
 			{
 				case "DES-EDE3-CBC":
@@ -480,13 +480,13 @@ export default class NodeEngine extends CryptoEngine
 					return Promise.reject("For PBES1 encryption algorithm could be only DES-EDE3-CBC or RC2-40-CBC");
 			}
 			//endregion
-			
+
 			//region Encrypt data using PBKDF1 as a source for key
 			sequence = sequence.then(() =>
 				nodeSpecificCrypto.encryptUsingPBKDF1Password(parameters.contentEncryptionAlgorithm.name, parameters.contentEncryptionAlgorithm.length, ivLength, parameters.password, saltBuffer, parameters.iterationCount, parameters.contentToEncrypt)
 			);
 			//endregion
-			
+
 			//region Store all parameters in EncryptedData object
 			sequence = sequence.then(result =>
 			{
@@ -503,24 +503,24 @@ export default class NodeEngine extends CryptoEngine
 					})
 				});
 				encryptedContentInfo.encryptedContent = new asn1js.OctetString({ valueHex: result });
-				
+
 				return encryptedContentInfo;
 			});
 			//endregion
-			
+
 			return sequence;
 		}
 		//endregion
-		
+
 		//region Initial variables
 		const ivBuffer = new ArrayBuffer(parameters.contentEncryptionAlgorithm.iv.length);
-		const ivView = new Uint8Array(ivBuffer);
+		let ivView = new Uint8Array(ivBuffer);
 		this.getRandomValues(ivView);
-		
+
 		const saltBuffer = new ArrayBuffer(8);
-		const saltView = new Uint8Array(saltBuffer);
+		let saltView = new Uint8Array(saltBuffer);
 		this.getRandomValues(saltView);
-		
+
 		const pbkdf2Params = new PBKDF2Params({
 			salt: new asn1js.OctetString({ valueHex: saltBuffer }),
 			iterationCount: parameters.iterationCount,
@@ -530,13 +530,13 @@ export default class NodeEngine extends CryptoEngine
 			})
 		});
 		//endregion
-		
+
 		//region Encrypt data using PBKDF2 as a source for key
 		sequence = sequence.then(() =>
 			nodeSpecificCrypto.encryptUsingPBKDF2Password(parameters.contentEncryptionAlgorithm.name, parameters.contentEncryptionAlgorithm.length, parameters.password, saltBuffer, parameters.iterationCount, parameters.hmacHashAlgorithm, ivBuffer, parameters.contentToEncrypt)
 		);
 		//endregion
-		
+
 		//region Store all parameters in EncryptedData object
 		sequence = sequence.then(result =>
 		{
@@ -550,7 +550,7 @@ export default class NodeEngine extends CryptoEngine
 					algorithmParams: new asn1js.OctetString({ valueHex: ivBuffer })
 				})
 			});
-			
+
 			const encryptedContentInfo = new EncryptedContentInfo({
 				contentType: parameters.contentType,
 				contentEncryptionAlgorithm: new AlgorithmIdentifier({
@@ -559,13 +559,13 @@ export default class NodeEngine extends CryptoEngine
 				})
 			});
 			encryptedContentInfo.encryptedContent = new asn1js.OctetString({ valueHex: result });
-			
+
 			return encryptedContentInfo;
 		}, error =>
 			Promise.reject(error)
 		);
 		//endregion
-		
+
 		return sequence;
 	}
 	//**********************************************************************************
@@ -584,17 +584,17 @@ export default class NodeEngine extends CryptoEngine
 		let pbes2Parameters;
 		let pbkdf2Params;
 		//endregion
-		
+
 		//region Check for input parameters
 		if((parameters instanceof Object) === false)
 			return Promise.reject("Parameters must have type \"Object\"");
-		
+
 		if(("password" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"password\"");
-		
+
 		if(("encryptedContentInfo" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"encryptedContentInfo\"");
-		
+
 		switch(parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId)
 		{
 			case "1.2.840.113549.1.5.13": // pkcs5PBES2
@@ -611,10 +611,10 @@ export default class NodeEngine extends CryptoEngine
 				return Promise.reject(`Unknown \"contentEncryptionAlgorithm\": ${parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 		}
 		//endregion
-		
+
 		//region Create correct data block for decryption
 		let dataBuffer = new ArrayBuffer(0);
-		
+
 		if(parameters.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false)
 			dataBuffer = parameters.encryptedContentInfo.encryptedContent.valueBlock.valueHex;
 		else
@@ -629,17 +629,17 @@ export default class NodeEngine extends CryptoEngine
 		{
 			//region Description
 			const pbesParameters = parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams;
-			
+
 			const saltBuffer = pbesParameters.valueBlock.value[0].valueBlock.valueHex;
 			const iterationCount = pbesParameters.valueBlock.value[1].valueBlock.valueDec;
 			//endregion
-			
+
 			return Promise.resolve().then(() =>
 				nodeSpecificCrypto.decryptUsingPBKDF1Password(pbes1EncryptionAlgorithm, pbes1EncryptionAlgorithmLength, pbes1EncryptionIVLength, parameters.password, saltBuffer, iterationCount, dataBuffer)
 			);
 		}
 		//endregion
-		
+
 		//region Initial variables
 		try
 		{
@@ -649,7 +649,7 @@ export default class NodeEngine extends CryptoEngine
 		{
 			return Promise.reject("Incorrectly encoded \"pbes2Parameters\"");
 		}
-		
+
 		try
 		{
 			pbkdf2Params = new PBKDF2Params({ schema: pbes2Parameters.keyDerivationFunc.algorithmParams });
@@ -658,28 +658,28 @@ export default class NodeEngine extends CryptoEngine
 		{
 			return Promise.reject("Incorrectly encoded \"pbkdf2Params\"");
 		}
-		
+
 		const contentEncryptionAlgorithm = this.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithmId);
 		if(("name" in contentEncryptionAlgorithm) === false)
 			return Promise.reject(`Incorrect OID for \"contentEncryptionAlgorithm\": ${pbes2Parameters.encryptionScheme.algorithmId}`);
-		
+
 		const ivBuffer = pbes2Parameters.encryptionScheme.algorithmParams.valueBlock.valueHex;
 		const saltBuffer = pbkdf2Params.salt.valueBlock.valueHex;
-		
+
 		const iterationCount = pbkdf2Params.iterationCount;
-		
+
 		let hmacHashAlgorithm = "SHA-1";
-		
+
 		if("prf" in pbkdf2Params)
 		{
 			const algorithm = this.getAlgorithmByOID(pbkdf2Params.prf.algorithmId);
 			if(("name" in algorithm) === false)
 				return Promise.reject("Incorrect OID for HMAC hash algorithm");
-			
+
 			hmacHashAlgorithm = algorithm.hash.name;
 		}
 		//endregion
-		
+
 		return Promise.resolve().then(() =>
 			nodeSpecificCrypto.decryptUsingPBKDF2Password(contentEncryptionAlgorithm.name, contentEncryptionAlgorithm.length, parameters.password, saltBuffer, iterationCount, hmacHashAlgorithm, ivBuffer, dataBuffer)
 		);
@@ -695,27 +695,27 @@ export default class NodeEngine extends CryptoEngine
 		//region Check for input parameters
 		if((parameters instanceof Object) === false)
 			return Promise.reject("Parameters must have type \"Object\"");
-		
+
 		if(("password" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"password\"");
-		
+
 		if(("hashAlgorithm" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
-		
+
 		if(("salt" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"iterationCount\"");
-		
+
 		if(("iterationCount" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"iterationCount\"");
-		
+
 		if(("contentToStamp" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"contentToStamp\"");
 		//endregion
-		
+
 		//region Initial variables
 		let length;
 		//endregion
-		
+
 		//region Choose correct length for HMAC key
 		switch(parameters.hashAlgorithm.toLowerCase())
 		{
@@ -746,29 +746,29 @@ export default class NodeEngine extends CryptoEngine
 		//region Check for input parameters
 		if((parameters instanceof Object) === false)
 			return Promise.reject("Parameters must have type \"Object\"");
-		
+
 		if(("password" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"password\"");
-		
+
 		if(("hashAlgorithm" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
-		
+
 		if(("salt" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"iterationCount\"");
-		
+
 		if(("iterationCount" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"salt\"");
-		
+
 		if(("contentToVerify" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"contentToVerify\"");
-		
+
 		if(("signatureToVerify" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"signatureToVerify\"");
 		//endregion
-		
+
 		//region Choose correct length for HMAC key
 		let length;
-		
+
 		switch(parameters.hashAlgorithm.toLowerCase())
 		{
 			case "sha-1":
@@ -787,7 +787,7 @@ export default class NodeEngine extends CryptoEngine
 				return Promise.reject(`Incorrect \"parameters.hashAlgorithm\" parameter: ${parameters.hashAlgorithm}`);
 		}
 		//endregion
-		
+
 		return Promise.resolve().then(() =>
 			nodeSpecificCrypto.verifyDataStampedWithPassword(parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount, parameters.contentToVerify, parameters.signatureToVerify)
 		);

@@ -16,7 +16,7 @@ import AuthenticatedSafe from "./AuthenticatedSafe.js";
 /**
  * Class from RFC7292
  */
-export default class PFX 
+export default class PFX
 {
 	//**********************************************************************************
 	/**
@@ -37,14 +37,14 @@ export default class PFX
 		 * @description authSafe
 		 */
 		this.authSafe = getParametersValue(parameters, "authSafe", PFX.defaultValues("authSafe"));
-		
+
 		if("macData" in parameters)
 			/**
 			 * @type {MacData}
 			 * @description macData
 			 */
 			this.macData = getParametersValue(parameters, "macData", PFX.defaultValues("macData"));
-		
+
 		if("parsedValue" in parameters)
 			/**
 			 * @type {*}
@@ -52,7 +52,7 @@ export default class PFX
 			 */
 			this.parsedValue = getParametersValue(parameters, "parsedValue", PFX.defaultValues("parsedValue"));
 		//endregion
-		
+
 		//region If input argument array contains "schema" for this object
 		if("schema" in parameters)
 			this.fromSchema(parameters.schema);
@@ -117,7 +117,7 @@ export default class PFX
 		//    authSafe	ContentInfo,
 		//    macData    	MacData OPTIONAL
 		//}
-		
+
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -126,7 +126,7 @@ export default class PFX
 		 * @property {string} [macData]
 		 */
 		const names = getParametersValue(parameters, "names", {});
-		
+
 		return (new asn1js.Sequence({
 			name: (names.blockName || ""),
 			value: [
@@ -159,7 +159,7 @@ export default class PFX
 			"macData"
 		]);
 		//endregion
-		
+
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -179,15 +179,15 @@ export default class PFX
 				}
 			})
 		);
-		
+
 		if(asn1.verified === false)
 			throw new Error("Object's schema was not verified against input data for PFX");
 		//endregion
-		
+
 		//region Get internal properties from parsed schema
 		this.version = asn1.result.version.valueBlock.valueDec;
 		this.authSafe = new ContentInfo({ schema: asn1.result.authSafe });
-		
+
 		if("macData" in asn1.result)
 			this.macData = new MacData({ schema: asn1.result.macData });
 		//endregion
@@ -204,10 +204,10 @@ export default class PFX
 			new asn1js.Integer({ value: this.version }),
 			this.authSafe.toSchema()
 		];
-		
+
 		if("macData" in this)
 			outputArray.push(this.macData.toSchema());
-		
+
 		return (new asn1js.Sequence({
 			value: outputArray
 		}));
@@ -224,10 +224,10 @@ export default class PFX
 			version: this.version,
 			authSafe: this.authSafe.toJSON()
 		};
-		
+
 		if("macData" in this)
 			output.macData = this.macData.toJSON();
-		
+
 		return output;
 	}
 	//**********************************************************************************
@@ -240,30 +240,30 @@ export default class PFX
 		//region Check mandatory parameter
 		if((parameters instanceof Object) === false)
 			return Promise.reject("The \"parameters\" must has \"Object\" type");
-		
+
 		if(("parsedValue" in this) === false)
 			return Promise.reject("Please call \"parseValues\" function first in order to make \"parsedValue\" data");
-		
+
 		if(("integrityMode" in this.parsedValue) === false)
 			return Promise.reject("Absent mandatory parameter \"integrityMode\" inside \"parsedValue\"");
 		//endregion
-		
+
 		//region Initial variables
 		let sequence = Promise.resolve();
 		//endregion
-		
+
 		//region Get a "crypto" extension
 		const crypto = getCrypto();
 		if(typeof crypto === "undefined")
 			return Promise.reject("Unable to create WebCrypto object");
 		//endregion
-		
+
 		//region Makes values for each particular integrity mode
 		//region Check that we do have neccessary fields in "parsedValue" object
 		if(("authenticatedSafe" in this.parsedValue) === false)
 			return Promise.reject("Absent mandatory parameter \"authenticatedSafe\" in \"parsedValue\"");
 		//endregion
-		
+
 		switch(this.parsedValue.integrityMode)
 		{
 			//region HMAC-based integrity
@@ -272,23 +272,23 @@ export default class PFX
 					//region Check additional mandatory parameters
 					if(("iterations" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"iterations\"");
-				
+
 					if(("pbkdf2HashAlgorithm" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"pbkdf2HashAlgorithm\"");
-				
+
 					if(("hmacHashAlgorithm" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"hmacHashAlgorithm\"");
-				
+
 					if(("password" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"password\"");
 					//endregion
-				
+
 					//region Initial variables
 					const saltBuffer = new ArrayBuffer(64);
-					const saltView = new Uint8Array(saltBuffer);
-				
+					let saltView = new Uint8Array(saltBuffer);
+
 					getRandomValues(saltView);
-					
+
 					const data = this.parsedValue.authenticatedSafe.toSchema().toBER(false);
 
 					this.authSafe = new ContentInfo({
@@ -296,13 +296,13 @@ export default class PFX
 						content: new asn1js.OctetString({ valueHex: data })
 					});
 					//endregion
-					
+
 					//region Call current crypto engine for making HMAC-based data stamp
 					const engine = getEngine();
-					
+
 					if(("stampDataWithPassword" in engine.subtle) === false)
 						return Promise.reject(`No support for "stampDataWithPassword" in current engine "${engine.name}"`);
-					
+
 					sequence = sequence.then(() =>
 						engine.subtle.stampDataWithPassword({
 							password: parameters.password,
@@ -313,7 +313,7 @@ export default class PFX
 						})
 					);
 					//endregion
-					
+
 					//region Make "MacData" values
 					sequence = sequence.then(
 						result =>
@@ -342,22 +342,22 @@ export default class PFX
 					//region Check additional mandatory parameters
 					if(("signingCertificate" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"signingCertificate\"");
-				
+
 					if(("privateKey" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"privateKey\"");
-				
+
 					if(("hashAlgorithm" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
 					//endregion
-				
+
 					//region Making data to be signed
 					// NOTE: all internal data for "authenticatedSafe" must be already prepared.
 					// Thus user must call "makeValues" for all internal "SafeContent" value with appropriate parameters.
 					// Or user can choose to use values from initial parsing of existing PKCS#12 data.
-				
+
 					const toBeSigned = this.parsedValue.authenticatedSafe.toSchema().toBER(false);
 					//endregion
-					
+
 					//region Initial variables
 					const cmsSigned = new SignedData({
 						version: 1,
@@ -368,14 +368,14 @@ export default class PFX
 						certificates: [parameters.signingCertificate]
 					});
 					//endregion
-					
+
 					//region Making additional attributes for CMS Signed Data
 					//region Create a message digest
 					sequence = sequence.then(
 						() => crypto.digest({ name: parameters.hashAlgorithm }, new Uint8Array(toBeSigned))
 					);
 					//endregion
-				
+
 					//region Combine all signed extensions
 					sequence = sequence.then(
 						result =>
@@ -383,7 +383,7 @@ export default class PFX
 							//region Initial variables
 							const signedAttr = [];
 							//endregion
-							
+
 							//region contentType
 							signedAttr.push(new Attribute({
 								type: "1.2.840.113549.1.9.3",
@@ -408,7 +408,7 @@ export default class PFX
 								]
 							}));
 							//endregion
-							
+
 							//region Making final value for "SignerInfo" type
 							cmsSigned.signerInfos.push(new SignerInfo({
 								version: 1,
@@ -427,13 +427,13 @@ export default class PFX
 					);
 					//endregion
 					//endregion
-				
+
 					//region Signing CMS Signed Data
 					sequence = sequence.then(
 						() => cmsSigned.sign(parameters.privateKey, 0, parameters.hashAlgorithm)
 					);
 					//endregion
-				
+
 					//region Making final CMS_CONTENT_INFO type
 					sequence = sequence.then(
 						() =>
@@ -455,55 +455,55 @@ export default class PFX
 			//endregion
 		}
 		//endregion
-		
+
 		return sequence;
 	}
 	//**********************************************************************************
 	parseInternalValues(parameters)
 	{
-		//region Check input data from "parameters" 
+		//region Check input data from "parameters"
 		if((parameters instanceof Object) === false)
 			return Promise.reject("The \"parameters\" must has \"Object\" type");
-		
+
 		if(("checkIntegrity" in parameters) === false)
 			parameters.checkIntegrity = true;
-		//endregion 
-		
-		//region Initial variables 
+		//endregion
+
+		//region Initial variables
 		let sequence = Promise.resolve();
-		//endregion 
-		
-		//region Get a "crypto" extension 
+		//endregion
+
+		//region Get a "crypto" extension
 		const crypto = getCrypto();
 		if(typeof crypto === "undefined")
 			return Promise.reject("Unable to create WebCrypto object");
-		//endregion 
-		
-		//region Create value for "this.parsedValue.authenticatedSafe" and check integrity 
+		//endregion
+
+		//region Create value for "this.parsedValue.authenticatedSafe" and check integrity
 		this.parsedValue = {};
-		
+
 		switch(this.authSafe.contentType)
 		{
-			//region data 
+			//region data
 			case "1.2.840.113549.1.7.1":
 				{
 					//region Check additional mandatory parameters
 					if(("password" in parameters) === false)
 						return Promise.reject("Absent mandatory parameter \"password\"");
 					//endregion
-				
+
 					//region Integrity based on HMAC
 					this.parsedValue.integrityMode = 0;
 					//endregion
-				
+
 					//region Check that we do have OCTETSTRING as "content"
 					if((this.authSafe.content instanceof asn1js.OctetString) === false)
 						return Promise.reject("Wrong type of \"this.authSafe.content\"");
 					//endregion
-					
+
 					//region Check we have "constructive encoding" for AuthSafe content
 					let authSafeContent = new ArrayBuffer(0);
-					
+
 					if(this.authSafe.content.valueBlock.isConstructed)
 					{
 						for(const contentValue of this.authSafe.content.valueBlock.value)
@@ -512,17 +512,17 @@ export default class PFX
 					else
 						authSafeContent = this.authSafe.content.valueBlock.valueHex;
 					//endregion
-					
+
 					//region Parse internal ASN.1 data
 					const asn1 = asn1js.fromBER(authSafeContent);
 					if(asn1.offset === (-1))
 						return Promise.reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\"");
 					//endregion
-				
+
 					//region Set "authenticatedSafe" value
 					this.parsedValue.authenticatedSafe = new AuthenticatedSafe({ schema: asn1.result });
 					//endregion
-				
+
 					//region Check integrity
 					if(parameters.checkIntegrity)
 					{
@@ -530,16 +530,16 @@ export default class PFX
 						if(("macData" in this) === false)
 							return Promise.reject("Absent \"macData\" value, can not check PKCS#12 data integrity");
 						//endregion
-						
+
 						//region Initial variables
 						const hashAlgorithm = getAlgorithmByOID(this.macData.mac.digestAlgorithm.algorithmId);
 						if(("name" in hashAlgorithm) === false)
 							return Promise.reject(`Unsupported digest algorithm: ${this.macData.mac.digestAlgorithm.algorithmId}`);
 						//endregion
-						
+
 						//region Call current crypto engine for verifying HMAC-based data stamp
 						const engine = getEngine();
-						
+
 						sequence = sequence.then(() =>
 							engine.subtle.verifyDataStampedWithPassword({
 								password: parameters.password,
@@ -558,7 +558,7 @@ export default class PFX
 							{
 								if(result === false)
 									return Promise.reject("Integrity for the PKCS#12 data is broken!");
-								
+
 								return Promise.resolve();
 							},
 							error => Promise.reject(error)
@@ -568,29 +568,29 @@ export default class PFX
 					//endregion
 				}
 				break;
-			//endregion 
-			//region signedData 
+			//endregion
+			//region signedData
 			case "1.2.840.113549.1.7.2":
 				{
 					//region Integrity based on signature using public key
 					this.parsedValue.integrityMode = 1;
 					//endregion
-				
+
 					//region Parse CMS Signed Data
 					const cmsSigned = new SignedData({ schema: this.authSafe.content });
 					//endregion
-				
+
 					//region Check that we do have OCTETSTRING as "content"
 					if(("eContent" in cmsSigned.encapContentInfo) === false)
 						return Promise.reject("Absent of attached data in \"cmsSigned.encapContentInfo\"");
-				
+
 					if((cmsSigned.encapContentInfo.eContent instanceof asn1js.OctetString) === false)
 						return Promise.reject("Wrong type of \"cmsSigned.encapContentInfo.eContent\"");
 					//endregion
-				
+
 					//region Create correct data block for verification
 					let data = new ArrayBuffer(0);
-				
+
 					if(cmsSigned.encapContentInfo.eContent.idBlock.isConstructed === false)
 						data = cmsSigned.encapContentInfo.eContent.valueBlock.valueHex;
 					else
@@ -599,17 +599,17 @@ export default class PFX
 							data = utilConcatBuf(data, cmsSigned.encapContentInfo.eContent.valueBlock.value[i].valueBlock.valueHex);
 					}
 					//endregion
-				
+
 					//region Parse internal ASN.1 data
 					const asn1 = asn1js.fromBER(data);
 					if(asn1.offset === (-1))
 						return Promise.reject("Error during parsing of ASN.1 data inside \"this.authSafe.content\"");
 					//endregion
-				
+
 					//region Set "authenticatedSafe" value
 					this.parsedValue.authenticatedSafe = new AuthenticatedSafe({ schema: asn1.result });
 					//endregion
-				
+
 					//region Check integrity
 					sequence = sequence.then(
 						() => cmsSigned.verify({ signer: 0, checkChain: false })
@@ -618,7 +618,7 @@ export default class PFX
 						{
 							if(result === false)
 								return Promise.reject("Integrity for the PKCS#12 data is broken!");
-							
+
 							return Promise.resolve();
 						},
 						error => Promise.reject(`Error during integrity verification: ${error}`)
@@ -626,20 +626,20 @@ export default class PFX
 					//endregion
 				}
 				break;
-			//endregion   
-			//region default 
+			//endregion
+			//region default
 			default:
 				return Promise.reject(`Incorrect value for "this.authSafe.contentType": ${this.authSafe.contentType}`);
-			//endregion 
+			//endregion
 		}
-		//endregion 
-		
-		//region Return result of the function 
+		//endregion
+
+		//region Return result of the function
 		return sequence.then(
 			() => this,
 			error => Promise.reject(`Error during parsing: ${error}`)
 		);
-		//endregion   
+		//endregion
 	}
 	//**********************************************************************************
 }

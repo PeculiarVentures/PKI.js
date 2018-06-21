@@ -17,10 +17,10 @@ function makePKCS12B2Key(cryptoEngine, hashAlgorithm, keyLength, password, salt,
 	//region Initial variables
 	let u;
 	let v;
-	
+
 	const result = [];
 	//endregion
-	
+
 	//region Get "u" and "v" values
 	switch(hashAlgorithm.toUpperCase())
 	{
@@ -44,78 +44,78 @@ function makePKCS12B2Key(cryptoEngine, hashAlgorithm, keyLength, password, salt,
 			throw new Error("Unsupported hashing algorithm");
 	}
 	//endregion
-	
+
 	//region Main algorithm making key
 	//region Transform password to UTF-8 like string
 	const passwordViewInitial = new Uint8Array(password);
-	
+
 	const passwordTransformed = new ArrayBuffer((password.byteLength * 2) + 2);
 	const passwordTransformedView = new Uint8Array(passwordTransformed);
-	
+
 	for(let i = 0; i < passwordViewInitial.length; i++)
 	{
 		passwordTransformedView[i * 2] = 0x00;
 		passwordTransformedView[i * 2 + 1] = passwordViewInitial[i];
 	}
-	
+
 	passwordTransformedView[passwordTransformedView.length - 2] = 0x00;
 	passwordTransformedView[passwordTransformedView.length - 1] = 0x00;
-	
+
 	password = passwordTransformed.slice(0);
 	//endregion
-	
+
 	//region Construct a string D (the "diversifier") by concatenating v/8 copies of ID
 	const D = new ArrayBuffer(v);
 	const dView = new Uint8Array(D);
-	
+
 	for(let i = 0; i < D.byteLength; i++)
 		dView[i] = 3; // The ID value equal to "3" for MACing (see B.3 of standard)
 	//endregion
-	
+
 	//region Concatenate copies of the salt together to create a string S of length v * ceil(s / v) bytes (the final copy of the salt may be trunacted to create S)
 	const saltLength = salt.byteLength;
-	
+
 	const sLen = v * Math.ceil(saltLength / v);
 	const S = new ArrayBuffer(sLen);
 	const sView = new Uint8Array(S);
-	
+
 	const saltView = new Uint8Array(salt);
-	
+
 	for(let i = 0; i < sLen; i++)
 		sView[i] = saltView[i % saltLength];
 	//endregion
-	
+
 	//region Concatenate copies of the password together to create a string P of length v * ceil(p / v) bytes (the final copy of the password may be truncated to create P)
 	const passwordLength = password.byteLength;
-	
+
 	const pLen = v * Math.ceil(passwordLength / v);
 	const P = new ArrayBuffer(pLen);
 	const pView = new Uint8Array(P);
-	
+
 	const passwordView = new Uint8Array(password);
-	
+
 	for(let i = 0; i < pLen; i++)
 		pView[i] = passwordView[i % passwordLength];
 	//endregion
-	
+
 	//region Set I=S||P to be the concatenation of S and P
 	const sPlusPLength = S.byteLength + P.byteLength;
-	
+
 	let I = new ArrayBuffer(sPlusPLength);
 	let iView = new Uint8Array(I);
-	
+
 	iView.set(sView);
 	iView.set(pView, sView.length);
 	//endregion
-	
+
 	//region Set c=ceil(n / u)
 	const c = Math.ceil((keyLength >> 3) / u);
 	//endregion
-	
+
 	//region Initial variables
 	let internalSequence = Promise.resolve(I);
 	//endregion
-	
+
 	//region For i=1, 2, ..., c, do the following:
 	for(let i = 0; i <= c; i++)
 	{
@@ -124,81 +124,81 @@ function makePKCS12B2Key(cryptoEngine, hashAlgorithm, keyLength, password, salt,
 			//region Create contecanetion of D and I
 			const dAndI = new ArrayBuffer(D.byteLength + _I.byteLength);
 			const dAndIView = new Uint8Array(dAndI);
-			
+
 			dAndIView.set(dView);
 			dAndIView.set(iView, dView.length);
 			//endregion
-			
+
 			return dAndI;
 		});
-		
+
 		//region Make "iterationCount" rounds of hashing
 		for(let j = 0; j < iterationCount; j++)
 			internalSequence = internalSequence.then(roundBuffer => cryptoEngine.digest({ name: hashAlgorithm }, new Uint8Array(roundBuffer)));
 		//endregion
-		
+
 		internalSequence = internalSequence.then(roundBuffer =>
 		{
 			//region Concatenate copies of Ai to create a string B of length v bits (the final copy of Ai may be truncated to create B)
 			const B = new ArrayBuffer(v);
 			const bView = new Uint8Array(B);
-			
+
 			for(let j = 0; j < B.byteLength; j++)
 				bView[j] = roundBuffer[j % roundBuffer.length];
 			//endregion
-			
+
 			//region Make new I value
 			const k = Math.ceil(saltLength / v) + Math.ceil(passwordLength / v);
 			const iRound = [];
-			
+
 			let sliceStart = 0;
 			let sliceLength = v;
-			
+
 			for(let j = 0; j < k; j++)
 			{
 				const chunk = Array.from(new Uint8Array(I.slice(sliceStart, sliceStart + sliceLength)));
 				sliceStart += v;
 				if((sliceStart + v) > I.byteLength)
 					sliceLength = I.byteLength - sliceStart;
-				
+
 				let x = 0x1ff;
-				
+
 				for(let l = (B.byteLength - 1); l >= 0; l--)
 				{
 					x >>= 8;
 					x += bView[l] + chunk[l];
 					chunk[l] = (x & 0xff);
 				}
-				
+
 				iRound.push(...chunk);
 			}
-			
+
 			I = new ArrayBuffer(iRound.length);
 			iView = new Uint8Array(I);
-			
+
 			iView.set(iRound);
 			//endregion
-			
+
 			result.push(...(new Uint8Array(roundBuffer)));
-			
+
 			return I;
 		});
 	}
 	//endregion
-	
+
 	//region Initialize final key
 	internalSequence = internalSequence.then(() =>
 	{
 		const resultBuffer = new ArrayBuffer(keyLength >> 3);
 		const resultView = new Uint8Array(resultBuffer);
-		
+
 		resultView.set((new Uint8Array(result)).slice(0, keyLength >> 3));
-		
+
 		return resultBuffer;
 	});
 	//endregion
 	//endregion
-	
+
 	return internalSequence;
 }
 //**************************************************************************************
@@ -248,12 +248,12 @@ export default class CryptoEngine
 		//region Initial variables
 		let jwk = {};
 		//endregion
-		
+
 		//region Change "keyData" type if needed
 		if(keyData instanceof Uint8Array)
 			keyData = keyData.buffer;
 		//endregion
-		
+
 		switch(format.toLowerCase())
 		{
 			case "raw":
@@ -374,7 +374,7 @@ export default class CryptoEngine
 								jwk.kty = "RSA";
 								jwk.ext = extractable;
 								jwk.key_ops = keyUsages;
-								
+
 								if(this.name.toLowerCase() === "safari")
 									jwk.alg = "RSA-OAEP";
 								else
@@ -397,10 +397,10 @@ export default class CryptoEngine
 											return Promise.reject(`Incorrect public key algorithm: ${publicKeyInfo.algorithm.algorithmId}`);
 									}
 								}
-								
+
 								//region Create ECDSA Public Key elements
 								const publicKeyJSON = publicKeyInfo.toJSON();
-								
+
 								for(const key of Object.keys(publicKeyJSON))
 									jwk[key] = publicKeyJSON[key];
 								//endregion
@@ -428,7 +428,7 @@ export default class CryptoEngine
 					{
 						return Promise.reject("Incorrect keyData");
 					}
-					
+
 					if(("parsedKey" in privateKeyInfo) === false)
 						return Promise.reject("Incorrect keyData");
 					//endregion
@@ -535,7 +535,7 @@ export default class CryptoEngine
 								jwk.kty = "RSA";
 								jwk.ext = extractable;
 								jwk.key_ops = keyUsages;
-								
+
 								//region Get information about used hash function
 								if(this.name.toLowerCase() === "safari")
 									jwk.alg = "RSA-OAEP";
@@ -560,10 +560,10 @@ export default class CryptoEngine
 									}
 								}
 								//endregion
-								
+
 								//region Create RSA Private Key elements
 								const privateKeyJSON = privateKeyInfo.toJSON();
-								
+
 								for(const key of Object.keys(privateKeyJSON))
 									jwk[key] = privateKeyJSON[key];
 								//endregion
@@ -580,7 +580,7 @@ export default class CryptoEngine
 			default:
 				return Promise.reject(`Incorrect format: ${format}`);
 		}
-		
+
 		//region Special case for Safari browser (since its acting not as WebCrypto standard describes)
 		if(this.name.toLowerCase() === "safari")
 		{
@@ -589,7 +589,7 @@ export default class CryptoEngine
 				.then(result => result, () => this.subtle.importKey("jwk", jwk, algorithm, extractable, keyUsages));
 		}
 		//endregion
-		
+
 		return this.subtle.importKey("jwk", jwk, algorithm, extractable, keyUsages);
 	}
 	//**********************************************************************************
@@ -602,7 +602,7 @@ export default class CryptoEngine
 	exportKey(format, key)
 	{
 		let sequence = this.subtle.exportKey("jwk", key);
-		
+
 		//region Currently Safari returns ArrayBuffer as JWK thus we need an additional transformation
 		if(this.name.toLowerCase() === "safari")
 		{
@@ -611,12 +611,12 @@ export default class CryptoEngine
 				// Some additional checks for Safari Technology Preview
 				if(result instanceof ArrayBuffer)
 					return JSON.parse(arrayBufferToString(result));
-				
+
 				return result;
 			});
 		}
 		//endregion
-		
+
 		switch(format.toLowerCase())
 		{
 			case "raw":
@@ -868,7 +868,7 @@ export default class CryptoEngine
 	{
 		if(("getRandomValues" in this.crypto) === false)
 			throw new Error("No support for getRandomValues");
-		
+
 		return this.crypto.getRandomValues(view);
 	}
 	//**********************************************************************************
@@ -1095,7 +1095,7 @@ export default class CryptoEngine
 			//endregion
 			default:
 		}
-		
+
 		return {};
 	}
 	//**********************************************************************************
@@ -1107,7 +1107,7 @@ export default class CryptoEngine
 	getOIDByAlgorithm(algorithm)
 	{
 		let result = "";
-		
+
 		switch(algorithm.name.toUpperCase())
 		{
 			case "RSASSA-PKCS1-V1_5":
@@ -1287,7 +1287,7 @@ export default class CryptoEngine
 			//endregion
 			default:
 		}
-		
+
 		return result;
 	}
 	//**********************************************************************************
@@ -1303,7 +1303,7 @@ export default class CryptoEngine
 			algorithm: {},
 			usages: []
 		};
-		
+
 		switch(algorithmName.toUpperCase())
 		{
 			case "RSASSA-PKCS1-V1_5":
@@ -1725,7 +1725,7 @@ export default class CryptoEngine
 				break;
 			default:
 		}
-		
+
 		return result;
 	}
 	//**********************************************************************************
@@ -1737,7 +1737,7 @@ export default class CryptoEngine
 	getHashAlgorithm(signatureAlgorithm)
 	{
 		let result = "";
-		
+
 		switch(signatureAlgorithm.algorithmId)
 		{
 			case "1.2.840.10045.4.1": // ecdsa-with-SHA1
@@ -1766,7 +1766,7 @@ export default class CryptoEngine
 							const algorithm = this.getAlgorithmByOID(params.hashAlgorithm.algorithmId);
 							if(("name" in algorithm) === false)
 								return "";
-							
+
 							result = algorithm.name;
 						}
 						else
@@ -1779,7 +1779,7 @@ export default class CryptoEngine
 				break;
 			default:
 		}
-		
+
 		return result;
 	}
 	//**********************************************************************************
@@ -1793,35 +1793,35 @@ export default class CryptoEngine
 		//region Check for input parameters
 		if((parameters instanceof Object) === false)
 			return Promise.reject("Parameters must have type \"Object\"");
-		
+
 		if(("password" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"password\"");
-		
+
 		if(("contentEncryptionAlgorithm" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"contentEncryptionAlgorithm\"");
-		
+
 		if(("hmacHashAlgorithm" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"hmacHashAlgorithm\"");
-		
+
 		if(("iterationCount" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"iterationCount\"");
-		
+
 		if(("contentToEncrypt" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"contentToEncrypt\"");
-		
+
 		if(("contentType" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"contentType\"");
 
 		const contentEncryptionOID = this.getOIDByAlgorithm(parameters.contentEncryptionAlgorithm);
 		if(contentEncryptionOID === "")
 			return Promise.reject("Wrong \"contentEncryptionAlgorithm\" value");
-		
+
 		const pbkdf2OID = this.getOIDByAlgorithm({
 			name: "PBKDF2"
 		});
 		if(pbkdf2OID === "")
 			return Promise.reject("Can not find OID for PBKDF2");
-		
+
 		const hmacOID = this.getOIDByAlgorithm({
 			name: "HMAC",
 			hash: {
@@ -1831,20 +1831,20 @@ export default class CryptoEngine
 		if(hmacOID === "")
 			return Promise.reject(`Incorrect value for "hmacHashAlgorithm": ${parameters.hmacHashAlgorithm}`);
 		//endregion
-		
+
 		//region Initial variables
 		let sequence = Promise.resolve();
-		
+
 		const ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
-		const ivView = new Uint8Array(ivBuffer);
+		let ivView = new Uint8Array(ivBuffer);
 		this.getRandomValues(ivView);
-		
+
 		const saltBuffer = new ArrayBuffer(64);
-		const saltView = new Uint8Array(saltBuffer);
+		let saltView = new Uint8Array(saltBuffer);
 		this.getRandomValues(saltView);
-		
+
 		const contentView = new Uint8Array(parameters.contentToEncrypt);
-		
+
 		const pbkdf2Params = new PBKDF2Params({
 			salt: new asn1js.OctetString({ valueHex: saltBuffer }),
 			iterationCount: parameters.iterationCount,
@@ -1854,12 +1854,12 @@ export default class CryptoEngine
 			})
 		});
 		//endregion
-		
+
 		//region Derive PBKDF2 key from "password" buffer
 		sequence = sequence.then(() =>
 		{
 			const passwordView = new Uint8Array(parameters.password);
-			
+
 			return this.importKey("raw",
 				passwordView,
 				"PBKDF2",
@@ -1869,7 +1869,7 @@ export default class CryptoEngine
 			Promise.reject(error)
 		);
 		//endregion
-		
+
 		//region Derive key for "contentEncryptionAlgorithm"
 		sequence = sequence.then(result =>
 			this.deriveKey({
@@ -1888,7 +1888,7 @@ export default class CryptoEngine
 			Promise.reject(error)
 		);
 		//endregion
-		
+
 		//region Encrypt content
 		sequence = sequence.then(result =>
 			this.encrypt({
@@ -1901,7 +1901,7 @@ export default class CryptoEngine
 			Promise.reject(error)
 		);
 		//endregion
-		
+
 		//region Store all parameters in EncryptedData object
 		sequence = sequence.then(result =>
 		{
@@ -1915,7 +1915,7 @@ export default class CryptoEngine
 					algorithmParams: new asn1js.OctetString({ valueHex: ivBuffer })
 				})
 			});
-			
+
 			return new EncryptedContentInfo({
 				contentType: parameters.contentType,
 				contentEncryptionAlgorithm: new AlgorithmIdentifier({
@@ -1942,22 +1942,22 @@ export default class CryptoEngine
 		//region Check for input parameters
 		if((parameters instanceof Object) === false)
 			return Promise.reject("Parameters must have type \"Object\"");
-		
+
 		if(("password" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"password\"");
-		
+
 		if(("encryptedContentInfo" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"encryptedContentInfo\"");
 
 		if(parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId !== "1.2.840.113549.1.5.13") // pkcs5PBES2
 			return Promise.reject(`Unknown "contentEncryptionAlgorithm": ${parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 		//endregion
-		
+
 		//region Initial variables
 		let sequence = Promise.resolve();
-		
+
 		let pbes2Parameters;
-		
+
 		try
 		{
 			pbes2Parameters = new PBES2Params({ schema: parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams });
@@ -1966,9 +1966,9 @@ export default class CryptoEngine
 		{
 			return Promise.reject("Incorrectly encoded \"pbes2Parameters\"");
 		}
-		
+
 		let pbkdf2Params;
-		
+
 		try
 		{
 			pbkdf2Params = new PBKDF2Params({ schema: pbes2Parameters.keyDerivationFunc.algorithmParams });
@@ -1977,31 +1977,31 @@ export default class CryptoEngine
 		{
 			return Promise.reject("Incorrectly encoded \"pbkdf2Params\"");
 		}
-		
+
 		const contentEncryptionAlgorithm = this.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithmId);
 		if(("name" in contentEncryptionAlgorithm) === false)
 			return Promise.reject(`Incorrect OID for "contentEncryptionAlgorithm": ${pbes2Parameters.encryptionScheme.algorithmId}`);
-		
+
 		const ivBuffer = pbes2Parameters.encryptionScheme.algorithmParams.valueBlock.valueHex;
 		const ivView = new Uint8Array(ivBuffer);
-		
+
 		const saltBuffer = pbkdf2Params.salt.valueBlock.valueHex;
 		const saltView = new Uint8Array(saltBuffer);
-		
+
 		const iterationCount = pbkdf2Params.iterationCount;
-		
+
 		let hmacHashAlgorithm = "SHA-1";
-		
+
 		if("prf" in pbkdf2Params)
 		{
 			const algorithm = this.getAlgorithmByOID(pbkdf2Params.prf.algorithmId);
 			if(("name" in algorithm) === false)
 				return Promise.reject("Incorrect OID for HMAC hash algorithm");
-			
+
 			hmacHashAlgorithm = algorithm.hash.name;
 		}
 		//endregion
-		
+
 		//region Derive PBKDF2 key from "password" buffer
 		sequence = sequence.then(() =>
 			this.importKey("raw",
@@ -2013,7 +2013,7 @@ export default class CryptoEngine
 			Promise.reject(error)
 		);
 		//endregion
-		
+
 		//region Derive key for "contentEncryptionAlgorithm"
 		sequence = sequence.then(result =>
 			this.deriveKey({
@@ -2032,13 +2032,13 @@ export default class CryptoEngine
 			Promise.reject(error)
 		);
 		//endregion
-		
+
 		//region Decrypt internal content using derived key
 		sequence = sequence.then(result =>
 		{
 			//region Create correct data block for decryption
 			let dataBuffer = new ArrayBuffer(0);
-			
+
 			if(parameters.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false)
 				dataBuffer = parameters.encryptedContentInfo.encryptedContent.valueBlock.valueHex;
 			else
@@ -2047,7 +2047,7 @@ export default class CryptoEngine
 					dataBuffer = utilConcatBuf(dataBuffer, content.valueBlock.valueHex);
 			}
 			//endregion
-			
+
 			return this.decrypt({
 				name: contentEncryptionAlgorithm.name,
 				iv: ivView
@@ -2058,7 +2058,7 @@ export default class CryptoEngine
 			Promise.reject(error)
 		);
 		//endregion
-		
+
 		return sequence;
 	}
 	//**********************************************************************************
@@ -2072,26 +2072,26 @@ export default class CryptoEngine
 		//region Check for input parameters
 		if((parameters instanceof Object) === false)
 			return Promise.reject("Parameters must have type \"Object\"");
-		
+
 		if(("password" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"password\"");
-		
+
 		if(("hashAlgorithm" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
-		
+
 		if(("salt" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"iterationCount\"");
-		
+
 		if(("iterationCount" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"salt\"");
-		
+
 		if(("contentToStamp" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"contentToStamp\"");
 		//endregion
-		
+
 		//region Choose correct length for HMAC key
 		let length;
-		
+
 		switch(parameters.hashAlgorithm.toLowerCase())
 		{
 			case "sha-1":
@@ -2110,10 +2110,10 @@ export default class CryptoEngine
 				return Promise.reject(`Incorrect "parameters.hashAlgorithm" parameter: ${parameters.hashAlgorithm}`);
 		}
 		//endregion
-		
+
 		//region Initial variables
 		let sequence = Promise.resolve();
-		
+
 		const hmacAlgorithm = {
 			name: "HMAC",
 			length,
@@ -2126,7 +2126,7 @@ export default class CryptoEngine
 		//region Create PKCS#12 key for integrity checking
 		sequence = sequence.then(() => makePKCS12B2Key(this, parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount));
 		//endregion
-		
+
 		//region Import HMAC key
 		// noinspection JSCheckFunctionSignatures
 		sequence = sequence.then(
@@ -2138,7 +2138,7 @@ export default class CryptoEngine
 					["sign"])
 		);
 		//endregion
-		
+
 		//region Make signed HMAC value
 		sequence = sequence.then(
 			result =>
@@ -2155,29 +2155,29 @@ export default class CryptoEngine
 		//region Check for input parameters
 		if((parameters instanceof Object) === false)
 			return Promise.reject("Parameters must have type \"Object\"");
-		
+
 		if(("password" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"password\"");
-		
+
 		if(("hashAlgorithm" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"hashAlgorithm\"");
-		
+
 		if(("salt" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"iterationCount\"");
-		
+
 		if(("iterationCount" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"salt\"");
-		
+
 		if(("contentToVerify" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"contentToVerify\"");
-		
+
 		if(("signatureToVerify" in parameters) === false)
 			return Promise.reject("Absent mandatory parameter \"signatureToVerify\"");
 		//endregion
-		
+
 		//region Choose correct length for HMAC key
 		let length;
-		
+
 		switch(parameters.hashAlgorithm.toLowerCase())
 		{
 			case "sha-1":
@@ -2196,10 +2196,10 @@ export default class CryptoEngine
 				return Promise.reject(`Incorrect "parameters.hashAlgorithm" parameter: ${parameters.hashAlgorithm}`);
 		}
 		//endregion
-		
+
 		//region Initial variables
 		let sequence = Promise.resolve();
-		
+
 		const hmacAlgorithm = {
 			name: "HMAC",
 			length,
@@ -2208,11 +2208,11 @@ export default class CryptoEngine
 			}
 		};
 		//endregion
-		
+
 		//region Create PKCS#12 key for integrity checking
 		sequence = sequence.then(() => makePKCS12B2Key(this, parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount));
 		//endregion
-		
+
 		//region Import HMAC key
 		// noinspection JSCheckFunctionSignatures
 		sequence = sequence.then(result =>
@@ -2223,7 +2223,7 @@ export default class CryptoEngine
 				["verify"])
 		);
 		//endregion
-		
+
 		//region Make signed HMAC value
 		sequence = sequence.then(
 			result =>
@@ -2231,7 +2231,7 @@ export default class CryptoEngine
 			error => Promise.reject(error)
 		);
 		//endregion
-		
+
 		return sequence;
 	}
 	//**********************************************************************************
@@ -2248,16 +2248,16 @@ export default class CryptoEngine
 		if(oid === "")
 			return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
 		//endregion
-		
+
 		//region Initial variables
 		const signatureAlgorithm = new AlgorithmIdentifier();
 		//endregion
-		
+
 		//region Get a "default parameters" for current algorithm
 		const parameters = this.getAlgorithmParameters(privateKey.algorithm.name, "sign");
 		parameters.algorithm.hash.name = hashAlgorithm;
 		//endregion
-		
+
 		//region Fill internal structures base on "privateKey" and "hashAlgorithm"
 		switch(privateKey.algorithm.name.toUpperCase())
 		{
@@ -2282,33 +2282,33 @@ export default class CryptoEngine
 						default:
 					}
 					//endregion
-					
+
 					//region Fill "RSASSA_PSS_params" object
 					const paramsObject = {};
-					
+
 					if(hashAlgorithm.toUpperCase() !== "SHA-1")
 					{
 						const hashAlgorithmOID = this.getOIDByAlgorithm({ name: hashAlgorithm });
 						if(hashAlgorithmOID === "")
 							return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
-						
+
 						paramsObject.hashAlgorithm = new AlgorithmIdentifier({
 							algorithmId: hashAlgorithmOID,
 							algorithmParams: new asn1js.Null()
 						});
-						
+
 						paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
 							algorithmId: "1.2.840.113549.1.1.8", // MGF1
 							algorithmParams: paramsObject.hashAlgorithm.toSchema()
 						});
 					}
-					
+
 					if(parameters.algorithm.saltLength !== 20)
 						paramsObject.saltLength = parameters.algorithm.saltLength;
-					
+
 					const pssParameters = new RSASSAPSSParams(paramsObject);
 					//endregion
-					
+
 					//region Automatically set signature algorithm
 					signatureAlgorithm.algorithmId = "1.2.840.113549.1.1.10";
 					signatureAlgorithm.algorithmParams = pssParameters.toSchema();
@@ -2344,7 +2344,7 @@ export default class CryptoEngine
 				if(parameters.algorithm.name === "ECDSA")
 					result = createCMSECDSASignature(result);
 				//endregion
-				
+
 				return result;
 			}, error =>
 				Promise.reject(`Signing error: ${error}`)
@@ -2354,34 +2354,34 @@ export default class CryptoEngine
 	fillPublicKeyParameters(publicKeyInfo, signatureAlgorithm)
 	{
 		const parameters = {};
-		
+
 		//region Find signer's hashing algorithm
 		const shaAlgorithm = this.getHashAlgorithm(signatureAlgorithm);
 		if(shaAlgorithm === "")
 			return Promise.reject(`Unsupported signature algorithm: ${signatureAlgorithm.algorithmId}`);
 		//endregion
-		
+
 		//region Get information about public key algorithm and default parameters for import
 		let algorithmId;
 		if(signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
 			algorithmId = signatureAlgorithm.algorithmId;
 		else
 			algorithmId = publicKeyInfo.algorithm.algorithmId;
-		
+
 		const algorithmObject = this.getAlgorithmByOID(algorithmId);
 		if(("name" in algorithmObject) === "")
 			return Promise.reject(`Unsupported public key algorithm: ${signatureAlgorithm.algorithmId}`);
-		
+
 		parameters.algorithm = this.getAlgorithmParameters(algorithmObject.name, "importkey");
 		if("hash" in parameters.algorithm.algorithm)
 			parameters.algorithm.algorithm.hash.name = shaAlgorithm;
-		
+
 		//region Special case for ECDSA
 		if(algorithmObject.name === "ECDSA")
 		{
 			//region Get information about named curve
 			let algorithmParamsChecked = false;
-			
+
 			if(("algorithmParams" in publicKeyInfo.algorithm) === true)
 			{
 				if("idBlock" in publicKeyInfo.algorithm.algorithmParams)
@@ -2390,20 +2390,20 @@ export default class CryptoEngine
 						algorithmParamsChecked = true;
 				}
 			}
-			
+
 			if(algorithmParamsChecked === false)
 				return Promise.reject("Incorrect type for ECDSA public key parameters");
-			
+
 			const curveObject = this.getAlgorithmByOID(publicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
 			if(("name" in curveObject) === false)
 				return Promise.reject(`Unsupported named curve algorithm: ${publicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
 			//endregion
-			
+
 			parameters.algorithm.algorithm.namedCurve = curveObject.name;
 		}
 		//endregion
 		//endregion
-		
+
 		return parameters;
 	}
 	//**********************************************************************************
@@ -2411,11 +2411,11 @@ export default class CryptoEngine
 	{
 		if(parameters === null)
 			parameters = this.fillPublicKeyParameters(publicKeyInfo, signatureAlgorithm);
-		
+
 		const publicKeyInfoSchema = publicKeyInfo.toSchema();
 		const publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
 		const publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
-		
+
 		return this.importKey("spki",
 			publicKeyInfoView,
 			parameters.algorithm.algorithm,
@@ -2429,14 +2429,14 @@ export default class CryptoEngine
 		//region Initial variables
 		let sequence = Promise.resolve();
 		//endregion
-		
+
 		//region Find signer's hashing algorithm
 		if(shaAlgorithm === null)
 		{
 			shaAlgorithm = this.getHashAlgorithm(signatureAlgorithm);
 			if(shaAlgorithm === "")
 				return Promise.reject(`Unsupported signature algorithm: ${signatureAlgorithm.algorithmId}`);
-			
+
 			//region Import public key
 			sequence = sequence.then(() =>
 				this.getPublicKey(publicKeyInfo, signatureAlgorithm));
@@ -2445,28 +2445,28 @@ export default class CryptoEngine
 		else
 		{
 			const parameters = {};
-			
+
 			//region Get information about public key algorithm and default parameters for import
 			let algorithmId;
 			if(signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
 				algorithmId = signatureAlgorithm.algorithmId;
 			else
 				algorithmId = publicKeyInfo.algorithm.algorithmId;
-			
+
 			const algorithmObject = this.getAlgorithmByOID(algorithmId);
 			if(("name" in algorithmObject) === "")
 				return Promise.reject(`Unsupported public key algorithm: ${signatureAlgorithm.algorithmId}`);
-			
+
 			parameters.algorithm = this.getAlgorithmParameters(algorithmObject.name, "importkey");
 			if("hash" in parameters.algorithm.algorithm)
 				parameters.algorithm.algorithm.hash.name = shaAlgorithm;
-			
+
 			//region Special case for ECDSA
 			if(algorithmObject.name === "ECDSA")
 			{
 				//region Get information about named curve
 				let algorithmParamsChecked = false;
-				
+
 				if(("algorithmParams" in publicKeyInfo.algorithm) === true)
 				{
 					if("idBlock" in publicKeyInfo.algorithm.algorithmParams)
@@ -2475,15 +2475,15 @@ export default class CryptoEngine
 							algorithmParamsChecked = true;
 					}
 				}
-				
+
 				if(algorithmParamsChecked === false)
 					return Promise.reject("Incorrect type for ECDSA public key parameters");
-				
+
 				const curveObject = this.getAlgorithmByOID(publicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
 				if(("name" in curveObject) === false)
 					return Promise.reject(`Unsupported named curve algorithm: ${publicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
 				//endregion
-				
+
 				parameters.algorithm.algorithm.namedCurve = curveObject.name;
 			}
 			//endregion
@@ -2495,7 +2495,7 @@ export default class CryptoEngine
 			//endregion
 		}
 		//endregion
-		
+
 		//region Verify signature
 		sequence = sequence.then(publicKey =>
 		{
@@ -2504,10 +2504,10 @@ export default class CryptoEngine
 			if("hash" in algorithm.algorithm)
 				algorithm.algorithm.hash.name = shaAlgorithm;
 			//endregion
-			
+
 			//region Special case for ECDSA signatures
 			let signatureValue = signature.valueBlock.valueHex;
-			
+
 			if(publicKey.algorithm.name === "ECDSA")
 			{
 				const asn1 = asn1js.fromBER(signatureValue);
@@ -2515,12 +2515,12 @@ export default class CryptoEngine
 				signatureValue = createECDSASignatureFromCMS(asn1.result);
 			}
 			//endregion
-			
+
 			//region Special case for RSA-PSS
 			if(publicKey.algorithm.name === "RSA-PSS")
 			{
 				let pssParameters;
-				
+
 				try
 				{
 					pssParameters = new RSASSAPSSParams({ schema: signatureAlgorithm.algorithmParams });
@@ -2529,27 +2529,27 @@ export default class CryptoEngine
 				{
 					return Promise.reject(ex);
 				}
-				
+
 				if("saltLength" in pssParameters)
 					algorithm.algorithm.saltLength = pssParameters.saltLength;
 				else
 					algorithm.algorithm.saltLength = 20;
-				
+
 				let hashAlgo = "SHA-1";
-				
+
 				if("hashAlgorithm" in pssParameters)
 				{
 					const hashAlgorithm = this.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithmId);
 					if(("name" in hashAlgorithm) === false)
 						return Promise.reject(`Unrecognized hash algorithm: ${pssParameters.hashAlgorithm.algorithmId}`);
-					
+
 					hashAlgo = hashAlgorithm.name;
 				}
-				
+
 				algorithm.algorithm.hash.name = hashAlgo;
 			}
 			//endregion
-			
+
 			return this.verify(algorithm.algorithm,
 				publicKey,
 				new Uint8Array(signatureValue),
@@ -2557,7 +2557,7 @@ export default class CryptoEngine
 			);
 		});
 		//endregion
-		
+
 		return sequence;
 	}
 	//**********************************************************************************
