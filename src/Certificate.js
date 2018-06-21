@@ -364,7 +364,7 @@ export default class Certificate
 		if("tbsCertificate.issuerUniqueID" in asn1.result)
 			this.issuerUniqueID = asn1.result["tbsCertificate.issuerUniqueID"].valueBlock.valueHex;
 		if("tbsCertificate.subjectUniqueID" in asn1.result)
-			this.issuerUniqueID = asn1.result["tbsCertificate.subjectUniqueID"].valueBlock.valueHex;
+			this.subjectUniqueID = asn1.result["tbsCertificate.subjectUniqueID"].valueBlock.valueHex;
 		if("tbsCertificate.extensions" in asn1.result)
 			this.extensions = Array.from(asn1.result["tbsCertificate.extensions"], element => new Extension({ schema: element }));
 		
@@ -429,18 +429,6 @@ export default class Certificate
 					tagNumber: 2 // [2]
 				},
 				valueHex: this.subjectUniqueID
-			}));
-		}
-		
-		if("subjectUniqueID" in this)
-		{
-			outputArray.push(new asn1js.Primitive({
-				optional: true,
-				idBlock: {
-					tagClass: 3, // CONTEXT-SPECIFIC
-					tagNumber: 3 // [3]
-				},
-				value: [this.extensions.toSchema()]
 			}));
 		}
 		

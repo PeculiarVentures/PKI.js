@@ -98,6 +98,6 @@
   "module": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.59",
+  "version": "2.1.60",
   "license": "MIT"
 }
