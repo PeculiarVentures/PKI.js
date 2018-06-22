@@ -569,7 +569,7 @@ export default class CertificateChainValidationEngine
 			//region Check each certificate (except "trusted root") to be non-revoked
 			if((_this.crls.length !== 0) || (_this.ocsps.length !== 0)) // If CRLs and OCSPs are empty then we consider all certificates to be valid
 			{
-				for(let i = 0; i < (path.length - 2); i++)
+				for(let i = 0; i < (path.length - 1); i++)
 				{
 					//region Initial variables
 					let ocspResult;
