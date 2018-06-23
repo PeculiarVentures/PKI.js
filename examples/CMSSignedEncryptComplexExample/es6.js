@@ -513,14 +513,20 @@ this.smimeEncrypt = function ()
 	// noinspection InnerHTMLJS
 	const encodedCertificate = that.recipcert;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Added alert messages to help explain usage errors and improved document wording.
 	if (encodedCertificate.length == 0) {
 	    alert ('Recipient no recipient certificate specified.');
 	}
 	if (!encodedCertificate.match(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g)) {
 	    alert ('Recipient certificate is not in valid PEM format.');
 	}
+<<<<<<< HEAD
 =======
 >>>>>>> Created example with combined Signing, and Encryption. Added ability to
+=======
+>>>>>>> Added alert messages to help explain usage errors and improved document wording.
 	const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 	certificateBuffer = stringToArrayBuffer(window.atob(clearEncodedCertificate));
 	
