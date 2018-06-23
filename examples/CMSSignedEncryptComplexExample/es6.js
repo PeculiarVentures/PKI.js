@@ -512,6 +512,12 @@ this.smimeEncrypt = function ()
 	//region Decode input certificate 
 	// noinspection InnerHTMLJS
 	const encodedCertificate = that.recipcert;
+	if (encodedCertificate.length == 0) {
+	    alert ('Recipient no recipient certificate specified.');
+	}
+	if (!encodedCertificate.match(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g)) {
+	    alert ('Recipient certificate is not in valid PEM format.');
+	}
 	const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 	certificateBuffer = stringToArrayBuffer(window.atob(clearEncodedCertificate));
 	
