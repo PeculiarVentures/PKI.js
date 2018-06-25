@@ -31,6 +31,57 @@ Description of PKI.js code structure could be found [_**in separate file**_](htt
 ## Important Information for PKI.js V1 Users
 PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to make it easier to move from PKIjs V1 code to PKIjs V2 code we made a file that provides a [_**mapping**_](MAPPING.md) between old and new class names.
 
+## Information about PKIjs internal structure
+
+First of all a few words about what the PKI itself is. The PKI is a set of many related RFCs (Request For Comment, [_**https://www.ietf.org/standards/rfcs/**_](https://www.ietf.org/standards/rfcs/)). All PKI data initially are in binary format, called ASN.1. Each ASN.1 PKI-related structure has its "ASN.1 schema" - textual representation in ASN.1 notation language. Inside PKI documentation you would find something like this (example from RFC5280):
+```asn1
+Certificate  ::=  SEQUENCE  {
+    tbsCertificate       TBSCertificate,
+    signatureAlgorithm   AlgorithmIdentifier,
+    signatureValue       BIT STRING  }
+```
+ 
+The PKIjs library is a set of "helpers", providing you easy access to necessary internal structures. Each PKIjs class is a direct "mirror" (in most cases) of ASN.1 structure, defined in related RFC. So, assume we have this ASN.1 structure representation (example from RFC5280):
+```asn1
+AccessDescription  ::=  SEQUENCE {
+       accessMethod          OBJECT IDENTIFIER,
+       accessLocation        GeneralName  }
+```
+Then inside PKIjs you would have class `AccessDescription` with properties `accessMethod` and `accessLocation`. Description of each property of such data you could find in related RFC. Each class has a link to the RFC the definition came from right before definition of the PKIjs class - `Class from RFC5280`, for example. Full table with links between PKIjs classes and related RFC you could find [_**here**_](https://github.com/PeculiarVentures/PKI.js/blob/master/src/README.MD).
+
+Each PKIjs class has these common functions:
+* `constructor` - Standard constructor for each class. Common for any ES6 class. Has `parameters` parameter having `Object` type. So, any PKIjs class could be initialized using this call `new <class>({ propertyName1: value1, propertyName2: value2 })`. Also constructor could be called in order to initialize PKIjs class from _**[ASN1js]**_ internal data (schema) - `new <class>({ schema: schemaData })`;
+* `defaultValues` - Static function. It is a common source of default values (pre-defined constants), specific for this particular class;
+* `schema` - Static function. The function returns pre-defined ASN.1 schema for this particular class. Usually using in call to `asn1js.compareSchema` function;
+* `fromSchema` - Major function initializing internal PKIjs class data from input _**[ASN1js]**_ internal data;
+* `toSchema` - Major function producing _**[ASN1js]**_ internal data from PKIjs class data;
+* `toJSON` - Standard function producing JSON representation of each class. Usually using indirectly during call to `JSON.stringify(<PKIjs class>)`;  
+
+In some complicated case PKIjs class could have additional functions, specific only for this particular class. For example, `sign`, `verify` etc.
+
+So, here is step-by-step description on how PKIjs parses binary PKI structures:
+1) Binary data parsed via _**[ASN1js]**_ package (`asn1js.fromBER` function). Outcome from this step is _**[ASN1js]**_ internal classes;
+2) In order to produce a "helper" user need to provide data from step #1 to specific class of PKIjs to function `<class>.fromSchema` (for example `Certificate.fromSchema`). Usually code will looks like `const cert = new Certificate({ schema: asn1.result })` - this code internally would call `Certificate.fromSchema` function;
+3) Inside `fromSchema` function PKIjs class would parse _**[ASN1js]**_ internal structures and produce easy to access class properties. Also in `fromSchema` PKIjs compare input ASN.1 structure with how it should like (compare with pre-defined ASN.1 schema); 
+
+So, usually user would use this code snippet:
+```javascript
+const asn1 = asn1js.fromBER(binaryData);
+if(asn1.offset === (-1))
+	alert("Can not parse binary data");
+
+const certificate = new Certificate({ schema: asn1.result });
+```
+
+Here is step-by-step description on how PKIjs class data converts back to binary representation:
+1) User need to convert PKIjs class to _**[ASN1js]**_ internal class. In order to do this user need to call `<class>.toSchema` function;
+2) As a result from step #1 we would have _**[ASN1js]**_ structures. And each of _**[ASN1js]**_ structure has its class member `toBER` - this function would return binary represenmtation of _**[ASN1js]**_ structure as ArrayBuffer;
+
+So, usually user would use this code snippet:
+```javascript
+const certificateBinary = certificate.toSchema().toBER(false);
+```
+
 ## Examples
 
 ### Parse a X.509 certificate
