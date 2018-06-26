@@ -21,6 +21,8 @@
     "cross-env": "^5.1.4",
     "emailjs-mime-builder": "latest",
     "emailjs-mime-parser": "^2.0.1",
+    "esdoc": "^1.1.0",
+    "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^4.19.1",
     "mocha": "^3.0.2",
     "nyc": "^11.6.0",
@@ -75,6 +77,7 @@
     "build:examples": "npm run ex1 && npm run ex2 && npm run ex3 && npm run ex4 && npm run ex5 && npm run ex6 && npm run ex7 && npm run ex8 && npm run ex9 && npm run ex10 && npm run ex11 && npm run ex12 && npm run ex13 && npm run ex14 && npm run ex15 && npm run ex16 && npm run ex17",
     "build:examples:es5": "npm run ex1:es5 && npm run ex2:es5 && npm run ex3 && npm run ex4:es5 && npm run ex5:es5 && npm run ex6:es5 && npm run ex7:es5 && npm run ex8:es5 && npm run ex9:es5 && npm run ex10:es5 && npm run ex11:es5 && npm run ex12:es5 && npm run ex13:es5 && npm run ex14:es5 && npm run ex15:es5 && npm run ex16:es5 && npm run ex17",
     "build:tests": "npm run build:examples",
+    "build:docs": "esdoc",
     "test:node": "cross-env NODE_ENV=test nyc mocha --timeout 40000 --require babel-register test/s_*.js && cross-env NODE_ENV=test nyc --clean=false mocha --timeout 40000 --require babel-register test/n_*.js",
     "test": "node -e \"console.log('\\nWARNING: !!! in order to test PKIjs in Node environment you\\nwould need to install additional package node-webcrypto-ossl !!!\\n\\nThe node-webcrypto-ossl is not referenced in PKIjs dependencies\\nanymore because we were noticed users have a problems with\\nthe package installation, especially on Windows platform.\\n\\nThe node-webcrypto-ossl is NOT a mandatory for testing PKIjs -\\nyou could visit test/browser subdir and run all the same tests\\nin your favorite browser.\\n\\nAlso you could check CircleCI - for each build the service runs\\nall tests and results could be easily observed.\\n\\nIf you do need to run PKIjs tests locally using Node please use\\nnpm run test:node')\"",
     "prepublishOnly": "npm run build"
@@ -99,5 +102,10 @@
   "main": "./build/index.js",
   "name": "pkijs",
   "version": "2.1.62",
-  "license": "MIT"
+  "license": "MIT",
+  "esdoc": {
+    "source": "./src",
+    "destination": "./docs",
+    "plugins": [{"name": "esdoc-standard-plugin"}]
+  }
 }
