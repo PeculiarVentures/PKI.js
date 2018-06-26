@@ -11,19 +11,19 @@ export default class AccessDescription
 	/**
 	 * Constructor for AccessDescription class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description accessMethod
+		 * @desc accessMethod
 		 */
 		this.accessMethod = getParametersValue(parameters, "accessMethod", AccessDescription.defaultValues("accessMethod"));
 		/**
 		 * @type {GeneralName}
-		 * @description accessLocation
+		 * @desc accessLocation
 		 */
 		this.accessLocation = getParametersValue(parameters, "accessLocation", AccessDescription.defaultValues("accessLocation"));
 		//endregion
@@ -52,16 +52,20 @@ export default class AccessDescription
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AccessDescription  ::=  SEQUENCE {
+	 *    accessMethod          OBJECT IDENTIFIER,
+	 *    accessLocation        GeneralName  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//AccessDescription  ::=  SEQUENCE {
-		//    accessMethod          OBJECT IDENTIFIER,
-		//    accessLocation        GeneralName  }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

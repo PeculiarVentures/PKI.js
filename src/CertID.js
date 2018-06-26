@@ -12,29 +12,29 @@ export default class CertID
 	/**
 	 * Constructor for CertID class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description hashAlgorithm
+		 * @desc hashAlgorithm
 		 */
 		this.hashAlgorithm = getParametersValue(parameters, "hashAlgorithm", CertID.defaultValues("hashAlgorithm"));
 		/**
 		 * @type {OctetString}
-		 * @description issuerNameHash
+		 * @desc issuerNameHash
 		 */
 		this.issuerNameHash = getParametersValue(parameters, "issuerNameHash", CertID.defaultValues("issuerNameHash"));
 		/**
 		 * @type {OctetString}
-		 * @description issuerKeyHash
+		 * @desc issuerKeyHash
 		 */
 		this.issuerKeyHash = getParametersValue(parameters, "issuerKeyHash", CertID.defaultValues("issuerKeyHash"));
 		/**
 		 * @type {Integer}
-		 * @description serialNumber
+		 * @desc serialNumber
 		 */
 		this.serialNumber = getParametersValue(parameters, "serialNumber", CertID.defaultValues("serialNumber"));
 		//endregion
@@ -86,18 +86,22 @@ export default class CertID
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * CertID          ::=     SEQUENCE {
+	 *    hashAlgorithm       AlgorithmIdentifier,
+	 *    issuerNameHash      OCTET STRING, -- Hash of issuer's DN
+	 *    issuerKeyHash       OCTET STRING, -- Hash of issuer's public key
+	 *    serialNumber        CertificateSerialNumber }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//CertID          ::=     SEQUENCE {
-		//    hashAlgorithm       AlgorithmIdentifier,
-		//    issuerNameHash      OCTET STRING, -- Hash of issuer's DN
-		//    issuerKeyHash       OCTET STRING, -- Hash of issuer's public key
-		//    serialNumber        CertificateSerialNumber }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

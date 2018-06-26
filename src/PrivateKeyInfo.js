@@ -14,38 +14,38 @@ export default class PrivateKeyInfo
 	/**
 	 * Constructor for PrivateKeyInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", PrivateKeyInfo.defaultValues("version"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description privateKeyAlgorithm
+		 * @desc privateKeyAlgorithm
 		 */
 		this.privateKeyAlgorithm = getParametersValue(parameters, "privateKeyAlgorithm", PrivateKeyInfo.defaultValues("privateKeyAlgorithm"));
 		/**
 		 * @type {OctetString}
-		 * @description privateKey
+		 * @desc privateKey
 		 */
 		this.privateKey = getParametersValue(parameters, "privateKey", PrivateKeyInfo.defaultValues("privateKey"));
 
 		if("attributes" in parameters)
 			/**
 			 * @type {Array.<Attribute>}
-			 * @description attributes
+			 * @desc attributes
 			 */
 			this.attributes = getParametersValue(parameters, "attributes", PrivateKeyInfo.defaultValues("attributes"));
 
 		if("parsedKey" in parameters)
 			/**
 			 * @type {ECPrivateKey|RSAPrivateKey}
-			 * @description Parsed public key value
+			 * @desc Parsed public key value
 			 */
 			this.parsedKey = getParametersValue(parameters, "parsedKey", PrivateKeyInfo.defaultValues("parsedKey"));
 		//endregion
@@ -84,24 +84,28 @@ export default class PrivateKeyInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PrivateKeyInfo ::= SEQUENCE {
+	 *    version Version,
+	 *    privateKeyAlgorithm AlgorithmIdentifier {{PrivateKeyAlgorithms}},
+	 *    privateKey PrivateKey,
+	 *    attributes [0] Attributes OPTIONAL }
+	 *
+	 * Version ::= INTEGER {v1(0)} (v1,...)
+	 *
+	 * PrivateKey ::= OCTET STRING
+	 *
+	 * Attributes ::= SET OF Attribute
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//PrivateKeyInfo ::= SEQUENCE {
-		//    version Version,
-		//    privateKeyAlgorithm AlgorithmIdentifier {{PrivateKeyAlgorithms}},
-		//    privateKey PrivateKey,
-		//    attributes [0] Attributes OPTIONAL }
-		//
-		//Version ::= INTEGER {v1(0)} (v1,...)
-		//
-		//PrivateKey ::= OCTET STRING
-		//
-		//Attributes ::= SET OF Attribute
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

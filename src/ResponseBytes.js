@@ -10,19 +10,19 @@ export default class ResponseBytes
 	/**
 	 * Constructor for ResponseBytes class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description responseType
+		 * @desc responseType
 		 */
 		this.responseType = getParametersValue(parameters, "responseType", ResponseBytes.defaultValues("responseType"));
 		/**
 		 * @type {OctetString}
-		 * @description response
+		 * @desc response
 		 */
 		this.response = getParametersValue(parameters, "response", ResponseBytes.defaultValues("response"));
 		//endregion
@@ -69,16 +69,20 @@ export default class ResponseBytes
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * ResponseBytes ::=       SEQUENCE {
+	 *    responseType   OBJECT IDENTIFIER,
+	 *    response       OCTET STRING }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//ResponseBytes ::=       SEQUENCE {
-		//    responseType   OBJECT IDENTIFIER,
-		//    response       OCTET STRING }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

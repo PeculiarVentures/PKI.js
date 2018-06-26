@@ -11,21 +11,21 @@ export default class PolicyInformation
 	/**
 	 * Constructor for PolicyInformation class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description policyIdentifier
+		 * @desc policyIdentifier
 		 */
 		this.policyIdentifier = getParametersValue(parameters, "policyIdentifier", PolicyInformation.defaultValues("policyIdentifier"));
 
 		if("policyQualifiers" in parameters)
 			/**
 			 * @type {Array.<PolicyQualifierInfo>}
-			 * @description Value of the TIME class
+			 * @desc Value of the TIME class
 			 */
 			this.policyQualifiers = getParametersValue(parameters, "policyQualifiers", PolicyInformation.defaultValues("policyQualifiers"));
 		//endregion
@@ -54,19 +54,23 @@ export default class PolicyInformation
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PolicyInformation ::= SEQUENCE {
+	 *    policyIdentifier   CertPolicyId,
+	 *    policyQualifiers   SEQUENCE SIZE (1..MAX) OF
+	 *    PolicyQualifierInfo OPTIONAL }
+	 *
+	 * CertPolicyId ::= OBJECT IDENTIFIER
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//PolicyInformation ::= SEQUENCE {
-		//    policyIdentifier   CertPolicyId,
-		//    policyQualifiers   SEQUENCE SIZE (1..MAX) OF
-		//    PolicyQualifierInfo OPTIONAL }
-		//
-		//CertPolicyId ::= OBJECT IDENTIFIER
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

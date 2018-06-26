@@ -10,24 +10,24 @@ export default class OtherPrimeInfo
 	/**
 	 * Constructor for OtherPrimeInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Integer}
-		 * @description prime
+		 * @desc prime
 		 */
 		this.prime = getParametersValue(parameters, "prime", OtherPrimeInfo.defaultValues("prime"));
 		/**
 		 * @type {Integer}
-		 * @description exponent
+		 * @desc exponent
 		 */
 		this.exponent = getParametersValue(parameters, "exponent", OtherPrimeInfo.defaultValues("exponent"));
 		/**
 		 * @type {Integer}
-		 * @description coefficient
+		 * @desc coefficient
 		 */
 		this.coefficient = getParametersValue(parameters, "coefficient", OtherPrimeInfo.defaultValues("coefficient"));
 		//endregion
@@ -62,17 +62,22 @@ export default class OtherPrimeInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * OtherPrimeInfo ::= Sequence {
+	 *    prime             Integer,  -- ri
+	 *    exponent          Integer,  -- di
+	 *    coefficient       Integer   -- ti
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//OtherPrimeInfo ::= Sequence {
-		//    prime             Integer,  -- ri
-		//    exponent          Integer,  -- di
-		//    coefficient       Integer   -- ti
-		//}
 
 		/**
 		 * @type {Object}

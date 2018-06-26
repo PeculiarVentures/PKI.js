@@ -12,26 +12,26 @@ export default class CertBag
 	/**
 	 * Constructor for CertBag class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description certId
+		 * @desc certId
 		 */
 		this.certId = getParametersValue(parameters, "certId", CertBag.defaultValues("certId"));
 		/**
 		 * @type {*}
-		 * @description certValue
+		 * @desc certValue
 		 */
 		this.certValue = getParametersValue(parameters, "certValue", CertBag.defaultValues("certValue"));
 		
 		if("parsedValue" in parameters)
 			/**
 			 * @type {*}
-			 * @description parsedValue
+			 * @desc parsedValue
 			 */
 			this.parsedValue = getParametersValue(parameters, "parsedValue", CertBag.defaultValues("parsedValue"));
 		//endregion
@@ -82,17 +82,21 @@ export default class CertBag
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * CertBag ::= SEQUENCE {
+	 *    certId    BAG-TYPE.&id   ({CertTypes}),
+	 *    certValue [0] EXPLICIT BAG-TYPE.&Type ({CertTypes}{@certId})
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//CertBag ::= SEQUENCE {
-		//    certId    BAG-TYPE.&id   ({CertTypes}),
-		//    certValue [0] EXPLICIT BAG-TYPE.&Type ({CertTypes}{@certId})
-		//}
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

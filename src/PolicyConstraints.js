@@ -10,7 +10,7 @@ export default class PolicyConstraints
 	/**
 	 * Constructor for PolicyConstraints class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
@@ -18,14 +18,14 @@ export default class PolicyConstraints
 		if("requireExplicitPolicy" in parameters)
 			/**
 			 * @type {number}
-			 * @description requireExplicitPolicy
+			 * @desc requireExplicitPolicy
 			 */
 			this.requireExplicitPolicy = getParametersValue(parameters, "requireExplicitPolicy", PolicyConstraints.defaultValues("requireExplicitPolicy"));
 
 		if("inhibitPolicyMapping" in parameters)
 			/**
 			 * @type {number}
-			 * @description Value of the TIME class
+			 * @desc Value of the TIME class
 			 */
 			this.inhibitPolicyMapping = getParametersValue(parameters, "inhibitPolicyMapping", PolicyConstraints.defaultValues("inhibitPolicyMapping"));
 		//endregion
@@ -54,20 +54,22 @@ export default class PolicyConstraints
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PolicyConstraints ::= SEQUENCE {
+	 *    requireExplicitPolicy           [0] SkipCerts OPTIONAL,
+	 *    inhibitPolicyMapping            [1] SkipCerts OPTIONAL }
+	 *
+	 * SkipCerts ::= INTEGER (0..MAX)
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// PolicyMappings OID ::= 2.5.29.36
-		//
-		//PolicyConstraints ::= SEQUENCE {
-		//    requireExplicitPolicy           [0] SkipCerts OPTIONAL,
-		//    inhibitPolicyMapping            [1] SkipCerts OPTIONAL }
-		//
-		//SkipCerts ::= INTEGER (0..MAX)
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

@@ -12,21 +12,21 @@ export default class OCSPResponse
 	/**
 	 * Constructor for OCSPResponse class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Enumerated}
-		 * @description responseStatus
+		 * @desc responseStatus
 		 */
 		this.responseStatus = getParametersValue(parameters, "responseStatus", OCSPResponse.defaultValues("responseStatus"));
 
 		if("responseBytes" in parameters)
 			/**
 			 * @type {ResponseBytes}
-			 * @description responseBytes
+			 * @desc responseBytes
 			 */
 			this.responseBytes = getParametersValue(parameters, "responseBytes", OCSPResponse.defaultValues("responseBytes"));
 		//endregion
@@ -74,26 +74,30 @@ export default class OCSPResponse
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * OCSPResponse ::= SEQUENCE {
+	 *    responseStatus         OCSPResponseStatus,
+	 *    responseBytes          [0] EXPLICIT ResponseBytes OPTIONAL }
+	 *
+	 * OCSPResponseStatus ::= ENUMERATED {
+	 *    successful            (0),  -- Response has valid confirmations
+	 *    malformedRequest      (1),  -- Illegal confirmation request
+	 *    internalError         (2),  -- Internal error in issuer
+	 *    tryLater              (3),  -- Try again later
+	 *    -- (4) is not used
+	 *    sigRequired           (5),  -- Must sign the request
+	 *    unauthorized          (6)   -- Request unauthorized
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//OCSPResponse ::= SEQUENCE {
-		//    responseStatus         OCSPResponseStatus,
-		//    responseBytes          [0] EXPLICIT ResponseBytes OPTIONAL }
-		//
-		//OCSPResponseStatus ::= ENUMERATED {
-		//    successful            (0),  -- Response has valid confirmations
-		//    malformedRequest      (1),  -- Illegal confirmation request
-		//    internalError         (2),  -- Internal error in issuer
-		//    tryLater              (3),  -- Try again later
-		//    -- (4) is not used
-		//    sigRequired           (5),  -- Must sign the request
-		//    unauthorized          (6)   -- Request unauthorized
-		//}
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

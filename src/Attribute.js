@@ -9,19 +9,19 @@ export default class Attribute {
 	/**
 	 * Constructor for Attribute class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description type
+		 * @desc type
 		 */
 		this.type = getParametersValue(parameters, "type", Attribute.defaultValues("type"));
 		/**
 		 * @type {Array}
-		 * @description values
+		 * @desc values
 		 */
 		this.values = getParametersValue(parameters, "values", Attribute.defaultValues("values"));
 		//endregion
@@ -68,17 +68,21 @@ export default class Attribute {
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
+	 *    type   ATTRIBUTE.&id({IOSet}),
+	 *    values SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{@type})
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
-		//    type   ATTRIBUTE.&id({IOSet}),
-		//    values SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{@type})
-		//}
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

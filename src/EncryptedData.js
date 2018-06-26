@@ -13,26 +13,26 @@ export default class EncryptedData
 	/**
 	 * Constructor for EncryptedData class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", EncryptedData.defaultValues("version"));
 		/**
 		 * @type {EncryptedContentInfo}
-		 * @description encryptedContentInfo
+		 * @desc encryptedContentInfo
 		 */
 		this.encryptedContentInfo = getParametersValue(parameters, "encryptedContentInfo", EncryptedData.defaultValues("encryptedContentInfo"));
 		
 		if("unprotectedAttrs" in parameters)
 			/**
 			 * @type {Array.<Attribute>}
-			 * @description unprotectedAttrs
+			 * @desc unprotectedAttrs
 			 */
 			this.unprotectedAttrs = getParametersValue(parameters, "unprotectedAttrs", EncryptedData.defaultValues("unprotectedAttrs"));
 		//endregion
@@ -85,20 +85,21 @@ export default class EncryptedData
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * EncryptedData ::= SEQUENCE {
+	 *    version CMSVersion,
+	 *    encryptedContentInfo EncryptedContentInfo,
+	 *    unprotectedAttrs [1] IMPLICIT UnprotectedAttributes OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//id-encryptedData OBJECT IDENTIFIER ::= { iso(1) member-body(2)
-		//    us(840) rsadsi(113549) pkcs(1) pkcs7(7) 6 }
-		
-		//EncryptedData ::= SEQUENCE {
-		//    version CMSVersion,
-		//    encryptedContentInfo EncryptedContentInfo,
-		//    unprotectedAttrs [1] IMPLICIT UnprotectedAttributes OPTIONAL }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

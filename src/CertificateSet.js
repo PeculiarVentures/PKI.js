@@ -14,14 +14,14 @@ export default class CertificateSet
 	/**
 	 * Constructor for CertificateSet class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array}
-		 * @description certificates
+		 * @desc certificates
 		 */
 		this.certificates = getParametersValue(parameters, "certificates", CertificateSet.defaultValues("certificates"));
 		//endregion
@@ -48,21 +48,25 @@ export default class CertificateSet
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * CertificateSet ::= SET OF CertificateChoices
+	 *
+	 * CertificateChoices ::= CHOICE {
+	 *    certificate Certificate,
+	 *    extendedCertificate [0] IMPLICIT ExtendedCertificate,  -- Obsolete
+	 *    v1AttrCert [1] IMPLICIT AttributeCertificateV1,        -- Obsolete
+	 *    v2AttrCert [2] IMPLICIT AttributeCertificateV2,
+	 *    other [3] IMPLICIT OtherCertificateFormat }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//CertificateSet ::= SET OF CertificateChoices
-		//
-		//CertificateChoices ::= CHOICE {
-		//    certificate Certificate,
-		//    extendedCertificate [0] IMPLICIT ExtendedCertificate,  -- Obsolete
-		//    v1AttrCert [1] IMPLICIT AttributeCertificateV1,        -- Obsolete
-		//    v2AttrCert [2] IMPLICIT AttributeCertificateV2,
-		//    other [3] IMPLICIT OtherCertificateFormat }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

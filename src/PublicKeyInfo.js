@@ -14,26 +14,26 @@ export default class PublicKeyInfo
 	/**
 	 * Constructor for PublicKeyInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description Algorithm identifier
+		 * @desc Algorithm identifier
 		 */
 		this.algorithm = getParametersValue(parameters, "algorithm", PublicKeyInfo.defaultValues("algorithm"));
 		/**
 		 * @type {BitString}
-		 * @description Subject public key value
+		 * @desc Subject public key value
 		 */
 		this.subjectPublicKey = getParametersValue(parameters, "subjectPublicKey", PublicKeyInfo.defaultValues("subjectPublicKey"));
 		
 		if("parsedKey" in parameters)
 			/**
 			 * @type {ECPublicKey|RSAPublicKey}
-			 * @description Parsed public key value
+			 * @desc Parsed public key value
 			 */
 			this.parsedKey = getParametersValue(parameters, "parsedKey", PublicKeyInfo.defaultValues("parsedKey"));
 		//endregion
@@ -66,16 +66,20 @@ export default class PublicKeyInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * SubjectPublicKeyInfo  ::=  Sequence  {
+	 *    algorithm            AlgorithmIdentifier,
+	 *    subjectPublicKey     BIT STRING  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//SubjectPublicKeyInfo  ::=  Sequence  {
-		//    algorithm            AlgorithmIdentifier,
-		//    subjectPublicKey     BIT STRING  }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

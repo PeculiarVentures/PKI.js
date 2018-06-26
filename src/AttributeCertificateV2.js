@@ -15,32 +15,32 @@ export class ObjectDigestInfo
 	/**
 	 * Constructor for ObjectDigestInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Enumerated}
-		 * @description digestedObjectType
+		 * @desc digestedObjectType
 		 */
 		this.digestedObjectType = getParametersValue(parameters, "digestedObjectType", ObjectDigestInfo.defaultValues("digestedObjectType"));
 		
 		if("otherObjectTypeID" in parameters)
 			/**
 			 * @type {ObjectIdentifier}
-			 * @description otherObjectTypeID
+			 * @desc otherObjectTypeID
 			 */
 			this.otherObjectTypeID = getParametersValue(parameters, "otherObjectTypeID", ObjectDigestInfo.defaultValues("otherObjectTypeID"));
 		
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description digestAlgorithm
+		 * @desc digestAlgorithm
 		 */
 		this.digestAlgorithm = getParametersValue(parameters, "digestAlgorithm", ObjectDigestInfo.defaultValues("digestAlgorithm"));
 		/**
 		 * @type {BitString}
-		 * @description objectDigest
+		 * @desc objectDigest
 		 */
 		this.objectDigest = getParametersValue(parameters, "objectDigest", ObjectDigestInfo.defaultValues("objectDigest"));
 		//endregion
@@ -73,24 +73,28 @@ export class ObjectDigestInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * ObjectDigestInfo ::= SEQUENCE {
+	 *   digestedObjectType  ENUMERATED {
+	 *     publicKey            (0),
+	 *     publicKeyCert        (1),
+	 *     otherObjectTypes     (2) },
+	 *   -- otherObjectTypes MUST NOT
+	 *   -- be used in this profile
+	 *   otherObjectTypeID   OBJECT IDENTIFIER OPTIONAL,
+	 *   digestAlgorithm     AlgorithmIdentifier,
+	 *   objectDigest        BIT STRING
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// ObjectDigestInfo ::= SEQUENCE {
-		//   digestedObjectType  ENUMERATED {
-		//     publicKey            (0),
-		//     publicKeyCert        (1),
-		//     otherObjectTypes     (2) },
-		//   -- otherObjectTypes MUST NOT
-		//   -- be used in this profile
-		//   otherObjectTypeID   OBJECT IDENTIFIER OPTIONAL,
-		//   digestAlgorithm     AlgorithmIdentifier,
-		//   objectDigest        BIT STRING
-		// }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -211,7 +215,7 @@ export class V2Form
 	/**
 	 * Constructor for V2Form class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
@@ -219,21 +223,21 @@ export class V2Form
 		if("issuerName" in parameters)
 			/**
 			 * @type {GeneralNames}
-			 * @description issuerName
+			 * @desc issuerName
 			 */
 			this.issuerName = getParametersValue(parameters, "issuerName", V2Form.defaultValues("issuerName"));
 		
 		if("baseCertificateID" in parameters)
 			/**
 			 * @type {IssuerSerial}
-			 * @description baseCertificateID
+			 * @desc baseCertificateID
 			 */
 			this.baseCertificateID = getParametersValue(parameters, "baseCertificateID", V2Form.defaultValues("baseCertificateID"));
 		
 		if("objectDigestInfo" in parameters)
 			/**
 			 * @type {ObjectDigestInfo}
-			 * @description objectDigestInfo
+			 * @desc objectDigestInfo
 			 */
 			this.objectDigestInfo = getParametersValue(parameters, "objectDigestInfo", V2Form.defaultValues("objectDigestInfo"));
 		//endregion
@@ -264,21 +268,25 @@ export class V2Form
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * V2Form ::= SEQUENCE {
+	 *   issuerName            GeneralNames  OPTIONAL,
+	 *   baseCertificateID     [0] IssuerSerial  OPTIONAL,
+	 *   objectDigestInfo      [1] ObjectDigestInfo  OPTIONAL
+	 *     -- issuerName MUST be present in this profile
+	 *     -- baseCertificateID and objectDigestInfo MUST NOT
+	 *     -- be present in this profile
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// V2Form ::= SEQUENCE {
-		//   issuerName            GeneralNames  OPTIONAL,
-		//   baseCertificateID     [0] IssuerSerial  OPTIONAL,
-		//   objectDigestInfo      [1] ObjectDigestInfo  OPTIONAL
-		//     -- issuerName MUST be present in this profile
-		//     -- baseCertificateID and objectDigestInfo MUST NOT
-		//     -- be present in this profile
-		// }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -441,7 +449,7 @@ export class Holder
 	/**
 	 * Constructor for Holder class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
@@ -449,21 +457,21 @@ export class Holder
 		if("baseCertificateID" in parameters)
 			/**
 			 * @type {IssuerSerial}
-			 * @description baseCertificateID
+			 * @desc baseCertificateID
 			 */
 			this.baseCertificateID = getParametersValue(parameters, "baseCertificateID", Holder.defaultValues("baseCertificateID"));
 		
 		if("entityName" in parameters)
 			/**
 			 * @type {GeneralNames}
-			 * @description entityName
+			 * @desc entityName
 			 */
 			this.entityName = getParametersValue(parameters, "entityName", Holder.defaultValues("entityName"));
 		
 		if("objectDigestInfo" in parameters)
 			/**
 			 * @type {ObjectDigestInfo}
-			 * @description objectDigestInfo
+			 * @desc objectDigestInfo
 			 */
 			this.objectDigestInfo = getParametersValue(parameters, "objectDigestInfo", Holder.defaultValues("objectDigestInfo"));
 		//endregion
@@ -494,23 +502,27 @@ export class Holder
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Holder ::= SEQUENCE {
+	 *   baseCertificateID   [0] IssuerSerial OPTIONAL,
+	 *       -- the issuer and serial number of
+	 *       -- the holder's Public Key Certificate
+	 *   entityName          [1] GeneralNames OPTIONAL,
+	 *       -- the name of the claimant or role
+	 *   objectDigestInfo    [2] ObjectDigestInfo OPTIONAL
+	 *       -- used to directly authenticate the holder,
+	 *       -- for example, an executable
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// Holder ::= SEQUENCE {
-		//   baseCertificateID   [0] IssuerSerial OPTIONAL,
-		//       -- the issuer and serial number of
-		//       -- the holder's Public Key Certificate
-		//   entityName          [1] GeneralNames OPTIONAL,
-		//       -- the name of the claimant or role
-		//   objectDigestInfo    [2] ObjectDigestInfo OPTIONAL
-		//       -- used to directly authenticate the holder,
-		//       -- for example, an executable
-		// }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -689,58 +701,58 @@ export class AttributeCertificateInfoV2
 	/**
 	 * Constructor for AttributeCertificateInfoV2 class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", AttributeCertificateInfoV2.defaultValues("version"));
 		/**
 		 * @type {Holder}
-		 * @description holder
+		 * @desc holder
 		 */
 		this.holder = getParametersValue(parameters, "holder", AttributeCertificateInfoV2.defaultValues("holder"));
 		/**
 		 * @type {GeneralNames|V2Form}
-		 * @description issuer
+		 * @desc issuer
 		 */
 		this.issuer = getParametersValue(parameters, "issuer", AttributeCertificateInfoV2.defaultValues("issuer"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signature
+		 * @desc signature
 		 */
 		this.signature = getParametersValue(parameters, "signature", AttributeCertificateInfoV2.defaultValues("signature"));
 		/**
 		 * @type {Integer}
-		 * @description serialNumber
+		 * @desc serialNumber
 		 */
 		this.serialNumber = getParametersValue(parameters, "serialNumber", AttributeCertificateInfoV2.defaultValues("serialNumber"));
 		/**
 		 * @type {AttCertValidityPeriod}
-		 * @description attrCertValidityPeriod
+		 * @desc attrCertValidityPeriod
 		 */
 		this.attrCertValidityPeriod = getParametersValue(parameters, "attrCertValidityPeriod", AttributeCertificateInfoV2.defaultValues("attrCertValidityPeriod"));
 		/**
 		 * @type {Array.<Attribute>}
-		 * @description attributes
+		 * @desc attributes
 		 */
 		this.attributes = getParametersValue(parameters, "attributes", AttributeCertificateInfoV2.defaultValues("attributes"));
 		
 		if("issuerUniqueID" in parameters)
 			/**
 			 * @type {BitString}
-			 * @description issuerUniqueID
+			 * @desc issuerUniqueID
 			 */
 			this.issuerUniqueID = getParametersValue(parameters, "issuerUniqueID", AttributeCertificateInfoV2.defaultValues("issuerUniqueID"));
 		
 		if("extensions" in parameters)
 			/**
 			 * @type {Extensions}
-			 * @description extensions
+			 * @desc extensions
 			 */
 			this.extensions = getParametersValue(parameters, "extensions", AttributeCertificateInfoV2.defaultValues("extensions"));
 		//endregion
@@ -783,24 +795,28 @@ export class AttributeCertificateInfoV2
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AttributeCertificateInfoV2 ::= SEQUENCE {
+	 *   version                 AttCertVersion, -- version is v2
+	 *   holder                  Holder,
+	 *   issuer                  AttCertIssuer,
+	 *   signature               AlgorithmIdentifier,
+	 *   serialNumber            CertificateSerialNumber,
+	 *   attrCertValidityPeriod  AttCertValidityPeriod,
+	 *   attributes              SEQUENCE OF Attribute,
+	 *   issuerUniqueID          UniqueIdentifier OPTIONAL,
+	 *   extensions              Extensions OPTIONAL
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// AttributeCertificateInfoV2 ::= SEQUENCE {
-		//   version                 AttCertVersion, -- version is v2
-		//   holder                  Holder,
-		//   issuer                  AttCertIssuer,
-		//   signature               AlgorithmIdentifier,
-		//   serialNumber            CertificateSerialNumber,
-		//   attrCertValidityPeriod  AttCertValidityPeriod,
-		//   attributes              SEQUENCE OF Attribute,
-		//   issuerUniqueID          UniqueIdentifier OPTIONAL,
-		//   extensions              Extensions OPTIONAL
-		// }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -1011,24 +1027,24 @@ export default class AttributeCertificateV2
 	/**
 	 * Constructor for AttributeCertificateV2 class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AttributeCertificateInfoV2}
-		 * @description acinfo
+		 * @desc acinfo
 		 */
 		this.acinfo = getParametersValue(parameters, "acinfo", AttributeCertificateV2.defaultValues("acinfo"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signatureAlgorithm
+		 * @desc signatureAlgorithm
 		 */
 		this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", AttributeCertificateV2.defaultValues("signatureAlgorithm"));
 		/**
 		 * @type {BitString}
-		 * @description signatureValue
+		 * @desc signatureValue
 		 */
 		this.signatureValue = getParametersValue(parameters, "signatureValue", AttributeCertificateV2.defaultValues("signatureValue"));
 		//endregion
@@ -1059,18 +1075,22 @@ export default class AttributeCertificateV2
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AttributeCertificate ::= SEQUENCE {
+	 *   acinfo               AttributeCertificateInfoV2,
+	 *   signatureAlgorithm   AlgorithmIdentifier,
+	 *   signatureValue       BIT STRING
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// AttributeCertificate ::= SEQUENCE {
-		//   acinfo               AttributeCertificateInfoV2,
-		//   signatureAlgorithm   AlgorithmIdentifier,
-		//   signatureValue       BIT STRING
-		// }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

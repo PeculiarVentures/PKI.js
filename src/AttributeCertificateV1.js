@@ -14,19 +14,19 @@ export class AttCertValidityPeriod
 	/**
 	 * Constructor for AttCertValidityPeriod class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {GeneralizedTime}
-		 * @description notBeforeTime
+		 * @desc notBeforeTime
 		 */
 		this.notBeforeTime = getParametersValue(parameters, "notBeforeTime", AttCertValidityPeriod.defaultValues("notBeforeTime"));
 		/**
 		 * @type {GeneralizedTime}
-		 * @description notAfterTime
+		 * @desc notAfterTime
 		 */
 		this.notAfterTime = getParametersValue(parameters, "notAfterTime", AttCertValidityPeriod.defaultValues("notAfterTime"));
 		//endregion
@@ -54,17 +54,21 @@ export class AttCertValidityPeriod
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AttCertValidityPeriod  ::= SEQUENCE {
+	 *   notBeforeTime  GeneralizedTime,
+	 *   notAfterTime   GeneralizedTime
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// AttCertValidityPeriod  ::= SEQUENCE {
-		//   notBeforeTime  GeneralizedTime,
-		//   notAfterTime   GeneralizedTime
-		// }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -155,26 +159,26 @@ export class IssuerSerial
 	/**
 	 * Constructor for IssuerSerial class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {RelativeDistinguishedNames}
-		 * @description issuer
+		 * @desc issuer
 		 */
 		this.issuer = getParametersValue(parameters, "issuer", IssuerSerial.defaultValues("issuer"));
 		/**
 		 * @type {Integer}
-		 * @description serialNumber
+		 * @desc serialNumber
 		 */
 		this.serialNumber = getParametersValue(parameters, "serialNumber", IssuerSerial.defaultValues("serialNumber"));
 		
 		if("issuerUID" in parameters)
 			/**
 			 * @type {BitString}
-			 * @description issuerUID
+			 * @desc issuerUID
 			 */
 			this.issuerUID = getParametersValue(parameters, "issuerUID", IssuerSerial.defaultValues("issuerUID"));
 		//endregion
@@ -205,21 +209,25 @@ export class IssuerSerial
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * IssuerSerial  ::=  SEQUENCE {
+	 *   	issuer         GeneralNames,
+	 * 		serial         CertificateSerialNumber,
+	 * 		issuerUID      UniqueIdentifier OPTIONAL
+	 * }
+	 *
+	 * CertificateSerialNumber ::= INTEGER
+	 * UniqueIdentifier  ::=  BIT STRING
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// 	IssuerSerial  ::=  SEQUENCE {
-		//   	issuer         GeneralNames,
-		// 		serial         CertificateSerialNumber,
-		// 		issuerUID      UniqueIdentifier OPTIONAL
-		// }
-		//
-		// CertificateSerialNumber ::= INTEGER
-		// UniqueIdentifier  ::=  BIT STRING
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -334,68 +342,68 @@ export class AttributeCertificateInfoV1
 	/**
 	 * Constructor for AttributeCertificateInfoV1 class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", AttributeCertificateInfoV1.defaultValues("version"));
 		
 		if("baseCertificateID" in parameters)
 			/**
 			 * @type {IssuerSerial}
-			 * @description baseCertificateID
+			 * @desc baseCertificateID
 			 */
 			this.baseCertificateID = getParametersValue(parameters, "baseCertificateID", AttributeCertificateInfoV1.defaultValues("baseCertificateID"));
 		
 		if("subjectName" in parameters)
 			/**
 			 * @type {GeneralNames}
-			 * @description subjectName
+			 * @desc subjectName
 			 */
 			this.subjectName = getParametersValue(parameters, "subjectName", AttributeCertificateInfoV1.defaultValues("subjectName"));
 
 		/**
 		 * @type {GeneralNames}
-		 * @description issuer
+		 * @desc issuer
 		 */
 		this.issuer = getParametersValue(parameters, "issuer", AttributeCertificateInfoV1.defaultValues("issuer"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signature
+		 * @desc signature
 		 */
 		this.signature = getParametersValue(parameters, "signature", AttributeCertificateInfoV1.defaultValues("signature"));
 		/**
 		 * @type {Integer}
-		 * @description serialNumber
+		 * @desc serialNumber
 		 */
 		this.serialNumber = getParametersValue(parameters, "serialNumber", AttributeCertificateInfoV1.defaultValues("serialNumber"));
 		/**
 		 * @type {AttCertValidityPeriod}
-		 * @description attrCertValidityPeriod
+		 * @desc attrCertValidityPeriod
 		 */
 		this.attrCertValidityPeriod = getParametersValue(parameters, "attrCertValidityPeriod", AttributeCertificateInfoV1.defaultValues("attrCertValidityPeriod"));
 		/**
 		 * @type {Array.<Attribute>}
-		 * @description attributes
+		 * @desc attributes
 		 */
 		this.attributes = getParametersValue(parameters, "attributes", AttributeCertificateInfoV1.defaultValues("attributes"));
 		
 		if("issuerUniqueID" in parameters)
 			/**
 			 * @type {BitString}
-			 * @description issuerUniqueID
+			 * @desc issuerUniqueID
 			 */
 			this.issuerUniqueID = getParametersValue(parameters, "issuerUniqueID", AttributeCertificateInfoV1.defaultValues("issuerUniqueID"));
 			
 		if("extensions" in parameters)
 			/**
 			 * @type {Extensions}
-			 * @description extensions
+			 * @desc extensions
 			 */
 			this.extensions = getParametersValue(parameters, "extensions", AttributeCertificateInfoV1.defaultValues("extensions"));
 		//endregion
@@ -440,26 +448,30 @@ export class AttributeCertificateInfoV1
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AttributeCertificateInfo ::= SEQUENCE {
+	 * 	version Version DEFAULT v1,
+	 * 	subject CHOICE {
+	 * 		baseCertificateID [0] IssuerSerial, -- associated with a Public Key Certificate
+	 * 		subjectName [1] GeneralNames }, -- associated with a name
+	 * 	issuer GeneralNames, -- CA issuing the attribute certificate
+	 * 	signature AlgorithmIdentifier,
+	 * 	serialNumber CertificateSerialNumber,
+	 * 	attrCertValidityPeriod AttCertValidityPeriod,
+	 * 	attributes SEQUENCE OF Attribute,
+	 * 	issuerUniqueID UniqueIdentifier OPTIONAL,
+	 * 	extensions Extensions OPTIONAL
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// AttributeCertificateInfo ::= SEQUENCE {
-		// 	version Version DEFAULT v1,
-		// 	subject CHOICE {
-		// 		baseCertificateID [0] IssuerSerial, -- associated with a Public Key Certificate
-		// 		subjectName [1] GeneralNames }, -- associated with a name
-		// 	issuer GeneralNames, -- CA issuing the attribute certificate
-		// 	signature AlgorithmIdentifier,
-		// 	serialNumber CertificateSerialNumber,
-		// 	attrCertValidityPeriod AttCertValidityPeriod,
-		// 	attributes SEQUENCE OF Attribute,
-		// 	issuerUniqueID UniqueIdentifier OPTIONAL,
-		// 	extensions Extensions OPTIONAL
-		// }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -699,24 +711,24 @@ export default class AttributeCertificateV1
 	/**
 	 * Constructor for AttributeCertificateV1 class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AttributeCertificateInfoV1}
-		 * @description acinfo
+		 * @desc acinfo
 		 */
 		this.acinfo = getParametersValue(parameters, "acinfo", AttributeCertificateV1.defaultValues("acinfo"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signatureAlgorithm
+		 * @desc signatureAlgorithm
 		 */
 		this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", AttributeCertificateV1.defaultValues("signatureAlgorithm"));
 		/**
 		 * @type {BitString}
-		 * @description signatureValue
+		 * @desc signatureValue
 		 */
 		this.signatureValue = getParametersValue(parameters, "signatureValue", AttributeCertificateV1.defaultValues("signatureValue"));
 		//endregion
@@ -747,18 +759,22 @@ export default class AttributeCertificateV1
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AttributeCertificate ::= SEQUENCE {
+	 *   acinfo               AttributeCertificateInfoV1,
+	 *   signatureAlgorithm   AlgorithmIdentifier,
+	 *   signatureValue       BIT STRING
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// AttributeCertificate ::= SEQUENCE {
-		//   acinfo               AttributeCertificateInfoV1,
-		//   signatureAlgorithm   AlgorithmIdentifier,
-		//   signatureValue       BIT STRING
-		// }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

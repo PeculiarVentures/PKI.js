@@ -14,42 +14,42 @@ export default class KeyAgreeRecipientInfo
 	/**
 	 * Constructor for KeyAgreeRecipientInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", KeyAgreeRecipientInfo.defaultValues("version"));
 		/**
 		 * @type {OriginatorIdentifierOrKey}
-		 * @description originator
+		 * @desc originator
 		 */
 		this.originator = getParametersValue(parameters, "originator", KeyAgreeRecipientInfo.defaultValues("originator"));
 
 		if("ukm" in parameters)
 			/**
 			 * @type {OctetString}
-			 * @description ukm
+			 * @desc ukm
 			 */
 			this.ukm = getParametersValue(parameters, "ukm", KeyAgreeRecipientInfo.defaultValues("ukm"));
 
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description keyEncryptionAlgorithm
+		 * @desc keyEncryptionAlgorithm
 		 */
 		this.keyEncryptionAlgorithm = getParametersValue(parameters, "keyEncryptionAlgorithm", KeyAgreeRecipientInfo.defaultValues("keyEncryptionAlgorithm"));
 		/**
 		 * @type {RecipientEncryptedKeys}
-		 * @description recipientEncryptedKeys
+		 * @desc recipientEncryptedKeys
 		 */
 		this.recipientEncryptedKeys = getParametersValue(parameters, "recipientEncryptedKeys", KeyAgreeRecipientInfo.defaultValues("recipientEncryptedKeys"));
 		/**
 		 * @type {Certificate}
-		 * @description recipientCertificate For some reasons we need to store recipient's certificate here
+		 * @desc recipientCertificate For some reasons we need to store recipient's certificate here
 		 */
 		this.recipientCertificate = getParametersValue(parameters, "recipientCertificate", KeyAgreeRecipientInfo.defaultValues("recipientCertificate"));
 		//endregion
@@ -112,19 +112,23 @@ export default class KeyAgreeRecipientInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * KeyAgreeRecipientInfo ::= SEQUENCE {
+	 *    version CMSVersion,  -- always set to 3
+	 *    originator [0] EXPLICIT OriginatorIdentifierOrKey,
+	 *    ukm [1] EXPLICIT UserKeyingMaterial OPTIONAL,
+	 *    keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
+	 *    recipientEncryptedKeys RecipientEncryptedKeys }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//KeyAgreeRecipientInfo ::= SEQUENCE {
-		//    version CMSVersion,  -- always set to 3
-		//    originator [0] EXPLICIT OriginatorIdentifierOrKey,
-		//    ukm [1] EXPLICIT UserKeyingMaterial OPTIONAL,
-		//    keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
-		//    recipientEncryptedKeys RecipientEncryptedKeys }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

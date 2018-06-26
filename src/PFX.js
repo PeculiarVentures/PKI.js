@@ -22,33 +22,33 @@ export default class PFX
 	/**
 	 * Constructor for PFX class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", PFX.defaultValues("version"));
 		/**
 		 * @type {ContentInfo}
-		 * @description authSafe
+		 * @desc authSafe
 		 */
 		this.authSafe = getParametersValue(parameters, "authSafe", PFX.defaultValues("authSafe"));
 		
 		if("macData" in parameters)
 			/**
 			 * @type {MacData}
-			 * @description macData
+			 * @desc macData
 			 */
 			this.macData = getParametersValue(parameters, "macData", PFX.defaultValues("macData"));
 		
 		if("parsedValue" in parameters)
 			/**
 			 * @type {*}
-			 * @description parsedValue
+			 * @desc parsedValue
 			 */
 			this.parsedValue = getParametersValue(parameters, "parsedValue", PFX.defaultValues("parsedValue"));
 		//endregion
@@ -106,18 +106,22 @@ export default class PFX
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PFX ::= SEQUENCE {
+	 *    version		INTEGER {v3(3)}(v3,...),
+	 *    authSafe	ContentInfo,
+	 *    macData    	MacData OPTIONAL
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//PFX ::= SEQUENCE {
-		//    version		INTEGER {v3(3)}(v3,...),
-		//    authSafe	ContentInfo,
-		//    macData    	MacData OPTIONAL
-		//}
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

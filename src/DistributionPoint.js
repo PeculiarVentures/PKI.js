@@ -12,7 +12,7 @@ export default class DistributionPoint
 	/**
 	 * Constructor for DistributionPoint class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 * @property {Object} [distributionPoint]
 	 * @property {Object} [reasons]
 	 * @property {Object} [cRLIssuer]
@@ -23,21 +23,21 @@ export default class DistributionPoint
 		if("distributionPoint" in parameters)
 			/**
 			 * @type {Array.<GeneralName>}
-			 * @description distributionPoint
+			 * @desc distributionPoint
 			 */
 			this.distributionPoint = getParametersValue(parameters, "distributionPoint", DistributionPoint.defaultValues("distributionPoint"));
 
 		if("reasons" in parameters)
 			/**
 			 * @type {BitString}
-			 * @description values
+			 * @desc values
 			 */
 			this.reasons = getParametersValue(parameters, "reasons", DistributionPoint.defaultValues("reasons"));
 
 		if("cRLIssuer" in parameters)
 			/**
 			 * @type {Array.<GeneralName>}
-			 * @description cRLIssuer
+			 * @desc cRLIssuer
 			 */
 			this.cRLIssuer = getParametersValue(parameters, "cRLIssuer", DistributionPoint.defaultValues("cRLIssuer"));
 		//endregion
@@ -68,32 +68,36 @@ export default class DistributionPoint
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * DistributionPoint ::= SEQUENCE {
+	 *    distributionPoint       [0]     DistributionPointName OPTIONAL,
+	 *    reasons                 [1]     ReasonFlags OPTIONAL,
+	 *    cRLIssuer               [2]     GeneralNames OPTIONAL }
+	 *
+	 * DistributionPointName ::= CHOICE {
+	 *    fullName                [0]     GeneralNames,
+	 *    nameRelativeToCRLIssuer [1]     RelativeDistinguishedName }
+	 *
+	 * ReasonFlags ::= BIT STRING {
+	 *    unused                  (0),
+	 *    keyCompromise           (1),
+	 *    cACompromise            (2),
+	 *    affiliationChanged      (3),
+	 *    superseded              (4),
+	 *    cessationOfOperation    (5),
+	 *    certificateHold         (6),
+	 *    privilegeWithdrawn      (7),
+	 *    aACompromise            (8) }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//DistributionPoint ::= SEQUENCE {
-		//    distributionPoint       [0]     DistributionPointName OPTIONAL,
-		//    reasons                 [1]     ReasonFlags OPTIONAL,
-		//    cRLIssuer               [2]     GeneralNames OPTIONAL }
-		//
-		//DistributionPointName ::= CHOICE {
-		//    fullName                [0]     GeneralNames,
-		//    nameRelativeToCRLIssuer [1]     RelativeDistinguishedName }
-		//
-		//ReasonFlags ::= BIT STRING {
-		//    unused                  (0),
-		//    keyCompromise           (1),
-		//    cACompromise            (2),
-		//    affiliationChanged      (3),
-		//    superseded              (4),
-		//    cessationOfOperation    (5),
-		//    certificateHold         (6),
-		//    privilegeWithdrawn      (7),
-		//    aACompromise            (8) }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

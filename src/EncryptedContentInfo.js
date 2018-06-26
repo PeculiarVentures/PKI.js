@@ -11,19 +11,19 @@ export default class EncryptedContentInfo
 	/**
 	 * Constructor for EncryptedContentInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description contentType
+		 * @desc contentType
 		 */
 		this.contentType = getParametersValue(parameters, "contentType", EncryptedContentInfo.defaultValues("contentType"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description contentEncryptionAlgorithm
+		 * @desc contentEncryptionAlgorithm
 		 */
 		this.contentEncryptionAlgorithm = getParametersValue(parameters, "contentEncryptionAlgorithm", EncryptedContentInfo.defaultValues("contentEncryptionAlgorithm"));
 
@@ -31,7 +31,7 @@ export default class EncryptedContentInfo
 		{
 			/**
 			 * @type {OctetString}
-			 * @description encryptedContent (!!!) could be contructive or primitive value (!!!)
+			 * @desc encryptedContent (!!!) could be contructive or primitive value (!!!)
 			 */
 			this.encryptedContent = parameters.encryptedContent;
 			
@@ -117,21 +117,25 @@ export default class EncryptedContentInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * EncryptedContentInfo ::= SEQUENCE {
+	 *    contentType ContentType,
+	 *    contentEncryptionAlgorithm ContentEncryptionAlgorithmIdentifier,
+	 *    encryptedContent [0] IMPLICIT EncryptedContent OPTIONAL }
+	 *
+	 * Comment: Strange, but modern crypto engines create "encryptedContent" as "[0] EXPLICIT EncryptedContent"
+	 *
+	 * EncryptedContent ::= OCTET STRING
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//EncryptedContentInfo ::= SEQUENCE {
-		//    contentType ContentType,
-		//    contentEncryptionAlgorithm ContentEncryptionAlgorithmIdentifier,
-		//    encryptedContent [0] IMPLICIT EncryptedContent OPTIONAL }
-		//
-		// Comment: Strange, but modern crypto engines create "encryptedContent" as "[0] EXPLICIT EncryptedContent"
-		//
-		//EncryptedContent ::= OCTET STRING
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

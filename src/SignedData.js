@@ -23,51 +23,51 @@ export default class SignedData
 	/**
 	 * Constructor for SignedData class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", SignedData.defaultValues("version"));
 		/**
 		 * @type {Array.<AlgorithmIdentifier>}
-		 * @description digestAlgorithms
+		 * @desc digestAlgorithms
 		 */
 		this.digestAlgorithms = getParametersValue(parameters, "digestAlgorithms", SignedData.defaultValues("digestAlgorithms"));
 		/**
 		 * @type {EncapsulatedContentInfo}
-		 * @description encapContentInfo
+		 * @desc encapContentInfo
 		 */
 		this.encapContentInfo = getParametersValue(parameters, "encapContentInfo", SignedData.defaultValues("encapContentInfo"));
 		
 		if("certificates" in parameters)
 			/**
 			 * @type {Array.<Certificate|OtherCertificateFormat>}
-			 * @description certificates
+			 * @desc certificates
 			 */
 			this.certificates = getParametersValue(parameters, "certificates", SignedData.defaultValues("certificates"));
 		
 		if("crls" in parameters)
 			/**
 			 * @type {Array.<CertificateRevocationList|OtherRevocationInfoFormat>}
-			 * @description crls
+			 * @desc crls
 			 */
 			this.crls = getParametersValue(parameters, "crls", SignedData.defaultValues("crls"));
 		
 		if("ocsps" in parameters)
 			/**
 			 * @type {Array.<BasicOCSPResponse>}
-			 * @description crls
+			 * @desc crls
 			 */
 			this.ocsps = getParametersValue(parameters, "ocsps", SignedData.defaultValues("ocsps"));
 
 		/**
 		 * @type {Array.<SignerInfo>}
-		 * @description signerInfos
+		 * @desc signerInfos
 		 */
 		this.signerInfos = getParametersValue(parameters, "signerInfos", SignedData.defaultValues("signerInfos"));
 		//endregion
@@ -130,20 +130,24 @@ export default class SignedData
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * SignedData ::= SEQUENCE {
+	 *    version CMSVersion,
+	 *    digestAlgorithms DigestAlgorithmIdentifiers,
+	 *    encapContentInfo EncapsulatedContentInfo,
+	 *    certificates [0] IMPLICIT CertificateSet OPTIONAL,
+	 *    crls [1] IMPLICIT RevocationInfoChoices OPTIONAL,
+	 *    signerInfos SignerInfos }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//SignedData ::= SEQUENCE {
-		//    version CMSVersion,
-		//    digestAlgorithms DigestAlgorithmIdentifiers,
-		//    encapContentInfo EncapsulatedContentInfo,
-		//    certificates [0] IMPLICIT CertificateSet OPTIONAL,
-		//    crls [1] IMPLICIT RevocationInfoChoices OPTIONAL,
-		//    signerInfos SignerInfos }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -372,16 +376,15 @@ export default class SignedData
 	//**********************************************************************************
 	/**
 	 * Verify current SignedData value
-	 * @param signer
-	 * @param data
-	 * @param trustedCerts
-	 * @param checkDate
-	 * @param checkChain
-	 * @param includeSignerCertificate
-	 * @param extendedMode
-	 * @param findOrigin
-	 * @param findIssuer
-	 * @returns {*}
+	 * @param {Object} [param={}]
+	 * @param {Number} [param.signer = -1] Index of the signer which information we need to verify
+	 * @param {ArrayBuffer} [param.data=new ArrayBuffer(0)]
+	 * @param {Array.<Certificate>} [param.trustedCerts=[]]
+	 * @param {Date} [param.checkDate=new Date()]
+	 * @param {Boolean} [param.checkChain=false]
+	 * @param {Boolean} [param.extendedMode=false]
+	 * @param {?Function} [findOrigin=null]
+	 * @param {?Function} [findIssuer=null]
 	 */
 	verify({
 		signer = (-1),

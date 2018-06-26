@@ -11,27 +11,27 @@ export default class ECCCMSSharedInfo
 	/**
 	 * Constructor for ECCCMSSharedInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description keyInfo
+		 * @desc keyInfo
 		 */
 		this.keyInfo = getParametersValue(parameters, "keyInfo", ECCCMSSharedInfo.defaultValues("keyInfo"));
 
 		if("entityUInfo" in parameters)
 			/**
 			 * @type {OctetString}
-			 * @description entityUInfo
+			 * @desc entityUInfo
 			 */
 			this.entityUInfo = getParametersValue(parameters, "entityUInfo", ECCCMSSharedInfo.defaultValues("entityUInfo"));
 
 		/**
 		 * @type {OctetString}
-		 * @description suppPubInfo
+		 * @desc suppPubInfo
 		 */
 		this.suppPubInfo = getParametersValue(parameters, "suppPubInfo", ECCCMSSharedInfo.defaultValues("suppPubInfo"));
 		//endregion
@@ -80,17 +80,21 @@ export default class ECCCMSSharedInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * ECC-CMS-SharedInfo  ::=  SEQUENCE {
+	 *    keyInfo      AlgorithmIdentifier,
+	 *    entityUInfo  [0] EXPLICIT OCTET STRING OPTIONAL,
+	 *    suppPubInfo  [2] EXPLICIT OCTET STRING }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//ECC-CMS-SharedInfo  ::=  SEQUENCE {
-		//    keyInfo      AlgorithmIdentifier,
-		//    entityUInfo  [0] EXPLICIT OCTET STRING OPTIONAL,
-		//    suppPubInfo  [2] EXPLICIT OCTET STRING }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

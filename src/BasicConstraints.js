@@ -10,7 +10,7 @@ export default class BasicConstraints
 	/**
 	 * Constructor for BasicConstraints class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 * @property {Object} [cA]
 	 * @property {Object} [pathLenConstraint]
 	 */
@@ -19,14 +19,14 @@ export default class BasicConstraints
 		//region Internal properties of the object
 		/**
 		 * @type {boolean}
-		 * @description cA
+		 * @desc cA
 		 */
 		this.cA = getParametersValue(parameters, "cA", false);
 
 		if("pathLenConstraint" in parameters)
 			/**
 			 * @type {number|Integer}
-			 * @description pathLenConstraint
+			 * @desc pathLenConstraint
 			 */
 			this.pathLenConstraint = getParametersValue(parameters, "pathLenConstraint", 0);
 		//endregion
@@ -53,18 +53,20 @@ export default class BasicConstraints
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * BasicConstraints ::= SEQUENCE {
+	 *    cA                      BOOLEAN DEFAULT FALSE,
+	 *    pathLenConstraint       INTEGER (0..MAX) OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// BasicConstraints OID ::= 2.5.29.19
-		//
-		//BasicConstraints ::= SEQUENCE {
-		//    cA                      BOOLEAN DEFAULT FALSE,
-		//    pathLenConstraint       INTEGER (0..MAX) OPTIONAL }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

@@ -25,10 +25,13 @@ In the new version of library we have some new features:
 * New version of "certificate chaing verification engine" passed almost all tests from NIST PKITS. Tests are also shipped with the library;
 * Internal "WebCrypto shim" making it possible to work with "spki/pkcs8" formats in any environment;
 
+## Additional information
+
 Full detailed information about all PKI.js features could be found [_**in separate file**_](FEATURES.md).
 Description of PKI.js code structure could be found [_**in separate file**_](https://github.com/PeculiarVentures/PKI.js/tree/master/src/README.md).
 
 ## Important Information for PKI.js V1 Users
+
 PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to make it easier to move from PKIjs V1 code to PKIjs V2 code we made a file that provides a [_**mapping**_](MAPPING.md) between old and new class names.
 
 ## Information about PKIjs internal structure

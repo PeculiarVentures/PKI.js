@@ -11,7 +11,7 @@ export default class RelativeDistinguishedNames
 	/**
 	 * Constructor for RelativeDistinguishedNames class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 * @property {Array.<AttributeTypeAndValue>} [typesAndValues] Array of "type and value" objects
 	 * @property {ArrayBuffer} [valueBeforeDecode] Value of the RDN before decoding from schema
 	 */
@@ -20,12 +20,12 @@ export default class RelativeDistinguishedNames
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<AttributeTypeAndValue>}
-		 * @description Array of "type and value" objects
+		 * @desc Array of "type and value" objects
 		 */
 		this.typesAndValues = getParametersValue(parameters, "typesAndValues", RelativeDistinguishedNames.defaultValues("typesAndValues"));
 		/**
 		 * @type {ArrayBuffer}
-		 * @description Value of the RDN before decoding from schema
+		 * @desc Value of the RDN before decoding from schema
 		 */
 		this.valueBeforeDecode = getParametersValue(parameters, "valueBeforeDecode", RelativeDistinguishedNames.defaultValues("valueBeforeDecode"));
 		//endregion
@@ -72,17 +72,21 @@ export default class RelativeDistinguishedNames
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RDNSequence ::= Sequence OF RelativeDistinguishedName
+	 *
+	 * RelativeDistinguishedName ::=
+	 * SET SIZE (1..MAX) OF AttributeTypeAndValue
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RDNSequence ::= Sequence OF RelativeDistinguishedName
-		//
-		//RelativeDistinguishedName ::=
-		//SET SIZE (1..MAX) OF AttributeTypeAndValue
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName] Name for entire block

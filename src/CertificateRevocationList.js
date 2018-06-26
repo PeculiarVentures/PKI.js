@@ -108,66 +108,66 @@ export default class CertificateRevocationList {
 	/**
 	 * Constructor for Attribute class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {ArrayBuffer}
-		 * @description tbs
+		 * @desc tbs
 		 */
 		this.tbs = getParametersValue(parameters, "tbs", CertificateRevocationList.defaultValues("tbs"));
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", CertificateRevocationList.defaultValues("version"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signature
+		 * @desc signature
 		 */
 		this.signature = getParametersValue(parameters, "signature", CertificateRevocationList.defaultValues("signature"));
 		/**
 		 * @type {RelativeDistinguishedNames}
-		 * @description issuer
+		 * @desc issuer
 		 */
 		this.issuer = getParametersValue(parameters, "issuer", CertificateRevocationList.defaultValues("issuer"));
 		/**
 		 * @type {Time}
-		 * @description thisUpdate
+		 * @desc thisUpdate
 		 */
 		this.thisUpdate = getParametersValue(parameters, "thisUpdate", CertificateRevocationList.defaultValues("thisUpdate"));
 		
 		if("nextUpdate" in parameters)
 			/**
 			 * @type {Time}
-			 * @description nextUpdate
+			 * @desc nextUpdate
 			 */
 			this.nextUpdate = getParametersValue(parameters, "nextUpdate", CertificateRevocationList.defaultValues("nextUpdate"));
 		
 		if("revokedCertificates" in parameters)
 			/**
 			 * @type {Array.<RevokedCertificate>}
-			 * @description revokedCertificates
+			 * @desc revokedCertificates
 			 */
 			this.revokedCertificates = getParametersValue(parameters, "revokedCertificates", CertificateRevocationList.defaultValues("revokedCertificates"));
 		
 		if("crlExtensions" in parameters)
 			/**
 			 * @type {Extensions}
-			 * @description crlExtensions
+			 * @desc crlExtensions
 			 */
 			this.crlExtensions = getParametersValue(parameters, "crlExtensions", CertificateRevocationList.defaultValues("crlExtensions"));
 		
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signatureAlgorithm
+		 * @desc signatureAlgorithm
 		 */
 		this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", CertificateRevocationList.defaultValues("signatureAlgorithm"));
 		/**
 		 * @type {BitString}
-		 * @description signatureValue
+		 * @desc signatureValue
 		 */
 		this.signatureValue = getParametersValue(parameters, "signatureValue", CertificateRevocationList.defaultValues("signatureValue"));
 		//endregion
@@ -212,17 +212,21 @@ export default class CertificateRevocationList {
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * CertificateList  ::=  SEQUENCE  {
+	 *    tbsCertList          TBSCertList,
+	 *    signatureAlgorithm   AlgorithmIdentifier,
+	 *    signatureValue       BIT STRING  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//CertificateList  ::=  SEQUENCE  {
-		//    tbsCertList          TBSCertList,
-		//    signatureAlgorithm   AlgorithmIdentifier,
-		//    signatureValue       BIT STRING  }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

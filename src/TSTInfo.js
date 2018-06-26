@@ -15,69 +15,69 @@ export default class TSTInfo
 	/**
 	 * Constructor for TSTInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", TSTInfo.defaultValues("version"));
 		/**
 		 * @type {string}
-		 * @description policy
+		 * @desc policy
 		 */
 		this.policy = getParametersValue(parameters, "policy", TSTInfo.defaultValues("policy"));
 		/**
 		 * @type {MessageImprint}
-		 * @description messageImprint
+		 * @desc messageImprint
 		 */
 		this.messageImprint = getParametersValue(parameters, "messageImprint", TSTInfo.defaultValues("messageImprint"));
 		/**
 		 * @type {Integer}
-		 * @description serialNumber
+		 * @desc serialNumber
 		 */
 		this.serialNumber = getParametersValue(parameters, "serialNumber", TSTInfo.defaultValues("serialNumber"));
 		/**
 		 * @type {Date}
-		 * @description genTime
+		 * @desc genTime
 		 */
 		this.genTime = getParametersValue(parameters, "genTime", TSTInfo.defaultValues("genTime"));
 
 		if("accuracy" in parameters)
 			/**
 			 * @type {Accuracy}
-			 * @description accuracy
+			 * @desc accuracy
 			 */
 			this.accuracy = getParametersValue(parameters, "accuracy", TSTInfo.defaultValues("accuracy"));
 
 		if("ordering" in parameters)
 			/**
 			 * @type {boolean}
-			 * @description ordering
+			 * @desc ordering
 			 */
 			this.ordering = getParametersValue(parameters, "ordering", TSTInfo.defaultValues("ordering"));
 
 		if("nonce" in parameters)
 			/**
 			 * @type {Integer}
-			 * @description nonce
+			 * @desc nonce
 			 */
 			this.nonce = getParametersValue(parameters, "nonce", TSTInfo.defaultValues("nonce"));
 
 		if("tsa" in parameters)
 			/**
 			 * @type {GeneralName}
-			 * @description tsa
+			 * @desc tsa
 			 */
 			this.tsa = getParametersValue(parameters, "tsa", TSTInfo.defaultValues("tsa"));
 
 		if("extensions" in parameters)
 			/**
 			 * @type {Array.<Extension>}
-			 * @description extensions
+			 * @desc extensions
 			 */
 			this.extensions = getParametersValue(parameters, "extensions", TSTInfo.defaultValues("extensions"));
 		//endregion
@@ -156,24 +156,28 @@ export default class TSTInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * TSTInfo ::= SEQUENCE  {
+	 *   version                      INTEGER  { v1(1) },
+	 *   policy                       TSAPolicyId,
+	 *   messageImprint               MessageImprint,
+	 *   serialNumber                 INTEGER,
+	 *   genTime                      GeneralizedTime,
+	 *   accuracy                     Accuracy                 OPTIONAL,
+	 *   ordering                     BOOLEAN             DEFAULT FALSE,
+	 *   nonce                        INTEGER                  OPTIONAL,
+	 *   tsa                          [0] GeneralName          OPTIONAL,
+	 *   extensions                   [1] IMPLICIT Extensions  OPTIONAL  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//TSTInfo ::= SEQUENCE  {
-		//   version                      INTEGER  { v1(1) },
-		//   policy                       TSAPolicyId,
-		//   messageImprint               MessageImprint,
-		//   serialNumber                 INTEGER,
-		//   genTime                      GeneralizedTime,
-		//   accuracy                     Accuracy                 OPTIONAL,
-		//   ordering                     BOOLEAN             DEFAULT FALSE,
-		//   nonce                        INTEGER                  OPTIONAL,
-		//   tsa                          [0] GeneralName          OPTIONAL,
-		//   extensions                   [1] IMPLICIT Extensions  OPTIONAL  }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

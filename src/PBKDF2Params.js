@@ -11,33 +11,33 @@ export default class PBKDF2Params
 	/**
 	 * Constructor for PBKDF2Params class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Object}
-		 * @description salt
+		 * @desc salt
 		 */
 		this.salt = getParametersValue(parameters, "salt", PBKDF2Params.defaultValues("salt"));
 		/**
 		 * @type {number}
-		 * @description iterationCount
+		 * @desc iterationCount
 		 */
 		this.iterationCount = getParametersValue(parameters, "iterationCount", PBKDF2Params.defaultValues("iterationCount"));
 		
 		if("keyLength" in parameters)
 			/**
 			 * @type {number}
-			 * @description keyLength
+			 * @desc keyLength
 			 */
 			this.keyLength = getParametersValue(parameters, "keyLength", PBKDF2Params.defaultValues("keyLength"));
 		
 		if("prf" in parameters)
 			/**
 			 * @type {AlgorithmIdentifier}
-			 * @description prf
+			 * @desc prf
 			 */
 			this.prf = getParametersValue(parameters, "prf", PBKDF2Params.defaultValues("prf"));
 		//endregion
@@ -73,21 +73,25 @@ export default class PBKDF2Params
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PBKDF2-params ::= SEQUENCE {
+	 *    salt CHOICE {
+	 *        specified OCTET STRING,
+	 *        otherSource AlgorithmIdentifier },
+	 *  iterationCount INTEGER (1..MAX),
+	 *  keyLength INTEGER (1..MAX) OPTIONAL,
+	 *  prf AlgorithmIdentifier
+	 *    DEFAULT { algorithm hMAC-SHA1, parameters NULL } }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//PBKDF2-params ::= SEQUENCE {
-		//    salt CHOICE {
-		//        specified OCTET STRING,
-		//        otherSource AlgorithmIdentifier },
-		//  iterationCount INTEGER (1..MAX),
-		//  keyLength INTEGER (1..MAX) OPTIONAL,
-		//  prf AlgorithmIdentifier
-		//    DEFAULT { algorithm hMAC-SHA1, parameters NULL } }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

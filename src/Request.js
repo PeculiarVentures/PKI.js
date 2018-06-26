@@ -12,21 +12,21 @@ export default class Request
 	/**
 	 * Constructor for Request class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {CertID}
-		 * @description reqCert
+		 * @desc reqCert
 		 */
 		this.reqCert = getParametersValue(parameters, "reqCert", Request.defaultValues("reqCert"));
 
 		if("singleRequestExtensions" in parameters)
 			/**
 			 * @type {Array.<Extension>}
-			 * @description singleRequestExtensions
+			 * @desc singleRequestExtensions
 			 */
 			this.singleRequestExtensions = getParametersValue(parameters, "singleRequestExtensions", Request.defaultValues("singleRequestExtensions"));
 		//endregion
@@ -73,16 +73,20 @@ export default class Request
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Request         ::=     SEQUENCE {
+	 *    reqCert                     CertID,
+	 *    singleRequestExtensions     [0] EXPLICIT Extensions OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//Request         ::=     SEQUENCE {
-		//    reqCert                     CertID,
-		//    singleRequestExtensions     [0] EXPLICIT Extensions OPTIONAL }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

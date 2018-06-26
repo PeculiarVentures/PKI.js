@@ -10,7 +10,7 @@ export default class RSAPublicKey
 	/**
 	 * Constructor for RSAPublicKey class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 * @property {Integer} [modulus]
 	 * @property {Integer} [publicExponent]
 	 */
@@ -19,12 +19,12 @@ export default class RSAPublicKey
 		//region Internal properties of the object
 		/**
 		 * @type {Integer}
-		 * @description Modulus part of RSA public key
+		 * @desc Modulus part of RSA public key
 		 */
 		this.modulus = getParametersValue(parameters, "modulus", RSAPublicKey.defaultValues("modulus"));
 		/**
 		 * @type {Integer}
-		 * @description Public exponent of RSA public key
+		 * @desc Public exponent of RSA public key
 		 */
 		this.publicExponent = getParametersValue(parameters, "publicExponent", RSAPublicKey.defaultValues("publicExponent"));
 		//endregion
@@ -57,17 +57,21 @@ export default class RSAPublicKey
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RSAPublicKey ::= Sequence {
+	 *    modulus           Integer,  -- n
+	 *    publicExponent    Integer   -- e
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RSAPublicKey ::= Sequence {
-		//    modulus           Integer,  -- n
-		//    publicExponent    Integer   -- e
-		//}
-
 		/**
 		 * @type {Object}
 		 * @property {string} utcTimeName Name for "utcTimeName" choice

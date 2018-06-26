@@ -11,14 +11,14 @@ export default class GeneralNames
 	/**
 	 * Constructor for GeneralNames class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<GeneralName>}
-		 * @description Array of "general names"
+		 * @desc Array of "general names"
 		 */
 		this.names = getParametersValue(parameters, "names", GeneralNames.defaultValues("names"));
 		//endregion
@@ -45,7 +45,13 @@ export default class GeneralNames
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @param {boolean} [optional=false] Flag would be element optional or not
 	 * @returns {Object} asn1js schema object

@@ -25,24 +25,24 @@ export default class Extension
 	/**
 	 * Constructor for Extension class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description extnID
+		 * @desc extnID
 		 */
 		this.extnID = getParametersValue(parameters, "extnID", Extension.defaultValues("extnID"));
 		/**
 		 * @type {boolean}
-		 * @description critical
+		 * @desc critical
 		 */
 		this.critical = getParametersValue(parameters, "critical", Extension.defaultValues("critical"));
 		/**
 		 * @type {OctetString}
-		 * @description extnValue
+		 * @desc extnValue
 		 */
 		if("extnValue" in parameters)
 			this.extnValue = new asn1js.OctetString({ valueHex: parameters.extnValue });
@@ -52,7 +52,7 @@ export default class Extension
 		if("parsedValue" in parameters)
 			/**
 			 * @type {Object}
-			 * @description parsedValue
+			 * @desc parsedValue
 			 */
 			this.parsedValue = getParametersValue(parameters, "parsedValue", Extension.defaultValues("parsedValue"));
 		//endregion
@@ -85,18 +85,22 @@ export default class Extension
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Extension  ::=  SEQUENCE  {
+	 *    extnID      OBJECT IDENTIFIER,
+	 *    critical    BOOLEAN DEFAULT FALSE,
+	 *    extnValue   OCTET STRING
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//Extension  ::=  SEQUENCE  {
-		//    extnID      OBJECT IDENTIFIER,
-		//    critical    BOOLEAN DEFAULT FALSE,
-		//    extnValue   OCTET STRING
-		//}
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

@@ -10,24 +10,24 @@ export default class ECPublicKey
 	/**
 	 * Constructor for ECCPublicKey class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {ArrayBuffer}
-		 * @description type
+		 * @desc type
 		 */
 		this.x = getParametersValue(parameters, "x", ECPublicKey.defaultValues("x"));
 		/**
 		 * @type {ArrayBuffer}
-		 * @description values
+		 * @desc values
 		 */
 		this.y = getParametersValue(parameters, "y", ECPublicKey.defaultValues("y"));
 		/**
 		 * @type {string}
-		 * @description namedCurve
+		 * @desc namedCurve
 		 */
 		this.namedCurve = getParametersValue(parameters, "namedCurve", ECPublicKey.defaultValues("namedCurve"));
 		//endregion
@@ -80,7 +80,7 @@ export default class ECPublicKey
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */

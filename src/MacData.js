@@ -11,26 +11,26 @@ export default class MacData
 	/**
 	 * Constructor for MacData class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {DigestInfo}
-		 * @description mac
+		 * @desc mac
 		 */
 		this.mac = getParametersValue(parameters, "mac", MacData.defaultValues("mac"));
 		/**
 		 * @type {OctetString}
-		 * @description macSalt
+		 * @desc macSalt
 		 */
 		this.macSalt = getParametersValue(parameters, "macSalt", MacData.defaultValues("macSalt"));
 		
 		if("iterations" in parameters)
 			/**
 			 * @type {number}
-			 * @description iterations
+			 * @desc iterations
 			 */
 			this.iterations = getParametersValue(parameters, "iterations", MacData.defaultValues("iterations"));
 		//endregion
@@ -82,19 +82,24 @@ export default class MacData
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * MacData ::= SEQUENCE {
+	 *    mac 		DigestInfo,
+	 *    macSalt       OCTET STRING,
+	 *    iterations	INTEGER DEFAULT 1
+	 *    -- Note: The default is for historical reasons and its use is
+	 *    -- deprecated. A higher value, like 1024 is recommended.
+	 *    }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//MacData ::= SEQUENCE {
-		//    mac 		DigestInfo,
-		//    macSalt       OCTET STRING,
-		//    iterations	INTEGER DEFAULT 1
-		//    -- Note: The default is for historical reasons and its use is
-		//    -- deprecated. A higher value, like 1024 is recommended.
-		//    }
 		
 		/**
 		 * @type {Object}

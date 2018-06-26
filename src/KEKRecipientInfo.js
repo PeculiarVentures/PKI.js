@@ -12,34 +12,34 @@ export default class KEKRecipientInfo
 	/**
 	 * Constructor for KEKRecipientInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", KEKRecipientInfo.defaultValues("version"));
 		/**
 		 * @type {KEKIdentifier}
-		 * @description kekid
+		 * @desc kekid
 		 */
 		this.kekid = getParametersValue(parameters, "kekid", KEKRecipientInfo.defaultValues("kekid"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description keyEncryptionAlgorithm
+		 * @desc keyEncryptionAlgorithm
 		 */
 		this.keyEncryptionAlgorithm = getParametersValue(parameters, "keyEncryptionAlgorithm", KEKRecipientInfo.defaultValues("keyEncryptionAlgorithm"));
 		/**
 		 * @type {OctetString}
-		 * @description encryptedKey
+		 * @desc encryptedKey
 		 */
 		this.encryptedKey = getParametersValue(parameters, "encryptedKey", KEKRecipientInfo.defaultValues("encryptedKey"));
 		/**
 		 * @type {ArrayBuffer}
-		 * @description preDefinedKEK KEK using to encrypt CEK
+		 * @desc preDefinedKEK KEK using to encrypt CEK
 		 */
 		this.preDefinedKEK = getParametersValue(parameters, "preDefinedKEK", KEKRecipientInfo.defaultValues("preDefinedKEK"));
 		//endregion
@@ -100,18 +100,22 @@ export default class KEKRecipientInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * KEKRecipientInfo ::= SEQUENCE {
+	 *    version CMSVersion,  -- always set to 4
+	 *    kekid KEKIdentifier,
+	 *    keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
+	 *    encryptedKey EncryptedKey }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//KEKRecipientInfo ::= SEQUENCE {
-		//    version CMSVersion,  -- always set to 4
-		//    kekid KEKIdentifier,
-		//    keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
-		//    encryptedKey EncryptedKey }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

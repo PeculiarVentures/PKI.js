@@ -11,19 +11,19 @@ export default class RecipientEncryptedKey
 	/**
 	 * Constructor for RecipientEncryptedKey class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {KeyAgreeRecipientIdentifier}
-		 * @description rid
+		 * @desc rid
 		 */
 		this.rid = getParametersValue(parameters, "rid", RecipientEncryptedKey.defaultValues("rid"));
 		/**
 		 * @type {OctetString}
-		 * @description encryptedKey
+		 * @desc encryptedKey
 		 */
 		this.encryptedKey = getParametersValue(parameters, "encryptedKey", RecipientEncryptedKey.defaultValues("encryptedKey"));
 		//endregion
@@ -70,18 +70,22 @@ export default class RecipientEncryptedKey
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RecipientEncryptedKey ::= SEQUENCE {
+	 *    rid KeyAgreeRecipientIdentifier,
+	 *    encryptedKey EncryptedKey }
+	 *
+	 * EncryptedKey ::= OCTET STRING
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RecipientEncryptedKey ::= SEQUENCE {
-		//    rid KeyAgreeRecipientIdentifier,
-		//    encryptedKey EncryptedKey }
-		//
-		//EncryptedKey ::= OCTET STRING
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

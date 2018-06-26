@@ -11,19 +11,19 @@ export default class PBES2Params
 	/**
 	 * Constructor for PBES2Params class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description keyDerivationFunc
+		 * @desc keyDerivationFunc
 		 */
 		this.keyDerivationFunc = getParametersValue(parameters, "keyDerivationFunc", PBES2Params.defaultValues("keyDerivationFunc"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description encryptionScheme
+		 * @desc encryptionScheme
 		 */
 		this.encryptionScheme = getParametersValue(parameters, "encryptionScheme", PBES2Params.defaultValues("encryptionScheme"));
 		//endregion
@@ -52,16 +52,20 @@ export default class PBES2Params
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PBES2-params ::= SEQUENCE {
+	 *    keyDerivationFunc AlgorithmIdentifier {{PBES2-KDFs}},
+	 *    encryptionScheme AlgorithmIdentifier {{PBES2-Encs}} }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//PBES2-params ::= SEQUENCE {
-		//    keyDerivationFunc AlgorithmIdentifier {{PBES2-KDFs}},
-		//    encryptionScheme AlgorithmIdentifier {{PBES2-Encs}} }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

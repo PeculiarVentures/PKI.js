@@ -10,14 +10,14 @@ export default class EncapsulatedContentInfo
 	/**
 	 * Constructor for EncapsulatedContentInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description eContentType
+		 * @desc eContentType
 		 */
 		this.eContentType = getParametersValue(parameters, "eContentType", EncapsulatedContentInfo.defaultValues("eContentType"));
 
@@ -25,7 +25,7 @@ export default class EncapsulatedContentInfo
 		{
 			/**
 			 * @type {OctetString}
-			 * @description eContent
+			 * @desc eContent
 			 */
 			this.eContent = getParametersValue(parameters, "eContent", EncapsulatedContentInfo.defaultValues("eContent"));
 			if((this.eContent.idBlock.tagClass === 1) &&
@@ -111,16 +111,20 @@ export default class EncapsulatedContentInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * EncapsulatedContentInfo ::= SEQUENCE {
+	 *    eContentType ContentType,
+	 *    eContent [0] EXPLICIT OCTET STRING OPTIONAL } * Changed it to ANY, as in PKCS#7
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//EncapsulatedContentInfo ::= SEQUENCE {
-		//    eContentType ContentType,
-		//    eContent [0] EXPLICIT OCTET STRING OPTIONAL } // Changed it to ANY, as in PKCS#7
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

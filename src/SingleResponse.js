@@ -13,38 +13,38 @@ export default class SingleResponse
 	/**
 	 * Constructor for SingleResponse class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {CertID}
-		 * @description certID
+		 * @desc certID
 		 */
 		this.certID = getParametersValue(parameters, "certID", SingleResponse.defaultValues("certID"));
 		/**
 		 * @type {Object}
-		 * @description certStatus
+		 * @desc certStatus
 		 */
 		this.certStatus = getParametersValue(parameters, "certStatus", SingleResponse.defaultValues("certStatus"));
 		/**
 		 * @type {Date}
-		 * @description thisUpdate
+		 * @desc thisUpdate
 		 */
 		this.thisUpdate = getParametersValue(parameters, "thisUpdate", SingleResponse.defaultValues("thisUpdate"));
 
 		if("nextUpdate" in parameters)
 			/**
 			 * @type {Date}
-			 * @description nextUpdate
+			 * @desc nextUpdate
 			 */
 			this.nextUpdate = getParametersValue(parameters, "nextUpdate", SingleResponse.defaultValues("nextUpdate"));
 
 		if("singleExtensions" in parameters)
 			/**
 			 * @type {Array.<Extension>}
-			 * @description singleExtensions
+			 * @desc singleExtensions
 			 */
 			this.singleExtensions = getParametersValue(parameters, "singleExtensions", SingleResponse.defaultValues("singleExtensions"));
 		//endregion
@@ -103,30 +103,34 @@ export default class SingleResponse
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * SingleResponse ::= SEQUENCE {
+	 *    certID                       CertID,
+	 *    certStatus                   CertStatus,
+	 *    thisUpdate                   GeneralizedTime,
+	 *    nextUpdate         [0]       EXPLICIT GeneralizedTime OPTIONAL,
+	 *    singleExtensions   [1]       EXPLICIT Extensions OPTIONAL }
+	 *
+	 * CertStatus ::= CHOICE {
+	 *    good        [0]     IMPLICIT NULL,
+	 *    revoked     [1]     IMPLICIT RevokedInfo,
+	 *    unknown     [2]     IMPLICIT UnknownInfo }
+	 *
+	 * RevokedInfo ::= SEQUENCE {
+	 *    revocationTime              GeneralizedTime,
+	 *    revocationReason    [0]     EXPLICIT CRLReason OPTIONAL }
+	 *
+	 * UnknownInfo ::= NULL
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//SingleResponse ::= SEQUENCE {
-		//    certID                       CertID,
-		//    certStatus                   CertStatus,
-		//    thisUpdate                   GeneralizedTime,
-		//    nextUpdate         [0]       EXPLICIT GeneralizedTime OPTIONAL,
-		//    singleExtensions   [1]       EXPLICIT Extensions OPTIONAL }
-		//
-		//CertStatus ::= CHOICE {
-		//    good        [0]     IMPLICIT NULL,
-		//    revoked     [1]     IMPLICIT RevokedInfo,
-		//    unknown     [2]     IMPLICIT UnknownInfo }
-		//
-		//RevokedInfo ::= SEQUENCE {
-		//    revocationTime              GeneralizedTime,
-		//    revocationReason    [0]     EXPLICIT CRLReason OPTIONAL }
-		//
-		//UnknownInfo ::= NULL
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

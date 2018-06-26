@@ -17,31 +17,31 @@ export default class BasicOCSPResponse
 	/**
 	 * Constructor for BasicOCSPResponse class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {ResponseData}
-		 * @description tbsResponseData
+		 * @desc tbsResponseData
 		 */
 		this.tbsResponseData = getParametersValue(parameters, "tbsResponseData", BasicOCSPResponse.defaultValues("tbsResponseData"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signatureAlgorithm
+		 * @desc signatureAlgorithm
 		 */
 		this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", BasicOCSPResponse.defaultValues("signatureAlgorithm"));
 		/**
 		 * @type {BitString}
-		 * @description signature
+		 * @desc signature
 		 */
 		this.signature = getParametersValue(parameters, "signature", BasicOCSPResponse.defaultValues("signature"));
 		
 		if("certs" in parameters)
 			/**
 			 * @type {Array.<Certificate>}
-			 * @description certs
+			 * @desc certs
 			 */
 			this.certs = getParametersValue(parameters, "certs", BasicOCSPResponse.defaultValues("certs"));
 		//endregion
@@ -107,18 +107,22 @@ export default class BasicOCSPResponse
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * BasicOCSPResponse       ::= SEQUENCE {
+	 *    tbsResponseData      ResponseData,
+	 *    signatureAlgorithm   AlgorithmIdentifier,
+	 *    signature            BIT STRING,
+	 *    certs            [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//BasicOCSPResponse       ::= SEQUENCE {
-		//    tbsResponseData      ResponseData,
-		//    signatureAlgorithm   AlgorithmIdentifier,
-		//    signature            BIT STRING,
-		//    certs            [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

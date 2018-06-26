@@ -10,7 +10,7 @@ export default class Accuracy
 	/**
 	 * Constructor for Accuracy class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
@@ -18,21 +18,21 @@ export default class Accuracy
 		if("seconds" in parameters)
 			/**
 			 * @type {number}
-			 * @description seconds
+			 * @desc seconds
 			 */
 			this.seconds = getParametersValue(parameters, "seconds", Accuracy.defaultValues("seconds"));
 		
 		if("millis" in parameters)
 			/**
 			 * @type {number}
-			 * @description millis
+			 * @desc millis
 			 */
 			this.millis = getParametersValue(parameters, "millis", Accuracy.defaultValues("millis"));
 		
 		if("micros" in parameters)
 			/**
 			 * @type {number}
-			 * @description micros
+			 * @desc micros
 			 */
 			this.micros = getParametersValue(parameters, "micros", Accuracy.defaultValues("micros"));
 		//endregion
@@ -79,17 +79,21 @@ export default class Accuracy
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Accuracy ::= SEQUENCE {
+	 *    seconds        INTEGER              OPTIONAL,
+	 *    millis     [0] INTEGER  (1..999)    OPTIONAL,
+	 *    micros     [1] INTEGER  (1..999)    OPTIONAL  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//Accuracy ::= SEQUENCE {
-		//    seconds        INTEGER              OPTIONAL,
-		//    millis     [0] INTEGER  (1..999)    OPTIONAL,
-		//    micros     [1] INTEGER  (1..999)    OPTIONAL  }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

@@ -30,39 +30,39 @@ export default class EnvelopedData
 	/**
 	 * Constructor for EnvelopedData class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", EnvelopedData.defaultValues("version"));
 		
 		if("originatorInfo" in parameters)
 			/**
 			 * @type {OriginatorInfo}
-			 * @description originatorInfo
+			 * @desc originatorInfo
 			 */
 			this.originatorInfo = getParametersValue(parameters, "originatorInfo", EnvelopedData.defaultValues("originatorInfo"));
 		
 		/**
 		 * @type {Array.<RecipientInfo>}
-		 * @description recipientInfos
+		 * @desc recipientInfos
 		 */
 		this.recipientInfos = getParametersValue(parameters, "recipientInfos", EnvelopedData.defaultValues("recipientInfos"));
 		/**
 		 * @type {EncryptedContentInfo}
-		 * @description encryptedContentInfo
+		 * @desc encryptedContentInfo
 		 */
 		this.encryptedContentInfo = getParametersValue(parameters, "encryptedContentInfo", EnvelopedData.defaultValues("encryptedContentInfo"));
 		
 		if("unprotectedAttrs" in parameters)
 			/**
 			 * @type {Array.<Attribute>}
-			 * @description unprotectedAttrs
+			 * @desc unprotectedAttrs
 			 */
 			this.unprotectedAttrs = getParametersValue(parameters, "unprotectedAttrs", EnvelopedData.defaultValues("unprotectedAttrs"));
 		//endregion
@@ -122,19 +122,23 @@ export default class EnvelopedData
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * EnvelopedData ::= SEQUENCE {
+	 *    version CMSVersion,
+	 *    originatorInfo [0] IMPLICIT OriginatorInfo OPTIONAL,
+	 *    recipientInfos RecipientInfos,
+	 *    encryptedContentInfo EncryptedContentInfo,
+	 *    unprotectedAttrs [1] IMPLICIT UnprotectedAttributes OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//EnvelopedData ::= SEQUENCE {
-		//    version CMSVersion,
-		//    originatorInfo [0] IMPLICIT OriginatorInfo OPTIONAL,
-		//    recipientInfos RecipientInfos,
-		//    encryptedContentInfo EncryptedContentInfo,
-		//    unprotectedAttrs [1] IMPLICIT UnprotectedAttributes OPTIONAL }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

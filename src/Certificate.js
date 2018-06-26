@@ -136,86 +136,86 @@ export default class Certificate
 	/**
 	 * Constructor for Certificate class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {ArrayBuffer}
-		 * @description tbs
+		 * @desc ToBeSigned (TBS) part of the certificate
 		 */
 		this.tbs = getParametersValue(parameters, "tbs", Certificate.defaultValues("tbs"));
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc Version number
 		 */
 		this.version = getParametersValue(parameters, "version", Certificate.defaultValues("version"));
 		/**
 		 * @type {Integer}
-		 * @description serialNumber
+		 * @desc Serial number of the certificate
 		 */
 		this.serialNumber = getParametersValue(parameters, "serialNumber", Certificate.defaultValues("serialNumber"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signature
+		 * @desc This field contains the algorithm identifier for the algorithm used by the CA to sign the certificate
 		 */
 		this.signature = getParametersValue(parameters, "signature", Certificate.defaultValues("signature"));
 		/**
 		 * @type {RelativeDistinguishedNames}
-		 * @description issuer
+		 * @desc The issuer field identifies the entity that has signed and issued the certificate
 		 */
 		this.issuer = getParametersValue(parameters, "issuer", Certificate.defaultValues("issuer"));
 		/**
 		 * @type {Time}
-		 * @description notBefore
+		 * @desc The date on which the certificate validity period begins
 		 */
 		this.notBefore = getParametersValue(parameters, "notBefore", Certificate.defaultValues("notBefore"));
 		/**
 		 * @type {Time}
-		 * @description notAfter
+		 * @desc The date on which the certificate validity period ends
 		 */
 		this.notAfter = getParametersValue(parameters, "notAfter", Certificate.defaultValues("notAfter"));
 		/**
 		 * @type {RelativeDistinguishedNames}
-		 * @description subject
+		 * @desc The subject field identifies the entity associated with the public key stored in the subject public key field
 		 */
 		this.subject = getParametersValue(parameters, "subject", Certificate.defaultValues("subject"));
 		/**
 		 * @type {PublicKeyInfo}
-		 * @description subjectPublicKeyInfo
+		 * @desc This field is used to carry the public key and identify the algorithm with which the key is used
 		 */
 		this.subjectPublicKeyInfo = getParametersValue(parameters, "subjectPublicKeyInfo", Certificate.defaultValues("subjectPublicKeyInfo"));
 		
 		if("issuerUniqueID" in parameters)
 			/**
 			 * @type {ArrayBuffer}
-			 * @description issuerUniqueID
+			 * @desc The subject and issuer unique identifiers are present in the certificate to handle the possibility of reuse of subject and/or issuer names over time
 			 */
 			this.issuerUniqueID = getParametersValue(parameters, "issuerUniqueID", Certificate.defaultValues("issuerUniqueID"));
 		
 		if("subjectUniqueID" in parameters)
 			/**
 			 * @type {ArrayBuffer}
-			 * @description subjectUniqueID
+			 * @desc The subject and issuer unique identifiers are present in the certificate to handle the possibility of reuse of subject and/or issuer names over time
 			 */
 			this.subjectUniqueID = getParametersValue(parameters, "subjectUniqueID", Certificate.defaultValues("subjectUniqueID"));
 		
 		if("extensions" in parameters)
 			/**
 			 * @type {Array}
-			 * @description extensions
+			 * @desc If present, this field is a SEQUENCE of one or more certificate extensions
 			 */
 			this.extensions = getParametersValue(parameters, "extensions", Certificate.defaultValues("extensions"));
 		
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signatureAlgorithm
+		 * @desc The signatureAlgorithm field contains the identifier for the cryptographic algorithm used by the CA to sign this certificate
 		 */
 		this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", Certificate.defaultValues("signatureAlgorithm"));
 		/**
 		 * @type {BitString}
-		 * @description signatureValue
+		 * @desc The signatureValue field contains a digital signature computed upon the ASN.1 DER encoded tbsCertificate
 		 */
 		this.signatureValue = getParametersValue(parameters, "signatureValue", Certificate.defaultValues("signatureValue"));
 		//endregion
@@ -268,17 +268,21 @@ export default class Certificate
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Certificate  ::=  SEQUENCE  {
+	 *    tbsCertificate       TBSCertificate,
+	 *    signatureAlgorithm   AlgorithmIdentifier,
+	 *    signatureValue       BIT STRING  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//Certificate  ::=  SEQUENCE  {
-		//    tbsCertificate       TBSCertificate,
-		//    signatureAlgorithm   AlgorithmIdentifier,
-		//    signatureValue       BIT STRING  }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

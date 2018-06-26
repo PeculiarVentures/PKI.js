@@ -14,26 +14,26 @@ export default class PKCS8ShroudedKeyBag
 	/**
 	 * Constructor for PKCS8ShroudedKeyBag class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description encryptionAlgorithm
+		 * @desc encryptionAlgorithm
 		 */
 		this.encryptionAlgorithm = getParametersValue(parameters, "encryptionAlgorithm", PKCS8ShroudedKeyBag.defaultValues("encryptionAlgorithm"));
 		/**
 		 * @type {OctetString}
-		 * @description encryptedData
+		 * @desc encryptedData
 		 */
 		this.encryptedData = getParametersValue(parameters, "encryptedData", PKCS8ShroudedKeyBag.defaultValues("encryptedData"));
 		
 		if("parsedValue" in parameters)
 			/**
 			 * @type {*}
-			 * @description parsedValue
+			 * @desc parsedValue
 			 */
 			this.parsedValue = getParametersValue(parameters, "parsedValue", PKCS8ShroudedKeyBag.defaultValues("parsedValue"));
 		//endregion
@@ -85,21 +85,25 @@ export default class PKCS8ShroudedKeyBag
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PKCS8ShroudedKeyBag ::= EncryptedPrivateKeyInfo
+	 *
+	 * EncryptedPrivateKeyInfo ::= SEQUENCE {
+	 *    encryptionAlgorithm AlgorithmIdentifier {{KeyEncryptionAlgorithms}},
+	 *    encryptedData EncryptedData
+	 * }
+	 *
+	 * EncryptedData ::= OCTET STRING
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//PKCS8ShroudedKeyBag ::= EncryptedPrivateKeyInfo
-		
-		//EncryptedPrivateKeyInfo ::= SEQUENCE {
-		//    encryptionAlgorithm AlgorithmIdentifier {{KeyEncryptionAlgorithms}},
-		//    encryptedData EncryptedData
-		//}
-		
-		//EncryptedData ::= OCTET STRING
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

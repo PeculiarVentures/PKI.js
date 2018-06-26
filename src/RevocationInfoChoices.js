@@ -12,19 +12,19 @@ export default class RevocationInfoChoices
 	/**
 	 * Constructor for RevocationInfoChoices class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<CertificateRevocationList>}
-		 * @description crls
+		 * @desc crls
 		 */
 		this.crls = getParametersValue(parameters, "crls", RevocationInfoChoices.defaultValues("crls"));
 		/**
 		 * @type {Array.<OtherRevocationInfoFormat>}
-		 * @description otherRevocationInfos
+		 * @desc otherRevocationInfos
 		 */
 		this.otherRevocationInfos = getParametersValue(parameters, "otherRevocationInfos", RevocationInfoChoices.defaultValues("otherRevocationInfos"));
 		//endregion
@@ -53,18 +53,22 @@ export default class RevocationInfoChoices
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RevocationInfoChoices ::= SET OF RevocationInfoChoice
+	 *
+	 * RevocationInfoChoice ::= CHOICE {
+	 *    crl CertificateList,
+	 *    other [1] IMPLICIT OtherRevocationInfoFormat }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RevocationInfoChoices ::= SET OF RevocationInfoChoice
-		
-		//RevocationInfoChoice ::= CHOICE {
-		//    crl CertificateList,
-		//    other [1] IMPLICIT OtherRevocationInfoFormat }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

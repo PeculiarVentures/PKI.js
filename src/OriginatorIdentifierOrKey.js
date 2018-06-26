@@ -12,21 +12,21 @@ export default class OriginatorIdentifierOrKey
 	/**
 	 * Constructor for OriginatorIdentifierOrKey class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description variant
+		 * @desc variant
 		 */
 		this.variant = getParametersValue(parameters, "variant", OriginatorIdentifierOrKey.defaultValues("variant"));
 
 		if("value" in parameters)
 			/**
 			 * @type {Array}
-			 * @description values
+			 * @desc values
 			 */
 			this.value = getParametersValue(parameters, "value", OriginatorIdentifierOrKey.defaultValues("value"));
 		//endregion
@@ -73,17 +73,21 @@ export default class OriginatorIdentifierOrKey
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * OriginatorIdentifierOrKey ::= CHOICE {
+	 *    issuerAndSerialNumber IssuerAndSerialNumber,
+	 *    subjectKeyIdentifier [0] SubjectKeyIdentifier,
+	 *    originatorKey [1] OriginatorPublicKey }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//OriginatorIdentifierOrKey ::= CHOICE {
-		//    issuerAndSerialNumber IssuerAndSerialNumber,
-		//    subjectKeyIdentifier [0] SubjectKeyIdentifier,
-		//    originatorKey [1] OriginatorPublicKey }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

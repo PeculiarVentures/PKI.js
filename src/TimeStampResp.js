@@ -13,21 +13,21 @@ export default class TimeStampResp
 	/**
 	 * Constructor for TimeStampResp class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {PKIStatusInfo}
-		 * @description status
+		 * @desc status
 		 */
 		this.status = getParametersValue(parameters, "status", TimeStampResp.defaultValues("status"));
 
 		if("timeStampToken" in parameters)
 			/**
 			 * @type {ContentInfo}
-			 * @description timeStampToken
+			 * @desc timeStampToken
 			 */
 			this.timeStampToken = getParametersValue(parameters, "timeStampToken", TimeStampResp.defaultValues("timeStampToken"));
 		//endregion
@@ -77,16 +77,20 @@ export default class TimeStampResp
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * TimeStampResp ::= SEQUENCE  {
+	 *    status                  PKIStatusInfo,
+	 *    timeStampToken          TimeStampToken     OPTIONAL  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//TimeStampResp ::= SEQUENCE  {
-		//    status                  PKIStatusInfo,
-		//    timeStampToken          TimeStampToken     OPTIONAL  }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

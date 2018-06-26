@@ -10,21 +10,21 @@ export default class OtherKeyAttribute
 	/**
 	 * Constructor for OtherKeyAttribute class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description keyAttrId
+		 * @desc keyAttrId
 		 */
 		this.keyAttrId = getParametersValue(parameters, "keyAttrId", OtherKeyAttribute.defaultValues("keyAttrId"));
 
 		if("keyAttr" in parameters)
 			/**
 			 * @type {*}
-			 * @description keyAttr
+			 * @desc keyAttr
 			 */
 			this.keyAttr = getParametersValue(parameters, "keyAttr", OtherKeyAttribute.defaultValues("keyAttr"));
 		//endregion
@@ -71,16 +71,20 @@ export default class OtherKeyAttribute
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * OtherKeyAttribute ::= SEQUENCE {
+	 *    keyAttrId OBJECT IDENTIFIER,
+	 *    keyAttr ANY DEFINED BY keyAttrId OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//OtherKeyAttribute ::= SEQUENCE {
-		//    keyAttrId OBJECT IDENTIFIER,
-		//    keyAttr ANY DEFINED BY keyAttrId OPTIONAL }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

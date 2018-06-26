@@ -7,44 +7,44 @@ export default class CertificateChainValidationEngine
 	/**
 	 * Constructor for CertificateChainValidationEngine class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<Certificate>}
-		 * @description Array of pre-defined trusted (by user) certificates
+		 * @desc Array of pre-defined trusted (by user) certificates
 		 */
 		this.trustedCerts = getParametersValue(parameters, "trustedCerts", this.defaultValues("trustedCerts"));
 		/**
 		 * @type {Array.<Certificate>}
-		 * @description Array with certificate chain. Could be only one end-user certificate in there!
+		 * @desc Array with certificate chain. Could be only one end-user certificate in there!
 		 */
 		this.certs = getParametersValue(parameters, "certs", this.defaultValues("certs"));
 		/**
 		 * @type {Array.<CertificateRevocationList>}
-		 * @description Array of all CRLs for all certificates from certificate chain
+		 * @desc Array of all CRLs for all certificates from certificate chain
 		 */
 		this.crls = getParametersValue(parameters, "crls", this.defaultValues("crls"));
 		/**
 		 * @type {Array}
-		 * @description Array of all OCSP responses
+		 * @desc Array of all OCSP responses
 		 */
 		this.ocsps = getParametersValue(parameters, "ocsps", this.defaultValues("ocsps"));
 		/**
 		 * @type {Date}
-		 * @description The date at which the check would be
+		 * @desc The date at which the check would be
 		 */
 		this.checkDate = getParametersValue(parameters, "checkDate", this.defaultValues("checkDate"));
 		/**
 		 * @type {Function}
-		 * @description The date at which the check would be
+		 * @desc The date at which the check would be
 		 */
 		this.findOrigin = getParametersValue(parameters, "findOrigin", this.defaultValues("findOrigin"));
 		/**
 		 * @type {Function}
-		 * @description The date at which the check would be
+		 * @desc The date at which the check would be
 		 */
 		this.findIssuer = getParametersValue(parameters, "findIssuer", this.defaultValues("findIssuer"));
 		//endregion

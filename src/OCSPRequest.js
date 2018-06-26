@@ -15,21 +15,21 @@ export default class OCSPRequest
 	/**
 	 * Constructor for OCSPRequest class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {TBSRequest}
-		 * @description tbsRequest
+		 * @desc tbsRequest
 		 */
 		this.tbsRequest = getParametersValue(parameters, "tbsRequest", OCSPRequest.defaultValues("tbsRequest"));
 		
 		if("optionalSignature" in parameters)
 			/**
 			 * @type {Signature}
-			 * @description optionalSignature
+			 * @desc optionalSignature
 			 */
 			this.optionalSignature = getParametersValue(parameters, "optionalSignature", OCSPRequest.defaultValues("optionalSignature"));
 		//endregion
@@ -83,16 +83,20 @@ export default class OCSPRequest
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * OCSPRequest     ::=     SEQUENCE {
+	 *    tbsRequest                  TBSRequest,
+	 *    optionalSignature   [0]     EXPLICIT Signature OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//OCSPRequest     ::=     SEQUENCE {
-		//    tbsRequest                  TBSRequest,
-		//    optionalSignature   [0]     EXPLICIT Signature OPTIONAL }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

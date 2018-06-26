@@ -11,14 +11,14 @@ export default class PolicyMappings
 	/**
 	 * Constructor for PolicyMappings class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<PolicyMapping>}
-		 * @description mappings
+		 * @desc mappings
 		 */
 		this.mappings = getParametersValue(parameters, "mappings", PolicyMappings.defaultValues("mappings"));
 		//endregion
@@ -45,16 +45,18 @@ export default class PolicyMappings
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PolicyMappings ::= SEQUENCE SIZE (1..MAX) OF PolicyMapping
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// PolicyMappings OID ::= 2.5.29.33
-		//
-		//PolicyMappings ::= SEQUENCE SIZE (1..MAX) OF PolicyMapping
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

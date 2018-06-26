@@ -11,14 +11,14 @@ export default class Extensions
 	/**
 	 * Constructor for Extensions class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<Extension>}
-		 * @description type
+		 * @desc type
 		 */
 		this.extensions = getParametersValue(parameters, "extensions", Extensions.defaultValues("extensions"));
 		//endregion
@@ -45,15 +45,19 @@ export default class Extensions
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Extensions  ::=  SEQUENCE SIZE (1..MAX) OF Extension
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @param {boolean} optional Flag that current schema should be optional
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {}, optional = false)
 	{
-		//Extensions  ::=  SEQUENCE SIZE (1..MAX) OF Extension
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

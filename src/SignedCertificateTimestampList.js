@@ -10,44 +10,44 @@ export class SignedCertificateTimestamp
 	/**
 	 * Constructor for SignedCertificateTimestamp class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", SignedCertificateTimestamp.defaultValues("version"));
 		/**
 		 * @type {ArrayBuffer}
-		 * @description logID
+		 * @desc logID
 		 */
 		this.logID = getParametersValue(parameters, "logID", SignedCertificateTimestamp.defaultValues("logID"));
 		/**
 		 * @type {Date}
-		 * @description timestamp
+		 * @desc timestamp
 		 */
 		this.timestamp = getParametersValue(parameters, "timestamp", SignedCertificateTimestamp.defaultValues("timestamp"));
 		/**
 		 * @type {ArrayBuffer}
-		 * @description extensions
+		 * @desc extensions
 		 */
 		this.extensions = getParametersValue(parameters, "extensions", SignedCertificateTimestamp.defaultValues("extensions"));
 		/**
 		 * @type {string}
-		 * @description hashAlgorithm
+		 * @desc hashAlgorithm
 		 */
 		this.hashAlgorithm = getParametersValue(parameters, "hashAlgorithm", SignedCertificateTimestamp.defaultValues("hashAlgorithm"));
 		/**
 		 * @type {string}
-		 * @description signatureAlgorithm
+		 * @desc signatureAlgorithm
 		 */
 		this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", SignedCertificateTimestamp.defaultValues("signatureAlgorithm"));
 		/**
 		 * @type {Object}
-		 * @description signature
+		 * @desc signature
 		 */
 		this.signature = getParametersValue(parameters, "signature", SignedCertificateTimestamp.defaultValues("signature"));
 		//endregion
@@ -391,14 +391,14 @@ export default class SignedCertificateTimestampList
 	/**
 	 * Constructor for SignedCertificateTimestampList class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<SignedCertificateTimestamp>}
-		 * @description timestamps
+		 * @desc timestamps
 		 */
 		this.timestamps = getParametersValue(parameters, "timestamps", SignedCertificateTimestampList.defaultValues("timestamps"));
 		//endregion
@@ -441,14 +441,18 @@ export default class SignedCertificateTimestampList
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * SignedCertificateTimestampList ::= OCTET STRING
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//SignedCertificateTimestampList ::= OCTET STRING
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

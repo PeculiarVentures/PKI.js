@@ -11,33 +11,33 @@ export default class ECPrivateKey
 	/**
 	 * Constructor for ECCPrivateKey class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", ECPrivateKey.defaultValues("version"));
 		/**
 		 * @type {OctetString}
-		 * @description privateKey
+		 * @desc privateKey
 		 */
 		this.privateKey = getParametersValue(parameters, "privateKey", ECPrivateKey.defaultValues("privateKey"));
 
 		if("namedCurve" in parameters)
 			/**
 			 * @type {string}
-			 * @description namedCurve
+			 * @desc namedCurve
 			 */
 			this.namedCurve = getParametersValue(parameters, "namedCurve", ECPrivateKey.defaultValues("namedCurve"));
 
 		if("publicKey" in parameters)
 			/**
 			 * @type {ECPublicKey}
-			 * @description publicKey
+			 * @desc publicKey
 			 */
 			this.publicKey = getParametersValue(parameters, "publicKey", ECPrivateKey.defaultValues("publicKey"));
 		//endregion
@@ -98,19 +98,23 @@ export default class ECPrivateKey
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * ECPrivateKey ::= SEQUENCE {
+	 * version        INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
+	 * privateKey     OCTET STRING,
+	 * parameters [0] ECParameters {{ NamedCurve }} OPTIONAL,
+	 * publicKey  [1] BIT STRING OPTIONAL
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// ECPrivateKey ::= SEQUENCE {
-		// version        INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
-		// privateKey     OCTET STRING,
-		// parameters [0] ECParameters {{ NamedCurve }} OPTIONAL,
-		// publicKey  [1] BIT STRING OPTIONAL
-		// }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

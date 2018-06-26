@@ -101,11 +101,16 @@
   "module": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.62",
+  "version": "2.1.63",
   "license": "MIT",
   "esdoc": {
     "source": "./src",
     "destination": "./docs",
-    "plugins": [{"name": "esdoc-standard-plugin"}]
+    "plugins": [
+      {
+        "name":
+        "esdoc-standard-plugin"
+      }
+    ]
   }
 }

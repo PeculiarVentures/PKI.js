@@ -10,28 +10,28 @@ export default class PKIStatusInfo
 	/**
 	 * Constructor for PKIStatusInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description status
+		 * @desc status
 		 */
 		this.status = getParametersValue(parameters, "status", PKIStatusInfo.defaultValues("status"));
 
 		if("statusStrings" in parameters)
 			/**
 			 * @type {Array.<Utf8String>}
-			 * @description statusStrings
+			 * @desc statusStrings
 			 */
 			this.statusStrings = getParametersValue(parameters, "statusStrings", PKIStatusInfo.defaultValues("statusStrings"));
 
 		if("failInfo" in parameters)
 			/**
 			 * @type {BitString}
-			 * @description failInfo
+			 * @desc failInfo
 			 */
 			this.failInfo = getParametersValue(parameters, "failInfo", PKIStatusInfo.defaultValues("failInfo"));
 		//endregion
@@ -82,17 +82,21 @@ export default class PKIStatusInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PKIStatusInfo ::= SEQUENCE {
+	 *    status        PKIStatus,
+	 *    statusString  PKIFreeText     OPTIONAL,
+	 *    failInfo      PKIFailureInfo  OPTIONAL  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//PKIStatusInfo ::= SEQUENCE {
-		//    status        PKIStatus,
-		//    statusString  PKIFreeText     OPTIONAL,
-		//    failInfo      PKIFailureInfo  OPTIONAL  }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

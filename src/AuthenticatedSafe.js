@@ -14,21 +14,21 @@ export default class AuthenticatedSafe
 	/**
 	 * Constructor for AuthenticatedSafe class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<ContentInfo>}
-		 * @description safeContents
+		 * @desc safeContents
 		 */
 		this.safeContents = getParametersValue(parameters, "safeContents", AuthenticatedSafe.defaultValues("safeContents"));
 
 		if("parsedValue" in parameters)
 			/**
 			 * @type {*}
-			 * @description parsedValue
+			 * @desc parsedValue
 			 */
 			this.parsedValue = getParametersValue(parameters, "parsedValue", AuthenticatedSafe.defaultValues("parsedValue"));
 		//endregion
@@ -75,17 +75,21 @@ export default class AuthenticatedSafe
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AuthenticatedSafe ::= SEQUENCE OF ContentInfo
+	 * -- Data if unencrypted
+	 * -- EncryptedData if password-encrypted
+	 * -- EnvelopedData if public key-encrypted
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//AuthenticatedSafe ::= SEQUENCE OF ContentInfo
-		//-- Data if unencrypted
-		//-- EncryptedData if password-encrypted
-		//-- EnvelopedData if public key-encrypted
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

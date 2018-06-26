@@ -11,7 +11,7 @@ export default class AuthorityKeyIdentifier
 	/**
 	 * Constructor for AuthorityKeyIdentifier class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
@@ -19,21 +19,21 @@ export default class AuthorityKeyIdentifier
 		if("keyIdentifier" in parameters)
 			/**
 			 * @type {OctetString}
-			 * @description keyIdentifier
+			 * @desc keyIdentifier
 			 */
 			this.keyIdentifier = getParametersValue(parameters, "keyIdentifier", AuthorityKeyIdentifier.defaultValues("keyIdentifier"));
 
 		if("authorityCertIssuer" in parameters)
 			/**
 			 * @type {Array.<GeneralName>}
-			 * @description authorityCertIssuer
+			 * @desc authorityCertIssuer
 			 */
 			this.authorityCertIssuer = getParametersValue(parameters, "authorityCertIssuer", AuthorityKeyIdentifier.defaultValues("authorityCertIssuer"));
 
 		if("authorityCertSerialNumber" in parameters)
 			/**
 			 * @type {Integer}
-			 * @description authorityCertIssuer
+			 * @desc authorityCertIssuer
 			 */
 			this.authorityCertSerialNumber = getParametersValue(parameters, "authorityCertSerialNumber", AuthorityKeyIdentifier.defaultValues("authorityCertSerialNumber"));
 		//endregion
@@ -64,21 +64,25 @@ export default class AuthorityKeyIdentifier
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AuthorityKeyIdentifier OID ::= 2.5.29.35
+	 *
+	 * AuthorityKeyIdentifier ::= SEQUENCE {
+	 *    keyIdentifier             [0] KeyIdentifier           OPTIONAL,
+	 *    authorityCertIssuer       [1] GeneralNames            OPTIONAL,
+	 *    authorityCertSerialNumber [2] CertificateSerialNumber OPTIONAL  }
+	 *
+	 * KeyIdentifier ::= OCTET STRING
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// AuthorityKeyIdentifier OID ::= 2.5.29.35
-		//
-		//AuthorityKeyIdentifier ::= SEQUENCE {
-		//    keyIdentifier             [0] KeyIdentifier           OPTIONAL,
-		//    authorityCertIssuer       [1] GeneralNames            OPTIONAL,
-		//    authorityCertSerialNumber [2] CertificateSerialNumber OPTIONAL  }
-		//
-		//KeyIdentifier ::= OCTET STRING
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

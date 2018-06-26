@@ -10,19 +10,19 @@ export default class SecretBag
 	/**
 	 * Constructor for SecretBag class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description secretTypeId
+		 * @desc secretTypeId
 		 */
 		this.secretTypeId = getParametersValue(parameters, "secretTypeId", SecretBag.defaultValues("secretTypeId"));
 		/**
 		 * @type {*}
-		 * @description secretValue
+		 * @desc secretValue
 		 */
 		this.secretValue = getParametersValue(parameters, "secretValue", SecretBag.defaultValues("secretValue"));
 		//endregion
@@ -69,17 +69,21 @@ export default class SecretBag
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * SecretBag ::= SEQUENCE {
+	 *    secretTypeId BAG-TYPE.&id ({SecretTypes}),
+	 *    secretValue  [0] EXPLICIT BAG-TYPE.&Type ({SecretTypes}{@secretTypeId})
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//SecretBag ::= SEQUENCE {
-		//    secretTypeId BAG-TYPE.&id ({SecretTypes}),
-		//    secretValue  [0] EXPLICIT BAG-TYPE.&Type ({SecretTypes}{@secretTypeId})
-		//}
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

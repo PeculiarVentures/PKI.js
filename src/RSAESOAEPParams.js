@@ -11,24 +11,24 @@ export default class RSAESOAEPParams
 	/**
 	 * Constructor for RSAESOAEPParams class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description hashAlgorithm
+		 * @desc hashAlgorithm
 		 */
 		this.hashAlgorithm = getParametersValue(parameters, "hashAlgorithm", RSAESOAEPParams.defaultValues("hashAlgorithm"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description maskGenAlgorithm
+		 * @desc maskGenAlgorithm
 		 */
 		this.maskGenAlgorithm = getParametersValue(parameters, "maskGenAlgorithm", RSAESOAEPParams.defaultValues("maskGenAlgorithm"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description pSourceAlgorithm
+		 * @desc pSourceAlgorithm
 		 */
 		this.pSourceAlgorithm = getParametersValue(parameters, "pSourceAlgorithm", RSAESOAEPParams.defaultValues("pSourceAlgorithm"));
 		//endregion
@@ -71,18 +71,22 @@ export default class RSAESOAEPParams
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RSAES-OAEP-params ::= SEQUENCE {
+	 *    hashAlgorithm     [0] HashAlgorithm    DEFAULT sha1,
+	 *    maskGenAlgorithm  [1] MaskGenAlgorithm DEFAULT mgf1SHA1,
+	 *    pSourceAlgorithm  [2] PSourceAlgorithm DEFAULT pSpecifiedEmpty
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RSAES-OAEP-params ::= SEQUENCE {
-		//    hashAlgorithm     [0] HashAlgorithm    DEFAULT sha1,
-		//    maskGenAlgorithm  [1] MaskGenAlgorithm DEFAULT mgf1SHA1,
-		//    pSourceAlgorithm  [2] PSourceAlgorithm DEFAULT pSpecifiedEmpty
-		//}
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

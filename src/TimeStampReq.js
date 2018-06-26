@@ -12,47 +12,47 @@ export default class TimeStampReq
 	/**
 	 * Constructor for TimeStampReq class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", TimeStampReq.defaultValues("version"));
 		/**
 		 * @type {MessageImprint}
-		 * @description messageImprint
+		 * @desc messageImprint
 		 */
 		this.messageImprint = getParametersValue(parameters, "messageImprint", TimeStampReq.defaultValues("messageImprint"));
 
 		if("reqPolicy" in parameters)
 			/**
 			 * @type {string}
-			 * @description reqPolicy
+			 * @desc reqPolicy
 			 */
 			this.reqPolicy = getParametersValue(parameters, "reqPolicy", TimeStampReq.defaultValues("reqPolicy"));
 
 		if("nonce" in parameters)
 			/**
 			 * @type {Integer}
-			 * @description nonce
+			 * @desc nonce
 			 */
 			this.nonce = getParametersValue(parameters, "nonce", TimeStampReq.defaultValues("nonce"));
 
 		if("certReq" in parameters)
 			/**
 			 * @type {boolean}
-			 * @description certReq
+			 * @desc certReq
 			 */
 			this.certReq = getParametersValue(parameters, "certReq", TimeStampReq.defaultValues("certReq"));
 
 		if("extensions" in parameters)
 			/**
 			 * @type {Array.<Extension>}
-			 * @description extensions
+			 * @desc extensions
 			 */
 			this.extensions = getParametersValue(parameters, "extensions", TimeStampReq.defaultValues("extensions"));
 		//endregion
@@ -114,22 +114,26 @@ export default class TimeStampReq
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * TimeStampReq ::= SEQUENCE  {
+	 *    version               INTEGER  { v1(1) },
+	 *    messageImprint        MessageImprint,
+	 *    reqPolicy             TSAPolicyId              OPTIONAL,
+	 *    nonce                 INTEGER                  OPTIONAL,
+	 *    certReq               BOOLEAN                  DEFAULT FALSE,
+	 *    extensions            [0] IMPLICIT Extensions  OPTIONAL  }
+	 *
+	 * TSAPolicyId ::= OBJECT IDENTIFIER
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//TimeStampReq ::= SEQUENCE  {
-		//    version               INTEGER  { v1(1) },
-		//    messageImprint        MessageImprint,
-		//    reqPolicy             TSAPolicyId              OPTIONAL,
-		//    nonce                 INTEGER                  OPTIONAL,
-		//    certReq               BOOLEAN                  DEFAULT FALSE,
-		//    extensions            [0] IMPLICIT Extensions  OPTIONAL  }
-		//
-		//TSAPolicyId ::= OBJECT IDENTIFIER
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

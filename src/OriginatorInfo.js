@@ -12,19 +12,19 @@ export default class OriginatorInfo
 	/**
 	 * Constructor for OriginatorInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {CertificateSet}
-		 * @description certs
+		 * @desc certs
 		 */
 		this.certs = getParametersValue(parameters, "certs", OriginatorInfo.defaultValues("certs"));
 		/**
 		 * @type {RevocationInfoChoices}
-		 * @description crls
+		 * @desc crls
 		 */
 		this.crls = getParametersValue(parameters, "crls", OriginatorInfo.defaultValues("crls"));
 		//endregion
@@ -71,16 +71,20 @@ export default class OriginatorInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * OriginatorInfo ::= SEQUENCE {
+	 *    certs [0] IMPLICIT CertificateSet OPTIONAL,
+	 *    crls [1] IMPLICIT RevocationInfoChoices OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//OriginatorInfo ::= SEQUENCE {
-		//    certs [0] IMPLICIT CertificateSet OPTIONAL,
-		//    crls [1] IMPLICIT RevocationInfoChoices OPTIONAL }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

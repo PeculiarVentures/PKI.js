@@ -11,28 +11,28 @@ export default class RecipientKeyIdentifier
 	/**
 	 * Constructor for RecipientKeyIdentifier class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {OctetString}
-		 * @description subjectKeyIdentifier
+		 * @desc subjectKeyIdentifier
 		 */
 		this.subjectKeyIdentifier = getParametersValue(parameters, "subjectKeyIdentifier", RecipientKeyIdentifier.defaultValues("subjectKeyIdentifier"));
 
 		if("date" in parameters)
 			/**
 			 * @type {GeneralizedTime}
-			 * @description date
+			 * @desc date
 			 */
 			this.date = getParametersValue(parameters, "date", RecipientKeyIdentifier.defaultValues("date"));
 
 		if("other" in parameters)
 			/**
 			 * @type {OtherKeyAttribute}
-			 * @description other
+			 * @desc other
 			 */
 			this.other = getParametersValue(parameters, "other", RecipientKeyIdentifier.defaultValues("other"));
 		//endregion
@@ -90,17 +90,21 @@ export default class RecipientKeyIdentifier
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RecipientKeyIdentifier ::= SEQUENCE {
+	 *    subjectKeyIdentifier SubjectKeyIdentifier,
+	 *    date GeneralizedTime OPTIONAL,
+	 *    other OtherKeyAttribute OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RecipientKeyIdentifier ::= SEQUENCE {
-		//    subjectKeyIdentifier SubjectKeyIdentifier,
-		//    date GeneralizedTime OPTIONAL,
-		//    other OtherKeyAttribute OPTIONAL }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

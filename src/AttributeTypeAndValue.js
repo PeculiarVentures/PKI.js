@@ -11,19 +11,19 @@ export default class AttributeTypeAndValue
 	/**
 	 * Constructor for AttributeTypeAndValue class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description type
+		 * @desc type
 		 */
 		this.type = getParametersValue(parameters, "type", AttributeTypeAndValue.defaultValues("type"));
 		/**
 		 * @type {Object}
-		 * @description Value of the AttributeTypeAndValue class
+		 * @desc Value of the AttributeTypeAndValue class
 		 */
 		this.value = getParametersValue(parameters, "value", AttributeTypeAndValue.defaultValues("value"));
 		//endregion
@@ -52,20 +52,24 @@ export default class AttributeTypeAndValue
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AttributeTypeAndValue ::= Sequence {
+	 *    type     AttributeType,
+	 *    value    AttributeValue }
+	 *
+	 * AttributeType ::= OBJECT IDENTIFIER
+	 *
+	 * AttributeValue ::= ANY -- DEFINED BY AttributeType
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//AttributeTypeAndValue ::= Sequence {
-		//    type     AttributeType,
-		//    value    AttributeValue }
-		//
-		//AttributeType ::= OBJECT IDENTIFIER
-		//
-		//AttributeValue ::= ANY -- DEFINED BY AttributeType
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName] Name for entire block

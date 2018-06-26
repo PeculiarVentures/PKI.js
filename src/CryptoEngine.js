@@ -211,24 +211,24 @@ export default class CryptoEngine
 	/**
 	 * Constructor for CryptoEngine class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Object}
-		 * @description Usually here we are expecting "window.crypto" or an equivalent from custom "crypto engine"
+		 * @desc Usually here we are expecting "window.crypto" or an equivalent from custom "crypto engine"
 		 */
 		this.crypto = getParametersValue(parameters, "crypto", {});
 		/**
 		 * @type {Object}
-		 * @description Usually here we are expecting "window.crypto.subtle" or an equivalent from custom "crypto engine"
+		 * @desc Usually here we are expecting "window.crypto.subtle" or an equivalent from custom "crypto engine"
 		 */
 		this.subtle = getParametersValue(parameters, "subtle", {});
 		/**
 		 * @type {string}
-		 * @description Name of the "crypto engine"
+		 * @desc Name of the "crypto engine"
 		 */
 		this.name = getParametersValue(parameters, "name", "");
 		//endregion

@@ -15,21 +15,21 @@ export default class RecipientInfo
 	/**
 	 * Constructor for RecipientInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description variant
+		 * @desc variant
 		 */
 		this.variant = getParametersValue(parameters, "variant", RecipientInfo.defaultValues("variant"));
 
 		if("value" in parameters)
 			/**
 			 * @type {*}
-			 * @description value
+			 * @desc value
 			 */
 			this.value = getParametersValue(parameters, "value", RecipientInfo.defaultValues("value"));
 		//endregion
@@ -76,19 +76,23 @@ export default class RecipientInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RecipientInfo ::= CHOICE {
+	 *    ktri KeyTransRecipientInfo,
+	 *    kari [1] KeyAgreeRecipientInfo,
+	 *    kekri [2] KEKRecipientInfo,
+	 *    pwri [3] PasswordRecipientinfo,
+	 *    ori [4] OtherRecipientInfo }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RecipientInfo ::= CHOICE {
-		//    ktri KeyTransRecipientInfo,
-		//    kari [1] KeyAgreeRecipientInfo,
-		//    kekri [2] KEKRecipientInfo,
-		//    pwri [3] PasswordRecipientinfo,
-		//    ori [4] OtherRecipientInfo }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]

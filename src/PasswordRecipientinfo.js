@@ -11,37 +11,37 @@ export default class PasswordRecipientinfo
 	/**
 	 * Constructor for PasswordRecipientinfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", PasswordRecipientinfo.defaultValues("version"));
 
 		if("keyDerivationAlgorithm" in parameters)
 			/**
 			 * @type {AlgorithmIdentifier}
-			 * @description keyDerivationAlgorithm
+			 * @desc keyDerivationAlgorithm
 			 */
 			this.keyDerivationAlgorithm = getParametersValue(parameters, "keyDerivationAlgorithm", PasswordRecipientinfo.defaultValues("keyDerivationAlgorithm"));
 
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description keyEncryptionAlgorithm
+		 * @desc keyEncryptionAlgorithm
 		 */
 		this.keyEncryptionAlgorithm = getParametersValue(parameters, "keyEncryptionAlgorithm", PasswordRecipientinfo.defaultValues("keyEncryptionAlgorithm"));
 		/**
 		 * @type {OctetString}
-		 * @description encryptedKey
+		 * @desc encryptedKey
 		 */
 		this.encryptedKey = getParametersValue(parameters, "encryptedKey", PasswordRecipientinfo.defaultValues("encryptedKey"));
 		/**
 		 * @type {ArrayBuffer}
-		 * @description password Password to derive key from
+		 * @desc password Password to derive key from
 		 */
 		this.password = getParametersValue(parameters, "password", PasswordRecipientinfo.defaultValues("password"));
 		//endregion
@@ -99,18 +99,22 @@ export default class PasswordRecipientinfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PasswordRecipientInfo ::= SEQUENCE {
+	 *    version CMSVersion,   -- Always set to 0
+	 *    keyDerivationAlgorithm [0] KeyDerivationAlgorithmIdentifier OPTIONAL,
+	 *    keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
+	 *    encryptedKey EncryptedKey }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//PasswordRecipientInfo ::= SEQUENCE {
-		//    version CMSVersion,   -- Always set to 0
-		//    keyDerivationAlgorithm [0] KeyDerivationAlgorithmIdentifier OPTIONAL,
-		//    keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
-		//    encryptedKey EncryptedKey }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
