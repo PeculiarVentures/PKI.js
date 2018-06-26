@@ -21,6 +21,8 @@
     "cross-env": "^5.1.4",
     "emailjs-mime-builder": "latest",
     "emailjs-mime-parser": "^2.0.1",
+    "esdoc": "^1.1.0",
+    "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^4.19.1",
     "mocha": "^3.0.2",
     "nyc": "^11.6.0",
@@ -32,8 +34,6 @@
   "dependencies": {
     "asn1js": "latest",
     "bytestreamjs": "latest",
-    "esdoc": "^1.1.0",
-    "esdoc-standard-plugin": "^1.0.0",
     "pvutils": "latest"
   },
   "engines": {
