@@ -27,8 +27,8 @@ In the new version of library we have some new features:
 
 ## Additional information
 
-Full detailed information about all PKI.js features could be found [_**in separate file**_](FEATURES.md).
-Description of PKI.js code structure could be found [_**in separate file**_](https://github.com/PeculiarVentures/PKI.js/tree/master/src/README.md).
+Full detailed information about all PKI.js features could be found [_**in separate file**_](https://github.com/PeculiarVentures/PKI.js/blob/master/FEATURES.md).
+Description of PKI.js code structure could be found [_**in separate file**_](https://github.com/PeculiarVentures/PKI.js/blob/master/src/README.MD).
 
 ## Important Information for PKI.js V1 Users
 
