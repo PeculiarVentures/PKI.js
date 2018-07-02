@@ -18,7 +18,7 @@ export default class AltName
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<GeneralName>}
-		 * @desc type
+		 * @desc Array of alternative names in GeneralName type
 		 */
 		this.altNames = getParametersValue(parameters, "altNames", AltName.defaultValues("altNames"));
 		//endregion

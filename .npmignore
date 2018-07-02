@@ -8,3 +8,4 @@ circle.yml
 .babelrc
 coverage
 .vs
+docs

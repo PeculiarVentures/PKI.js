@@ -534,9 +534,10 @@ export default class Certificate
 	}
 	//**********************************************************************************
 	/**
-	 * Get SHA-1 hash value for subject public key
+	 * Get hash value for subject public key (default SHA-1)
+	 * @param {String} [hashAlgorithm=SHA-1] Hashing algorithm name
 	 */
-	getKeyHash()
+	getKeyHash(hashAlgorithm = "SHA-1")
 	{
 		//region Get a "crypto" extension
 		const crypto = getCrypto();
@@ -544,7 +545,7 @@ export default class Certificate
 			return Promise.reject("Unable to create WebCrypto object");
 		//endregion
 		
-		return crypto.digest({ name: "sha-1" }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
+		return crypto.digest({ name: hashAlgorithm }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
 	}
 	//**********************************************************************************
 	/**

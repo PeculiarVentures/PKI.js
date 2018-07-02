@@ -18,12 +18,12 @@ export default class AccessDescription
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @desc accessMethod
+		 * @desc The type and format of the information are specified by the accessMethod field. This profile defines two accessMethod OIDs: id-ad-caIssuers and id-ad-ocsp
 		 */
 		this.accessMethod = getParametersValue(parameters, "accessMethod", AccessDescription.defaultValues("accessMethod"));
 		/**
 		 * @type {GeneralName}
-		 * @desc accessLocation
+		 * @desc The accessLocation field specifies the location of the information
 		 */
 		this.accessLocation = getParametersValue(parameters, "accessLocation", AccessDescription.defaultValues("accessLocation"));
 		//endregion

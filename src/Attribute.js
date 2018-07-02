@@ -16,12 +16,12 @@ export default class Attribute {
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @desc type
+		 * @desc ObjectIdentifier for attribute (string representation)
 		 */
 		this.type = getParametersValue(parameters, "type", Attribute.defaultValues("type"));
 		/**
 		 * @type {Array}
-		 * @desc values
+		 * @desc Any attribute values
 		 */
 		this.values = getParametersValue(parameters, "values", Attribute.defaultValues("values"));
 		//endregion
