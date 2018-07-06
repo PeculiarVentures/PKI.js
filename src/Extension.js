@@ -167,7 +167,15 @@ export default class Extension
 		switch(this.extnID)
 		{
 			case "2.5.29.9": // SubjectDirectoryAttributes
-				this.parsedValue = new SubjectDirectoryAttributes({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new SubjectDirectoryAttributes({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new SubjectDirectoryAttributes();
+					this.parsedValue.parsingError = "Incorrectly formated SubjectDirectoryAttributes";
+				}
 				break;
 			case "2.5.29.14": // SubjectKeyIdentifier
 				this.parsedValue = asn1.result; // Should be just a simple OCTETSTRING
@@ -176,14 +184,38 @@ export default class Extension
 				this.parsedValue = asn1.result; // Should be just a simple BITSTRING
 				break;
 			case "2.5.29.16": // PrivateKeyUsagePeriod
-				this.parsedValue = new PrivateKeyUsagePeriod({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new PrivateKeyUsagePeriod({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new PrivateKeyUsagePeriod();
+					this.parsedValue.parsingError = "Incorrectly formated PrivateKeyUsagePeriod";
+				}
 				break;
 			case "2.5.29.17": // SubjectAltName
 			case "2.5.29.18": // IssuerAltName
-				this.parsedValue = new AltName({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new AltName({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new AltName();
+					this.parsedValue.parsingError = "Incorrectly formated AltName";
+				}
 				break;
 			case "2.5.29.19": // BasicConstraints
-				this.parsedValue = new BasicConstraints({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new BasicConstraints({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new BasicConstraints();
+					this.parsedValue.parsingError = "Incorrectly formated BasicConstraints";
+				}
 				break;
 			case "2.5.29.20": // CRLNumber
 			case "2.5.29.27": // BaseCRLNumber (delta CRL indicator)
@@ -196,42 +228,130 @@ export default class Extension
 				this.parsedValue = asn1.result; // Should be just a simple GeneralizedTime
 				break;
 			case "2.5.29.28": // IssuingDistributionPoint
-				this.parsedValue = new IssuingDistributionPoint({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new IssuingDistributionPoint({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new IssuingDistributionPoint();
+					this.parsedValue.parsingError = "Incorrectly formated IssuingDistributionPoint";
+				}
 				break;
 			case "2.5.29.29": // CertificateIssuer
-				this.parsedValue = new GeneralNames({ schema: asn1.result }); // Should be just a simple
+				try
+				{
+					this.parsedValue = new GeneralNames({ schema: asn1.result }); // Should be just a simple
+				}
+				catch(ex)
+				{
+					this.parsedValue = new GeneralNames();
+					this.parsedValue.parsingError = "Incorrectly formated GeneralNames";
+				}
 				break;
 			case "2.5.29.30": // NameConstraints
-				this.parsedValue = new NameConstraints({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new NameConstraints({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new NameConstraints();
+					this.parsedValue.parsingError = "Incorrectly formated NameConstraints";
+				}
 				break;
 			case "2.5.29.31": // CRLDistributionPoints
 			case "2.5.29.46": // FreshestCRL
-				this.parsedValue = new CRLDistributionPoints({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new CRLDistributionPoints({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new CRLDistributionPoints();
+					this.parsedValue.parsingError = "Incorrectly formated CRLDistributionPoints";
+				}
 				break;
 			case "2.5.29.32": // CertificatePolicies
-				this.parsedValue = new CertificatePolicies({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new CertificatePolicies({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new CertificatePolicies();
+					this.parsedValue.parsingError = "Incorrectly formated CertificatePolicies";
+				}
 				break;
 			case "2.5.29.33": // PolicyMappings
-				this.parsedValue = new PolicyMappings({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new PolicyMappings({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new PolicyMappings();
+					this.parsedValue.parsingError = "Incorrectly formated CertificatePolicies";
+				}
 				break;
 			case "2.5.29.35": // AuthorityKeyIdentifier
-				this.parsedValue = new AuthorityKeyIdentifier({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new AuthorityKeyIdentifier({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new AuthorityKeyIdentifier();
+					this.parsedValue.parsingError = "Incorrectly formated AuthorityKeyIdentifier";
+				}
 				break;
 			case "2.5.29.36": // PolicyConstraints
-				this.parsedValue = new PolicyConstraints({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new PolicyConstraints({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new PolicyConstraints();
+					this.parsedValue.parsingError = "Incorrectly formated PolicyConstraints";
+				}
 				break;
 			case "2.5.29.37": // ExtKeyUsage
-				this.parsedValue = new ExtKeyUsage({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new ExtKeyUsage({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new ExtKeyUsage();
+					this.parsedValue.parsingError = "Incorrectly formated ExtKeyUsage";
+				}
 				break;
 			case "2.5.29.54": // InhibitAnyPolicy
 				this.parsedValue = asn1.result; // Should be just a simple INTEGER
 				break;
 			case "1.3.6.1.5.5.7.1.1": // AuthorityInfoAccess
 			case "1.3.6.1.5.5.7.1.11": // SubjectInfoAccess
-				this.parsedValue = new InfoAccess({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new InfoAccess({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new InfoAccess();
+					this.parsedValue.parsingError = "Incorrectly formated InfoAccess";
+				}
 				break;
 			case "1.3.6.1.4.1.11129.2.4.2": // SignedCertificateTimestampList
-				this.parsedValue = new SignedCertificateTimestampList({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new SignedCertificateTimestampList({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new SignedCertificateTimestampList();
+					this.parsedValue.parsingError = "Incorrectly formated SignedCertificateTimestampList";
+				}
 				break;
 			default:
 		}

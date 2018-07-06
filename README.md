@@ -25,7 +25,7 @@ In the new version of library we have some new features:
 * New version of "certificate chaing verification engine" passed almost all tests from NIST PKITS. Tests are also shipped with the library;
 * Internal "WebCrypto shim" making it possible to work with "spki/pkcs8" formats in any environment;
 
-## Additional information
+## Features And Additional information
 
 Full detailed information about all PKI.js features could be found [_**in separate file**_](https://github.com/PeculiarVentures/PKI.js/blob/master/FEATURES.md).
 Description of PKI.js code structure could be found [_**in separate file**_](https://github.com/PeculiarVentures/PKI.js/blob/master/src/README.MD).
