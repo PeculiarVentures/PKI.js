@@ -246,7 +246,7 @@ export default class CertificateChainValidationEngine
 		}
 	}
 	//**********************************************************************************
-	async sort()
+	async sort(passedWhenNotRevValues = false)
 	{
 		//region Initial variables
 		const localCerts = [];
@@ -336,12 +336,12 @@ export default class CertificateChainValidationEngine
 			}
 			//endregion
 			
-			//region Find all CRLs for crtificate's issuer
+			//region Find all CRLs for certificate's issuer
 			crls.push(..._this.crls.filter(element => element.issuer.isEqual(certificate.issuer)));
 			if(crls.length === 0)
 			{
 				return {
-					status: 1,
+					status: 2,
 					statusMessage: "No CRLs for specific certificate issuer"
 				};
 			}
@@ -390,7 +390,7 @@ export default class CertificateChainValidationEngine
 			}
 			
 			return {
-				status: 1,
+				status: 3,
 				statusMessage: "No valid CRLs found"
 			};
 		}
@@ -572,8 +572,11 @@ export default class CertificateChainValidationEngine
 				for(let i = 0; i < (path.length - 1); i++)
 				{
 					//region Initial variables
-					let ocspResult;
-					let crlResult;
+					let ocspResult = 2;
+					let crlResult = {
+						status: 0,
+						statusMessage: ""
+					};
 					//endregion
 					
 					//region Check OCSPs first
@@ -602,40 +605,46 @@ export default class CertificateChainValidationEngine
 					if(_this.crls.length !== 0)
 					{
 						crlResult = await findCRL(path[i]);
-						if(crlResult.status)
+
+						if(crlResult.status === 0)
 						{
-							throw {
-								result: false,
-								resultCode: 11,
-								resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
-							};
+							for(let j = 0; j < crlResult.result.length; j++)
+							{
+								//region Check that the CRL issuer certificate have not been revoked
+								const isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked(path[i]);
+								if(isCertificateRevoked)
+								{
+									return {
+										result: false,
+										resultCode: 12,
+										resultMessage: "One of certificates had been revoked"
+									};
+								}
+								//endregion
+
+								//region Check that the CRL issuer certificate is a CA certificate
+								const isCertificateCA = await checkForCA(crlResult.result[j].certificate, true);
+								if(isCertificateCA.result === false)
+								{
+									return {
+										result: false,
+										resultCode: 13,
+										resultMessage: "CRL issuer certificate is not a CA certificate or does not have crlSign flag"
+									};
+								}
+								//endregion
+							}
 						}
-						
-						for(let j = 0; j < crlResult.result.length; j++)
+						else
 						{
-							//region Check that the CRL issuer certificate have not been revoked
-							const isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked(path[i]);
-							if(isCertificateRevoked)
+							if(passedWhenNotRevValues === false)
 							{
-								return {
+								throw {
 									result: false,
-									resultCode: 12,
-									resultMessage: "One of certificates had been revoked"
+									resultCode: 11,
+									resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
 								};
 							}
-							//endregion
-							
-							//region Check that the CRL issuer certificate is a CA certificate
-							const isCertificateCA = await checkForCA(crlResult.result[j].certificate, true);
-							if(isCertificateCA.result === false)
-							{
-								return {
-									result: false,
-									resultCode: 13,
-									resultMessage: "CRL issuer certificate is not a CA certificate or does not have crlSign flag"
-								};
-							}
-							//endregion
 						}
 					}
 					else
@@ -646,6 +655,39 @@ export default class CertificateChainValidationEngine
 								result: false,
 								resultCode: 11,
 								resultMessage: "No revocation values found for one of certificates"
+							};
+						}
+					}
+					//endregion
+
+					//region Check we do have links to revocation values inside issuer's certificate
+					if((ocspResult === 2) && (crlResult.status === 2) && passedWhenNotRevValues)
+					{
+						const issuerCertificate = path[i + 1];
+						let extensionFound = false;
+
+						if("extensions" in issuerCertificate)
+						{
+							for(const extension of issuerCertificate.extensions)
+							{
+								switch(extension.extnID)
+								{
+									case "2.5.29.31": // CRLDistributionPoints
+									case "2.5.29.46": // FreshestCRL
+									case "1.3.6.1.5.5.7.1.1": // AuthorityInfoAccess
+										extensionFound = true;
+										break;
+									default:
+								}
+							}
+						}
+
+						if(extensionFound)
+						{
+							throw {
+								result: false,
+								resultCode: 11,
+								resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
 							};
 						}
 					}
@@ -1055,6 +1097,11 @@ export default class CertificateChainValidationEngine
 			//endregion
 			
 			//region Get input variables
+			let passedWhenNotRevValues = false;
+
+			if("passedWhenNotRevValues" in parameters)
+				passedWhenNotRevValues = parameters.passedWhenNotRevValues;
+
 			let initialPolicySet = [];
 			initialPolicySet.push("2.5.29.32.0"); // "anyPolicy"
 			
@@ -1108,7 +1155,7 @@ export default class CertificateChainValidationEngine
 			//endregion
 			
 			//region Sorting certificates in the chain array
-			this.certs = await this.sort();
+			this.certs = await this.sort(passedWhenNotRevValues);
 			//endregion
 			
 			//region Work with policies

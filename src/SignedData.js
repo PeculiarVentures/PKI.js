@@ -393,6 +393,7 @@ export default class SignedData
 		checkDate = (new Date()),
 		checkChain = false,
 		extendedMode = false,
+		passedWhenNotRevValues = false,
 		findOrigin = null,
 		findIssuer = null
 	} = {})
@@ -674,7 +675,7 @@ export default class SignedData
 				if("ocsps" in this)
 					certificateChainEngine.ocsps.push(...(this.ocsps));
 				
-				return certificateChainEngine.verify().then(verificationResult =>
+				return certificateChainEngine.verify({ passedWhenNotRevValues }).then(verificationResult =>
 				{
 					if("certificatePath" in verificationResult)
 						certificatePath = verificationResult.certificatePath;
