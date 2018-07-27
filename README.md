@@ -109,6 +109,7 @@ In the new version of library we have some new features:
     * Making any kind of internal values (SafeContexts/SafeBags) with any kind of parameters;
 </details>
 
+
 Description of PKI.js code structure could be found [_**in separate file**_](https://github.com/PeculiarVentures/PKI.js/blob/master/src/README.MD).
 
 ## Important Information for PKI.js V1 Users
