@@ -662,7 +662,7 @@ export default class SignedData
 				{
 					for(const crl of this.crls)
 					{
-						if(crl instanceof CertificateRevocationList)
+						if("thisUpdate" in crl)
 							certificateChainEngine.crls.push(crl);
 						else // Assumed "revocation value" has "OtherRevocationInfoFormat"
 						{
