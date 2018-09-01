@@ -108,8 +108,7 @@
     "destination": "./docs",
     "plugins": [
       {
-        "name":
-        "esdoc-standard-plugin"
+        "name": "esdoc-standard-plugin"
       }
     ]
   }
