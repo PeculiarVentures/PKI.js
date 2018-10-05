@@ -1,4 +1,4 @@
-var smimehandler = new SMIMEHandler(false); // true/false protect private key.
+let smimehandler = new SMIMEHandler(false); // true/false protect private key.
 /* Initial variables */
 smimehandler.newcert.dc = [
 	'com',
@@ -37,43 +37,43 @@ smimehandler.senderaddr = 'user1@localhost';
 smimehandler.recipientaddr = 'user1@localhost';
 smimehandler.msgsubject = 'Example SMIME/CMS Email';
 
-var document = window.document;
+// let document = window.document;
 
-var cbobj       = new Object;
+let cbobj       = new Object;
 cbobj.successcb = function () {};
 cbobj.failurecb = function () {};
 cbobj.errorcb   = function () {};
 cbobj.error     = new String;
 
 /* Begin bind DOM elements to variables */
-var createselfbutton   = document.getElementById ('createselfbutton' );
-var createcsrbutton    = document.getElementById ('createcsrbutton'  );
-var new_signed_data    = document.getElementById ('new_signed_data'  );
-var importbutton       = document.getElementById ('importbutton'     );
-var encryptbutton      = document.getElementById ('encryptbutton'    );
-var decryptbutton      = document.getElementById ('decryptbutton'    );
-var signbutton         = document.getElementById ('signbutton'       );
-var verifysignedbutton = document.getElementById ('verifysignedbutton');
-var verifycertbutton   = document.getElementById ('verifycertbutton' );
-var recipcertbox       = document.getElementById ('recipcertbox'     );
-var cert_data          = document.getElementById ('cert_data'        );
-var pkcs8_key          = document.getElementById ('pkcs8_key'        );
-var input_text         = document.getElementById ('input_text'       );
-var encryptedbox       = document.getElementById ('encrypted_content');
-var decryptedbox       = document.getElementById ('decrypted_content');
-var parsebutton        = document.getElementById ('parsebutton'      );
-var extractbox         = document.getElementById ('extractbox'       );
-var input_file         = document.getElementById ('input_file'       );
-var parsing_file       = document.getElementById ('parsing_file'     );
-var ca_bundle          = document.getElementById ('ca_bundle'        );
-var inter_certs        = document.getElementById ('inter_certs'      );
-var trusted_certtext   = document.getElementById ('trusted_certtext' );
-var pkcs12_file        = document.getElementById ('pkcs12_file'      );
-var exppkcs12_file     = document.getElementById ('exppkcs12_file'   );
-var password           = document.getElementById ('password'         );
-var cmsdgstalgos       = document.getElementById ('cms-dgst-algos'   );
-var divtable           = document.getElementById ('divtable'         );
-var divtablemsgcerts   = document.getElementById ('divtablemsgcerts' );
+let createselfbutton   = document.getElementById ('createselfbutton' );
+let createcsrbutton    = document.getElementById ('createcsrbutton'  );
+let new_signed_data    = document.getElementById ('new_signed_data'  );
+let importbutton       = document.getElementById ('importbutton'     );
+let encryptbutton      = document.getElementById ('encryptbutton'    );
+let decryptbutton      = document.getElementById ('decryptbutton'    );
+let signbutton         = document.getElementById ('signbutton'       );
+let verifysignedbutton = document.getElementById ('verifysignedbutton');
+let verifycertbutton   = document.getElementById ('verifycertbutton' );
+let recipcertbox       = document.getElementById ('recipcertbox'     );
+let cert_data          = document.getElementById ('cert_data'        );
+let pkcs8_key          = document.getElementById ('pkcs8_key'        );
+let input_text         = document.getElementById ('input_text'       );
+let encryptedbox       = document.getElementById ('encrypted_content');
+let decryptedbox       = document.getElementById ('decrypted_content');
+let parsebutton        = document.getElementById ('parsebutton'      );
+let extractbox         = document.getElementById ('extractbox'       );
+let input_file         = document.getElementById ('input_file'       );
+let parsing_file       = document.getElementById ('parsing_file'     );
+let ca_bundle          = document.getElementById ('ca_bundle'        );
+let inter_certs        = document.getElementById ('inter_certs'      );
+let trusted_certtext   = document.getElementById ('trusted_certtext' );
+let pkcs12_file        = document.getElementById ('pkcs12_file'      );
+let exppkcs12_file     = document.getElementById ('exppkcs12_file'   );
+let password           = document.getElementById ('password'         );
+let cmsdgstalgos       = document.getElementById ('cms-dgst-algos'   );
+let divtable           = document.getElementById ('divtable'         );
+let divtablemsgcerts   = document.getElementById ('divtablemsgcerts' );
 /* End bind DOM elements to variables */
 
 /* Begin callback declarations */
@@ -200,10 +200,10 @@ smimehandler.decryptedcb = function (val) {
 	    alert('ERROR DURING DECRYPTION PROCESS: ' + smimehandler.error);
 	}
 }
-var verifysigcb = function (result) {
+let verifysigcb = function (result) {
 	alert ('Verification result: ' + result);
 }
-var errorverifysigcb = function (result) {
+let errorverifysigcb = function (result) {
 	alert ('Error while verifying signature: ' + result);
 }
 smimehandler.certvcb = function (result, message) {
@@ -247,15 +247,15 @@ importbutton.onclick = function () {
 createselfbutton.onclick = smimehandler.createCertificate;
 createcsrbutton.onclick = smimehandler.createPKCS10;
 signbutton.onclick = function () {
-	var dataBuffer;
-	var header =
+	let dataBuffer;
+	let header =
 	'Content-Type: text/plain\r\n\r\n';
 	const tempReader = new FileReader();
 	smimehandler.keyimportedcb = function () {
 	    dataBuffer = tempReader.result;
 	    smimehandler.createCMSSigned(dataBuffer);
 	}
-	var textBlob = new Blob (
+	let textBlob = new Blob (
 	    [header + input_text.value],
 	    { type: 'text/plain' }
 	);
@@ -278,8 +278,8 @@ decryptbutton.onclick = function () {
 	smimehandler.encrypted = smimehandler.encrypted.toString();
 	smimehandler.smimeDecrypt ();
 }
-var parsecomplcb = function (cbobj) {
-	var contreader = new FileReader;
+let parsecomplcb = function (cbobj) {
+	let contreader = new FileReader;
 	if (cbobj.contentdecoded.type == 'text/plain') {
 	    contreader.onloadend = function () {
 	        extractbox.value
@@ -287,7 +287,7 @@ var parsecomplcb = function (cbobj) {
 	    }
 	    contreader.readAsText (cbobj.contentdecoded);
 	}
-	var c = 0;
+	let c = 0;
 	while (c < cbobj.digalgs.length) {
 	    cmsdgstalgos.appendChild (
 	        document.createElement('li').appendChild (
@@ -313,7 +313,7 @@ verifycertbutton.onclick =  function () {
 }
 parsebutton.onclick = function () {
 	cbobj.success = parsecomplcb;
-	var tmpcmssignedtext = new String (
+	let tmpcmssignedtext = new String (
 	    decryptedbox.value
 	);
 	const cmssignedtext  = tmpcmssignedtext.toString();

@@ -1,22 +1,22 @@
-var destroyClickedElement = function (event)
+let destroyClickedElement = function (event)
 {
 	// noinspection XHTMLIncompatabilitiesJS
 	document.body.removeChild(event.target);
 }
 
-var certtablerow = function (parsedcert, num)
+let certtablerow = function (parsedcert, num)
 {
-	var localtr = window.document.createElement('tr');
-	var dnstr = '';
-	var dn = new Array;
-	var alts = new Array;
-	var altstr = '';
-	var c = 0;
-	var j = 0;
-	var tdn;
-	var tn;
-	var ul;
-	var li;
+	let localtr = window.document.createElement('tr');
+	let dnstr = '';
+	let dn = new Array;
+	let alts = new Array;
+	let altstr = '';
+	let c = 0;
+	let j = 0;
+	let tdn;
+	let tn;
+	let ul;
+	let li;
 	
 	if (num !== undefined) {
 	    tdn= window.document.createElement('td');
@@ -41,7 +41,7 @@ var certtablerow = function (parsedcert, num)
 	        dn = parsedcert.subject.dn;
 	    else
 	        dn = parsedcert.issuer.dn;
-	    var l = dn.length;
+	    let l = dn.length;
 	    if (l > 0) {
 	        dnstr = '/';
 	        dnstr += dn[0][0]
@@ -91,49 +91,52 @@ var certtablerow = function (parsedcert, num)
 
 	return localtr;
 }
-var certtable = function (parsedcerts, signers)
+let certtable = function (parsedcerts, signers)
 {
-	var l;
-	var certtcont =
+	let l;
+	let thr;
+	let th;
+	let tn;
+	let certtcont =
 	    window.document.createElement('div');
-	var certt = 
+	let certt = 
 	    window.document.createElement('table');
 
 	/* create header row */
-	var thr =
+	thr =
 	    window.document.createElement('tr');
-	var th =
+	th =
 	    window.document.createElement('th');
-	var tn =
+	tn =
 	    window.document.createTextNode('#');
 
 	th.appendChild (tn);
 	thr.appendChild (th);
 
-	var th =
+	th =
 	    window.document.createElement('th');
-	var tn =
+	tn =
 	    window.document.createTextNode('Serial #');
 	th.appendChild (tn);
 	thr.appendChild (th);
 
-	var th =
+	th =
 	    window.document.createElement('th');
-	var tn =
+	tn =
 	    window.document.createTextNode('Subject DN');
 	th.appendChild (tn);
 	thr.appendChild (th);
 
-	var th =
+	th =
 	    window.document.createElement('th');
-	var tn =
+	tn =
 	    window.document.createTextNode('Issuer DN');
 	th.appendChild (tn);
 	thr.appendChild (th);
 
-	var th =
+	th =
 	    window.document.createElement('th');
-	var tn =
+	tn =
 	    window.document.createTextNode('Subject Alt Name');
 	th.appendChild (tn);
 	thr.appendChild (th);
@@ -144,18 +147,18 @@ var certtable = function (parsedcerts, signers)
 	if (signers !== undefined
 	    && signers.length !== undefined
 	    && signers.length > 0) {
-	    var sp =
+	    let sp =
 	        window.document.createElement('span');
-	    var str = 'Signers: ';
+	    let str = 'Signers: ';
 	    str += signers[0];
-	    var c = 1;
+	    let c = 1;
 	    while (c < signers.length) {
 	        str += ', '
 	            + signers[c]
 	        ;
 	        c++;
 	    }
-	    var tn =
+	    let tn =
 	        window.document.createTextNode(str);
 	    sp.appendChild (tn);
 	    certtcont.appendChild (sp);
@@ -164,7 +167,7 @@ var certtable = function (parsedcerts, signers)
 	l = parsedcerts.length;
 
 	while (c < l) {
-	    var tr =  certtablerow (parsedcerts[c], c);
+	    let tr =  certtablerow (parsedcerts[c], c);
 	    certt.appendChild (tr);
 	    c++;
 	}
@@ -172,7 +175,7 @@ var certtable = function (parsedcerts, signers)
 	
 	return certtcont;
 }
-var dlblob = function (pkcs12AsBlob)
+let dlblob = function (pkcs12AsBlob)
 {
 	    const downloadLink = document.createElement("a");
 	    downloadLink.download = "pkijs_pkcs12.p12";
