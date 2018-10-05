@@ -87,7 +87,7 @@ function formatPEM(pemString)
 	
 	return resultString;
 }
-var PEMtoCertArray = function (pemcerts) {
+let PEMtoCertArray = function (pemcerts) {
 	pemcerts = pemcerts.replace (/\r/g, '');
 	pemcerts = pemcerts.replace (/\n/g, '');
 	let certpemreg = new RegExp(
@@ -126,11 +126,11 @@ var PEMtoCertArray = function (pemcerts) {
 	return certSimpl;
 }
 
-var certBufftoPEM = function (certBuff) {
+let certBufftoPEM = function (certBuff) {
 // Takes a single asn.1 object certificate, or an array of
 // asn1 object certs.
-	var i = 0;
-	var pemcert = '';
+	let i = 0;
+	let pemcert = '';
 	if (Array.isArray (certBuff)) {
 	    while (i < certBuff.length) {
 	        pemcert += "-----BEGIN CERTIFICATE-----\r\n"
@@ -146,7 +146,7 @@ var certBufftoPEM = function (certBuff) {
 	return pemcert;
 }
 
-var PEMtoKey = function (PEMkey) {
+let PEMtoKey = function (PEMkey) {
 	let keypemreg = new RegExp(
 	    '(-----(BEGIN|END)( NEW)? PRIVATE KEY-----|\n)',
 	    'g'
@@ -172,8 +172,8 @@ var PEMtoKey = function (PEMkey) {
 	);
 	return new PrivateKeyInfo({ schema: asn1.result });
 }
-var keyBufftoPEM = function (keyBuff) {
-	var pemkey = "-----BEGIN PRIVATE KEY-----\r\n"
+let keyBufftoPEM = function (keyBuff) {
+	let pemkey = "-----BEGIN PRIVATE KEY-----\r\n"
 	    + formatPEM(window.btoa(arrayBufferToString(keyBuff)))
 	    + "\r\n-----END PRIVATE KEY-----\r\n";
 	return pemkey;
@@ -185,13 +185,13 @@ var keyBufftoPEM = function (keyBuff) {
 //*********************************************************************************
 // noinspection FunctionWithInconsistentReturnsJS
 function SMIMEHandler (varprotkey) {
-	var that = this;
-	var protkey = new Boolean (varprotkey);
-	var key = new String;
-	var objectCerts = null;
-	var objectPrivateKey = null;
-	var certSimpl = new Array;
-	var pkcs8Simpl = null;
+	let that = this;
+	let protkey = new Boolean (varprotkey);
+	let key = new String;
+	let objectCerts = null;
+	let objectPrivateKey = null;
+	let certSimpl = new Array;
+	let pkcs8Simpl = null;
 	this.newcert = new Object;
 	this.error = new String;
 	this.keytoimport = null;
@@ -284,7 +284,7 @@ this.createCertificate = function ()
 	certificate.serialNumber = new asn1js.Integer({ value: 1 });
 
 	if (that.newcert.dc instanceof Array) {
-	    var c3 = 0;
+	    let c3 = 0;
 	    while (c3 < that.newcert.dc.length) {
 	        certificate.issuer.typesAndValues.push(new AttributeTypeAndValue({
 	            type: "0.9.2342.19200300.100.1.25",
@@ -431,7 +431,7 @@ this.createCertificate = function ()
 	}));
 
 	if (that.newcert.dc instanceof Array) {
-	    var c3 = 0;
+	    let c3 = 0;
 	    while (c3 < that.newcert.dc.length) {
 	        certificate.subject.typesAndValues.push(new AttributeTypeAndValue({
 	            type: "0.9.2342.19200300.100.1.25",
@@ -676,16 +676,16 @@ this.createCertificate = function ()
 	//endregion
 	
 	//region AltSubject fields.
-	var alt_names = that.newcert.altnames;
-	var temp_altnames = new Array;
-	var c = 0;
-	var alttype = 0;
-	var newalt = new String;
-	var ipf = new Array;
-	var ipv4addrregexp = new RegExp (
+	let alt_names = that.newcert.altnames;
+	let temp_altnames = new Array;
+	let c = 0;
+	let alttype = 0;
+	let newalt = new String;
+	let ipf = new Array;
+	let ipv4addrregexp = new RegExp (
 	    '^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$'
 	);
-	var ipv6addrregexp = new RegExp (
+	let ipv6addrregexp = new RegExp (
 	    '^([0-9A-Fa-f]{0,4}:){2,7}([0-9A-Fa-f]{1,4}$|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4})$'
 	);
 	while (c < alt_names.length) {
@@ -705,14 +705,15 @@ this.createCertificate = function ()
 	    }
 	    if (alttype == 7) {
 	        // Test for IP address type
+	        let ipuint;
 		if (
 	            alt_names[c].match(
 	                ipv4addrregexp
 	           )
 	        ) {
 	            // IPv4 address
-	            var ipf = alt_names[c].split('.');
-	            var ipuint = new Uint8Array
+	            let ipf = alt_names[c].split('.');
+	            ipuint = new Uint8Array
 	            ([
 	                parseInt(ipf[0]),
 	                parseInt(ipf[1]),
@@ -721,20 +722,20 @@ this.createCertificate = function ()
 	            ]).buffer;
 	        } else {
 	            // IPv6 address
-	            var ipv6delim = new RegExp(':', 'g');
-	            var ip6l = alt_names[c].replace (
+	            let ipv6delim = new RegExp(':', 'g');
+	            let ip6l = alt_names[c].replace (
 	                ipv6delim,
 	                ''
 	            );
-	            var ip6l = ip6l.length;
-	            var c5 = 0;
-	            var mis0 = 32 - ip6l;
-	            var zeros = '';
+	            ip6l = ip6l.length;
+	            let c5 = 0;
+	            let mis0 = 32 - ip6l;
+	            let zeros = '';
 	            while (c5 < mis0) {
 	                zeros = zeros + '0';
 	                c5++;
 	            }
-	            var ipv6fstr = alt_names[c].replace (
+	            let ipv6fstr = alt_names[c].replace (
 	                '::',
 	                zeros
 	            );
@@ -742,9 +743,9 @@ this.createCertificate = function ()
 	                ipv6delim,
 	                ''
 	            );
-	            var ipoctarr = new Array;
+	            let ipoctarr = new Array;
 	            c5 = 0;
-	            var c6 = 2;
+	            let c6 = 2;
 	            while (c6 < 33) {
 	                ipoctarr.push (
 	                    parseInt (
@@ -755,7 +756,7 @@ this.createCertificate = function ()
 	                c5 = c5 + 2;
 	                c6 = c6 + 2;
 	            }
-	            var ipuint = new Uint8Array (
+	            ipuint = new Uint8Array (
 	                ipoctarr
 	            );
 	        }
@@ -866,8 +867,8 @@ this.createCertificate = function ()
 	        else
 	            that.unprotkey = resultString;
 		
-		var parsedcerts =  new Array;
-		var cbobj2  = new Object;
+		let parsedcerts =  new Array;
+		let cbobj2  = new Object;
 		cbobj2.cert = certificate;
                 let pcert = parseCert (cbobj2);
                 parsedcerts.push (pcert);
@@ -930,7 +931,7 @@ this.createPKCS10 = function ()
 	//region Put a static values
 	pkcs10.version = 0;
 	if (that.newcert.dc instanceof Array) {
-	    var c3 = 0;
+	    let c3 = 0;
 	    while (c3 < that.newcert.dc.length) {
 	        pkcs10.subject.typesAndValues.push(new AttributeTypeAndValue({
 	            type: "0.9.2342.19200300.100.1.25",
@@ -1073,16 +1074,17 @@ this.createPKCS10 = function ()
 		value: new asn1js.Utf8String({ value: that.newcert.cn })
 	}));
 
-	var alt_names = that.newcert.altnames;
-	var temp_altnames = new Array;
-	var c = 0;
-	var alttype = 0;
-	var newalt = new String;
-	var ipf = new Array;
-	var ipv4addrregexp = new RegExp (
+	let alt_names = that.newcert.altnames;
+	let temp_altnames = new Array;
+	let c = 0;
+	let alttype = 0;
+	let newalt = new String;
+	let ipf = new Array;
+	let ipuint;
+	let ipv4addrregexp = new RegExp (
 	    '^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$'
 	);
-	var ipv6addrregexp = new RegExp (
+	let ipv6addrregexp = new RegExp (
 	    '^([0-9A-Fa-f]{0,4}:){2,7}([0-9A-Fa-f]{1,4}$|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4})$'
 	);
 	while (c < alt_names.length) {
@@ -1108,8 +1110,8 @@ this.createPKCS10 = function ()
 	           )
 	        ) {
 	            // IPv4 address
-	            var ipf = alt_names[c].split('.');
-	            var ipuint = new Uint8Array
+	            ipf = alt_names[c].split('.');
+	            ipuint = new Uint8Array
 	            ([
 	                parseInt(ipf[0]),
 	                parseInt(ipf[1]),
@@ -1118,20 +1120,20 @@ this.createPKCS10 = function ()
 	            ]).buffer;
 	        } else {
 	            // IPv6 address
-	            var ipv6delim = new RegExp(':', 'g');
-	            var ip6l = alt_names[c].replace (
+	            let ipv6delim = new RegExp(':', 'g');
+	            let ip6l = alt_names[c].replace (
 	                ipv6delim,
 	                ''
 	            );
-	            var ip6l = ip6l.length;
-	            var c5 = 0;
-	            var mis0 = 32 - ip6l;
-	            var zeros = '';
+	            ip6l = ip6l.length;
+	            let c5 = 0;
+	            let mis0 = 32 - ip6l;
+	            let zeros = '';
 	            while (c5 < mis0) {
 	                zeros = zeros + '0';
 	                c5++;
 	            }
-	            var ipv6fstr = alt_names[c].replace (
+	            let ipv6fstr = alt_names[c].replace (
 	                '::',
 	                zeros
 	            );
@@ -1139,9 +1141,9 @@ this.createPKCS10 = function ()
 	                ipv6delim,
 	                ''
 	            );
-	            var ipoctarr = new Array;
+	            let ipoctarr = new Array;
 	            c5 = 0;
-	            var c6 = 2;
+	            let c6 = 2;
 	            while (c6 < 33) {
 	                ipoctarr.push (
 	                    parseInt (
@@ -1152,7 +1154,7 @@ this.createPKCS10 = function ()
 	                c5 = c5 + 2;
 	                c6 = c6 + 2;
 	            }
-	            var ipuint = new Uint8Array (
+	            let ipuint = new Uint8Array (
 	                ipoctarr
 	            );
 	        }
@@ -1352,7 +1354,7 @@ this.createPKCS10 = function ()
 //*********************************************************************************
 //region openSSLLikeInteral
 //*********************************************************************************
-var openSSLLikeInternal = function (password)
+let openSSLLikeInternal = function (password)
 {
 	//region Initial variables
 	let sequence = Promise.resolve();
@@ -1383,8 +1385,8 @@ var openSSLLikeInternal = function (password)
 	//endregion
 	
 	//region Create simplified structires for certificate and private key
-	var i = 0;
-	var sBags = new Array;
+	let i = 0;
+	let sBags = new Array;
 	while (i < certSimpl.length) {
 	    sBags.push(
 	        new SafeBag ({
@@ -1549,7 +1551,7 @@ this.exportOpenSSLLike = function (password)
 //*********************************************************************************
 //region parsePKCS12internal
 //*********************************************************************************
-var parsePKCS12Internal = function (buffer, password)
+let parsePKCS12Internal = function (buffer, password)
 {
 	//region Initial variables
 	let sequence = Promise.resolve();
@@ -1619,11 +1621,11 @@ this.parsePKCS12 =  function (buffer, password)
 	    //endregion
 	    
 	    //region Store X.509 certificate value
-	        var c = 0;
+	        let c = 0;
 	        const numCerts = 
 	            pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags.length;
 	        while (c < numCerts) {
-	            var certificateBuffer = pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[c].bagValue.parsedValue.toSchema().toBER(false);
+	            let certificateBuffer = pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[c].bagValue.parsedValue.toSchema().toBER(false);
 	    
 	            pemcerts += certBufftoPEM(certificateBuffer);
 	            let asn1 = asn1js.fromBER(certificateBuffer);
@@ -1631,8 +1633,8 @@ this.parsePKCS12 =  function (buffer, password)
 	            c++;
 	        }
 	    c = 0;
-	    var cbobj2 = new Object;
-	    var parsedcerts = new Array;
+	    let cbobj2 = new Object;
+	    let parsedcerts = new Array;
 	    while (c < certSimpl.length) {
 	        let cbobj2  = new Object;
 	        cbobj2.cert = certSimpl[c];
@@ -1965,8 +1967,8 @@ this.smimeEncrypt = function ()
 this.importCerts = function ()
 {
 	certSimpl = PEMtoCertArray (that.certs);
-	var parsedcerts =  new Array;
-	var c = 0;
+	let parsedcerts =  new Array;
+	let c = 0;
 	while (c < certSimpl.length) {
 	    let cbobj2  = new Object;
 	    cbobj2.cert = certSimpl[c];
@@ -2266,7 +2268,7 @@ function parseCAbundle(buffer, cbobj)
 //*********************************************************************************
 //region Parse Certificate
 //*********************************************************************************
-var parseCert = function (cbobj)
+let parseCert = function (cbobj)
 {
 	const rdnmap = {
 	        "0.9.2342.19200300.100.1.25": "DC",
@@ -2287,9 +2289,10 @@ var parseCert = function (cbobj)
 		"2.5.4.3": "CN",
 		"1.2.840.113549.1.9.1": "E-mail"
 	};
-	        var asn1cert = cbobj.cert;
-	        var pcert = new Object;
-	        var issuer = new Object;
+		let alt_names = [];
+	        let asn1cert = cbobj.cert;
+	        let pcert = new Object;
+	        let issuer = new Object;
 	        issuer.dn = new Array;
 	        for(let i = 0; i < asn1cert.issuer.typesAndValues.length; i++)
 	        {
@@ -2300,7 +2303,7 @@ var parseCert = function (cbobj)
 	            issuer.dn.push ([typeval, subjval]);
 	        }
 	        pcert.serial = bufferToHexCodes(asn1cert.serialNumber.valueBlock.valueHex)
-	        var subject = new Object;
+	        let subject = new Object;
 	        subject.dn = new Array;
 	        for(let i = 0; i < asn1cert.subject.typesAndValues.length; i++)
 	        {
@@ -2312,9 +2315,9 @@ var parseCert = function (cbobj)
 	        }
 if (asn1cert.extensions !== undefined) {
 	let c = 0;
-	var extensions =
+	let extensions =
 	    asn1cert.extensions;
-	var thatAltName;
+	let thatAltName;
 	while (c < extensions.length) {
 	    if (
 		(extensions[c].parsedValue !== undefined)
@@ -2329,34 +2332,33 @@ if (asn1cert.extensions !== undefined) {
 	            const issuerAltName = extensions[c].parsedValue.altNames;
 	            thatAltName = issuerAltName;
 	        }
-	        var c2 = 0;
-	        var alt_names = new Array;
+	        let c2 = 0;
+	        let ip = '';
+	        let valpair = [];
+	        let ipbuf;
+	        let ipint;
 	        while (c2 < thatAltName.length) {
 	            if (thatAltName[c2].type == 1) {
-	                var valpair = new Array;
 	                valpair.push('EMAIL');
 	                valpair.push(thatAltName[c2].value);
 	            } else if (thatAltName[c2].type == 2) {
-	                var valpair = new Array;
 	                valpair.push('DNS');
 	                valpair.push(thatAltName[c2].value);
 	            } else if (thatAltName[c2].type == 7) {
-	                var valpair = new Array;
 	                valpair.push('IP');
-	                var ipbuf = thatAltName[c2].value.valueBlock.valueHex;
-	                var ipint = new Uint8Array (ipbuf);
+	                ipbuf = thatAltName[c2].value.valueBlock.valueHex;
+	                ipint = new Uint8Array (ipbuf);
 	                if (ipint.length == 4) {
 	                    // IPv4 Address
-	                    var ip = '' + ipint[0] 
+	                    ip = '' + ipint[0] 
 	                        + '.' + ipint[1]
 	                        + '.' + ipint[2]
 	                        + '.' + ipint[3];
 	                } else if (ipint.length == 16) {
 	                    // IPv6 address.
-	                    var ip = '';
-	                    var c7 = 1;
-	                    var tempstr = '';
-	                    var pad0 = '';
+	                    let c7 = 1;
+	                    let tempstr = '';
+	                    let pad0 = '';
 	                    tempstr = ipint[0].toString(16);
 	                    while (
 	                        pad0.length +
@@ -2392,6 +2394,8 @@ if (asn1cert.extensions !== undefined) {
 	                valpair.push(thatAltName[c2].value);
 	            }
 	            alt_names.push (valpair);
+	            valpair = [];
+	            // Check for IP address problem.
 	            c2++;
 	        }
 	    }
@@ -2411,6 +2415,8 @@ if (asn1cert.extensions !== undefined) {
 //*********************************************************************************
 function parseCMSSigned(cbobj)
 {
+	let smtype;
+	let smcont;
 	const dgstmap = {
 		"1.3.14.3.2.26": "SHA-1",
 		"2.16.840.1.101.3.4.2.1": "SHA-256",
@@ -2439,9 +2445,7 @@ function parseCMSSigned(cbobj)
 	const mimnod = parse (cmsSignedBuffer);
 	cbobj.messageinfo.type = mimnod.contentType.value;
 	if (mimnod.contentType.value == 'multipart/signed') {
-	    var c = 0;
-	    var smtype;
-	    var smcont;
+	    let c = 0;
 	    while (c < mimnod.childNodes.length) {
 	        smtype = mimnod.childNodes[c].contentType.value;
 	        smcont = mimnod.childNodes[c].content.buffer;
@@ -2451,10 +2455,10 @@ function parseCMSSigned(cbobj)
 	                {type: smtype}
 	            );
 	            if (!mimnod.childNodes[c].raw.match('\r')) {
-	                var regm = new RegExp ('\n', 'g');
-	                var corrected_text =
+	                let regm = new RegExp ('\n', 'g');
+	                let corrected_text =
 	                    mimnod.childNodes[c].raw.replace (regm, '\r\n');
-	                var enc = new TextEncoder('iso-8859-1');
+	                let enc = new TextEncoder('iso-8859-1');
 	                dataBuffer = enc.encode(corrected_text).buffer;
 	            } else {
 	                dataBuffer = mimnod.childNodes[c].raw;
@@ -2476,7 +2480,7 @@ function parseCMSSigned(cbobj)
 	//endregion
 	
 	//region Put information about digest algorithms in the CMS Signed Data
-	var digalgs = new Array;
+	let digalgs = new Array;
 	for(let i = 0; i < cmsSignedSimpl.digestAlgorithms.length; i++)
 	{
 		let typeval = dgstmap[cmsSignedSimpl.digestAlgorithms[i].algorithmId];
@@ -2492,7 +2496,7 @@ function parseCMSSigned(cbobj)
 	if (mimnod.contentType.value == 'application/pkcs7-mime') {
 	    let eContentInfo = cmsSignedSimpl.encapContentInfo;
 	    let messagehex = eContentInfo.eContent.valueBlock.value[0].valueBlock.valueHex;
-	    var slicetext = '';
+	    let slicetext = '';
 	    if (messagehex.byteLength < 29) {
 	        slicetext =
 	             new TextDecoder('utf-8').decode(messagehex);
@@ -2520,8 +2524,8 @@ function parseCMSSigned(cbobj)
 	
 	//region Put information about included certificates
 	
-	var parsedcerts = new Array;
-	var cbobj2 =  new Object;
+	let parsedcerts = new Array;
+	let cbobj2 =  new Object;
 	cbobj.messageinfo.signerindex = new Array;
 	cmsSigners = new Array;
 	if("certificates" in cmsSignedSimpl)
@@ -2550,7 +2554,7 @@ function parseCMSSigned(cbobj)
 	//endregion
 	
 	//region Put information about included CRLs
-	var crls = new Array;
+	let crls = new Array;
 	if("crls" in cmsSignedSimpl)
 	{
 	    for(let j = 0; j < cmsSignedSimpl.crls.length; j++)
@@ -2637,10 +2641,10 @@ function verifyCertificateInternal()
 	let sequence = Promise.resolve();
 	//endregion
 
-	var c = 0;
-	var j = 0;
-	var signerbool = false;
-	var msgcerts =
+	let c = 0;
+	let j = 0;
+	let signerbool = false;
+	let msgcerts =
 	    parsedCMSContentSimpl.content.SignedData.certificates;
 
 	//region Major activities
@@ -2688,7 +2692,7 @@ function verifyCertificateInternal()
 				
 		const trustedCerts = [];
 	        if (trustedCertificates.length > 0) {
-	            var c = 0;
+	            let c = 0;
 	            while (c < trustedCertificates.length) {
 		        trustedCerts.push(trustedCertificates[c++]);
 	            }
@@ -2790,7 +2794,7 @@ function handleTrustedCertsText(encodedCertificate)
 
 	const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 	const trustedCertificateBuffer = stringToArrayBuffer(window.atob(clearEncodedCertificate));
-	var textBlob = new Blob([trustedCertificateBuffer], { type: 'application/octet-stream' });
+	let textBlob = new Blob([trustedCertificateBuffer], { type: 'application/octet-stream' });
 	const tempReader = new FileReader();
 	
 	// noinspection AnonymousFunctionJS
