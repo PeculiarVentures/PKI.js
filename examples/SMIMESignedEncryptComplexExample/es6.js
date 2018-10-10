@@ -1,5 +1,6 @@
 /* eslint-disable no-undef,no-unreachable,no-unused-vars */
-import * as asn1js from "asn1js";
+//import * as asn1js from "asn1js";
+import {asn1js} from "asn1js";
 import {
 	arrayBufferToString,
 	stringToArrayBuffer,
@@ -55,7 +56,7 @@ let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-v1_5";
 let oaepHashAlg = "SHA-1";
 let cmsSignedBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CMS_Signed
-let cmsSigners = new Array;
+let cmsSigners = [];
 let parsedCMSContentSimpl = null;
 // let privateKeyBuffer = new ArrayBuffer(0);
 let dataBuffer = new ArrayBuffer(0);
@@ -100,7 +101,7 @@ let PEMtoCertArray = function (pemcerts) {
 	);
 	certat = certat.replace (/ /g, '');
 	let certsplit = certat.split ('@');
-	let certsBASE64 = new Array;
+	let certsBASE64 = [];
 	let i = 0;
 	while (i < certsplit.length) {
 	    if (certsplit[i].length != 0) {
@@ -111,7 +112,7 @@ let PEMtoCertArray = function (pemcerts) {
 	    i++;
 	}
 	i = 0;
-	let certSimpl = new Array;
+	let certSimpl = [];
 	while (i < certsBASE64.length) {
 	    let asn1 = asn1js.fromBER(
 	        stringToArrayBuffer (
@@ -187,21 +188,21 @@ let keyBufftoPEM = function (keyBuff) {
 function SMIMEHandler (varprotkey) {
 	let that = this;
 	let protkey = new Boolean (varprotkey);
-	let key = new String;
+	let key = "";
 	let objectCerts = null;
 	let objectPrivateKey = null;
-	let certSimpl = new Array;
+	let certSimpl = [];
 	let pkcs8Simpl = null;
-	this.newcert = new Object;
-	this.error = new String;
+	this.newcert = {};
+	this.error = "";
 	this.keytoimport = null;
-	this.unprotkey = new String;
-	this.newcert.co = new String;
-	this.newcert.cn = new String;
+	this.unprotkey = "";
+	this.newcert.co = "";
+	this.newcert.cn = "";
 	this.notbefore = new Date;
 	this.notafter  = new Date;
-	this.certs = new String;
-	this.recipcert = new String;
+	this.certs = "";
+	this.recipcert = "";
 	this.dataBuffer = new ArrayBuffer(0);
 	this.createcertcb = function () {};
 	this.nocryptocb = function () {};
@@ -214,11 +215,11 @@ function SMIMEHandler (varprotkey) {
 	this.parsepkcs12cb = function () {};
 	this.parsepkcs12failcb = function () {};
 	this.recipientcertbadformatcb = function () {};
-	this.new_signed_data = new String;
+	this.new_signed_data = "";
 	this.signedcb = function () {};
-	this.encrypted = new String;
+	this.encrypted = "";
 	this.decryptparserrorcb = function () {};
-	this.decrypted = new String;
+	this.decrypted = "";
 	this.encryptedcb = function () {};
 	this.decryptedcb = function () {};
 	this.parseCAformaterrorcb = function () {};
@@ -677,11 +678,11 @@ this.createCertificate = function ()
 	
 	//region AltSubject fields.
 	let alt_names = that.newcert.altnames;
-	let temp_altnames = new Array;
+	let temp_altnames = [];
 	let c = 0;
 	let alttype = 0;
-	let newalt = new String;
-	let ipf = new Array;
+	let newalt = "";
+	let ipf = [];
 	let ipv4addrregexp = new RegExp (
 	    '^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$'
 	);
@@ -743,7 +744,7 @@ this.createCertificate = function ()
 	                ipv6delim,
 	                ''
 	            );
-	            let ipoctarr = new Array;
+	            let ipoctarr = [];
 	            c5 = 0;
 	            let c6 = 2;
 	            while (c6 < 33) {
@@ -867,8 +868,8 @@ this.createCertificate = function ()
 	        else
 	            that.unprotkey = resultString;
 		
-		let parsedcerts =  new Array;
-		let cbobj2  = new Object;
+		let parsedcerts =  [];
+		let cbobj2  = {};
 		cbobj2.cert = certificate;
                 let pcert = parseCert (cbobj2);
                 parsedcerts.push (pcert);
@@ -1075,11 +1076,11 @@ this.createPKCS10 = function ()
 	}));
 
 	let alt_names = that.newcert.altnames;
-	let temp_altnames = new Array;
+	let temp_altnames = [];
 	let c = 0;
 	let alttype = 0;
-	let newalt = new String;
-	let ipf = new Array;
+	let newalt = "";
+	let ipf = [];
 	let ipuint;
 	let ipv4addrregexp = new RegExp (
 	    '^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$'
@@ -1141,7 +1142,7 @@ this.createPKCS10 = function ()
 	                ipv6delim,
 	                ''
 	            );
-	            let ipoctarr = new Array;
+	            let ipoctarr = [];
 	            c5 = 0;
 	            let c6 = 2;
 	            while (c6 < 33) {
@@ -1386,7 +1387,7 @@ let openSSLLikeInternal = function (password)
 	
 	//region Create simplified structires for certificate and private key
 	let i = 0;
-	let sBags = new Array;
+	let sBags = [];
 	while (i < certSimpl.length) {
 	    sBags.push(
 	        new SafeBag ({
@@ -1617,7 +1618,7 @@ this.parsePKCS12 =  function (buffer, password)
 	    //region Initial variables
 	    let pemcerts = "";
 	    let pemkey = "";
-	    certSimpl = new Array;
+	    certSimpl = [];
 	    //endregion
 	    
 	    //region Store X.509 certificate value
@@ -1633,10 +1634,10 @@ this.parsePKCS12 =  function (buffer, password)
 	            c++;
 	        }
 	    c = 0;
-	    let cbobj2 = new Object;
-	    let parsedcerts = new Array;
+	    let cbobj2 = {};
+	    let parsedcerts = [];
 	    while (c < certSimpl.length) {
-	        let cbobj2  = new Object;
+	        let cbobj2  = {};
 	        cbobj2.cert = certSimpl[c];
                 let pcert = parseCert (cbobj2);
                 parsedcerts.push (pcert);
@@ -1880,7 +1881,7 @@ this.createCMSSigned = function (dataBuffer)
 	{
 		const certSimplString = String.fromCharCode.apply(null, new Uint8Array(certificateBuffer));
 		
-		let resultString = new String;
+		let resultString = "";
 		
 		const signedDataString = String.fromCharCode.apply(null, new Uint8Array(cmsSignedBuffer));
 
@@ -1967,10 +1968,10 @@ this.smimeEncrypt = function ()
 this.importCerts = function ()
 {
 	certSimpl = PEMtoCertArray (that.certs);
-	let parsedcerts =  new Array;
+	let parsedcerts =  [];
 	let c = 0;
 	while (c < certSimpl.length) {
-	    let cbobj2  = new Object;
+	    let cbobj2  = {};
 	    cbobj2.cert = certSimpl[c];
             let pcert = parseCert (cbobj2);
             parsedcerts.push (pcert);
@@ -2291,9 +2292,9 @@ let parseCert = function (cbobj)
 	};
 		let alt_names = [];
 	        let asn1cert = cbobj.cert;
-	        let pcert = new Object;
-	        let issuer = new Object;
-	        issuer.dn = new Array;
+	        let pcert = {};
+	        let issuer = {};
+	        issuer.dn = [];
 	        for(let i = 0; i < asn1cert.issuer.typesAndValues.length; i++)
 	        {
 	            let typeval = rdnmap[asn1cert.issuer.typesAndValues[i].type];
@@ -2303,8 +2304,8 @@ let parseCert = function (cbobj)
 	            issuer.dn.push ([typeval, subjval]);
 	        }
 	        pcert.serial = bufferToHexCodes(asn1cert.serialNumber.valueBlock.valueHex)
-	        let subject = new Object;
-	        subject.dn = new Array;
+	        let subject = {};
+	        subject.dn = [];
 	        for(let i = 0; i < asn1cert.subject.typesAndValues.length; i++)
 	        {
 	            let typeval = rdnmap[asn1cert.subject.typesAndValues[i].type];
@@ -2441,7 +2442,7 @@ function parseCMSSigned(cbobj)
 	//region Initial activities
 	
 	//region Decode existing CMS Signed Data
-	cbobj.messageinfo = new Object;
+	cbobj.messageinfo = {};
 	const mimnod = parse (cmsSignedBuffer);
 	cbobj.messageinfo.type = mimnod.contentType.value;
 	if (mimnod.contentType.value == 'multipart/signed') {
@@ -2480,7 +2481,7 @@ function parseCMSSigned(cbobj)
 	//endregion
 	
 	//region Put information about digest algorithms in the CMS Signed Data
-	let digalgs = new Array;
+	let digalgs = [];
 	for(let i = 0; i < cmsSignedSimpl.digestAlgorithms.length; i++)
 	{
 		let typeval = dgstmap[cmsSignedSimpl.digestAlgorithms[i].algorithmId];
@@ -2524,10 +2525,10 @@ function parseCMSSigned(cbobj)
 	
 	//region Put information about included certificates
 	
-	let parsedcerts = new Array;
-	let cbobj2 =  new Object;
-	cbobj.messageinfo.signerindex = new Array;
-	cmsSigners = new Array;
+	let parsedcerts = [];
+	let cbobj2 =  {};
+	cbobj.messageinfo.signerindex = [];
+	cmsSigners = [];
 	if("certificates" in cmsSignedSimpl)
 	{
 	    for(let j = 0; j < cmsSignedSimpl.certificates.length; j++)
@@ -2554,7 +2555,7 @@ function parseCMSSigned(cbobj)
 	//endregion
 	
 	//region Put information about included CRLs
-	let crls = new Array;
+	let crls = [];
 	if("crls" in cmsSignedSimpl)
 	{
 	    for(let j = 0; j < cmsSignedSimpl.crls.length; j++)
