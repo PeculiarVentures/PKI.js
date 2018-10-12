@@ -275,12 +275,12 @@ export default class SingleResponse
 		if("nextUpdate" in this)
 		{
 			outputArray.push(new asn1js.Constructed({
-					idBlock: {
-						tagClass: 3, // CONTEXT-SPECIFIC
-						tagNumber: 0 // [0]
-					},
-					value: [new asn1js.GeneralizedTime({ valueDate: (this.nextUpdate ) })]
-				}))
+				idBlock: {
+					tagClass: 3, // CONTEXT-SPECIFIC
+					tagNumber: 0 // [0]
+				},
+				value: [new asn1js.GeneralizedTime({ valueDate: this.nextUpdate })]
+			}));
 		}
 
 		if("singleExtensions" in this)
