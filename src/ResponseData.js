@@ -298,8 +298,14 @@ export default class ResponseData
 			
 			if("responseExtensions" in this)
 			{
-				outputArray.push(new asn1js.Sequence({
-					value: Array.from(this.responseExtensions, element => element.toSchema())
+				outputArray.push(new asn1js.Constructed({
+					idBlock: {
+						tagClass: 3, // CONTEXT-SPECIFIC
+						tagNumber: 1 // [1]
+					},
+					value: [new asn1js.Sequence({
+						value: Array.from(this.responseExtensions, element => element.toSchema())
+					})]
 				}));
 			}
 			
