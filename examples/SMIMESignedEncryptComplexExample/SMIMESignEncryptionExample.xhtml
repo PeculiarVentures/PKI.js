@@ -139,7 +139,7 @@
 
 <body>
     <div class="wrapper">
-        <p class="header-block">Put existing data or create new X.509 certificate and private key</p>
+        <h1 class="header-block">Put existing data or create new X.509 certificate and private key</h1>
         <div id="output_div" class="border-block">
             <p>
                 <label for="hash_alg" style="font-weight:bold">Hashing algorithm:</label>
@@ -165,13 +165,13 @@
 	        OR
                 <a id="createcsrbutton">Create Request</a>
             </p>
-            <label for="cert_data" style="font-weight:bold;float:left;">BASE-64 encoded certificate:</label>
+            <label for="cert_data" style="font-weight:bold">BASE-64 encoded certificate:</label>
             <textarea id="cert_data">&lt;  Encoded certificate must be put here &gt;</textarea>
-            <label for="pkcs8_key" style="font-weight:bold;float:left;">BASE-64 encoded PKCS#8 private key:</label>
+            <label for="pkcs8_key" style="font-weight:bold">BASE-64 encoded PKCS#8 private key:</label>
             <textarea id="pkcs8_key">&lt; PKCS#8 private key must be put here &gt;</textarea>
-	    <label for="password" style="font-weight:bold;float:left;">Password:</label>
+	    <label for="password" style="font-weight:bold">Password:</label>
 	    <input type="text" id="password"></input>
-	    <label for="pkcs12_file" style="font-weight:bold;float:left;">Select binary PKCS12 file:</label>
+	    <label for="pkcs12_file" style="font-weight:bold">Select binary PKCS12 file:</label>
 	    <input id="pkcs12_file" type="file" title="PKCS#12 file"></input>
 	    <a id="exppkcs12_file">Export as PKCS12</a>
             <div id="divtable" class="border-block"></div>
@@ -198,12 +198,12 @@
                 <label for="input_file" style="font-weight:bold">Select a file to make signature for:</label>
                 <input type="file" id="input_file" title="Input file" />
             </p>
-            <label for="new_signed_data" style="font-weight:bold;float:left;">CMS data:</label>
+            <label for="new_signed_data" style="font-weight:bold">CMS data:</label>
             <textarea id="new_signed_data">&lt;  New CSM signed data &gt;</textarea>
         </div>
         <p class="header-block">Work with S/MIME Encryption</p>
         <div class="border-block">
-            <label for="content" style="font-weight:bold;float:left;">Content recipient PEM encoded certificate:</label>
+            <label for="content" style="font-weight:bold">Content recipient PEM encoded certificate:</label>
             <textarea id="recipcertbox">&lt; Put recipient certificate here &gt;</textarea>
             <p>
                 <label for="content_enc_alg" style="font-weight:bold">Content encryption algorithm:</label>
@@ -234,12 +234,12 @@
             <p>
                 <a id="encryptbutton">Encrypt</a>
             </p>
-            <label for="encrypted_content" style="font-weight:bold;float:left;">S/MIME message:</label>
+            <label for="encrypted_content" style="font-weight:bold">S/MIME message:</label>
             <textarea id="encrypted_content">&lt; Put encrypted content here &gt;</textarea>
             <p>
                 <a id="decryptbutton">Decrypt</a>
             </p>
-            <label for="decrypted_content" style="font-weight:bold;float:left;">Decrypted content:</label>
+            <label for="decrypted_content" style="font-weight:bold">Decrypted content:</label>
             <textarea id="decrypted_content">&lt; Decrypted content will be put here &gt;</textarea>
         </div>
 	<!-- Sign section start -->
@@ -287,7 +287,7 @@
                 </p>
                 <p>OR</p>
                 <p>
-            <label for="trusted_certtext" style="font-weight:bold;float:left;">BASE-64 encoded trusted certificate:</label>
+            <label for="trusted_certtext" style="font-weight:bold">BASE-64 encoded trusted certificate:</label>
             <textarea id="trusted_certtext" style="width:530px;">&lt;  Encoded certificate must be put here &gt;</textarea>
                 </p>
             </div>
