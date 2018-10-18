@@ -1,9 +1,11 @@
 let destroyClickedElement = function (event) {
+    "use strict";
     // noinspection XHTMLIncompatabilitiesJS
     document.body.removeChild(event.target);
 };
 
 let certtablerow = function (parsedcert, num) {
+    "use strict";
     let localtr = window.document.createElement("tr");
     let dnstr = "";
     let dn = [];
@@ -90,6 +92,7 @@ let certtablerow = function (parsedcert, num) {
     return localtr;
 };
 let certtable = function (parsedcerts, signers) {
+    "use strict";
     let l;
     let thr;
     let th;
@@ -173,6 +176,7 @@ let certtable = function (parsedcerts, signers) {
     return certtcont;
 };
 let dlblob = function (pkcs12AsBlob) {
+    "use strict";
     const downloadLink = document.createElement("a");
     downloadLink.download = "pkijs_pkcs12.p12";
     // noinspection InnerHTMLJS
