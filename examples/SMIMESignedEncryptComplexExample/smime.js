@@ -41,12 +41,15 @@ smimehandler.msgsubject = "Example SMIME/CMS Email";
 
 let cbobj = {};
 cbobj.successcb = function () {
+    "use strict";
     return null;
 };
 cbobj.failurecb = function () {
+    "use strict";
     return null;
 };
 cbobj.errorcb = function () {
+    "use strict";
     return null;
 };
 cbobj.error = "";
@@ -84,42 +87,52 @@ let divtablemsgcerts = document.getElementById("divtablemsgcerts");
 
 /* Begin callback declarations */
 smimehandler.createcertcb = function () {
+    "use strict";
     cert_data.value = smimehandler.certs;
 };
 
 smimehandler.createcsrcb = function () {
+    "use strict";
     cert_data.value = smimehandler.csr;
 };
 
 smimehandler.nocryptocb = function () {
+    "use strict";
     alert("No WebCrypto extension found");
 };
 
 smimehandler.certgenerror = function () {
+    "use strict";
     alert("Error during key generation: " + smimehandler.error);
 };
 
 smimehandler.csrgenerrorcb = function () {
+    "use strict";
     alert("Error during key generation: " + smimehandler.error);
 };
 
 smimehandler.pubkeyexprterrorcb = function () {
+    "use strict";
     alert("Error during exporting public key: " + smimehandler.error);
 };
 
 smimehandler.certcreatedcb = function () {
+    "use strict";
     alert("Certificate created successfully!");
 };
 
 smimehandler.selfsignfailcb = function () {
+    "use strict";
     alert("Error during signing: " + smimehandler.error);
 };
 
 smimehandler.csrsignfailcb = function () {
+    "use strict";
     alert("Error during signing: " + smimehandler.error);
 };
 
 smimehandler.privatekeyexportcb = function () {
+    "use strict";
     alert("Private key exported successfully!");
     if (!smimehandler.unprotkey.length) {
         pkcs8_key.value = "Private key is protected; Cannot display.";
@@ -129,17 +142,21 @@ smimehandler.privatekeyexportcb = function () {
 };
 
 smimehandler.privatekeyexportfailcb = function () {
+    "use strict";
     alert("Error during exporting of private key: " + smimehandler.error);
 };
 
 smimehandler.keyimportfailcb = function () {
+    "use strict";
     alert("Error importing private key: " + smimehandler.error);
 };
 
 smimehandler.keyimportedcb = function () {
+    "use strict";
     smimehandler.createCMSSigned();
 };
 smimehandler.parsepkcs12cb = function () {
+    "use strict";
     alert("PKCS12 key imported.");
     cert_data.value = smimehandler.certs;
     divtable.appendChild(
@@ -154,22 +171,27 @@ smimehandler.parsepkcs12cb = function () {
     }
 };
 smimehandler.exportpkcs12cb = function (pkcs12AsBlob) {
+    "use strict";
     dlblob(pkcs12AsBlob);
 };
 smimehandler.signedcb = function () {
+    "use strict";
     alert("CMS Signed Data created successfully!");
     new_signed_data.value = smimehandler.new_signed_data;
 };
 
 smimehandler.encryptnorecipientcb = function () {
+    "use strict";
     alert("Recipient no recipient certificate specified.");
 };
 
 smimehandler.recipientcertbadformatcb = function () {
+    "use strict";
     alert("Recipient certificate is not in valid PEM format.");
 };
 
 smimehandler.encryptedcb = function (val) {
+    "use strict";
     if (val === true) {
         encryptedbox.value = smimehandler.encrypted;
         alert("Encryption process finished successfully");
@@ -182,6 +204,7 @@ smimehandler.encryptedcb = function (val) {
 };
 
 smimehandler.decryptparserrorcb = function () {
+    "use strict";
     alert(
         "Unable to parse your data. "
         + "Please check you have "
@@ -191,6 +214,7 @@ smimehandler.decryptparserrorcb = function () {
 };
 
 smimehandler.decryptedcb = function (val) {
+    "use strict";
     if (val === true) {
         decryptedbox.value = smimehandler.decrypted;
     } else {
@@ -198,12 +222,15 @@ smimehandler.decryptedcb = function (val) {
     }
 };
 let verifysigcb = function (result) {
+    "use strict";
     alert("Verification result: " + result);
 };
 let errorverifysigcb = function (result) {
+    "use strict";
     alert("Error while verifying signature: " + result);
 };
 smimehandler.certvcb = function (result, message) {
+    "use strict";
     if (message) {
         alert("Verification result: "
                 + result
@@ -216,26 +243,33 @@ smimehandler.certvcb = function (result, message) {
 
 /* Begin onchange / button use event function declarations */
 input_file.onchange = function () {
+    "use strict";
     cbobj = smimehandler;
     handleFileBrowse(input_file.files, cbobj);
 };
 parsing_file.onchange = function () {
+    "use strict";
     handleParsingFile(parsing_file.files);
 };
 let cabundleerrorcb = function () {
+    "use strict";
     alert("Error parsing CA file: " + cbobj.error);
 };
 ca_bundle.onchange = function () {
+    "use strict";
     cbobj.errorcb = cabundleerrorcb;
     handleCABundle(ca_bundle.files, cbobj);
 };
 inter_certs.onchange = function () {
+    "use strict";
     handleInterCertsFile(inter_certs.files);
 };
 trusted_certtext.onchange = function () {
+    "use strict";
     handleTrustedCertsText(trusted_certtext.value);
 };
 importbutton.onclick = function () {
+    "use strict";
     smimehandler.certs = cert_data.value;
     smimehandler.keytoimport = pkcs8_key.value;
     smimehandler.importCerts();
@@ -243,12 +277,13 @@ importbutton.onclick = function () {
 createselfbutton.onclick = smimehandler.createCertificate;
 createcsrbutton.onclick = smimehandler.createPKCS10;
 signbutton.onclick = function () {
+    "use strict";
+    let dataB;
     let header =
             "Content-Type: text/plain\r\n\r\n";
     const tempReader = new FileReader();
     smimehandler.keyimportedcb = function () {
-        dataBuffer = tempReader.result;
-        smimehandler.createCMSSigned(dataBuffer);
+        smimehandler.createCMSSigned(dataB);
     };
     let textBlob = new Blob(
         [header + input_text.value],
@@ -256,22 +291,25 @@ signbutton.onclick = function () {
     );
 
     tempReader.onloadend = function () {
-        dataBuffer = tempReader.result;
+        dataB = tempReader.result;
         smimehandler.importKey();
     };
 
     tempReader.readAsArrayBuffer(textBlob);
 };
 encryptbutton.onclick = function () {
+    "use strict";
     smimehandler.recipcert = String(recipcertbox.value);
 //  messagebox = null;
     smimehandler.smimeEncrypt();
 };
 decryptbutton.onclick = function () {
+    "use strict";
     smimehandler.encrypted = String(encryptedbox.value);
     smimehandler.smimeDecrypt();
 };
 let parsecomplcb = function (cbobj) {
+    "use strict";
     let contreader = new FileReader();
     if (cbobj.contentdecoded.type === "text/plain") {
         contreader.onloadend = function () {
@@ -299,12 +337,15 @@ let parsecomplcb = function (cbobj) {
     );
 };
 verifysignedbutton.onclick = function () {
+    "use strict";
     verifyCMSSigned(verifysigcb, errorverifysigcb);
 };
 verifycertbutton.onclick = function () {
+    "use strict";
     verifyCertificate(smimehandler.certvcb);
 };
 parsebutton.onclick = function () {
+    "use strict";
     cbobj.success = parsecomplcb;
     let tmpcmssignedtext = String(
         decryptedbox.value
@@ -326,6 +367,7 @@ parsebutton.onclick = function () {
 };
 
 pkcs12_file.onchange = function () {
+    "use strict";
     const tempReader = new FileReader();
     const currentFiles = pkcs12_file.files;
 
@@ -341,6 +383,7 @@ pkcs12_file.onchange = function () {
     tempReader.readAsArrayBuffer(currentFiles[0]);
 };
 exppkcs12_file.onclick = function () {
+    "use strict";
     smimehandler.exportOpenSSLLike(password.value);
 };
 /* End onchange / button click event function declarations */
