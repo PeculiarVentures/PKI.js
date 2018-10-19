@@ -4,19 +4,57 @@ let destroyClickedElement = function (event) {
     document.body.removeChild(event.target);
 };
 
+let subjecttable = function (dn) {
+    "use strict";
+    let c;
+    let tbl = window.document.createElement("table");
+    let tr = window.document.createElement("tr");
+    let th = window.document.createElement("th");
+    let td;
+    let tn = window.document.createTextNode("Type");
+
+    th.appendChild(tn);
+    tr.appendChild(th);
+
+    th = window.document.createElement("th");
+    tn = window.document.createTextNode("Value");
+
+    th.appendChild(tn);
+    tr.appendChild(th);
+    tbl.appendChild(tr);
+
+    if (dn.length < 1) {
+        return null;
+    }
+    c = 0;
+    while (c < dn.length) {
+        tr = window.document.createElement("tr");
+        td = window.document.createElement("td");
+        tn = window.document.createTextNode(dn[c][0]);
+
+        td.appendChild(tn);
+        tr.appendChild(td);
+
+        td = window.document.createElement("td");
+        tn = window.document.createTextNode(dn[c][1]);
+
+        td.appendChild(tn);
+        tr.appendChild(td);
+
+        tbl.appendChild(tr);
+        c += 1;
+    }
+    return tbl;
+};
+
 let certtablerow = function (parsedcert, num) {
     "use strict";
     let localtr = window.document.createElement("tr");
-    let dnstr = "";
     let dn = [];
     let alts = [];
-    let altstr = "";
-    let c = 0;
     let j = 0;
-    let tdn;
     let tn;
-    let ul;
-    let li;
+    let tdn;
 
     if (num !== undefined) {
         tdn = window.document.createElement("td");
@@ -35,62 +73,30 @@ let certtablerow = function (parsedcert, num) {
     localtr.appendChild(tdn);
 
     j = 0;
-    let l;
+    let cdn;
     while (j < 2) {
-        c = 0;
+        tdn = window.document.createElement("td");
         if (j === 0) {
             dn = parsedcert.subject.dn;
         } else {
             dn = parsedcert.issuer.dn;
         }
-        l = dn.length;
-        if (l > 0) {
-            dnstr = "/";
-            dnstr += dn[0][0]
-                    + "="
-                    + dn[0][1];
-        }
-        c = 1;
-        while (c < l) {
-            if (dn[c][0] === dn[c - 1][0]) {
-                dnstr += ",";
-            } else {
-                dnstr += "/";
-            }
-            dnstr += dn[c][0]
-                    + "="
-                    + dn[c][1];
-            c += 1;
-        }
-        tdn =
-                window.document.createElement("td");
-        tn = window.document.createTextNode(dnstr);
-        tdn.appendChild(tn);
+        cdn = subjecttable(dn);
+        tdn.appendChild(cdn);
         localtr.appendChild(tdn);
         j += 1;
     }
     tdn = window.document.createElement("td");
-    if (parsedcert.subject.alt_names) {
+    if (parsedcert.subject.alt_names.length !== 0) {
         alts = parsedcert.subject.alt_names;
-        l = alts.length;
-        ul = window.document.createElement("ul");
-        c = 0;
-        while (c < l) {
-            altstr = alts[c][0]
-                    + ": "
-                    + alts[c][1];
-            tn = window.document.createTextNode(altstr);
-            li = window.document.createElement("li");
-            li.appendChild(tn);
-            ul.appendChild(li);
-            c += 1;
-        }
-        tdn.appendChild(ul);
+        cdn = subjecttable(alts);
+        tdn.appendChild(cdn);
     }
     localtr.appendChild(tdn);
 
     return localtr;
 };
+
 let certtable = function (parsedcerts, signers) {
     "use strict";
     let l;
