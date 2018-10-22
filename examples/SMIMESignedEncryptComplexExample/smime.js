@@ -86,6 +86,10 @@ let divtablemsgcerts = document.getElementById("divtablemsgcerts");
 /* End bind DOM elements to variables */
 
 /* Begin callback declarations */
+let nullfunction = function () {
+    return null;
+};
+
 smimehandler.createcertcb = function () {
     "use strict";
     cert_data.value = smimehandler.certs;
@@ -149,6 +153,10 @@ smimehandler.privatekeyexportfailcb = function () {
 smimehandler.keyimportfailcb = function () {
     "use strict";
     alert("Error importing private key: " + smimehandler.error);
+};
+
+let importkey = function () {
+    alert ("Key has been imported.");
 };
 
 smimehandler.keyimportedcb = function () {
@@ -272,6 +280,7 @@ importbutton.onclick = function () {
     "use strict";
     smimehandler.certs = cert_data.value;
     smimehandler.keytoimport = pkcs8_key.value;
+    smimehandler.importKey();
     smimehandler.importCerts();
 };
 createselfbutton.onclick = smimehandler.createCertificate;
