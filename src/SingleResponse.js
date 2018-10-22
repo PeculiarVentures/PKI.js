@@ -273,7 +273,15 @@ export default class SingleResponse
 		outputArray.push(this.certStatus);
 		outputArray.push(new asn1js.GeneralizedTime({ valueDate: this.thisUpdate }));
 		if("nextUpdate" in this)
-			outputArray.push(new asn1js.GeneralizedTime({ valueDate: this.nextUpdate }));
+		{
+			outputArray.push(new asn1js.Constructed({
+				idBlock: {
+					tagClass: 3, // CONTEXT-SPECIFIC
+					tagNumber: 0 // [0]
+				},
+				value: [new asn1js.GeneralizedTime({ valueDate: this.nextUpdate })]
+			}));
+		}
 
 		if("singleExtensions" in this)
 		{
