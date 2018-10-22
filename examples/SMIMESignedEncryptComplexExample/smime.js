@@ -161,7 +161,7 @@ let importkey = function () {
 
 smimehandler.keyimportedcb = function () {
     "use strict";
-    smimehandler.createCMSSigned();
+    alert("Key imported successfully");
 };
 smimehandler.parsepkcs12cb = function () {
     "use strict";
