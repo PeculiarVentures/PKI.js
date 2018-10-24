@@ -29,7 +29,7 @@ smimehandler.newcert.altnames = [];
 smimehandler.newcert.altnames = [
     "127.0.0.1",
     "::1",
-    "user1@localhost",
+    "user1@localhost.my.domain",
     "localhost"
 ];
 
