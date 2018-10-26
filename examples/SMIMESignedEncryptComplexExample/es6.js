@@ -1597,15 +1597,30 @@ function SMIMEHandler(varprotkey) {
         //region Initial variables
         let sequence = Promise.resolve();
 
+        let idbuffar = [];
         const keyLocalIDBuffer = new ArrayBuffer(4);
         const keyLocalIDView = new Uint8Array(keyLocalIDBuffer);
 
         getRandomValues(keyLocalIDView);
 
-        const certLocalIDBuffer = new ArrayBuffer(4);
-        const certLocalIDView = new Uint8Array(certLocalIDBuffer);
+        let certLocalIDBuffer = keyLocalIDBuffer.slice(0);
+        let certLocalIDView = new Uint8Array(certLocalIDBuffer);
 
-        getRandomValues(certLocalIDView);
+        idbuffar.push(certLocalIDBuffer);
+
+        let i;
+
+        i = 1;
+        while (i < certSimpl.length) {
+            certLocalIDBuffer = new ArrayBuffer(4);
+            certLocalIDView = new Uint8Array(certLocalIDBuffer);
+
+            getRandomValues(certLocalIDView);
+            idbuffar.push(certLocalIDBuffer);
+
+            i += 1;
+
+        }
 
         //region "KeyUsage" attribute
         const bitArray = new ArrayBuffer(1);
@@ -1623,7 +1638,7 @@ function SMIMEHandler(varprotkey) {
         //endregion
 
         //region Create simplified structires for certificate and private key
-        let i = 0;
+        i = 0;
         let sBags = [];
         while (i < certSimpl.length) {
             sBags.push(
@@ -1645,7 +1660,7 @@ function SMIMEHandler(varprotkey) {
                             type: "1.2.840.113549.1.9.21", // localKeyID
                             values: [
                                 new asn1js.OctetString({
-                                    valueHex: certLocalIDBuffer
+                                    valueHex: idbuffar[i]
                                 })
                             ]
                         }),
