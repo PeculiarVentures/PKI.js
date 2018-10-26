@@ -14,7 +14,7 @@ export function setEngine(name, crypto, subtle)
 {
 	//region We are in Node
 	// noinspection JSUnresolvedVariable
-	if((typeof process !== "undefined") && ("pid" in process) && (typeof global !== "undefined"))
+	if((typeof process !== "undefined") && ("pid" in process) && (typeof global !== "undefined") && (typeof window === "undefined"))
 	{
 		// noinspection ES6ModulesDependencies, JSUnresolvedVariable
 		if(typeof global[process.pid] === "undefined")
