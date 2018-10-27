@@ -29,7 +29,7 @@ smimehandler.newcert.altnames = [];
 smimehandler.newcert.altnames = [
     "127.0.0.1",
     "::1",
-    "user1@localhost.my.domain",
+    "user1@localhost",
     "localhost"
 ];
 
@@ -309,6 +309,7 @@ signbutton.onclick = function () {
 encryptbutton.onclick = function () {
     "use strict";
     smimehandler.recipcert = String(recipcertbox.value);
+    smimehandler.datatoencrypt = new_signed_data.value;
 //  messagebox = null;
     smimehandler.smimeEncrypt();
 };

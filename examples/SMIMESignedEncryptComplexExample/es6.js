@@ -1065,8 +1065,6 @@ function SMIMEHandler(varprotkey) {
             resultString += formatPEM(window.btoa(certificateString));
             resultString += "\r\n-----END CERTIFICATE-----\r\n";
 
-            // noinspection InnerHTMLJS
-            // document.getElementById("new_signed_data").value = resultString;
             certSimpl.push(certificate);
             that.certs = resultString;
 
@@ -2242,7 +2240,7 @@ function SMIMEHandler(varprotkey) {
 
         return cmsEnveloped.encrypt(
             encAlg,
-            stringToArrayBuffer(that.new_signed_data)
+            stringToArrayBuffer(that.datatoencrypt)
         ).then(
             function () {
                 const cmsContentSimpl = new ContentInfo();
