@@ -163,6 +163,7 @@ smimehandler.keyimportedcb = function () {
     "use strict";
     alert("Key imported successfully");
 };
+
 smimehandler.parsepkcs12cb = function () {
     "use strict";
     alert("PKCS12 key imported.");
@@ -178,10 +179,12 @@ smimehandler.parsepkcs12cb = function () {
         pkcs8_key.value = smimehandler.unprotkey;
     }
 };
+
 smimehandler.exportpkcs12cb = function (pkcs12AsBlob) {
     "use strict";
     dlblob(pkcs12AsBlob);
 };
+
 smimehandler.signedcb = function () {
     "use strict";
     alert("CMS Signed Data created successfully!");
@@ -229,14 +232,17 @@ smimehandler.decryptedcb = function (val) {
         alert("ERROR DURING DECRYPTION PROCESS: " + smimehandler.error);
     }
 };
+
 let verifysigcb = function (result) {
     "use strict";
     alert("Verification result: " + result);
 };
+
 let errorverifysigcb = function (result) {
     "use strict";
     alert("Error while verifying signature: " + result);
 };
+
 smimehandler.certvcb = function (result, message) {
     "use strict";
     if (message) {
@@ -255,27 +261,33 @@ input_file.onchange = function () {
     cbobj = smimehandler;
     handleFileBrowse(input_file.files, cbobj);
 };
+
 parsing_file.onchange = function () {
     "use strict";
     handleParsingFile(parsing_file.files);
 };
+
 let cabundleerrorcb = function () {
     "use strict";
     alert("Error parsing CA file: " + cbobj.error);
 };
+
 ca_bundle.onchange = function () {
     "use strict";
     cbobj.errorcb = cabundleerrorcb;
     handleCABundle(ca_bundle.files, cbobj);
 };
+
 inter_certs.onchange = function () {
     "use strict";
     handleInterCertsFile(inter_certs.files);
 };
+
 trusted_certtext.onchange = function () {
     "use strict";
     handleTrustedCertsText(trusted_certtext.value);
 };
+
 importbutton.onclick = function () {
     "use strict";
     smimehandler.certs = cert_data.value;
@@ -283,6 +295,7 @@ importbutton.onclick = function () {
     smimehandler.importKey();
     smimehandler.importCerts();
 };
+
 createselfbutton.onclick = smimehandler.createCertificate;
 createcsrbutton.onclick = smimehandler.createPKCS10;
 signbutton.onclick = function () {
@@ -306,6 +319,7 @@ signbutton.onclick = function () {
 
     tempReader.readAsArrayBuffer(textBlob);
 };
+
 encryptbutton.onclick = function () {
     "use strict";
     smimehandler.recipcert = String(recipcertbox.value);
@@ -313,11 +327,13 @@ encryptbutton.onclick = function () {
 //  messagebox = null;
     smimehandler.smimeEncrypt();
 };
+
 decryptbutton.onclick = function () {
     "use strict";
     smimehandler.encrypted = String(encryptedbox.value);
     smimehandler.smimeDecrypt();
 };
+
 let parsecomplcb = function (cbobj) {
     "use strict";
     let contreader = new FileReader();
@@ -346,14 +362,17 @@ let parsecomplcb = function (cbobj) {
         )
     );
 };
+
 verifysignedbutton.onclick = function () {
     "use strict";
     verifyCMSSigned(verifysigcb, errorverifysigcb);
 };
+
 verifycertbutton.onclick = function () {
     "use strict";
     verifyCertificate(smimehandler.certvcb);
 };
+
 parsebutton.onclick = function () {
     "use strict";
     cbobj.success = parsecomplcb;
@@ -392,6 +411,7 @@ pkcs12_file.onchange = function () {
     };
     tempReader.readAsArrayBuffer(currentFiles[0]);
 };
+
 exppkcs12_file.onclick = function () {
     "use strict";
     smimehandler.exportOpenSSLLike(password.value);
