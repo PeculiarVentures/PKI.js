@@ -81,6 +81,7 @@ let pkcs12_file = document.getElementById("pkcs12_file");
 let exppkcs12_file = document.getElementById("exppkcs12_file");
 let password = document.getElementById("password");
 let cmsdgstalgos = document.getElementById("cms-dgst-algos");
+let cmsenctype = document.getElementById("cms-encap-type");
 let divtable = document.getElementById("divtable");
 let divtablemsgcerts = document.getElementById("divtablemsgcerts");
 /* End bind DOM elements to variables */
@@ -167,7 +168,11 @@ smimehandler.keyimportedcb = function () {
 smimehandler.parsepkcs12cb = function () {
     "use strict";
     alert("PKCS12 key imported.");
+    let i;
     cert_data.value = smimehandler.certs;
+    while (divtable.childNodes.length > 0) {
+        divtable.removeChild(divtable.firstChild);
+    }
     divtable.appendChild(
         certtable(
             smimehandler.parsedcerts
@@ -344,22 +349,34 @@ let parsecomplcb = function (cbobj) {
         };
         contreader.readAsText(cbobj.contentdecoded);
     }
+    while (cmsdgstalgos.childNodes.length > 0) {
+        cmsdgstalgos.removeChild(cmsdgstalgos.firstChild);
+    }
     let c = 0;
     while (c < cbobj.digalgs.length) {
         cmsdgstalgos.appendChild(
             document.createElement("li").appendChild(
                 document.createTextNode(
-                    cbobj.digalgs
+                    cbobj.digalgs[c]
                 )
             )
         );
         c += 1;
+    }
+    while (divtablemsgcerts.childNodes.length > 0) {
+        divtablemsgcerts.removeChild(divtablemsgcerts.firstChild);
     }
     divtablemsgcerts.appendChild(
         certtable(
             cbobj.parsedcerts,
             cbobj.messageinfo.signerindex
         )
+    );
+    while (cmsenctype.childNodes.length > 0) {
+        cmsenctype.removeChild(cmsenctype.firstChild);
+    }
+    cmsenctype.appendChild(
+        document.createTextNode(cbobj.enctype)
     );
 };
 
