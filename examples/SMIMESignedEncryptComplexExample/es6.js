@@ -2957,6 +2957,9 @@ function handleCABundle(evt, cbobj) {
 //********************************************
 function handleTrustedCertsText(encodedCertificate) {
 
+    while (trustedCertificates.length > 0) {
+        trustedCertificates.pop();
+    }
     const clearEncodedCertificate = encodedCertificate.replace(
         /(-----(BEGIN|END)(\sNEW)?\sCERTIFICATE-----|\n)/g,
         ""
