@@ -1,13 +1,15 @@
 /* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import { arrayBufferToString, stringToArrayBuffer, toBase64, fromBase64, isEqualBuffer } from "pvutils";
-import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
-import Certificate from "../../src/Certificate";
-import EnvelopedData from "../../src/EnvelopedData";
-import ContentInfo from "../../src/ContentInfo";
-import AttributeTypeAndValue from "../../src/AttributeTypeAndValue";
-import BasicConstraints from "../../src/BasicConstraints";
-import Extension from "../../src/Extension";
+import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common.js";
+import Certificate from "../../src/Certificate.js";
+import EnvelopedData from "../../src/EnvelopedData.js";
+import ContentInfo from "../../src/ContentInfo.js";
+import AttributeTypeAndValue from "../../src/AttributeTypeAndValue.js";
+import BasicConstraints from "../../src/BasicConstraints.js";
+import Extension from "../../src/Extension.js";
+import OriginatorInfo from "../../src/OriginatorInfo.js";
+import CertificateSet from "../../src/CertificateSet.js";
 //<nodewebcryptoossl>
 //*********************************************************************************
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT 
@@ -230,7 +232,13 @@ function envelopedEncryptInternal()
 	const certSimpl = new Certificate({ schema: asn1.result });
 	//endregion
 	
-	const cmsEnveloped = new EnvelopedData();
+	const cmsEnveloped = new EnvelopedData({
+		originatorInfo: new OriginatorInfo({
+			certs: new CertificateSet({
+				certificates: [certSimpl]
+			})
+		})
+	});
 	
 	cmsEnveloped.addRecipientByCertificate(certSimpl, { oaepHashAlgorithm: oaepHashAlg });
 	
@@ -253,7 +261,7 @@ function envelopedEncrypt()
 	return Promise.resolve().then(() =>
 	{
 		// noinspection InnerHTMLJS
-		const encodedCertificate = document.getElementById("new_signed_data").innerHTML;
+		const encodedCertificate = document.getElementById("new_signed_data").value;
 		const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 		certificateBuffer = stringToArrayBuffer(fromBase64(clearEncodedCertificate));
 		
@@ -303,17 +311,17 @@ function envelopedDecrypt()
 	return Promise.resolve().then(() =>
 	{
 		// noinspection InnerHTMLJS
-		const encodedCertificate = document.getElementById("new_signed_data").innerHTML;
+		const encodedCertificate = document.getElementById("new_signed_data").value;
 		const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 		certificateBuffer = stringToArrayBuffer(window.atob(clearEncodedCertificate));
 		
 		// noinspection InnerHTMLJS
-		const encodedPrivateKey = document.getElementById("pkcs8_key").innerHTML;
+		const encodedPrivateKey = document.getElementById("pkcs8_key").value;
 		const clearPrivateKey = encodedPrivateKey.replace(/(-----(BEGIN|END)( NEW)? PRIVATE KEY-----|\n)/g, "");
 		privateKeyBuffer = stringToArrayBuffer(window.atob(clearPrivateKey));
 		
 		// noinspection InnerHTMLJS
-		const encodedCMSEnveloped = document.getElementById("encrypted_content").innerHTML;
+		const encodedCMSEnveloped = document.getElementById("encrypted_content").value;
 		const clearEncodedCMSEnveloped = encodedCMSEnveloped.replace(/(-----(BEGIN|END)( NEW)? CMS-----|\n)/g, "");
 		cmsEnvelopedBuffer = stringToArrayBuffer(window.atob(clearEncodedCMSEnveloped));
 	}).then(() => envelopedDecryptInternal()).then(result =>

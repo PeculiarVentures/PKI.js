@@ -361,15 +361,15 @@ export default class EnvelopedData
 		{
 			case 1: // Key transport scheme
 				{
-				//region keyEncryptionAlgorithm
+					//region keyEncryptionAlgorithm
 					const oaepOID = getOIDByAlgorithm({
 						name: "RSA-OAEP"
 					});
 					if(oaepOID === "")
 						throw new Error("Can not find OID for OAEP");
-				//endregion
-				
-				//region RSAES-OAEP-params
+					//endregion
+
+					//region RSAES-OAEP-params
 					const hashOID = getOIDByAlgorithm({
 						name: encryptionParameters.oaepHashAlgorithm
 					});
@@ -388,9 +388,9 @@ export default class EnvelopedData
 							algorithmParams: hashAlgorithm.toSchema()
 						})
 					});
-				//endregion
-				
-				//region KeyTransRecipientInfo
+					//endregion
+
+					//region KeyTransRecipientInfo
 					const keyInfo = new KeyTransRecipientInfo({
 						version: 0,
 						rid: new IssuerAndSerialNumber({
@@ -402,21 +402,21 @@ export default class EnvelopedData
 							algorithmParams: rsaOAEPParams.toSchema()
 						}),
 						recipientCertificate: certificate
-					// "encryptedKey" will be calculated in "encrypt" function
+						// "encryptedKey" will be calculated in "encrypt" function
 					});
-				//endregion
+					//endregion
 				
-				//region Final values for "CMS_ENVELOPED_DATA"
+					//region Final values for "CMS_ENVELOPED_DATA"
 					this.recipientInfos.push(new RecipientInfo({
 						variant: 1,
 						value: keyInfo
 					}));
-				//endregion
+					//endregion
 				}
 				break;
 			case 2: // Key agreement scheme
 				{
-				//region RecipientEncryptedKey
+					//region RecipientEncryptedKey
 					const encryptedKey = new RecipientEncryptedKey({
 						rid: new KeyAgreeRecipientIdentifier({
 							variant: 1,
@@ -427,9 +427,9 @@ export default class EnvelopedData
 						})
 					// "encryptedKey" will be calculated in "encrypt" function
 					});
-				//endregion
+					//endregion
 				
-				//region keyEncryptionAlgorithm
+					//region keyEncryptionAlgorithm
 					const aesKWoid = getOIDByAlgorithm({
 						name: "AES-KW",
 						length: encryptionParameters.kekEncryptionLength
@@ -441,9 +441,9 @@ export default class EnvelopedData
 						algorithmId: aesKWoid,
 						algorithmParams: new asn1js.Null()
 					});
-				//endregion
-				
-				//region KeyAgreeRecipientInfo
+					//endregion
+
+					//region KeyAgreeRecipientInfo
 					const ecdhOID = getOIDByAlgorithm({
 						name: "ECDH",
 						kdf: encryptionParameters.kdfAlgorithm
@@ -451,8 +451,8 @@ export default class EnvelopedData
 					if(ecdhOID === "")
 						throw new Error(`Unknown KDF algorithm: ${encryptionParameters.kdfAlgorithm}`);
 				
-				// In fact there is no need in so long UKM, but RFC2631
-				// has requirement that "UserKeyMaterial" must be 512 bits long
+					// In fact there is no need in so long UKM, but RFC2631
+					// has requirement that "UserKeyMaterial" must be 512 bits long
 					const ukmBuffer = new ArrayBuffer(64);
 					const ukmView = new Uint8Array(ukmBuffer);
 					getRandomValues(ukmView); // Generate random values in 64 bytes long buffer
@@ -470,14 +470,14 @@ export default class EnvelopedData
 						}),
 						recipientCertificate: certificate
 					});
-				//endregion
-				
-				//region Final values for "CMS_ENVELOPED_DATA"
+					//endregion
+
+					//region Final values for "CMS_ENVELOPED_DATA"
 					this.recipientInfos.push(new RecipientInfo({
 						variant: 2,
 						value: keyInfo
 					}));
-				//endregion
+					//endregion
 				}
 				break;
 			default:
@@ -541,13 +541,13 @@ export default class EnvelopedData
 		{
 			case 1: // KEKRecipientInfo
 				{
-				//region keyEncryptionAlgorithm
+					//region keyEncryptionAlgorithm
 					const kekOID = getOIDByAlgorithm(encryptionParameters.keyEncryptionAlgorithm);
 					if(kekOID === "")
 						throw new Error("Incorrect value for \"keyEncryptionAlgorithm\"");
-				//endregion
-				
-				//region KEKRecipientInfo
+					//endregion
+
+					//region KEKRecipientInfo
 					const keyInfo = new KEKRecipientInfo({
 						version: 4,
 						kekid: new KEKIdentifier({
@@ -563,33 +563,33 @@ export default class EnvelopedData
 						preDefinedKEK: preDefinedData
 					// "encryptedKey" would be set in "ecrypt" function
 					});
-				//endregion
-				
-				//region Final values for "CMS_ENVELOPED_DATA"
+					//endregion
+
+					//region Final values for "CMS_ENVELOPED_DATA"
 					this.recipientInfos.push(new RecipientInfo({
 						variant: 3,
 						value: keyInfo
 					}));
-				//endregion
+					//endregion
 				}
 				break;
 			case 2: // PasswordRecipientinfo
 				{
-				//region keyDerivationAlgorithm
+					//region keyDerivationAlgorithm
 					const pbkdf2OID = getOIDByAlgorithm({
 						name: "PBKDF2"
 					});
 					if(pbkdf2OID === "")
 						throw new Error("Can not find OID for PBKDF2");
-				//endregion
-				
-				//region Salt
+					//endregion
+
+					//region Salt
 					const saltBuffer = new ArrayBuffer(64);
 					const saltView = new Uint8Array(saltBuffer);
 					getRandomValues(saltView);
-				//endregion
-				
-				//region HMAC-based algorithm
+					//endregion
+
+					//region HMAC-based algorithm
 					const hmacOID = getOIDByAlgorithm({
 						name: "HMAC",
 						hash: {
@@ -598,9 +598,9 @@ export default class EnvelopedData
 					});
 					if(hmacOID === "")
 						throw new Error(`Incorrect value for "hmacHashAlgorithm": ${encryptionParameters.hmacHashAlgorithm}`);
-				//endregion
-				
-				//region PBKDF2-params
+					//endregion
+
+					//region PBKDF2-params
 					const pbkdf2Params = new PBKDF2Params({
 						salt: new asn1js.OctetString({ valueHex: saltBuffer }),
 						iterationCount: encryptionParameters.iterationCount,
@@ -609,15 +609,15 @@ export default class EnvelopedData
 							algorithmParams: new asn1js.Null()
 						})
 					});
-				//endregion
-				
-				//region keyEncryptionAlgorithm
+					//endregion
+
+					//region keyEncryptionAlgorithm
 					const kekOID = getOIDByAlgorithm(encryptionParameters.keyEncryptionAlgorithm);
 					if(kekOID === "")
 						throw new Error("Incorrect value for \"keyEncryptionAlgorithm\"");
-				//endregion
-				
-				//region PasswordRecipientinfo
+					//endregion
+
+					//region PasswordRecipientinfo
 					const keyInfo = new PasswordRecipientinfo({
 						version: 0,
 						keyDerivationAlgorithm: new AlgorithmIdentifier({
@@ -634,14 +634,14 @@ export default class EnvelopedData
 						password: preDefinedData
 					// "encryptedKey" would be set in "ecrypt" function
 					});
-				//endregion
-				
-				//region Final values for "CMS_ENVELOPED_DATA"
+					//endregion
+
+					//region Final values for "CMS_ENVELOPED_DATA"
 					this.recipientInfos.push(new RecipientInfo({
 						variant: 4,
 						value: keyInfo
 					}));
-				//endregion
+					//endregion
 				}
 				break;
 			default:
@@ -1424,14 +1424,14 @@ export default class EnvelopedData
 				if(("recipientPrivateKey" in decryptionParameters) === false)
 					return Promise.reject("Parameter \"recipientPrivateKey\" is mandatory for \"KeyTransRecipientInfo\"");
 					
-					//region Get current used SHA algorithm
+				//region Get current used SHA algorithm
 				const schema = _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams;
 				const rsaOAEPParams = new RSAESOAEPParams({ schema });
 					
 				const hashAlgorithm = getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId);
 				if(("name" in hashAlgorithm) === false)
 					return Promise.reject(`Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`);
-					//endregion
+				//endregion
 					
 				return crypto.importKey("pkcs8",
 					decryptionParameters.recipientPrivateKey,

@@ -17,16 +17,19 @@ export default class OriginatorInfo
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
-		/**
-		 * @type {CertificateSet}
-		 * @desc certs
-		 */
-		this.certs = getParametersValue(parameters, "certs", OriginatorInfo.defaultValues("certs"));
-		/**
-		 * @type {RevocationInfoChoices}
-		 * @desc crls
-		 */
-		this.crls = getParametersValue(parameters, "crls", OriginatorInfo.defaultValues("crls"));
+		if("certs" in parameters)
+			/**
+			 * @type {CertificateSet}
+			 * @desc certs
+			 */
+			this.certs = getParametersValue(parameters, "certs", OriginatorInfo.defaultValues("certs"));
+
+		if("crls" in parameters)
+			/**
+			 * @type {RevocationInfoChoices}
+			 * @desc crls
+			 */
+			this.crls = getParametersValue(parameters, "crls", OriginatorInfo.defaultValues("crls"));
 		//endregion
 
 		//region If input argument array contains "schema" for this object
@@ -147,17 +150,23 @@ export default class OriginatorInfo
 		//endregion
 
 		//region Get internal properties from parsed schema
-		this.certs = new CertificateSet({
-			schema: new asn1js.Set({
-				value: asn1.result.certs.valueBlock.value
-			})
-		});
+		if("certs" in asn1.result)
+		{
+			this.certs = new CertificateSet({
+				schema: new asn1js.Set({
+					value: asn1.result.certs.valueBlock.value
+				})
+			});
+		}
 
-		this.crls = new RevocationInfoChoices({
-			schema: new asn1js.Set({
-				value: asn1.result.crls.valueBlock.value
-			})
-		});
+		if("crls" in asn1.result)
+		{
+			this.crls = new RevocationInfoChoices({
+				schema: new asn1js.Set({
+					value: asn1.result.crls.valueBlock.value
+				})
+			});
+		}
 		//endregion
 	}
 	//**********************************************************************************
@@ -167,26 +176,33 @@ export default class OriginatorInfo
 	 */
 	toSchema()
 	{
+		const sequenceValue = [];
+
+		if("certs" in this)
+		{
+			sequenceValue.push(new asn1js.Constructed({
+				idBlock: {
+					tagClass: 3, // CONTEXT-SPECIFIC
+					tagNumber: 0 // [0]
+				},
+				value: this.certs.toSchema().valueBlock.value
+			}));
+		}
+
+		if("crls" in this)
+		{
+			sequenceValue.push(new asn1js.Constructed({
+				idBlock: {
+					tagClass: 3, // CONTEXT-SPECIFIC
+					tagNumber: 1 // [1]
+				},
+				value: this.crls.toSchema().valueBlock.value
+			}));
+		}
+
 		//region Construct and return new ASN.1 schema for this object
 		return (new asn1js.Sequence({
-			value: [
-				new asn1js.Constructed({
-					optional: true,
-					idBlock: {
-						tagClass: 3, // CONTEXT-SPECIFIC
-						tagNumber: 0 // [0]
-					},
-					value: this.certs.toSchema().valueBlock.value
-				}),
-				new asn1js.Constructed({
-					optional: true,
-					idBlock: {
-						tagClass: 3, // CONTEXT-SPECIFIC
-						tagNumber: 1 // [1]
-					},
-					value: this.crls.toSchema().valueBlock.value
-				})
-			]
+			value: sequenceValue
 		}));
 		//endregion
 	}
@@ -197,10 +213,15 @@ export default class OriginatorInfo
 	 */
 	toJSON()
 	{
-		return {
-			certs: this.certs.toJSON(),
-			crls: this.crls.toJSON()
-		};
+		const object = {};
+
+		if("certs" in this)
+			object.certs = this.certs.toJSON();
+
+		if("crls" in this)
+			object.crls = this.crls.toJSON();
+
+		return object;
 	}
 	//**********************************************************************************
 }

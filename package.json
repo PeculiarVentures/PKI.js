@@ -102,7 +102,7 @@
   "module": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.69",
+  "version": "2.1.70",
   "license": "MIT",
   "esdoc": {
     "source": "./src",
