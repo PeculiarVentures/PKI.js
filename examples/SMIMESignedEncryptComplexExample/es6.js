@@ -7,7 +7,6 @@ import {
     toBase64
 } from "pvutils";
 // import * as asn1js from "asn1js";
-// import asn1js from "asn1js";
 import {
     RawData,
     Repeated,
@@ -176,6 +175,20 @@ const rdnmap = {
     "2.5.4.3": "CN",
     "1.2.840.113549.1.9.1": "E-mail"
 };
+
+if ((window == undefined)
+        || (window.crypto == undefined)
+        || (window.crypto.subtle == undefined)) {
+
+    let loccrypto;
+    if ((window == undefined)
+            || (window.crypto == undefined)) {
+        loccrypto = null;
+    }
+
+    setEngine("NullEngine", loccrypto, null);
+}
+    
 //********************************************
 //region Auxiliary functions
 //********************************************
