@@ -285,7 +285,7 @@ _**WARNING**_: if you would try to build PKI.js code for Node version <= 4 then 
 
 ### How to use PKI.js ES6 files directly in browser
 
-Currently there is a posibility to use ES6 modules directly from Web pages, without any transpilations (Babel, Rollup etc.). In order to do this all used files must point to direct or relative names and should be achivable via browser. Almost all moder browsers would support the "native ES6 modules". You could check [_**this link to caniuse site**_](https://caniuse.com/#feat=es6-module) for current status.
+Currently there is a posibility to use ES6 modules directly from Web pages, without any transpilations (Babel, Rollup etc.). In order to do this all used files must point to direct or relative names and should be achievable via browser. Almost all modern browsers would support the "native ES6 modules". You could check [_**this link to caniuse site**_](https://caniuse.com/#feat=es6-module) for current status.
  
 You could check [_**full-featured example here**_](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser). And please carefully read [_**this README**_](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser/README.md) before run it.
  
