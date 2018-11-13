@@ -107,7 +107,7 @@ export function getEngine()
 			 * @property {Object} [webkitSubtle] Subtle object from Apple
 			 */
 			const cryptoObject = self.crypto;
-			let subtleObject = null;
+			let subtleObject;
 			
 			// Apple Safari support
 			if("webkitSubtle" in self.crypto)
@@ -126,12 +126,24 @@ export function getEngine()
 			
 			if("subtle" in self.crypto)
 				subtleObject = self.crypto.subtle;
-			
-			engine = {
-				name: engineName,
-				crypto: cryptoObject,
-				subtle: new CryptoEngine({ name: engineName, crypto: self.crypto, subtle: subtleObject })
-			};
+
+
+			if(typeof subtleObject === "undefined")
+			{
+				engine = {
+					name: engineName,
+					crypto: cryptoObject,
+					subtle: null
+				};
+			}
+			else
+			{
+				engine = {
+					name: engineName,
+					crypto: cryptoObject,
+					subtle: new CryptoEngine({name: engineName, crypto: self.crypto, subtle: subtleObject})
+				};
+			}
 		}
 	}
 	
