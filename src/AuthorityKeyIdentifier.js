@@ -181,12 +181,12 @@ export default class AuthorityKeyIdentifier
 		
 		if("keyIdentifier" in this)
 		{
-			outputArray.push(new asn1js.Constructed({
+			outputArray.push(new asn1js.Primitive({
 				idBlock: {
 					tagClass: 3, // CONTEXT-SPECIFIC
 					tagNumber: 0 // [0]
 				},
-				value: this.keyIdentifier.valueBlock.value
+				valueHex: this.keyIdentifier.valueBlock.valueHex
 			}));
 		}
 		
@@ -203,12 +203,12 @@ export default class AuthorityKeyIdentifier
 		
 		if("authorityCertSerialNumber" in this)
 		{
-			outputArray.push(new asn1js.Constructed({
+			outputArray.push(new asn1js.Primitive({
 				idBlock: {
 					tagClass: 3, // CONTEXT-SPECIFIC
 					tagNumber: 2 // [2]
 				},
-				value: this.authorityCertSerialNumber.valueBlock.value
+				valueHex: this.authorityCertSerialNumber.valueBlock.valueHex
 			}));
 		}
 		//endregion
