@@ -2,7 +2,7 @@ import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 //**************************************************************************************
-//region Additional asn1js schema elements existing inside GENERAL_NAME schema
+//region Additional asn1js schema elements existing inside GeneralName schema
 //**************************************************************************************
 /**
  * Schema for "builtInStandardAttributes" of "ORAddress"
@@ -242,7 +242,7 @@ export default class GeneralName
 	 * @param {Object} [parameters={}]
 	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 * @property {number} [type] value type - from a tagged value (0 for "otherName", 1 for "rfc822Name" etc.)
-	 * @property {Object} [value] asn1js object having GENERAL_NAME value (type depends on "type" value)
+	 * @property {Object} [value] asn1js object having GeneralName value (type depends on "type" value)
 	 */
 	constructor(parameters = {})
 	{
@@ -254,7 +254,7 @@ export default class GeneralName
 		this.type = getParametersValue(parameters, "type", GeneralName.defaultValues("type"));
 		/**
 		 * @type {Object}
-		 * @desc asn1js object having GENERAL_NAME value (type depends on "type" value)
+		 * @desc asn1js object having GeneralName value (type depends on "type" value)
 		 */
 		this.value = getParametersValue(parameters, "value", GeneralName.defaultValues("value"));
 		//endregion
@@ -622,13 +622,20 @@ export default class GeneralName
 	toJSON()
 	{
 		const _object = {
-			type: this.type
+			type: this.type,
+			value: ""
 		};
 
 		if((typeof this.value) === "string")
 			_object.value = this.value;
 		else
-			_object.value = this.value.toJSON();
+		{
+			try
+			{
+				_object.value = this.value.toJSON();
+			}
+			catch(ex){}
+		}
 
 		return _object;
 	}
