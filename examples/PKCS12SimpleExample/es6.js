@@ -679,6 +679,147 @@ function openSSLLike()
 	});
 }
 //*********************************************************************************
+function windowsInternal(password)
+{
+	//region Initial variables
+	let sequence = Promise.resolve();
+	
+	const localIdBuffer = new ArrayBuffer(4);
+	const localIdView = new Uint8Array(localIdBuffer);
+	
+	getRandomValues(localIdView);
+	
+	const passwordConverted = stringToArrayBuffer(password);
+	//endregion
+	
+	//region Create simplified structires for certificate and private key
+	let asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(certificateBASE64)));
+	const certSimpl = new Certificate({ schema: asn1.result });
+	
+	asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(privateKeyBASE64)));
+	const pkcs8Simpl = new PrivateKeyInfo({ schema: asn1.result });
+	//endregion
+
+	// region Create Bag attributes for key and certificate
+	const bagAttributes = [
+		new Attribute({
+			type: "1.2.840.113549.1.9.20", // friendlyName
+			values: [
+				new asn1js.BmpString({ value: "PKCS8ShroudedKeyBag from PKIjs" })
+			]
+		}),
+		new Attribute({
+			type: "1.2.840.113549.1.9.21", // localKeyID
+			values: [
+				new asn1js.OctetString({ valueHex: localIdBuffer })
+			]
+		}),
+	];
+	// endregion
+
+	// region Create bag value for the key
+	const keyBagValue = new PKCS8ShroudedKeyBag({
+		parsedValue: pkcs8Simpl
+	});
+	// endregion
+	
+	//region Put initial values for PKCS#12 structures
+	const pkcs12 = new PFX({
+		parsedValue: {
+			integrityMode: 0, // Password-Based Integrity Mode
+			authenticatedSafe: new AuthenticatedSafe({
+				parsedValue: {
+					safeContents: [
+						{
+							privacyMode: 0, // "No-privacy" Protection Mode
+							value: new SafeContents({
+								safeBags: [
+									new SafeBag({
+										bagId: "1.2.840.113549.1.12.10.1.3",
+										bagValue: new CertBag({
+											parsedValue: certSimpl
+										}),
+										bagAttributes,
+									}),
+									new SafeBag({
+										bagId: "1.2.840.113549.1.12.10.1.2",
+										bagValue: keyBagValue,
+										bagAttributes,
+									}),
+								]
+							})
+						},
+					]
+				}
+			})
+		}
+	});
+	//endregion
+	
+	//region Encode internal values for "PKCS8ShroudedKeyBag"
+	sequence = sequence.then(
+		() => keyBagValue.makeInternalValues({
+			password: passwordConverted,
+			contentEncryptionAlgorithm: {
+				name: "AES-CBC",
+				length: 128
+			},
+			hmacHashAlgorithm: "SHA-1",
+			iterationCount: 2048
+		})
+	);
+	//endregion
+	
+	//region Encode internal values for all "SafeContents" firts (create all "Privacy Protection" envelopes)
+	sequence = sequence.then(
+		() => pkcs12.parsedValue.authenticatedSafe.makeInternalValues({
+			safeContents: [
+				{
+					// Empty parameters for first SafeContent since "No Privacy" protection mode there
+				},
+			]
+		})
+	);
+	//endregion
+	
+	//region Encode internal values for "Integrity Protection" envelope
+	sequence = sequence.then(
+		() => pkcs12.makeInternalValues({
+			password: passwordConverted,
+			iterations: 2048,
+			pbkdf2HashAlgorithm: "SHA-1",
+			hmacHashAlgorithm: "SHA-1"
+		})
+	);
+	//endregion
+	
+	//region Save encoded data
+	sequence = sequence.then(() => pkcs12.toSchema().toBER(false));
+	//endregion
+	
+	return sequence;
+}
+//*********************************************************************************
+function windowsLike()
+{
+	return Promise.resolve().then(() => windowsInternal(document.getElementById("password0").value)).then(result =>
+	{
+		const pkcs12AsBlob = new Blob([result], { type: "application/x-pkcs12" });
+		const downloadLink = document.createElement("a");
+		downloadLink.download = "pkijs_pkcs12.p12";
+		// noinspection InnerHTMLJS
+		downloadLink.innerHTML = "Download File";
+		
+		downloadLink.href = window.URL.createObjectURL(pkcs12AsBlob);
+		downloadLink.onclick = destroyClickedElement;
+		downloadLink.style.display = "none";
+		// noinspection XHTMLIncompatabilitiesJS
+		document.body.appendChild(downloadLink);
+		
+		downloadLink.click();
+	});
+}
+//*********************************************************************************
 function parsePKCS12Internal(buffer, password)
 {
 	//region Initial variables
@@ -790,6 +931,7 @@ context("Hack for Rollup.js", () =>
 	passwordPrivacy();
 	certificatePrivacy();
 	openSSLLike();
+	windowsLike();
 	parsePKCS12();
 	handlePKCS12();
 	setEngine();
@@ -816,5 +958,7 @@ context("PKCS#12 Simple Example", () =>
 	it("Certificate Privacy", () => certificatePrivacyInternal(password));
 	
 	it("Making OpenSSL-like PKCS#12 Data", () => openSSLLikeInternal(password).then(result => parsePKCS12Internal(result, password)));
+	
+	it("Making Windows-like PKCS#12 Data", () => windowsLikeInternal(password).then(result => parsePKCS12Internal(result, password)));
 });
 //**********************************************************************************
