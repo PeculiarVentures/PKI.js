@@ -679,7 +679,7 @@ function openSSLLike()
 	});
 }
 //*********************************************************************************
-function windowsInternal(password)
+function windowsLikeInternal(password)
 {
 	//region Initial variables
 	let sequence = Promise.resolve();
@@ -802,7 +802,7 @@ function windowsInternal(password)
 //*********************************************************************************
 function windowsLike()
 {
-	return Promise.resolve().then(() => windowsInternal(document.getElementById("password0").value)).then(result =>
+	return Promise.resolve().then(() => windowsLikeInternal(document.getElementById("password0").value)).then(result =>
 	{
 		const pkcs12AsBlob = new Blob([result], { type: "application/x-pkcs12" });
 		const downloadLink = document.createElement("a");
