@@ -176,19 +176,6 @@ const rdnmap = {
     "1.2.840.113549.1.9.1": "E-mail"
 };
 
-if ((window == undefined)
-        || (window.crypto == undefined)
-        || (window.crypto.subtle == undefined)) {
-
-    let loccrypto;
-    if ((window == undefined)
-            || (window.crypto == undefined)) {
-        loccrypto = null;
-    }
-
-    setEngine("NullEngine", loccrypto, null);
-}
-    
 //********************************************
 //region Auxiliary functions
 //********************************************
@@ -236,15 +223,24 @@ let PEMtoCertArray = function (pemcerts) {
     }
     i = 0;
     let certSimpl = [];
+    let isschematch;
     while (i < certsBASE64.length) {
-        let asn1 = asn1js.fromBER(
-            stringToArrayBuffer(
-                window.atob(
-                    certsBASE64[i]
+        let cbuf1 = window.atob(certsBASE64[i]);
+        if (cbuf1 !== undefined) {
+            let asn1 = asn1js.fromBER(
+                stringToArrayBuffer(
+                    cbuf1
                 )
-            )
-        );
-        certSimpl.push(new Certificate({schema: asn1.result}));
+            );
+            isschematch = asn1js.compareSchema(
+                asn1.result,
+                asn1.result,
+                Certificate.schema()
+            ).verified;
+            if (isschematch) {
+                certSimpl.push(new Certificate({schema: asn1.result}));
+            }
+        }
         i += 1;
     }
     return certSimpl;
@@ -1845,13 +1841,24 @@ function SMIMEHandler(varprotkey) {
     let parsePKCS12Internal = function (buffer, password) {
         //region Initial variables
         let sequence = Promise.resolve();
+        let isschematch;
+        let pkcs12 = null;
 
         const passwordConverted = stringToArrayBuffer(password);
         //endregion
 
         //region Parse internal PKCS#12 values
         const asn1 = asn1js.fromBER(buffer);
-        const pkcs12 = new PFX({schema: asn1.result});
+        isschematch = asn1js.compareSchema(
+            asn1.result,
+            asn1.result,
+            PFX.schema()
+        ).verified;
+        if (isschematch) {
+            pkcs12 = new PFX({schema: asn1.result});
+        } else {
+            return null;
+        }
         //endregion
 
         //region Parse "AuthenticatedSafe" value of PKCS#12 data
@@ -1930,7 +1937,15 @@ function SMIMEHandler(varprotkey) {
 
                     pemcerts += certBufftoPEM(certificateBuffer);
                     let asn1 = asn1js.fromBER(certificateBuffer);
-                    certSimpl.push(new Certificate({schema: asn1.result}));
+                    let validtest = asn1js.compareSchema(
+                        asn1.result,
+                        asn1.result,
+                        Certificate.schema()
+                    ).verified;
+                    if (validtest) {
+                        let certholder = new Certificate({schema: asn1.result});
+                        certSimpl.push(certholder);
+                    }
                     c += 1;
                 }
                 c = 0;
@@ -1966,6 +1981,10 @@ function SMIMEHandler(varprotkey) {
 
                 // noinspection InnerHTMLJS
                 that.parsepkcs12cb();
+            },
+            function (error) {
+                that.error = error;
+                that.parsepkcs12errcb();
             }
         );
     };
@@ -2241,7 +2260,19 @@ function SMIMEHandler(varprotkey) {
         );
 
         const asn1 = asn1js.fromBER(certificateBuffer);
-        certSimpl = new Certificate({schema: asn1.result});
+        let isschematch;
+        isschematch = asn1js.compareSchema(
+            asn1.result,
+            asn1.result,
+            Certificate.schema()
+        ).verified;
+        if (isschematch) {
+            certSimpl = new Certificate({schema: asn1.result});
+        } else {
+            that.error = "Could not parse encryption certificate";
+            that.encryptedcb(false);
+            return null;
+        }
         //endregion
 
         const cmsEnveloped = new EnvelopedData();
@@ -2350,10 +2381,35 @@ function SMIMEHandler(varprotkey) {
             return;
         }
 
-        const cmsContentSimpl = new ContentInfo({schema: asn1.result});
-        const cmsEnvelopedSimp = new EnvelopedData(
-            {schema: cmsContentSimpl.content}
-        );
+        let isschematch;
+        let cmsContentSimpl;
+        isschematch = asn1js.compareSchema(
+            asn1.result,
+            asn1.result,
+            ContentInfo.schema()
+        ).verified;
+        if (isschematch) {
+            cmsContentSimpl = new ContentInfo({schema: asn1.result});
+        } else {
+            that.error = "Message is not properly formatted";
+            that.decryptparserrorcb();
+        }
+
+        let cmsEnvelopedSimp;
+        isschematch = asn1js.compareSchema(
+            cmsContentSimpl.content,
+            cmsContentSimpl.content,
+            EnvelopedData.schema()
+        ).verified;
+        if (isschematch) {
+            cmsEnvelopedSimp = new EnvelopedData(
+                {schema: cmsContentSimpl.content}
+            );
+        } else {
+            that.error = "Message is not properly formatted";
+            that.decryptparserrorcb();
+            return null;
+        }
         //endregion
 
         return cmsEnvelopedSimp.decrypt(0,
@@ -2842,7 +2898,18 @@ function verifyCertificateInternal() {
                 return Promise.resolve({result: false});
             }
             const asn1 = asn1js.fromBER(certificateBuffer);
-            const certificate = new Certificate({schema: asn1.result});
+            let isschematch;
+            let certificate;
+            isschematch = asn1js.compareSchema(
+                asn1.result,
+                asn1.result,
+                Certificate.schema()
+            ).verified;
+            if (isschematch) {
+                certificate = new Certificate({schema: asn1.result});
+            } else {
+                return Promise.resolve({result: false});
+            }
             j = 0;
             while (j < cmsSigners.length) {
                 if (cmsSigners[j] === c) {
@@ -2993,7 +3060,6 @@ function handleTrustedCertsText(encodedCertificate) {
             // noinspection JSUnresolvedVariable
             const asn1 = asn1js.fromBER(event.target.result);
             const certificate = new Certificate({schema: asn1.result});
-
             trustedCertificates.push(certificate);
         } catch (ex) {
             return ex;
