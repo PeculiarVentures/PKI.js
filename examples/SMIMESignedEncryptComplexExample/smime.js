@@ -88,6 +88,7 @@ let divtablemsgcerts = document.getElementById("divtablemsgcerts");
 
 /* Begin callback declarations */
 let nullfunction = function () {
+    "use strict";
     return null;
 };
 
@@ -157,6 +158,7 @@ smimehandler.keyimportfailcb = function () {
 };
 
 let importkey = function () {
+    "use strict";
     alert ("Key has been imported.");
 };
 
@@ -164,11 +166,16 @@ smimehandler.keyimportedcb = function () {
     "use strict";
     alert("Key imported successfully");
 };
+smimehandler.parsepkcs12errcb = function () {
+    "use strict";
+    alert("PKCS12 Error parsing: "
+        + smimehandler.error);
+   
+};
 
 smimehandler.parsepkcs12cb = function () {
     "use strict";
     alert("PKCS12 key imported.");
-    let i;
     cert_data.value = smimehandler.certs;
     while (divtable.childNodes.length > 0) {
         divtable.removeChild(divtable.firstChild);
