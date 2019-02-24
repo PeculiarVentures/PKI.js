@@ -16,7 +16,7 @@ jobs:
           command: sudo apt-get install -y nodejs
       - run:
           name: Install NPM
-          command: sudo apt install npm
+          command: sudo apt-get install npm
       - run:
           name: Installing global dependencies
           command: npm install -g typescript rollup nyc coveralls
