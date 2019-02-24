@@ -9,6 +9,9 @@ jobs:
       COVERALLS_REPO_TOKEN: 5VZxtP3jvfuAygXWjgkaJCrHpT9FwiVTU
     steps:
       - run:
+          name: Update packages
+          command: sudo apt-get update
+      - run:
           name: Download Node.js
           command: curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
       - run:
