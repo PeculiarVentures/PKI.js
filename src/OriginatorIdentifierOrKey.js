@@ -25,8 +25,8 @@ export default class OriginatorIdentifierOrKey
 
 		if("value" in parameters)
 			/**
-			 * @type {Array}
-			 * @desc values
+			 * @type {IssuerAndSerialNumber|OctetString|OriginatorPublicKey}
+			 * @desc value
 			 */
 			this.value = getParametersValue(parameters, "value", OriginatorIdentifierOrKey.defaultValues("value"));
 		//endregion

@@ -1,12 +1,14 @@
 /* eslint-disable no-undef,no-unreachable,no-unused-vars */
 import * as asn1js from "asn1js";
-import { utilConcatBuf, stringToArrayBuffer, fromBase64, toBase64, arrayBufferToString } from "pvutils";
-import { setEngine } from "../../src/common.js";
-import PrivateKeyInfo from "../../src/PrivateKeyInfo.js";
+import { utilConcatBuf, stringToArrayBuffer, fromBase64, toBase64, arrayBufferToString, bufferToHexCodes } from "pvutils";
+import { setEngine, getCrypto } from "../../src/common.js";
 import RSAPrivateKey from "../../src/RSAPrivateKey.js";
 //<nodewebcryptoossl>
 //*********************************************************************************
-let opensslEncryptedBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created TSP request
+let privateKeyData = new ArrayBuffer(0);
+let passwordBuffer = new ArrayBuffer(0);
+let ivBuffer = new ArrayBuffer(0);
+let aesKeyLength = 16;
 //*********************************************************************************
 function formatPEM(pemString)
 {
@@ -178,131 +180,207 @@ function hex2b(hex)
 //*********************************************************************************
 //region Create OpenSSL Encrypted Private Key
 //*********************************************************************************
-function createOpenSSLPrivateKeyInternal()
+async function createOpenSSLPrivateKeyInternal()
 {
-	return Promise.resolve();
+	//region Initial variables
+	const algorithm = {
+		name: "AES-CBC",
+		length: aesKeyLength << 3
+	};
+	//endregion
+
+	//region Get a "crypto" extension
+	const crypto = getCrypto();
+	if(typeof crypto === "undefined")
+		throw new Error("No WebCrypto extension found");
+	//endregion
+
+	//region Generate IV
+	ivBuffer = new ArrayBuffer(16);
+	const ivView = new Uint8Array(ivBuffer);
+
+	await crypto.getRandomValues(ivView);
+
+	algorithm.iv = ivBuffer.slice(0);
+	//endregion
+
+	//region Generate OpenSSL encryption key
+	const openSSLKey = openSSLBytesToKey(passwordBuffer, ivBuffer.slice(0, 8), aesKeyLength, 1);
+	//endregion
+
+	//region Import OpenSSL key into crypto engine internals
+	const key = await crypto.subtle.importKey("raw", openSSLKey, algorithm, false, ["encrypt", "decrypt"]);
+	//endregion
+
+	//region Finally encrypt privatekey
+	try
+	{
+		privateKeyData = await crypto.subtle.encrypt(algorithm, key, new Uint8Array(privateKeyData));
+	}
+	catch(ex)
+	{
+		privateKeyData = new ArrayBuffer(0);
+		ivBuffer = new ArrayBuffer(0);
+	}
+	//endregion
 }
 //*********************************************************************************
 function createOpenSSLPrivateKey()
 {
-	return Promise.resolve();
+	return Promise.resolve().
+		then(() =>
+		{
+			const encodedPrivateKey = document.getElementById("pkijs_data").value;
+			let clearPrivateKey = encodedPrivateKey.replace(/(-+(BEGIN|END)( RSA)? PRIVATE KEY-+|\r|\n)/g, "");
+
+			privateKeyData = stringToArrayBuffer(fromBase64(clearPrivateKey));
+			passwordBuffer = stringToArrayBuffer(document.getElementById("password").value);
+
+			return createOpenSSLPrivateKeyInternal();
+		}).
+		then(() =>
+		{
+			let resultString = "-----BEGIN RSA PRIVATE KEY-----\r\n";
+			resultString += "Proc-Type: 4,ENCRYPTED\r\n";
+			resultString += `DEK-Info: AES-${aesKeyLength << 3}-CBC,${bufferToHexCodes(ivBuffer).toUpperCase()}\r\n\r\n`;
+			resultString += `${formatPEM(toBase64(arrayBufferToString(privateKeyData)))}`;
+			resultString += "\r\n-----END RSA PRIVATE KEY-----\r\n";
+
+			document.getElementById("openssl_data").value = resultString;
+		});
 }
 //*********************************************************************************
 //endregion 
 //*********************************************************************************
 //region Parse existing OpenSSL Encrypted Private Key
 //*********************************************************************************
-/**
- * Decrypt encrypted OpenSSL Encrypted Private Key
- * @param {ArrayBuffer} encryptedKey The encrypted key data
- * @param {ArrayBuffer} password Password for the encrypted data
- * @param {string} algorithmName String representation of algorithm's name
- * @param {number} keyLength Key length for decryption key (for AES-256-CBC it should be 32)
- * @param {ArrayBuffer} iv Initialization Vector
- * @return {Promise<ArrayBuffer>} Decrypted Private key
- */
-async function decryptOpenSSLPrivateKey(encryptedKey, password, algorithmName, keyLength, iv)
+async function parseOpenSSLPrivateKeyInternal()
 {
 	//region Initial variables
 	const algorithm = {
-		name: algorithmName,
-		length: keyLength >> 3,
-		iv
+		name: "AES-CBC",
+		length: aesKeyLength >> 3,
+		iv: ivBuffer.slice(0)
 	};
 	//endregion
 
-	const openSSLKey = openSSLBytesToKey(password, iv.slice(0, 8), keyLength, 1);
+	const openSSLKey = openSSLBytesToKey(passwordBuffer, ivBuffer.slice(0, 8), aesKeyLength, 1);
+
+	//region Get a "crypto" extension
+	const crypto = getCrypto();
+	if(typeof crypto === "undefined")
+		throw new Error("No WebCrypto extension found");
+	//endregion
 
 	const key = await crypto.subtle.importKey("raw", openSSLKey, algorithm, false, ["encrypt", "decrypt"]);
 
-	let decryptResult;
-
 	try
 	{
-		decryptResult = await crypto.subtle.decrypt(algorithm, key, new Uint8Array(encryptedKey));
+		privateKeyData = await crypto.subtle.decrypt(algorithm, key, new Uint8Array(privateKeyData));
 	}
 	catch(ex)
 	{
-		return new ArrayBuffer(0);
+		privateKeyData = new ArrayBuffer(0);
 	}
-
-	return decryptResult;
 }
 //*********************************************************************************
 async function parseOpenSSLPrivateKey()
 {
-	let keyLength = 0;
-	let base64 = "";
-
-	const headerExp = /([\x21-\x7e]+):\s*([\x21-\x7e\s^:]+)/;
-
-	const stringPEM = document.getElementById("openssl_data").value.replace(/(-----(BEGIN|END) RSA PRIVATE KEY-----)/g, "");
-	const lines = stringPEM.split(/\r?\n/);
-
-	let dekFound = false;
-	let iv = new ArrayBuffer(0);
-
-	for(let i = 0; i < lines.length; i++)
-	{
-		const lineMatch = lines[i].match(headerExp);
-		if(lineMatch !== null)
+	return Promise.resolve().
+		then(() =>
 		{
-			if(lineMatch[1] === "DEK-Info")
+			let base64 = "";
+
+			const headerExp = /([\x21-\x7e]+):\s*([\x21-\x7e\s^:]+)/;
+
+			const stringPEM = document.getElementById("openssl_data").value.replace(/(-+(BEGIN|END)( RSA)? PRIVATE KEY-+)/g, "");
+			const lines = stringPEM.split(/\r?\n/);
+
+			let dekFound = false;
+
+			for(let i = 0; i < lines.length; i++)
 			{
-				dekFound = true;
-
-				const values = lineMatch[2].split(",");
-
-				for(let j = 0; j < values.length; j++)
-					values[j] = values[j].trim();
-
-				switch(values[0].toLocaleUpperCase())
+				const lineMatch = lines[i].match(headerExp);
+				if(lineMatch !== null)
 				{
-					case "AES-128-CBC":
-						keyLength = 16;
-						break;
-					case "AES-192-CBC":
-						keyLength = 24;
-						break;
-					case "AES-256-CBC":
-						keyLength = 32;
-						break;
-					default:
-						throw new Error(`Unsupported apgorithm ${values[0].toLocaleUpperCase()}`);
+					if(lineMatch[1] === "DEK-Info")
+					{
+						dekFound = true;
+
+						const values = lineMatch[2].split(",");
+
+						for(let j = 0; j < values.length; j++)
+							values[j] = values[j].trim();
+
+						switch(values[0].toLocaleUpperCase())
+						{
+							case "AES-128-CBC":
+								aesKeyLength = 16;
+								break;
+							case "AES-192-CBC":
+								aesKeyLength = 24;
+								break;
+							case "AES-256-CBC":
+								aesKeyLength = 32;
+								break;
+							default:
+								throw new Error(`Unsupported apgorithm ${values[0].toLocaleUpperCase()}`);
+						}
+
+						ivBuffer = hex2b(values[1]);
+					}
 				}
-
-				iv = hex2b(values[1]);
+				else
+				{
+					if(dekFound)
+						base64 += lines[i];
+				}
 			}
-		}
-		else
+
+			if(dekFound === false)
+				throw new Error("Can not find DEK-Info section!");
+
+			privateKeyData = stringToArrayBuffer(fromBase64(base64.trim()));
+			passwordBuffer = stringToArrayBuffer(document.getElementById("password").value);
+
+			return parseOpenSSLPrivateKeyInternal();
+		}).
+		then(() =>
 		{
-			if(dekFound)
-				base64 += lines[i];
-		}
-	}
+			const asn1 = asn1js.fromBER(privateKeyData);
+			if(asn1.offset === (-1))
+				throw new Error("Incorect encrypted key");
 
-	if(dekFound === false)
-		throw new Error("Can not find DEK-Info section!");
+			// Just in order to check all was decoded correctly
+			const rsaPrivateKey = new RSAPrivateKey({ schema: asn1.result });
 
-	const dataBuffer = await decryptOpenSSLPrivateKey(stringToArrayBuffer(fromBase64(base64.trim())), stringToArrayBuffer(document.getElementById("password").value), "AES-CBC", keyLength, iv);
+			let resultString = "-----BEGIN RSA PRIVATE KEY-----\r\n";
+			resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(privateKeyData)))}`;
+			resultString = `${resultString}\r\n-----END RSA PRIVATE KEY-----\r\n`;
 
-	const asn1 = asn1js.fromBER(dataBuffer);
-	if(asn1.offset === (-1))
-		throw new Error("Incorect encrypted key");
-
-	//const privateKeyInfo = new PrivateKeyInfo({ schema: asn1.result });
-	const rsaPrivateKey = new RSAPrivateKey({ schema: asn1.result });
-
-	let resultString = "-----BEGIN RSA PRIVATE KEY-----\r\n";
-	//resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(privateKeyInfo.toSchema().toBER(false))))}`;
-	resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(rsaPrivateKey.toSchema().toBER(false))))}`;
-	//resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(dataBuffer)))}`;
-	resultString = `${resultString}\r\n-----END RSA PRIVATE KEY-----\r\n`;
-
-	document.getElementById("pkijs_data").value = resultString;
+			document.getElementById("pkijs_data").value = resultString;
+		});
 }
 //*********************************************************************************
-//endregion 
+//endregion
+//*********************************************************************************
+function handleContentEncLenOnChange()
+{
+	const encryptionAlgorithmLengthSelect = document.getElementById("content_enc_alg_len").value;
+	switch(encryptionAlgorithmLengthSelect)
+	{
+		case "len_128":
+			aesKeyLength = 128 << 3;
+			break;
+		case "len_192":
+			aesKeyLength = 192 << 3;
+			break;
+		case "len_256":
+			aesKeyLength = 256 << 3;
+			break;
+		default:
+	}
+}
 //*********************************************************************************
 context("Hack for Rollup.js", () =>
 {
@@ -311,13 +389,28 @@ context("Hack for Rollup.js", () =>
 	// noinspection UnreachableCodeJS
 	createOpenSSLPrivateKey();
 	parseOpenSSLPrivateKey();
+	handleContentEncLenOnChange();
 	setEngine();
 });
 //*********************************************************************************
 context("OpenSSL Encrypted Private Key", () =>
 {
-	it("Create And Parse OpenSSP Encrypted Private Key", () =>
+	//region Initial variables
+	passwordBuffer = stringToArrayBuffer("password");
+
+	const encLens = [128, 192, 256];
+	//endregion
+
+	encLens.forEach(encLen =>
 	{
+		const testName = `Create And Parse OpenSSL Encrypted Private Key for AES-${encLen}-CBC`;
+
+		aesKeyLength = encLen >> 3;
+
+		it(testName, () =>
+		{
+			return createOpenSSLPrivateKeyInternal().then(() => parseOpenSSLPrivateKeyInternal());
+		});
 	});
 });
 //*********************************************************************************

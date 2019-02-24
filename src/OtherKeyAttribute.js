@@ -155,7 +155,7 @@ export default class OtherKeyAttribute
 		outputArray.push(new asn1js.ObjectIdentifier({ value: this.keyAttrId }));
 
 		if("keyAttr" in this)
-			outputArray.push(this.keyAttr.toSchema());
+			outputArray.push(this.keyAttr);
 		//endregion
 
 		//region Construct and return new ASN.1 schema for this object

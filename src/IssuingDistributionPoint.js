@@ -334,7 +334,13 @@ export default class IssuingDistributionPoint
 				value.idBlock.tagNumber = 1; // [1]
 			}
 			
-			outputArray.push(value);
+			outputArray.push(new asn1js.Constructed({
+				idBlock: {
+					tagClass: 3, // CONTEXT-SPECIFIC
+					tagNumber: 0 // [0]
+				},
+				value: [value]
+			}));
 		}
 		
 		if(this.onlyContainsUserCerts !== IssuingDistributionPoint.defaultValues("onlyContainsUserCerts"))

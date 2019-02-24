@@ -470,7 +470,7 @@ context("Node.js PKCS#12 Example", () =>
 		
 		return windowsLike(password, "RC2-40-CBC", "SHA-1").then(result =>
 		{
-			console.log(`X.509 Certificate, RC2-40-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			//console.log(`X.509 Certificate, RC2-40-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		});
 	});
@@ -485,19 +485,19 @@ context("Node.js PKCS#12 Example", () =>
 		
 		return openSSLLike(password, "DES-EDE3-CBC", "SHA-1").then(result =>
 		{
-			console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-1 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			//console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-1 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		}).then(() => openSSLLike(password, "DES-EDE3-CBC", "SHA-256")).then(result =>
 		{
-			console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-256 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			//console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-256 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		}).then(() => openSSLLike(password, "DES-EDE3-CBC", "SHA-384")).then(result =>
 		{
-			console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-384 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			//console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-384 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		}).then(() => openSSLLike(password, "DES-EDE3-CBC", "SHA-512")).then(result =>
 		{
-			console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-512 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			//console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-512 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		});
 	});
@@ -512,7 +512,7 @@ context("Node.js PKCS#12 Example", () =>
 		
 		return openSSLLike(password, "DES-EDE3-CBC").then(result =>
 		{
-			console.log(`Attribute Certificate, DES-EDE3-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			//console.log(`Attribute Certificate, DES-EDE3-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		});
 	});
@@ -527,7 +527,7 @@ context("Node.js PKCS#12 Example", () =>
 		
 		return openSSLLike(password, "AES-256-CBC").then(result =>
 		{
-			console.log(`X.509 Certificate, AES-256-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			//console.log(`X.509 Certificate, AES-256-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		});
 	});
@@ -542,7 +542,7 @@ context("Node.js PKCS#12 Example", () =>
 		
 		return openSSLLike(password, "AES-256-CBC").then(result =>
 		{
-			console.log(`Attribute Certificate, AES-256-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
+			//console.log(`Attribute Certificate, AES-256-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		});
 	});

@@ -11,6 +11,8 @@ export default {
 			format: "iife",
 			outro: `
 window.parseOpenSSLPrivateKey = parseOpenSSLPrivateKey;
+window.createOpenSSLPrivateKey = createOpenSSLPrivateKey;
+window.handleContentEncLenOnChange = handleContentEncLenOnChange;
 
 function context(name, func) {}`
 		}

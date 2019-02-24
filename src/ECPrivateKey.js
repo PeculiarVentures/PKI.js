@@ -9,7 +9,7 @@ export default class ECPrivateKey
 {
 	//**********************************************************************************
 	/**
-	 * Constructor for ECCPrivateKey class
+	 * Constructor for ECPrivateKey class
 	 * @param {Object} [parameters={}]
 	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */

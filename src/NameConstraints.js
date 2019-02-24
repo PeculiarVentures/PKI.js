@@ -159,28 +159,22 @@ export default class NameConstraints
 		if("permittedSubtrees" in this)
 		{
 			outputArray.push(new asn1js.Constructed({
-				optional: true,
 				idBlock: {
 					tagClass: 3, // CONTEXT-SPECIFIC
 					tagNumber: 0 // [0]
 				},
-				value: [new asn1js.Sequence({
-					value: Array.from(this.permittedSubtrees, element => element.toSchema())
-				})]
+				value: Array.from(this.permittedSubtrees, element => element.toSchema())
 			}));
 		}
 		
 		if("excludedSubtrees" in this)
 		{
 			outputArray.push(new asn1js.Constructed({
-				optional: true,
 				idBlock: {
 					tagClass: 3, // CONTEXT-SPECIFIC
 					tagNumber: 1 // [1]
 				},
-				value: [new asn1js.Sequence({
-					value: Array.from(this.excludedSubtrees, element => element.toSchema())
-				})]
+				value: Array.from(this.excludedSubtrees, element => element.toSchema())
 			}));
 		}
 		//endregion

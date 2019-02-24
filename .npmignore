@@ -1,6 +1,7 @@
 .idea
 /examples
 /test
+.circleci
 circle.yml
 .nycrc
 .nyc_output
