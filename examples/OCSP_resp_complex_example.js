@@ -5900,7 +5900,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for AlgorithmIdentifier class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    * @property {string} [algorithmId] ObjectIdentifier for algorithm (string representation)
    */
 		constructor() {
@@ -5909,14 +5909,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {string}
-    * @description ObjectIdentifier for algorithm (string representation)
+    * @desc ObjectIdentifier for algorithm (string representation)
     */
 			this.algorithmId = getParametersValue(parameters, "algorithmId", AlgorithmIdentifier.defaultValues("algorithmId"));
 
 			if ("algorithmParams" in parameters)
 				/**
      * @type {Object}
-     * @description Any algorithm parameters
+     * @desc Any algorithm parameters
      */
 				this.algorithmParams = getParametersValue(parameters, "algorithmParams", AlgorithmIdentifier.defaultValues("algorithmParams"));
 			//endregion
@@ -5958,16 +5958,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * AlgorithmIdentifier  ::=  Sequence  {
+   *    algorithm               OBJECT IDENTIFIER,
+   *    parameters              ANY DEFINED BY algorithm OPTIONAL  }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//AlgorithmIdentifier  ::=  Sequence  {
-			//    algorithm               OBJECT IDENTIFIER,
-			//    parameters              ANY DEFINED BY algorithm OPTIONAL  }
 
 			/**
     * @type {Object}
@@ -6081,7 +6085,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for ECCPublicKey class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -6089,17 +6093,17 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {ArrayBuffer}
-    * @description type
+    * @desc type
     */
 			this.x = getParametersValue(parameters, "x", ECPublicKey.defaultValues("x"));
 			/**
     * @type {ArrayBuffer}
-    * @description values
+    * @desc values
     */
 			this.y = getParametersValue(parameters, "y", ECPublicKey.defaultValues("y"));
 			/**
     * @type {string}
-    * @description namedCurve
+    * @desc namedCurve
     */
 			this.namedCurve = getParametersValue(parameters, "namedCurve", ECPublicKey.defaultValues("namedCurve"));
 			//endregion
@@ -6146,7 +6150,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
@@ -6294,7 +6298,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for RSAPublicKey class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    * @property {Integer} [modulus]
    * @property {Integer} [publicExponent]
    */
@@ -6304,12 +6308,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Integer}
-    * @description Modulus part of RSA public key
+    * @desc Modulus part of RSA public key
     */
 			this.modulus = getParametersValue(parameters, "modulus", RSAPublicKey.defaultValues("modulus"));
 			/**
     * @type {Integer}
-    * @description Public exponent of RSA public key
+    * @desc Public exponent of RSA public key
     */
 			this.publicExponent = getParametersValue(parameters, "publicExponent", RSAPublicKey.defaultValues("publicExponent"));
 			//endregion
@@ -6338,17 +6342,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * RSAPublicKey ::= Sequence {
+   *    modulus           Integer,  -- n
+   *    publicExponent    Integer   -- e
+   * }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//RSAPublicKey ::= Sequence {
-			//    modulus           Integer,  -- n
-			//    publicExponent    Integer   -- e
-			//}
 
 			/**
     * @type {Object}
@@ -6437,7 +6445,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for PublicKeyInfo class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -6445,19 +6453,19 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {AlgorithmIdentifier}
-    * @description Algorithm identifier
+    * @desc Algorithm identifier
     */
 			this.algorithm = getParametersValue(parameters, "algorithm", PublicKeyInfo.defaultValues("algorithm"));
 			/**
     * @type {BitString}
-    * @description Subject public key value
+    * @desc Subject public key value
     */
 			this.subjectPublicKey = getParametersValue(parameters, "subjectPublicKey", PublicKeyInfo.defaultValues("subjectPublicKey"));
 
 			if ("parsedKey" in parameters)
 				/**
      * @type {ECPublicKey|RSAPublicKey}
-     * @description Parsed public key value
+     * @desc Parsed public key value
      */
 				this.parsedKey = getParametersValue(parameters, "parsedKey", PublicKeyInfo.defaultValues("parsedKey"));
 			//endregion
@@ -6486,16 +6494,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * SubjectPublicKeyInfo  ::=  Sequence  {
+   *    algorithm            AlgorithmIdentifier,
+   *    subjectPublicKey     BIT STRING  }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//SubjectPublicKeyInfo  ::=  Sequence  {
-			//    algorithm            AlgorithmIdentifier,
-			//    subjectPublicKey     BIT STRING  }
 
 			/**
     * @type {Object}
@@ -6723,7 +6735,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for Attribute class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -6731,12 +6743,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {string}
-    * @description type
+    * @desc ObjectIdentifier for attribute (string representation)
     */
 			this.type = getParametersValue(parameters, "type", Attribute.defaultValues("type"));
 			/**
     * @type {Array}
-    * @description values
+    * @desc Any attribute values
     */
 			this.values = getParametersValue(parameters, "values", Attribute.defaultValues("values"));
 			//endregion
@@ -6778,17 +6790,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
+   *    type   ATTRIBUTE.&id({IOSet}),
+   *    values SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{@type})
+   * }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
-			//    type   ATTRIBUTE.&id({IOSet}),
-			//    values SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{@type})
-			//}
 
 			/**
     * @type {Object}
@@ -6872,9 +6888,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 	class ECPrivateKey {
 		//**********************************************************************************
 		/**
-   * Constructor for ECCPrivateKey class
+   * Constructor for ECPrivateKey class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -6882,26 +6898,26 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {number}
-    * @description version
+    * @desc version
     */
 			this.version = getParametersValue(parameters, "version", ECPrivateKey.defaultValues("version"));
 			/**
     * @type {OctetString}
-    * @description privateKey
+    * @desc privateKey
     */
 			this.privateKey = getParametersValue(parameters, "privateKey", ECPrivateKey.defaultValues("privateKey"));
 
 			if ("namedCurve" in parameters)
 				/**
      * @type {string}
-     * @description namedCurve
+     * @desc namedCurve
      */
 				this.namedCurve = getParametersValue(parameters, "namedCurve", ECPrivateKey.defaultValues("namedCurve"));
 
 			if ("publicKey" in parameters)
 				/**
      * @type {ECPublicKey}
-     * @description publicKey
+     * @desc publicKey
      */
 				this.publicKey = getParametersValue(parameters, "publicKey", ECPrivateKey.defaultValues("publicKey"));
 			//endregion
@@ -6954,19 +6970,23 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * ECPrivateKey ::= SEQUENCE {
+   * version        INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
+   * privateKey     OCTET STRING,
+   * parameters [0] ECParameters {{ NamedCurve }} OPTIONAL,
+   * publicKey  [1] BIT STRING OPTIONAL
+   * }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// ECPrivateKey ::= SEQUENCE {
-			// version        INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
-			// privateKey     OCTET STRING,
-			// parameters [0] ECParameters {{ NamedCurve }} OPTIONAL,
-			// publicKey  [1] BIT STRING OPTIONAL
-			// }
 
 			/**
     * @type {Object}
@@ -7160,7 +7180,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for OtherPrimeInfo class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -7168,17 +7188,17 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Integer}
-    * @description prime
+    * @desc prime
     */
 			this.prime = getParametersValue(parameters, "prime", OtherPrimeInfo.defaultValues("prime"));
 			/**
     * @type {Integer}
-    * @description exponent
+    * @desc exponent
     */
 			this.exponent = getParametersValue(parameters, "exponent", OtherPrimeInfo.defaultValues("exponent"));
 			/**
     * @type {Integer}
-    * @description coefficient
+    * @desc coefficient
     */
 			this.coefficient = getParametersValue(parameters, "coefficient", OtherPrimeInfo.defaultValues("coefficient"));
 			//endregion
@@ -7209,18 +7229,23 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * OtherPrimeInfo ::= Sequence {
+   *    prime             Integer,  -- ri
+   *    exponent          Integer,  -- di
+   *    coefficient       Integer   -- ti
+   * }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-			//OtherPrimeInfo ::= Sequence {
-			//    prime             Integer,  -- ri
-			//    exponent          Integer,  -- di
-			//    coefficient       Integer   -- ti
-			//}
 
 			/**
     * @type {Object}
@@ -7312,7 +7337,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for RSAPrivateKey class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -7320,54 +7345,54 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {number}
-    * @description version
+    * @desc version
     */
 			this.version = getParametersValue(parameters, "version", RSAPrivateKey.defaultValues("version"));
 			/**
     * @type {Integer}
-    * @description modulus
+    * @desc modulus
     */
 			this.modulus = getParametersValue(parameters, "modulus", RSAPrivateKey.defaultValues("modulus"));
 			/**
     * @type {Integer}
-    * @description publicExponent
+    * @desc publicExponent
     */
 			this.publicExponent = getParametersValue(parameters, "publicExponent", RSAPrivateKey.defaultValues("publicExponent"));
 			/**
     * @type {Integer}
-    * @description privateExponent
+    * @desc privateExponent
     */
 			this.privateExponent = getParametersValue(parameters, "privateExponent", RSAPrivateKey.defaultValues("privateExponent"));
 			/**
     * @type {Integer}
-    * @description prime1
+    * @desc prime1
     */
 			this.prime1 = getParametersValue(parameters, "prime1", RSAPrivateKey.defaultValues("prime1"));
 			/**
     * @type {Integer}
-    * @description prime2
+    * @desc prime2
     */
 			this.prime2 = getParametersValue(parameters, "prime2", RSAPrivateKey.defaultValues("prime2"));
 			/**
     * @type {Integer}
-    * @description exponent1
+    * @desc exponent1
     */
 			this.exponent1 = getParametersValue(parameters, "exponent1", RSAPrivateKey.defaultValues("exponent1"));
 			/**
     * @type {Integer}
-    * @description exponent2
+    * @desc exponent2
     */
 			this.exponent2 = getParametersValue(parameters, "exponent2", RSAPrivateKey.defaultValues("exponent2"));
 			/**
     * @type {Integer}
-    * @description coefficient
+    * @desc coefficient
     */
 			this.coefficient = getParametersValue(parameters, "coefficient", RSAPrivateKey.defaultValues("coefficient"));
 
 			if ("otherPrimeInfos" in parameters)
 				/**
      * @type {Array.<OtherPrimeInfo>}
-     * @description otherPrimeInfos
+     * @desc otherPrimeInfos
      */
 				this.otherPrimeInfos = getParametersValue(parameters, "otherPrimeInfos", RSAPrivateKey.defaultValues("otherPrimeInfos"));
 			//endregion
@@ -7412,27 +7437,31 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * RSAPrivateKey ::= Sequence {
+   *    version           Version,
+   *    modulus           Integer,  -- n
+   *    publicExponent    Integer,  -- e
+   *    privateExponent   Integer,  -- d
+   *    prime1            Integer,  -- p
+   *    prime2            Integer,  -- q
+   *    exponent1         Integer,  -- d mod (p-1)
+   *    exponent2         Integer,  -- d mod (q-1)
+   *    coefficient       Integer,  -- (inverse of q) mod p
+   *    otherPrimeInfos   OtherPrimeInfos OPTIONAL
+   * }
+   *
+   * OtherPrimeInfos ::= Sequence SIZE(1..MAX) OF OtherPrimeInfo
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//RSAPrivateKey ::= Sequence {
-			//    version           Version,
-			//    modulus           Integer,  -- n
-			//    publicExponent    Integer,  -- e
-			//    privateExponent   Integer,  -- d
-			//    prime1            Integer,  -- p
-			//    prime2            Integer,  -- q
-			//    exponent1         Integer,  -- d mod (p-1)
-			//    exponent2         Integer,  -- d mod (q-1)
-			//    coefficient       Integer,  -- (inverse of q) mod p
-			//    otherPrimeInfos   OtherPrimeInfos OPTIONAL
-			//}
-			//
-			//OtherPrimeInfos ::= Sequence SIZE(1..MAX) OF OtherPrimeInfo
 
 			/**
     * @type {Object}
@@ -7599,7 +7628,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for PrivateKeyInfo class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -7607,31 +7636,31 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {number}
-    * @description version
+    * @desc version
     */
 			this.version = getParametersValue(parameters, "version", PrivateKeyInfo.defaultValues("version"));
 			/**
     * @type {AlgorithmIdentifier}
-    * @description privateKeyAlgorithm
+    * @desc privateKeyAlgorithm
     */
 			this.privateKeyAlgorithm = getParametersValue(parameters, "privateKeyAlgorithm", PrivateKeyInfo.defaultValues("privateKeyAlgorithm"));
 			/**
     * @type {OctetString}
-    * @description privateKey
+    * @desc privateKey
     */
 			this.privateKey = getParametersValue(parameters, "privateKey", PrivateKeyInfo.defaultValues("privateKey"));
 
 			if ("attributes" in parameters)
 				/**
      * @type {Array.<Attribute>}
-     * @description attributes
+     * @desc attributes
      */
 				this.attributes = getParametersValue(parameters, "attributes", PrivateKeyInfo.defaultValues("attributes"));
 
 			if ("parsedKey" in parameters)
 				/**
      * @type {ECPrivateKey|RSAPrivateKey}
-     * @description Parsed public key value
+     * @desc Parsed public key value
      */
 				this.parsedKey = getParametersValue(parameters, "parsedKey", PrivateKeyInfo.defaultValues("parsedKey"));
 			//endregion
@@ -7666,24 +7695,28 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * PrivateKeyInfo ::= SEQUENCE {
+   *    version Version,
+   *    privateKeyAlgorithm AlgorithmIdentifier {{PrivateKeyAlgorithms}},
+   *    privateKey PrivateKey,
+   *    attributes [0] Attributes OPTIONAL }
+   *
+   * Version ::= INTEGER {v1(0)} (v1,...)
+   *
+   * PrivateKey ::= OCTET STRING
+   *
+   * Attributes ::= SET OF Attribute
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//PrivateKeyInfo ::= SEQUENCE {
-			//    version Version,
-			//    privateKeyAlgorithm AlgorithmIdentifier {{PrivateKeyAlgorithms}},
-			//    privateKey PrivateKey,
-			//    attributes [0] Attributes OPTIONAL }
-			//
-			//Version ::= INTEGER {v1(0)} (v1,...)
-			//
-			//PrivateKey ::= OCTET STRING
-			//
-			//Attributes ::= SET OF Attribute
 
 			/**
     * @type {Object}
@@ -7906,7 +7939,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for EncryptedContentInfo class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -7914,19 +7947,19 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {string}
-    * @description contentType
+    * @desc contentType
     */
 			this.contentType = getParametersValue(parameters, "contentType", EncryptedContentInfo.defaultValues("contentType"));
 			/**
     * @type {AlgorithmIdentifier}
-    * @description contentEncryptionAlgorithm
+    * @desc contentEncryptionAlgorithm
     */
 			this.contentEncryptionAlgorithm = getParametersValue(parameters, "contentEncryptionAlgorithm", EncryptedContentInfo.defaultValues("contentEncryptionAlgorithm"));
 
 			if ("encryptedContent" in parameters) {
 				/**
      * @type {OctetString}
-     * @description encryptedContent (!!!) could be contructive or primitive value (!!!)
+     * @desc encryptedContent (!!!) could be contructive or primitive value (!!!)
      */
 				this.encryptedContent = parameters.encryptedContent;
 
@@ -8002,21 +8035,25 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * EncryptedContentInfo ::= SEQUENCE {
+   *    contentType ContentType,
+   *    contentEncryptionAlgorithm ContentEncryptionAlgorithmIdentifier,
+   *    encryptedContent [0] IMPLICIT EncryptedContent OPTIONAL }
+   *
+   * Comment: Strange, but modern crypto engines create "encryptedContent" as "[0] EXPLICIT EncryptedContent"
+   *
+   * EncryptedContent ::= OCTET STRING
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//EncryptedContentInfo ::= SEQUENCE {
-			//    contentType ContentType,
-			//    contentEncryptionAlgorithm ContentEncryptionAlgorithmIdentifier,
-			//    encryptedContent [0] IMPLICIT EncryptedContent OPTIONAL }
-			//
-			// Comment: Strange, but modern crypto engines create "encryptedContent" as "[0] EXPLICIT EncryptedContent"
-			//
-			//EncryptedContent ::= OCTET STRING
 
 			/**
     * @type {Object}
@@ -8155,7 +8192,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for RSASSAPSSParams class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -8163,22 +8200,22 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {AlgorithmIdentifier}
-    * @description Algorithms of hashing (DEFAULT sha1)
+    * @desc Algorithms of hashing (DEFAULT sha1)
     */
 			this.hashAlgorithm = getParametersValue(parameters, "hashAlgorithm", RSASSAPSSParams.defaultValues("hashAlgorithm"));
 			/**
     * @type {AlgorithmIdentifier}
-    * @description Algorithm of "mask generaion function (MGF)" (DEFAULT mgf1SHA1)
+    * @desc Algorithm of "mask generaion function (MGF)" (DEFAULT mgf1SHA1)
     */
 			this.maskGenAlgorithm = getParametersValue(parameters, "maskGenAlgorithm", RSASSAPSSParams.defaultValues("maskGenAlgorithm"));
 			/**
     * @type {number}
-    * @description Salt length (DEFAULT 20)
+    * @desc Salt length (DEFAULT 20)
     */
 			this.saltLength = getParametersValue(parameters, "saltLength", RSASSAPSSParams.defaultValues("saltLength"));
 			/**
     * @type {number}
-    * @description (DEFAULT 1)
+    * @desc (DEFAULT 1)
     */
 			this.trailerField = getParametersValue(parameters, "trailerField", RSASSAPSSParams.defaultValues("trailerField"));
 			//endregion
@@ -8217,18 +8254,22 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * RSASSA-PSS-params  ::=  Sequence  {
+   *    hashAlgorithm      [0] HashAlgorithm DEFAULT sha1Identifier,
+   *    maskGenAlgorithm   [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
+   *    saltLength         [2] Integer DEFAULT 20,
+   *    trailerField       [3] Integer DEFAULT 1  }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//RSASSA-PSS-params  ::=  Sequence  {
-			//    hashAlgorithm      [0] HashAlgorithm DEFAULT sha1Identifier,
-			//    maskGenAlgorithm   [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
-			//    saltLength         [2] Integer DEFAULT 20,
-			//    trailerField       [3] Integer DEFAULT 1  }
 
 			/**
     * @type {Object}
@@ -8401,7 +8442,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for PBKDF2Params class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -8409,26 +8450,26 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Object}
-    * @description salt
+    * @desc salt
     */
 			this.salt = getParametersValue(parameters, "salt", PBKDF2Params.defaultValues("salt"));
 			/**
     * @type {number}
-    * @description iterationCount
+    * @desc iterationCount
     */
 			this.iterationCount = getParametersValue(parameters, "iterationCount", PBKDF2Params.defaultValues("iterationCount"));
 
 			if ("keyLength" in parameters)
 				/**
      * @type {number}
-     * @description keyLength
+     * @desc keyLength
      */
 				this.keyLength = getParametersValue(parameters, "keyLength", PBKDF2Params.defaultValues("keyLength"));
 
 			if ("prf" in parameters)
 				/**
      * @type {AlgorithmIdentifier}
-     * @description prf
+     * @desc prf
      */
 				this.prf = getParametersValue(parameters, "prf", PBKDF2Params.defaultValues("prf"));
 			//endregion
@@ -8461,21 +8502,25 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * PBKDF2-params ::= SEQUENCE {
+   *    salt CHOICE {
+   *        specified OCTET STRING,
+   *        otherSource AlgorithmIdentifier },
+   *  iterationCount INTEGER (1..MAX),
+   *  keyLength INTEGER (1..MAX) OPTIONAL,
+   *  prf AlgorithmIdentifier
+   *    DEFAULT { algorithm hMAC-SHA1, parameters NULL } }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//PBKDF2-params ::= SEQUENCE {
-			//    salt CHOICE {
-			//        specified OCTET STRING,
-			//        otherSource AlgorithmIdentifier },
-			//  iterationCount INTEGER (1..MAX),
-			//  keyLength INTEGER (1..MAX) OPTIONAL,
-			//  prf AlgorithmIdentifier
-			//    DEFAULT { algorithm hMAC-SHA1, parameters NULL } }
 
 			/**
     * @type {Object}
@@ -8605,7 +8650,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for PBES2Params class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -8613,12 +8658,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {AlgorithmIdentifier}
-    * @description keyDerivationFunc
+    * @desc keyDerivationFunc
     */
 			this.keyDerivationFunc = getParametersValue(parameters, "keyDerivationFunc", PBES2Params.defaultValues("keyDerivationFunc"));
 			/**
     * @type {AlgorithmIdentifier}
-    * @description encryptionScheme
+    * @desc encryptionScheme
     */
 			this.encryptionScheme = getParametersValue(parameters, "encryptionScheme", PBES2Params.defaultValues("encryptionScheme"));
 			//endregion
@@ -8644,16 +8689,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * PBES2-params ::= SEQUENCE {
+   *    keyDerivationFunc AlgorithmIdentifier {{PBES2-KDFs}},
+   *    encryptionScheme AlgorithmIdentifier {{PBES2-Encs}} }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//PBES2-params ::= SEQUENCE {
-			//    keyDerivationFunc AlgorithmIdentifier {{PBES2-KDFs}},
-			//    encryptionScheme AlgorithmIdentifier {{PBES2-Encs}} }
 
 			/**
     * @type {Object}
@@ -8922,7 +8971,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for CryptoEngine class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -8930,17 +8979,17 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Object}
-    * @description Usually here we are expecting "window.crypto" or an equivalent from custom "crypto engine"
+    * @desc Usually here we are expecting "window.crypto" or an equivalent from custom "crypto engine"
     */
 			this.crypto = getParametersValue(parameters, "crypto", {});
 			/**
     * @type {Object}
-    * @description Usually here we are expecting "window.crypto.subtle" or an equivalent from custom "crypto engine"
+    * @desc Usually here we are expecting "window.crypto.subtle" or an equivalent from custom "crypto engine"
     */
 			this.subtle = getParametersValue(parameters, "subtle", {});
 			/**
     * @type {string}
-    * @description Name of the "crypto engine"
+    * @desc Name of the "crypto engine"
     */
 			this.name = getParametersValue(parameters, "name", "");
 			//endregion
@@ -11142,7 +11191,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 	function setEngine(name, crypto, subtle) {
 		//region We are in Node
 		// noinspection JSUnresolvedVariable
-		if (typeof process !== "undefined" && "pid" in process && typeof global !== "undefined") {
+		if (typeof process !== "undefined" && "pid" in process && typeof global !== "undefined" && typeof window === "undefined") {
 			// noinspection ES6ModulesDependencies, JSUnresolvedVariable
 			if (typeof global[process.pid] === "undefined") {
 				// noinspection JSUnresolvedVariable
@@ -11189,7 +11238,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 	function getEngine() {
 		//region We are in Node
 		// noinspection JSUnresolvedVariable
-		if (typeof process !== "undefined" && "pid" in process && typeof global !== "undefined") {
+		if (typeof process !== "undefined" && "pid" in process && typeof global !== "undefined" && typeof window === "undefined") {
 			var _engine = void 0;
 
 			try {
@@ -11217,7 +11266,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
      * @property {Object} [webkitSubtle] Subtle object from Apple
      */
 				var cryptoObject = self.crypto;
-				var subtleObject = null;
+				var subtleObject = void 0;
 
 				// Apple Safari support
 				if ("webkitSubtle" in self.crypto) {
@@ -11232,11 +11281,19 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 				if ("subtle" in self.crypto) subtleObject = self.crypto.subtle;
 
-				engine = {
-					name: engineName,
-					crypto: cryptoObject,
-					subtle: new CryptoEngine({ name: engineName, crypto: self.crypto, subtle: subtleObject })
-				};
+				if (typeof subtleObject === "undefined") {
+					engine = {
+						name: engineName,
+						crypto: cryptoObject,
+						subtle: null
+					};
+				} else {
+					engine = {
+						name: engineName,
+						crypto: cryptoObject,
+						subtle: new CryptoEngine({ name: engineName, crypto: self.crypto, subtle: subtleObject })
+					};
+				}
 			}
 		}
 
@@ -11446,7 +11503,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for ResponseBytes class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -11454,12 +11511,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {string}
-    * @description responseType
+    * @desc responseType
     */
 			this.responseType = getParametersValue(parameters, "responseType", ResponseBytes.defaultValues("responseType"));
 			/**
     * @type {OctetString}
-    * @description response
+    * @desc response
     */
 			this.response = getParametersValue(parameters, "response", ResponseBytes.defaultValues("response"));
 			//endregion
@@ -11501,16 +11558,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * ResponseBytes ::=       SEQUENCE {
+   *    responseType   OBJECT IDENTIFIER,
+   *    response       OCTET STRING }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//ResponseBytes ::=       SEQUENCE {
-			//    responseType   OBJECT IDENTIFIER,
-			//    response       OCTET STRING }
 
 			/**
     * @type {Object}
@@ -11587,7 +11648,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for AttributeTypeAndValue class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -11595,12 +11656,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {string}
-    * @description type
+    * @desc type
     */
 			this.type = getParametersValue(parameters, "type", AttributeTypeAndValue.defaultValues("type"));
 			/**
     * @type {Object}
-    * @description Value of the AttributeTypeAndValue class
+    * @desc Value of the AttributeTypeAndValue class
     */
 			this.value = getParametersValue(parameters, "value", AttributeTypeAndValue.defaultValues("value"));
 			//endregion
@@ -11626,20 +11687,24 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * AttributeTypeAndValue ::= Sequence {
+   *    type     AttributeType,
+   *    value    AttributeValue }
+   *
+   * AttributeType ::= OBJECT IDENTIFIER
+   *
+   * AttributeValue ::= ANY -- DEFINED BY AttributeType
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//AttributeTypeAndValue ::= Sequence {
-			//    type     AttributeType,
-			//    value    AttributeValue }
-			//
-			//AttributeType ::= OBJECT IDENTIFIER
-			//
-			//AttributeValue ::= ANY -- DEFINED BY AttributeType
 
 			/**
     * @type {Object}
@@ -11748,7 +11813,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for RelativeDistinguishedNames class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    * @property {Array.<AttributeTypeAndValue>} [typesAndValues] Array of "type and value" objects
    * @property {ArrayBuffer} [valueBeforeDecode] Value of the RDN before decoding from schema
    */
@@ -11758,12 +11823,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<AttributeTypeAndValue>}
-    * @description Array of "type and value" objects
+    * @desc Array of "type and value" objects
     */
 			this.typesAndValues = getParametersValue(parameters, "typesAndValues", RelativeDistinguishedNames.defaultValues("typesAndValues"));
 			/**
     * @type {ArrayBuffer}
-    * @description Value of the RDN before decoding from schema
+    * @desc Value of the RDN before decoding from schema
     */
 			this.valueBeforeDecode = getParametersValue(parameters, "valueBeforeDecode", RelativeDistinguishedNames.defaultValues("valueBeforeDecode"));
 			//endregion
@@ -11805,17 +11870,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * RDNSequence ::= Sequence OF RelativeDistinguishedName
+   *
+   * RelativeDistinguishedName ::=
+   * SET SIZE (1..MAX) OF AttributeTypeAndValue
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//RDNSequence ::= Sequence OF RelativeDistinguishedName
-			//
-			//RelativeDistinguishedName ::=
-			//SET SIZE (1..MAX) OF AttributeTypeAndValue
 
 			/**
     * @type {Object}
@@ -11961,7 +12030,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for CertID class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -11969,22 +12038,22 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {AlgorithmIdentifier}
-    * @description hashAlgorithm
+    * @desc hashAlgorithm
     */
 			this.hashAlgorithm = getParametersValue(parameters, "hashAlgorithm", CertID.defaultValues("hashAlgorithm"));
 			/**
     * @type {OctetString}
-    * @description issuerNameHash
+    * @desc issuerNameHash
     */
 			this.issuerNameHash = getParametersValue(parameters, "issuerNameHash", CertID.defaultValues("issuerNameHash"));
 			/**
     * @type {OctetString}
-    * @description issuerKeyHash
+    * @desc issuerKeyHash
     */
 			this.issuerKeyHash = getParametersValue(parameters, "issuerKeyHash", CertID.defaultValues("issuerKeyHash"));
 			/**
     * @type {Integer}
-    * @description serialNumber
+    * @desc serialNumber
     */
 			this.serialNumber = getParametersValue(parameters, "serialNumber", CertID.defaultValues("serialNumber"));
 			//endregion
@@ -12031,18 +12100,22 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * CertID          ::=     SEQUENCE {
+   *    hashAlgorithm       AlgorithmIdentifier,
+   *    issuerNameHash      OCTET STRING, -- Hash of issuer's DN
+   *    issuerKeyHash       OCTET STRING, -- Hash of issuer's public key
+   *    serialNumber        CertificateSerialNumber }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//CertID          ::=     SEQUENCE {
-			//    hashAlgorithm       AlgorithmIdentifier,
-			//    issuerNameHash      OCTET STRING, -- Hash of issuer's DN
-			//    issuerKeyHash       OCTET STRING, -- Hash of issuer's public key
-			//    serialNumber        CertificateSerialNumber }
 
 			/**
     * @type {Object}
@@ -12212,7 +12285,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for SubjectDirectoryAttributes class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -12220,7 +12293,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<Attribute>}
-    * @description attributes
+    * @desc attributes
     */
 			this.attributes = getParametersValue(parameters, "attributes", SubjectDirectoryAttributes.defaultValues("attributes"));
 			//endregion
@@ -12244,16 +12317,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * SubjectDirectoryAttributes ::= SEQUENCE SIZE (1..MAX) OF Attribute
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// SubjectDirectoryAttributes OID ::= 2.5.29.9
-			//
-			//SubjectDirectoryAttributes ::= SEQUENCE SIZE (1..MAX) OF Attribute
 
 			/**
     * @type {Object}
@@ -12330,7 +12405,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for PrivateKeyUsagePeriod class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -12339,14 +12414,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			if ("notBefore" in parameters)
 				/**
      * @type {Date}
-     * @description notBefore
+     * @desc notBefore
      */
 				this.notBefore = getParametersValue(parameters, "notBefore", PrivateKeyUsagePeriod.defaultValues("notBefore"));
 
 			if ("notAfter" in parameters)
 				/**
      * @type {Date}
-     * @description notAfter
+     * @desc notAfter
      */
 				this.notAfter = getParametersValue(parameters, "notAfter", PrivateKeyUsagePeriod.defaultValues("notAfter"));
 			//endregion
@@ -12372,19 +12447,23 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * PrivateKeyUsagePeriod OID ::= 2.5.29.16
+   *
+   * PrivateKeyUsagePeriod ::= SEQUENCE {
+   *    notBefore       [0]     GeneralizedTime OPTIONAL,
+   *    notAfter        [1]     GeneralizedTime OPTIONAL }
+   * -- either notBefore or notAfter MUST be present
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// PrivateKeyUsagePeriod OID ::= 2.5.29.16
-			//
-			//PrivateKeyUsagePeriod ::= SEQUENCE {
-			//    notBefore       [0]     GeneralizedTime OPTIONAL,
-			//    notAfter        [1]     GeneralizedTime OPTIONAL }
-			//-- either notBefore or notAfter MUST be present
 
 			/**
     * @type {Object}
@@ -12503,7 +12582,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 	//**************************************************************************************
 
 	//**************************************************************************************
-	//region Additional asn1js schema elements existing inside GENERAL_NAME schema
+	//region Additional asn1js schema elements existing inside GeneralName schema
 	//**************************************************************************************
 	/**
   * Schema for "builtInStandardAttributes" of "ORAddress"
@@ -12706,9 +12785,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for GeneralName class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    * @property {number} [type] value type - from a tagged value (0 for "otherName", 1 for "rfc822Name" etc.)
-   * @property {Object} [value] asn1js object having GENERAL_NAME value (type depends on "type" value)
+   * @property {Object} [value] asn1js object having GeneralName value (type depends on "type" value)
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -12716,12 +12795,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {number}
-    * @description value type - from a tagged value (0 for "otherName", 1 for "rfc822Name" etc.)
+    * @desc value type - from a tagged value (0 for "otherName", 1 for "rfc822Name" etc.)
     */
 			this.type = getParametersValue(parameters, "type", GeneralName.defaultValues("type"));
 			/**
     * @type {Object}
-    * @description asn1js object having GENERAL_NAME value (type depends on "type" value)
+    * @desc asn1js object having GeneralName value (type depends on "type" value)
     */
 			this.value = getParametersValue(parameters, "value", GeneralName.defaultValues("value"));
 			//endregion
@@ -12763,23 +12842,27 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * GeneralName ::= Choice {
+   *    otherName                       [0]     OtherName,
+   *    rfc822Name                      [1]     IA5String,
+   *    dNSName                         [2]     IA5String,
+   *    x400Address                     [3]     ORAddress,
+   *    directoryName                   [4]     value,
+   *    ediPartyName                    [5]     EDIPartyName,
+   *    uniformResourceIdentifier       [6]     IA5String,
+   *    iPAddress                       [7]     OCTET STRING,
+   *    registeredID                    [8]     OBJECT IDENTIFIER }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//GeneralName ::= Choice {
-			//    otherName                       [0]     OtherName,
-			//    rfc822Name                      [1]     IA5String,
-			//    dNSName                         [2]     IA5String,
-			//    x400Address                     [3]     ORAddress,
-			//    directoryName                   [4]     value,
-			//    ediPartyName                    [5]     EDIPartyName,
-			//    uniformResourceIdentifier       [6]     IA5String,
-			//    iPAddress                       [7]     OCTET STRING,
-			//    registeredID                    [8]     OBJECT IDENTIFIER }
 
 			/**
     * @type {Object}
@@ -13029,10 +13112,15 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
    */
 		toJSON() {
 			var _object = {
-				type: this.type
+				type: this.type,
+				value: ""
 			};
 
-			if (typeof this.value === "string") _object.value = this.value;else _object.value = this.value.toJSON();
+			if (typeof this.value === "string") _object.value = this.value;else {
+				try {
+					_object.value = this.value.toJSON();
+				} catch (ex) {}
+			}
 
 			return _object;
 		}
@@ -13049,7 +13137,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for AltName class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -13057,7 +13145,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<GeneralName>}
-    * @description type
+    * @desc Array of alternative names in GeneralName type
     */
 			this.altNames = getParametersValue(parameters, "altNames", AltName.defaultValues("altNames"));
 			//endregion
@@ -13081,17 +13169,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * AltName ::= GeneralNames
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// SubjectAltName OID ::= 2.5.29.17
-			// IssuerAltName OID ::= 2.5.29.18
-			//
-			// AltName ::= GeneralNames
 
 			/**
     * @type {Object}
@@ -13167,7 +13256,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for BasicConstraints class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    * @property {Object} [cA]
    * @property {Object} [pathLenConstraint]
    */
@@ -13177,14 +13266,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {boolean}
-    * @description cA
+    * @desc cA
     */
 			this.cA = getParametersValue(parameters, "cA", false);
 
 			if ("pathLenConstraint" in parameters)
 				/**
      * @type {number|Integer}
-     * @description pathLenConstraint
+     * @desc pathLenConstraint
      */
 				this.pathLenConstraint = getParametersValue(parameters, "pathLenConstraint", 0);
 			//endregion
@@ -13208,18 +13297,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * BasicConstraints ::= SEQUENCE {
+   *    cA                      BOOLEAN DEFAULT FALSE,
+   *    pathLenConstraint       INTEGER (0..MAX) OPTIONAL }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// BasicConstraints OID ::= 2.5.29.19
-			//
-			//BasicConstraints ::= SEQUENCE {
-			//    cA                      BOOLEAN DEFAULT FALSE,
-			//    pathLenConstraint       INTEGER (0..MAX) OPTIONAL }
 
 			/**
     * @type {Object}
@@ -13320,7 +13411,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for IssuingDistributionPoint class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -13329,38 +13420,38 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			if ("distributionPoint" in parameters)
 				/**
      * @type {Array.<GeneralName>|RelativeDistinguishedNames}
-     * @description distributionPoint
+     * @desc distributionPoint
      */
 				this.distributionPoint = getParametersValue(parameters, "distributionPoint", IssuingDistributionPoint.defaultValues("distributionPoint"));
 
 			/**
     * @type {boolean}
-    * @description onlyContainsUserCerts
+    * @desc onlyContainsUserCerts
     */
 			this.onlyContainsUserCerts = getParametersValue(parameters, "onlyContainsUserCerts", IssuingDistributionPoint.defaultValues("onlyContainsUserCerts"));
 
 			/**
     * @type {boolean}
-    * @description onlyContainsCACerts
+    * @desc onlyContainsCACerts
     */
 			this.onlyContainsCACerts = getParametersValue(parameters, "onlyContainsCACerts", IssuingDistributionPoint.defaultValues("onlyContainsCACerts"));
 
 			if ("onlySomeReasons" in parameters)
 				/**
      * @type {number}
-     * @description onlySomeReasons
+     * @desc onlySomeReasons
      */
 				this.onlySomeReasons = getParametersValue(parameters, "onlySomeReasons", IssuingDistributionPoint.defaultValues("onlySomeReasons"));
 
 			/**
     * @type {boolean}
-    * @description indirectCRL
+    * @desc indirectCRL
     */
 			this.indirectCRL = getParametersValue(parameters, "indirectCRL", IssuingDistributionPoint.defaultValues("indirectCRL"));
 
 			/**
     * @type {boolean}
-    * @description onlyContainsAttributeCerts
+    * @desc onlyContainsAttributeCerts
     */
 			this.onlyContainsAttributeCerts = getParametersValue(parameters, "onlyContainsAttributeCerts", IssuingDistributionPoint.defaultValues("onlyContainsAttributeCerts"));
 			//endregion
@@ -13394,33 +13485,35 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * IssuingDistributionPoint ::= SEQUENCE {
+   *    distributionPoint          [0] DistributionPointName OPTIONAL,
+   *    onlyContainsUserCerts      [1] BOOLEAN DEFAULT FALSE,
+   *    onlyContainsCACerts        [2] BOOLEAN DEFAULT FALSE,
+   *    onlySomeReasons            [3] ReasonFlags OPTIONAL,
+   *    indirectCRL                [4] BOOLEAN DEFAULT FALSE,
+   *    onlyContainsAttributeCerts [5] BOOLEAN DEFAULT FALSE }
+   *
+   * ReasonFlags ::= BIT STRING {
+   *    unused                  (0),
+   *    keyCompromise           (1),
+   *    cACompromise            (2),
+   *    affiliationChanged      (3),
+   *    superseded              (4),
+   *    cessationOfOperation    (5),
+   *    certificateHold         (6),
+   *    privilegeWithdrawn      (7),
+   *    aACompromise            (8) }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// IssuingDistributionPoint OID ::= 2.5.29.28
-			//
-			//IssuingDistributionPoint ::= SEQUENCE {
-			//    distributionPoint          [0] DistributionPointName OPTIONAL,
-			//    onlyContainsUserCerts      [1] BOOLEAN DEFAULT FALSE,
-			//    onlyContainsCACerts        [2] BOOLEAN DEFAULT FALSE,
-			//    onlySomeReasons            [3] ReasonFlags OPTIONAL,
-			//    indirectCRL                [4] BOOLEAN DEFAULT FALSE,
-			//    onlyContainsAttributeCerts [5] BOOLEAN DEFAULT FALSE }
-			//
-			//ReasonFlags ::= BIT STRING {
-			//    unused                  (0),
-			//    keyCompromise           (1),
-			//    cACompromise            (2),
-			//    affiliationChanged      (3),
-			//    superseded              (4),
-			//    cessationOfOperation    (5),
-			//    certificateHold         (6),
-			//    privilegeWithdrawn      (7),
-			//    aACompromise            (8) }
 
 			/**
     * @type {Object}
@@ -13607,7 +13700,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 					value.idBlock.tagNumber = 1; // [1]
 				}
 
-				outputArray.push(value);
+				outputArray.push(new Constructed({
+					idBlock: {
+						tagClass: 3, // CONTEXT-SPECIFIC
+						tagNumber: 0 // [0]
+					},
+					value: [value]
+				}));
 			}
 
 			if (this.onlyContainsUserCerts !== IssuingDistributionPoint.defaultValues("onlyContainsUserCerts")) {
@@ -13709,7 +13808,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for GeneralNames class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -13717,7 +13816,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<GeneralName>}
-    * @description Array of "general names"
+    * @desc Array of "general names"
     */
 			this.names = getParametersValue(parameters, "names", GeneralNames.defaultValues("names"));
 			//endregion
@@ -13741,7 +13840,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @param {boolean} [optional=false] Flag would be element optional or not
    * @returns {Object} asn1js schema object
@@ -13826,7 +13931,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for GeneralSubtree class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -13834,20 +13939,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {GeneralName}
-    * @description base
+    * @desc base
     */
 			this.base = getParametersValue(parameters, "base", GeneralSubtree.defaultValues("base"));
 
 			/**
     * @type {number|Integer}
-    * @description base
+    * @desc base
     */
 			this.minimum = getParametersValue(parameters, "minimum", GeneralSubtree.defaultValues("minimum"));
 
 			if ("maximum" in parameters)
 				/**
      * @type {number|Integer}
-     * @description minimum
+     * @desc minimum
      */
 				this.maximum = getParametersValue(parameters, "maximum", GeneralSubtree.defaultValues("maximum"));
 			//endregion
@@ -13875,19 +13980,23 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * GeneralSubtree ::= SEQUENCE {
+   *    base                    GeneralName,
+   *    minimum         [0]     BaseDistance DEFAULT 0,
+   *    maximum         [1]     BaseDistance OPTIONAL }
+   *
+   * BaseDistance ::= INTEGER (0..MAX)
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//GeneralSubtree ::= SEQUENCE {
-			//    base                    GeneralName,
-			//    minimum         [0]     BaseDistance DEFAULT 0,
-			//    maximum         [1]     BaseDistance OPTIONAL }
-			//
-			//BaseDistance ::= INTEGER (0..MAX)
 
 			/**
     * @type {Object}
@@ -14036,7 +14145,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for NameConstraints class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -14045,14 +14154,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			if ("permittedSubtrees" in parameters)
 				/**
      * @type {Array.<GeneralSubtree>}
-     * @description permittedSubtrees
+     * @desc permittedSubtrees
      */
 				this.permittedSubtrees = getParametersValue(parameters, "permittedSubtrees", NameConstraints.defaultValues("permittedSubtrees"));
 
 			if ("excludedSubtrees" in parameters)
 				/**
      * @type {Array.<GeneralSubtree>}
-     * @description excludedSubtrees
+     * @desc excludedSubtrees
      */
 				this.excludedSubtrees = getParametersValue(parameters, "excludedSubtrees", NameConstraints.defaultValues("excludedSubtrees"));
 			//endregion
@@ -14078,18 +14187,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * NameConstraints ::= SEQUENCE {
+   *    permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
+   *    excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// NameConstraints OID ::= 2.5.29.30
-			//
-			//NameConstraints ::= SEQUENCE {
-			//    permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
-			//    excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }
 
 			/**
     * @type {Object}
@@ -14162,27 +14273,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 			if ("permittedSubtrees" in this) {
 				outputArray.push(new Constructed({
-					optional: true,
 					idBlock: {
 						tagClass: 3, // CONTEXT-SPECIFIC
 						tagNumber: 0 // [0]
 					},
-					value: [new Sequence({
-						value: Array.from(this.permittedSubtrees, element => element.toSchema())
-					})]
+					value: Array.from(this.permittedSubtrees, element => element.toSchema())
 				}));
 			}
 
 			if ("excludedSubtrees" in this) {
 				outputArray.push(new Constructed({
-					optional: true,
 					idBlock: {
 						tagClass: 3, // CONTEXT-SPECIFIC
 						tagNumber: 1 // [1]
 					},
-					value: [new Sequence({
-						value: Array.from(this.excludedSubtrees, element => element.toSchema())
-					})]
+					value: Array.from(this.excludedSubtrees, element => element.toSchema())
 				}));
 			}
 			//endregion
@@ -14220,7 +14325,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for DistributionPoint class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    * @property {Object} [distributionPoint]
    * @property {Object} [reasons]
    * @property {Object} [cRLIssuer]
@@ -14232,21 +14337,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			if ("distributionPoint" in parameters)
 				/**
      * @type {Array.<GeneralName>}
-     * @description distributionPoint
+     * @desc distributionPoint
      */
 				this.distributionPoint = getParametersValue(parameters, "distributionPoint", DistributionPoint.defaultValues("distributionPoint"));
 
 			if ("reasons" in parameters)
 				/**
      * @type {BitString}
-     * @description values
+     * @desc values
      */
 				this.reasons = getParametersValue(parameters, "reasons", DistributionPoint.defaultValues("reasons"));
 
 			if ("cRLIssuer" in parameters)
 				/**
      * @type {Array.<GeneralName>}
-     * @description cRLIssuer
+     * @desc cRLIssuer
      */
 				this.cRLIssuer = getParametersValue(parameters, "cRLIssuer", DistributionPoint.defaultValues("cRLIssuer"));
 			//endregion
@@ -14274,32 +14379,36 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * DistributionPoint ::= SEQUENCE {
+   *    distributionPoint       [0]     DistributionPointName OPTIONAL,
+   *    reasons                 [1]     ReasonFlags OPTIONAL,
+   *    cRLIssuer               [2]     GeneralNames OPTIONAL }
+   *
+   * DistributionPointName ::= CHOICE {
+   *    fullName                [0]     GeneralNames,
+   *    nameRelativeToCRLIssuer [1]     RelativeDistinguishedName }
+   *
+   * ReasonFlags ::= BIT STRING {
+   *    unused                  (0),
+   *    keyCompromise           (1),
+   *    cACompromise            (2),
+   *    affiliationChanged      (3),
+   *    superseded              (4),
+   *    cessationOfOperation    (5),
+   *    certificateHold         (6),
+   *    privilegeWithdrawn      (7),
+   *    aACompromise            (8) }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//DistributionPoint ::= SEQUENCE {
-			//    distributionPoint       [0]     DistributionPointName OPTIONAL,
-			//    reasons                 [1]     ReasonFlags OPTIONAL,
-			//    cRLIssuer               [2]     GeneralNames OPTIONAL }
-			//
-			//DistributionPointName ::= CHOICE {
-			//    fullName                [0]     GeneralNames,
-			//    nameRelativeToCRLIssuer [1]     RelativeDistinguishedName }
-			//
-			//ReasonFlags ::= BIT STRING {
-			//    unused                  (0),
-			//    keyCompromise           (1),
-			//    cACompromise            (2),
-			//    affiliationChanged      (3),
-			//    superseded              (4),
-			//    cessationOfOperation    (5),
-			//    certificateHold         (6),
-			//    privilegeWithdrawn      (7),
-			//    aACompromise            (8) }
 
 			/**
     * @type {Object}
@@ -14506,7 +14615,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for CRLDistributionPoints class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -14514,7 +14623,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<DistributionPoint>}
-    * @description distributionPoints
+    * @desc distributionPoints
     */
 			this.distributionPoints = getParametersValue(parameters, "distributionPoints", CRLDistributionPoints.defaultValues("distributionPoints"));
 			//endregion
@@ -14538,16 +14647,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * CRLDistributionPoints ::= SEQUENCE SIZE (1..MAX) OF DistributionPoint
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// CRLDistributionPoints OID ::= 2.5.29.31
-			//
-			//CRLDistributionPoints ::= SEQUENCE SIZE (1..MAX) OF DistributionPoint
 
 			/**
     * @type {Object}
@@ -14623,7 +14734,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for PolicyQualifierInfo class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -14631,12 +14742,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {string}
-    * @description policyQualifierId
+    * @desc policyQualifierId
     */
 			this.policyQualifierId = getParametersValue(parameters, "policyQualifierId", PolicyQualifierInfo.defaultValues("policyQualifierId"));
 			/**
     * @type {Object}
-    * @description qualifier
+    * @desc qualifier
     */
 			this.qualifier = getParametersValue(parameters, "qualifier", PolicyQualifierInfo.defaultValues("qualifier"));
 			//endregion
@@ -14662,22 +14773,26 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * PolicyQualifierInfo ::= SEQUENCE {
+   *    policyQualifierId  PolicyQualifierId,
+   *    qualifier          ANY DEFINED BY policyQualifierId }
+   *
+   * id-qt          OBJECT IDENTIFIER ::=  { id-pkix 2 }
+   * id-qt-cps      OBJECT IDENTIFIER ::=  { id-qt 1 }
+   * id-qt-unotice  OBJECT IDENTIFIER ::=  { id-qt 2 }
+   *
+   * PolicyQualifierId ::= OBJECT IDENTIFIER ( id-qt-cps | id-qt-unotice )
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//PolicyQualifierInfo ::= SEQUENCE {
-			//    policyQualifierId  PolicyQualifierId,
-			//    qualifier          ANY DEFINED BY policyQualifierId }
-			//
-			//id-qt          OBJECT IDENTIFIER ::=  { id-pkix 2 }
-			//id-qt-cps      OBJECT IDENTIFIER ::=  { id-qt 1 }
-			//id-qt-unotice  OBJECT IDENTIFIER ::=  { id-qt 2 }
-			//
-			//PolicyQualifierId ::= OBJECT IDENTIFIER ( id-qt-cps | id-qt-unotice )
 
 			/**
     * @type {Object}
@@ -14754,7 +14869,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for PolicyInformation class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -14762,14 +14877,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {string}
-    * @description policyIdentifier
+    * @desc policyIdentifier
     */
 			this.policyIdentifier = getParametersValue(parameters, "policyIdentifier", PolicyInformation.defaultValues("policyIdentifier"));
 
 			if ("policyQualifiers" in parameters)
 				/**
      * @type {Array.<PolicyQualifierInfo>}
-     * @description Value of the TIME class
+     * @desc Value of the TIME class
      */
 				this.policyQualifiers = getParametersValue(parameters, "policyQualifiers", PolicyInformation.defaultValues("policyQualifiers"));
 			//endregion
@@ -14795,19 +14910,23 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * PolicyInformation ::= SEQUENCE {
+   *    policyIdentifier   CertPolicyId,
+   *    policyQualifiers   SEQUENCE SIZE (1..MAX) OF
+   *    PolicyQualifierInfo OPTIONAL }
+   *
+   * CertPolicyId ::= OBJECT IDENTIFIER
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//PolicyInformation ::= SEQUENCE {
-			//    policyIdentifier   CertPolicyId,
-			//    policyQualifiers   SEQUENCE SIZE (1..MAX) OF
-			//    PolicyQualifierInfo OPTIONAL }
-			//
-			//CertPolicyId ::= OBJECT IDENTIFIER
 
 			/**
     * @type {Object}
@@ -14906,7 +15025,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for CertificatePolicies class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -14914,7 +15033,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<PolicyInformation>}
-    * @description certificatePolicies
+    * @desc certificatePolicies
     */
 			this.certificatePolicies = getParametersValue(parameters, "certificatePolicies", CertificatePolicies.defaultValues("certificatePolicies"));
 			//endregion
@@ -14938,16 +15057,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * certificatePolicies ::= SEQUENCE SIZE (1..MAX) OF PolicyInformation
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// CertificatePolicies OID ::= 2.5.29.32
-			//
-			//certificatePolicies ::= SEQUENCE SIZE (1..MAX) OF PolicyInformation
 
 			/**
     * @type {Object}
@@ -15023,7 +15144,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for PolicyMapping class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -15031,12 +15152,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {string}
-    * @description issuerDomainPolicy
+    * @desc issuerDomainPolicy
     */
 			this.issuerDomainPolicy = getParametersValue(parameters, "issuerDomainPolicy", PolicyMapping.defaultValues("issuerDomainPolicy"));
 			/**
     * @type {string}
-    * @description subjectDomainPolicy
+    * @desc subjectDomainPolicy
     */
 			this.subjectDomainPolicy = getParametersValue(parameters, "subjectDomainPolicy", PolicyMapping.defaultValues("subjectDomainPolicy"));
 			//endregion
@@ -15062,16 +15183,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * PolicyMapping ::= SEQUENCE {
+   *    issuerDomainPolicy      CertPolicyId,
+   *    subjectDomainPolicy     CertPolicyId }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//PolicyMapping ::= SEQUENCE {
-			//    issuerDomainPolicy      CertPolicyId,
-			//    subjectDomainPolicy     CertPolicyId }
 
 			/**
     * @type {Object}
@@ -15148,7 +15273,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for PolicyMappings class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -15156,7 +15281,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<PolicyMapping>}
-    * @description mappings
+    * @desc mappings
     */
 			this.mappings = getParametersValue(parameters, "mappings", PolicyMappings.defaultValues("mappings"));
 			//endregion
@@ -15180,16 +15305,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * PolicyMappings ::= SEQUENCE SIZE (1..MAX) OF PolicyMapping
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// PolicyMappings OID ::= 2.5.29.33
-			//
-			//PolicyMappings ::= SEQUENCE SIZE (1..MAX) OF PolicyMapping
 
 			/**
     * @type {Object}
@@ -15266,7 +15393,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for AuthorityKeyIdentifier class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -15275,21 +15402,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			if ("keyIdentifier" in parameters)
 				/**
      * @type {OctetString}
-     * @description keyIdentifier
+     * @desc keyIdentifier
      */
 				this.keyIdentifier = getParametersValue(parameters, "keyIdentifier", AuthorityKeyIdentifier.defaultValues("keyIdentifier"));
 
 			if ("authorityCertIssuer" in parameters)
 				/**
      * @type {Array.<GeneralName>}
-     * @description authorityCertIssuer
+     * @desc authorityCertIssuer
      */
 				this.authorityCertIssuer = getParametersValue(parameters, "authorityCertIssuer", AuthorityKeyIdentifier.defaultValues("authorityCertIssuer"));
 
 			if ("authorityCertSerialNumber" in parameters)
 				/**
      * @type {Integer}
-     * @description authorityCertIssuer
+     * @desc authorityCertIssuer
      */
 				this.authorityCertSerialNumber = getParametersValue(parameters, "authorityCertSerialNumber", AuthorityKeyIdentifier.defaultValues("authorityCertSerialNumber"));
 			//endregion
@@ -15317,21 +15444,25 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * AuthorityKeyIdentifier OID ::= 2.5.29.35
+   *
+   * AuthorityKeyIdentifier ::= SEQUENCE {
+   *    keyIdentifier             [0] KeyIdentifier           OPTIONAL,
+   *    authorityCertIssuer       [1] GeneralNames            OPTIONAL,
+   *    authorityCertSerialNumber [2] CertificateSerialNumber OPTIONAL  }
+   *
+   * KeyIdentifier ::= OCTET STRING
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// AuthorityKeyIdentifier OID ::= 2.5.29.35
-			//
-			//AuthorityKeyIdentifier ::= SEQUENCE {
-			//    keyIdentifier             [0] KeyIdentifier           OPTIONAL,
-			//    authorityCertIssuer       [1] GeneralNames            OPTIONAL,
-			//    authorityCertSerialNumber [2] CertificateSerialNumber OPTIONAL  }
-			//
-			//KeyIdentifier ::= OCTET STRING
 
 			/**
     * @type {Object}
@@ -15411,12 +15542,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			var outputArray = [];
 
 			if ("keyIdentifier" in this) {
-				outputArray.push(new Constructed({
+				outputArray.push(new Primitive({
 					idBlock: {
 						tagClass: 3, // CONTEXT-SPECIFIC
 						tagNumber: 0 // [0]
 					},
-					value: this.keyIdentifier.valueBlock.value
+					valueHex: this.keyIdentifier.valueBlock.valueHex
 				}));
 			}
 
@@ -15431,12 +15562,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			}
 
 			if ("authorityCertSerialNumber" in this) {
-				outputArray.push(new Constructed({
+				outputArray.push(new Primitive({
 					idBlock: {
 						tagClass: 3, // CONTEXT-SPECIFIC
 						tagNumber: 2 // [2]
 					},
-					value: this.authorityCertSerialNumber.valueBlock.value
+					valueHex: this.authorityCertSerialNumber.valueBlock.valueHex
 				}));
 			}
 			//endregion
@@ -15476,7 +15607,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for PolicyConstraints class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -15485,14 +15616,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			if ("requireExplicitPolicy" in parameters)
 				/**
      * @type {number}
-     * @description requireExplicitPolicy
+     * @desc requireExplicitPolicy
      */
 				this.requireExplicitPolicy = getParametersValue(parameters, "requireExplicitPolicy", PolicyConstraints.defaultValues("requireExplicitPolicy"));
 
 			if ("inhibitPolicyMapping" in parameters)
 				/**
      * @type {number}
-     * @description Value of the TIME class
+     * @desc Value of the TIME class
      */
 				this.inhibitPolicyMapping = getParametersValue(parameters, "inhibitPolicyMapping", PolicyConstraints.defaultValues("inhibitPolicyMapping"));
 			//endregion
@@ -15518,20 +15649,22 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * PolicyConstraints ::= SEQUENCE {
+   *    requireExplicitPolicy           [0] SkipCerts OPTIONAL,
+   *    inhibitPolicyMapping            [1] SkipCerts OPTIONAL }
+   *
+   * SkipCerts ::= INTEGER (0..MAX)
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// PolicyMappings OID ::= 2.5.29.36
-			//
-			//PolicyConstraints ::= SEQUENCE {
-			//    requireExplicitPolicy           [0] SkipCerts OPTIONAL,
-			//    inhibitPolicyMapping            [1] SkipCerts OPTIONAL }
-			//
-			//SkipCerts ::= INTEGER (0..MAX)
 
 			/**
     * @type {Object}
@@ -15670,7 +15803,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for ExtKeyUsage class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -15678,7 +15811,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<string>}
-    * @description keyPurposes
+    * @desc keyPurposes
     */
 			this.keyPurposes = getParametersValue(parameters, "keyPurposes", ExtKeyUsage.defaultValues("keyPurposes"));
 			//endregion
@@ -15702,18 +15835,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * ExtKeyUsage ::= SEQUENCE SIZE (1..MAX) OF KeyPurposeId
+   *
+   * KeyPurposeId ::= OBJECT IDENTIFIER
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// ExtKeyUsage OID ::= 2.5.29.37
-			//
-			// ExtKeyUsage ::= SEQUENCE SIZE (1..MAX) OF KeyPurposeId
-
-			// KeyPurposeId ::= OBJECT IDENTIFIER
 
 			/**
     * @type {Object}
@@ -15789,7 +15924,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for AccessDescription class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -15797,12 +15932,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {string}
-    * @description accessMethod
+    * @desc The type and format of the information are specified by the accessMethod field. This profile defines two accessMethod OIDs: id-ad-caIssuers and id-ad-ocsp
     */
 			this.accessMethod = getParametersValue(parameters, "accessMethod", AccessDescription.defaultValues("accessMethod"));
 			/**
     * @type {GeneralName}
-    * @description accessLocation
+    * @desc The accessLocation field specifies the location of the information
     */
 			this.accessLocation = getParametersValue(parameters, "accessLocation", AccessDescription.defaultValues("accessLocation"));
 			//endregion
@@ -15828,16 +15963,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * AccessDescription  ::=  SEQUENCE {
+   *    accessMethod          OBJECT IDENTIFIER,
+   *    accessLocation        GeneralName  }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//AccessDescription  ::=  SEQUENCE {
-			//    accessMethod          OBJECT IDENTIFIER,
-			//    accessLocation        GeneralName  }
 
 			/**
     * @type {Object}
@@ -15918,7 +16057,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for InfoAccess class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -15926,7 +16065,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<AccessDescription>}
-    * @description accessDescriptions
+    * @desc accessDescriptions
     */
 			this.accessDescriptions = getParametersValue(parameters, "accessDescriptions", InfoAccess.defaultValues("accessDescriptions"));
 			//endregion
@@ -15950,18 +16089,19 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * AuthorityInfoAccessSyntax  ::=
+   * SEQUENCE SIZE (1..MAX) OF AccessDescription
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			// AuthorityInfoAccess OID ::= 1.3.6.1.5.5.7.1.1
-			// SubjectInfoAccess OID ::= 1.3.6.1.5.5.7.1.11
-			//
-			//AuthorityInfoAccessSyntax  ::=
-			//SEQUENCE SIZE (1..MAX) OF AccessDescription
 
 			/**
     * @type {Object}
@@ -16033,8 +16173,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
   * All rights reserved.
   *
   * Author 2016-2018, Yury Strozhevsky <www.strozhevsky.com>.
-  *
-  * THIS IS A PRIVATE SOURCE CODE AND ANY DISTRIBUTION OR COPYING IS PROHIBITED.
   *
   */
 	//**************************************************************************************
@@ -17791,6 +17929,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 						case "appendBlock":
 							this.appendBlock = parameters.appendBlock;
 							break;
+						case "view":
+							this.stream = new ByteStream({ view: parameters.view });
+							break;
+						case "buffer":
+							this.stream = new ByteStream({ buffer: parameters.buffer });
+							break;
+						case "string":
+							this.stream = new ByteStream({ string: parameters.string });
+							break;
+						case "hexstring":
+							this.stream = new ByteStream({ hexstring: parameters.hexstring });
+							break;
 						default:
 					}
 				}
@@ -17870,7 +18020,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			this.prevLength = this._length;
 			//endregion
 
-			// noinspection JSUnusedGlobalSymbols
+			// noinspection JSUnusedGlobalSymbols, ConditionalExpressionJS
 			this._length -= this.backward ? this._start - value : value - this._start;
 			// noinspection JSUnusedGlobalSymbols
 			this._start = value;
@@ -17882,6 +18032,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
    */
 		get start() {
 			return this._start;
+		}
+		//**********************************************************************************
+		/**
+   * Return ArrayBuffer with having value of existing SeqStream length
+   * @return {ArrayBuffer}
+   */
+		get buffer() {
+			return this._stream._buffer.slice(0, this._length);
 		}
 		//**********************************************************************************
 		// noinspection JSUnusedGlobalSymbols
@@ -18343,6 +18501,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
    */
 		appendChar(char) {
 			if (this._start + 1 > this._stream._buffer.byteLength) {
+				// noinspection ConstantOnLefSideOfComparisonJS
 				if (1 > this.appendBlock) {
 					// noinspection MagicNumberJS
 					this.appendBlock = 1000;
@@ -18358,12 +18517,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			this.prevLength -= 2;
 		}
 		//**********************************************************************************
+		// noinspection FunctionNamingConventionJS
 		/**
    * Append a new number to the current "Stream"
    * @param {number} number A new unsigned 16-bit integer to append to current "stream"
    */
 		appendUint16(number) {
 			if (this._start + 2 > this._stream._buffer.byteLength) {
+				// noinspection ConstantOnLefSideOfComparisonJS
 				if (2 > this.appendBlock) {
 					// noinspection MagicNumberJS
 					this.appendBlock = 1000;
@@ -18383,12 +18544,42 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			this.prevLength -= 4;
 		}
 		//**********************************************************************************
+		// noinspection FunctionNamingConventionJS
+		/**
+   * Append a new number to the current "Stream"
+   * @param {number} number A new unsigned 24-bit integer to append to current "stream"
+   */
+		appendUint24(number) {
+			if (this._start + 3 > this._stream._buffer.byteLength) {
+				// noinspection ConstantOnLefSideOfComparisonJS
+				if (3 > this.appendBlock) {
+					// noinspection MagicNumberJS
+					this.appendBlock = 1000;
+				}
+
+				this._stream.realloc(this._stream._buffer.byteLength + this.appendBlock);
+			}
+
+			var value = new Uint32Array([number]);
+			var view = new Uint8Array(value.buffer);
+
+			this._stream._view[this._start] = view[2];
+			this._stream._view[this._start + 1] = view[1];
+			this._stream._view[this._start + 2] = view[0];
+
+			this._length += 6;
+			this.start = this._start + 3;
+			this.prevLength -= 6;
+		}
+		//**********************************************************************************
+		// noinspection FunctionNamingConventionJS
 		/**
    * Append a new number to the current "Stream"
    * @param {number} number A new unsigned 32-bit integer to append to current "stream"
    */
 		appendUint32(number) {
 			if (this._start + 4 > this._stream._buffer.byteLength) {
+				// noinspection ConstantOnLefSideOfComparisonJS
 				if (4 > this.appendBlock) {
 					// noinspection MagicNumberJS
 					this.appendBlock = 1000;
@@ -18492,6 +18683,34 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		//**********************************************************************************
 		// noinspection JSUnusedGlobalSymbols, FunctionWithMultipleReturnPointsJS, FunctionNamingConventionJS
 		/**
+   * Get 3-byte unsigned integer value
+   * @param {boolean} [changeLength=true] Should we change "length" and "start" value after reading the data block
+   * @returns {number}
+   */
+		getUint24() {
+			var changeLength = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
+			var block = this.getBlock(3, changeLength);
+
+			//region Check posibility for convertion
+			// noinspection ConstantOnRightSideOfComparisonJS, ConstantOnLeftSideOfComparisonJS, NonBlockStatementBodyJS
+			if (block.length < 3) return 0;
+			//endregion
+
+			//region Convert byte array to "Uint32Array" value
+			var value = new Uint32Array(1);
+			var view = new Uint8Array(value.buffer);
+
+			// noinspection ConstantOnRightSideOfComparisonJS, ConstantOnLeftSideOfComparisonJS, NonBlockStatementBodyJS
+			for (var i = 3; i >= 1; i--) {
+				view[3 - i] = block[i - 1];
+			} //endregion
+
+			return value[0];
+		}
+		//**********************************************************************************
+		// noinspection JSUnusedGlobalSymbols, FunctionWithMultipleReturnPointsJS, FunctionNamingConventionJS
+		/**
    * Get 4-byte unsigned integer value
    * @param {boolean} [changeLength=true] Should we change "length" and "start" value after reading the data block
    * @returns {number}
@@ -18527,7 +18746,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for SignedCertificateTimestamp class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -18535,37 +18754,37 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {number}
-    * @description version
+    * @desc version
     */
 			this.version = getParametersValue(parameters, "version", SignedCertificateTimestamp.defaultValues("version"));
 			/**
     * @type {ArrayBuffer}
-    * @description logID
+    * @desc logID
     */
 			this.logID = getParametersValue(parameters, "logID", SignedCertificateTimestamp.defaultValues("logID"));
 			/**
     * @type {Date}
-    * @description timestamp
+    * @desc timestamp
     */
 			this.timestamp = getParametersValue(parameters, "timestamp", SignedCertificateTimestamp.defaultValues("timestamp"));
 			/**
     * @type {ArrayBuffer}
-    * @description extensions
+    * @desc extensions
     */
 			this.extensions = getParametersValue(parameters, "extensions", SignedCertificateTimestamp.defaultValues("extensions"));
 			/**
     * @type {string}
-    * @description hashAlgorithm
+    * @desc hashAlgorithm
     */
 			this.hashAlgorithm = getParametersValue(parameters, "hashAlgorithm", SignedCertificateTimestamp.defaultValues("hashAlgorithm"));
 			/**
     * @type {string}
-    * @description signatureAlgorithm
+    * @desc signatureAlgorithm
     */
 			this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", SignedCertificateTimestamp.defaultValues("signatureAlgorithm"));
 			/**
     * @type {Object}
-    * @description signature
+    * @desc signature
     */
 			this.signature = getParametersValue(parameters, "signature", SignedCertificateTimestamp.defaultValues("signature"));
 			//endregion
@@ -18722,7 +18941,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			var timeView = new Uint8Array(timeBuffer);
 
 			var baseArray = utilToBase(this.timestamp.valueOf(), 8);
-			timeView.set(baseArray, 8 - baseArray.byteLength);
+			timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
 
 			stream.appendView(timeView);
 			stream.appendUint16(this.extensions.byteLength);
@@ -18804,6 +19023,156 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			};
 		}
 		//**********************************************************************************
+		/**
+   * Verify SignedCertificateTimestamp for specific input data
+   * @param {Object[]} logs Array of objects with information about each CT Log (like here: https://ct.grahamedgecombe.com/logs.json)
+   * @param {String} logs.log_id Identifier of the CT Log encoded in BASE-64 format
+   * @param {String} logs.key Public key of the CT Log encoded in BASE-64 format
+   * @param {ArrayBuffer} data Data to verify signature against. Could be encoded Certificate or encoded PreCert
+   * @param {Number} [dataType=0] Type = 0 (data is encoded Certificate), type = 1 (data is encoded PreCert)
+   * @return {Promise<void>}
+   */
+		verify(logs, data) {
+			var _arguments = arguments,
+			    _this2 = this;
+
+			return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+				var dataType = _arguments.length > 2 && _arguments[2] !== undefined ? _arguments[2] : 0;
+
+				var logId, publicKeyBase64, publicKeyInfo, stream, _iteratorNormalCompletion20, _didIteratorError20, _iteratorError20, _iterator20, _step20, log, asn1, timeBuffer, timeView, baseArray;
+
+				return regeneratorRuntime.wrap(function _callee$(_context) {
+					while (1) {
+						switch (_context.prev = _context.next) {
+							case 0:
+								//region Initial variables
+								logId = toBase64(arrayBufferToString(_this2.logID));
+								publicKeyBase64 = null;
+								publicKeyInfo = void 0;
+								stream = new SeqStream();
+								//endregion
+
+								//region Found and init public key
+
+								_iteratorNormalCompletion20 = true;
+								_didIteratorError20 = false;
+								_iteratorError20 = undefined;
+								_context.prev = 7;
+								_iterator20 = logs[Symbol.iterator]();
+
+							case 9:
+								if (_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done) {
+									_context.next = 17;
+									break;
+								}
+
+								log = _step20.value;
+
+								if (!(log.log_id === logId)) {
+									_context.next = 14;
+									break;
+								}
+
+								publicKeyBase64 = log.key;
+								return _context.abrupt("break", 17);
+
+							case 14:
+								_iteratorNormalCompletion20 = true;
+								_context.next = 9;
+								break;
+
+							case 17:
+								_context.next = 23;
+								break;
+
+							case 19:
+								_context.prev = 19;
+								_context.t0 = _context["catch"](7);
+								_didIteratorError20 = true;
+								_iteratorError20 = _context.t0;
+
+							case 23:
+								_context.prev = 23;
+								_context.prev = 24;
+
+								if (!_iteratorNormalCompletion20 && _iterator20.return) {
+									_iterator20.return();
+								}
+
+							case 26:
+								_context.prev = 26;
+
+								if (!_didIteratorError20) {
+									_context.next = 29;
+									break;
+								}
+
+								throw _iteratorError20;
+
+							case 29:
+								return _context.finish(26);
+
+							case 30:
+								return _context.finish(23);
+
+							case 31:
+								if (!(publicKeyBase64 === null)) {
+									_context.next = 33;
+									break;
+								}
+
+								throw new Error(`Public key not found for CT with logId: ${logId}`);
+
+							case 33:
+								asn1 = fromBER(stringToArrayBuffer(fromBase64(publicKeyBase64)));
+
+								if (!(asn1.offset === -1)) {
+									_context.next = 36;
+									break;
+								}
+
+								throw new Error(`Incorrect key value for CT Log with logId: ${logId}`);
+
+							case 36:
+
+								publicKeyInfo = new PublicKeyInfo({ schema: asn1.result });
+								//endregion
+
+								//region Initialize signed data block
+								stream.appendChar(0x00); // sct_version
+								stream.appendChar(0x00); // signature_type = certificate_timestamp
+
+								timeBuffer = new ArrayBuffer(8);
+								timeView = new Uint8Array(timeBuffer);
+								baseArray = utilToBase(_this2.timestamp.valueOf(), 8);
+
+								timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
+
+								stream.appendView(timeView);
+
+								stream.appendUint16(dataType);
+
+								if (dataType === 0) stream.appendUint24(data.byteLength);
+
+								stream.appendView(new Uint8Array(data));
+
+								stream.appendUint16(_this2.extensions.byteLength);
+
+								if (_this2.extensions.byteLength !== 0) stream.appendView(new Uint8Array(_this2.extensions));
+								//endregion
+
+								//region Perform verification
+								return _context.abrupt("return", getEngine().subtle.verifyWithPublicKey(stream._stream._buffer.slice(0, stream._length), { valueBlock: { valueHex: _this2.signature.toBER(false) } }, publicKeyInfo, { algorithmId: "" }, "SHA-256"));
+
+							case 50:
+							case "end":
+								return _context.stop();
+						}
+					}
+				}, _callee, _this2, [[7, 19, 23, 31], [24,, 26, 30]]);
+			}))();
+		}
+		//**********************************************************************************
 	}
 	//**************************************************************************************
 	/**
@@ -18814,7 +19183,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for SignedCertificateTimestampList class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -18822,7 +19191,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<SignedCertificateTimestamp>}
-    * @description timestamps
+    * @desc timestamps
     */
 			this.timestamps = getParametersValue(parameters, "timestamps", SignedCertificateTimestampList.defaultValues("timestamps"));
 			//endregion
@@ -18860,14 +19229,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * SignedCertificateTimestampList ::= OCTET STRING
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//SignedCertificateTimestampList ::= OCTET STRING
 
 			/**
     * @type {Object}
@@ -18922,47 +19295,19 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//endregion
 
 			//region Get overall length
-			var _iteratorNormalCompletion20 = true;
-			var _didIteratorError20 = false;
-			var _iteratorError20 = undefined;
+			var _iteratorNormalCompletion21 = true;
+			var _didIteratorError21 = false;
+			var _iteratorError21 = undefined;
 
 			try {
-				for (var _iterator20 = this.timestamps[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
-					var timestamp = _step20.value;
+				for (var _iterator21 = this.timestamps[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
+					var timestamp = _step21.value;
 
 					var timestampStream = timestamp.toStream();
 					timestampsData.push(timestampStream);
 					overallLength += timestampStream.stream.buffer.byteLength;
 				}
 				//endregion
-			} catch (err) {
-				_didIteratorError20 = true;
-				_iteratorError20 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion20 && _iterator20.return) {
-						_iterator20.return();
-					}
-				} finally {
-					if (_didIteratorError20) {
-						throw _iteratorError20;
-					}
-				}
-			}
-
-			stream.appendUint16(overallLength);
-
-			//region Set data from all timestamps
-			var _iteratorNormalCompletion21 = true;
-			var _didIteratorError21 = false;
-			var _iteratorError21 = undefined;
-
-			try {
-				for (var _iterator21 = timestampsData[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
-					var _timestamp = _step21.value;
-
-					stream.appendView(_timestamp.stream.view);
-				} //endregion
 			} catch (err) {
 				_didIteratorError21 = true;
 				_iteratorError21 = err;
@@ -18974,6 +19319,34 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 				} finally {
 					if (_didIteratorError21) {
 						throw _iteratorError21;
+					}
+				}
+			}
+
+			stream.appendUint16(overallLength);
+
+			//region Set data from all timestamps
+			var _iteratorNormalCompletion22 = true;
+			var _didIteratorError22 = false;
+			var _iteratorError22 = undefined;
+
+			try {
+				for (var _iterator22 = timestampsData[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
+					var _timestamp = _step22.value;
+
+					stream.appendView(_timestamp.stream.view);
+				} //endregion
+			} catch (err) {
+				_didIteratorError22 = true;
+				_iteratorError22 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion22 && _iterator22.return) {
+						_iterator22.return();
+					}
+				} finally {
+					if (_didIteratorError22) {
+						throw _iteratorError22;
 					}
 				}
 			}
@@ -18992,7 +19365,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 	}
-	//**************************************************************************************
+	//**********************************************************************************
 
 	//**************************************************************************************
 	/**
@@ -19003,7 +19376,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for Extension class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -19011,24 +19384,24 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {string}
-    * @description extnID
+    * @desc extnID
     */
 			this.extnID = getParametersValue(parameters, "extnID", Extension.defaultValues("extnID"));
 			/**
     * @type {boolean}
-    * @description critical
+    * @desc critical
     */
 			this.critical = getParametersValue(parameters, "critical", Extension.defaultValues("critical"));
 			/**
     * @type {OctetString}
-    * @description extnValue
+    * @desc extnValue
     */
 			if ("extnValue" in parameters) this.extnValue = new OctetString({ valueHex: parameters.extnValue });else this.extnValue = Extension.defaultValues("extnValue");
 
 			if ("parsedValue" in parameters)
 				/**
      * @type {Object}
-     * @description parsedValue
+     * @desc parsedValue
      */
 				this.parsedValue = getParametersValue(parameters, "parsedValue", Extension.defaultValues("parsedValue"));
 			//endregion
@@ -19058,18 +19431,22 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * Extension  ::=  SEQUENCE  {
+   *    extnID      OBJECT IDENTIFIER,
+   *    critical    BOOLEAN DEFAULT FALSE,
+   *    extnValue   OCTET STRING
+   * }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//Extension  ::=  SEQUENCE  {
-			//    extnID      OBJECT IDENTIFIER,
-			//    critical    BOOLEAN DEFAULT FALSE,
-			//    extnValue   OCTET STRING
-			//}
 
 			/**
     * @type {Object}
@@ -19122,7 +19499,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			switch (this.extnID) {
 				case "2.5.29.9":
 					// SubjectDirectoryAttributes
-					this.parsedValue = new SubjectDirectoryAttributes({ schema: asn1.result });
+					try {
+						this.parsedValue = new SubjectDirectoryAttributes({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new SubjectDirectoryAttributes();
+						this.parsedValue.parsingError = "Incorrectly formated SubjectDirectoryAttributes";
+					}
 					break;
 				case "2.5.29.14":
 					// SubjectKeyIdentifier
@@ -19134,16 +19516,31 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 					break;
 				case "2.5.29.16":
 					// PrivateKeyUsagePeriod
-					this.parsedValue = new PrivateKeyUsagePeriod({ schema: asn1.result });
+					try {
+						this.parsedValue = new PrivateKeyUsagePeriod({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new PrivateKeyUsagePeriod();
+						this.parsedValue.parsingError = "Incorrectly formated PrivateKeyUsagePeriod";
+					}
 					break;
 				case "2.5.29.17": // SubjectAltName
 				case "2.5.29.18":
 					// IssuerAltName
-					this.parsedValue = new AltName({ schema: asn1.result });
+					try {
+						this.parsedValue = new AltName({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new AltName();
+						this.parsedValue.parsingError = "Incorrectly formated AltName";
+					}
 					break;
 				case "2.5.29.19":
 					// BasicConstraints
-					this.parsedValue = new BasicConstraints({ schema: asn1.result });
+					try {
+						this.parsedValue = new BasicConstraints({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new BasicConstraints();
+						this.parsedValue.parsingError = "Incorrectly formated BasicConstraints";
+					}
 					break;
 				case "2.5.29.20": // CRLNumber
 				case "2.5.29.27":
@@ -19160,40 +19557,85 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 					break;
 				case "2.5.29.28":
 					// IssuingDistributionPoint
-					this.parsedValue = new IssuingDistributionPoint({ schema: asn1.result });
+					try {
+						this.parsedValue = new IssuingDistributionPoint({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new IssuingDistributionPoint();
+						this.parsedValue.parsingError = "Incorrectly formated IssuingDistributionPoint";
+					}
 					break;
 				case "2.5.29.29":
 					// CertificateIssuer
-					this.parsedValue = new GeneralNames({ schema: asn1.result }); // Should be just a simple
+					try {
+						this.parsedValue = new GeneralNames({ schema: asn1.result }); // Should be just a simple
+					} catch (ex) {
+						this.parsedValue = new GeneralNames();
+						this.parsedValue.parsingError = "Incorrectly formated GeneralNames";
+					}
 					break;
 				case "2.5.29.30":
 					// NameConstraints
-					this.parsedValue = new NameConstraints({ schema: asn1.result });
+					try {
+						this.parsedValue = new NameConstraints({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new NameConstraints();
+						this.parsedValue.parsingError = "Incorrectly formated NameConstraints";
+					}
 					break;
 				case "2.5.29.31": // CRLDistributionPoints
 				case "2.5.29.46":
 					// FreshestCRL
-					this.parsedValue = new CRLDistributionPoints({ schema: asn1.result });
+					try {
+						this.parsedValue = new CRLDistributionPoints({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new CRLDistributionPoints();
+						this.parsedValue.parsingError = "Incorrectly formated CRLDistributionPoints";
+					}
 					break;
 				case "2.5.29.32":
 					// CertificatePolicies
-					this.parsedValue = new CertificatePolicies({ schema: asn1.result });
+					try {
+						this.parsedValue = new CertificatePolicies({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new CertificatePolicies();
+						this.parsedValue.parsingError = "Incorrectly formated CertificatePolicies";
+					}
 					break;
 				case "2.5.29.33":
 					// PolicyMappings
-					this.parsedValue = new PolicyMappings({ schema: asn1.result });
+					try {
+						this.parsedValue = new PolicyMappings({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new PolicyMappings();
+						this.parsedValue.parsingError = "Incorrectly formated CertificatePolicies";
+					}
 					break;
 				case "2.5.29.35":
 					// AuthorityKeyIdentifier
-					this.parsedValue = new AuthorityKeyIdentifier({ schema: asn1.result });
+					try {
+						this.parsedValue = new AuthorityKeyIdentifier({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new AuthorityKeyIdentifier();
+						this.parsedValue.parsingError = "Incorrectly formated AuthorityKeyIdentifier";
+					}
 					break;
 				case "2.5.29.36":
 					// PolicyConstraints
-					this.parsedValue = new PolicyConstraints({ schema: asn1.result });
+					try {
+						this.parsedValue = new PolicyConstraints({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new PolicyConstraints();
+						this.parsedValue.parsingError = "Incorrectly formated PolicyConstraints";
+					}
 					break;
 				case "2.5.29.37":
 					// ExtKeyUsage
-					this.parsedValue = new ExtKeyUsage({ schema: asn1.result });
+					try {
+						this.parsedValue = new ExtKeyUsage({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new ExtKeyUsage();
+						this.parsedValue.parsingError = "Incorrectly formated ExtKeyUsage";
+					}
 					break;
 				case "2.5.29.54":
 					// InhibitAnyPolicy
@@ -19202,11 +19644,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 				case "1.3.6.1.5.5.7.1.1": // AuthorityInfoAccess
 				case "1.3.6.1.5.5.7.1.11":
 					// SubjectInfoAccess
-					this.parsedValue = new InfoAccess({ schema: asn1.result });
+					try {
+						this.parsedValue = new InfoAccess({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new InfoAccess();
+						this.parsedValue.parsingError = "Incorrectly formated InfoAccess";
+					}
 					break;
 				case "1.3.6.1.4.1.11129.2.4.2":
 					// SignedCertificateTimestampList
-					this.parsedValue = new SignedCertificateTimestampList({ schema: asn1.result });
+					try {
+						this.parsedValue = new SignedCertificateTimestampList({ schema: asn1.result });
+					} catch (ex) {
+						this.parsedValue = new SignedCertificateTimestampList();
+						this.parsedValue.parsingError = "Incorrectly formated SignedCertificateTimestampList";
+					}
 					break;
 				default:
 			}
@@ -19267,7 +19719,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for Extensions class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -19275,7 +19727,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<Extension>}
-    * @description type
+    * @desc type
     */
 			this.extensions = getParametersValue(parameters, "extensions", Extensions.defaultValues("extensions"));
 			//endregion
@@ -19299,7 +19751,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * Extensions  ::=  SEQUENCE SIZE (1..MAX) OF Extension
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @param {boolean} optional Flag that current schema should be optional
    * @returns {Object} asn1js schema object
@@ -19307,8 +19765,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 			var optional = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-			//Extensions  ::=  SEQUENCE SIZE (1..MAX) OF Extension
 
 			/**
     * @type {Object}
@@ -19386,7 +19842,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for SingleResponse class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -19394,31 +19850,31 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {CertID}
-    * @description certID
+    * @desc certID
     */
 			this.certID = getParametersValue(parameters, "certID", SingleResponse.defaultValues("certID"));
 			/**
     * @type {Object}
-    * @description certStatus
+    * @desc certStatus
     */
 			this.certStatus = getParametersValue(parameters, "certStatus", SingleResponse.defaultValues("certStatus"));
 			/**
     * @type {Date}
-    * @description thisUpdate
+    * @desc thisUpdate
     */
 			this.thisUpdate = getParametersValue(parameters, "thisUpdate", SingleResponse.defaultValues("thisUpdate"));
 
 			if ("nextUpdate" in parameters)
 				/**
      * @type {Date}
-     * @description nextUpdate
+     * @desc nextUpdate
      */
 				this.nextUpdate = getParametersValue(parameters, "nextUpdate", SingleResponse.defaultValues("nextUpdate"));
 
 			if ("singleExtensions" in parameters)
 				/**
      * @type {Array.<Extension>}
-     * @description singleExtensions
+     * @desc singleExtensions
      */
 				this.singleExtensions = getParametersValue(parameters, "singleExtensions", SingleResponse.defaultValues("singleExtensions"));
 			//endregion
@@ -19469,30 +19925,34 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * SingleResponse ::= SEQUENCE {
+   *    certID                       CertID,
+   *    certStatus                   CertStatus,
+   *    thisUpdate                   GeneralizedTime,
+   *    nextUpdate         [0]       EXPLICIT GeneralizedTime OPTIONAL,
+   *    singleExtensions   [1]       EXPLICIT Extensions OPTIONAL }
+   *
+   * CertStatus ::= CHOICE {
+   *    good        [0]     IMPLICIT NULL,
+   *    revoked     [1]     IMPLICIT RevokedInfo,
+   *    unknown     [2]     IMPLICIT UnknownInfo }
+   *
+   * RevokedInfo ::= SEQUENCE {
+   *    revocationTime              GeneralizedTime,
+   *    revocationReason    [0]     EXPLICIT CRLReason OPTIONAL }
+   *
+   * UnknownInfo ::= NULL
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//SingleResponse ::= SEQUENCE {
-			//    certID                       CertID,
-			//    certStatus                   CertStatus,
-			//    thisUpdate                   GeneralizedTime,
-			//    nextUpdate         [0]       EXPLICIT GeneralizedTime OPTIONAL,
-			//    singleExtensions   [1]       EXPLICIT Extensions OPTIONAL }
-			//
-			//CertStatus ::= CHOICE {
-			//    good        [0]     IMPLICIT NULL,
-			//    revoked     [1]     IMPLICIT RevokedInfo,
-			//    unknown     [2]     IMPLICIT UnknownInfo }
-			//
-			//RevokedInfo ::= SEQUENCE {
-			//    revocationTime              GeneralizedTime,
-			//    revocationReason    [0]     EXPLICIT CRLReason OPTIONAL }
-			//
-			//UnknownInfo ::= NULL
 
 			/**
     * @type {Object}
@@ -19610,7 +20070,15 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			outputArray.push(this.certID.toSchema());
 			outputArray.push(this.certStatus);
 			outputArray.push(new GeneralizedTime({ valueDate: this.thisUpdate }));
-			if ("nextUpdate" in this) outputArray.push(new GeneralizedTime({ valueDate: this.nextUpdate }));
+			if ("nextUpdate" in this) {
+				outputArray.push(new Constructed({
+					idBlock: {
+						tagClass: 3, // CONTEXT-SPECIFIC
+						tagNumber: 0 // [0]
+					},
+					value: [new GeneralizedTime({ valueDate: this.nextUpdate })]
+				}));
+			}
 
 			if ("singleExtensions" in this) {
 				outputArray.push(new Sequence({
@@ -19656,7 +20124,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for ResponseData class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -19664,29 +20132,29 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {ArrayBuffer}
-    * @description tbs
+    * @desc tbs
     */
 			this.tbs = getParametersValue(parameters, "tbs", ResponseData.defaultValues("tbs"));
 			/**
     * @type {Object}
-    * @description responderID
+    * @desc responderID
     */
 			this.responderID = getParametersValue(parameters, "responderID", ResponseData.defaultValues("responderID"));
 			/**
     * @type {Date}
-    * @description producedAt
+    * @desc producedAt
     */
 			this.producedAt = getParametersValue(parameters, "producedAt", ResponseData.defaultValues("producedAt"));
 			/**
     * @type {Array.<SingleResponse>}
-    * @description responses
+    * @desc responses
     */
 			this.responses = getParametersValue(parameters, "responses", ResponseData.defaultValues("responses"));
 
 			if ("responseExtensions" in parameters)
 				/**
      * @type {Array.<Extension>}
-     * @description responseExtensions
+     * @desc responseExtensions
      */
 				this.responseExtensions = getParametersValue(parameters, "responseExtensions", ResponseData.defaultValues("responseExtensions"));
 			//endregion
@@ -19738,19 +20206,23 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * ResponseData ::= SEQUENCE {
+   *    version              [0] EXPLICIT Version DEFAULT v1,
+   *    responderID              ResponderID,
+   *    producedAt               GeneralizedTime,
+   *    responses                SEQUENCE OF SingleResponse,
+   *    responseExtensions   [1] EXPLICIT Extensions OPTIONAL }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//ResponseData ::= SEQUENCE {
-			//    version              [0] EXPLICIT Version DEFAULT v1,
-			//    responderID              ResponderID,
-			//    producedAt               GeneralizedTime,
-			//    responses                SEQUENCE OF SingleResponse,
-			//    responseExtensions   [1] EXPLICIT Extensions OPTIONAL }
 
 			/**
     * @type {Object}
@@ -19900,8 +20372,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 					}));
 
 					if ("responseExtensions" in this) {
-						outputArray.push(new Sequence({
-							value: Array.from(this.responseExtensions, element => element.toSchema())
+						outputArray.push(new Constructed({
+							idBlock: {
+								tagClass: 3, // CONTEXT-SPECIFIC
+								tagNumber: 1 // [1]
+							},
+							value: [new Sequence({
+								value: Array.from(this.responseExtensions, element => element.toSchema())
+							})]
 						}));
 					}
 
@@ -19948,7 +20426,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for Time class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    * @property {number} [type] 0 - UTCTime; 1 - GeneralizedTime; 2 - empty value
    * @property {Date} [value] Value of the TIME class
    */
@@ -19958,12 +20436,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {number}
-    * @description 0 - UTCTime; 1 - GeneralizedTime; 2 - empty value
+    * @desc 0 - UTCTime; 1 - GeneralizedTime; 2 - empty value
     */
 			this.type = getParametersValue(parameters, "type", Time.defaultValues("type"));
 			/**
     * @type {Date}
-    * @description Value of the TIME class
+    * @desc Value of the TIME class
     */
 			this.value = getParametersValue(parameters, "value", Time.defaultValues("value"));
 			//endregion
@@ -19989,7 +20467,15 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * Time ::= CHOICE {
+      *   utcTime        UTCTime,
+      *   generalTime    GeneralizedTime }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @param {boolean} optional Flag that current schema should be optional
    * @returns {Object} asn1js schema object
@@ -20190,7 +20676,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for Certificate class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -20198,79 +20684,79 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {ArrayBuffer}
-    * @description tbs
+    * @desc ToBeSigned (TBS) part of the certificate
     */
 			this.tbs = getParametersValue(parameters, "tbs", Certificate.defaultValues("tbs"));
 			/**
     * @type {number}
-    * @description version
+    * @desc Version number
     */
 			this.version = getParametersValue(parameters, "version", Certificate.defaultValues("version"));
 			/**
     * @type {Integer}
-    * @description serialNumber
+    * @desc Serial number of the certificate
     */
 			this.serialNumber = getParametersValue(parameters, "serialNumber", Certificate.defaultValues("serialNumber"));
 			/**
     * @type {AlgorithmIdentifier}
-    * @description signature
+    * @desc This field contains the algorithm identifier for the algorithm used by the CA to sign the certificate
     */
 			this.signature = getParametersValue(parameters, "signature", Certificate.defaultValues("signature"));
 			/**
     * @type {RelativeDistinguishedNames}
-    * @description issuer
+    * @desc The issuer field identifies the entity that has signed and issued the certificate
     */
 			this.issuer = getParametersValue(parameters, "issuer", Certificate.defaultValues("issuer"));
 			/**
     * @type {Time}
-    * @description notBefore
+    * @desc The date on which the certificate validity period begins
     */
 			this.notBefore = getParametersValue(parameters, "notBefore", Certificate.defaultValues("notBefore"));
 			/**
     * @type {Time}
-    * @description notAfter
+    * @desc The date on which the certificate validity period ends
     */
 			this.notAfter = getParametersValue(parameters, "notAfter", Certificate.defaultValues("notAfter"));
 			/**
     * @type {RelativeDistinguishedNames}
-    * @description subject
+    * @desc The subject field identifies the entity associated with the public key stored in the subject public key field
     */
 			this.subject = getParametersValue(parameters, "subject", Certificate.defaultValues("subject"));
 			/**
     * @type {PublicKeyInfo}
-    * @description subjectPublicKeyInfo
+    * @desc This field is used to carry the public key and identify the algorithm with which the key is used
     */
 			this.subjectPublicKeyInfo = getParametersValue(parameters, "subjectPublicKeyInfo", Certificate.defaultValues("subjectPublicKeyInfo"));
 
 			if ("issuerUniqueID" in parameters)
 				/**
      * @type {ArrayBuffer}
-     * @description issuerUniqueID
+     * @desc The subject and issuer unique identifiers are present in the certificate to handle the possibility of reuse of subject and/or issuer names over time
      */
 				this.issuerUniqueID = getParametersValue(parameters, "issuerUniqueID", Certificate.defaultValues("issuerUniqueID"));
 
 			if ("subjectUniqueID" in parameters)
 				/**
      * @type {ArrayBuffer}
-     * @description subjectUniqueID
+     * @desc The subject and issuer unique identifiers are present in the certificate to handle the possibility of reuse of subject and/or issuer names over time
      */
 				this.subjectUniqueID = getParametersValue(parameters, "subjectUniqueID", Certificate.defaultValues("subjectUniqueID"));
 
 			if ("extensions" in parameters)
 				/**
      * @type {Array}
-     * @description extensions
+     * @desc If present, this field is a SEQUENCE of one or more certificate extensions
      */
 				this.extensions = getParametersValue(parameters, "extensions", Certificate.defaultValues("extensions"));
 
 			/**
     * @type {AlgorithmIdentifier}
-    * @description signatureAlgorithm
+    * @desc The signatureAlgorithm field contains the identifier for the cryptographic algorithm used by the CA to sign this certificate
     */
 			this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", Certificate.defaultValues("signatureAlgorithm"));
 			/**
     * @type {BitString}
-    * @description signatureValue
+    * @desc The signatureValue field contains a digital signature computed upon the ASN.1 DER encoded tbsCertificate
     */
 			this.signatureValue = getParametersValue(parameters, "signatureValue", Certificate.defaultValues("signatureValue"));
 			//endregion
@@ -20320,17 +20806,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * Certificate  ::=  SEQUENCE  {
+   *    tbsCertificate       TBSCertificate,
+   *    signatureAlgorithm   AlgorithmIdentifier,
+   *    signatureValue       BIT STRING  }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//Certificate  ::=  SEQUENCE  {
-			//    tbsCertificate       TBSCertificate,
-			//    signatureAlgorithm   AlgorithmIdentifier,
-			//    signatureValue       BIT STRING  }
 
 			/**
     * @type {Object}
@@ -20390,7 +20880,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			this.subject = new RelativeDistinguishedNames({ schema: asn1.result["tbsCertificate.subject"] });
 			this.subjectPublicKeyInfo = new PublicKeyInfo({ schema: asn1.result["tbsCertificate.subjectPublicKeyInfo"] });
 			if ("tbsCertificate.issuerUniqueID" in asn1.result) this.issuerUniqueID = asn1.result["tbsCertificate.issuerUniqueID"].valueBlock.valueHex;
-			if ("tbsCertificate.subjectUniqueID" in asn1.result) this.issuerUniqueID = asn1.result["tbsCertificate.subjectUniqueID"].valueBlock.valueHex;
+			if ("tbsCertificate.subjectUniqueID" in asn1.result) this.subjectUniqueID = asn1.result["tbsCertificate.subjectUniqueID"].valueBlock.valueHex;
 			if ("tbsCertificate.extensions" in asn1.result) this.extensions = Array.from(asn1.result["tbsCertificate.extensions"], element => new Extension({ schema: element }));
 
 			this.signatureAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.signatureAlgorithm });
@@ -20446,17 +20936,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 						tagNumber: 2 // [2]
 					},
 					valueHex: this.subjectUniqueID
-				}));
-			}
-
-			if ("subjectUniqueID" in this) {
-				outputArray.push(new Primitive({
-					optional: true,
-					idBlock: {
-						tagClass: 3, // CONTEXT-SPECIFIC
-						tagNumber: 3 // [3]
-					},
-					value: [this.extensions.toSchema()]
 				}));
 			}
 
@@ -20548,15 +21027,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Get SHA-1 hash value for subject public key
+   * Get hash value for subject public key (default SHA-1)
+   * @param {String} [hashAlgorithm=SHA-1] Hashing algorithm name
    */
 		getKeyHash() {
+			var hashAlgorithm = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "SHA-1";
+
 			//region Get a "crypto" extension
 			var crypto = getCrypto();
 			if (typeof crypto === "undefined") return Promise.reject("Unable to create WebCrypto object");
 			//endregion
 
-			return crypto.digest({ name: "sha-1" }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
+			return crypto.digest({ name: hashAlgorithm }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
 		}
 		//**********************************************************************************
 		/**
@@ -20635,7 +21117,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for CertificateChainValidationEngine class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -20643,37 +21125,37 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Array.<Certificate>}
-    * @description Array of pre-defined trusted (by user) certificates
+    * @desc Array of pre-defined trusted (by user) certificates
     */
 			this.trustedCerts = getParametersValue(parameters, "trustedCerts", this.defaultValues("trustedCerts"));
 			/**
     * @type {Array.<Certificate>}
-    * @description Array with certificate chain. Could be only one end-user certificate in there!
+    * @desc Array with certificate chain. Could be only one end-user certificate in there!
     */
 			this.certs = getParametersValue(parameters, "certs", this.defaultValues("certs"));
 			/**
     * @type {Array.<CertificateRevocationList>}
-    * @description Array of all CRLs for all certificates from certificate chain
+    * @desc Array of all CRLs for all certificates from certificate chain
     */
 			this.crls = getParametersValue(parameters, "crls", this.defaultValues("crls"));
 			/**
     * @type {Array}
-    * @description Array of all OCSP responses
+    * @desc Array of all OCSP responses
     */
 			this.ocsps = getParametersValue(parameters, "ocsps", this.defaultValues("ocsps"));
 			/**
     * @type {Date}
-    * @description The date at which the check would be
+    * @desc The date at which the check would be
     */
 			this.checkDate = getParametersValue(parameters, "checkDate", this.defaultValues("checkDate"));
 			/**
     * @type {Function}
-    * @description The date at which the check would be
+    * @desc The date at which the check would be
     */
 			this.findOrigin = getParametersValue(parameters, "findOrigin", this.defaultValues("findOrigin"));
 			/**
     * @type {Function}
-    * @description The date at which the check would be
+    * @desc The date at which the check would be
     */
 			this.findIssuer = getParametersValue(parameters, "findIssuer", this.defaultValues("findIssuer"));
 			//endregion
@@ -20685,13 +21167,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//endregion
 
 			//region Search in Intermediate Certificates
-			var _iteratorNormalCompletion22 = true;
-			var _didIteratorError22 = false;
-			var _iteratorError22 = undefined;
+			var _iteratorNormalCompletion23 = true;
+			var _didIteratorError23 = false;
+			var _iteratorError23 = undefined;
 
 			try {
-				for (var _iterator22 = validationEngine.certs[Symbol.iterator](), _step22; !(_iteratorNormalCompletion22 = (_step22 = _iterator22.next()).done); _iteratorNormalCompletion22 = true) {
-					var localCert = _step22.value;
+				for (var _iterator23 = validationEngine.certs[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
+					var localCert = _step23.value;
 
 					//region Firstly encode TBS for certificate
 					if (localCert.tbs.byteLength === 0) localCert.tbs = localCert.encodeTBS();
@@ -20702,36 +21184,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 				//endregion
 
 				//region Search in Trusted Certificates
-			} catch (err) {
-				_didIteratorError22 = true;
-				_iteratorError22 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion22 && _iterator22.return) {
-						_iterator22.return();
-					}
-				} finally {
-					if (_didIteratorError22) {
-						throw _iteratorError22;
-					}
-				}
-			}
-
-			var _iteratorNormalCompletion23 = true;
-			var _didIteratorError23 = false;
-			var _iteratorError23 = undefined;
-
-			try {
-				for (var _iterator23 = validationEngine.trustedCerts[Symbol.iterator](), _step23; !(_iteratorNormalCompletion23 = (_step23 = _iterator23.next()).done); _iteratorNormalCompletion23 = true) {
-					var trustedCert = _step23.value;
-
-					//region Firstly encode TBS for certificate
-					if (trustedCert.tbs.byteLength === 0) trustedCert.tbs = trustedCert.encodeTBS();
-					//endregion
-
-					if (isEqualBuffer(certificate.tbs, trustedCert.tbs)) return "Trusted Certificates";
-				}
-				//endregion
 			} catch (err) {
 				_didIteratorError23 = true;
 				_iteratorError23 = err;
@@ -20747,18 +21199,48 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 				}
 			}
 
+			var _iteratorNormalCompletion24 = true;
+			var _didIteratorError24 = false;
+			var _iteratorError24 = undefined;
+
+			try {
+				for (var _iterator24 = validationEngine.trustedCerts[Symbol.iterator](), _step24; !(_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done); _iteratorNormalCompletion24 = true) {
+					var trustedCert = _step24.value;
+
+					//region Firstly encode TBS for certificate
+					if (trustedCert.tbs.byteLength === 0) trustedCert.tbs = trustedCert.encodeTBS();
+					//endregion
+
+					if (isEqualBuffer(certificate.tbs, trustedCert.tbs)) return "Trusted Certificates";
+				}
+				//endregion
+			} catch (err) {
+				_didIteratorError24 = true;
+				_iteratorError24 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion24 && _iterator24.return) {
+						_iterator24.return();
+					}
+				} finally {
+					if (_didIteratorError24) {
+						throw _iteratorError24;
+					}
+				}
+			}
+
 			return "Unknown";
 		}
 		//**********************************************************************************
 		defaultFindIssuer(certificate, validationEngine) {
-			var _this2 = this;
+			var _this3 = this;
 
-			return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-				var result, keyIdentifier, authorityCertIssuer, authorityCertSerialNumber, verificationResult, _iteratorNormalCompletion24, _didIteratorError24, _iteratorError24, _iterator24, _step24, extension, checkCertificate, _iteratorNormalCompletion26, _didIteratorError26, _iteratorError26, _iterator26, _step26, trustedCert, _iteratorNormalCompletion27, _didIteratorError27, _iteratorError27, _iterator27, _step27, intermediateCert, i, _verificationResult;
+			return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+				var result, keyIdentifier, authorityCertIssuer, authorityCertSerialNumber, verificationResult, _iteratorNormalCompletion25, _didIteratorError25, _iteratorError25, _iterator25, _step25, extension, checkCertificate, _iteratorNormalCompletion27, _didIteratorError27, _iteratorError27, _iterator27, _step27, trustedCert, _iteratorNormalCompletion28, _didIteratorError28, _iteratorError28, _iterator28, _step28, intermediateCert, i, _verificationResult;
 
-				return regeneratorRuntime.wrap(function _callee$(_context) {
+				return regeneratorRuntime.wrap(function _callee2$(_context2) {
 					while (1) {
-						switch (_context.prev = _context.next) {
+						switch (_context2.prev = _context2.next) {
 							case 0:
 								checkCertificate = function checkCertificate(possibleIssuer) {
 									//region Firstly search for appropriate extensions
@@ -20766,13 +21248,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 										if ("extensions" in possibleIssuer) {
 											var extensionFound = false;
 
-											var _iteratorNormalCompletion25 = true;
-											var _didIteratorError25 = false;
-											var _iteratorError25 = undefined;
+											var _iteratorNormalCompletion26 = true;
+											var _didIteratorError26 = false;
+											var _iteratorError26 = undefined;
 
 											try {
-												for (var _iterator25 = possibleIssuer.extensions[Symbol.iterator](), _step25; !(_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done); _iteratorNormalCompletion25 = true) {
-													var _extension = _step25.value;
+												for (var _iterator26 = possibleIssuer.extensions[Symbol.iterator](), _step26; !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
+													var _extension = _step26.value;
 
 													if (_extension.extnID === "2.5.29.14") // SubjectKeyIdentifier
 														{
@@ -20784,16 +21266,16 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 														}
 												}
 											} catch (err) {
-												_didIteratorError25 = true;
-												_iteratorError25 = err;
+												_didIteratorError26 = true;
+												_iteratorError26 = err;
 											} finally {
 												try {
-													if (!_iteratorNormalCompletion25 && _iterator25.return) {
-														_iterator25.return();
+													if (!_iteratorNormalCompletion26 && _iterator26.return) {
+														_iterator26.return();
 													}
 												} finally {
-													if (_didIteratorError25) {
-														throw _iteratorError25;
+													if (_didIteratorError26) {
+														throw _iteratorError26;
 													}
 												}
 											}
@@ -20830,54 +21312,54 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								//region Speed-up searching in case of self-signed certificates
 
 								if (!certificate.subject.isEqual(certificate.issuer)) {
-									_context.next = 16;
+									_context2.next = 16;
 									break;
 								}
 
-								_context.prev = 6;
-								_context.next = 9;
+								_context2.prev = 6;
+								_context2.next = 9;
 								return certificate.verify();
 
 							case 9:
-								verificationResult = _context.sent;
+								verificationResult = _context2.sent;
 
 								if (!(verificationResult === true)) {
-									_context.next = 12;
+									_context2.next = 12;
 									break;
 								}
 
-								return _context.abrupt("return", [certificate]);
+								return _context2.abrupt("return", [certificate]);
 
 							case 12:
-								_context.next = 16;
+								_context2.next = 16;
 								break;
 
 							case 14:
-								_context.prev = 14;
-								_context.t0 = _context["catch"](6);
+								_context2.prev = 14;
+								_context2.t0 = _context2["catch"](6);
 
 							case 16:
 								if (!("extensions" in certificate)) {
-									_context.next = 44;
+									_context2.next = 44;
 									break;
 								}
 
-								_iteratorNormalCompletion24 = true;
-								_didIteratorError24 = false;
-								_iteratorError24 = undefined;
-								_context.prev = 20;
-								_iterator24 = certificate.extensions[Symbol.iterator]();
+								_iteratorNormalCompletion25 = true;
+								_didIteratorError25 = false;
+								_iteratorError25 = undefined;
+								_context2.prev = 20;
+								_iterator25 = certificate.extensions[Symbol.iterator]();
 
 							case 22:
-								if (_iteratorNormalCompletion24 = (_step24 = _iterator24.next()).done) {
-									_context.next = 30;
+								if (_iteratorNormalCompletion25 = (_step25 = _iterator25.next()).done) {
+									_context2.next = 30;
 									break;
 								}
 
-								extension = _step24.value;
+								extension = _step25.value;
 
 								if (!(extension.extnID === "2.5.29.35")) {
-									_context.next = 27;
+									_context2.next = 27;
 									break;
 								}
 
@@ -20887,180 +21369,180 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 									if ("authorityCertSerialNumber" in extension.parsedValue) authorityCertSerialNumber = extension.parsedValue.authorityCertSerialNumber;
 								}
 
-								return _context.abrupt("break", 30);
+								return _context2.abrupt("break", 30);
 
 							case 27:
-								_iteratorNormalCompletion24 = true;
-								_context.next = 22;
+								_iteratorNormalCompletion25 = true;
+								_context2.next = 22;
 								break;
 
 							case 30:
-								_context.next = 36;
+								_context2.next = 36;
 								break;
 
 							case 32:
-								_context.prev = 32;
-								_context.t1 = _context["catch"](20);
-								_didIteratorError24 = true;
-								_iteratorError24 = _context.t1;
+								_context2.prev = 32;
+								_context2.t1 = _context2["catch"](20);
+								_didIteratorError25 = true;
+								_iteratorError25 = _context2.t1;
 
 							case 36:
-								_context.prev = 36;
-								_context.prev = 37;
+								_context2.prev = 36;
+								_context2.prev = 37;
 
-								if (!_iteratorNormalCompletion24 && _iterator24.return) {
-									_iterator24.return();
+								if (!_iteratorNormalCompletion25 && _iterator25.return) {
+									_iterator25.return();
 								}
 
 							case 39:
-								_context.prev = 39;
+								_context2.prev = 39;
 
-								if (!_didIteratorError24) {
-									_context.next = 42;
+								if (!_didIteratorError25) {
+									_context2.next = 42;
 									break;
 								}
 
-								throw _iteratorError24;
+								throw _iteratorError25;
 
 							case 42:
-								return _context.finish(39);
+								return _context2.finish(39);
 
 							case 43:
-								return _context.finish(36);
+								return _context2.finish(36);
 
 							case 44:
 								//endregion
 
 								//region Search in Trusted Certificates
-								_iteratorNormalCompletion26 = true;
-								_didIteratorError26 = false;
-								_iteratorError26 = undefined;
-								_context.prev = 47;
-								for (_iterator26 = validationEngine.trustedCerts[Symbol.iterator](); !(_iteratorNormalCompletion26 = (_step26 = _iterator26.next()).done); _iteratorNormalCompletion26 = true) {
-									trustedCert = _step26.value;
+								_iteratorNormalCompletion27 = true;
+								_didIteratorError27 = false;
+								_iteratorError27 = undefined;
+								_context2.prev = 47;
+								for (_iterator27 = validationEngine.trustedCerts[Symbol.iterator](); !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
+									trustedCert = _step27.value;
 
 									checkCertificate(trustedCert);
 								} //endregion
 
 								//region Search in Intermediate Certificates
-								_context.next = 55;
+								_context2.next = 55;
 								break;
 
 							case 51:
-								_context.prev = 51;
-								_context.t2 = _context["catch"](47);
-								_didIteratorError26 = true;
-								_iteratorError26 = _context.t2;
+								_context2.prev = 51;
+								_context2.t2 = _context2["catch"](47);
+								_didIteratorError27 = true;
+								_iteratorError27 = _context2.t2;
 
 							case 55:
-								_context.prev = 55;
-								_context.prev = 56;
-
-								if (!_iteratorNormalCompletion26 && _iterator26.return) {
-									_iterator26.return();
-								}
-
-							case 58:
-								_context.prev = 58;
-
-								if (!_didIteratorError26) {
-									_context.next = 61;
-									break;
-								}
-
-								throw _iteratorError26;
-
-							case 61:
-								return _context.finish(58);
-
-							case 62:
-								return _context.finish(55);
-
-							case 63:
-								_iteratorNormalCompletion27 = true;
-								_didIteratorError27 = false;
-								_iteratorError27 = undefined;
-								_context.prev = 66;
-								for (_iterator27 = validationEngine.certs[Symbol.iterator](); !(_iteratorNormalCompletion27 = (_step27 = _iterator27.next()).done); _iteratorNormalCompletion27 = true) {
-									intermediateCert = _step27.value;
-
-									checkCertificate(intermediateCert);
-								} //endregion
-
-								//region Now perform certificate verification checking
-								_context.next = 74;
-								break;
-
-							case 70:
-								_context.prev = 70;
-								_context.t3 = _context["catch"](66);
-								_didIteratorError27 = true;
-								_iteratorError27 = _context.t3;
-
-							case 74:
-								_context.prev = 74;
-								_context.prev = 75;
+								_context2.prev = 55;
+								_context2.prev = 56;
 
 								if (!_iteratorNormalCompletion27 && _iterator27.return) {
 									_iterator27.return();
 								}
 
-							case 77:
-								_context.prev = 77;
+							case 58:
+								_context2.prev = 58;
 
 								if (!_didIteratorError27) {
-									_context.next = 80;
+									_context2.next = 61;
 									break;
 								}
 
 								throw _iteratorError27;
 
+							case 61:
+								return _context2.finish(58);
+
+							case 62:
+								return _context2.finish(55);
+
+							case 63:
+								_iteratorNormalCompletion28 = true;
+								_didIteratorError28 = false;
+								_iteratorError28 = undefined;
+								_context2.prev = 66;
+								for (_iterator28 = validationEngine.certs[Symbol.iterator](); !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
+									intermediateCert = _step28.value;
+
+									checkCertificate(intermediateCert);
+								} //endregion
+
+								//region Now perform certificate verification checking
+								_context2.next = 74;
+								break;
+
+							case 70:
+								_context2.prev = 70;
+								_context2.t3 = _context2["catch"](66);
+								_didIteratorError28 = true;
+								_iteratorError28 = _context2.t3;
+
+							case 74:
+								_context2.prev = 74;
+								_context2.prev = 75;
+
+								if (!_iteratorNormalCompletion28 && _iterator28.return) {
+									_iterator28.return();
+								}
+
+							case 77:
+								_context2.prev = 77;
+
+								if (!_didIteratorError28) {
+									_context2.next = 80;
+									break;
+								}
+
+								throw _iteratorError28;
+
 							case 80:
-								return _context.finish(77);
+								return _context2.finish(77);
 
 							case 81:
-								return _context.finish(74);
+								return _context2.finish(74);
 
 							case 82:
 								i = 0;
 
 							case 83:
 								if (!(i < result.length)) {
-									_context.next = 97;
+									_context2.next = 97;
 									break;
 								}
 
-								_context.prev = 84;
-								_context.next = 87;
+								_context2.prev = 84;
+								_context2.next = 87;
 								return certificate.verify(result[i]);
 
 							case 87:
-								_verificationResult = _context.sent;
+								_verificationResult = _context2.sent;
 
 								if (_verificationResult === false) result.splice(i, 1);
-								_context.next = 94;
+								_context2.next = 94;
 								break;
 
 							case 91:
-								_context.prev = 91;
-								_context.t4 = _context["catch"](84);
+								_context2.prev = 91;
+								_context2.t4 = _context2["catch"](84);
 
 								result.splice(i, 1); // Something wrong, remove the certificate
 
 							case 94:
 								i++;
-								_context.next = 83;
+								_context2.next = 83;
 								break;
 
 							case 97:
-								return _context.abrupt("return", result);
+								return _context2.abrupt("return", result);
 
 							case 98:
 							case "end":
-								return _context.stop();
+								return _context2.stop();
 						}
 					}
-				}, _callee, _this2, [[6, 14], [20, 32, 36, 44], [37,, 39, 43], [47, 51, 55, 63], [56,, 58, 62], [66, 70, 74, 82], [75,, 77, 81], [84, 91]]);
+				}, _callee2, _this3, [[6, 14], [20, 32, 36, 44], [37,, 39, 43], [47, 51, 55, 63], [56,, 58, 62], [66, 70, 74, 82], [75,, 77, 81], [84, 91]]);
 			}))();
 		}
 		//**********************************************************************************
@@ -21090,18 +21572,19 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		sort() {
-			var _this3 = this;
+			var _arguments2 = arguments,
+			    _this4 = this;
 
-			return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7() {
+			return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
 				//endregion
 
 				//region Building certificate path
 				var buildPath = (() => {
-					var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(certificate) {
+					var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(certificate) {
 						var result, checkUnique, findIssuerResult, i, buildPathResult, j, copy;
-						return regeneratorRuntime.wrap(function _callee2$(_context2) {
+						return regeneratorRuntime.wrap(function _callee3$(_context3) {
 							while (1) {
-								switch (_context2.prev = _context2.next) {
+								switch (_context3.prev = _context3.next) {
 									case 0:
 										checkUnique = function checkUnique(array) {
 											var unique = true;
@@ -21126,14 +21609,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 										//region Aux function checking array for unique elements
 
-										_context2.next = 4;
+										_context3.next = 4;
 										return _this.findIssuer(certificate, _this);
 
 									case 4:
-										findIssuerResult = _context2.sent;
+										findIssuerResult = _context3.sent;
 
 										if (!(findIssuerResult.length === 0)) {
-											_context2.next = 7;
+											_context3.next = 7;
 											break;
 										}
 
@@ -21144,24 +21627,24 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 8:
 										if (!(i < findIssuerResult.length)) {
-											_context2.next = 19;
+											_context3.next = 19;
 											break;
 										}
 
 										if (!isEqualBuffer(findIssuerResult[i].tbs, certificate.tbs)) {
-											_context2.next = 12;
+											_context3.next = 12;
 											break;
 										}
 
 										result.push([findIssuerResult[i]]);
-										return _context2.abrupt("continue", 16);
+										return _context3.abrupt("continue", 16);
 
 									case 12:
-										_context2.next = 14;
+										_context3.next = 14;
 										return buildPath(findIssuerResult[i]);
 
 									case 14:
-										buildPathResult = _context2.sent;
+										buildPathResult = _context3.sent;
 
 
 										for (j = 0; j < buildPathResult.length; j++) {
@@ -21174,21 +21657,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 16:
 										i++;
-										_context2.next = 8;
+										_context3.next = 8;
 										break;
 
 									case 19:
-										return _context2.abrupt("return", result);
+										return _context3.abrupt("return", result);
 
 									case 20:
 									case "end":
-										return _context2.stop();
+										return _context3.stop();
 								}
 							}
-						}, _callee2, this);
+						}, _callee3, this);
 					}));
 
-					return function buildPath(_x248) {
+					return function buildPath(_x252) {
 						return _ref3.apply(this, arguments);
 					};
 				})();
@@ -21198,12 +21681,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 
 				var findCRL = (() => {
-					var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(certificate) {
+					var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(certificate) {
 						var issuerCertificates, crls, crlsAndCertificates, i, j, _result6;
 
-						return regeneratorRuntime.wrap(function _callee3$(_context3) {
+						return regeneratorRuntime.wrap(function _callee4$(_context4) {
 							while (1) {
-								switch (_context3.prev = _context3.next) {
+								switch (_context4.prev = _context4.next) {
 									case 0:
 										//region Initial variables
 										issuerCertificates = [];
@@ -21218,11 +21701,11 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 										}));
 
 										if (!(issuerCertificates.length === 0)) {
-											_context3.next = 6;
+											_context4.next = 6;
 											break;
 										}
 
-										return _context3.abrupt("return", {
+										return _context4.abrupt("return", {
 											status: 1,
 											statusMessage: "No certificate's issuers"
 										});
@@ -21230,18 +21713,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 									case 6:
 										//endregion
 
-										//region Find all CRLs for crtificate's issuer
+										//region Find all CRLs for certificate's issuer
 										crls.push(..._this.crls.filter(function (element) {
 											return element.issuer.isEqual(certificate.issuer);
 										}));
 
 										if (!(crls.length === 0)) {
-											_context3.next = 9;
+											_context4.next = 9;
 											break;
 										}
 
-										return _context3.abrupt("return", {
-											status: 1,
+										return _context4.abrupt("return", {
+											status: 2,
 											statusMessage: "No CRLs for specific certificate issuer"
 										});
 
@@ -21250,35 +21733,35 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 10:
 										if (!(i < crls.length)) {
-											_context3.next = 32;
+											_context4.next = 32;
 											break;
 										}
 
 										if (!(crls[i].nextUpdate.value < _this.checkDate)) {
-											_context3.next = 13;
+											_context4.next = 13;
 											break;
 										}
 
-										return _context3.abrupt("continue", 29);
+										return _context4.abrupt("continue", 29);
 
 									case 13:
 										j = 0;
 
 									case 14:
 										if (!(j < issuerCertificates.length)) {
-											_context3.next = 29;
+											_context4.next = 29;
 											break;
 										}
 
-										_context3.prev = 15;
-										_context3.next = 18;
+										_context4.prev = 15;
+										_context4.next = 18;
 										return crls[i].verify({ issuerCertificate: issuerCertificates[j] });
 
 									case 18:
-										_result6 = _context3.sent;
+										_result6 = _context4.sent;
 
 										if (!_result6) {
-											_context3.next = 22;
+											_context4.next = 22;
 											break;
 										}
 
@@ -21287,53 +21770,53 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 											certificate: issuerCertificates[j]
 										});
 
-										return _context3.abrupt("break", 29);
+										return _context4.abrupt("break", 29);
 
 									case 22:
-										_context3.next = 26;
+										_context4.next = 26;
 										break;
 
 									case 24:
-										_context3.prev = 24;
-										_context3.t0 = _context3["catch"](15);
+										_context4.prev = 24;
+										_context4.t0 = _context4["catch"](15);
 
 									case 26:
 										j++;
-										_context3.next = 14;
+										_context4.next = 14;
 										break;
 
 									case 29:
 										i++;
-										_context3.next = 10;
+										_context4.next = 10;
 										break;
 
 									case 32:
 										if (!crlsAndCertificates.length) {
-											_context3.next = 34;
+											_context4.next = 34;
 											break;
 										}
 
-										return _context3.abrupt("return", {
+										return _context4.abrupt("return", {
 											status: 0,
 											statusMessage: "",
 											result: crlsAndCertificates
 										});
 
 									case 34:
-										return _context3.abrupt("return", {
-											status: 1,
+										return _context4.abrupt("return", {
+											status: 3,
 											statusMessage: "No valid CRLs found"
 										});
 
 									case 35:
 									case "end":
-										return _context3.stop();
+										return _context4.stop();
 								}
 							}
-						}, _callee3, this, [[15, 24]]);
+						}, _callee4, this, [[15, 24]]);
 					}));
 
-					return function findCRL(_x249) {
+					return function findCRL(_x253) {
 						return _ref4.apply(this, arguments);
 					};
 				})();
@@ -21343,78 +21826,78 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 
 				var findOCSP = (() => {
-					var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4(certificate, issuerCertificate) {
+					var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(certificate, issuerCertificate) {
 						var hashAlgorithm, i, _result7;
 
-						return regeneratorRuntime.wrap(function _callee4$(_context4) {
+						return regeneratorRuntime.wrap(function _callee5$(_context5) {
 							while (1) {
-								switch (_context4.prev = _context4.next) {
+								switch (_context5.prev = _context5.next) {
 									case 0:
 										//region Get hash algorithm from certificate
 										hashAlgorithm = getAlgorithmByOID(certificate.signatureAlgorithm.algorithmId);
 
 										if (!("name" in hashAlgorithm === false)) {
-											_context4.next = 3;
+											_context5.next = 3;
 											break;
 										}
 
-										return _context4.abrupt("return", 1);
+										return _context5.abrupt("return", 1);
 
 									case 3:
 										if (!("hash" in hashAlgorithm === false)) {
-											_context4.next = 5;
+											_context5.next = 5;
 											break;
 										}
 
-										return _context4.abrupt("return", 1);
+										return _context5.abrupt("return", 1);
 
 									case 5:
 										i = 0;
 
 									case 6:
 										if (!(i < _this.ocsps.length)) {
-											_context4.next = 17;
+											_context5.next = 17;
 											break;
 										}
 
-										_context4.next = 9;
+										_context5.next = 9;
 										return _this.ocsps[i].getCertificateStatus(certificate, issuerCertificate);
 
 									case 9:
-										_result7 = _context4.sent;
+										_result7 = _context5.sent;
 
 										if (!_result7.isForCertificate) {
-											_context4.next = 14;
+											_context5.next = 14;
 											break;
 										}
 
 										if (!(_result7.status === 0)) {
-											_context4.next = 13;
+											_context5.next = 13;
 											break;
 										}
 
-										return _context4.abrupt("return", 0);
+										return _context5.abrupt("return", 0);
 
 									case 13:
-										return _context4.abrupt("return", 1);
+										return _context5.abrupt("return", 1);
 
 									case 14:
 										i++;
-										_context4.next = 6;
+										_context5.next = 6;
 										break;
 
 									case 17:
-										return _context4.abrupt("return", 2);
+										return _context5.abrupt("return", 2);
 
 									case 18:
 									case "end":
-										return _context4.stop();
+										return _context5.stop();
 								}
 							}
-						}, _callee4, this);
+						}, _callee5, this);
 					}));
 
-					return function findOCSP(_x250, _x251) {
+					return function findOCSP(_x254, _x255) {
 						return _ref5.apply(this, arguments);
 					};
 				})();
@@ -21424,12 +21907,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 
 				var checkForCA = (() => {
-					var _ref6 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(certificate) {
+					var _ref6 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(certificate) {
 						var needToCheckCRL = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 						var isCA, mustBeCA, keyUsagePresent, cRLSign, j, view;
-						return regeneratorRuntime.wrap(function _callee5$(_context5) {
+						return regeneratorRuntime.wrap(function _callee6$(_context6) {
 							while (1) {
-								switch (_context5.prev = _context5.next) {
+								switch (_context6.prev = _context6.next) {
 									case 0:
 										//region Initial variables
 										isCA = false;
@@ -21439,7 +21922,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 										//endregion
 
 										if (!("extensions" in certificate)) {
-											_context5.next = 20;
+											_context6.next = 20;
 											break;
 										}
 
@@ -21447,16 +21930,16 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 6:
 										if (!(j < certificate.extensions.length)) {
-											_context5.next = 14;
+											_context6.next = 14;
 											break;
 										}
 
 										if (!(certificate.extensions[j].critical === true && "parsedValue" in certificate.extensions[j] === false)) {
-											_context5.next = 9;
+											_context6.next = 9;
 											break;
 										}
 
-										return _context5.abrupt("return", {
+										return _context6.abrupt("return", {
 											result: false,
 											resultCode: 6,
 											resultMessage: `Unable to parse critical certificate extension: ${certificate.extensions[j].extnID}`
@@ -21487,16 +21970,16 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 11:
 										j++;
-										_context5.next = 6;
+										_context6.next = 6;
 										break;
 
 									case 14:
 										if (!(mustBeCA === true && isCA === false)) {
-											_context5.next = 16;
+											_context6.next = 16;
 											break;
 										}
 
-										return _context5.abrupt("return", {
+										return _context6.abrupt("return", {
 											result: false,
 											resultCode: 3,
 											resultMessage: "Unable to build certificate chain - using \"keyCertSign\" flag set without BasicConstaints"
@@ -21504,11 +21987,11 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 16:
 										if (!(keyUsagePresent === true && isCA === true && mustBeCA === false)) {
-											_context5.next = 18;
+											_context6.next = 18;
 											break;
 										}
 
-										return _context5.abrupt("return", {
+										return _context6.abrupt("return", {
 											result: false,
 											resultCode: 4,
 											resultMessage: "Unable to build certificate chain - \"keyCertSign\" flag was not set"
@@ -21516,11 +21999,11 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 18:
 										if (!(isCA === true && keyUsagePresent === true && needToCheckCRL && cRLSign === false)) {
-											_context5.next = 20;
+											_context6.next = 20;
 											break;
 										}
 
-										return _context5.abrupt("return", {
+										return _context6.abrupt("return", {
 											result: false,
 											resultCode: 5,
 											resultMessage: "Unable to build certificate chain - intermediate certificate must have \"cRLSign\" key usage flag"
@@ -21528,18 +22011,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 20:
 										if (!(isCA === false)) {
-											_context5.next = 22;
+											_context6.next = 22;
 											break;
 										}
 
-										return _context5.abrupt("return", {
+										return _context6.abrupt("return", {
 											result: false,
 											resultCode: 7,
 											resultMessage: "Unable to build certificate chain - more than one possible end-user certificate"
 										});
 
 									case 22:
-										return _context5.abrupt("return", {
+										return _context6.abrupt("return", {
 											result: true,
 											resultCode: 0,
 											resultMessage: ""
@@ -21547,13 +22030,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 23:
 									case "end":
-										return _context5.stop();
+										return _context6.stop();
 								}
 							}
-						}, _callee5, this);
+						}, _callee6, this);
 					}));
 
-					return function checkForCA(_x253) {
+					return function checkForCA(_x257) {
 						return _ref6.apply(this, arguments);
 					};
 				})();
@@ -21563,27 +22046,27 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 
 				var basicCheck = (() => {
-					var _ref7 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee6(path, checkDate) {
-						var i, _i18, _i19, ocspResult, crlResult, j, isCertificateRevoked, isCertificateCA, _i20, _result8;
+					var _ref7 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee7(path, checkDate) {
+						var i, _i18, _i19, ocspResult, crlResult, j, isCertificateRevoked, isCertificateCA, issuerCertificate, extensionFound, _iteratorNormalCompletion29, _didIteratorError29, _iteratorError29, _iterator29, _step29, extension, _i20, _result8;
 
-						return regeneratorRuntime.wrap(function _callee6$(_context6) {
+						return regeneratorRuntime.wrap(function _callee7$(_context7) {
 							while (1) {
-								switch (_context6.prev = _context6.next) {
+								switch (_context7.prev = _context7.next) {
 									case 0:
 										i = 0;
 
 									case 1:
 										if (!(i < path.length)) {
-											_context6.next = 7;
+											_context7.next = 7;
 											break;
 										}
 
 										if (!(path[i].notBefore.value > checkDate || path[i].notAfter.value < checkDate)) {
-											_context6.next = 4;
+											_context7.next = 4;
 											break;
 										}
 
-										return _context6.abrupt("return", {
+										return _context7.abrupt("return", {
 											result: false,
 											resultCode: 8,
 											resultMessage: "The certificate is either not yet valid or expired"
@@ -21591,16 +22074,16 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 4:
 										i++;
-										_context6.next = 1;
+										_context7.next = 1;
 										break;
 
 									case 7:
 										if (!(path.length < 2)) {
-											_context6.next = 9;
+											_context7.next = 9;
 											break;
 										}
 
-										return _context6.abrupt("return", {
+										return _context7.abrupt("return", {
 											result: false,
 											resultCode: 9,
 											resultMessage: "Too short certificate path"
@@ -21611,21 +22094,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 10:
 										if (!(_i18 >= 0)) {
-											_context6.next = 17;
+											_context7.next = 17;
 											break;
 										}
 
 										if (!(path[_i18].issuer.isEqual(path[_i18].subject) === false)) {
-											_context6.next = 14;
+											_context7.next = 14;
 											break;
 										}
 
 										if (!(path[_i18].issuer.isEqual(path[_i18 + 1].subject) === false)) {
-											_context6.next = 14;
+											_context7.next = 14;
 											break;
 										}
 
-										return _context6.abrupt("return", {
+										return _context7.abrupt("return", {
 											result: false,
 											resultCode: 10,
 											resultMessage: "Incorrect name chaining"
@@ -21633,71 +22116,129 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 									case 14:
 										_i18--;
-										_context6.next = 10;
+										_context7.next = 10;
 										break;
 
 									case 17:
 										if (!(_this.crls.length !== 0 || _this.ocsps.length !== 0)) {
-											_context6.next = 58;
+											_context7.next = 96;
 											break;
 										}
 
 										_i19 = 0;
 
 									case 19:
-										if (!(_i19 < path.length - 2)) {
-											_context6.next = 58;
+										if (!(_i19 < path.length - 1)) {
+											_context7.next = 96;
 											break;
 										}
 
 										//region Initial variables
-										ocspResult = void 0;
-										crlResult = void 0;
+										ocspResult = 2;
+										crlResult = {
+											status: 0,
+											statusMessage: ""
+										};
 										//endregion
 
 										//region Check OCSPs first
 
 										if (!(_this.ocsps.length !== 0)) {
-											_context6.next = 32;
+											_context7.next = 32;
 											break;
 										}
 
-										_context6.next = 25;
+										_context7.next = 25;
 										return findOCSP(path[_i19], path[_i19 + 1]);
 
 									case 25:
-										ocspResult = _context6.sent;
-										_context6.t0 = ocspResult;
-										_context6.next = _context6.t0 === 0 ? 29 : _context6.t0 === 1 ? 30 : _context6.t0 === 2 ? 31 : 32;
+										ocspResult = _context7.sent;
+										_context7.t0 = ocspResult;
+										_context7.next = _context7.t0 === 0 ? 29 : _context7.t0 === 1 ? 30 : _context7.t0 === 2 ? 31 : 32;
 										break;
 
 									case 29:
-										return _context6.abrupt("continue", 55);
+										return _context7.abrupt("continue", 93);
 
 									case 30:
-										return _context6.abrupt("return", {
+										return _context7.abrupt("return", {
 											result: false,
 											resultCode: 12,
 											resultMessage: "One of certificates was revoked via OCSP response"
 										});
 
 									case 31:
-										return _context6.abrupt("break", 32);
+										return _context7.abrupt("break", 32);
 
 									case 32:
 										if (!(_this.crls.length !== 0)) {
-											_context6.next = 53;
+											_context7.next = 56;
 											break;
 										}
 
-										_context6.next = 35;
+										_context7.next = 35;
 										return findCRL(path[_i19]);
 
 									case 35:
-										crlResult = _context6.sent;
+										crlResult = _context7.sent;
 
-										if (!crlResult.status) {
-											_context6.next = 38;
+										if (!(crlResult.status === 0)) {
+											_context7.next = 52;
+											break;
+										}
+
+										j = 0;
+
+									case 38:
+										if (!(j < crlResult.result.length)) {
+											_context7.next = 50;
+											break;
+										}
+
+										//region Check that the CRL issuer certificate have not been revoked
+										isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked(path[_i19]);
+
+										if (!isCertificateRevoked) {
+											_context7.next = 42;
+											break;
+										}
+
+										return _context7.abrupt("return", {
+											result: false,
+											resultCode: 12,
+											resultMessage: "One of certificates had been revoked"
+										});
+
+									case 42:
+										_context7.next = 44;
+										return checkForCA(crlResult.result[j].certificate, true);
+
+									case 44:
+										isCertificateCA = _context7.sent;
+
+										if (!(isCertificateCA.result === false)) {
+											_context7.next = 47;
+											break;
+										}
+
+										return _context7.abrupt("return", {
+											result: false,
+											resultCode: 13,
+											resultMessage: "CRL issuer certificate is not a CA certificate or does not have crlSign flag"
+										});
+
+									case 47:
+										j++;
+										_context7.next = 38;
+										break;
+
+									case 50:
+										_context7.next = 54;
+										break;
+
+									case 52:
+										if (!(passedWhenNotRevValues === false)) {
+											_context7.next = 54;
 											break;
 										}
 
@@ -21707,118 +22248,159 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 											resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
 										};
 
-									case 38:
-										j = 0;
-
-									case 39:
-										if (!(j < crlResult.result.length)) {
-											_context6.next = 51;
-											break;
-										}
-
-										//region Check that the CRL issuer certificate have not been revoked
-										isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked(path[_i19]);
-
-										if (!isCertificateRevoked) {
-											_context6.next = 43;
-											break;
-										}
-
-										return _context6.abrupt("return", {
-											result: false,
-											resultCode: 12,
-											resultMessage: "One of certificates had been revoked"
-										});
-
-									case 43:
-										_context6.next = 45;
-										return checkForCA(crlResult.result[j].certificate, true);
-
-									case 45:
-										isCertificateCA = _context6.sent;
-
-										if (!(isCertificateCA.result === false)) {
-											_context6.next = 48;
-											break;
-										}
-
-										return _context6.abrupt("return", {
-											result: false,
-											resultCode: 13,
-											resultMessage: "CRL issuer certificate is not a CA certificate or does not have crlSign flag"
-										});
-
-									case 48:
-										j++;
-										_context6.next = 39;
+									case 54:
+										_context7.next = 58;
 										break;
 
-									case 51:
-										_context6.next = 55;
-										break;
-
-									case 53:
+									case 56:
 										if (!(ocspResult === 2)) {
-											_context6.next = 55;
+											_context7.next = 58;
 											break;
 										}
 
-										return _context6.abrupt("return", {
+										return _context7.abrupt("return", {
 											result: false,
 											resultCode: 11,
 											resultMessage: "No revocation values found for one of certificates"
 										});
 
-									case 55:
-										_i19++;
-										_context6.next = 19;
+									case 58:
+										if (!(ocspResult === 2 && crlResult.status === 2 && passedWhenNotRevValues)) {
+											_context7.next = 93;
+											break;
+										}
+
+										issuerCertificate = path[_i19 + 1];
+										extensionFound = false;
+
+										if (!("extensions" in issuerCertificate)) {
+											_context7.next = 91;
+											break;
+										}
+
+										_iteratorNormalCompletion29 = true;
+										_didIteratorError29 = false;
+										_iteratorError29 = undefined;
+										_context7.prev = 65;
+										_iterator29 = issuerCertificate.extensions[Symbol.iterator]();
+
+									case 67:
+										if (_iteratorNormalCompletion29 = (_step29 = _iterator29.next()).done) {
+											_context7.next = 77;
+											break;
+										}
+
+										extension = _step29.value;
+										_context7.t1 = extension.extnID;
+										_context7.next = _context7.t1 === "2.5.29.31" ? 72 : _context7.t1 === "2.5.29.46" ? 72 : _context7.t1 === "1.3.6.1.5.5.7.1.1" ? 72 : 74;
 										break;
 
-									case 58:
+									case 72:
+										// AuthorityInfoAccess
+										extensionFound = true;
+										return _context7.abrupt("break", 74);
+
+									case 74:
+										_iteratorNormalCompletion29 = true;
+										_context7.next = 67;
+										break;
+
+									case 77:
+										_context7.next = 83;
+										break;
+
+									case 79:
+										_context7.prev = 79;
+										_context7.t2 = _context7["catch"](65);
+										_didIteratorError29 = true;
+										_iteratorError29 = _context7.t2;
+
+									case 83:
+										_context7.prev = 83;
+										_context7.prev = 84;
+
+										if (!_iteratorNormalCompletion29 && _iterator29.return) {
+											_iterator29.return();
+										}
+
+									case 86:
+										_context7.prev = 86;
+
+										if (!_didIteratorError29) {
+											_context7.next = 89;
+											break;
+										}
+
+										throw _iteratorError29;
+
+									case 89:
+										return _context7.finish(86);
+
+									case 90:
+										return _context7.finish(83);
+
+									case 91:
+										if (!extensionFound) {
+											_context7.next = 93;
+											break;
+										}
+
+										throw {
+											result: false,
+											resultCode: 11,
+											resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
+										};
+
+									case 93:
+										_i19++;
+										_context7.next = 19;
+										break;
+
+									case 96:
 										_i20 = 1;
 
-									case 59:
+									case 97:
 										if (!(_i20 < path.length)) {
-											_context6.next = 68;
+											_context7.next = 106;
 											break;
 										}
 
-										_context6.next = 62;
+										_context7.next = 100;
 										return checkForCA(path[_i20]);
 
-									case 62:
-										_result8 = _context6.sent;
+									case 100:
+										_result8 = _context7.sent;
 
 										if (!(_result8.result === false)) {
-											_context6.next = 65;
+											_context7.next = 103;
 											break;
 										}
 
-										return _context6.abrupt("return", {
+										return _context7.abrupt("return", {
 											result: false,
 											resultCode: 14,
 											resultMessage: "One of intermediate certificates is not a CA certificate"
 										});
 
-									case 65:
+									case 103:
 										_i20++;
-										_context6.next = 59;
+										_context7.next = 97;
 										break;
 
-									case 68:
-										return _context6.abrupt("return", {
+									case 106:
+										return _context7.abrupt("return", {
 											result: true
 										});
 
-									case 69:
+									case 107:
 									case "end":
-										return _context6.stop();
+										return _context7.stop();
 								}
 							}
-						}, _callee6, this);
+						}, _callee7, this, [[65, 79, 83, 91], [84,, 86, 90]]);
 					}));
 
-					return function basicCheck(_x254, _x255) {
+					return function basicCheck(_x258, _x259) {
 						return _ref7.apply(this, arguments);
 					};
 				})();
@@ -21828,15 +22410,17 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 				//region Initialize "localCerts" by value of "_this.certs" + "_this.trustedCerts" arrays
 
 
+				var passedWhenNotRevValues = _arguments2.length > 0 && _arguments2[0] !== undefined ? _arguments2[0] : false;
+
 				var localCerts, _this, i, j, result, certificatePath, _i21, found, _j3, certificate, k, shortestLength, shortestIndex, _i22, _i23;
 
-				return regeneratorRuntime.wrap(function _callee7$(_context7) {
+				return regeneratorRuntime.wrap(function _callee8$(_context8) {
 					while (1) {
-						switch (_context7.prev = _context7.next) {
+						switch (_context8.prev = _context8.next) {
 							case 0:
 								//region Initial variables
 								localCerts = [];
-								_this = _this3;
+								_this = _this4;
 								localCerts.push(..._this.trustedCerts);
 								localCerts.push(..._this.certs);
 								//endregion
@@ -21846,7 +22430,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 							case 5:
 								if (!(i < localCerts.length)) {
-									_context7.next = 20;
+									_context8.next = 20;
 									break;
 								}
 
@@ -21854,35 +22438,35 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 							case 7:
 								if (!(j < localCerts.length)) {
-									_context7.next = 17;
+									_context8.next = 17;
 									break;
 								}
 
 								if (!(i === j)) {
-									_context7.next = 10;
+									_context8.next = 10;
 									break;
 								}
 
-								return _context7.abrupt("continue", 14);
+								return _context8.abrupt("continue", 14);
 
 							case 10:
 								if (!isEqualBuffer(localCerts[i].tbs, localCerts[j].tbs)) {
-									_context7.next = 14;
+									_context8.next = 14;
 									break;
 								}
 
 								localCerts.splice(j, 1);
 								i = 0;
-								return _context7.abrupt("break", 17);
+								return _context8.abrupt("break", 17);
 
 							case 14:
 								j++;
-								_context7.next = 7;
+								_context8.next = 7;
 								break;
 
 							case 17:
 								i++;
-								_context7.next = 5;
+								_context8.next = 5;
 								break;
 
 							case 20:
@@ -21895,18 +22479,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 								//region Build path for "end entity" certificate
 
-								_context7.next = 24;
+								_context8.next = 24;
 								return buildPath(localCerts[localCerts.length - 1]);
 
 							case 24:
-								result = _context7.sent;
+								result = _context8.sent;
 
 								if (!(result.length === 0)) {
-									_context7.next = 27;
+									_context8.next = 27;
 									break;
 								}
 
-								return _context7.abrupt("return", {
+								return _context8.abrupt("return", {
 									result: false,
 									resultCode: 60,
 									resultMessage: "Unable to find certificate path"
@@ -21917,7 +22501,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 							case 28:
 								if (!(_i21 < result.length)) {
-									_context7.next = 50;
+									_context8.next = 50;
 									break;
 								}
 
@@ -21926,7 +22510,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 							case 31:
 								if (!(_j3 < result[_i21].length)) {
-									_context7.next = 46;
+									_context8.next = 46;
 									break;
 								}
 
@@ -21935,34 +22519,34 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 							case 34:
 								if (!(k < _this.trustedCerts.length)) {
-									_context7.next = 41;
+									_context8.next = 41;
 									break;
 								}
 
 								if (!isEqualBuffer(certificate.tbs, _this.trustedCerts[k].tbs)) {
-									_context7.next = 38;
+									_context8.next = 38;
 									break;
 								}
 
 								found = true;
-								return _context7.abrupt("break", 41);
+								return _context8.abrupt("break", 41);
 
 							case 38:
 								k++;
-								_context7.next = 34;
+								_context8.next = 34;
 								break;
 
 							case 41:
 								if (!found) {
-									_context7.next = 43;
+									_context8.next = 43;
 									break;
 								}
 
-								return _context7.abrupt("break", 46);
+								return _context8.abrupt("break", 46);
 
 							case 43:
 								_j3++;
-								_context7.next = 31;
+								_context8.next = 31;
 								break;
 
 							case 46:
@@ -21974,12 +22558,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 							case 47:
 								_i21++;
-								_context7.next = 28;
+								_context8.next = 28;
 								break;
 
 							case 50:
 								if (!(result.length === 0)) {
-									_context7.next = 52;
+									_context8.next = 52;
 									break;
 								}
 
@@ -22011,28 +22595,28 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								} //endregion
 
 								//region Perform basic checking for all certificates in the path
-								_context7.next = 58;
+								_context8.next = 58;
 								return basicCheck(certificatePath, _this.checkDate);
 
 							case 58:
-								result = _context7.sent;
+								result = _context8.sent;
 
 								if (!(result.result === false)) {
-									_context7.next = 61;
+									_context8.next = 61;
 									break;
 								}
 
 								throw result;
 
 							case 61:
-								return _context7.abrupt("return", certificatePath);
+								return _context8.abrupt("return", certificatePath);
 
 							case 62:
 							case "end":
-								return _context7.stop();
+								return _context8.stop();
 						}
 					}
-				}, _callee7, _this3);
+				}, _callee8, _this4);
 			}))();
 		}
 		//**********************************************************************************
@@ -22042,17 +22626,17 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
    * @returns {Promise}
    */
 		verify() {
-			var _arguments = arguments,
-			    _this4 = this;
+			var _arguments3 = arguments,
+			    _this5 = this;
 
-			return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
-				var parameters = _arguments.length > 0 && _arguments[0] !== undefined ? _arguments[0] : {};
+			return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9() {
+				var parameters = _arguments3.length > 0 && _arguments3[0] !== undefined ? _arguments3[0] : {};
 
-				var compareDNSName, compareRFC822Name, compareUniformResourceIdentifier, compareIPAddress, compareDirectoryName, initialPolicySet, initialExplicitPolicy, initialPolicyMappingInhibit, initialInhibitPolicy, initialPermittedSubtreesSet, initialExcludedSubtreesSet, initialRequiredNameForms, explicitPolicyIndicator, policyMappingInhibitIndicator, inhibitAnyPolicyIndicator, pendingConstraints, explicitPolicyPending, policyMappingInhibitPending, inhibitAnyPolicyPending, permittedSubtrees, excludedSubtrees, requiredNameForms, pathDepth, allPolicies, policiesAndCerts, anyPolicyArray, ii, policyMappings, certPolicies, explicitPolicyStart, i, j, s, k, policyIndex, _s, certArray, _policyIndex, searchAnyPolicy, _i27, _k, issuerDomainPolicyIndex, subjectDomainPolicyIndex, n, _j4, m, _i28, _j5, authConstrPolicies, _i29, found, _j6, anyPolicyFound, _k2, userConstrPolicies, _i30, _j7, policyResult, _i31, subjectAltNames, certPermittedSubtrees, certExcludedSubtrees, _j8, formFound, _j9, _k3, constrGroups, _j10, p, groupPermitted, valueExists, group, _j11, _k4, _k5, _k6, _k7, _k8, excluded, _j12, _k9, _k10, _k11, _k12, _k13;
+				var compareDNSName, compareRFC822Name, compareUniformResourceIdentifier, compareIPAddress, compareDirectoryName, passedWhenNotRevValues, initialPolicySet, initialExplicitPolicy, initialPolicyMappingInhibit, initialInhibitPolicy, initialPermittedSubtreesSet, initialExcludedSubtreesSet, initialRequiredNameForms, explicitPolicyIndicator, policyMappingInhibitIndicator, inhibitAnyPolicyIndicator, pendingConstraints, explicitPolicyPending, policyMappingInhibitPending, inhibitAnyPolicyPending, permittedSubtrees, excludedSubtrees, requiredNameForms, pathDepth, allPolicies, policiesAndCerts, anyPolicyArray, ii, policyMappings, certPolicies, explicitPolicyStart, i, j, s, k, policyIndex, _s, certArray, _policyIndex, searchAnyPolicy, _i27, _k, issuerDomainPolicyIndex, subjectDomainPolicyIndex, n, _j4, m, _i28, _j5, authConstrPolicies, _i29, found, _j6, anyPolicyFound, _k2, userConstrPolicies, _i30, _j7, policyResult, _i31, subjectAltNames, certPermittedSubtrees, certExcludedSubtrees, _j8, formFound, _j9, _k3, constrGroups, _j10, p, groupPermitted, valueExists, group, _j11, _k4, _k5, _k6, _k7, _k8, excluded, _j12, _k9, _k10, _k11, _k12, _k13;
 
-				return regeneratorRuntime.wrap(function _callee8$(_context8) {
+				return regeneratorRuntime.wrap(function _callee9$(_context9) {
 					while (1) {
-						switch (_context8.prev = _context8.next) {
+						switch (_context9.prev = _context9.next) {
 							case 0:
 								compareDirectoryName = function compareDirectoryName(name, constraint) {
 									/// <summary>Compare two directoryName values</summary>
@@ -22272,10 +22856,10 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								//region Auxiliary functions for name constraints checking
 
 
-								_context8.prev = 5;
+								_context9.prev = 5;
 
-								if (!(_this4.certs.length === 0)) {
-									_context8.next = 8;
+								if (!(_this5.certs.length === 0)) {
+									_context9.next = 8;
 									break;
 								}
 
@@ -22285,6 +22869,11 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								//endregion
 
 								//region Get input variables
+								passedWhenNotRevValues = false;
+
+
+								if ("passedWhenNotRevValues" in parameters) passedWhenNotRevValues = parameters.passedWhenNotRevValues;
+
 								initialPolicySet = [];
 
 								initialPolicySet.push("2.5.29.32.0"); // "anyPolicy"
@@ -22332,11 +22921,11 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 								//region Sorting certificates in the chain array
 
-								_context8.next = 39;
-								return _this4.sort();
+								_context9.next = 41;
+								return _this5.sort(passedWhenNotRevValues);
 
-							case 39:
-								_this4.certs = _context8.sent;
+							case 41:
+								_this5.certs = _context9.sent;
 
 								//endregion
 
@@ -22348,77 +22937,77 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 								policiesAndCerts = []; // In fact "array of array" where rows are for each specific policy, column for each certificate and value is "true/false"
 
-								anyPolicyArray = new Array(_this4.certs.length - 1); // Minus "trusted anchor"
+								anyPolicyArray = new Array(_this5.certs.length - 1); // Minus "trusted anchor"
 
-								for (ii = 0; ii < _this4.certs.length - 1; ii++) {
+								for (ii = 0; ii < _this5.certs.length - 1; ii++) {
 									anyPolicyArray[ii] = true;
 								}policiesAndCerts.push(anyPolicyArray);
 
-								policyMappings = new Array(_this4.certs.length - 1); // Array of "PolicyMappings" for each certificate
+								policyMappings = new Array(_this5.certs.length - 1); // Array of "PolicyMappings" for each certificate
 
-								certPolicies = new Array(_this4.certs.length - 1); // Array of "CertificatePolicies" for each certificate
+								certPolicies = new Array(_this5.certs.length - 1); // Array of "CertificatePolicies" for each certificate
 
-								explicitPolicyStart = explicitPolicyIndicator ? _this4.certs.length - 1 : -1;
+								explicitPolicyStart = explicitPolicyIndicator ? _this5.certs.length - 1 : -1;
 								//endregion
 
 								//region Gather all neccessary information from certificate chain
 
-								i = _this4.certs.length - 2;
+								i = _this5.certs.length - 2;
 
-							case 50:
+							case 52:
 								if (!(i >= 0)) {
-									_context8.next = 105;
+									_context9.next = 107;
 									break;
 								}
 
-								if (!("extensions" in _this4.certs[i])) {
-									_context8.next = 102;
+								if (!("extensions" in _this5.certs[i])) {
+									_context9.next = 104;
 									break;
 								}
 
 								j = 0;
 
-							case 53:
-								if (!(j < _this4.certs[i].extensions.length)) {
-									_context8.next = 88;
+							case 55:
+								if (!(j < _this5.certs[i].extensions.length)) {
+									_context9.next = 90;
 									break;
 								}
 
-								if (!(_this4.certs[i].extensions[j].extnID === "2.5.29.32")) {
-									_context8.next = 79;
+								if (!(_this5.certs[i].extensions[j].extnID === "2.5.29.32")) {
+									_context9.next = 81;
 									break;
 								}
 
-								certPolicies[i] = _this4.certs[i].extensions[j].parsedValue;
+								certPolicies[i] = _this5.certs[i].extensions[j].parsedValue;
 
 								//region Remove entry from "anyPolicies" for the certificate
 								s = 0;
 
-							case 57:
+							case 59:
 								if (!(s < allPolicies.length)) {
-									_context8.next = 64;
+									_context9.next = 66;
 									break;
 								}
 
 								if (!(allPolicies[s] === "2.5.29.32.0")) {
-									_context8.next = 61;
+									_context9.next = 63;
 									break;
 								}
 
 								delete policiesAndCerts[s][i];
-								return _context8.abrupt("break", 64);
+								return _context9.abrupt("break", 66);
 
-							case 61:
+							case 63:
 								s++;
-								_context8.next = 57;
+								_context9.next = 59;
 								break;
 
-							case 64:
+							case 66:
 								k = 0;
 
-							case 65:
-								if (!(k < _this4.certs[i].extensions[j].parsedValue.certificatePolicies.length)) {
-									_context8.next = 79;
+							case 67:
+								if (!(k < _this5.certs[i].extensions[j].parsedValue.certificatePolicies.length)) {
+									_context9.next = 81;
 									break;
 								}
 
@@ -22428,88 +23017,88 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 								_s = 0;
 
-							case 68:
+							case 70:
 								if (!(_s < allPolicies.length)) {
-									_context8.next = 75;
+									_context9.next = 77;
 									break;
 								}
 
-								if (!(_this4.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier === allPolicies[_s])) {
-									_context8.next = 72;
+								if (!(_this5.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier === allPolicies[_s])) {
+									_context9.next = 74;
 									break;
 								}
 
 								policyIndex = _s;
-								return _context8.abrupt("break", 75);
+								return _context9.abrupt("break", 77);
 
-							case 72:
+							case 74:
 								_s++;
-								_context8.next = 68;
+								_context9.next = 70;
 								break;
 
-							case 75:
+							case 77:
 								//endregion
 
 								if (policyIndex === -1) {
-									allPolicies.push(_this4.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier);
+									allPolicies.push(_this5.certs[i].extensions[j].parsedValue.certificatePolicies[k].policyIdentifier);
 
-									certArray = new Array(_this4.certs.length - 1);
+									certArray = new Array(_this5.certs.length - 1);
 
 									certArray[i] = true;
 
 									policiesAndCerts.push(certArray);
 								} else policiesAndCerts[policyIndex][i] = true;
 
-							case 76:
+							case 78:
 								k++;
-								_context8.next = 65;
+								_context9.next = 67;
 								break;
 
-							case 79:
-								if (!(_this4.certs[i].extensions[j].extnID === "2.5.29.33")) {
-									_context8.next = 83;
+							case 81:
+								if (!(_this5.certs[i].extensions[j].extnID === "2.5.29.33")) {
+									_context9.next = 85;
 									break;
 								}
 
 								if (!policyMappingInhibitIndicator) {
-									_context8.next = 82;
+									_context9.next = 84;
 									break;
 								}
 
-								return _context8.abrupt("return", {
+								return _context9.abrupt("return", {
 									result: false,
 									resultCode: 98,
 									resultMessage: "Policy mapping prohibited"
 								});
 
-							case 82:
+							case 84:
 
-								policyMappings[i] = _this4.certs[i].extensions[j].parsedValue;
+								policyMappings[i] = _this5.certs[i].extensions[j].parsedValue;
 
-							case 83:
+							case 85:
 								//endregion
 
 								//region PolicyConstraints
-								if (_this4.certs[i].extensions[j].extnID === "2.5.29.36") {
+								if (_this5.certs[i].extensions[j].extnID === "2.5.29.36") {
 									if (explicitPolicyIndicator === false) {
 										//region requireExplicitPolicy
-										if (_this4.certs[i].extensions[j].parsedValue.requireExplicitPolicy === 0) {
+										if (_this5.certs[i].extensions[j].parsedValue.requireExplicitPolicy === 0) {
 											explicitPolicyIndicator = true;
 											explicitPolicyStart = i;
 										} else {
 											if (pendingConstraints[0] === false) {
 												pendingConstraints[0] = true;
-												explicitPolicyPending = _this4.certs[i].extensions[j].parsedValue.requireExplicitPolicy;
-											} else explicitPolicyPending = explicitPolicyPending > _this4.certs[i].extensions[j].parsedValue.requireExplicitPolicy ? _this4.certs[i].extensions[j].parsedValue.requireExplicitPolicy : explicitPolicyPending;
+												explicitPolicyPending = _this5.certs[i].extensions[j].parsedValue.requireExplicitPolicy;
+											} else explicitPolicyPending = explicitPolicyPending > _this5.certs[i].extensions[j].parsedValue.requireExplicitPolicy ? _this5.certs[i].extensions[j].parsedValue.requireExplicitPolicy : explicitPolicyPending;
 										}
 										//endregion
 
 										//region inhibitPolicyMapping
-										if (_this4.certs[i].extensions[j].parsedValue.inhibitPolicyMapping === 0) policyMappingInhibitIndicator = true;else {
+										if (_this5.certs[i].extensions[j].parsedValue.inhibitPolicyMapping === 0) policyMappingInhibitIndicator = true;else {
 											if (pendingConstraints[1] === false) {
 												pendingConstraints[1] = true;
-												policyMappingInhibitPending = _this4.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1;
-											} else policyMappingInhibitPending = policyMappingInhibitPending > _this4.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 ? _this4.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 : policyMappingInhibitPending;
+												policyMappingInhibitPending = _this5.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1;
+											} else policyMappingInhibitPending = policyMappingInhibitPending > _this5.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 ? _this5.certs[i].extensions[j].parsedValue.inhibitPolicyMapping + 1 : policyMappingInhibitPending;
 										}
 										//endregion
 									}
@@ -22517,26 +23106,26 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								//endregion
 
 								//region InhibitAnyPolicy
-								if (_this4.certs[i].extensions[j].extnID === "2.5.29.54") {
+								if (_this5.certs[i].extensions[j].extnID === "2.5.29.54") {
 									if (inhibitAnyPolicyIndicator === false) {
-										if (_this4.certs[i].extensions[j].parsedValue.valueBlock.valueDec === 0) inhibitAnyPolicyIndicator = true;else {
+										if (_this5.certs[i].extensions[j].parsedValue.valueBlock.valueDec === 0) inhibitAnyPolicyIndicator = true;else {
 											if (pendingConstraints[2] === false) {
 												pendingConstraints[2] = true;
-												inhibitAnyPolicyPending = _this4.certs[i].extensions[j].parsedValue.valueBlock.valueDec;
-											} else inhibitAnyPolicyPending = inhibitAnyPolicyPending > _this4.certs[i].extensions[j].parsedValue.valueBlock.valueDec ? _this4.certs[i].extensions[j].parsedValue.valueBlock.valueDec : inhibitAnyPolicyPending;
+												inhibitAnyPolicyPending = _this5.certs[i].extensions[j].parsedValue.valueBlock.valueDec;
+											} else inhibitAnyPolicyPending = inhibitAnyPolicyPending > _this5.certs[i].extensions[j].parsedValue.valueBlock.valueDec ? _this5.certs[i].extensions[j].parsedValue.valueBlock.valueDec : inhibitAnyPolicyPending;
 										}
 									}
 								}
 								//endregion
 
-							case 85:
+							case 87:
 								j++;
-								_context8.next = 53;
+								_context9.next = 55;
 								break;
 
-							case 88:
+							case 90:
 								if (!(inhibitAnyPolicyIndicator === true)) {
-									_context8.next = 99;
+									_context9.next = 101;
 									break;
 								}
 
@@ -22546,31 +23135,31 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 								searchAnyPolicy = 0;
 
-							case 91:
+							case 93:
 								if (!(searchAnyPolicy < allPolicies.length)) {
-									_context8.next = 98;
+									_context9.next = 100;
 									break;
 								}
 
 								if (!(allPolicies[searchAnyPolicy] === "2.5.29.32.0")) {
-									_context8.next = 95;
+									_context9.next = 97;
 									break;
 								}
 
 								_policyIndex = searchAnyPolicy;
-								return _context8.abrupt("break", 98);
+								return _context9.abrupt("break", 100);
 
-							case 95:
+							case 97:
 								searchAnyPolicy++;
-								_context8.next = 91;
+								_context9.next = 93;
 								break;
 
-							case 98:
+							case 100:
 								//endregion
 
 								if (_policyIndex !== -1) delete policiesAndCerts[0][i]; // Unset value to "undefined" for "anyPolicies" value for current certificate
 
-							case 99:
+							case 101:
 								//endregion
 
 								//region Process with "pending constraints"
@@ -22607,45 +23196,45 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								}
 								//endregion
 
-							case 102:
+							case 104:
 								i--, pathDepth++;
-								_context8.next = 50;
+								_context9.next = 52;
 								break;
 
-							case 105:
+							case 107:
 								_i27 = 0;
 
-							case 106:
-								if (!(_i27 < _this4.certs.length - 1)) {
-									_context8.next = 123;
+							case 108:
+								if (!(_i27 < _this5.certs.length - 1)) {
+									_context9.next = 125;
 									break;
 								}
 
-								if (!(_i27 < _this4.certs.length - 2 && typeof policyMappings[_i27 + 1] !== "undefined")) {
-									_context8.next = 120;
+								if (!(_i27 < _this5.certs.length - 2 && typeof policyMappings[_i27 + 1] !== "undefined")) {
+									_context9.next = 122;
 									break;
 								}
 
 								_k = 0;
 
-							case 109:
+							case 111:
 								if (!(_k < policyMappings[_i27 + 1].mappings.length)) {
-									_context8.next = 120;
+									_context9.next = 122;
 									break;
 								}
 
 								if (!(policyMappings[_i27 + 1].mappings[_k].issuerDomainPolicy === "2.5.29.32.0" || policyMappings[_i27 + 1].mappings[_k].subjectDomainPolicy === "2.5.29.32.0")) {
-									_context8.next = 112;
+									_context9.next = 114;
 									break;
 								}
 
-								return _context8.abrupt("return", {
+								return _context9.abrupt("return", {
 									result: false,
 									resultCode: 99,
 									resultMessage: "The \"anyPolicy\" should not be a part of policy mapping scheme"
 								});
 
-							case 112:
+							case 114:
 								//endregion
 
 								//region Initial variables
@@ -22683,17 +23272,17 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								}
 								//endregion
 
-							case 117:
+							case 119:
 								_k++;
-								_context8.next = 109;
+								_context9.next = 111;
 								break;
 
-							case 120:
+							case 122:
 								_i27++;
-								_context8.next = 106;
+								_context9.next = 108;
 								break;
 
-							case 123:
+							case 125:
 								//endregion
 
 								//region Working with "explicitPolicyIndicator" and "anyPolicy"
@@ -22710,148 +23299,148 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								authConstrPolicies = [];
 								_i29 = 0;
 
-							case 126:
+							case 128:
 								if (!(_i29 < policiesAndCerts.length)) {
-									_context8.next = 154;
+									_context9.next = 156;
 									break;
 								}
 
 								found = true;
 								_j6 = 0;
 
-							case 129:
-								if (!(_j6 < _this4.certs.length - 1)) {
-									_context8.next = 150;
+							case 131:
+								if (!(_j6 < _this5.certs.length - 1)) {
+									_context9.next = 152;
 									break;
 								}
 
 								anyPolicyFound = false;
 
 								if (!(_j6 < explicitPolicyStart && allPolicies[_i29] === "2.5.29.32.0" && allPolicies.length > 1)) {
-									_context8.next = 134;
+									_context9.next = 136;
 									break;
 								}
 
 								found = false;
-								return _context8.abrupt("break", 150);
+								return _context9.abrupt("break", 152);
 
-							case 134:
+							case 136:
 								if (!(typeof policiesAndCerts[_i29][_j6] === "undefined")) {
-									_context8.next = 147;
+									_context9.next = 149;
 									break;
 								}
 
 								if (!(_j6 >= explicitPolicyStart)) {
-									_context8.next = 144;
+									_context9.next = 146;
 									break;
 								}
 
 								_k2 = 0;
 
-							case 137:
+							case 139:
 								if (!(_k2 < allPolicies.length)) {
-									_context8.next = 144;
+									_context9.next = 146;
 									break;
 								}
 
 								if (!(allPolicies[_k2] === "2.5.29.32.0")) {
-									_context8.next = 141;
+									_context9.next = 143;
 									break;
 								}
 
 								if (policiesAndCerts[_k2][_j6] === true) anyPolicyFound = true;
 
-								return _context8.abrupt("break", 144);
+								return _context9.abrupt("break", 146);
 
-							case 141:
+							case 143:
 								_k2++;
-								_context8.next = 137;
+								_context9.next = 139;
 								break;
 
-							case 144:
+							case 146:
 								if (anyPolicyFound) {
-									_context8.next = 147;
+									_context9.next = 149;
 									break;
 								}
 
 								found = false;
-								return _context8.abrupt("break", 150);
+								return _context9.abrupt("break", 152);
 
-							case 147:
+							case 149:
 								_j6++;
-								_context8.next = 129;
+								_context9.next = 131;
 								break;
 
-							case 150:
+							case 152:
 
 								if (found === true) authConstrPolicies.push(allPolicies[_i29]);
 
-							case 151:
+							case 153:
 								_i29++;
-								_context8.next = 126;
+								_context9.next = 128;
 								break;
 
-							case 154:
+							case 156:
 								//endregion
 
 								//region Create "set of user-constrained policies"
 								userConstrPolicies = [];
 
 								if (!(initialPolicySet.length === 1 && initialPolicySet[0] === "2.5.29.32.0" && explicitPolicyIndicator === false)) {
-									_context8.next = 159;
+									_context9.next = 161;
 									break;
 								}
 
 								userConstrPolicies = initialPolicySet;
-								_context8.next = 176;
+								_context9.next = 178;
 								break;
 
-							case 159:
+							case 161:
 								if (!(authConstrPolicies.length === 1 && authConstrPolicies[0] === "2.5.29.32.0")) {
-									_context8.next = 163;
+									_context9.next = 165;
 									break;
 								}
 
 								userConstrPolicies = initialPolicySet;
-								_context8.next = 176;
+								_context9.next = 178;
 								break;
 
-							case 163:
+							case 165:
 								_i30 = 0;
 
-							case 164:
+							case 166:
 								if (!(_i30 < authConstrPolicies.length)) {
-									_context8.next = 176;
+									_context9.next = 178;
 									break;
 								}
 
 								_j7 = 0;
 
-							case 166:
+							case 168:
 								if (!(_j7 < initialPolicySet.length)) {
-									_context8.next = 173;
+									_context9.next = 175;
 									break;
 								}
 
 								if (!(initialPolicySet[_j7] === authConstrPolicies[_i30] || initialPolicySet[_j7] === "2.5.29.32.0")) {
-									_context8.next = 170;
+									_context9.next = 172;
 									break;
 								}
 
 								userConstrPolicies.push(authConstrPolicies[_i30]);
-								return _context8.abrupt("break", 173);
+								return _context9.abrupt("break", 175);
 
-							case 170:
+							case 172:
 								_j7++;
-								_context8.next = 166;
+								_context9.next = 168;
 								break;
 
-							case 173:
+							case 175:
 								_i30++;
-								_context8.next = 164;
+								_context9.next = 166;
 								break;
 
-							case 176:
+							case 178:
 								//endregion
 
 								//region Combine output object
@@ -22863,35 +23452,35 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 									userConstrPolicies,
 									explicitPolicyIndicator,
 									policyMappings,
-									certificatePath: _this4.certs
+									certificatePath: _this5.certs
 								};
 
 								if (!(userConstrPolicies.length === 0)) {
-									_context8.next = 179;
+									_context9.next = 181;
 									break;
 								}
 
-								return _context8.abrupt("return", policyResult);
-
-							case 179:
-								if (!(policyResult.result === false)) {
-									_context8.next = 181;
-									break;
-								}
-
-								return _context8.abrupt("return", policyResult);
+								return _context9.abrupt("return", policyResult);
 
 							case 181:
+								if (!(policyResult.result === false)) {
+									_context9.next = 183;
+									break;
+								}
+
+								return _context9.abrupt("return", policyResult);
+
+							case 183:
 								//endregion
 
 								//region Check all certificates, excluding "trust anchor"
 								pathDepth = 1;
 
-								_i31 = _this4.certs.length - 2;
+								_i31 = _this5.certs.length - 2;
 
-							case 183:
+							case 185:
 								if (!(_i31 >= 0)) {
-									_context8.next = 305;
+									_context9.next = 307;
 									break;
 								}
 
@@ -22901,18 +23490,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								certExcludedSubtrees = [];
 								//endregion
 
-								if ("extensions" in _this4.certs[_i31]) {
-									for (_j8 = 0; _j8 < _this4.certs[_i31].extensions.length; _j8++) {
+								if ("extensions" in _this5.certs[_i31]) {
+									for (_j8 = 0; _j8 < _this5.certs[_i31].extensions.length; _j8++) {
 										//region NameConstraints
-										if (_this4.certs[_i31].extensions[_j8].extnID === "2.5.29.30") {
-											if ("permittedSubtrees" in _this4.certs[_i31].extensions[_j8].parsedValue) certPermittedSubtrees = certPermittedSubtrees.concat(_this4.certs[_i31].extensions[_j8].parsedValue.permittedSubtrees);
+										if (_this5.certs[_i31].extensions[_j8].extnID === "2.5.29.30") {
+											if ("permittedSubtrees" in _this5.certs[_i31].extensions[_j8].parsedValue) certPermittedSubtrees = certPermittedSubtrees.concat(_this5.certs[_i31].extensions[_j8].parsedValue.permittedSubtrees);
 
-											if ("excludedSubtrees" in _this4.certs[_i31].extensions[_j8].parsedValue) certExcludedSubtrees = certExcludedSubtrees.concat(_this4.certs[_i31].extensions[_j8].parsedValue.excludedSubtrees);
+											if ("excludedSubtrees" in _this5.certs[_i31].extensions[_j8].parsedValue) certExcludedSubtrees = certExcludedSubtrees.concat(_this5.certs[_i31].extensions[_j8].parsedValue.excludedSubtrees);
 										}
 										//endregion
 
 										//region SubjectAltName
-										if (_this4.certs[_i31].extensions[_j8].extnID === "2.5.29.17") subjectAltNames = subjectAltNames.concat(_this4.certs[_i31].extensions[_j8].parsedValue.altNames);
+										if (_this5.certs[_i31].extensions[_j8].extnID === "2.5.29.17") subjectAltNames = subjectAltNames.concat(_this5.certs[_i31].extensions[_j8].parsedValue.altNames);
 										//endregion
 									}
 								}
@@ -22921,68 +23510,68 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								formFound = requiredNameForms.length <= 0;
 								_j9 = 0;
 
-							case 190:
+							case 192:
 								if (!(_j9 < requiredNameForms.length)) {
-									_context8.next = 211;
+									_context9.next = 213;
 									break;
 								}
 
-								_context8.t0 = requiredNameForms[_j9].base.type;
-								_context8.next = _context8.t0 === 4 ? 194 : 208;
+								_context9.t0 = requiredNameForms[_j9].base.type;
+								_context9.next = _context9.t0 === 4 ? 196 : 210;
 								break;
 
-							case 194:
-								if (!(requiredNameForms[_j9].base.value.typesAndValues.length !== _this4.certs[_i31].subject.typesAndValues.length)) {
-									_context8.next = 196;
+							case 196:
+								if (!(requiredNameForms[_j9].base.value.typesAndValues.length !== _this5.certs[_i31].subject.typesAndValues.length)) {
+									_context9.next = 198;
 									break;
 								}
 
-								return _context8.abrupt("continue", 208);
+								return _context9.abrupt("continue", 210);
 
-							case 196:
+							case 198:
 
 								formFound = true;
 
 								_k3 = 0;
 
-							case 198:
-								if (!(_k3 < _this4.certs[_i31].subject.typesAndValues.length)) {
-									_context8.next = 205;
+							case 200:
+								if (!(_k3 < _this5.certs[_i31].subject.typesAndValues.length)) {
+									_context9.next = 207;
 									break;
 								}
 
-								if (!(_this4.certs[_i31].subject.typesAndValues[_k3].type !== requiredNameForms[_j9].base.value.typesAndValues[_k3].type)) {
-									_context8.next = 202;
+								if (!(_this5.certs[_i31].subject.typesAndValues[_k3].type !== requiredNameForms[_j9].base.value.typesAndValues[_k3].type)) {
+									_context9.next = 204;
 									break;
 								}
 
 								formFound = false;
-								return _context8.abrupt("break", 205);
+								return _context9.abrupt("break", 207);
 
-							case 202:
+							case 204:
 								_k3++;
-								_context8.next = 198;
+								_context9.next = 200;
 								break;
 
-							case 205:
+							case 207:
 								if (!(formFound === true)) {
-									_context8.next = 207;
+									_context9.next = 209;
 									break;
 								}
 
-								return _context8.abrupt("break", 208);
+								return _context9.abrupt("break", 210);
 
-							case 207:
-								return _context8.abrupt("break", 208);
+							case 209:
+								return _context9.abrupt("break", 210);
 
-							case 208:
+							case 210:
 								_j9++;
-								_context8.next = 190;
+								_context9.next = 192;
 								break;
 
-							case 211:
+							case 213:
 								if (!(formFound === false)) {
-									_context8.next = 216;
+									_context9.next = 218;
 									break;
 								}
 
@@ -22992,7 +23581,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 								throw policyResult;
 
-							case 216:
+							case 218:
 								//endregion
 
 								//region Checking for "permited sub-trees"
@@ -23007,47 +23596,47 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 								_j10 = 0;
 
-							case 223:
+							case 225:
 								if (!(_j10 < permittedSubtrees.length)) {
-									_context8.next = 240;
+									_context9.next = 242;
 									break;
 								}
 
-								_context8.t1 = permittedSubtrees[_j10].base.type;
-								_context8.next = _context8.t1 === 1 ? 227 : _context8.t1 === 2 ? 229 : _context8.t1 === 4 ? 231 : _context8.t1 === 6 ? 233 : _context8.t1 === 7 ? 235 : 237;
+								_context9.t1 = permittedSubtrees[_j10].base.type;
+								_context9.next = _context9.t1 === 1 ? 229 : _context9.t1 === 2 ? 231 : _context9.t1 === 4 ? 233 : _context9.t1 === 6 ? 235 : _context9.t1 === 7 ? 237 : 239;
 								break;
-
-							case 227:
-								constrGroups[0].push(permittedSubtrees[_j10]);
-								return _context8.abrupt("break", 237);
 
 							case 229:
-								constrGroups[1].push(permittedSubtrees[_j10]);
-								return _context8.abrupt("break", 237);
+								constrGroups[0].push(permittedSubtrees[_j10]);
+								return _context9.abrupt("break", 239);
 
 							case 231:
-								constrGroups[2].push(permittedSubtrees[_j10]);
-								return _context8.abrupt("break", 237);
+								constrGroups[1].push(permittedSubtrees[_j10]);
+								return _context9.abrupt("break", 239);
 
 							case 233:
-								constrGroups[3].push(permittedSubtrees[_j10]);
-								return _context8.abrupt("break", 237);
+								constrGroups[2].push(permittedSubtrees[_j10]);
+								return _context9.abrupt("break", 239);
 
 							case 235:
-								constrGroups[4].push(permittedSubtrees[_j10]);
-								return _context8.abrupt("break", 237);
+								constrGroups[3].push(permittedSubtrees[_j10]);
+								return _context9.abrupt("break", 239);
 
 							case 237:
+								constrGroups[4].push(permittedSubtrees[_j10]);
+								return _context9.abrupt("break", 239);
+
+							case 239:
 								_j10++;
-								_context8.next = 223;
+								_context9.next = 225;
 								break;
 
-							case 240:
+							case 242:
 								p = 0;
 
-							case 241:
+							case 243:
 								if (!(p < 5)) {
-									_context8.next = 274;
+									_context9.next = 276;
 									break;
 								}
 
@@ -23056,17 +23645,17 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								group = constrGroups[p];
 								_j11 = 0;
 
-							case 246:
+							case 248:
 								if (!(_j11 < group.length)) {
-									_context8.next = 266;
+									_context9.next = 268;
 									break;
 								}
 
-								_context8.t2 = p;
-								_context8.next = _context8.t2 === 0 ? 250 : _context8.t2 === 1 ? 252 : _context8.t2 === 2 ? 254 : _context8.t2 === 3 ? 257 : _context8.t2 === 4 ? 259 : 261;
+								_context9.t2 = p;
+								_context9.next = _context9.t2 === 0 ? 252 : _context9.t2 === 1 ? 254 : _context9.t2 === 2 ? 256 : _context9.t2 === 3 ? 259 : _context9.t2 === 4 ? 261 : 263;
 								break;
 
-							case 250:
+							case 252:
 								if (subjectAltNames.length > 0) {
 									for (_k4 = 0; _k4 < subjectAltNames.length; _k4++) {
 										if (subjectAltNames[_k4].type === 1) // rfc822Name
@@ -23077,18 +23666,18 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 									}
 								} else // Try to find out "emailAddress" inside "subject"
 									{
-										for (_k5 = 0; _k5 < _this4.certs[_i31].subject.typesAndValues.length; _k5++) {
-											if (_this4.certs[_i31].subject.typesAndValues[_k5].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
-											_this4.certs[_i31].subject.typesAndValues[_k5].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
+										for (_k5 = 0; _k5 < _this5.certs[_i31].subject.typesAndValues.length; _k5++) {
+											if (_this5.certs[_i31].subject.typesAndValues[_k5].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
+											_this5.certs[_i31].subject.typesAndValues[_k5].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
 												{
 													valueExists = true;
-													groupPermitted = groupPermitted || compareRFC822Name(_this4.certs[_i31].subject.typesAndValues[_k5].value.valueBlock.value, group[_j11].base.value);
+													groupPermitted = groupPermitted || compareRFC822Name(_this5.certs[_i31].subject.typesAndValues[_k5].value.valueBlock.value, group[_j11].base.value);
 												}
 										}
 									}
-								return _context8.abrupt("break", 261);
+								return _context9.abrupt("break", 263);
 
-							case 252:
+							case 254:
 								if (subjectAltNames.length > 0) {
 									for (_k6 = 0; _k6 < subjectAltNames.length; _k6++) {
 										if (subjectAltNames[_k6].type === 2) // dNSName
@@ -23098,14 +23687,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 											}
 									}
 								}
-								return _context8.abrupt("break", 261);
+								return _context9.abrupt("break", 263);
 
-							case 254:
+							case 256:
 								valueExists = true;
-								groupPermitted = compareDirectoryName(_this4.certs[_i31].subject, group[_j11].base.value);
-								return _context8.abrupt("break", 261);
+								groupPermitted = compareDirectoryName(_this5.certs[_i31].subject, group[_j11].base.value);
+								return _context9.abrupt("break", 263);
 
-							case 257:
+							case 259:
 								if (subjectAltNames.length > 0) {
 									for (_k7 = 0; _k7 < subjectAltNames.length; _k7++) {
 										if (subjectAltNames[_k7].type === 6) // uniformResourceIdentifier
@@ -23115,9 +23704,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 											}
 									}
 								}
-								return _context8.abrupt("break", 261);
+								return _context9.abrupt("break", 263);
 
-							case 259:
+							case 261:
 								if (subjectAltNames.length > 0) {
 									for (_k8 = 0; _k8 < subjectAltNames.length; _k8++) {
 										if (subjectAltNames[_k8].type === 7) // iPAddress
@@ -23127,24 +23716,24 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 											}
 									}
 								}
-								return _context8.abrupt("break", 261);
+								return _context9.abrupt("break", 263);
 
-							case 261:
+							case 263:
 								if (!groupPermitted) {
-									_context8.next = 263;
+									_context9.next = 265;
 									break;
 								}
 
-								return _context8.abrupt("break", 266);
+								return _context9.abrupt("break", 268);
 
-							case 263:
+							case 265:
 								_j11++;
-								_context8.next = 246;
+								_context9.next = 248;
 								break;
 
-							case 266:
+							case 268:
 								if (!(groupPermitted === false && group.length > 0 && valueExists)) {
-									_context8.next = 271;
+									_context9.next = 273;
 									break;
 								}
 
@@ -23154,12 +23743,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 								throw policyResult;
 
-							case 271:
+							case 273:
 								p++;
-								_context8.next = 241;
+								_context9.next = 243;
 								break;
 
-							case 274:
+							case 276:
 								//endregion
 								//endregion
 
@@ -23167,17 +23756,17 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								excluded = false;
 								_j12 = 0;
 
-							case 276:
+							case 278:
 								if (!(_j12 < excludedSubtrees.length)) {
-									_context8.next = 295;
+									_context9.next = 297;
 									break;
 								}
 
-								_context8.t3 = excludedSubtrees[_j12].base.type;
-								_context8.next = _context8.t3 === 1 ? 280 : _context8.t3 === 2 ? 282 : _context8.t3 === 4 ? 284 : _context8.t3 === 6 ? 286 : _context8.t3 === 7 ? 288 : 290;
+								_context9.t3 = excludedSubtrees[_j12].base.type;
+								_context9.next = _context9.t3 === 1 ? 282 : _context9.t3 === 2 ? 284 : _context9.t3 === 4 ? 286 : _context9.t3 === 6 ? 288 : _context9.t3 === 7 ? 290 : 292;
 								break;
 
-							case 280:
+							case 282:
 								if (subjectAltNames.length >= 0) {
 									for (_k9 = 0; _k9 < subjectAltNames.length; _k9++) {
 										if (subjectAltNames[_k9].type === 1) // rfc822Name
@@ -23185,61 +23774,61 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 									}
 								} else // Try to find out "emailAddress" inside "subject"
 									{
-										for (_k10 = 0; _k10 < _this4.certs[_i31].subject.typesAndValues.length; _k10++) {
-											if (_this4.certs[_i31].subject.typesAndValues[_k10].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
-											_this4.certs[_i31].subject.typesAndValues[_k10].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
-												excluded = excluded || compareRFC822Name(_this4.certs[_i31].subject.typesAndValues[_k10].value.valueBlock.value, excludedSubtrees[_j12].base.value);
+										for (_k10 = 0; _k10 < _this5.certs[_i31].subject.typesAndValues.length; _k10++) {
+											if (_this5.certs[_i31].subject.typesAndValues[_k10].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
+											_this5.certs[_i31].subject.typesAndValues[_k10].type === "0.9.2342.19200300.100.1.3") // RFC1274 "rfc822Mailbox" e-mail address
+												excluded = excluded || compareRFC822Name(_this5.certs[_i31].subject.typesAndValues[_k10].value.valueBlock.value, excludedSubtrees[_j12].base.value);
 										}
 									}
-								return _context8.abrupt("break", 290);
+								return _context9.abrupt("break", 292);
 
-							case 282:
+							case 284:
 								if (subjectAltNames.length > 0) {
 									for (_k11 = 0; _k11 < subjectAltNames.length; _k11++) {
 										if (subjectAltNames[_k11].type === 2) // dNSName
 											excluded = excluded || compareDNSName(subjectAltNames[_k11].value, excludedSubtrees[_j12].base.value);
 									}
 								}
-								return _context8.abrupt("break", 290);
-
-							case 284:
-								excluded = excluded || compareDirectoryName(_this4.certs[_i31].subject, excludedSubtrees[_j12].base.value);
-								return _context8.abrupt("break", 290);
+								return _context9.abrupt("break", 292);
 
 							case 286:
+								excluded = excluded || compareDirectoryName(_this5.certs[_i31].subject, excludedSubtrees[_j12].base.value);
+								return _context9.abrupt("break", 292);
+
+							case 288:
 								if (subjectAltNames.length > 0) {
 									for (_k12 = 0; _k12 < subjectAltNames.length; _k12++) {
 										if (subjectAltNames[_k12].type === 6) // uniformResourceIdentifier
 											excluded = excluded || compareUniformResourceIdentifier(subjectAltNames[_k12].value, excludedSubtrees[_j12].base.value);
 									}
 								}
-								return _context8.abrupt("break", 290);
+								return _context9.abrupt("break", 292);
 
-							case 288:
+							case 290:
 								if (subjectAltNames.length > 0) {
 									for (_k13 = 0; _k13 < subjectAltNames.length; _k13++) {
 										if (subjectAltNames[_k13].type === 7) // iPAddress
 											excluded = excluded || compareIPAddress(subjectAltNames[_k13].value, excludedSubtrees[_j12].base.value);
 									}
 								}
-								return _context8.abrupt("break", 290);
+								return _context9.abrupt("break", 292);
 
-							case 290:
+							case 292:
 								if (!excluded) {
-									_context8.next = 292;
+									_context9.next = 294;
 									break;
 								}
 
-								return _context8.abrupt("break", 295);
+								return _context9.abrupt("break", 297);
 
-							case 292:
+							case 294:
 								_j12++;
-								_context8.next = 276;
+								_context9.next = 278;
 								break;
 
-							case 295:
+							case 297:
 								if (!(excluded === true)) {
-									_context8.next = 300;
+									_context9.next = 302;
 									break;
 								}
 
@@ -23249,7 +23838,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 								throw policyResult;
 
-							case 300:
+							case 302:
 								//endregion
 
 								//region Append "cert_..._subtrees" to "..._subtrees"
@@ -23257,55 +23846,55 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								excludedSubtrees = excludedSubtrees.concat(certExcludedSubtrees);
 								//endregion
 
-							case 302:
+							case 304:
 								_i31--, pathDepth++;
-								_context8.next = 183;
+								_context9.next = 185;
 								break;
 
-							case 305:
-								return _context8.abrupt("return", policyResult);
+							case 307:
+								return _context9.abrupt("return", policyResult);
 
-							case 308:
-								_context8.prev = 308;
-								_context8.t4 = _context8["catch"](5);
+							case 310:
+								_context9.prev = 310;
+								_context9.t4 = _context9["catch"](5);
 
-								if (!(_context8.t4 instanceof Object)) {
-									_context8.next = 315;
+								if (!(_context9.t4 instanceof Object)) {
+									_context9.next = 317;
 									break;
 								}
 
-								if (!("resultMessage" in _context8.t4)) {
-									_context8.next = 313;
+								if (!("resultMessage" in _context9.t4)) {
+									_context9.next = 315;
 									break;
 								}
 
-								return _context8.abrupt("return", _context8.t4);
-
-							case 313:
-								if (!("message" in _context8.t4)) {
-									_context8.next = 315;
-									break;
-								}
-
-								return _context8.abrupt("return", {
-									result: false,
-									resultCode: -1,
-									resultMessage: _context8.t4.message
-								});
+								return _context9.abrupt("return", _context9.t4);
 
 							case 315:
-								return _context8.abrupt("return", {
+								if (!("message" in _context9.t4)) {
+									_context9.next = 317;
+									break;
+								}
+
+								return _context9.abrupt("return", {
 									result: false,
 									resultCode: -1,
-									resultMessage: _context8.t4
+									resultMessage: _context9.t4.message
 								});
 
-							case 316:
+							case 317:
+								return _context9.abrupt("return", {
+									result: false,
+									resultCode: -1,
+									resultMessage: _context9.t4
+								});
+
+							case 318:
 							case "end":
-								return _context8.stop();
+								return _context9.stop();
 						}
 					}
-				}, _callee8, _this4, [[5, 308]]);
+				}, _callee9, _this5, [[5, 310]]);
 			}))();
 		}
 		//**********************************************************************************
@@ -23321,7 +23910,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for BasicOCSPResponse class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -23329,24 +23918,24 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {ResponseData}
-    * @description tbsResponseData
+    * @desc tbsResponseData
     */
 			this.tbsResponseData = getParametersValue(parameters, "tbsResponseData", BasicOCSPResponse.defaultValues("tbsResponseData"));
 			/**
     * @type {AlgorithmIdentifier}
-    * @description signatureAlgorithm
+    * @desc signatureAlgorithm
     */
 			this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", BasicOCSPResponse.defaultValues("signatureAlgorithm"));
 			/**
     * @type {BitString}
-    * @description signature
+    * @desc signature
     */
 			this.signature = getParametersValue(parameters, "signature", BasicOCSPResponse.defaultValues("signature"));
 
 			if ("certs" in parameters)
 				/**
      * @type {Array.<Certificate>}
-     * @description certs
+     * @desc certs
      */
 				this.certs = getParametersValue(parameters, "certs", BasicOCSPResponse.defaultValues("certs"));
 			//endregion
@@ -23403,18 +23992,22 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * BasicOCSPResponse       ::= SEQUENCE {
+   *    tbsResponseData      ResponseData,
+   *    signatureAlgorithm   AlgorithmIdentifier,
+   *    signature            BIT STRING,
+   *    certs            [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//BasicOCSPResponse       ::= SEQUENCE {
-			//    tbsResponseData      ResponseData,
-			//    signatureAlgorithm   AlgorithmIdentifier,
-			//    signature            BIT STRING,
-			//    certs            [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
 
 			/**
     * @type {Object}
@@ -23548,13 +24141,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//endregion
 
 			//region Create all "certIDs" for input certificates
-			var _iteratorNormalCompletion28 = true;
-			var _didIteratorError28 = false;
-			var _iteratorError28 = undefined;
+			var _iteratorNormalCompletion30 = true;
+			var _didIteratorError30 = false;
+			var _iteratorError30 = undefined;
 
 			try {
-				for (var _iterator28 = this.tbsResponseData.responses[Symbol.iterator](), _step28; !(_iteratorNormalCompletion28 = (_step28 = _iterator28.next()).done); _iteratorNormalCompletion28 = true) {
-					var response = _step28.value;
+				for (var _iterator30 = this.tbsResponseData.responses[Symbol.iterator](), _step30; !(_iteratorNormalCompletion30 = (_step30 = _iterator30.next()).done); _iteratorNormalCompletion30 = true) {
+					var response = _step30.value;
 
 					var hashAlgorithm = getAlgorithmByOID(response.certID.hashAlgorithm.algorithmId);
 					if ("name" in hashAlgorithm === false) return Promise.reject(`Wrong CertID hashing algorithm: ${response.certID.hashAlgorithm.algorithmId}`);
@@ -23572,16 +24165,16 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 					}
 				}
 			} catch (err) {
-				_didIteratorError28 = true;
-				_iteratorError28 = err;
+				_didIteratorError30 = true;
+				_iteratorError30 = err;
 			} finally {
 				try {
-					if (!_iteratorNormalCompletion28 && _iterator28.return) {
-						_iterator28.return();
+					if (!_iteratorNormalCompletion30 && _iterator30.return) {
+						_iterator30.return();
 					}
 				} finally {
-					if (_didIteratorError28) {
-						throw _iteratorError28;
+					if (_didIteratorError30) {
+						throw _iteratorError30;
 					}
 				}
 			}
@@ -23591,20 +24184,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 			//region Compare all response's "certIDs" with identifiers for input certificate
 			sequence = sequence.then(() => {
-				var _iteratorNormalCompletion29 = true;
-				var _didIteratorError29 = false;
-				var _iteratorError29 = undefined;
+				var _iteratorNormalCompletion31 = true;
+				var _didIteratorError31 = false;
+				var _iteratorError31 = undefined;
 
 				try {
-					for (var _iterator29 = this.tbsResponseData.responses[Symbol.iterator](), _step29; !(_iteratorNormalCompletion29 = (_step29 = _iterator29.next()).done); _iteratorNormalCompletion29 = true) {
-						var _response = _step29.value;
-						var _iteratorNormalCompletion30 = true;
-						var _didIteratorError30 = false;
-						var _iteratorError30 = undefined;
+					for (var _iterator31 = this.tbsResponseData.responses[Symbol.iterator](), _step31; !(_iteratorNormalCompletion31 = (_step31 = _iterator31.next()).done); _iteratorNormalCompletion31 = true) {
+						var _response = _step31.value;
+						var _iteratorNormalCompletion32 = true;
+						var _didIteratorError32 = false;
+						var _iteratorError32 = undefined;
 
 						try {
-							for (var _iterator30 = certIDs[Symbol.iterator](), _step30; !(_iteratorNormalCompletion30 = (_step30 = _iterator30.next()).done); _iteratorNormalCompletion30 = true) {
-								var id = _step30.value;
+							for (var _iterator32 = certIDs[Symbol.iterator](), _step32; !(_iteratorNormalCompletion32 = (_step32 = _iterator32.next()).done); _iteratorNormalCompletion32 = true) {
+								var id = _step32.value;
 
 								if (_response.certID.isEqual(id)) {
 									result.isForCertificate = true;
@@ -23637,31 +24230,31 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								}
 							}
 						} catch (err) {
-							_didIteratorError30 = true;
-							_iteratorError30 = err;
+							_didIteratorError32 = true;
+							_iteratorError32 = err;
 						} finally {
 							try {
-								if (!_iteratorNormalCompletion30 && _iterator30.return) {
-									_iterator30.return();
+								if (!_iteratorNormalCompletion32 && _iterator32.return) {
+									_iterator32.return();
 								}
 							} finally {
-								if (_didIteratorError30) {
-									throw _iteratorError30;
+								if (_didIteratorError32) {
+									throw _iteratorError32;
 								}
 							}
 						}
 					}
 				} catch (err) {
-					_didIteratorError29 = true;
-					_iteratorError29 = err;
+					_didIteratorError31 = true;
+					_iteratorError31 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion29 && _iterator29.return) {
-							_iterator29.return();
+						if (!_iteratorNormalCompletion31 && _iterator31.return) {
+							_iterator31.return();
 						}
 					} finally {
-						if (_didIteratorError29) {
-							throw _iteratorError29;
+						if (_didIteratorError31) {
+							throw _iteratorError31;
 						}
 					}
 				}
@@ -23764,13 +24357,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 				var isCA = false;
 
-				var _iteratorNormalCompletion31 = true;
-				var _didIteratorError31 = false;
-				var _iteratorError31 = undefined;
+				var _iteratorNormalCompletion33 = true;
+				var _didIteratorError33 = false;
+				var _iteratorError33 = undefined;
 
 				try {
-					for (var _iterator31 = cert.extensions[Symbol.iterator](), _step31; !(_iteratorNormalCompletion31 = (_step31 = _iterator31.next()).done); _iteratorNormalCompletion31 = true) {
-						var extension = _step31.value;
+					for (var _iterator33 = cert.extensions[Symbol.iterator](), _step33; !(_iteratorNormalCompletion33 = (_step33 = _iterator33.next()).done); _iteratorNormalCompletion33 = true) {
+						var extension = _step33.value;
 
 						if (extension.extnID === "2.5.29.19") // BasicConstraints
 							{
@@ -23780,16 +24373,16 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 							}
 					}
 				} catch (err) {
-					_didIteratorError31 = true;
-					_iteratorError31 = err;
+					_didIteratorError33 = true;
+					_iteratorError33 = err;
 				} finally {
 					try {
-						if (!_iteratorNormalCompletion31 && _iterator31.return) {
-							_iterator31.return();
+						if (!_iteratorNormalCompletion33 && _iterator33.return) {
+							_iterator33.return();
 						}
 					} finally {
-						if (_didIteratorError31) {
-							throw _iteratorError31;
+						if (_didIteratorError33) {
+							throw _iteratorError33;
 						}
 					}
 				}
@@ -23810,13 +24403,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 				case this.tbsResponseData.responderID instanceof RelativeDistinguishedNames:
 					// [1] Name
 					sequence = sequence.then(() => {
-						var _iteratorNormalCompletion32 = true;
-						var _didIteratorError32 = false;
-						var _iteratorError32 = undefined;
+						var _iteratorNormalCompletion34 = true;
+						var _didIteratorError34 = false;
+						var _iteratorError34 = undefined;
 
 						try {
-							for (var _iterator32 = _this.certs.entries()[Symbol.iterator](), _step32; !(_iteratorNormalCompletion32 = (_step32 = _iterator32.next()).done); _iteratorNormalCompletion32 = true) {
-								var _ref8 = _step32.value;
+							for (var _iterator34 = _this.certs.entries()[Symbol.iterator](), _step34; !(_iteratorNormalCompletion34 = (_step34 = _iterator34.next()).done); _iteratorNormalCompletion34 = true) {
+								var _ref8 = _step34.value;
 
 								var _ref9 = _slicedToArray(_ref8, 2);
 
@@ -23829,16 +24422,16 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								}
 							}
 						} catch (err) {
-							_didIteratorError32 = true;
-							_iteratorError32 = err;
+							_didIteratorError34 = true;
+							_iteratorError34 = err;
 						} finally {
 							try {
-								if (!_iteratorNormalCompletion32 && _iterator32.return) {
-									_iterator32.return();
+								if (!_iteratorNormalCompletion34 && _iterator34.return) {
+									_iterator34.return();
 								}
 							} finally {
-								if (_didIteratorError32) {
-									throw _iteratorError32;
+								if (_didIteratorError34) {
+									throw _iteratorError34;
 								}
 							}
 						}
@@ -23847,13 +24440,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 				case this.tbsResponseData.responderID instanceof OctetString:
 					// [2] KeyHash
 					sequence = sequence.then(() => Promise.all(Array.from(_this.certs, element => crypto.digest({ name: "sha-1" }, new Uint8Array(element.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex)))).then(results => {
-						var _iteratorNormalCompletion33 = true;
-						var _didIteratorError33 = false;
-						var _iteratorError33 = undefined;
+						var _iteratorNormalCompletion35 = true;
+						var _didIteratorError35 = false;
+						var _iteratorError35 = undefined;
 
 						try {
-							for (var _iterator33 = _this.certs.entries()[Symbol.iterator](), _step33; !(_iteratorNormalCompletion33 = (_step33 = _iterator33.next()).done); _iteratorNormalCompletion33 = true) {
-								var _ref10 = _step33.value;
+							for (var _iterator35 = _this.certs.entries()[Symbol.iterator](), _step35; !(_iteratorNormalCompletion35 = (_step35 = _iterator35.next()).done); _iteratorNormalCompletion35 = true) {
+								var _ref10 = _step35.value;
 
 								var _ref11 = _slicedToArray(_ref10, 1);
 
@@ -23865,16 +24458,16 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 								}
 							}
 						} catch (err) {
-							_didIteratorError33 = true;
-							_iteratorError33 = err;
+							_didIteratorError35 = true;
+							_iteratorError35 = err;
 						} finally {
 							try {
-								if (!_iteratorNormalCompletion33 && _iterator33.return) {
-									_iterator33.return();
+								if (!_iteratorNormalCompletion35 && _iterator35.return) {
+									_iterator35.return();
 								}
 							} finally {
-								if (_didIteratorError33) {
-									throw _iteratorError33;
+								if (_didIteratorError35) {
+									throw _iteratorError35;
 								}
 							}
 						}
@@ -23895,27 +24488,27 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 					var additionalCerts = [];
 					additionalCerts.push(signerCert);
 
-					var _iteratorNormalCompletion34 = true;
-					var _didIteratorError34 = false;
-					var _iteratorError34 = undefined;
+					var _iteratorNormalCompletion36 = true;
+					var _didIteratorError36 = false;
+					var _iteratorError36 = undefined;
 
 					try {
-						for (var _iterator34 = promiseResults[Symbol.iterator](), _step34; !(_iteratorNormalCompletion34 = (_step34 = _iterator34.next()).done); _iteratorNormalCompletion34 = true) {
-							var promiseResult = _step34.value;
+						for (var _iterator36 = promiseResults[Symbol.iterator](), _step36; !(_iteratorNormalCompletion36 = (_step36 = _iterator36.next()).done); _iteratorNormalCompletion36 = true) {
+							var promiseResult = _step36.value;
 
 							if (promiseResult !== null) additionalCerts.push(promiseResult);
 						}
 					} catch (err) {
-						_didIteratorError34 = true;
-						_iteratorError34 = err;
+						_didIteratorError36 = true;
+						_iteratorError36 = err;
 					} finally {
 						try {
-							if (!_iteratorNormalCompletion34 && _iterator34.return) {
-								_iterator34.return();
+							if (!_iteratorNormalCompletion36 && _iterator36.return) {
+								_iterator36.return();
 							}
 						} finally {
-							if (_didIteratorError34) {
-								throw _iteratorError34;
+							if (_didIteratorError36) {
+								throw _iteratorError36;
 							}
 						}
 					}
@@ -23951,7 +24544,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		/**
    * Constructor for OCSPResponse class
    * @param {Object} [parameters={}]
-   * @property {Object} [schema] asn1js parsed value
+   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
    */
 		constructor() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -23959,14 +24552,14 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			//region Internal properties of the object
 			/**
     * @type {Enumerated}
-    * @description responseStatus
+    * @desc responseStatus
     */
 			this.responseStatus = getParametersValue(parameters, "responseStatus", OCSPResponse.defaultValues("responseStatus"));
 
 			if ("responseBytes" in parameters)
 				/**
      * @type {ResponseBytes}
-     * @description responseBytes
+     * @desc responseBytes
      */
 				this.responseBytes = getParametersValue(parameters, "responseBytes", OCSPResponse.defaultValues("responseBytes"));
 			//endregion
@@ -24008,26 +24601,30 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 		}
 		//**********************************************************************************
 		/**
-   * Return value of asn1js schema for current class
+   * Return value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn1
+   * OCSPResponse ::= SEQUENCE {
+   *    responseStatus         OCSPResponseStatus,
+   *    responseBytes          [0] EXPLICIT ResponseBytes OPTIONAL }
+   *
+   * OCSPResponseStatus ::= ENUMERATED {
+   *    successful            (0),  -- Response has valid confirmations
+   *    malformedRequest      (1),  -- Illegal confirmation request
+   *    internalError         (2),  -- Internal error in issuer
+   *    tryLater              (3),  -- Try again later
+   *    -- (4) is not used
+   *    sigRequired           (5),  -- Must sign the request
+   *    unauthorized          (6)   -- Request unauthorized
+   * }
+   * ```
+   *
    * @param {Object} parameters Input parameters for the schema
    * @returns {Object} asn1js schema object
    */
 		static schema() {
 			var parameters = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-			//OCSPResponse ::= SEQUENCE {
-			//    responseStatus         OCSPResponseStatus,
-			//    responseBytes          [0] EXPLICIT ResponseBytes OPTIONAL }
-			//
-			//OCSPResponseStatus ::= ENUMERATED {
-			//    successful            (0),  -- Response has valid confirmations
-			//    malformedRequest      (1),  -- Illegal confirmation request
-			//    internalError         (2),  -- Internal error in issuer
-			//    tryLater              (3),  -- Try again later
-			//    -- (4) is not used
-			//    sigRequired           (5),  -- Must sign the request
-			//    unauthorized          (6)   -- Request unauthorized
-			//}
 
 			/**
     * @type {Object}
@@ -24272,8 +24869,8 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 			value: new BmpString({ value: "Test" })
 		}));
 
-		certSimpl.notBefore.value = new Date(2016, 1, 1);
-		certSimpl.notAfter.value = new Date(2019, 1, 1);
+		certSimpl.notBefore.value = new Date(2019, 1, 1);
+		certSimpl.notAfter.value = new Date(2022, 1, 1);
 
 		certSimpl.extensions = []; // Extensions are not a part of certificate by default, it's an optional array
 
