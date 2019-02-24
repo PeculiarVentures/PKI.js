@@ -9,10 +9,11 @@ jobs:
       COVERALLS_REPO_TOKEN: 5VZxtP3jvfuAygXWjgkaJCrHpT9FwiVTU
     steps:
       - run:
+          name: Download Node.js
+          command: curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+      - run:
           name: Install Node.js
-          command: |
-            curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-            sudo apt-get install -y nodejs
+          command: sudo apt-get install -y nodejs
       - run:
           name: Install NPM
           command: sudo apt install npm
