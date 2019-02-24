@@ -11,8 +11,11 @@ jobs:
       - run:
           name: Install Node.js
           command: |
-            curl -sL https://deb.nodesource.com/setup_8.7 | sudo -E bash -
+            curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
             sudo apt-get install -y nodejs
+      - run:
+          name: Install NPM
+          command: sudo apt install npm
       - run:
           name: Installing global dependencies
           command: npm install -g typescript rollup nyc coveralls
