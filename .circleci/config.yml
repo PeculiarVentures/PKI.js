@@ -4,22 +4,11 @@ jobs:
     branches:
       ignore:
         - gh-pages
-    machine: true
+    docker:
+      - image: "circleci/node:8.7.0"
     environment:
       COVERALLS_REPO_TOKEN: 5VZxtP3jvfuAygXWjgkaJCrHpT9FwiVTU
     steps:
-      - run:
-          name: Update packages
-          command: sudo apt-get update
-      - run:
-          name: Download Node.js
-          command: curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-      - run:
-          name: Install Node.js
-          command: sudo apt-get install -y nodejs
-      - run:
-          name: Install NPM
-          command: sudo apt-get install npm
       - run:
           name: Installing global dependencies
           command: npm install -g typescript rollup nyc coveralls
