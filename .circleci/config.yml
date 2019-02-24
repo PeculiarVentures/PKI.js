@@ -11,7 +11,7 @@ jobs:
     steps:
       - run:
           name: Installing global dependencies
-          command: npm install -g typescript rollup nyc coveralls
+          command: sudo npm install -g typescript rollup nyc coveralls
       - checkout
       - run:
           name: Installing PKI.js
