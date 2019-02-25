@@ -1,6 +1,8 @@
 version: 2
+
 jobs:
-  build:
+  installation:
+    working_directory: ~/pkijs
     branches:
       ignore:
         - gh-pages
@@ -13,6 +15,8 @@ jobs:
           name: Installing global dependencies
           command: sudo npm install -g typescript rollup nyc coveralls
       - checkout
+      - attach_workspace:
+          at: ~/pkijs
       - run:
           name: Installing PKI.js
           command: npm install
@@ -22,12 +26,35 @@ jobs:
       - run:
           name: Building tests
           command: npm run build:examples
-      - run:
-          name: Run tests
-          command: npm run test:node
-      - run:
-          name: Coveralls
-          command: cat ./coverage/lcov.info | coveralls
-      - store_artifacts:
-          path: ./coverage/lcov.info
-          destination: coverage
+
+  test1:
+    working_directory: ~/pkijs
+    docker:
+      - image: "circleci/node:8.7.0"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/pkijs
+      - run: ls -al
+
+  test2:
+    working_directory: ~/pkijs
+    docker:
+      - image: "circleci/node:8.7.0"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/pkijs
+      - run: ls -al
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - installation
+      - test1:
+          requires:
+            - installation
+      - test2:
+          requires:
+            - installation
