@@ -24,10 +24,13 @@ jobs:
           name: Building tests
           command: npm run build:examples
       - run:
-          name: Run tests
+          name: Run tests (local)
           command: |
-            TESTFILES=$(circleci tests glob "test/s_*.js" "test/n_*.js" | circleci tests split)
+            TESTFILES=$(circleci tests glob "test/s_*.js" | circleci tests split --split-by=timings)
             npm run test_l -- ${TESTFILES}
+      - run:
+          name: Run tests (Node)
+          command: npm run test_l -- "test/n_*.js"
       - run:
           name: Coveralls
           command: cat ./coverage/lcov.info | coveralls
