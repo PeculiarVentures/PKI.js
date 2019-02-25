@@ -18,7 +18,7 @@ jobs:
           name: Installing PKI.js
           command: npm install
       - save_cache:
-          key: -{{ .Branch }}-{{ .BuildNum }}
+          key: -{{ .Branch }}-{{ .Revision }}
           paths:
             - ~/pkijs
   test1:
@@ -27,7 +27,7 @@ jobs:
       - image: "circleci/node:8.7.0"
     steps:
       - restore_cache:
-          key: -{{ .Branch }}-{{ .BuildNum }}
+          key: -{{ .Branch }}-{{ .Revision }}
       - run: ls -al
 
   test2:
@@ -39,7 +39,7 @@ jobs:
       - attach_workspace:
           at: ~/pkijs
       - restore_cache:
-          key: -{{ .Branch }}-{{ .BuildNum }}
+          key: -{{ .Branch }}-{{ .Revision }}
       - run: ls -al
 
 workflows:
