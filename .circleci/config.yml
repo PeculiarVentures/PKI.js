@@ -17,15 +17,17 @@ jobs:
       - run:
           name: Installing PKI.js
           command: npm install
-
+      - save_cache:
+          key: -{{ .Branch }}-{{ .BuildNum }}
+          paths:
+            - ~/pkijs
   test1:
     working_directory: ~/pkijs
     docker:
       - image: "circleci/node:8.7.0"
     steps:
-      - checkout
-      - attach_workspace:
-          at: ~/pkijs
+      - restore_cache:
+          key: -{{ .Branch }}-{{ .BuildNum }}
       - run: ls -al
 
   test2:
@@ -36,8 +38,9 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/pkijs
+      - restore_cache:
+          key: -{{ .Branch }}-{{ .BuildNum }}
       - run: ls -al
-      - run: rollup
 
 workflows:
   version: 2
