@@ -1,8 +1,10 @@
 version: 2
-
 jobs:
-  installation:
-    working_directory: ~/pkijs
+  build:
+    parallelism: 4
+    branches:
+      ignore:
+        - gh-pages
     docker:
       - image: "circleci/node:8.7.0"
     environment:
@@ -10,7 +12,7 @@ jobs:
     steps:
       - run:
           name: Installing global dependencies
-          command: sudo npm install -g typescript
+          command: sudo npm install -g typescript rollup nyc coveralls
       - checkout
       - run:
           name: Installing PKI.js
@@ -21,45 +23,14 @@ jobs:
       - run:
           name: Building tests
           command: npm run build:examples
-      - save_cache:
-          key: -{{ .Branch }}-{{ .Revision }}
-          paths:
-            - ~/pkijs
-
-  test1:
-    parallelism: 4
-    working_directory: ~/pkijs
-    docker:
-      - image: "circleci/node:8.7.0"
-    steps:
-      - restore_cache:
-          key: -{{ .Branch }}-{{ .Revision }}
-      - run: npm run test:node
-
-  test2:
-    working_directory: ~/pkijs
-    docker:
-      - image: "circleci/node:8.7.0"
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ~/pkijs
-      - restore_cache:
-          key: -{{ .Branch }}-{{ .Revision }}
-      - run: ls -al
-
-workflows:
-  version: 2
-  main:
-    jobs:
-      - installation:
-          filters:
-            branches:
-              ignore:
-                - gh-pages
-      - test1:
-          requires:
-            - installation
-      - test2:
-          requires:
-            - installation
+      - run:
+          name: Run tests
+          command: |
+            TESTFILES=$(circleci tests glob "spec/**/*.rb" | circleci tests split --split-by=timings)
+            cross-env NODE_ENV=test nyc --clean=false mocha --timeout 40000 --require babel-register ${TESTFILES}
+      - run:
+          name: Coveralls
+          command: cat ./coverage/lcov.info | coveralls
+      - store_artifacts:
+          path: ./coverage/lcov.info
+          destination: coverage
