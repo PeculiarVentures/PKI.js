@@ -10,25 +10,31 @@ jobs:
     steps:
       - run:
           name: Installing global dependencies
-          command: sudo npm install -g typescript rollup nyc coveralls
+          command: sudo npm install -g typescript
       - checkout
-      - attach_workspace:
-          at: ~/pkijs
       - run:
           name: Installing PKI.js
           command: npm install
+      - run:
+          name: Installing node-webcrypto-ossl
+          command: npm install node-webcrypto-ossl
+      - run:
+          name: Building tests
+          command: npm run build:examples
       - save_cache:
           key: -{{ .Branch }}-{{ .Revision }}
           paths:
             - ~/pkijs
+
   test1:
+    parallelism: 4
     working_directory: ~/pkijs
     docker:
       - image: "circleci/node:8.7.0"
     steps:
       - restore_cache:
           key: -{{ .Branch }}-{{ .Revision }}
-      - run: ls -al
+      - run: npm run test:node
 
   test2:
     working_directory: ~/pkijs
@@ -52,16 +58,8 @@ workflows:
               ignore:
                 - gh-pages
       - test1:
-          filters:
-            branches:
-              ignore:
-                - gh-pages
           requires:
             - installation
       - test2:
-          filters:
-            branches:
-              ignore:
-                - gh-pages
           requires:
             - installation
