@@ -48,7 +48,7 @@ workflows:
   version: 2
   main:
     jobs:
-      - installation
+      - installation:
           filters:
             branches:
               ignore:
