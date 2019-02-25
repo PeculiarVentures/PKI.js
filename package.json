@@ -83,6 +83,7 @@
     "build:docs": "esdoc",
     "test:node": "cross-env NODE_ENV=test nyc mocha --timeout 40000 --require babel-register test/s_*.js && cross-env NODE_ENV=test nyc --clean=false mocha --timeout 40000 --require babel-register test/n_*.js",
     "test": "node -e \"console.log('\\nWARNING: !!! in order to test PKIjs in Node environment you\\nwould need to install additional package node-webcrypto-ossl !!!\\n\\nThe node-webcrypto-ossl is not referenced in PKIjs dependencies\\nanymore because we were noticed users have a problems with\\nthe package installation, especially on Windows platform.\\n\\nThe node-webcrypto-ossl is NOT a mandatory for testing PKIjs -\\nyou could visit test/browser subdir and run all the same tests\\nin your favorite browser.\\n\\nAlso you could check CircleCI - for each build the service runs\\nall tests and results could be easily observed.\\n\\nIf you do need to run PKIjs tests locally using Node please use\\nnpm run test:node')\"",
+    "test_l": "cross-env NODE_ENV=test nyc --clean=false mocha --timeout 40000 --require babel-register",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
