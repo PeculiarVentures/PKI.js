@@ -17,12 +17,6 @@ jobs:
       - run:
           name: Installing PKI.js
           command: npm install
-      - run:
-          name: Installing node-webcrypto-ossl
-          command: npm install node-webcrypto-ossl
-      - run:
-          name: Building tests
-          command: npm run build:examples
 
   test1:
     working_directory: ~/pkijs
@@ -43,6 +37,7 @@ jobs:
       - attach_workspace:
           at: ~/pkijs
       - run: ls -al
+      - run: rollup
 
 workflows:
   version: 2
