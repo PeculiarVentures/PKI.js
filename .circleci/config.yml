@@ -26,7 +26,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            TESTFILES=$(circleci tests glob "spec/**/*.rb" | circleci tests split --split-by=timings)
+            TESTFILES=$(circleci tests glob "test/s_*.js" "test/n_*.js" | circleci tests split)
             cross-env NODE_ENV=test nyc --clean=false mocha --timeout 40000 --require babel-register ${TESTFILES}
       - run:
           name: Coveralls
