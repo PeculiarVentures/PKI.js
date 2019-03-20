@@ -10,6 +10,8 @@ import CertificateRevocationList from "../../src/CertificateRevocationList.js";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common.js";
 import BasicConstraints from "../../src/BasicConstraints.js";
 import ExtKeyUsage from "../../src/ExtKeyUsage.js";
+import CertificateTemplate from "../../src/CertificateTemplate.js";
+import CAVersion from "../../src/CAVersion.js";
 //<nodewebcryptoossl>
 //*********************************************************************************
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT
@@ -304,7 +306,54 @@ function createCertificateInternal()
 		parsedValue: extKeyUsage // Parsed value for well-known extensions
 	}));
 	//endregion
-	//endregion 
+
+
+	//region Microsoft-specific extensions
+	const certType = new asn1js.Utf8String({ value: "certType" });
+
+	certificate.extensions.push(new Extension({
+		extnID: "1.3.6.1.4.1.311.20.2",
+		critical: false,
+		extnValue: certType.toBER(false),
+		parsedValue: certType // Parsed value for well-known extensions
+	}));
+
+
+	const prevHash = new asn1js.OctetString({ valueHex: (new Uint8Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])).buffer });
+
+	certificate.extensions.push(new Extension({
+		extnID: "1.3.6.1.4.1.311.21.2",
+		critical: false,
+		extnValue: prevHash.toBER(false),
+		parsedValue: prevHash // Parsed value for well-known extensions
+	}));
+
+	const certificateTemplate = new CertificateTemplate({
+		templateID: "1.1.1.1.1.1",
+		templateMajorVersion: 10,
+		templateMinorVersion: 20
+	});
+
+	certificate.extensions.push(new Extension({
+		extnID: "1.3.6.1.4.1.311.21.7",
+		critical: false,
+		extnValue: certificateTemplate.toSchema().toBER(false),
+		parsedValue: certificateTemplate // Parsed value for well-known extensions
+	}));
+
+	const caVersion = new CAVersion({
+		certificateIndex: 10,
+		keyIndex: 20
+	});
+
+	certificate.extensions.push(new Extension({
+		extnID: "1.3.6.1.4.1.311.21.1",
+		critical: false,
+		extnValue: caVersion.toSchema().toBER(false),
+		parsedValue: caVersion // Parsed value for well-known extensions
+	}));
+	//endregion
+	//endregion
 	
 	//region Create a new key pair 
 	sequence = sequence.then(() =>

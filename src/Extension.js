@@ -15,6 +15,8 @@ import PolicyConstraints from "./PolicyConstraints.js";
 import ExtKeyUsage from "./ExtKeyUsage.js";
 import InfoAccess from "./InfoAccess.js";
 import SignedCertificateTimestampList from "./SignedCertificateTimestampList.js";
+import CertificateTemplate from "./CertificateTemplate.js";
+import CAVersion from "./CAVersion.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -273,6 +275,7 @@ export default class Extension
 				}
 				break;
 			case "2.5.29.32": // CertificatePolicies
+			case "1.3.6.1.4.1.311.21.10": // szOID_APPLICATION_CERT_POLICIES - Microsoft-specific OID
 				try
 				{
 					this.parsedValue = new CertificatePolicies({ schema: asn1.result });
@@ -351,6 +354,34 @@ export default class Extension
 				{
 					this.parsedValue = new SignedCertificateTimestampList();
 					this.parsedValue.parsingError = "Incorrectly formated SignedCertificateTimestampList";
+				}
+				break;
+			case "1.3.6.1.4.1.311.20.2": // szOID_ENROLL_CERTTYPE_EXTENSION - Microsoft-specific extension
+				this.parsedValue = asn1.result; // Used to be simple Unicode string
+				break;
+			case "1.3.6.1.4.1.311.21.2": // szOID_CERTSRV_PREVIOUS_CERT_HASH - Microsoft-specific extension
+				this.parsedValue = asn1.result; // Used to be simple OctetString
+				break;
+			case "1.3.6.1.4.1.311.21.7": // szOID_CERTIFICATE_TEMPLATE - Microsoft-specific extension
+				try
+				{
+					this.parsedValue = new CertificateTemplate({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new CertificateTemplate();
+					this.parsedValue.parsingError = "Incorrectly formated CertificateTemplate";
+				}
+				break;
+			case "1.3.6.1.4.1.311.21.1": // szOID_CERTSRV_CA_VERSION - Microsoft-specific extension
+				try
+				{
+					this.parsedValue = new CAVersion({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new CAVersion();
+					this.parsedValue.parsingError = "Incorrectly formated CAVersion";
 				}
 				break;
 			default:
