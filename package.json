@@ -30,7 +30,7 @@
     "rollup": "latest",
     "rollup-plugin-commonjs": "latest",
     "rollup-plugin-node-builtins": "latest",
-    "rollup-plugin-node-resolve": "4ю"
+    "rollup-plugin-node-resolve": "4.0.1"
   },
   "dependencies": {
     "asn1js": "latest",
