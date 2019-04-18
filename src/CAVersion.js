@@ -77,8 +77,38 @@ export default class CAVersion
 			throw new Error("Object's schema was not verified against input data for CAVersion");
 		//endregion
 
+		//region Check length of the input value and correct it if needed
+		let value = schema.valueBlock.valueHex.slice(0);
+		const valueView = new Uint8Array(value);
+
+		switch(true)
+		{
+			case (value.byteLength < 4):
+			{
+				const tempValue = new ArrayBuffer(4);
+				const tempValueView = new Uint8Array(tempValue);
+
+				tempValueView.set(valueView, 4 - value.byteLength);
+
+				value = tempValue.slice(0);
+			}
+				break;
+			case (value.byteLength > 4):
+			{
+				const tempValue = new ArrayBuffer(4);
+				const tempValueView = new Uint8Array(tempValue);
+
+				tempValueView.set(valueView.slice(0, 4));
+
+				value = tempValue.slice(0);
+			}
+				break;
+			default:
+		}
+		//endregion
+
 		//region Get internal properties from parsed schema
-		const keyIndexBuffer = schema.valueBlock.valueHex.slice(0, 2);
+		const keyIndexBuffer = value.slice(0, 2);
 		const keyIndexView8 = new Uint8Array(keyIndexBuffer);
 		let temp = keyIndexView8[0];
 		keyIndexView8[0] = keyIndexView8[1];
@@ -88,7 +118,7 @@ export default class CAVersion
 
 		this.keyIndex = keyIndexView16[0];
 
-		const certificateIndexBuffer = schema.valueBlock.valueHex.slice(2);
+		const certificateIndexBuffer = value.slice(2);
 		const certificateIndexView8 = new Uint8Array(certificateIndexBuffer);
 		temp = certificateIndexView8[0];
 		certificateIndexView8[0] = certificateIndexView8[1];
