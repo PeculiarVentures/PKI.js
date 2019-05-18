@@ -143,33 +143,35 @@ export default class CertificateSet
 		//endregion
 		
 		//region Get internal properties from parsed schema
-		this.certificates = Array.from(asn1.result.certificates, element =>
-		{
-			const initialTagNumber = element.idBlock.tagNumber;
-
-			if(element.idBlock.tagClass === 1)
-				return new Certificate({ schema: element });
-			
-			//region Making "Sequence" from "Constructed" value
-			const elementSequence = new asn1js.Sequence({
-				value: element.valueBlock.value
-			});
-			//endregion
-
-			switch(initialTagNumber)
+		if (asn1.result.certificates) {
+			this.certificates = Array.from(asn1.result.certificates, element =>
 			{
-				case 1:
-					return new AttributeCertificateV1({ schema: elementSequence });
-				case 2:
-					return new AttributeCertificateV2({ schema: elementSequence });
-				case 3:
-					return new OtherCertificateFormat({ schema: elementSequence });
-				case 0:
-				default:
-			}
-			
-			return element;
-		});
+				const initialTagNumber = element.idBlock.tagNumber;
+
+				if(element.idBlock.tagClass === 1)
+					return new Certificate({ schema: element });
+
+				//region Making "Sequence" from "Constructed" value
+				const elementSequence = new asn1js.Sequence({
+					value: element.valueBlock.value
+				});
+				//endregion
+
+				switch(initialTagNumber)
+				{
+					case 1:
+						return new AttributeCertificateV1({ schema: elementSequence });
+					case 2:
+						return new AttributeCertificateV2({ schema: elementSequence });
+					case 3:
+						return new OtherCertificateFormat({ schema: elementSequence });
+					case 0:
+					default:
+				}
+
+				return element;
+			});
+		}
 		//endregion
 	}
 	//**********************************************************************************

@@ -438,9 +438,11 @@ export default class SignedData
 			return Promise.reject("Unable to get signer index from input parameters");
 		}
 		//endregion
-		
+
+		const certificates = (this.certificates || []).length ? this.certificates : trustedCerts;
+
 		//region Check that certificates field was included in signed data
-		if(("certificates" in this) === false)
+		if(!certificates)
 		{
 			if(extendedMode)
 			{
@@ -463,7 +465,7 @@ export default class SignedData
 		{
 			sequence = sequence.then(() =>
 			{
-				for(const certificate of this.certificates)
+				for(const certificate of certificates)
 				{
 					if((certificate instanceof Certificate) === false)
 						continue;
@@ -494,11 +496,11 @@ export default class SignedData
 		else // Find by SubjectKeyIdentifier
 		{
 			sequence = sequence.then(() =>
-				Promise.all(Array.from(this.certificates.filter(certificate => (certificate instanceof Certificate)), certificate =>
+				Promise.all(Array.from(certificates.filter(certificate => (certificate instanceof Certificate)), certificate =>
 					crypto.digest({ name: "sha-1" }, new Uint8Array(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex)))
 				).then(results =>
 				{
-					for(const [index, certificate] of this.certificates.entries())
+					for(const [index, certificate] of certificates.entries())
 					{
 						if((certificate instanceof Certificate) === false)
 							continue;

@@ -23,7 +23,9 @@ let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-v1_5";
 let addExt = false;
 let detachedSignature = false;
+let detachedCertificate = false;
 
+let signerCertificate;
 const trustedCertificates = []; // Array of root certificates from "CA Bundle"
 //*********************************************************************************
 //region Auxiliary functions 
@@ -431,6 +433,7 @@ function createCMSSignedInternal()
 		() =>
 		{
 			trustedCertificates.push(certSimpl);
+			signerCertificate = certSimpl;
 			certificateBuffer = certSimpl.toSchema(true).toBER(false);
 		},
 		error => Promise.reject(`Error during signing: ${error}`)
@@ -514,7 +517,7 @@ function createCMSSignedInternal()
 						})
 					})
 				],
-				certificates: [certSimpl]
+				certificates: detachedCertificate ? [] : [certSimpl],
 			});
 			
 			if(addExt)
@@ -623,7 +626,7 @@ function createCMSSigned()
 //*********************************************************************************
 //region Verify existing CMS_Signed
 //*********************************************************************************
-function verifyCMSSignedInternal()
+function verifyCMSSignedInternal(extendedMode = false)
 {
 	//region Initial check
 	if(cmsSignedBuffer.byteLength === 0)
@@ -641,7 +644,8 @@ function verifyCMSSignedInternal()
 		//region Verify CMS_Signed
 		const verificationParameters = {
 			signer: 0,
-			trustedCerts: trustedCertificates
+			trustedCerts: detachedCertificate ? [signerCertificate] : trustedCertificates,
+			extendedMode
 		};
 		if(detachedSignature)
 			verificationParameters.data = dataBuffer;
@@ -798,7 +802,8 @@ context("CMS Signed Complex Example", () =>
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
 	const addExts = [false, true];
 	const detachedSignatures = [false, true];
-	
+	const detachedCertificates = [false, true];
+
 	dataBuffer = (new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09])).buffer;
 	//endregion
 	
@@ -810,27 +815,31 @@ context("CMS Signed Complex Example", () =>
 			{
 				detachedSignatures.forEach(_detachedSignature =>
 				{
-					const testName = `${_hashAlg} + ${_signAlg}, add ext: ${_addExt}, detached signature: ${_detachedSignature}`;
-					
-					it(testName, () =>
+					detachedCertificates.forEach(_detachedCertificate =>
 					{
-						hashAlg = _hashAlg;
-						signAlg = _signAlg;
-						addExt = _addExt;
-						detachedSignature = _detachedSignature;
-						
-						return createCMSSignedInternal().then(() =>
+						const testName = `${_hashAlg} + ${_signAlg}, add ext: ${_addExt}, detached signature: ${_detachedSignature}, detached cert: ${_detachedCertificate}`;
+
+						it(testName, () =>
 						{
-							//region Simple test for decoding data
-							const asn1 = asn1js.fromBER(cmsSignedBuffer);
-							const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
-							// noinspection JSUnusedLocalSymbols
-							const cmsSignedSimpl = new SignedData({ schema: cmsContentSimpl.content });
-							//endregion
-							
-							return verifyCMSSignedInternal().then(result =>
+							hashAlg = _hashAlg;
+							signAlg = _signAlg;
+							addExt = _addExt;
+							detachedSignature = _detachedSignature;
+							detachedCertificate = _detachedCertificate;
+
+							return createCMSSignedInternal().then(() =>
 							{
-								assert.equal(result, true, "CMS SignedData must be verified sucessfully");
+								//region Simple test for decoding data
+								const asn1 = asn1js.fromBER(cmsSignedBuffer);
+								const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
+								// noinspection JSUnusedLocalSymbols
+								const cmsSignedSimpl = new SignedData({ schema: cmsContentSimpl.content });
+								//endregion
+
+								return verifyCMSSignedInternal(true).then(result =>
+								{
+									assert.equal(result.signatureVerified, true, `CMS SignedData must be verified successfully (code: ${result.code})`);
+								});
 							});
 						});
 					});
