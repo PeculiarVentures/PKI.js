@@ -143,7 +143,7 @@ export default class CertificateSet
 		//endregion
 		
 		//region Get internal properties from parsed schema
-		this.certificates = Array.from(asn1.result.certificates, element =>
+		this.certificates = Array.from(asn1.result.certificates || [], element =>
 		{
 			const initialTagNumber = element.idBlock.tagNumber;
 

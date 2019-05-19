@@ -104,7 +104,7 @@
   "module": "./src/index.js",
   "main": "./build/index.js",
   "name": "pkijs",
-  "version": "2.1.77",
+  "version": "2.1.78",
   "license": "BSD-3-Clause",
   "esdoc": {
     "source": "./src",
