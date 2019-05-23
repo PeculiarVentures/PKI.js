@@ -84,24 +84,24 @@ export default class CAVersion
 		switch(true)
 		{
 			case (value.byteLength < 4):
-			{
-				const tempValue = new ArrayBuffer(4);
-				const tempValueView = new Uint8Array(tempValue);
+				{
+					const tempValue = new ArrayBuffer(4);
+					const tempValueView = new Uint8Array(tempValue);
 
-				tempValueView.set(valueView, 4 - value.byteLength);
+					tempValueView.set(valueView, 4 - value.byteLength);
 
-				value = tempValue.slice(0);
-			}
+					value = tempValue.slice(0);
+				}
 				break;
 			case (value.byteLength > 4):
-			{
-				const tempValue = new ArrayBuffer(4);
-				const tempValueView = new Uint8Array(tempValue);
+				{
+					const tempValue = new ArrayBuffer(4);
+					const tempValueView = new Uint8Array(tempValue);
 
-				tempValueView.set(valueView.slice(0, 4));
+					tempValueView.set(valueView.slice(0, 4));
 
-				value = tempValue.slice(0);
-			}
+					value = tempValue.slice(0);
+				}
 				break;
 			default:
 		}

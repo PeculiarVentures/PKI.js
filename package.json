@@ -15,10 +15,11 @@
     "url": "git://github.com/PeculiarVentures/PKI.js.git"
   },
   "devDependencies": {
-    "babel-cli": "latest",
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
     "babel-plugin-istanbul": "latest",
-    "babel-preset-env": "latest",
-    "babel-register": "latest",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/register": "^7.0.0",
     "cross-env": "latest",
     "emailjs-mime-builder": "latest",
     "emailjs-mime-parser": "latest",
@@ -27,6 +28,7 @@
     "eslint": "latest",
     "mocha": "latest",
     "nyc": "latest",
+    "@peculiar/webcrypto": "^1.0.11",
     "rollup": "latest",
     "rollup-plugin-commonjs": "latest",
     "rollup-plugin-node-builtins": "latest",
@@ -81,8 +83,7 @@
     "build:examples:es5": "npm run ex1:es5 && npm run ex2:es5 && npm run ex3 && npm run ex4:es5 && npm run ex5:es5 && npm run ex6:es5 && npm run ex7:es5 && npm run ex8:es5 && npm run ex9:es5 && npm run ex10:es5 && npm run ex11:es5 && npm run ex12:es5 && npm run ex13:es5 && npm run ex14:es5 && npm run ex15:es5 && npm run ex16:es5 && npm run ex18:es5",
     "build:tests": "npm run build:examples",
     "build:docs": "esdoc",
-    "test:node": "cross-env NODE_ENV=test nyc mocha --timeout 40000 --require babel-register test/s_*.js && cross-env NODE_ENV=test nyc --clean=false mocha --timeout 40000 --require babel-register test/n_*.js",
-    "test": "node -e \"console.log('\\nWARNING: !!! in order to test PKIjs in Node environment you\\nwould need to install additional package node-webcrypto-ossl !!!\\n\\nThe node-webcrypto-ossl is not referenced in PKIjs dependencies\\nanymore because we were noticed users have a problems with\\nthe package installation, especially on Windows platform.\\n\\nThe node-webcrypto-ossl is NOT a mandatory for testing PKIjs -\\nyou could visit test/browser subdir and run all the same tests\\nin your favorite browser.\\n\\nAlso you could check CircleCI - for each build the service runs\\nall tests and results could be easily observed.\\n\\nIf you do need to run PKIjs tests locally using Node please use\\nnpm run test:node')\"",
+    "test": "cross-env NODE_ENV=test nyc mocha --timeout 40000 --require @babel/register test/s_*.js && cross-env NODE_ENV=test nyc --clean=false mocha --timeout 40000 --require @babel/register test/n_*.js",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
