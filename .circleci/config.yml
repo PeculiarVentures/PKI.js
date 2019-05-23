@@ -24,7 +24,7 @@ jobs:
           command: npm run build:examples
       - run:
           name: Run tests
-          command: npm run test:node
+          command: npm test
       - run:
           name: Coveralls
           command: cat ./coverage/lcov.info | coveralls
