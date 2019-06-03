@@ -268,6 +268,8 @@ export default class ECPrivateKey
 			case "1.3.132.0.35": // P-521
 				crvName = "P-521";
 				break;
+			case "1.3.132.0.10": //K-256
+				crvName = "K-256";
 			default:
 		}
 
@@ -301,6 +303,10 @@ export default class ECPrivateKey
 			{
 				case "P-256":
 					this.namedCurve = "1.2.840.10045.3.1.7";
+					coodinateLength = 32;
+					break;
+				case "K-256":
+					this.namedCurve = "1.3.132.0.10";
 					coodinateLength = 32;
 					break;
 				case "P-384":

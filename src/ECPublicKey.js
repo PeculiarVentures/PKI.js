@@ -112,6 +112,9 @@ export default class ECPublicKey
 			case "1.2.840.10045.3.1.7": // P-256
 				coordinateLength = 32;
 				break;
+			case "1.3.132.0.10": //K-256
+				coordinateLength = 32;
+				break;
 			case "1.3.132.0.34": // P-384
 				coordinateLength = 48;
 				break;
@@ -163,6 +166,9 @@ export default class ECPublicKey
 			case "1.3.132.0.35": // P-521
 				crvName = "P-521";
 				break;
+			case "1.3.132.0.10": //K-256
+				crvName = "K-256";
+				break;
 			default:
 		}
 
@@ -185,8 +191,12 @@ export default class ECPublicKey
 		{
 			switch(json.crv.toUpperCase())
 			{
-				case "P-256":
+					case "P-256":
 					this.namedCurve = "1.2.840.10045.3.1.7";
+					coodinateLength = 32;
+					break;
+				case "K-256":
+					this.namedCurve = "1.3.132.0.10";
 					coodinateLength = 32;
 					break;
 				case "P-384":
@@ -196,7 +206,6 @@ export default class ECPublicKey
 				case "P-521":
 					this.namedCurve = "1.3.132.0.35";
 					coodinateLength = 66;
-					break;
 				default:
 			}
 		}
