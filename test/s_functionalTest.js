@@ -303,6 +303,31 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
+	it("ECPublicKey_secp256k1", () =>
+	{
+		results["ECPublicKey_secp256k1"] = new pkijs.ECPublicKey({
+			schema: (new pkijs.ECPublicKey({
+				x: fakeHex,
+				y: fakeHex,
+				namedCurve: "1.3.132.0.10" // Same length as P-256
+			})).toSchema().data, // Return specifically ArrayBuffer
+			namedCurve: "1.3.132.0.10" // Needs specifically for this class
+		});
+	});
+
+	it("ECPrivateKey_secp256k1", () =>
+	{
+		results["ECPrivateKey_secp256k1"] = new pkijs.ECPrivateKey({
+			schema: (new pkijs.ECPrivateKey({
+				version: 1,
+				privateKey: new asn1js.OctetString({ valueHex: fakeHex }),
+				namedCurve: "1.3.132.0.10",  // Same length as P-256
+				publicKey: results["ECPublicKey"]
+			})).toSchema()
+		});
+	});
+
+
 	it("EncapsulatedContentInfo", () =>
 	{
 		results["EncapsulatedContentInfo"] = new pkijs.EncapsulatedContentInfo({
