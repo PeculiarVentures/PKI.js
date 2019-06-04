@@ -167,7 +167,7 @@ function parseCertificate() {
 		else
 			modulusBitLength = rsaPublicKey.modulus.valueBlock.valueHex.byteLength * 8;
 
-			document.getElementById("cert-keysize").innerHTML = modulusBitLength.toString();
+		document.getElementById("cert-keysize").innerHTML = modulusBitLength.toString();
 	}
 
 	//endregion
@@ -770,7 +770,7 @@ function handleHashAlgOnChange() {
 function handleSignAlgOnChange() {
 	const signOption = document.getElementById("sign_alg").value;
 	const curveChange = document.getElementById('sign_alg_curve_container');
-	curveChange.style.display = 'none';
+	curveChange.style.display = signOption === 'alg_ECDSA' ? 'inherit' : 'none';
 	switch (signOption) {
 		case "alg_RSA15":
 			signAlg = "RSASSA-PKCS1-V1_5";
@@ -780,7 +780,6 @@ function handleSignAlgOnChange() {
 			break;
 		case "alg_ECDSA":
 			signAlg = "ECDSA";
-			curveChange.style.display = 'inherit';
 			break;
 		default:
 	}
