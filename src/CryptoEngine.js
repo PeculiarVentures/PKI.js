@@ -260,7 +260,7 @@ export default class CryptoEngine
 		switch(format.toLowerCase())
 		{
 			case "raw":
-                return this.subtle.importKey("raw", keyData, algorithm, extractable, keyUsages);
+				return this.subtle.importKey("raw", keyData, algorithm, extractable, keyUsages);
 			case "spki":
 				{
 					const asn1 = asn1js.fromBER(keyData);
