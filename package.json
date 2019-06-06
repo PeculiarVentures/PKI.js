@@ -36,7 +36,9 @@
   },
   "dependencies": {
     "asn1js": "latest",
+    "base-64": "^0.1.0",
     "bytestreamjs": "latest",
+    "crypto-js": "^3.1.9-1",
     "pvutils": "latest"
   },
   "engines": {

@@ -8,6 +8,9 @@ import EncryptedContentInfo from "./EncryptedContentInfo.js";
 import RSASSAPSSParams from "./RSASSAPSSParams.js";
 import PBKDF2Params from "./PBKDF2Params.js";
 import PBES2Params from "./PBES2Params.js";
+import base64 from "base-64";
+import CryptoJS from "crypto-js";
+
 //**************************************************************************************
 /**
  * Making MAC key using algorithm described in B.2 of PKCS#12 standard.
@@ -257,7 +260,7 @@ export default class CryptoEngine
 		switch(format.toLowerCase())
 		{
 			case "raw":
-				return this.subtle.importKey("raw", keyData, algorithm, extractable, keyUsages);
+                return this.subtle.importKey("raw", keyData, algorithm, extractable, keyUsages);
 			case "spki":
 				{
 					const asn1 = asn1js.fromBER(keyData);
@@ -776,6 +779,39 @@ export default class CryptoEngine
 	 */
 	decrypt(...args)
 	{
+        let [algorithm, key, ciphertext] = args;
+        console.debug("decrypt args: %o", args);
+        
+        if(algorithm.name === 'DES-EDE3-CBC'){
+            
+            let promise = new Promise((resolve, reject) =>{
+                console.debug("decrypt key: %o", CryptoJS.enc.Base64.stringify(key));
+                console.debug("ciphertext: %o", new Uint8Array(ciphertext).length );
+                console.debug("ciphertext hex: %o", this.bufferToHex(ciphertext).length );
+
+                let encryptedBlob = CryptoJS.enc.Hex.parse(this.bufferToHex(ciphertext));
+                let iv  = CryptoJS.enc.Hex.parse(this.bufferToHex(algorithm.iv));
+                let css = { ciphertext : encryptedBlob };
+
+                let decryptedRes = CryptoJS.TripleDES.decrypt(
+                    css, //encryptedBlob,
+                    key, 
+                    { mode: CryptoJS.mode.CBC, iv: iv});
+                
+                console.debug("decryptedRes %o", decryptedRes);
+                
+                let decryptedB64 = decryptedRes.toString(CryptoJS.enc.Base64); 
+                let raw = base64.decode(decryptedB64);
+                let decrypted = Uint8Array.from(Array.prototype.map.call(raw,function(x) { 
+                    return x.charCodeAt(0); 
+                }));
+                
+                console.debug("decrypted %o", decrypted);
+                
+                return resolve( decrypted.buffer );
+            });
+            return promise;
+        }
 		return this.subtle.decrypt(...args);
 	}
 	//**********************************************************************************
@@ -824,10 +860,42 @@ export default class CryptoEngine
 	 * @param args
 	 * @returns {Promise}
 	 */
-	deriveKey(...args)
+	async deriveKey(...args)
 	{
+        let [algorithm, baseKey, derivedKeyAlgorithm, extractable, ...other] = args;
+        if(derivedKeyAlgorithm.name.startsWith('DES-EDE3')){
+            let derivedKeyAlgorithm2 =
+                {
+                    name : "AES-CBC",
+                    length : 192 // 3DES lenght: 168
+                };
+            console.debug("deriveKey: algo:%o baseKey:%o %o", algorithm, baseKey, derivedKeyAlgorithm);
+            
+            let pw = new TextDecoder("utf-8").decode(await this.exportKey("raw", baseKey));
+            console.debug(">>> baseKey: %o", pw);
+            let s = this.bufferToHex(algorithm.salt);
+            let salt = CryptoJS.enc.Hex.parse(s);
+            let desKey = CryptoJS.PBKDF2(pw, salt, { keySize: derivedKeyAlgorithm2.length/32, iterations: algorithm.iterations }); 
+            console.debug("deriveKey manual:  salt:%o key:%o %o",
+                    s,
+                    CryptoJS.enc.Base64.stringify(desKey),
+                    desKey
+                         );
+            let sessionKey = Uint8Array.from(desKey.words);
+            console.debug("session desKey: %o ", sessionKey );
+            let promise = new Promise((resolve, reject) =>{resolve(desKey);});
+            return promise;
+            
+            return this.subtle.deriveKey(algorithm, baseKey, derivedKeyAlgorithm2, true, ...other);
+        }
 		return this.subtle.deriveKey(...args);
 	}
+	
+	bufferToHex(buffer) {
+    var s = '', h = '0123456789ABCDEF';
+    (new Uint8Array(buffer)).forEach((v) => { s += h[v >> 4] + h[v & 15]; });
+    return s;
+    }
 	//**********************************************************************************
 	/**
 	 * Wrapper for standard function "deriveBits"
@@ -1079,6 +1147,11 @@ export default class CryptoEngine
 				return {
 					name: "PBKDF2"
 				};
+			case "1.2.840.113549.3.7":
+				return {
+					name:"DES-EDE3-CBC",
+                    length: 168
+				};
 			//region Special case - OIDs for ECC curves
 			case "1.2.840.10045.3.1.7":
 				return {
@@ -1273,6 +1346,10 @@ export default class CryptoEngine
 				break;
 			case "PBKDF2":
 				result = "1.2.840.113549.1.5.12";
+				break;
+				break;
+			case "DES-EDE3-CBC":
+				result = "1.2.840.113549.3.7";
 				break;
 			//region Special case - OIDs for ECC curves
 			case "P-256":
@@ -1863,7 +1940,7 @@ export default class CryptoEngine
 			return this.importKey("raw",
 				passwordView,
 				"PBKDF2",
-				false,
+				true,
 				["deriveKey"]);
 		}, error =>
 			Promise.reject(error)
@@ -2007,7 +2084,7 @@ export default class CryptoEngine
 			this.importKey("raw",
 				parameters.password,
 				"PBKDF2",
-				false,
+				true,
 				["deriveKey"]),
 		error =>
 			Promise.reject(error)
