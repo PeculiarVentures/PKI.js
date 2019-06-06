@@ -1307,6 +1307,9 @@ export default class CryptoEngine
 					default:
 				}
 				break;
+			case "DES-EDE3-CBC":
+                result = "1.2.840.113549.3.7";
+				break;                                
 			case "HMAC":
 				switch(algorithm.hash.name.toUpperCase())
 				{
