@@ -17,6 +17,7 @@ import InfoAccess from "./InfoAccess.js";
 import SignedCertificateTimestampList from "./SignedCertificateTimestampList.js";
 import CertificateTemplate from "./CertificateTemplate.js";
 import CAVersion from "./CAVersion.js";
+import QCStatements from "./QCStatements.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -382,6 +383,17 @@ export default class Extension
 				{
 					this.parsedValue = new CAVersion();
 					this.parsedValue.parsingError = "Incorrectly formated CAVersion";
+				}
+				break;
+			case "1.3.6.1.5.5.7.1.3": // QCStatements
+				try
+				{
+					this.parsedValue = new QCStatements({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new QCStatements();
+					this.parsedValue.parsingError = "Incorrectly formated QCStatements";
 				}
 				break;
 			default:

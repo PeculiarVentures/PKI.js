@@ -211,3 +211,6 @@ import CertificateTemplate from "./CertificateTemplate.js";
 export { CertificateTemplate };
 import CAVersion from "./CAVersion.js";
 export { CAVersion };
+import { QCStatement }from "./QCStatements.js";
+import QCStatements from "./CAVersion.js";
+export { QCStatement, QCStatements };
