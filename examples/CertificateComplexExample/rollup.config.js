@@ -14,6 +14,7 @@ export default {
 			format: "iife",
 			outro: `
 ${fs.readFileSync('./elliptic.min.js', {'encoding':'utf8'})};
+${fs.readFileSync('./webcrypto-liner.shim.js', {'encoding':'utf8'})};
 window.parseCertificate = parseCertificate;
 window.createCertificate = createCertificate;
 window.verifyCertificate = verifyCertificate;

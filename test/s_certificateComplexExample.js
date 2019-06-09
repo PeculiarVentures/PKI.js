@@ -4,23 +4,29 @@ import {
 	stringToArrayBuffer,
 	bufferToHexCodes
 } from "pvutils";
-import Certificate from "../../src/Certificate.js";
-import AttributeTypeAndValue from "../../src/AttributeTypeAndValue.js";
-import Extension from "../../src/Extension.js";
-import RSAPublicKey from "../../src/RSAPublicKey.js";
-import CertificateChainValidationEngine from "../../src/CertificateChainValidationEngine.js";
-import CertificateRevocationList from "../../src/CertificateRevocationList.js";
+import Certificate from "../src/Certificate.js";
+import AttributeTypeAndValue from "../src/AttributeTypeAndValue.js";
+import Extension from "../src/Extension.js";
+import RSAPublicKey from "../src/RSAPublicKey.js";
+import CertificateChainValidationEngine from "../src/CertificateChainValidationEngine.js";
+import CertificateRevocationList from "../src/CertificateRevocationList.js";
 import {
 	getCrypto,
 	getAlgorithmParameters,
 	setEngine
-} from "../../src/common.js";
-import BasicConstraints from "../../src/BasicConstraints.js";
-import ExtKeyUsage from "../../src/ExtKeyUsage.js";
-import CertificateTemplate from "../../src/CertificateTemplate.js";
-import CAVersion from "../../src/CAVersion.js";
+} from "../src/common.js";
+import BasicConstraints from "../src/BasicConstraints.js";
+import ExtKeyUsage from "../src/ExtKeyUsage.js";
+import CertificateTemplate from "../src/CertificateTemplate.js";
+import CAVersion from "../src/CAVersion.js";
 
-//<nodewebcryptoossl>
+import CryptoEngine from "../src/CryptoEngine";
+
+const { Crypto } = require("@peculiar/webcrypto");
+const webcrypto = new Crypto();
+
+const assert = require("assert");
+setEngine("newEngine", webcrypto, new CryptoEngine({ name: "", crypto: webcrypto, subtle: webcrypto.subtle }));
 //*********************************************************************************
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT
 let privateKeyBuffer = new ArrayBuffer(0);
