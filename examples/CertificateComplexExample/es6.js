@@ -808,7 +808,7 @@ context("Hack for Rollup.js", () => {
 context("Certificate Complex Example", () => {
 	//region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
-	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS", "ECDSA_K-256"];
+	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
 
 	const algorithmsMap = new Map([
 		["SHA-1 + RSASSA-PKCS1-V1_5", "1.2.840.113549.1.1.5"],
