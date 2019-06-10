@@ -12,9 +12,11 @@ export default {
 	output: [{
 			file: "bundle.js",
 			format: "iife",
+			intro: `
+			${fs.readFileSync('./elliptic.min.js', {'encoding':'utf8'})};
+			${fs.readFileSync('./webcrypto-liner.shim.js', {'encoding':'utf8'})};
+			`,
 			outro: `
-${fs.readFileSync('./elliptic.min.js', {'encoding':'utf8'})};
-${fs.readFileSync('./webcrypto-liner.shim.js', {'encoding':'utf8'})};
 window.parseCertificate = parseCertificate;
 window.createCertificate = createCertificate;
 window.verifyCertificate = verifyCertificate;
