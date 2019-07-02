@@ -87,6 +87,11 @@ export default class AttributeTypeAndValue
 		}));
 	}
 	//**********************************************************************************
+	static blockName()
+	{
+		return "AttributeTypeAndValue";
+	}
+	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
 	 * @param {!Object} schema
@@ -178,7 +183,7 @@ export default class AttributeTypeAndValue
 			asn1js.CharacterString.blockName()
 		];
 
-		if(compareTo instanceof AttributeTypeAndValue)
+		if(compareTo.constructor.blockName() === AttributeTypeAndValue.blockName())
 		{
 			if(this.type !== compareTo.type)
 				return false;
