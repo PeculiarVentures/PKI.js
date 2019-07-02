@@ -163,28 +163,48 @@ export default class AttributeTypeAndValue
 	 */
 	isEqual(compareTo)
 	{
+		const stringBlockNames = [
+			asn1js.Utf8String.blockName(),
+			asn1js.BmpString.blockName(),
+			asn1js.UniversalString.blockName(),
+			asn1js.NumericString.blockName(),
+			asn1js.PrintableString.blockName(),
+			asn1js.TeletexString.blockName(),
+			asn1js.VideotexString.blockName(),
+			asn1js.IA5String.blockName(),
+			asn1js.GraphicString.blockName(),
+			asn1js.VisibleString.blockName(),
+			asn1js.GeneralString.blockName(),
+			asn1js.CharacterString.blockName()
+		];
+
 		if(compareTo instanceof AttributeTypeAndValue)
 		{
 			if(this.type !== compareTo.type)
 				return false;
-			
-			// noinspection OverlyComplexBooleanExpressionJS
-			if(((this.value instanceof asn1js.Utf8String) && (compareTo.value instanceof asn1js.Utf8String)) ||
-				((this.value instanceof asn1js.BmpString) && (compareTo.value instanceof asn1js.BmpString)) ||
-				((this.value instanceof asn1js.UniversalString) && (compareTo.value instanceof asn1js.UniversalString)) ||
-				((this.value instanceof asn1js.NumericString) && (compareTo.value instanceof asn1js.NumericString)) ||
-				((this.value instanceof asn1js.PrintableString) && (compareTo.value instanceof asn1js.PrintableString)) ||
-				((this.value instanceof asn1js.TeletexString) && (compareTo.value instanceof asn1js.TeletexString)) ||
-				((this.value instanceof asn1js.VideotexString) && (compareTo.value instanceof asn1js.VideotexString)) ||
-				((this.value instanceof asn1js.IA5String) && (compareTo.value instanceof asn1js.IA5String)) ||
-				((this.value instanceof asn1js.GraphicString) && (compareTo.value instanceof asn1js.GraphicString)) ||
-				((this.value instanceof asn1js.VisibleString) && (compareTo.value instanceof asn1js.VisibleString)) ||
-				((this.value instanceof asn1js.GeneralString) && (compareTo.value instanceof asn1js.GeneralString)) ||
-				((this.value instanceof asn1js.CharacterString) && (compareTo.value instanceof asn1js.CharacterString)))
+
+			//region Check we do have both strings
+			let isString = false;
+			const thisName = this.value.constructor.blockName();
+
+			if(thisName === compareTo.value.constructor.blockName())
+			{
+				for(const name of stringBlockNames)
+				{
+					if(thisName === name)
+					{
+						isString = true;
+						break;
+					}
+				}
+			}
+			//endregion
+
+			if(isString)
 			{
 				const value1 = stringPrep(this.value.valueBlock.value);
 				const value2 = stringPrep(compareTo.value.valueBlock.value);
-				
+
 				if(value1.localeCompare(value2) !== 0)
 					return false;
 			}
@@ -193,10 +213,10 @@ export default class AttributeTypeAndValue
 				if(isEqualBuffer(this.value.valueBeforeDecode, compareTo.value.valueBeforeDecode) === false)
 					return false;
 			}
-			
+
 			return true;
 		}
-		
+
 		if(compareTo instanceof ArrayBuffer)
 			return isEqualBuffer(this.value.valueBeforeDecode, compareTo);
 
