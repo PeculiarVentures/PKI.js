@@ -161,9 +161,9 @@ export default class RelativeDistinguishedNames
 		if(this.valueBeforeDecode.byteLength === 0) // No stored encoded array, create "from scratch"
 		{
 			return (new asn1js.Sequence({
-				value: [new asn1js.Set({
-					value: Array.from(this.typesAndValues, element => element.toSchema())
-				})]
+				value: Array.from(this.typesAndValues, element => new asn1js.Set({
+					value: [element.toSchema()]
+				}))
 			}));
 		}
 
