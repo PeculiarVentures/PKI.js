@@ -141,6 +141,11 @@ function createPKCS10Internal()
 							extnID: "2.5.29.17",
 							critical: false,
 							extnValue: altNames.toSchema().toBER(false)
+						}),
+						new Extension({
+							extnID: "1.2.840.113549.1.9.7",
+							critical: false,
+							extnValue: (new PrintableString({ value: "passwordChallenge" })).toBER(false)
 						})
 					]
 				})).toSchema()]
