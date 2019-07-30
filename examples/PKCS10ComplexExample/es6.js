@@ -145,7 +145,7 @@ function createPKCS10Internal()
 						new Extension({
 							extnID: "1.2.840.113549.1.9.7",
 							critical: false,
-							extnValue: (new PrintableString({ value: "passwordChallenge" })).toBER(false)
+							extnValue: (new asn1js.PrintableString({ value: "passwordChallenge" })).toBER(false)
 						})
 					]
 				})).toSchema()]
