@@ -138,7 +138,7 @@ export default class PublicKeyInfo
 			case "1.2.840.10045.2.1": // ECDSA
 				if("algorithmParams" in this.algorithm)
 				{
-					if(this.algorithm.algorithmParams instanceof asn1js.ObjectIdentifier)
+					if(this.algorithm.algorithmParams.constructor.blockName() === asn1js.ObjectIdentifier.blockName())
 					{
 						try
 						{
