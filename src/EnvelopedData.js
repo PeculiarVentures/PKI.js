@@ -949,6 +949,17 @@ export default class EnvelopedData
 			//region Get recipient's public key
 			currentSequence = currentSequence.then(() =>
 			{
+				//region Check we have a correct algorithm here
+				const oaepOID = getOIDByAlgorithm({
+					name: "RSA-OAEP"
+				});
+				if(oaepOID === "")
+					throw new Error("Can not find OID for OAEP");
+
+				if(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId !== oaepOID)
+					throw new Error("Not supported encryption scheme, only RSA-OAEP is supported for key transport encryption scheme");
+				//endregion
+
 				//region Get current used SHA algorithm
 				const schema = _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams;
 				const rsaOAEPParams = new RSAESOAEPParams({ schema });
