@@ -466,8 +466,8 @@ function verifyCertificateInternal()
 		
 		//region Create certificate's array (end-user certificate + intermediate certificates)
 		const certificates = [];
-		certificates.push(certificate);
 		certificates.push(...intermadiateCertificates);
+		certificates.push(certificate);
 		//endregion
 		
 		//region Make a copy of trusted certificates array
