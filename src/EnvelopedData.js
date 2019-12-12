@@ -932,6 +932,8 @@ export default class EnvelopedData
 				 */
 				_this.recipientInfos[index].value.recipientEncryptedKeys.encryptedKeys[0].encryptedKey = new asn1js.OctetString({ valueHex: result });
 				//endregion
+
+				return {ecdhPrivateKey};
 			}, error =>
 				Promise.reject(error)
 			);
