@@ -1261,7 +1261,7 @@ export default class EnvelopedData
 					
 					
 				if(curveObject.constructor.name !== "ObjectIdentifier")
-					return Promise.reject(`BADGER decrypt Incorrect "recipientCertificate" for index ${index}`);
+					return Promise.reject(`Incorrect "recipientCertificate" for index ${index}`);
 				curveOID = curveObject.valueBlock.toString();
 					
 				switch(curveOID)
