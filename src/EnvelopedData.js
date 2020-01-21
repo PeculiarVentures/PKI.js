@@ -760,7 +760,7 @@ export default class EnvelopedData
 			{
 				const curveObject = _this.recipientInfos[index].value.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
 				
-				if(curveObject.constructor.name !== "ObjectIdentifier")
+				if(curveObject.constructor.blockName() !== asn1js.ObjectIdentifier.blockName())
 					return Promise.reject(`Incorrect "recipientCertificate" for index ${index}`);
 				
 				const curveOID = curveObject.valueBlock.toString();
@@ -1260,7 +1260,7 @@ export default class EnvelopedData
 				const curveObject = decryptionParameters.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
 					
 					
-				if(curveObject.constructor.name !== "ObjectIdentifier")
+				if(curveObject.constructor.blockName() !== asn1js.ObjectIdentifier.blockName())
 					return Promise.reject(`Incorrect "recipientCertificate" for index ${index}`);
 				curveOID = curveObject.valueBlock.toString();
 					
