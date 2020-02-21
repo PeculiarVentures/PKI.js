@@ -1467,9 +1467,7 @@ export default class CryptoEngine
 						result = {
 							algorithm: {
 								name: "ECDSA",
-								hash: {
-									name: "SHA-256"
-								}
+								namedCurve: "P-256"
 							},
 							usages: ["sign"]
 						};
