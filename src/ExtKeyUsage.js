@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -10,14 +10,14 @@ export default class ExtKeyUsage
 	/**
 	 * Constructor for ExtKeyUsage class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<string>}
-		 * @description keyPurposes
+		 * @desc keyPurposes
 		 */
 		this.keyPurposes = getParametersValue(parameters, "keyPurposes", ExtKeyUsage.defaultValues("keyPurposes"));
 		//endregion
@@ -44,18 +44,20 @@ export default class ExtKeyUsage
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * ExtKeyUsage ::= SEQUENCE SIZE (1..MAX) OF KeyPurposeId
+	 *
+	 * KeyPurposeId ::= OBJECT IDENTIFIER
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// ExtKeyUsage OID ::= 2.5.29.37
-		//
-		// ExtKeyUsage ::= SEQUENCE SIZE (1..MAX) OF KeyPurposeId
-
-		// KeyPurposeId ::= OBJECT IDENTIFIER
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -80,6 +82,12 @@ export default class ExtKeyUsage
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"keyPurposes"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
+import { getParametersValue, clearProps } from "pvutils";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 //**************************************************************************************
 /**
  * Class from RFC3447
@@ -11,19 +11,19 @@ export default class DigestInfo
 	/**
 	 * Constructor for DigestInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description digestAlgorithm
+		 * @desc digestAlgorithm
 		 */
 		this.digestAlgorithm = getParametersValue(parameters, "digestAlgorithm", DigestInfo.defaultValues("digestAlgorithm"));
 		/**
 		 * @type {OctetString}
-		 * @description digest
+		 * @desc digest
 		 */
 		this.digest = getParametersValue(parameters, "digest", DigestInfo.defaultValues("digest"));
 		//endregion
@@ -33,7 +33,6 @@ export default class DigestInfo
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -51,7 +50,6 @@ export default class DigestInfo
 				throw new Error(`Invalid member name for DigestInfo class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -66,26 +64,29 @@ export default class DigestInfo
 				return ((AlgorithmIdentifier.compareWithDefault("algorithmId", memberValue.algorithmId)) &&
 				(("algorithmParams" in memberValue) === false));
 			case "digest":
-				return (memberValue.isEqual(this.constructor.defaultValues(memberName)));
+				return (memberValue.isEqual(DigestInfo.defaultValues(memberName)));
 			default:
 				throw new Error(`Invalid member name for DigestInfo class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * DigestInfo ::= SEQUENCE {
+	 *    digestAlgorithm DigestAlgorithmIdentifier,
+	 *    digest Digest }
+	 *
+	 * Digest ::= OCTET STRING
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//DigestInfo ::= SEQUENCE {
-		//    digestAlgorithm DigestAlgorithmIdentifier,
-		//    digest Digest }
-		
-		//Digest ::= OCTET STRING
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -114,6 +115,13 @@ export default class DigestInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"digestAlgorithm",
+			"digest"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -138,7 +146,6 @@ export default class DigestInfo
 		this.digest = asn1.result.digest;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -155,7 +162,6 @@ export default class DigestInfo
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -168,7 +174,6 @@ export default class DigestInfo
 			digest: this.digest.toJSON()
 		};
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

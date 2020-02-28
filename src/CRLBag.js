@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import CertificateRevocationList from "./CertificateRevocationList";
+import { getParametersValue, clearProps } from "pvutils";
+import CertificateRevocationList from "./CertificateRevocationList.js";
 //**************************************************************************************
 /**
  * Class from RFC7292
@@ -11,26 +11,26 @@ export default class CRLBag
 	/**
 	 * Constructor for CRLBag class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description crlId
+		 * @desc crlId
 		 */
 		this.crlId = getParametersValue(parameters, "crlId", CRLBag.defaultValues("crlId"));
 		/**
 		 * @type {*}
-		 * @description crlValue
+		 * @desc crlValue
 		 */
 		this.crlValue = getParametersValue(parameters, "crlValue", CRLBag.defaultValues("crlValue"));
 		
 		if("parsedValue" in parameters)
 			/**
 			 * @type {*}
-			 * @description parsedValue
+			 * @desc parsedValue
 			 */
 			this.parsedValue = getParametersValue(parameters, "parsedValue", CRLBag.defaultValues("parsedValue"));
 		//endregion
@@ -81,17 +81,21 @@ export default class CRLBag
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * CRLBag ::= SEQUENCE {
+	 *    crlId     	BAG-TYPE.&id ({CRLTypes}),
+	 *    crlValue 	[0] EXPLICIT BAG-TYPE.&Type ({CRLTypes}{@crlId})
+	 *}
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//CRLBag ::= SEQUENCE {
-		//    crlId     	BAG-TYPE.&id ({CRLTypes}),
-		//    crlValue 	[0] EXPLICIT BAG-TYPE.&Type ({CRLTypes}{@crlId})
-		//}
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -121,6 +125,13 @@ export default class CRLBag
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"crlId",
+			"crlValue"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -149,7 +160,7 @@ export default class CRLBag
 				}
 				break;
 			default:
-				throw new Error(`Incorrect \"crlId\" value in CertBag: ${this.crlId}`);
+				throw new Error(`Incorrect "crlId" value in CRLBag: ${this.crlId}`);
 		}
 		//endregion
 	}

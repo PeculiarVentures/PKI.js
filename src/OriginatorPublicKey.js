@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
+import { getParametersValue, clearProps } from "pvutils";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -11,19 +11,19 @@ export default class OriginatorPublicKey
 	/**
 	 * Constructor for OriginatorPublicKey class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description algorithm
+		 * @desc algorithm
 		 */
 		this.algorithm = getParametersValue(parameters, "algorithm", OriginatorPublicKey.defaultValues("algorithm"));
 		/**
 		 * @type {BitString}
-		 * @description publicKey
+		 * @desc publicKey
 		 */
 		this.publicKey = getParametersValue(parameters, "publicKey", OriginatorPublicKey.defaultValues("publicKey"));
 		//endregion
@@ -69,16 +69,20 @@ export default class OriginatorPublicKey
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * OriginatorPublicKey ::= SEQUENCE {
+	 *    algorithm AlgorithmIdentifier,
+	 *    publicKey BIT STRING }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//OriginatorPublicKey ::= SEQUENCE {
-		//    algorithm AlgorithmIdentifier,
-		//    publicKey BIT STRING }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -102,6 +106,13 @@ export default class OriginatorPublicKey
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"algorithm",
+			"publicKey"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

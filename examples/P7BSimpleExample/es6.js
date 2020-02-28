@@ -1,3 +1,4 @@
+/* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
 import { arrayBufferToString, toBase64 } from "pvutils";
@@ -7,6 +8,7 @@ import Extension from "../../src/Extension";
 import SignedData from "../../src/SignedData";
 import EncapsulatedContentInfo from "../../src/EncapsulatedContentInfo";
 import ContentInfo from "../../src/ContentInfo";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let cmsSignedBuffer = new ArrayBuffer(0);
 
@@ -87,7 +89,7 @@ function createP7BInternal()
 	//region "KeyUsage" extension
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
-	bitView[0] = bitView[0] | 0x02; // Key usage "cRLSign" flag
+	bitView[0] |= 0x02; // Key usage "cRLSign" flag
 	//bitView[0] = bitView[0] | 0x04; // Key usage "keyCertSign" flag
 	
 	const keyUsage = new asn1js.BitString({ valueHex: bitArray });
@@ -147,7 +149,7 @@ function createP7BInternal()
 			})).toSchema(true)
 		});
 		
-		cmsSignedBuffer = cmsContentSimp.toSchema(true).toBER(false);
+		cmsSignedBuffer = cmsContentSimp.toSchema().toBER(false);
 	});
 	//endregion
 	
@@ -158,12 +160,12 @@ function createP7B()
 {
 	return Promise.resolve().then(() => createP7BInternal()).then(() =>
 	{
-		let resultString = document.getElementById("newSignedData").innerHTML;
-		
-		resultString = "\r\n-----BEGIN CMS-----\r\n";
+		// noinspection InnerHTMLJS
+		let resultString = "\r\n-----BEGIN CMS-----\r\n";
 		resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(cmsSignedBuffer)))}`;
 		resultString = `${resultString}\r\n-----END CMS-----\r\n\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("newSignedData").innerHTML = resultString;
 	});
 }
@@ -213,6 +215,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	createP7B();
 	handleHashAlgOnChange();
 	handleSignAlgOnChange();

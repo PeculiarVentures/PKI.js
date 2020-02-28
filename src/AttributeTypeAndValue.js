@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, isEqualBuffer } from "pvutils";
-import { stringPrep } from "./common";
+import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
+import { stringPrep } from "./common.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -11,19 +11,19 @@ export default class AttributeTypeAndValue
 	/**
 	 * Constructor for AttributeTypeAndValue class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description type
+		 * @desc type
 		 */
 		this.type = getParametersValue(parameters, "type", AttributeTypeAndValue.defaultValues("type"));
 		/**
 		 * @type {Object}
-		 * @description Value of the AttributeTypeAndValue class
+		 * @desc Value of the AttributeTypeAndValue class
 		 */
 		this.value = getParametersValue(parameters, "value", AttributeTypeAndValue.defaultValues("value"));
 		//endregion
@@ -52,20 +52,24 @@ export default class AttributeTypeAndValue
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AttributeTypeAndValue ::= Sequence {
+	 *    type     AttributeType,
+	 *    value    AttributeValue }
+	 *
+	 * AttributeType ::= OBJECT IDENTIFIER
+	 *
+	 * AttributeValue ::= ANY -- DEFINED BY AttributeType
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//AttributeTypeAndValue ::= Sequence {
-		//    type     AttributeType,
-		//    value    AttributeValue }
-		//
-		//AttributeType ::= OBJECT IDENTIFIER
-		//
-		//AttributeValue ::= ANY -- DEFINED BY AttributeType
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName] Name for entire block
@@ -83,16 +87,25 @@ export default class AttributeTypeAndValue
 		}));
 	}
 	//**********************************************************************************
+	static blockName()
+	{
+		return "AttributeTypeAndValue";
+	}
+	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
 	 * @param {!Object} schema
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"type",
+			"typeValue"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
-		/**
-		 * @type {{verified: boolean}|{verified: boolean, result: {type: Object, typeValue: Object}}}
-		 */
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
 			AttributeTypeAndValue.schema({
@@ -104,11 +117,12 @@ export default class AttributeTypeAndValue
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for ATTR_TYPE_AND_VALUE");
+			throw new Error("Object's schema was not verified against input data for AttributeTypeAndValue");
 		//endregion
 
 		//region Get internal properties from parsed schema
 		this.type = asn1.result.type.valueBlock.toString();
+		// noinspection JSUnresolvedVariable
 		this.value = asn1.result.typeValue;
 		//endregion
 	}
@@ -154,27 +168,48 @@ export default class AttributeTypeAndValue
 	 */
 	isEqual(compareTo)
 	{
-		if(compareTo instanceof AttributeTypeAndValue)
+		const stringBlockNames = [
+			asn1js.Utf8String.blockName(),
+			asn1js.BmpString.blockName(),
+			asn1js.UniversalString.blockName(),
+			asn1js.NumericString.blockName(),
+			asn1js.PrintableString.blockName(),
+			asn1js.TeletexString.blockName(),
+			asn1js.VideotexString.blockName(),
+			asn1js.IA5String.blockName(),
+			asn1js.GraphicString.blockName(),
+			asn1js.VisibleString.blockName(),
+			asn1js.GeneralString.blockName(),
+			asn1js.CharacterString.blockName()
+		];
+
+		if(compareTo.constructor.blockName() === AttributeTypeAndValue.blockName())
 		{
 			if(this.type !== compareTo.type)
 				return false;
-			
-			if(((this.value instanceof asn1js.Utf8String) && (compareTo.value instanceof asn1js.Utf8String)) ||
-				((this.value instanceof asn1js.BmpString) && (compareTo.value instanceof asn1js.BmpString)) ||
-				((this.value instanceof asn1js.UniversalString) && (compareTo.value instanceof asn1js.UniversalString)) ||
-				((this.value instanceof asn1js.NumericString) && (compareTo.value instanceof asn1js.NumericString)) ||
-				((this.value instanceof asn1js.PrintableString) && (compareTo.value instanceof asn1js.PrintableString)) ||
-				((this.value instanceof asn1js.TeletexString) && (compareTo.value instanceof asn1js.TeletexString)) ||
-				((this.value instanceof asn1js.VideotexString) && (compareTo.value instanceof asn1js.VideotexString)) ||
-				((this.value instanceof asn1js.IA5String) && (compareTo.value instanceof asn1js.IA5String)) ||
-				((this.value instanceof asn1js.GraphicString) && (compareTo.value instanceof asn1js.GraphicString)) ||
-				((this.value instanceof asn1js.VisibleString) && (compareTo.value instanceof asn1js.VisibleString)) ||
-				((this.value instanceof asn1js.GeneralString) && (compareTo.value instanceof asn1js.GeneralString)) ||
-				((this.value instanceof asn1js.CharacterString) && (compareTo.value instanceof asn1js.CharacterString)))
+
+			//region Check we do have both strings
+			let isString = false;
+			const thisName = this.value.constructor.blockName();
+
+			if(thisName === compareTo.value.constructor.blockName())
+			{
+				for(const name of stringBlockNames)
+				{
+					if(thisName === name)
+					{
+						isString = true;
+						break;
+					}
+				}
+			}
+			//endregion
+
+			if(isString)
 			{
 				const value1 = stringPrep(this.value.valueBlock.value);
 				const value2 = stringPrep(compareTo.value.valueBlock.value);
-				
+
 				if(value1.localeCompare(value2) !== 0)
 					return false;
 			}
@@ -183,10 +218,10 @@ export default class AttributeTypeAndValue
 				if(isEqualBuffer(this.value.valueBeforeDecode, compareTo.value.valueBeforeDecode) === false)
 					return false;
 			}
-			
+
 			return true;
 		}
-		
+
 		if(compareTo instanceof ArrayBuffer)
 			return isEqualBuffer(this.value.valueBeforeDecode, compareTo);
 

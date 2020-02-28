@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import DigestInfo from "./DigestInfo";
+import { getParametersValue, clearProps } from "pvutils";
+import DigestInfo from "./DigestInfo.js";
 //**************************************************************************************
 /**
  * Class from RFC7292
@@ -11,26 +11,26 @@ export default class MacData
 	/**
 	 * Constructor for MacData class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {DigestInfo}
-		 * @description mac
+		 * @desc mac
 		 */
 		this.mac = getParametersValue(parameters, "mac", MacData.defaultValues("mac"));
 		/**
 		 * @type {OctetString}
-		 * @description macSalt
+		 * @desc macSalt
 		 */
 		this.macSalt = getParametersValue(parameters, "macSalt", MacData.defaultValues("macSalt"));
 		
 		if("iterations" in parameters)
 			/**
 			 * @type {number}
-			 * @description iterations
+			 * @desc iterations
 			 */
 			this.iterations = getParametersValue(parameters, "iterations", MacData.defaultValues("iterations"));
 		//endregion
@@ -40,7 +40,6 @@ export default class MacData
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -60,7 +59,6 @@ export default class MacData
 				throw new Error(`Invalid member name for MacData class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -82,22 +80,26 @@ export default class MacData
 				throw new Error(`Invalid member name for MacData class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * MacData ::= SEQUENCE {
+	 *    mac 		DigestInfo,
+	 *    macSalt       OCTET STRING,
+	 *    iterations	INTEGER DEFAULT 1
+	 *    -- Note: The default is for historical reasons and its use is
+	 *    -- deprecated. A higher value, like 1024 is recommended.
+	 *    }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//MacData ::= SEQUENCE {
-		//    mac 		DigestInfo,
-		//    macSalt       OCTET STRING,
-		//    iterations	INTEGER DEFAULT 1
-		//    -- Note: The default is for historical reasons and its use is
-		//    -- deprecated. A higher value, like 1024 is recommended.
-		//    }
 		
 		/**
 		 * @type {Object}
@@ -133,6 +135,14 @@ export default class MacData
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"mac",
+			"macSalt",
+			"iterations"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -161,7 +171,6 @@ export default class MacData
 			this.iterations = asn1.result.iterations.valueBlock.valueDec;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -183,7 +192,6 @@ export default class MacData
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -201,7 +209,6 @@ export default class MacData
 		
 		return output;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

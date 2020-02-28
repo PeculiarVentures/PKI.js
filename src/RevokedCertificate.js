@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import Time from "./Time";
-import Extensions from "./Extensions";
+import { getParametersValue, clearProps } from "pvutils";
+import Time from "./Time.js";
+import Extensions from "./Extensions.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -12,26 +12,26 @@ export default class RevokedCertificate
 	/**
 	 * Constructor for RevokedCertificate class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Integer}
-		 * @description userCertificate
+		 * @desc userCertificate
 		 */
 		this.userCertificate = getParametersValue(parameters, "userCertificate", RevokedCertificate.defaultValues("userCertificate"));
 		/**
 		 * @type {Time}
-		 * @description revocationDate
+		 * @desc revocationDate
 		 */
 		this.revocationDate = getParametersValue(parameters, "revocationDate", RevokedCertificate.defaultValues("revocationDate"));
 
 		if("crlEntryExtensions" in parameters)
 			/**
 			 * @type {Extensions}
-			 * @description crlEntryExtensions
+			 * @desc crlEntryExtensions
 			 */
 			this.crlEntryExtensions = getParametersValue(parameters, "crlEntryExtensions", RevokedCertificate.defaultValues("crlEntryExtensions"));
 		//endregion
@@ -62,7 +62,18 @@ export default class RevokedCertificate
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * revokedCertificates     SEQUENCE OF SEQUENCE  {
+     *        userCertificate         CertificateSerialNumber,
+     *        revocationDate          Time,
+     *        crlEntryExtensions      Extensions OPTIONAL
+     *                                 -- if present, version MUST be v2
+     *                             }  OPTIONAL,
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
@@ -102,6 +113,14 @@ export default class RevokedCertificate
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"userCertificate",
+			"revocationDate",
+			"crlEntryExtensions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -109,7 +128,7 @@ export default class RevokedCertificate
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for REV_CERT");
+			throw new Error("Object's schema was not verified against input data for RevokedCertificate");
 		//endregion
 
 		//region Get internal properties from parsed schema

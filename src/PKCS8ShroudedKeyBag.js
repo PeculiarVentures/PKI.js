@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import EncryptedData from "./EncryptedData";
-import EncryptedContentInfo from "./EncryptedContentInfo";
-import PrivateKeyInfo from "./PrivateKeyInfo";
+import { getParametersValue, clearProps } from "pvutils";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import EncryptedData from "./EncryptedData.js";
+import EncryptedContentInfo from "./EncryptedContentInfo.js";
+import PrivateKeyInfo from "./PrivateKeyInfo.js";
 //**************************************************************************************
 /**
  * Class from RFC7292
@@ -14,26 +14,26 @@ export default class PKCS8ShroudedKeyBag
 	/**
 	 * Constructor for PKCS8ShroudedKeyBag class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description encryptionAlgorithm
+		 * @desc encryptionAlgorithm
 		 */
 		this.encryptionAlgorithm = getParametersValue(parameters, "encryptionAlgorithm", PKCS8ShroudedKeyBag.defaultValues("encryptionAlgorithm"));
 		/**
 		 * @type {OctetString}
-		 * @description encryptedData
+		 * @desc encryptedData
 		 */
 		this.encryptedData = getParametersValue(parameters, "encryptedData", PKCS8ShroudedKeyBag.defaultValues("encryptedData"));
 		
 		if("parsedValue" in parameters)
 			/**
 			 * @type {*}
-			 * @description parsedValue
+			 * @desc parsedValue
 			 */
 			this.parsedValue = getParametersValue(parameters, "parsedValue", PKCS8ShroudedKeyBag.defaultValues("parsedValue"));
 		//endregion
@@ -43,7 +43,6 @@ export default class PKCS8ShroudedKeyBag
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -63,7 +62,6 @@ export default class PKCS8ShroudedKeyBag
 				throw new Error(`Invalid member name for PKCS8ShroudedKeyBag class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -85,24 +83,27 @@ export default class PKCS8ShroudedKeyBag
 				throw new Error(`Invalid member name for PKCS8ShroudedKeyBag class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PKCS8ShroudedKeyBag ::= EncryptedPrivateKeyInfo
+	 *
+	 * EncryptedPrivateKeyInfo ::= SEQUENCE {
+	 *    encryptionAlgorithm AlgorithmIdentifier {{KeyEncryptionAlgorithms}},
+	 *    encryptedData EncryptedData
+	 * }
+	 *
+	 * EncryptedData ::= OCTET STRING
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//PKCS8ShroudedKeyBag ::= EncryptedPrivateKeyInfo
-		
-		//EncryptedPrivateKeyInfo ::= SEQUENCE {
-		//    encryptionAlgorithm AlgorithmIdentifier {{KeyEncryptionAlgorithms}},
-		//    encryptedData EncryptedData
-		//}
-		
-		//EncryptedData ::= OCTET STRING
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -133,7 +134,6 @@ export default class PKCS8ShroudedKeyBag
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -141,6 +141,13 @@ export default class PKCS8ShroudedKeyBag
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"encryptionAlgorithm",
+			"encryptedData"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -165,7 +172,6 @@ export default class PKCS8ShroudedKeyBag
 		this.encryptedData = asn1.result.encryptedData;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -182,7 +188,6 @@ export default class PKCS8ShroudedKeyBag
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -218,6 +223,9 @@ export default class PKCS8ShroudedKeyBag
 		
 		//region Initialize "parsedValue" with decrypted PKCS#8 private key 
 		sequence = sequence.then(
+			/**
+			 * @param {ArrayBuffer} result
+			 */
 			result =>
 			{
 				const asn1 = asn1js.fromBER(result);
@@ -225,6 +233,8 @@ export default class PKCS8ShroudedKeyBag
 					return Promise.reject("Error during parsing ASN.1 data");
 				
 				this.parsedValue = new PrivateKeyInfo({ schema: asn1.result });
+				
+				return Promise.resolve();
 			},
 			error => Promise.reject(error)
 		);
@@ -232,7 +242,6 @@ export default class PKCS8ShroudedKeyBag
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 	makeInternalValues(parameters)
 	{
@@ -271,7 +280,6 @@ export default class PKCS8ShroudedKeyBag
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

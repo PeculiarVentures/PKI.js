@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
-import RecipientKeyIdentifier from "./RecipientKeyIdentifier";
+import { getParametersValue, clearProps } from "pvutils";
+import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
+import RecipientKeyIdentifier from "./RecipientKeyIdentifier.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -12,19 +12,19 @@ export default class KeyAgreeRecipientIdentifier
 	/**
 	 * Constructor for KeyAgreeRecipientIdentifier class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description variant
+		 * @desc variant
 		 */
 		this.variant = getParametersValue(parameters, "variant", KeyAgreeRecipientIdentifier.defaultValues("variant"));
 		/**
 		 * @type {*}
-		 * @description values
+		 * @desc values
 		 */
 		this.value = getParametersValue(parameters, "value", KeyAgreeRecipientIdentifier.defaultValues("value"));
 		//endregion
@@ -71,16 +71,20 @@ export default class KeyAgreeRecipientIdentifier
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * KeyAgreeRecipientIdentifier ::= CHOICE {
+	 *    issuerAndSerialNumber IssuerAndSerialNumber,
+	 *    rKeyId [0] IMPLICIT RecipientKeyIdentifier }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//KeyAgreeRecipientIdentifier ::= CHOICE {
-		//    issuerAndSerialNumber IssuerAndSerialNumber,
-		//    rKeyId [0] IMPLICIT RecipientKeyIdentifier }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -118,6 +122,12 @@ export default class KeyAgreeRecipientIdentifier
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"blockName"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -142,10 +152,11 @@ export default class KeyAgreeRecipientIdentifier
 		{
 			this.variant = 2;
 
-			asn1.result.blockName.idBlock.tagClass = 1; // UNIVERSAL
-			asn1.result.blockName.idBlock.tagNumber = 16; // SEQUENCE
-
-			this.value = new RecipientKeyIdentifier({ schema: asn1.result.blockName });
+			this.value = new RecipientKeyIdentifier({
+				schema: new asn1js.Sequence({
+					value: asn1.result.blockName.valueBlock.value
+				})
+			});
 		}
 		//endregion
 	}

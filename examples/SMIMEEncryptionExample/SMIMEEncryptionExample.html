@@ -5,15 +5,8 @@
     <meta charset="utf-8" />
     <title>S/MIME encryption and decryption</title>
 
-    <script type="text/javascript" src="js/mimefuncs.js"></script>
-    <script type="text/javascript" src="js/addressparser.js"></script>
-    <script type="text/javascript" src="js/mimeparser-tzabbr.js"></script>
-    <script type="text/javascript" src="js/mimeparser.js"></script>
-    <script type="text/javascript" src="js/emailjs-mime-codec.js"></script>
-    <script type="text/javascript" src="js/emailjs-mime-types.js"></script>
-    <script type="text/javascript" src="js/emailjs-addressparser.js"></script>
-    <script type="text/javascript" src="js/punycode.js"></script>
-    <script type="text/javascript" src="js/emailjs-mime-builder.js"></script>
+    <script type="application/javascript" src="../../node_modules/babel-polyfill/dist/polyfill.js"></script>
+    <script type="text/javascript" src="bundle.js"></script>
 
     <style type="text/css">
         body{background:#EFEFEF;font:normal 14px/16px Helvetica, Arial, sans-serif;}
@@ -128,8 +121,6 @@
         border: 1px solid black; 
        }
     </style>
-
-    <script type="text/javascript" src="bundle.js"></script>
 </head>
 
 <body>
@@ -182,6 +173,15 @@
                     <option value="len_192">192</option>
                     -->
                     <option value="len_256">256</option>
+                </select>
+            </p>
+            <p>
+                <label for="oaep_hash_alg" style="font-weight:bold">RSA-OAEP Hashing Algorithm:</label>
+                <select id="oaep_hash_alg" onchange="handleOAEPHashAlgOnChange()">
+                    <option value="alg_SHA1">SHA-1</option>
+                    <option value="alg_SHA256">SHA-256</option>
+                    <option value="alg_SHA384">SHA-384</option>
+                    <option value="alg_SHA512">SHA-512</option>
                 </select>
             </p>
             <p>

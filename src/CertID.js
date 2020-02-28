@@ -1,8 +1,7 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, isEqualBuffer } from "pvutils";
-import { getCrypto, getOIDByAlgorithm } from "./common";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import Certificate from "./Certificate";
+import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
+import { getCrypto, getOIDByAlgorithm } from "./common.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 //**************************************************************************************
 /**
  * Class from RFC6960
@@ -13,29 +12,29 @@ export default class CertID
 	/**
 	 * Constructor for CertID class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description hashAlgorithm
+		 * @desc hashAlgorithm
 		 */
 		this.hashAlgorithm = getParametersValue(parameters, "hashAlgorithm", CertID.defaultValues("hashAlgorithm"));
 		/**
 		 * @type {OctetString}
-		 * @description issuerNameHash
+		 * @desc issuerNameHash
 		 */
 		this.issuerNameHash = getParametersValue(parameters, "issuerNameHash", CertID.defaultValues("issuerNameHash"));
 		/**
 		 * @type {OctetString}
-		 * @description issuerKeyHash
+		 * @desc issuerKeyHash
 		 */
 		this.issuerKeyHash = getParametersValue(parameters, "issuerKeyHash", CertID.defaultValues("issuerKeyHash"));
 		/**
 		 * @type {Integer}
-		 * @description serialNumber
+		 * @desc serialNumber
 		 */
 		this.serialNumber = getParametersValue(parameters, "serialNumber", CertID.defaultValues("serialNumber"));
 		//endregion
@@ -45,7 +44,6 @@ export default class CertID
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -66,7 +64,6 @@ export default class CertID
 				throw new Error(`Invalid member name for CertID class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -87,21 +84,24 @@ export default class CertID
 				throw new Error(`Invalid member name for CertID class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * CertID          ::=     SEQUENCE {
+	 *    hashAlgorithm       AlgorithmIdentifier,
+	 *    issuerNameHash      OCTET STRING, -- Hash of issuer's DN
+	 *    issuerKeyHash       OCTET STRING, -- Hash of issuer's public key
+	 *    serialNumber        CertificateSerialNumber }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//CertID          ::=     SEQUENCE {
-		//    hashAlgorithm       AlgorithmIdentifier,
-		//    issuerNameHash      OCTET STRING, -- Hash of issuer's DN
-		//    issuerKeyHash       OCTET STRING, -- Hash of issuer's public key
-		//    serialNumber        CertificateSerialNumber }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -127,7 +127,6 @@ export default class CertID
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -135,6 +134,15 @@ export default class CertID
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"hashAlgorithm",
+			"issuerNameHash",
+			"issuerKeyHash",
+			"serialNumber"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -159,7 +167,6 @@ export default class CertID
 		this.serialNumber = asn1.result.serialNumber;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -178,7 +185,6 @@ export default class CertID
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -193,7 +199,6 @@ export default class CertID
 			serialNumber: this.serialNumber.toJSON()
 		};
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Check that two "CertIDs" are equal
@@ -224,7 +229,6 @@ export default class CertID
 		
 		return true;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Making OCSP certificate identifier for specific certificate
@@ -252,7 +256,7 @@ export default class CertID
 		
 		const hashOID = getOIDByAlgorithm({ name: parameters.hashAlgorithm });
 		if(hashOID === "")
-			return Promise.reject(`Incorrect \"hashAlgorithm\": ${this.hashAlgorithm}`);
+			return Promise.reject(`Incorrect "hashAlgorithm": ${this.hashAlgorithm}`);
 		
 		this.hashAlgorithm = new AlgorithmIdentifier({
 			algorithmId: hashOID,
@@ -271,9 +275,9 @@ export default class CertID
 		
 		//region Create "issuerNameHash"
 		sequence = sequence.then(() =>
-				crypto.digest({ name: parameters.hashAlgorithm }, issuerCertificate.subject.toSchema().toBER(false)),
-			error =>
-				Promise.reject(error)
+			crypto.digest({ name: parameters.hashAlgorithm }, issuerCertificate.subject.toSchema().toBER(false)),
+		error =>
+			Promise.reject(error)
 		);
 		//endregion
 		
@@ -297,7 +301,6 @@ export default class CertID
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

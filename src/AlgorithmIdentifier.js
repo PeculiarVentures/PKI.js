@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -10,7 +10,7 @@ export default class AlgorithmIdentifier
 	/**
 	 * Constructor for AlgorithmIdentifier class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 * @property {string} [algorithmId] ObjectIdentifier for algorithm (string representation)
 	 */
 	constructor(parameters = {})
@@ -18,14 +18,14 @@ export default class AlgorithmIdentifier
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description ObjectIdentifier for algorithm (string representation)
+		 * @desc ObjectIdentifier for algorithm (string representation)
 		 */
 		this.algorithmId = getParametersValue(parameters, "algorithmId", AlgorithmIdentifier.defaultValues("algorithmId"));
 
 		if("algorithmParams" in parameters)
 			/**
 			 * @type {Object}
-			 * @description Any algorithm parameters
+			 * @desc Any algorithm parameters
 			 */
 			this.algorithmParams = getParametersValue(parameters, "algorithmParams", AlgorithmIdentifier.defaultValues("algorithmParams"));
 		//endregion
@@ -72,16 +72,20 @@ export default class AlgorithmIdentifier
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AlgorithmIdentifier  ::=  Sequence  {
+	 *    algorithm               OBJECT IDENTIFIER,
+	 *    parameters              ANY DEFINED BY algorithm OPTIONAL  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//AlgorithmIdentifier  ::=  Sequence  {
-		//    algorithm               OBJECT IDENTIFIER,
-		//    parameters              ANY DEFINED BY algorithm OPTIONAL  }
-
 		/**
 		 * @type {Object}
 		 * @property {string} algorithmIdentifier ObjectIdentifier for the algorithm
@@ -105,10 +109,14 @@ export default class AlgorithmIdentifier
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"algorithm",
+			"params"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
-		/**
-		 * @type {{verified: boolean}|{verified: boolean, result: {algorithm: Object, params: Object}}}
-		 */
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
 			AlgorithmIdentifier.schema({

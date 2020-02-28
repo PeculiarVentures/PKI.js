@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import PKIStatusInfo from "./PKIStatusInfo";
-import ContentInfo from "./ContentInfo";
-import SignedData from "./SignedData";
+import { getParametersValue, clearProps } from "pvutils";
+import PKIStatusInfo from "./PKIStatusInfo.js";
+import ContentInfo from "./ContentInfo.js";
+import SignedData from "./SignedData.js";
 //**************************************************************************************
 /**
  * Class from RFC3161
@@ -13,21 +13,21 @@ export default class TimeStampResp
 	/**
 	 * Constructor for TimeStampResp class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {PKIStatusInfo}
-		 * @description status
+		 * @desc status
 		 */
 		this.status = getParametersValue(parameters, "status", TimeStampResp.defaultValues("status"));
 
 		if("timeStampToken" in parameters)
 			/**
 			 * @type {ContentInfo}
-			 * @description timeStampToken
+			 * @desc timeStampToken
 			 */
 			this.timeStampToken = getParametersValue(parameters, "timeStampToken", TimeStampResp.defaultValues("timeStampToken"));
 		//endregion
@@ -77,16 +77,20 @@ export default class TimeStampResp
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * TimeStampResp ::= SEQUENCE  {
+	 *    status                  PKIStatusInfo,
+	 *    timeStampToken          TimeStampToken     OPTIONAL  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//TimeStampResp ::= SEQUENCE  {
-		//    status                  PKIStatusInfo,
-		//    timeStampToken          TimeStampToken     OPTIONAL  }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -119,6 +123,13 @@ export default class TimeStampResp
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"TimeStampResp.status",
+			"TimeStampResp.timeStampToken"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -126,7 +137,7 @@ export default class TimeStampResp
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for TSP_RESPONSE");
+			throw new Error("Object's schema was not verified against input data for TimeStampResp");
 		//endregion
 
 		//region Get internal properties from parsed schema

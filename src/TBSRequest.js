@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import GeneralName from "./GeneralName";
-import Request from "./Request";
-import Extension from "./Extension";
-import Extensions from "./Extensions";
+import { getParametersValue, clearProps } from "pvutils";
+import GeneralName from "./GeneralName.js";
+import Request from "./Request.js";
+import Extension from "./Extension.js";
+import Extensions from "./Extensions.js";
 //**************************************************************************************
 /**
  * Class from RFC6960
@@ -14,41 +14,41 @@ export default class TBSRequest
 	/**
 	 * Constructor for TBSRequest class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {ArrayBuffer}
-		 * @description tbs
+		 * @desc tbs
 		 */
 		this.tbs = getParametersValue(parameters, "tbs", TBSRequest.defaultValues("tbs"));
 
 		if("version" in parameters)
 			/**
 			 * @type {number}
-			 * @description version
+			 * @desc version
 			 */
 			this.version = getParametersValue(parameters, "version", TBSRequest.defaultValues("version"));
 
 		if("requestorName" in parameters)
 			/**
 			 * @type {GeneralName}
-			 * @description requestorName
+			 * @desc requestorName
 			 */
 			this.requestorName = getParametersValue(parameters, "requestorName", TBSRequest.defaultValues("requestorName"));
 
 		/**
 		 * @type {Array.<Request>}
-		 * @description requestList
+		 * @desc requestList
 		 */
 		this.requestList = getParametersValue(parameters, "requestList", TBSRequest.defaultValues("requestList"));
 
 		if("requestExtensions" in parameters)
 			/**
 			 * @type {Array.<Extension>}
-			 * @description requestExtensions
+			 * @desc requestExtensions
 			 */
 			this.requestExtensions = getParametersValue(parameters, "requestExtensions", TBSRequest.defaultValues("requestExtensions"));
 		//endregion
@@ -105,18 +105,22 @@ export default class TBSRequest
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * TBSRequest      ::=     SEQUENCE {
+	 *    version             [0]     EXPLICIT Version DEFAULT v1,
+	 *    requestorName       [1]     EXPLICIT GeneralName OPTIONAL,
+	 *    requestList                 SEQUENCE OF Request,
+	 *    requestExtensions   [2]     EXPLICIT Extensions OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//TBSRequest      ::=     SEQUENCE {
-		//    version             [0]     EXPLICIT Version DEFAULT v1,
-		//    requestorName       [1]     EXPLICIT GeneralName OPTIONAL,
-		//    requestList                 SEQUENCE OF Request,
-		//    requestExtensions   [2]     EXPLICIT Extensions OPTIONAL }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -184,6 +188,16 @@ export default class TBSRequest
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"TBSRequest",
+			"TBSRequest.version",
+			"TBSRequest.requestorName",
+			"TBSRequest.requests",
+			"TBSRequest.requestExtensions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

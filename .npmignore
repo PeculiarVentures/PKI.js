@@ -1,2 +1,12 @@
 .idea
 /examples
+/test
+.circleci
+circle.yml
+.nycrc
+.nyc_output
+.eslintrc.js
+.babelrc
+coverage
+.vs
+docs

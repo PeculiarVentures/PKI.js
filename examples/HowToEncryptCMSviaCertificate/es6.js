@@ -1,12 +1,16 @@
+/* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import { arrayBufferToString, stringToArrayBuffer, toBase64, fromBase64, isEqualBuffer } from "pvutils";
-import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
-import Certificate from "../../src/Certificate";
-import EnvelopedData from "../../src/EnvelopedData";
-import ContentInfo from "../../src/ContentInfo";
-import AttributeTypeAndValue from "../../src/AttributeTypeAndValue";
-import BasicConstraints from "../../src/BasicConstraints";
-import Extension from "../../src/Extension";
+import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common.js";
+import Certificate from "../../src/Certificate.js";
+import EnvelopedData from "../../src/EnvelopedData.js";
+import ContentInfo from "../../src/ContentInfo.js";
+import AttributeTypeAndValue from "../../src/AttributeTypeAndValue.js";
+import BasicConstraints from "../../src/BasicConstraints.js";
+import Extension from "../../src/Extension.js";
+import OriginatorInfo from "../../src/OriginatorInfo.js";
+import CertificateSet from "../../src/CertificateSet.js";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT 
 let privateKeyBuffer = new ArrayBuffer(0);
@@ -18,6 +22,7 @@ let trustedCertificates = []; // Array of root certificates from "CA Bundle"
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-v1_5";
+let oaepHashAlg = "SHA-1";
 
 const encAlg = {
 	name: "AES-CBC",
@@ -111,8 +116,8 @@ function createCertificateInternal()
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
-	bitView[0] = bitView[0] | 0x02; // Key usage "cRLSign" flag
-	bitView[0] = bitView[0] | 0x04; // Key usage "keyCertSign" flag
+	bitView[0] |= 0x02; // Key usage "cRLSign" flag
+	bitView[0] |= 0x04; // Key usage "keyCertSign" flag
 	
 	const keyUsage = new asn1js.BitString({ valueHex: bitArray });
 	
@@ -154,8 +159,8 @@ function createCertificateInternal()
 	
 	//region Signing final certificate
 	sequence = sequence.then(() =>
-			certificate.sign(privateKey, hashAlg),
-		error => Promise.reject(`Error during exporting public key: ${error}`));
+		certificate.sign(privateKey, hashAlg),
+	error => Promise.reject(`Error during exporting public key: ${error}`));
 	//endregion
 	
 	//region Encode and store certificate
@@ -192,16 +197,18 @@ function createCertificate()
 		resultString = `${resultString}${formatPEM(toBase64(certificateString))}`;
 		resultString = `${resultString}\r\n-----END CERTIFICATE-----\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("new_signed_data").innerHTML = resultString;
 
 		alert("Certificate created successfully!");
 		
 		const privateKeyString = String.fromCharCode.apply(null, new Uint8Array(privateKeyBuffer));
 		
-		resultString = `-----BEGIN PRIVATE KEY-----\r\n`;
+		resultString = "-----BEGIN PRIVATE KEY-----\r\n";
 		resultString = `${resultString}${formatPEM(toBase64(privateKeyString))}`;
 		resultString = `${resultString}\r\n-----END PRIVATE KEY-----\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("pkcs8_key").innerHTML = resultString;
 		
 		alert("Private key exported successfully!");
@@ -225,29 +232,36 @@ function envelopedEncryptInternal()
 	const certSimpl = new Certificate({ schema: asn1.result });
 	//endregion
 	
-	const cmsEnveloped = new EnvelopedData();
+	const cmsEnveloped = new EnvelopedData({
+		originatorInfo: new OriginatorInfo({
+			certs: new CertificateSet({
+				certificates: [certSimpl]
+			})
+		})
+	});
 	
-	cmsEnveloped.addRecipientByCertificate(certSimpl);
+	cmsEnveloped.addRecipientByCertificate(certSimpl, { oaepHashAlgorithm: oaepHashAlg });
 	
 	return cmsEnveloped.encrypt(encAlg, valueBuffer).
-	then(
-		() =>
-		{
-			const cmsContentSimpl = new ContentInfo();
-			cmsContentSimpl.contentType = "1.2.840.113549.1.7.3";
-			cmsContentSimpl.content = cmsEnveloped.toSchema();
-			
-			cmsEnvelopedBuffer = cmsContentSimpl.toSchema().toBER(false);
-		},
-		error => Promise.reject(`ERROR DURING ENCRYPTION PROCESS: ${error}`)
-	);
+		then(
+			() =>
+			{
+				const cmsContentSimpl = new ContentInfo();
+				cmsContentSimpl.contentType = "1.2.840.113549.1.7.3";
+				cmsContentSimpl.content = cmsEnveloped.toSchema();
+				
+				cmsEnvelopedBuffer = cmsContentSimpl.toSchema().toBER(false);
+			},
+			error => Promise.reject(`ERROR DURING ENCRYPTION PROCESS: ${error}`)
+		);
 }
 //*********************************************************************************
 function envelopedEncrypt()
 {
 	return Promise.resolve().then(() =>
 	{
-		const encodedCertificate = document.getElementById("new_signed_data").innerHTML;
+		// noinspection InnerHTMLJS
+		const encodedCertificate = document.getElementById("new_signed_data").value;
 		const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 		certificateBuffer = stringToArrayBuffer(fromBase64(clearEncodedCertificate));
 		
@@ -258,6 +272,7 @@ function envelopedEncrypt()
 		resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(cmsEnvelopedBuffer)))}`;
 		resultString = `${resultString}\r\n-----END CMS-----\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("encrypted_content").innerHTML = resultString;
 		
 		alert("Encryption process finished successfully");
@@ -295,19 +310,23 @@ function envelopedDecrypt()
 {
 	return Promise.resolve().then(() =>
 	{
-		const encodedCertificate = document.getElementById("new_signed_data").innerHTML;
+		// noinspection InnerHTMLJS
+		const encodedCertificate = document.getElementById("new_signed_data").value;
 		const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 		certificateBuffer = stringToArrayBuffer(window.atob(clearEncodedCertificate));
 		
-		const encodedPrivateKey = document.getElementById("pkcs8_key").innerHTML;
+		// noinspection InnerHTMLJS
+		const encodedPrivateKey = document.getElementById("pkcs8_key").value;
 		const clearPrivateKey = encodedPrivateKey.replace(/(-----(BEGIN|END)( NEW)? PRIVATE KEY-----|\n)/g, "");
 		privateKeyBuffer = stringToArrayBuffer(window.atob(clearPrivateKey));
 		
-		const encodedCMSEnveloped = document.getElementById("encrypted_content").innerHTML;
+		// noinspection InnerHTMLJS
+		const encodedCMSEnveloped = document.getElementById("encrypted_content").value;
 		const clearEncodedCMSEnveloped = encodedCMSEnveloped.replace(/(-----(BEGIN|END)( NEW)? CMS-----|\n)/g, "");
 		cmsEnvelopedBuffer = stringToArrayBuffer(window.atob(clearEncodedCMSEnveloped));
 	}).then(() => envelopedDecryptInternal()).then(result =>
 	{
+		// noinspection InnerHTMLJS
 		document.getElementById("decrypted_content").innerHTML = arrayBufferToString(result);
 	});
 }
@@ -386,10 +405,32 @@ function handleEncLenOnChange()
 	}
 }
 //*********************************************************************************
+function handleOAEPHashAlgOnChange()
+{
+	const hashOption = document.getElementById("oaep_hash_alg").value;
+	switch(hashOption)
+	{
+		case "alg_SHA1":
+			oaepHashAlg = "sha-1";
+			break;
+		case "alg_SHA256":
+			oaepHashAlg = "sha-256";
+			break;
+		case "alg_SHA384":
+			oaepHashAlg = "sha-384";
+			break;
+		case "alg_SHA512":
+			oaepHashAlg = "sha-512";
+			break;
+		default:
+	}
+}
+//*********************************************************************************
 context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	createCertificate();
 	envelopedEncrypt();
 	envelopedDecrypt();
@@ -397,12 +438,14 @@ context("Hack for Rollup.js", () =>
 	handleSignAlgOnChange();
 	handleEncAlgOnChange();
 	handleEncLenOnChange();
+	handleOAEPHashAlgOnChange();
 	setEngine();
 });
 //*********************************************************************************
 context("How To Encrypt CMS via Certificate", () => {
 	//region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
+	const oaepHashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
 	const encAlgs = ["AES-CBC", "AES-GCM"];
 	const encLens = [128, 192, 256];
@@ -418,19 +461,23 @@ context("How To Encrypt CMS via Certificate", () => {
 			{
 				hashAlgs.forEach(_hashAlg =>
 				{
-					const testName = `${_encAlg} with ${_encLen}, ${_hashAlg} + ${_signAlg}`;
-					
-					it(testName, () =>
+					oaepHashAlgs.forEach(_oaepHashAlg =>
 					{
-						hashAlg = _hashAlg;
-						signAlg = _signAlg;
+						const testName = `${_encAlg} with ${_encLen}, ${_hashAlg} + ${_signAlg}, OAEP hash: ${_oaepHashAlg}`;
 						
-						encAlg.name = _encAlg;
-						encAlg.length = _encLen;
-						
-						return createCertificateInternal().then(() => envelopedEncryptInternal()).then(() => envelopedDecryptInternal()).then(result =>
+						it(testName, () =>
 						{
-							assert.equal(isEqualBuffer(result, valueBuffer), true, "Decrypted value must be equal with initially encrypted value");
+							hashAlg = _hashAlg;
+							signAlg = _signAlg;
+							oaepHashAlg = _oaepHashAlg;
+							
+							encAlg.name = _encAlg;
+							encAlg.length = _encLen;
+							
+							return createCertificateInternal().then(() => envelopedEncryptInternal()).then(() => envelopedDecryptInternal()).then(result =>
+							{
+								assert.equal(isEqualBuffer(result, valueBuffer), true, "Decrypted value must be equal with initially encrypted value");
+							});
 						});
 					});
 				});

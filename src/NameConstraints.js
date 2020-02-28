@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import GeneralSubtree from "./GeneralSubtree";
+import { getParametersValue, clearProps } from "pvutils";
+import GeneralSubtree from "./GeneralSubtree.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -11,7 +11,7 @@ export default class NameConstraints
 	/**
 	 * Constructor for NameConstraints class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
@@ -19,14 +19,14 @@ export default class NameConstraints
 		if("permittedSubtrees" in parameters)
 			/**
 			 * @type {Array.<GeneralSubtree>}
-			 * @description permittedSubtrees
+			 * @desc permittedSubtrees
 			 */
 			this.permittedSubtrees = getParametersValue(parameters, "permittedSubtrees", NameConstraints.defaultValues("permittedSubtrees"));
 
 		if("excludedSubtrees" in parameters)
 			/**
 			 * @type {Array.<GeneralSubtree>}
-			 * @description excludedSubtrees
+			 * @desc excludedSubtrees
 			 */
 			this.excludedSubtrees = getParametersValue(parameters, "excludedSubtrees", NameConstraints.defaultValues("excludedSubtrees"));
 		//endregion
@@ -55,18 +55,20 @@ export default class NameConstraints
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * NameConstraints ::= SEQUENCE {
+	 *    permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
+	 *    excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// NameConstraints OID ::= 2.5.29.30
-		//
-		//NameConstraints ::= SEQUENCE {
-		//    permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
-		//    excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -114,6 +116,13 @@ export default class NameConstraints
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"permittedSubtrees",
+			"excludedSubtrees"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -150,28 +159,22 @@ export default class NameConstraints
 		if("permittedSubtrees" in this)
 		{
 			outputArray.push(new asn1js.Constructed({
-				optional: true,
 				idBlock: {
 					tagClass: 3, // CONTEXT-SPECIFIC
 					tagNumber: 0 // [0]
 				},
-				value: [new asn1js.Sequence({
-					value: Array.from(this.permittedSubtrees, element => element.toSchema())
-				})]
+				value: Array.from(this.permittedSubtrees, element => element.toSchema())
 			}));
 		}
 		
 		if("excludedSubtrees" in this)
 		{
 			outputArray.push(new asn1js.Constructed({
-				optional: true,
 				idBlock: {
 					tagClass: 3, // CONTEXT-SPECIFIC
 					tagNumber: 1 // [1]
 				},
-				value: [new asn1js.Sequence({
-					value: Array.from(this.excludedSubtrees, element => element.toSchema())
-				})]
+				value: Array.from(this.excludedSubtrees, element => element.toSchema())
 			}));
 		}
 		//endregion

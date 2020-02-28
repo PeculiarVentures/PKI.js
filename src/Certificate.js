@@ -1,21 +1,12 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, bufferToHexCodes } from "pvutils";
-import {
-	getCrypto,
-	getHashAlgorithm,
-	getAlgorithmByOID,
-	createCMSECDSASignature,
-	createECDSASignatureFromCMS,
-	getAlgorithmParameters,
-	getOIDByAlgorithm
-} from "./common";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
-import Time from "./Time";
-import PublicKeyInfo from "./PublicKeyInfo";
-import Extension from "./Extension";
-import Extensions from "./Extensions";
-import RSASSAPSSParams from "./RSASSAPSSParams";
+import { getParametersValue, bufferToHexCodes, clearProps } from "pvutils";
+import { getCrypto, getEngine } from "./common.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import Time from "./Time.js";
+import PublicKeyInfo from "./PublicKeyInfo.js";
+import Extension from "./Extension.js";
+import Extensions from "./Extensions.js";
 //**************************************************************************************
 function tbsCertificate(parameters = {})
 {
@@ -139,91 +130,92 @@ function tbsCertificate(parameters = {})
 /**
  * Class from RFC5280
  */
-export default class Certificate {
+export default class Certificate
+{
 	//**********************************************************************************
 	/**
 	 * Constructor for Certificate class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {ArrayBuffer}
-		 * @description tbs
+		 * @desc ToBeSigned (TBS) part of the certificate
 		 */
 		this.tbs = getParametersValue(parameters, "tbs", Certificate.defaultValues("tbs"));
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc Version number
 		 */
 		this.version = getParametersValue(parameters, "version", Certificate.defaultValues("version"));
 		/**
 		 * @type {Integer}
-		 * @description serialNumber
+		 * @desc Serial number of the certificate
 		 */
 		this.serialNumber = getParametersValue(parameters, "serialNumber", Certificate.defaultValues("serialNumber"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signature
+		 * @desc This field contains the algorithm identifier for the algorithm used by the CA to sign the certificate
 		 */
 		this.signature = getParametersValue(parameters, "signature", Certificate.defaultValues("signature"));
 		/**
 		 * @type {RelativeDistinguishedNames}
-		 * @description issuer
+		 * @desc The issuer field identifies the entity that has signed and issued the certificate
 		 */
 		this.issuer = getParametersValue(parameters, "issuer", Certificate.defaultValues("issuer"));
 		/**
 		 * @type {Time}
-		 * @description notBefore
+		 * @desc The date on which the certificate validity period begins
 		 */
 		this.notBefore = getParametersValue(parameters, "notBefore", Certificate.defaultValues("notBefore"));
 		/**
 		 * @type {Time}
-		 * @description notAfter
+		 * @desc The date on which the certificate validity period ends
 		 */
 		this.notAfter = getParametersValue(parameters, "notAfter", Certificate.defaultValues("notAfter"));
 		/**
 		 * @type {RelativeDistinguishedNames}
-		 * @description subject
+		 * @desc The subject field identifies the entity associated with the public key stored in the subject public key field
 		 */
 		this.subject = getParametersValue(parameters, "subject", Certificate.defaultValues("subject"));
 		/**
 		 * @type {PublicKeyInfo}
-		 * @description subjectPublicKeyInfo
+		 * @desc This field is used to carry the public key and identify the algorithm with which the key is used
 		 */
 		this.subjectPublicKeyInfo = getParametersValue(parameters, "subjectPublicKeyInfo", Certificate.defaultValues("subjectPublicKeyInfo"));
 		
 		if("issuerUniqueID" in parameters)
 			/**
 			 * @type {ArrayBuffer}
-			 * @description issuerUniqueID
+			 * @desc The subject and issuer unique identifiers are present in the certificate to handle the possibility of reuse of subject and/or issuer names over time
 			 */
 			this.issuerUniqueID = getParametersValue(parameters, "issuerUniqueID", Certificate.defaultValues("issuerUniqueID"));
 		
 		if("subjectUniqueID" in parameters)
 			/**
 			 * @type {ArrayBuffer}
-			 * @description subjectUniqueID
+			 * @desc The subject and issuer unique identifiers are present in the certificate to handle the possibility of reuse of subject and/or issuer names over time
 			 */
 			this.subjectUniqueID = getParametersValue(parameters, "subjectUniqueID", Certificate.defaultValues("subjectUniqueID"));
 		
 		if("extensions" in parameters)
 			/**
 			 * @type {Array}
-			 * @description extensions
+			 * @desc If present, this field is a SEQUENCE of one or more certificate extensions
 			 */
 			this.extensions = getParametersValue(parameters, "extensions", Certificate.defaultValues("extensions"));
 		
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signatureAlgorithm
+		 * @desc The signatureAlgorithm field contains the identifier for the cryptographic algorithm used by the CA to sign this certificate
 		 */
 		this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", Certificate.defaultValues("signatureAlgorithm"));
 		/**
 		 * @type {BitString}
-		 * @description signatureValue
+		 * @desc The signatureValue field contains a digital signature computed upon the ASN.1 DER encoded tbsCertificate
 		 */
 		this.signatureValue = getParametersValue(parameters, "signatureValue", Certificate.defaultValues("signatureValue"));
 		//endregion
@@ -233,7 +225,6 @@ export default class Certificate {
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -275,20 +266,23 @@ export default class Certificate {
 				throw new Error(`Invalid member name for Certificate class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Certificate  ::=  SEQUENCE  {
+	 *    tbsCertificate       TBSCertificate,
+	 *    signatureAlgorithm   AlgorithmIdentifier,
+	 *    signatureValue       BIT STRING  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//Certificate  ::=  SEQUENCE  {
-		//    tbsCertificate       TBSCertificate,
-		//    signatureAlgorithm   AlgorithmIdentifier,
-		//    signatureValue       BIT STRING  }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -311,7 +305,6 @@ export default class Certificate {
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -319,6 +312,25 @@ export default class Certificate {
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"tbsCertificate",
+			"tbsCertificate.extensions",
+			"tbsCertificate.version",
+			"tbsCertificate.serialNumber",
+			"tbsCertificate.signature",
+			"tbsCertificate.issuer",
+			"tbsCertificate.notBefore",
+			"tbsCertificate.notAfter",
+			"tbsCertificate.subject",
+			"tbsCertificate.subjectPublicKeyInfo",
+			"tbsCertificate.issuerUniqueID",
+			"tbsCertificate.subjectUniqueID",
+			"signatureAlgorithm",
+			"signatureValue"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -338,7 +350,7 @@ export default class Certificate {
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CERT");
+			throw new Error("Object's schema was not verified against input data for Certificate");
 		//endregion
 		
 		//region Get internal properties from parsed schema
@@ -356,7 +368,7 @@ export default class Certificate {
 		if("tbsCertificate.issuerUniqueID" in asn1.result)
 			this.issuerUniqueID = asn1.result["tbsCertificate.issuerUniqueID"].valueBlock.valueHex;
 		if("tbsCertificate.subjectUniqueID" in asn1.result)
-			this.issuerUniqueID = asn1.result["tbsCertificate.subjectUniqueID"].valueBlock.valueHex;
+			this.subjectUniqueID = asn1.result["tbsCertificate.subjectUniqueID"].valueBlock.valueHex;
 		if("tbsCertificate.extensions" in asn1.result)
 			this.extensions = Array.from(asn1.result["tbsCertificate.extensions"], element => new Extension({ schema: element }));
 		
@@ -364,7 +376,6 @@ export default class Certificate {
 		this.signatureValue = asn1.result.signatureValue;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Create ASN.1 schema for existing values of TBS part for the certificate
@@ -425,18 +436,6 @@ export default class Certificate {
 			}));
 		}
 		
-		if("subjectUniqueID" in this)
-		{
-			outputArray.push(new asn1js.Primitive({
-				optional: true,
-				idBlock: {
-					tagClass: 3, // CONTEXT-SPECIFIC
-					tagNumber: 3 // [3]
-				},
-				value: [this.extensions.toSchema()]
-			}));
-		}
-		
 		if("extensions" in this)
 		{
 			outputArray.push(new asn1js.Constructed({
@@ -458,7 +457,6 @@ export default class Certificate {
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -492,7 +490,6 @@ export default class Certificate {
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -527,85 +524,20 @@ export default class Certificate {
 		
 		return object;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Importing public key for current certificate
 	 */
 	getPublicKey(parameters = null)
 	{
-		//region Get a "crypto" extension
-		const crypto = getCrypto();
-		if(typeof crypto === "undefined")
-			return Promise.reject("Unable to create WebCrypto object");
-		//endregion
-		
-		//region Find correct algorithm for imported public key
-		if(parameters === null)
-		{
-			//region Initial variables
-			parameters = {};
-			//endregion
-			
-			//region Find signer's hashing algorithm
-			const shaAlgorithm = getHashAlgorithm(this.signatureAlgorithm);
-			if(shaAlgorithm === "")
-				return Promise.reject(`Unsupported signature algorithm: ${this.signatureAlgorithm.algorithmId}`);
-			//endregion
-			
-			//region Get information about public key algorithm and default parameters for import
-			const algorithmObject = getAlgorithmByOID(this.subjectPublicKeyInfo.algorithm.algorithmId);
-			if(("name" in algorithmObject) === false)
-				return Promise.reject(`Unsupported public key algorithm: ${this.subjectPublicKeyInfo.algorithm.algorithmId}`);
-			
-			parameters.algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
-			if("hash" in parameters.algorithm.algorithm)
-				parameters.algorithm.algorithm.hash.name = shaAlgorithm;
-			
-			//region Special case for ECDSA
-			if(algorithmObject.name === "ECDSA")
-			{
-				// #region Get information about named curve
-				let algorithmParamsChecked = false;
-				
-				if(("algorithmParams" in this.subjectPublicKeyInfo.algorithm) === true)
-				{
-					if("idBlock" in this.subjectPublicKeyInfo.algorithm.algorithmParams)
-					{
-						if((this.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (this.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
-							algorithmParamsChecked = true;
-					}
-				}
-				
-				if(algorithmParamsChecked === false)
-					return Promise.reject("Incorrect type for ECDSA public key parameters");
-				
-				const curveObject = getAlgorithmByOID(this.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
-				if(("name" in curveObject) === false)
-					return Promise.reject(`Unsupported named curve algorithm: ${this.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
-				// #endregion
-				
-				parameters.algorithm.algorithm.namedCurve = curveObject.name;
-			}
-			//endregion
-			//endregion
-		}
-		//endregion
-		
-		//region Get neccessary values from internal fields for current certificate
-		const publicKeyInfoSchema = this.subjectPublicKeyInfo.toSchema();
-		const publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
-		const publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
-		//endregion
-		
-		return crypto.importKey("spki", publicKeyInfoView, parameters.algorithm.algorithm, true, parameters.algorithm.usages);
+		return getEngine().subtle.getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
 	}
-	
 	//**********************************************************************************
 	/**
-	 * Get SHA-1 hash value for subject public key
+	 * Get hash value for subject public key (default SHA-1)
+	 * @param {String} [hashAlgorithm=SHA-1] Hashing algorithm name
 	 */
-	getKeyHash()
+	getKeyHash(hashAlgorithm = "SHA-1")
 	{
 		//region Get a "crypto" extension
 		const crypto = getCrypto();
@@ -613,9 +545,8 @@ export default class Certificate {
 			return Promise.reject("Unable to create WebCrypto object");
 		//endregion
 		
-		return crypto.digest({ name: "sha-1" }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
+		return crypto.digest({ name: hashAlgorithm }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Make a signature for current value from TBS section
@@ -624,118 +555,54 @@ export default class Certificate {
 	 */
 	sign(privateKey, hashAlgorithm = "SHA-1")
 	{
-		//region Get hashing algorithm
-		const oid = getOIDByAlgorithm({ name: hashAlgorithm });
-		if(oid === "")
-			return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
+		//region Initial checking
+		//region Check private key
+		if(typeof privateKey === "undefined")
+			return Promise.reject("Need to provide a private key for signing");
+		//endregion
 		//endregion
 		
-		//region Get a "default parameters" for current algorithm
-		const defParams = getAlgorithmParameters(privateKey.algorithm.name, "sign");
-		defParams.algorithm.hash.name = hashAlgorithm;
+		//region Initial variables
+		let sequence = Promise.resolve();
+		let parameters;
+		
+		const engine = getEngine();
 		//endregion
 		
-		//region Fill internal structures base on "privateKey" and "hashAlgorithm"
-		switch(privateKey.algorithm.name.toUpperCase())
+		//region Get a "default parameters" for current algorithm and set correct signature algorithm
+		sequence = sequence.then(() => engine.subtle.getSignatureParameters(privateKey, hashAlgorithm));
+		
+		sequence = sequence.then(result =>
 		{
-			case "RSASSA-PKCS1-V1_5":
-			case "ECDSA":
-				this.signature.algorithmId = getOIDByAlgorithm(defParams.algorithm);
-				this.signatureAlgorithm.algorithmId = this.signature.algorithmId;
-				break;
-			case "RSA-PSS":
-				{
-				//region Set "saltLength" as a length (in octets) of hash function result
-					switch(hashAlgorithm.toUpperCase())
-				{
-						case "SHA-256":
-							defParams.algorithm.saltLength = 32;
-							break;
-						case "SHA-384":
-							defParams.algorithm.saltLength = 48;
-							break;
-						case "SHA-512":
-							defParams.algorithm.saltLength = 64;
-							break;
-						default:
-					}
-				//endregion
-				
-				//region Fill "RSASSA_PSS_params" object
-					const paramsObject = {};
-				
-					if(hashAlgorithm.toUpperCase() !== "SHA-1")
-				{
-						const hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
-						if(hashAlgorithmOID === "")
-							return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
-					
-						paramsObject.hashAlgorithm = new AlgorithmIdentifier({
-							algorithmId: hashAlgorithmOID,
-							algorithmParams: new asn1js.Null()
-						});
-					
-						paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
-							algorithmId: "1.2.840.113549.1.1.8", // MGF1
-							algorithmParams: paramsObject.hashAlgorithm.toSchema()
-						});
-					}
-				
-					if(defParams.algorithm.saltLength !== 20)
-						paramsObject.saltLength = defParams.algorithm.saltLength;
-				
-					const pssParameters = new RSASSAPSSParams(paramsObject);
-				//endregion
-				
-				//region Automatically set signature algorithm
-					this.signature = new AlgorithmIdentifier({
-						algorithmId: "1.2.840.113549.1.1.10",
-						algorithmParams: pssParameters.toSchema()
-					});
-					this.signatureAlgorithm = this.signature; // Must be the same
-				//endregion
-				}
-				break;
-			default:
-				return Promise.reject(`Unsupported signature algorithm: ${privateKey.algorithm.name}`);
-		}
+			parameters = result.parameters;
+			this.signature = result.signatureAlgorithm;
+			this.signatureAlgorithm = result.signatureAlgorithm;
+		});
 		//endregion
 		
 		//region Create TBS data for signing
-		this.tbs = this.encodeTBS().toBER(false);
-		//endregion
-		
-		//region Get a "crypto" extension
-		const crypto = getCrypto();
-		if(typeof crypto === "undefined")
-			return Promise.reject("Unable to create WebCrypto object");
+		sequence = sequence.then(() =>
+		{
+			this.tbs = this.encodeTBS().toBER(false);
+		});
 		//endregion
 		
 		//region Signing TBS data on provided private key
-		return crypto.sign(defParams.algorithm,
-			privateKey,
-			new Uint8Array(this.tbs)).then(result =>
+		sequence = sequence.then(() => engine.subtle.signWithPrivateKey(this.tbs, privateKey, parameters));
+		
+		sequence = sequence.then(result =>
 		{
-			//region Special case for ECDSA algorithm
-				if(defParams.algorithm.name === "ECDSA")
-					result = createCMSECDSASignature(result);
-			//endregion
-			
-				this.signatureValue = new asn1js.BitString({ valueHex: result });
-			}, error => Promise.reject(`Signing error: ${error}`));
+			this.signatureValue = new asn1js.BitString({ valueHex: result });
+		});
 		//endregion
+		
+		return sequence;
 	}
-	
 	//**********************************************************************************
 	verify(issuerCertificate = null)
 	{
 		//region Global variables
-		let sequence = Promise.resolve();
-		
 		let subjectPublicKeyInfo = {};
-		
-		const signature = this.signatureValue;
-		const tbs = this.tbs;
 		//endregion
 		
 		//region Set correct "subjectPublicKeyInfo" value
@@ -751,136 +618,8 @@ export default class Certificate {
 			return Promise.reject("Please provide issuer certificate as a parameter");
 		//endregion
 		
-		//region Get a "crypto" extension
-		const crypto = getCrypto();
-		if(typeof crypto === "undefined")
-			return Promise.reject("Unable to create WebCrypto object");
-		//endregion
-		
-		//region Find signer's hashing algorithm
-		const shaAlgorithm = getHashAlgorithm(this.signatureAlgorithm);
-		if(shaAlgorithm === "")
-			return Promise.reject(`Unsupported signature algorithm: ${this.signatureAlgorithm.algorithmId}`);
-		//endregion
-		
-		//region Importing public key
-		sequence = sequence.then(() =>
-		{
-			//region Get information about public key algorithm and default parameters for import
-			let algorithmId;
-			if(this.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
-				algorithmId = this.signatureAlgorithm.algorithmId;
-			else
-				algorithmId = subjectPublicKeyInfo.algorithm.algorithmId;
-			
-			const algorithmObject = getAlgorithmByOID(algorithmId);
-			if(("name" in algorithmObject) === false)
-				return Promise.reject(`Unsupported public key algorithm: ${algorithmId}`);
-			
-			const algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
-			if("hash" in algorithm.algorithm)
-				algorithm.algorithm.hash.name = shaAlgorithm;
-			
-			//region Special case for ECDSA
-			if(algorithmObject.name === "ECDSA")
-			{
-				// #region Get information about named curve
-				let algorithmParamsChecked = false;
-				
-				if(("algorithmParams" in subjectPublicKeyInfo.algorithm) === true)
-				{
-					if("idBlock" in subjectPublicKeyInfo.algorithm.algorithmParams)
-					{
-						if((subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
-							algorithmParamsChecked = true;
-					}
-				}
-				
-				if(algorithmParamsChecked === false)
-					return Promise.reject("Incorrect type for ECDSA public key parameters");
-				
-				const curveObject = getAlgorithmByOID(subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
-				if(("name" in curveObject) === false)
-					return Promise.reject(`Unsupported named curve algorithm: ${subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
-				// #endregion
-				
-				algorithm.algorithm.namedCurve = curveObject.name;
-			}
-			//endregion
-			//endregion
-			
-			const publicKeyInfoSchema = subjectPublicKeyInfo.toSchema();
-			const publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
-			const publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
-			
-			return crypto.importKey("spki", publicKeyInfoView, algorithm.algorithm, true, algorithm.usages);
-		});
-		//endregion
-		
-		//region Verify signature for the certificate
-		sequence = sequence.then(publicKey =>
-		{
-			//region Get default algorithm parameters for verification
-			const algorithm = getAlgorithmParameters(publicKey.algorithm.name, "verify");
-			if("hash" in algorithm.algorithm)
-				algorithm.algorithm.hash.name = shaAlgorithm;
-			//endregion
-			
-			//region Special case for ECDSA signatures
-			let signatureValue = signature.valueBlock.valueHex;
-			
-			if(publicKey.algorithm.name === "ECDSA")
-			{
-				const asn1 = asn1js.fromBER(signatureValue);
-				signatureValue = createECDSASignatureFromCMS(asn1.result);
-			}
-			//endregion
-			
-			//region Special case for RSA-PSS
-			if(publicKey.algorithm.name === "RSA-PSS")
-			{
-				let pssParameters;
-				
-				try
-				{
-					pssParameters = new RSASSAPSSParams({ schema: this.signatureAlgorithm.algorithmParams });
-				}
-				catch(ex)
-				{
-					return Promise.reject(ex);
-				}
-				
-				if("saltLength" in pssParameters)
-					algorithm.algorithm.saltLength = pssParameters.saltLength;
-				else
-					algorithm.algorithm.saltLength = 20;
-				
-				let hashAlgo = "SHA-1";
-				
-				if("hashAlgorithm" in pssParameters)
-				{
-					const hashAlgorithm = getAlgorithmByOID(pssParameters.hashAlgorithm.algorithmId);
-					if(("name" in hashAlgorithm) === false)
-						return Promise.reject(`Unrecognized hash algorithm: ${pssParameters.hashAlgorithm.algorithmId}`);
-					
-					hashAlgo = hashAlgorithm.name;
-				}
-				
-				algorithm.algorithm.hash.name = hashAlgo;
-			}
-			//endregion
-			
-			return crypto.verify(algorithm.algorithm,
-				publicKey,
-				new Uint8Array(signatureValue),
-				new Uint8Array(tbs)
-			);
-		});
-		//endregion
-		
-		return sequence;
+		return getEngine().subtle.verifyWithPublicKey(this.tbs, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64 } from "pvutils";
-import OtherPrimeInfo from "./OtherPrimeInfo";
+import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64, clearProps } from "pvutils";
+import OtherPrimeInfo from "./OtherPrimeInfo.js";
 //**************************************************************************************
 /**
  * Class from RFC3447
@@ -11,61 +11,61 @@ export default class RSAPrivateKey
 	/**
 	 * Constructor for RSAPrivateKey class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", RSAPrivateKey.defaultValues("version"));
 		/**
 		 * @type {Integer}
-		 * @description modulus
+		 * @desc modulus
 		 */
 		this.modulus = getParametersValue(parameters, "modulus", RSAPrivateKey.defaultValues("modulus"));
 		/**
 		 * @type {Integer}
-		 * @description publicExponent
+		 * @desc publicExponent
 		 */
 		this.publicExponent = getParametersValue(parameters, "publicExponent", RSAPrivateKey.defaultValues("publicExponent"));
 		/**
 		 * @type {Integer}
-		 * @description privateExponent
+		 * @desc privateExponent
 		 */
 		this.privateExponent = getParametersValue(parameters, "privateExponent", RSAPrivateKey.defaultValues("privateExponent"));
 		/**
 		 * @type {Integer}
-		 * @description prime1
+		 * @desc prime1
 		 */
 		this.prime1 = getParametersValue(parameters, "prime1", RSAPrivateKey.defaultValues("prime1"));
 		/**
 		 * @type {Integer}
-		 * @description prime2
+		 * @desc prime2
 		 */
 		this.prime2 = getParametersValue(parameters, "prime2", RSAPrivateKey.defaultValues("prime2"));
 		/**
 		 * @type {Integer}
-		 * @description exponent1
+		 * @desc exponent1
 		 */
 		this.exponent1 = getParametersValue(parameters, "exponent1", RSAPrivateKey.defaultValues("exponent1"));
 		/**
 		 * @type {Integer}
-		 * @description exponent2
+		 * @desc exponent2
 		 */
 		this.exponent2 = getParametersValue(parameters, "exponent2", RSAPrivateKey.defaultValues("exponent2"));
 		/**
 		 * @type {Integer}
-		 * @description coefficient
+		 * @desc coefficient
 		 */
 		this.coefficient = getParametersValue(parameters, "coefficient", RSAPrivateKey.defaultValues("coefficient"));
 
 		if("otherPrimeInfos" in parameters)
 			/**
 			 * @type {Array.<OtherPrimeInfo>}
-			 * @description otherPrimeInfos
+			 * @desc otherPrimeInfos
 			 */
 			this.otherPrimeInfos = getParametersValue(parameters, "otherPrimeInfos", RSAPrivateKey.defaultValues("otherPrimeInfos"));
 		//endregion
@@ -114,27 +114,31 @@ export default class RSAPrivateKey
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RSAPrivateKey ::= Sequence {
+	 *    version           Version,
+	 *    modulus           Integer,  -- n
+	 *    publicExponent    Integer,  -- e
+	 *    privateExponent   Integer,  -- d
+	 *    prime1            Integer,  -- p
+	 *    prime2            Integer,  -- q
+	 *    exponent1         Integer,  -- d mod (p-1)
+	 *    exponent2         Integer,  -- d mod (q-1)
+	 *    coefficient       Integer,  -- (inverse of q) mod p
+	 *    otherPrimeInfos   OtherPrimeInfos OPTIONAL
+	 * }
+	 *
+	 * OtherPrimeInfos ::= Sequence SIZE(1..MAX) OF OtherPrimeInfo
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RSAPrivateKey ::= Sequence {
-		//    version           Version,
-		//    modulus           Integer,  -- n
-		//    publicExponent    Integer,  -- e
-		//    privateExponent   Integer,  -- d
-		//    prime1            Integer,  -- p
-		//    prime2            Integer,  -- q
-		//    exponent1         Integer,  -- d mod (p-1)
-		//    exponent2         Integer,  -- d mod (q-1)
-		//    coefficient       Integer,  -- (inverse of q) mod p
-		//    otherPrimeInfos   OtherPrimeInfos OPTIONAL
-		//}
-		//
-		//OtherPrimeInfos ::= Sequence SIZE(1..MAX) OF OtherPrimeInfo
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -183,6 +187,21 @@ export default class RSAPrivateKey
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"version",
+			"modulus",
+			"publicExponent",
+			"privateExponent",
+			"prime1",
+			"prime2",
+			"exponent1",
+			"exponent2",
+			"coefficient",
+			"otherPrimeInfos"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

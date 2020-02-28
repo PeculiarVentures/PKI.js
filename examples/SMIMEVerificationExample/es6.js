@@ -1,8 +1,11 @@
+/* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
-import { stringToArrayBuffer, utilConcatBuf } from "pvutils";
+import { stringToArrayBuffer } from "pvutils";
 import Certificate from "../../src/Certificate";
 import SignedData from "../../src/SignedData";
 import ContentInfo from "../../src/ContentInfo";
+
+import parse from "emailjs-mime-parser";
 //*********************************************************************************
 const trustedCertificates = []; // Array of root certificates from "CA Bundle"
 //*********************************************************************************
@@ -10,7 +13,7 @@ const trustedCertificates = []; // Array of root certificates from "CA Bundle"
 //*********************************************************************************
 function parseCAbundle(buffer)
 {
-	// #region Initial variables
+	//region Initial variables
 	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 	
 	const startChars = "-----BEGIN CERTIFICATE-----";
@@ -26,19 +29,19 @@ function parseCAbundle(buffer)
 	let started = false;
 	
 	let certBodyEncoded = "";
-	// #endregion
+	//endregion
 	
 	for(let i = 0; i < view.length; i++)
 	{
 		if(started === true)
 		{
 			if(base64Chars.indexOf(String.fromCharCode(view[i])) !== (-1))
-				certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+				certBodyEncoded += String.fromCharCode(view[i]);
 			else
 			{
 				if(String.fromCharCode(view[i]) === "-")
 				{
-					// #region Decoded trustedCertificates
+					//region Decoded trustedCertificates
 					const asn1 = asn1js.fromBER(stringToArrayBuffer(window.atob(certBodyEncoded)));
 					try
 					{
@@ -49,14 +52,14 @@ function parseCAbundle(buffer)
 						alert("Wrong certificate format");
 						return;
 					}
-					// #endregion
+					//endregion
 					
-					// #region Set all "flag variables"
+					//region Set all "flag variables"
 					certBodyEncoded = "";
 					
 					started = false;
 					waitForEnd = true;
-					// #endregion
+					//endregion
 				}
 			}
 		}
@@ -80,7 +83,7 @@ function parseCAbundle(buffer)
 							waitForStart = false;
 							started = true;
 							
-							certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+							certBodyEncoded += String.fromCharCode(view[i]);
 						}
 						else
 							middleStage = true;
@@ -130,21 +133,18 @@ function parseCAbundle(buffer)
 function verifySMIME()
 {
 	//region Parse MIME contents to find signature and detached data
-	const parser = new MimeParser();
-	parser.write(document.getElementById("smime_message").value);
-	parser.end();
+	const parser = parse(document.getElementById("smime_message").value);
 	//endregion
 	
-	if(("_childNodes" in parser.node) || (parser.node._childNodes.length !== 2))
+	// noinspection JSUnresolvedVariable
+	if(("childNodes" in parser) || (parser.childNodes.length !== 2))
 	{
-		const lastNode = parser.getNode("2");
+		// noinspection JSUnresolvedVariable
+		const lastNode = parser.childNodes[1];
 		if((lastNode.contentType.value === "application/x-pkcs7-signature") || (lastNode.contentType.value === "application/pkcs7-signature"))
 		{
-			// Get signature buffer
-			const signedBuffer = utilConcatBuf(new ArrayBuffer(0), lastNode.content);
-			
 			// Parse into pkijs types
-			const asn1 = asn1js.fromBER(signedBuffer);
+			const asn1 = asn1js.fromBER(lastNode.content.buffer);
 			if(asn1.offset === (-1))
 			{
 				alert("Incorrect message format!");
@@ -166,7 +166,8 @@ function verifySMIME()
 			}
 			
 			// Get signed data buffer
-			const signedDataBuffer = stringToArrayBuffer(parser.nodes.node1.raw.replace(/\n/g, "\r\n"));
+			// noinspection JSUnresolvedVariable
+			const signedDataBuffer = stringToArrayBuffer(parser.childNodes[0].raw.replace(/\n/g, "\r\n"));
 			
 			// Verify the signed data
 			let sequence = Promise.resolve();
@@ -205,7 +206,12 @@ function handleMIMEFile(evt)
 	
 	const currentFiles = evt.target.files;
 	
-	tempReader.onload = event => document.getElementById("smime_message").value = String.fromCharCode.apply(null, new Uint8Array(event.target.result));
+	// noinspection AnonymousFunctionJS
+	tempReader.onload = event =>
+	{
+		// noinspection JSUnresolvedVariable
+		document.getElementById("smime_message").value = String.fromCharCode.apply(null, new Uint8Array(event.target.result));
+	};
 	
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
@@ -216,6 +222,7 @@ function handleCABundle(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS, JSUnresolvedVariable
 	tempReader.onload = event => parseCAbundle(event.target.result);
 	
 	tempReader.readAsArrayBuffer(currentFiles[0]);
@@ -227,9 +234,9 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	verifySMIME();
 	handleMIMEFile();
 	handleCABundle();
-	setEngine();
 });
 //*********************************************************************************

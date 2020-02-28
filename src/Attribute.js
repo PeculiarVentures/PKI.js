@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC2986
@@ -9,19 +9,19 @@ export default class Attribute {
 	/**
 	 * Constructor for Attribute class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description type
+		 * @desc ObjectIdentifier for attribute (string representation)
 		 */
 		this.type = getParametersValue(parameters, "type", Attribute.defaultValues("type"));
 		/**
 		 * @type {Array}
-		 * @description values
+		 * @desc Any attribute values
 		 */
 		this.values = getParametersValue(parameters, "values", Attribute.defaultValues("values"));
 		//endregion
@@ -31,7 +31,6 @@ export default class Attribute {
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -49,7 +48,6 @@ export default class Attribute {
 				throw new Error(`Invalid member name for Attribute class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -68,20 +66,23 @@ export default class Attribute {
 				throw new Error(`Invalid member name for Attribute class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
+	 *    type   ATTRIBUTE.&id({IOSet}),
+	 *    values SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{@type})
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
-		//    type   ATTRIBUTE.&id({IOSet}),
-		//    values SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{@type})
-		//}
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -114,6 +115,13 @@ export default class Attribute {
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"type",
+			"values"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -126,7 +134,7 @@ export default class Attribute {
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for ATTRIBUTE");
+			throw new Error("Object's schema was not verified against input data for Attribute");
 		//endregion
 		
 		//region Get internal properties from parsed schema
@@ -134,7 +142,6 @@ export default class Attribute {
 		this.values = asn1.result.values;
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -153,7 +160,6 @@ export default class Attribute {
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -166,7 +172,6 @@ export default class Attribute {
 			values: Array.from(this.values, element => element.toJSON())
 		};
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

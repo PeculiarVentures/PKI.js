@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import DistributionPoint from "./DistributionPoint";
+import { getParametersValue, clearProps } from "pvutils";
+import DistributionPoint from "./DistributionPoint.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -11,14 +11,14 @@ export default class CRLDistributionPoints
 	/**
 	 * Constructor for CRLDistributionPoints class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<DistributionPoint>}
-		 * @description distributionPoints
+		 * @desc distributionPoints
 		 */
 		this.distributionPoints = getParametersValue(parameters, "distributionPoints", CRLDistributionPoints.defaultValues("distributionPoints"));
 		//endregion
@@ -45,16 +45,18 @@ export default class CRLDistributionPoints
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * CRLDistributionPoints ::= SEQUENCE SIZE (1..MAX) OF DistributionPoint
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// CRLDistributionPoints OID ::= 2.5.29.31
-		//
-		//CRLDistributionPoints ::= SEQUENCE SIZE (1..MAX) OF DistributionPoint
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -79,6 +81,12 @@ export default class CRLDistributionPoints
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"distributionPoints"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

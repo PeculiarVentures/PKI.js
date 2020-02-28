@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import Certificate from "./Certificate";
+import { getParametersValue, clearProps } from "pvutils";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import Certificate from "./Certificate.js";
 //**************************************************************************************
 /**
  * Class from RFC6960
@@ -12,26 +12,26 @@ export default class Signature
 	/**
 	 * Constructor for Signature class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signatureAlgorithm
+		 * @desc signatureAlgorithm
 		 */
 		this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", Signature.defaultValues("signatureAlgorithm"));
 		/**
 		 * @type {BitString}
-		 * @description signature
+		 * @desc signature
 		 */
 		this.signature = getParametersValue(parameters, "signature", Signature.defaultValues("signature"));
 
 		if("certs" in parameters)
 			/**
 			 * @type {Array.<Certificate>}
-			 * @description certs
+			 * @desc certs
 			 */
 			this.certs = getParametersValue(parameters, "certs", Signature.defaultValues("certs"));
 		//endregion
@@ -82,17 +82,21 @@ export default class Signature
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Signature       ::=     SEQUENCE {
+	 *    signatureAlgorithm      AlgorithmIdentifier,
+	 *    signature               BIT STRING,
+	 *    certs               [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//Signature       ::=     SEQUENCE {
-		//    signatureAlgorithm      AlgorithmIdentifier,
-		//    signature               BIT STRING,
-		//    certs               [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -132,6 +136,14 @@ export default class Signature
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"signatureAlgorithm",
+			"signature",
+			"certs"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -149,7 +161,7 @@ export default class Signature
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for ocsp.Signature");
+			throw new Error("Object's schema was not verified against input data for Signature");
 		//endregion
 
 		//region Get internal properties from parsed schema

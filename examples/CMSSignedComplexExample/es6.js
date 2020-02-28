@@ -1,5 +1,6 @@
+/* eslint-disable no-undef,no-unreachable,no-unused-vars */
 import * as asn1js from "asn1js";
-import { stringToArrayBuffer, bufferToHexCodes } from "pvutils";
+import { stringToArrayBuffer, bufferToHexCodes, fromBase64 } from "pvutils";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
 import Certificate from "../../src/Certificate";
 import AttributeTypeAndValue from "../../src/AttributeTypeAndValue";
@@ -11,6 +12,7 @@ import SignerInfo from "../../src/SignerInfo";
 import IssuerAndSerialNumber from "../../src/IssuerAndSerialNumber";
 import SignedAndUnsignedAttributes from "../../src/SignedAndUnsignedAttributes";
 import ContentInfo from "../../src/ContentInfo";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let cmsSignedBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CMS_Signed
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT
@@ -39,7 +41,7 @@ function formatPEM(pemString)
 			count = 0;
 		}
 		
-		resultString = resultString + pemString[i];
+		resultString += pemString[i];
 	}
 	
 	return resultString;
@@ -74,7 +76,7 @@ function parseCAbundle(buffer)
 		if(started === true)
 		{
 			if(base64Chars.indexOf(String.fromCharCode(view[i])) !== (-1))
-				certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+				certBodyEncoded += String.fromCharCode(view[i]);
 			else
 			{
 				if(String.fromCharCode(view[i]) === "-")
@@ -121,7 +123,7 @@ function parseCAbundle(buffer)
 							waitForStart = false;
 							started = true;
 							
-							certBodyEncoded = certBodyEncoded + String.fromCharCode(view[i]);
+							certBodyEncoded += String.fromCharCode(view[i]);
 						}
 						else
 							middleStage = true;
@@ -179,6 +181,7 @@ function parseCMSSigned()
 	//endregion
 	
 	//region Initial activities
+	// noinspection InnerHTMLJS
 	document.getElementById("cms-dgst-algos").innerHTML = "";
 	
 	document.getElementById("cms-certs").style.display = "none";
@@ -215,6 +218,7 @@ function parseCMSSigned()
 		
 		const ulrow = `<li><p><span>${typeval}</span></p></li>`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("cms-dgst-algos").innerHTML = document.getElementById("cms-dgst-algos").innerHTML + ulrow;
 	}
 	//endregion
@@ -229,14 +233,15 @@ function parseCMSSigned()
 	if(typeof eContentType === "undefined")
 		eContentType = cmsSignedSimpl.encapContentInfo.eContentType;
 	
+	// noinspection InnerHTMLJS
 	document.getElementById("cms-encap-type").innerHTML = eContentType;
 	//endregion
 	
 	//region Put information about included certificates
 	const rdnmap = {
 		"2.5.4.6": "C",
-		"2.5.4.10": "OU",
-		"2.5.4.11": "O",
+		"2.5.4.10": "O",
+		"2.5.4.11": "OU",
 		"2.5.4.3": "CN",
 		"2.5.4.7": "L",
 		"2.5.4.8": "S",
@@ -260,17 +265,18 @@ function parseCMSSigned()
 					typeval = cmsSignedSimpl.certificates[j].issuer.typesAndValues[i].type;
 				
 				const subjval = cmsSignedSimpl.certificates[j].issuer.typesAndValues[i].value.valueBlock.value;
-				const ulrow = `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
 				
-				ul = ul + ulrow;
+				ul += `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
 			}
 			
 			ul = `${ul}</ul>`;
 			
 			const row = certificatesTable.insertRow(certificatesTable.rows.length);
 			const cell0 = row.insertCell(0);
+			// noinspection InnerHTMLJS
 			cell0.innerHTML = bufferToHexCodes(cmsSignedSimpl.certificates[j].serialNumber.valueBlock.valueHex);
 			const cell1 = row.insertCell(1);
+			// noinspection InnerHTMLJS
 			cell1.innerHTML = ul;
 		}
 		
@@ -292,15 +298,15 @@ function parseCMSSigned()
 					typeval = cmsSignedSimpl.crls[j].issuer.typesAndValues[i].type;
 				
 				const subjval = cmsSignedSimpl.crls[j].issuer.typesAndValues[i].value.valueBlock.value;
-				const ulrow = `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
 				
-				ul = ul + ulrow;
+				ul += `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
 			}
 			
 			ul = `${ul}</ul>`;
 			
 			const row = crlsTable.insertRow(certificatesTable.rows.length);
 			const cell = row.insertCell(0);
+			// noinspection InnerHTMLJS
 			cell.innerHTML = ul;
 		}
 		
@@ -309,6 +315,7 @@ function parseCMSSigned()
 	//endregion
 	
 	//region Put information about number of signers
+	// noinspection InnerHTMLJS
 	document.getElementById("cms-signs").innerHTML = cmsSignedSimpl.signerInfos.length.toString();
 	//endregion
 	
@@ -366,7 +373,7 @@ function createCMSSignedInternal()
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
-	bitView[0] = bitView[0] | 0x02; // Key usage "cRLSign" flag
+	bitView[0] |= 0x02; // Key usage "cRLSign" flag
 	//bitView[0] = bitView[0] | 0x04; // Key usage "keyCertSign" flag
 	
 	const keyUsage = new asn1js.BitString({ valueHex: bitArray });
@@ -545,7 +552,7 @@ function createCMSSignedInternal()
 				content: cmsSignedSchema
 			});
 			
-			const _cmsSignedSchema = cmsContentSimp.toSchema(true);
+			const _cmsSignedSchema = cmsContentSimp.toSchema();
 			
 			//region Make length of some elements in "indefinite form"
 			_cmsSignedSchema.lenBlock.isIndefiniteForm = true;
@@ -581,7 +588,7 @@ function createCMSSigned()
 		const certSimplString = String.fromCharCode.apply(null, new Uint8Array(certificateBuffer));
 		
 		let resultString = "-----BEGIN CERTIFICATE-----\r\n";
-		resultString = resultString + formatPEM(window.btoa(certSimplString));
+		resultString += formatPEM(window.btoa(certSimplString));
 		resultString = `${resultString}\r\n-----END CERTIFICATE-----\r\n`;
 		
 		alert("Certificate created successfully!");
@@ -589,9 +596,10 @@ function createCMSSigned()
 		const privateKeyString = String.fromCharCode.apply(null, new Uint8Array(privateKeyBuffer));
 		
 		resultString = `${resultString}\r\n-----BEGIN PRIVATE KEY-----\r\n`;
-		resultString = resultString + formatPEM(window.btoa(privateKeyString));
+		resultString += formatPEM(window.btoa(privateKeyString));
 		resultString = `${resultString}\r\n-----END PRIVATE KEY-----\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("new_signed_data").innerHTML = resultString;
 		
 		alert("Private key exported successfully!");
@@ -599,9 +607,10 @@ function createCMSSigned()
 		const signedDataString = String.fromCharCode.apply(null, new Uint8Array(cmsSignedBuffer));
 
 		resultString = `${resultString}\r\n-----BEGIN CMS-----\r\n`;
-		resultString = resultString + formatPEM(window.btoa(signedDataString));
+		resultString += formatPEM(window.btoa(signedDataString));
 		resultString = `${resultString}\r\n-----END CMS-----\r\n\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("new_signed_data").innerHTML = resultString;
 		
 		parseCMSSigned();
@@ -648,15 +657,15 @@ function verifyCMSSigned()
 	if(cmsSignedBuffer.byteLength === 0)
 	{
 		alert("Nothing to verify!");
-		return;
+		return Promise.resolve();
 	}
 	//endregion
 	
 	return verifyCMSSignedInternal().
-	then(
-		result => alert(`Verification result: ${result}`),
-		error => alert(`Error during verification: ${error}`)
-	);
+		then(
+			result => alert(`Verification result: ${result}`),
+			error => alert(`Error during verification: ${error}`)
+		);
 }
 //*********************************************************************************
 //endregion 
@@ -669,9 +678,11 @@ function handleFileBrowse(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		event =>
 		{
+			// noinspection JSUnresolvedVariable
 			dataBuffer = event.target.result;
 			createCMSSigned();
 		};
@@ -685,9 +696,11 @@ function handleParsingFile(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		event =>
 		{
+			// noinspection JSUnresolvedVariable
 			cmsSignedBuffer = event.target.result;
 			parseCMSSigned();
 		};
@@ -701,6 +714,7 @@ function handleCABundle(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection JSUnresolvedVariable, AnonymousFunctionJS
 	tempReader.onload =
 		event => parseCAbundle(event.target.result);
 	
@@ -762,6 +776,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	parseCMSSigned();
 	createCMSSigned();
 	verifyCMSSigned();
@@ -809,6 +824,7 @@ context("CMS Signed Complex Example", () =>
 							//region Simple test for decoding data
 							const asn1 = asn1js.fromBER(cmsSignedBuffer);
 							const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
+							// noinspection JSUnusedLocalSymbols
 							const cmsSignedSimpl = new SignedData({ schema: cmsContentSimpl.content });
 							//endregion
 							
@@ -820,6 +836,25 @@ context("CMS Signed Complex Example", () =>
 					});
 				});
 			});
+		});
+	});
+	
+	it("Special test case for issue #170", () =>
+	{
+		const testData = "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";
+		
+		//region Simple test for decoding data
+		cmsSignedBuffer = stringToArrayBuffer(fromBase64(testData));
+		
+		const asn1 = asn1js.fromBER(cmsSignedBuffer);
+		const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
+		// noinspection JSUnusedLocalSymbols
+		const cmsSignedSimpl = new SignedData({ schema: cmsContentSimpl.content });
+		//endregion
+		
+		return verifyCMSSignedInternal().then(result =>
+		{
+			assert.equal(result, true, "CMS SignedData must be verified sucessfully");
 		});
 	});
 });

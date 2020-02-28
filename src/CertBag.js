@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import Certificate from "./Certificate";
+import { getParametersValue, clearProps } from "pvutils";
+import Certificate from "./Certificate.js";
+import AttributeCertificateV2 from "./AttributeCertificateV2.js";
 //**************************************************************************************
 /**
  * Class from RFC7292
@@ -11,26 +12,26 @@ export default class CertBag
 	/**
 	 * Constructor for CertBag class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description certId
+		 * @desc certId
 		 */
 		this.certId = getParametersValue(parameters, "certId", CertBag.defaultValues("certId"));
 		/**
 		 * @type {*}
-		 * @description certValue
+		 * @desc certValue
 		 */
 		this.certValue = getParametersValue(parameters, "certValue", CertBag.defaultValues("certValue"));
 		
 		if("parsedValue" in parameters)
 			/**
 			 * @type {*}
-			 * @description parsedValue
+			 * @desc parsedValue
 			 */
 			this.parsedValue = getParametersValue(parameters, "parsedValue", CertBag.defaultValues("parsedValue"));
 		//endregion
@@ -81,17 +82,21 @@ export default class CertBag
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * CertBag ::= SEQUENCE {
+	 *    certId    BAG-TYPE.&id   ({CertTypes}),
+	 *    certValue [0] EXPLICIT BAG-TYPE.&Type ({CertTypes}{@certId})
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//CertBag ::= SEQUENCE {
-		//    certId    BAG-TYPE.&id   ({CertTypes}),
-		//    certValue [0] EXPLICIT BAG-TYPE.&Type ({CertTypes}{@certId})
-		//}
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -121,7 +126,14 @@ export default class CertBag
 	 */
 	fromSchema(schema)
 	{
-		//region Check the schema is valid 
+		//region Clear input data first
+		clearProps(schema, [
+			"certId",
+			"certValue"
+		]);
+		//endregion
+		
+		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
 			CertBag.schema({
@@ -145,12 +157,26 @@ export default class CertBag
 			case "1.2.840.113549.1.9.22.1": // x509Certificate
 				{
 					const asn1Inner = asn1js.fromBER(this.certValue.valueBlock.valueHex);
-					this.parsedValue = new Certificate({ schema: asn1Inner.result });
+					
+					try
+					{
+						this.parsedValue = new Certificate({ schema: asn1Inner.result });
+					}
+					catch(ex) // In some realizations the same OID used for attribute certificates
+					{
+						this.parsedValue = new AttributeCertificateV2({ schema: asn1Inner.result });
+					}
+				}
+				break;
+			case "1.2.840.113549.1.9.22.3": // attributeCertificate - (!!!) THIS OID IS SUBJECT FOR CHANGE IN FUTURE (!!!)
+				{
+					const asn1Inner = asn1js.fromBER(this.certValue.valueBlock.valueHex);
+					this.parsedValue = new AttributeCertificateV2({ schema: asn1Inner.result });
 				}
 				break;
 			case "1.2.840.113549.1.9.22.2": // sdsiCertificate
 			default:
-				throw new Error(`Incorrect \"certId\" value in CertBag: ${this.certId}`);
+				throw new Error(`Incorrect "certId" value in CertBag: ${this.certId}`);
 		}
 		//endregion 
 	}
@@ -164,7 +190,11 @@ export default class CertBag
 		//region Construct and return new ASN.1 schema for this object
 		if("parsedValue" in this)
 		{
-			this.certId = "1.2.840.113549.1.9.22.1";
+			if("acinfo" in this.parsedValue) // attributeCertificate
+				this.certId = "1.2.840.113549.1.9.22.3";
+			else // x509Certificate
+				this.certId = "1.2.840.113549.1.9.22.1";
+
 			this.certValue = new asn1js.OctetString({ valueHex: this.parsedValue.toSchema().toBER(false) });
 		}
 		

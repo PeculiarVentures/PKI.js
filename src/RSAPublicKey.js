@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64 } from "pvutils";
+import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64, nearestPowerOf2, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC3447
@@ -10,7 +10,7 @@ export default class RSAPublicKey
 	/**
 	 * Constructor for RSAPublicKey class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 * @property {Integer} [modulus]
 	 * @property {Integer} [publicExponent]
 	 */
@@ -19,12 +19,12 @@ export default class RSAPublicKey
 		//region Internal properties of the object
 		/**
 		 * @type {Integer}
-		 * @description Modulus part of RSA public key
+		 * @desc Modulus part of RSA public key
 		 */
 		this.modulus = getParametersValue(parameters, "modulus", RSAPublicKey.defaultValues("modulus"));
 		/**
 		 * @type {Integer}
-		 * @description Public exponent of RSA public key
+		 * @desc Public exponent of RSA public key
 		 */
 		this.publicExponent = getParametersValue(parameters, "publicExponent", RSAPublicKey.defaultValues("publicExponent"));
 		//endregion
@@ -57,17 +57,21 @@ export default class RSAPublicKey
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RSAPublicKey ::= Sequence {
+	 *    modulus           Integer,  -- n
+	 *    publicExponent    Integer   -- e
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RSAPublicKey ::= Sequence {
-		//    modulus           Integer,  -- n
-		//    publicExponent    Integer   -- e
-		//}
-
 		/**
 		 * @type {Object}
 		 * @property {string} utcTimeName Name for "utcTimeName" choice
@@ -90,6 +94,13 @@ export default class RSAPublicKey
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"modulus",
+			"publicExponent"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -146,7 +157,10 @@ export default class RSAPublicKey
 	fromJSON(json)
 	{
 		if("n" in json)
-			this.modulus = new asn1js.Integer({ valueHex: stringToArrayBuffer(fromBase64(json.n, true)).slice(0, 256) });
+		{
+			const array = stringToArrayBuffer(fromBase64(json.n, true));
+			this.modulus = new asn1js.Integer({ valueHex: array.slice(0, Math.pow(2, nearestPowerOf2(array.byteLength))) });
+		}
 		else
 			throw new Error("Absent mandatory parameter \"n\"");
 

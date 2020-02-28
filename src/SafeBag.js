@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import Attribute from "./Attribute";
-import PrivateKeyInfo from "./PrivateKeyInfo";
-import PKCS8ShroudedKeyBag from "./PKCS8ShroudedKeyBag";
-import CertBag from "./CertBag";
-import CRLBag from "./CRLBag";
-import SecretBag from "./SecretBag";
-import SafeContents from "./SafeContents";
+import { getParametersValue, clearProps } from "pvutils";
+import Attribute from "./Attribute.js";
+import PrivateKeyInfo from "./PrivateKeyInfo.js";
+import PKCS8ShroudedKeyBag from "./PKCS8ShroudedKeyBag.js";
+import CertBag from "./CertBag.js";
+import CRLBag from "./CRLBag.js";
+import SecretBag from "./SecretBag.js";
+import SafeContents from "./SafeContents.js";
 //**************************************************************************************
 /**
  * Class from RFC7292
@@ -17,26 +17,26 @@ export default class SafeBag
 	/**
 	 * Constructor for SafeBag class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description bagId
+		 * @desc bagId
 		 */
 		this.bagId = getParametersValue(parameters, "bagId", SafeBag.defaultValues("bagId"));
 		/**
 		 * @type {*}
-		 * @description bagValue
+		 * @desc bagValue
 		 */
 		this.bagValue = getParametersValue(parameters, "bagValue", SafeBag.defaultValues("bagValue"));
 		
 		if("bagAttributes" in parameters)
 			/**
 			 * @type {Array.<Attribute>}
-			 * @description bagAttributes
+			 * @desc bagAttributes
 			 */
 			this.bagAttributes = getParametersValue(parameters, "bagAttributes", SafeBag.defaultValues("bagAttributes"));
 		//endregion
@@ -87,37 +87,22 @@ export default class SafeBag
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * SafeBag ::= SEQUENCE {
+	 *    bagId	      	BAG-TYPE.&id ({PKCS12BagSet}),
+	 *    bagValue      [0] EXPLICIT BAG-TYPE.&Type({PKCS12BagSet}{@bagId}),
+	 *    bagAttributes SET OF PKCS12Attribute OPTIONAL
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//SafeBag ::= SEQUENCE {
-		//    bagId	      	BAG-TYPE.&id ({PKCS12BagSet}),
-		//    bagValue      [0] EXPLICIT BAG-TYPE.&Type({PKCS12BagSet}{@bagId}),
-		//    bagAttributes SET OF PKCS12Attribute OPTIONAL
-		//}
-		
-		//rsadsi	OBJECT IDENTIFIER ::= {iso(1) member-body(2) us(840) rsadsi(113549)}
-		//pkcs    OBJECT IDENTIFIER ::= {rsadsi pkcs(1)}
-		//pkcs-12	OBJECT IDENTIFIER ::= {pkcs 12}
-		
-		//bagtypes			OBJECT IDENTIFIER ::= {pkcs-12 10 1}
-		
-		//keyBag 	  BAG-TYPE ::=
-		//{KeyBag IDENTIFIED BY {bagtypes 1}}
-		//pkcs8ShroudedKeyBag BAG-TYPE ::=
-		//{PKCS8ShroudedKeyBag IDENTIFIED BY {bagtypes 2}}
-		//certBag BAG-TYPE ::=
-		//{CertBag IDENTIFIED BY {bagtypes 3}}
-		//crlBag BAG-TYPE ::=
-		//{CRLBag IDENTIFIED BY {bagtypes 4}}
-		//secretBag BAG-TYPE ::=
-		//{SecretBag IDENTIFIED BY {bagtypes 5}}
-		//safeContentsBag BAG-TYPE ::=
-		//{SafeContents IDENTIFIED BY {bagtypes 6}}
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -157,6 +142,14 @@ export default class SafeBag
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"bagId",
+			"bagValue",
+			"bagAttributes"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -197,7 +190,7 @@ export default class SafeBag
 				this.bagValue = new SafeContents({ schema: asn1.result.bagValue });
 				break;
 			default:
-				throw new Error(`Invalid \"bagId\" for SafeBag: ${this.bagId}`);
+				throw new Error(`Invalid "bagId" for SafeBag: ${this.bagId}`);
 		}
 		
 		if("bagAttributes" in asn1.result)

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
+import { getParametersValue, clearProps } from "pvutils";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 //**************************************************************************************
 /**
  * Class from RFC3161
@@ -11,19 +11,19 @@ export default class MessageImprint
 	/**
 	 * Constructor for MessageImprint class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description hashAlgorithm
+		 * @desc hashAlgorithm
 		 */
 		this.hashAlgorithm = getParametersValue(parameters, "hashAlgorithm", MessageImprint.defaultValues("hashAlgorithm"));
 		/**
 		 * @type {OctetString}
-		 * @description hashedMessage
+		 * @desc hashedMessage
 		 */
 		this.hashedMessage = getParametersValue(parameters, "hashedMessage", MessageImprint.defaultValues("hashedMessage"));
 		//endregion
@@ -70,16 +70,20 @@ export default class MessageImprint
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * MessageImprint ::= SEQUENCE  {
+	 *    hashAlgorithm                AlgorithmIdentifier,
+	 *    hashedMessage                OCTET STRING  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//MessageImprint ::= SEQUENCE  {
-		//    hashAlgorithm                AlgorithmIdentifier,
-		//    hashedMessage                OCTET STRING  }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -103,6 +107,13 @@ export default class MessageImprint
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"hashAlgorithm",
+			"hashedMessage"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

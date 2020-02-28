@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
+import { getParametersValue, clearProps } from "pvutils";
+import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -11,21 +11,21 @@ export default class RecipientIdentifier
 	/**
 	 * Constructor for RecipientIdentifier class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description variant
+		 * @desc variant
 		 */
 		this.variant = getParametersValue(parameters, "variant", RecipientIdentifier.defaultValues("variant"));
 
 		if("value" in parameters)
 			/**
 			 * @type {*}
-			 * @description value
+			 * @desc value
 			 */
 			this.value = getParametersValue(parameters, "value", RecipientIdentifier.defaultValues("value"));
 		//endregion
@@ -72,18 +72,22 @@ export default class RecipientIdentifier
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RecipientIdentifier ::= CHOICE {
+	 *    issuerAndSerialNumber IssuerAndSerialNumber,
+	 *    subjectKeyIdentifier [0] SubjectKeyIdentifier }
+	 *
+	 * SubjectKeyIdentifier ::= OCTET STRING
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RecipientIdentifier ::= CHOICE {
-		//    issuerAndSerialNumber IssuerAndSerialNumber,
-		//    subjectKeyIdentifier [0] SubjectKeyIdentifier }
-		//
-		//SubjectKeyIdentifier ::= OCTET STRING
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -115,6 +119,12 @@ export default class RecipientIdentifier
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"blockName"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

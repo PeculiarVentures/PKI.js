@@ -1,0 +1,7 @@
+{
+    "reporter": [
+      "lcovonly"
+    ],
+    "sourceMap": false,
+    "instrument": false
+}

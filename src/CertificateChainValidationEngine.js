@@ -1,8 +1,5 @@
 import { getParametersValue, isEqualBuffer } from "pvutils";
-import { getAlgorithmByOID, stringPrep } from "./common";
-import CertificateRevocationList from "./CertificateRevocationList";
-import Certificate from "./Certificate";
-import generatorsDriver from "./GeneratorsDriver";
+import { getAlgorithmByOID, stringPrep } from "./common.js";
 //**************************************************************************************
 export default class CertificateChainValidationEngine
 {
@@ -10,49 +7,223 @@ export default class CertificateChainValidationEngine
 	/**
 	 * Constructor for CertificateChainValidationEngine class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<Certificate>}
-		 * @description Array of pre-defined trusted (by user) certificates
+		 * @desc Array of pre-defined trusted (by user) certificates
 		 */
-		this.trustedCerts = getParametersValue(parameters, "trustedCerts", CertificateChainValidationEngine.defaultValues("trustedCerts"));
+		this.trustedCerts = getParametersValue(parameters, "trustedCerts", this.defaultValues("trustedCerts"));
 		/**
 		 * @type {Array.<Certificate>}
-		 * @description Array with certificate chain. Could be only one end-user certificate in there!
+		 * @desc Array with certificate chain. Could be only one end-user certificate in there!
 		 */
-		this.certs = getParametersValue(parameters, "certs", CertificateChainValidationEngine.defaultValues("certs"));
+		this.certs = getParametersValue(parameters, "certs", this.defaultValues("certs"));
 		/**
 		 * @type {Array.<CertificateRevocationList>}
-		 * @description Array of all CRLs for all certificates from certificate chain
+		 * @desc Array of all CRLs for all certificates from certificate chain
 		 */
-		this.crls = getParametersValue(parameters, "crls", CertificateChainValidationEngine.defaultValues("crls"));
+		this.crls = getParametersValue(parameters, "crls", this.defaultValues("crls"));
 		/**
 		 * @type {Array}
-		 * @description Array of all OCSP responses
+		 * @desc Array of all OCSP responses
 		 */
-		this.ocsps = getParametersValue(parameters, "ocsps", CertificateChainValidationEngine.defaultValues("ocsps"));
+		this.ocsps = getParametersValue(parameters, "ocsps", this.defaultValues("ocsps"));
 		/**
 		 * @type {Date}
-		 * @description The date at which the check would be
+		 * @desc The date at which the check would be
 		 */
-		this.checkDate = getParametersValue(parameters, "checkDate", CertificateChainValidationEngine.defaultValues("checkDate"));
+		this.checkDate = getParametersValue(parameters, "checkDate", this.defaultValues("checkDate"));
+		/**
+		 * @type {Function}
+		 * @desc The date at which the check would be
+		 */
+		this.findOrigin = getParametersValue(parameters, "findOrigin", this.defaultValues("findOrigin"));
+		/**
+		 * @type {Function}
+		 * @desc The date at which the check would be
+		 */
+		this.findIssuer = getParametersValue(parameters, "findIssuer", this.defaultValues("findIssuer"));
+		//endregion
+	}
+	//**********************************************************************************
+	static defaultFindOrigin(certificate, validationEngine)
+	{
+		//region Firstly encode TBS for certificate
+		if(certificate.tbs.byteLength === 0)
+			certificate.tbs = certificate.encodeTBS();
 		//endregion
 		
-		//region If input argument array contains "schema" for this object
-		if("schema" in parameters)
-			this.fromSchema(parameters.schema);
+		//region Search in Intermediate Certificates
+		for(const localCert of validationEngine.certs)
+		{
+			//region Firstly encode TBS for certificate
+			if(localCert.tbs.byteLength === 0)
+				localCert.tbs = localCert.encodeTBS();
+			//endregion
+			
+			if(isEqualBuffer(certificate.tbs, localCert.tbs))
+				return "Intermediate Certificates";
+		}
 		//endregion
+		
+		//region Search in Trusted Certificates
+		for(const trustedCert of validationEngine.trustedCerts)
+		{
+			//region Firstly encode TBS for certificate
+			if(trustedCert.tbs.byteLength === 0)
+				trustedCert.tbs = trustedCert.encodeTBS();
+			//endregion
+			
+			if(isEqualBuffer(certificate.tbs, trustedCert.tbs))
+				return "Trusted Certificates";
+		}
+		//endregion
+		
+		return "Unknown";
+	}
+	//**********************************************************************************
+	async defaultFindIssuer(certificate, validationEngine)
+	{
+		//region Initial variables
+		let result = [];
+		
+		let keyIdentifier = null;
+		
+		let authorityCertIssuer = null;
+		let authorityCertSerialNumber = null;
+		//endregion
+		
+		//region Speed-up searching in case of self-signed certificates
+		if(certificate.subject.isEqual(certificate.issuer))
+		{
+			try
+			{
+				const verificationResult = await certificate.verify();
+				if(verificationResult === true)
+					return [certificate];
+			}
+			catch(ex)
+			{
+			}
+		}
+		//endregion
+		
+		//region Find values to speed-up search
+		if("extensions" in certificate)
+		{
+			for(const extension of certificate.extensions)
+			{
+				if(extension.extnID === "2.5.29.35") // AuthorityKeyIdentifier
+				{
+					if("keyIdentifier" in extension.parsedValue)
+						keyIdentifier = extension.parsedValue.keyIdentifier;
+					else
+					{
+						if("authorityCertIssuer" in extension.parsedValue)
+							authorityCertIssuer = extension.parsedValue.authorityCertIssuer;
+						
+						if("authorityCertSerialNumber" in extension.parsedValue)
+							authorityCertSerialNumber = extension.parsedValue.authorityCertSerialNumber;
+					}
+					
+					break;
+				}
+			}
+		}
+		//endregion
+		
+		//region Aux function
+		function checkCertificate(possibleIssuer)
+		{
+			//region Firstly search for appropriate extensions
+			if(keyIdentifier !== null)
+			{
+				if("extensions" in possibleIssuer)
+				{
+					let extensionFound = false;
+					
+					for(const extension of possibleIssuer.extensions)
+					{
+						if(extension.extnID === "2.5.29.14") // SubjectKeyIdentifier
+						{
+							extensionFound = true;
+							
+							if(isEqualBuffer(extension.parsedValue.valueBlock.valueHex, keyIdentifier.valueBlock.valueHex))
+								result.push(possibleIssuer);
+							
+							break;
+						}
+					}
+					
+					if(extensionFound)
+						return;
+				}
+			}
+			//endregion
+			
+			//region Now search for authorityCertSerialNumber
+			let authorityCertSerialNumberEqual = false;
+			
+			if(authorityCertSerialNumber !== null)
+				authorityCertSerialNumberEqual = possibleIssuer.serialNumber.isEqual(authorityCertSerialNumber);
+			//endregion
+			
+			//region And at least search for Issuer data
+			if(authorityCertIssuer !== null)
+			{
+				if(possibleIssuer.subject.isEqual(authorityCertIssuer))
+				{
+					if(authorityCertSerialNumberEqual)
+						result.push(possibleIssuer);
+				}
+			}
+			else
+			{
+				if(certificate.issuer.isEqual(possibleIssuer.subject))
+					result.push(possibleIssuer);
+			}
+			//endregion
+		}
+		//endregion
+		
+		//region Search in Trusted Certificates
+		for(const trustedCert of validationEngine.trustedCerts)
+			checkCertificate(trustedCert);
+		//endregion
+		
+		//region Search in Intermediate Certificates
+		for(const intermediateCert of validationEngine.certs)
+			checkCertificate(intermediateCert);
+		//endregion
+		
+		//region Now perform certificate verification checking
+		for(let i = 0; i < result.length; i++)
+		{
+			try
+			{
+				const verificationResult = await certificate.verify(result[i]);
+				if(verificationResult === false)
+					result.splice(i, 1);
+			}
+			catch(ex)
+			{
+				result.splice(i, 1); // Something wrong, remove the certificate
+			}
+		}
+		//endregion
+		
+		return result;
 	}
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
 	 * @param {string} memberName String name for a class member
 	 */
-	static defaultValues(memberName)
+	defaultValues(memberName)
 	{
 		switch(memberName)
 		{
@@ -66,57 +237,24 @@ export default class CertificateChainValidationEngine
 				return [];
 			case "checkDate":
 				return new Date();
+			case "findOrigin":
+				return CertificateChainValidationEngine.defaultFindOrigin;
+			case "findIssuer":
+				return this.defaultFindIssuer;
 			default:
 				throw new Error(`Invalid member name for CertificateChainValidationEngine class: ${memberName}`);
 		}
 	}
 	//**********************************************************************************
-	sort()
+	async sort(passedWhenNotRevValues = false)
 	{
 		//region Initial variables
 		const localCerts = [];
 		const _this = this;
 		//endregion
 		
-		//region Finding certificate issuer
-		function *findIssuer(certificate, index)
-		{
-			const result = [];
-			
-			//region Speed-up searching in case of self-signed certificates
-			if(certificate.subject.isEqual(certificate.issuer))
-			{
-				try
-				{
-					const verificationResult = yield certificate.verify();
-					if(verificationResult === true)
-						return [index];
-				}
-				catch(ex)
-				{
-				}
-			}
-			//endregion
-			
-			for(let i = 0; i < localCerts.length; i++)
-			{
-				try
-				{
-					const verificationResult = yield certificate.verify(localCerts[i]);
-					if(verificationResult === true)
-						result.push(i);
-				}
-				catch(ex)
-				{
-				}
-			}
-			
-			return ((result.length) ? result : [-1]);
-		}
-		//endregion
-		
 		//region Building certificate path
-		function *buildPath(certificate, index)
+		async function buildPath(certificate)
 		{
 			const result = [];
 			
@@ -148,63 +286,38 @@ export default class CertificateChainValidationEngine
 			
 			//endregion
 			
-			const findIssuerResult = yield findIssuer(certificate, index);
-			if((findIssuerResult.length === 1) && (findIssuerResult[0] === (-1)))
-				throw new Error("Incorrect result");
+			const findIssuerResult = await _this.findIssuer(certificate, _this);
+			if(findIssuerResult.length === 0)
+				throw new Error("No valid certificate paths found");
 			
-			if(findIssuerResult.length === 1)
+			for(let i = 0; i < findIssuerResult.length; i++)
 			{
-				if(findIssuerResult[0] === index)
+				if(isEqualBuffer(findIssuerResult[i].tbs, certificate.tbs))
 				{
-					result.push(findIssuerResult);
-					return result;
+					result.push([findIssuerResult[i]]);
+					continue;
 				}
 				
-				const buildPathResult = yield buildPath(localCerts[findIssuerResult[0]], findIssuerResult[0]);
+				const buildPathResult = await buildPath(findIssuerResult[i]);
 				
-				for(let i = 0; i < buildPathResult.length; i++)
+				for(let j = 0; j < buildPathResult.length; j++)
 				{
-					const copy = buildPathResult[i].slice();
-					copy.splice(0, 0, findIssuerResult[0]);
+					const copy = buildPathResult[j].slice();
+					copy.splice(0, 0, findIssuerResult[i]);
 					
 					if(checkUnique(copy))
 						result.push(copy);
 					else
-						result.push(buildPathResult[i]);
-				}
-			}
-			else
-			{
-				for(let i = 0; i < findIssuerResult.length; i++)
-				{
-					if(findIssuerResult[i] === index)
-					{
-						result.push([findIssuerResult[i]]);
-						continue;
-					}
-					
-					const buildPathResult = yield buildPath(localCerts[findIssuerResult[i]], findIssuerResult[i]);
-					
-					for(let j = 0; j < buildPathResult.length; j++)
-					{
-						const copy = buildPathResult[j].slice();
-						copy.splice(0, 0, findIssuerResult[i]);
-						
-						if(checkUnique(copy))
-							result.push(copy);
-						else
-							result.push(buildPathResult[j]);
-					}
+						result.push(buildPathResult[j]);
 				}
 			}
 			
 			return result;
 		}
-		
 		//endregion
 		
 		//region Find CRL for specific certificate
-		function *findCRL(certificate)
+		async function findCRL(certificate)
 		{
 			//region Initial variables
 			const issuerCertificates = [];
@@ -223,12 +336,12 @@ export default class CertificateChainValidationEngine
 			}
 			//endregion
 			
-			//region Find all CRLs for crtificate's issuer
+			//region Find all CRLs for certificate's issuer
 			crls.push(..._this.crls.filter(element => element.issuer.isEqual(certificate.issuer)));
 			if(crls.length === 0)
 			{
 				return {
-					status: 1,
+					status: 2,
 					statusMessage: "No CRLs for specific certificate issuer"
 				};
 			}
@@ -249,7 +362,7 @@ export default class CertificateChainValidationEngine
 				{
 					try
 					{
-						const result = yield crls[i].verify({ issuerCertificate: issuerCertificates[j] });
+						const result = await crls[i].verify({ issuerCertificate: issuerCertificates[j] });
 						if(result)
 						{
 							crlsAndCertificates.push({
@@ -277,15 +390,14 @@ export default class CertificateChainValidationEngine
 			}
 			
 			return {
-				status: 1,
+				status: 3,
 				statusMessage: "No valid CRLs found"
 			};
 		}
-		
 		//endregion
 		
 		//region Find OCSP for specific certificate
-		function *findOCSP(certificate, issuerCertificate)
+		async function findOCSP(certificate, issuerCertificate)
 		{
 			//region Get hash algorithm from certificate
 			const hashAlgorithm = getAlgorithmByOID(certificate.signatureAlgorithm.algorithmId);
@@ -298,7 +410,7 @@ export default class CertificateChainValidationEngine
 			//region Search for OCSP response for the certificate
 			for(let i = 0; i < _this.ocsps.length; i++)
 			{
-				const result = yield _this.ocsps[i].getCertificateStatus(certificate, issuerCertificate);
+				const result = await _this.ocsps[i].getCertificateStatus(certificate, issuerCertificate);
 				if(result.isForCertificate)
 				{
 					if(result.status === 0)
@@ -311,11 +423,10 @@ export default class CertificateChainValidationEngine
 			
 			return 2;
 		}
-		
 		//endregion
 		
 		//region Check for certificate to be CA
-		function *checkForCA(certificate, needToCheckCRL = false)
+		async function checkForCA(certificate, needToCheckCRL = false)
 		{
 			//region Initial variables
 			let isCA = false;
@@ -379,6 +490,7 @@ export default class CertificateChainValidationEngine
 					};
 				}
 				
+				// noinspection OverlyComplexBooleanExpressionJS
 				if((isCA === true) && (keyUsagePresent === true) && ((needToCheckCRL) && (cRLSign === false)))
 				{
 					return {
@@ -404,11 +516,10 @@ export default class CertificateChainValidationEngine
 				resultMessage: ""
 			};
 		}
-		
 		//endregion
 		
 		//region Basic check for certificate path
-		function *basicCheck(path, checkDate)
+		async function basicCheck(path, checkDate)
 		{
 			//region Check that all dates are valid
 			for(let i = 0; i < path.length; i++)
@@ -419,7 +530,7 @@ export default class CertificateChainValidationEngine
 					return {
 						result: false,
 						resultCode: 8,
-						resultMessage: "Certificate validity period is out of checking date"
+						resultMessage: "The certificate is either not yet valid or expired"
 					};
 				}
 			}
@@ -458,17 +569,20 @@ export default class CertificateChainValidationEngine
 			//region Check each certificate (except "trusted root") to be non-revoked
 			if((_this.crls.length !== 0) || (_this.ocsps.length !== 0)) // If CRLs and OCSPs are empty then we consider all certificates to be valid
 			{
-				for(let i = 0; i < (path.length - 2); i++)
+				for(let i = 0; i < (path.length - 1); i++)
 				{
 					//region Initial variables
-					let ocspResult;
-					let crlResult;
+					let ocspResult = 2;
+					let crlResult = {
+						status: 0,
+						statusMessage: ""
+					};
 					//endregion
 					
 					//region Check OCSPs first
 					if(_this.ocsps.length !== 0)
 					{
-						ocspResult = yield findOCSP(path[i], path[i + 1]);
+						ocspResult = await findOCSP(path[i], path[i + 1]);
 						
 						switch(ocspResult)
 						{
@@ -490,41 +604,47 @@ export default class CertificateChainValidationEngine
 					//region Check CRLs
 					if(_this.crls.length !== 0)
 					{
-						crlResult = yield findCRL(path[i]);
-						if(crlResult.status)
+						crlResult = await findCRL(path[i]);
+
+						if(crlResult.status === 0)
 						{
-							throw {
-								result: false,
-								resultCode: 11,
-								resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
-							};
+							for(let j = 0; j < crlResult.result.length; j++)
+							{
+								//region Check that the CRL issuer certificate have not been revoked
+								const isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked(path[i]);
+								if(isCertificateRevoked)
+								{
+									return {
+										result: false,
+										resultCode: 12,
+										resultMessage: "One of certificates had been revoked"
+									};
+								}
+								//endregion
+
+								//region Check that the CRL issuer certificate is a CA certificate
+								const isCertificateCA = await checkForCA(crlResult.result[j].certificate, true);
+								if(isCertificateCA.result === false)
+								{
+									return {
+										result: false,
+										resultCode: 13,
+										resultMessage: "CRL issuer certificate is not a CA certificate or does not have crlSign flag"
+									};
+								}
+								//endregion
+							}
 						}
-						
-						for(let j = 0; j < crlResult.result.length; j++)
+						else
 						{
-							//region Check that the CRL issuer certificate have not been revoked
-							const isCertificateRevoked = crlResult.result[j].crl.isCertificateRevoked(path[i]);
-							if(isCertificateRevoked)
+							if(passedWhenNotRevValues === false)
 							{
-								return {
+								throw {
 									result: false,
-									resultCode: 12,
-									resultMessage: "One of certificates had been revoked"
+									resultCode: 11,
+									resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
 								};
 							}
-							//endregion
-							
-							//region Check that the CRL issuer certificate is a CA certificate
-							const isCertificateCA = yield checkForCA(crlResult.result[j].certificate, true);
-							if(isCertificateCA.result === false)
-							{
-								return {
-									result: false,
-									resultCode: 13,
-									resultMessage: "CRL issuer certificate is not a CA certificate or does not have crlSign flag"
-								};
-							}
-							//endregion
 						}
 					}
 					else
@@ -539,6 +659,39 @@ export default class CertificateChainValidationEngine
 						}
 					}
 					//endregion
+
+					//region Check we do have links to revocation values inside issuer's certificate
+					if((ocspResult === 2) && (crlResult.status === 2) && passedWhenNotRevValues)
+					{
+						const issuerCertificate = path[i + 1];
+						let extensionFound = false;
+
+						if("extensions" in issuerCertificate)
+						{
+							for(const extension of issuerCertificate.extensions)
+							{
+								switch(extension.extnID)
+								{
+									case "2.5.29.31": // CRLDistributionPoints
+									case "2.5.29.46": // FreshestCRL
+									case "1.3.6.1.5.5.7.1.1": // AuthorityInfoAccess
+										extensionFound = true;
+										break;
+									default:
+								}
+							}
+						}
+
+						if(extensionFound)
+						{
+							throw {
+								result: false,
+								resultCode: 11,
+								resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
+							};
+						}
+					}
+					//endregion
 				}
 			}
 			//endregion
@@ -546,7 +699,7 @@ export default class CertificateChainValidationEngine
 			//region Check each certificate (except "end entity") in the path to be a CA certificate
 			for(let i = 1; i < path.length; i++)
 			{
-				const result = yield checkForCA(path[i]);
+				const result = await checkForCA(path[i]);
 				if(result.result === false)
 				{
 					return {
@@ -564,114 +717,113 @@ export default class CertificateChainValidationEngine
 		}
 		//endregion
 		
-		return generatorsDriver(function *generatorFunction()
+		//region Do main work
+		//region Initialize "localCerts" by value of "_this.certs" + "_this.trustedCerts" arrays
+		localCerts.push(..._this.trustedCerts);
+		localCerts.push(..._this.certs);
+		//endregion
+		
+		//region Check all certificates for been unique
+		for(let i = 0; i < localCerts.length; i++)
 		{
-			//region Initialize "localCerts" by value of "_this.certs" + "_this.trustedCerts" arrays
-			localCerts.push(..._this.trustedCerts);
-			localCerts.push(..._this.certs);
-			//endregion
-			
-			//region Check all certificates for been unique
-			for(let i = 0; i < localCerts.length; i++)
+			for(let j = 0; j < localCerts.length; j++)
 			{
-				for(let j = 0; j < localCerts.length; j++)
-				{
-					if(i === j)
-						continue;
-					
-					if(isEqualBuffer(localCerts[i].tbs, localCerts[j].tbs))
-					{
-						localCerts.splice(j, 1);
-						i = 0;
-						break;
-					}
-				}
-			}
-			//endregion
-			
-			//region Initial variables
-			let result;
-			const certificatePath = [localCerts[localCerts.length - 1]]; // The "end entity" certificate must be the least in "certs" array
-			//endregion
-			
-			//region Build path for "end entity" certificate
-			result = yield buildPath(localCerts[localCerts.length - 1], localCerts.length - 1);
-			if(result.length === 0)
-			{
-				return {
-					result: false,
-					resultCode: 60,
-					resultMessage: "Unable to find certificate path"
-				};
-			}
-			//endregion
-			
-			//region Exclude certificate paths not ended with "trusted roots"
-			for(let i = 0; i < result.length; i++)
-			{
-				let found = false;
+				if(i === j)
+					continue;
 				
-				for(let j = 0; j < (result[i]).length; j++)
+				if(isEqualBuffer(localCerts[i].tbs, localCerts[j].tbs))
 				{
-					const certificate = localCerts[(result[i])[j]];
-					
-					for(let k = 0; k < _this.trustedCerts.length; k++)
-					{
-						if(isEqualBuffer(certificate.tbs, _this.trustedCerts[k].tbs))
-						{
-							found = true;
-							break;
-						}
-					}
-					
-					if(found)
-						break;
-				}
-				
-				if(!found)
-				{
-					result.splice(i, 1);
+					localCerts.splice(j, 1);
 					i = 0;
+					break;
 				}
 			}
+		}
+		//endregion
+		
+		//region Initial variables
+		let result;
+		const certificatePath = [localCerts[localCerts.length - 1]]; // The "end entity" certificate must be the least in "certs" array
+		//endregion
+		
+		//region Build path for "end entity" certificate
+		result = await buildPath(localCerts[localCerts.length - 1]);
+		if(result.length === 0)
+		{
+			return {
+				result: false,
+				resultCode: 60,
+				resultMessage: "Unable to find certificate path"
+			};
+		}
+		//endregion
+		
+		//region Exclude certificate paths not ended with "trusted roots"
+		for(let i = 0; i < result.length; i++)
+		{
+			let found = false;
 			
-			if(result.length === 0)
+			for(let j = 0; j < (result[i]).length; j++)
 			{
-				throw {
-					result: false,
-					resultCode: 97,
-					resultMessage: "No valid certificate paths found"
-				};
-			}
-			//endregion
-			
-			//region Find shortest certificate path (for the moment it is the only criteria)
-			let shortestLength = result[0].length;
-			let shortestIndex = 0;
-			
-			for(let i = 0; i < result.length; i++)
-			{
-				if(result[i].length < shortestLength)
+				const certificate = (result[i])[j];
+				
+				for(let k = 0; k < _this.trustedCerts.length; k++)
 				{
-					shortestLength = result[i].length;
-					shortestIndex = i;
+					if(isEqualBuffer(certificate.tbs, _this.trustedCerts[k].tbs))
+					{
+						found = true;
+						break;
+					}
 				}
+				
+				if(found)
+					break;
 			}
-			//endregion
 			
-			//region Create certificate path for basic check
-			for(let i = 0; i < result[shortestIndex].length; i++)
-				certificatePath.push(localCerts[(result[shortestIndex])[i]]);
-			//endregion
-			
-			//region Perform basic checking for all certificates in the path
-			result = yield basicCheck(certificatePath, _this.checkDate);
-			if(result.result === false)
-				throw result;
-			//endregion
-			
-			return certificatePath;
-		});
+			if(!found)
+			{
+				result.splice(i, 1);
+				i = 0;
+			}
+		}
+		
+		if(result.length === 0)
+		{
+			throw {
+				result: false,
+				resultCode: 97,
+				resultMessage: "No valid certificate paths found"
+			};
+		}
+		//endregion
+		
+		//region Find shortest certificate path (for the moment it is the only criteria)
+		let shortestLength = result[0].length;
+		let shortestIndex = 0;
+		
+		for(let i = 0; i < result.length; i++)
+		{
+			if(result[i].length < shortestLength)
+			{
+				shortestLength = result[i].length;
+				shortestIndex = i;
+			}
+		}
+		//endregion
+		
+		//region Create certificate path for basic check
+		for(let i = 0; i < result[shortestIndex].length; i++)
+			certificatePath.push((result[shortestIndex])[i]);
+		//endregion
+		
+		//region Perform basic checking for all certificates in the path
+		result = await basicCheck(certificatePath, _this.checkDate);
+		if(result.result === false)
+			throw result;
+		//endregion
+		
+		return certificatePath;
+		//endregion
 	}
 	//**********************************************************************************
 	/**
@@ -679,80 +831,334 @@ export default class CertificateChainValidationEngine
 	 * @param {{initialPolicySet, initialExplicitPolicy, initialPolicyMappingInhibit, initialInhibitPolicy, initialPermittedSubtreesSet, initialExcludedSubtreesSet, initialRequiredNameForms}} [parameters]
 	 * @returns {Promise}
 	 */
-	verify(parameters = {})
+	async verify(parameters = {})
 	{
-		//region Initial checks
-		if(this.certs.length === 0)
-			return Promise.reject("Empty certificate array");
-		//endregion
-		
-		//region Initial variables
-		let sequence = Promise.resolve();
-		//endregion
-		
-		//region Get input variables
-		let initialPolicySet = [];
-		initialPolicySet.push("2.5.29.32.0"); // "anyPolicy"
-		
-		let initialExplicitPolicy = false;
-		let initialPolicyMappingInhibit = false;
-		let initialInhibitPolicy = false;
-		
-		let initialPermittedSubtreesSet = []; // Array of "simpl.x509.GeneralSubtree"
-		let initialExcludedSubtreesSet = [];  // Array of "simpl.x509.GeneralSubtree"
-		let initialRequiredNameForms = [];    // Array of "simpl.x509.GeneralSubtree"
-		
-		if("initialPolicySet" in parameters)
-			initialPolicySet = parameters.initialPolicySet;
-		
-		if("initialExplicitPolicy" in parameters)
-			initialExplicitPolicy = parameters.initialExplicitPolicy;
-		
-		if("initialPolicyMappingInhibit" in parameters)
-			initialPolicyMappingInhibit = parameters.initialPolicyMappingInhibit;
-		
-		if("initialInhibitPolicy" in parameters)
-			initialInhibitPolicy = parameters.initialInhibitPolicy;
-		
-		if("initialPermittedSubtreesSet" in parameters)
-			initialPermittedSubtreesSet = parameters.initialPermittedSubtreesSet;
-		
-		if("initialExcludedSubtreesSet" in parameters)
-			initialExcludedSubtreesSet = parameters.initialExcludedSubtreesSet;
-		
-		if("initialRequiredNameForms" in parameters)
-			initialRequiredNameForms = parameters.initialRequiredNameForms;
-		
-		let explicitPolicyIndicator = initialExplicitPolicy;
-		let policyMappingInhibitIndicator = initialPolicyMappingInhibit;
-		let inhibitAnyPolicyIndicator = initialInhibitPolicy;
-		
-		const pendingConstraints = new Array(3);
-		pendingConstraints[0] = false; // For "explicitPolicyPending"
-		pendingConstraints[1] = false; // For "policyMappingInhibitPending"
-		pendingConstraints[2] = false; // For "inhibitAnyPolicyPending"
-		
-		let explicitPolicyPending = 0;
-		let policyMappingInhibitPending = 0;
-		let inhibitAnyPolicyPending = 0;
-		
-		let permittedSubtrees = initialPermittedSubtreesSet;
-		let excludedSubtrees = initialExcludedSubtreesSet;
-		const requiredNameForms = initialRequiredNameForms;
-		
-		let pathDepth = 1;
-		//endregion
-		
-		//region Sorting certificates in the chain array
-		sequence = this.sort().then(sortedCerts =>
+		//region Auxiliary functions for name constraints checking
+		function compareDNSName(name, constraint)
 		{
-			this.certs = sortedCerts;
-		});
-		//endregion
+			/// <summary>Compare two dNSName values</summary>
+			/// <param name="name" type="String">DNS from name</param>
+			/// <param name="constraint" type="String">Constraint for DNS from name</param>
+			/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+			
+			//region Make a "string preparation" for both name and constrain
+			const namePrepared = stringPrep(name);
+			const constraintPrepared = stringPrep(constraint);
+			//endregion
+			
+			//region Make a "splitted" versions of "constraint" and "name"
+			const nameSplitted = namePrepared.split(".");
+			const constraintSplitted = constraintPrepared.split(".");
+			//endregion
+			
+			//region Length calculation and additional check
+			const nameLen = nameSplitted.length;
+			const constrLen = constraintSplitted.length;
+			
+			if((nameLen === 0) || (constrLen === 0) || (nameLen < constrLen))
+				return false;
+			//endregion
+			
+			//region Check that no part of "name" has zero length
+			for(let i = 0; i < nameLen; i++)
+			{
+				if(nameSplitted[i].length === 0)
+					return false;
+			}
+			//endregion
+			
+			//region Check that no part of "constraint" has zero length
+			for(let i = 0; i < constrLen; i++)
+			{
+				if(constraintSplitted[i].length === 0)
+				{
+					if(i === 0)
+					{
+						if(constrLen === 1)
+							return false;
+						
+						continue;
+					}
+					
+					return false;
+				}
+			}
+			//endregion
+			
+			//region Check that "name" has a tail as "constraint"
+			
+			for(let i = 0; i < constrLen; i++)
+			{
+				if(constraintSplitted[constrLen - 1 - i].length === 0)
+					continue;
+				
+				if(nameSplitted[nameLen - 1 - i].localeCompare(constraintSplitted[constrLen - 1 - i]) !== 0)
+					return false;
+			}
+			//endregion
+			
+			return true;
+		}
 		
-		//region Work with policies
-		sequence = sequence.then(() =>
+		function compareRFC822Name(name, constraint)
 		{
+			/// <summary>Compare two rfc822Name values</summary>
+			/// <param name="name" type="String">E-mail address from name</param>
+			/// <param name="constraint" type="String">Constraint for e-mail address from name</param>
+			/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+			
+			//region Make a "string preparation" for both name and constrain
+			const namePrepared = stringPrep(name);
+			const constraintPrepared = stringPrep(constraint);
+			//endregion
+			
+			//region Make a "splitted" versions of "constraint" and "name"
+			const nameSplitted = namePrepared.split("@");
+			const constraintSplitted = constraintPrepared.split("@");
+			//endregion
+			
+			//region Splitted array length checking
+			if((nameSplitted.length === 0) || (constraintSplitted.length === 0) || (nameSplitted.length < constraintSplitted.length))
+				return false;
+			//endregion
+			
+			if(constraintSplitted.length === 1)
+			{
+				const result = compareDNSName(nameSplitted[1], constraintSplitted[0]);
+				
+				if(result)
+				{
+					//region Make a "splitted" versions of domain name from "constraint" and "name"
+					const ns = nameSplitted[1].split(".");
+					const cs = constraintSplitted[0].split(".");
+					//endregion
+					
+					if(cs[0].length === 0)
+						return true;
+					
+					return ns.length === cs.length;
+				}
+				
+				return false;
+			}
+			
+			return (namePrepared.localeCompare(constraintPrepared) === 0);
+		}
+		
+		function compareUniformResourceIdentifier(name, constraint)
+		{
+			/// <summary>Compare two uniformResourceIdentifier values</summary>
+			/// <param name="name" type="String">uniformResourceIdentifier from name</param>
+			/// <param name="constraint" type="String">Constraint for uniformResourceIdentifier from name</param>
+			/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+			
+			//region Make a "string preparation" for both name and constrain
+			let namePrepared = stringPrep(name);
+			const constraintPrepared = stringPrep(constraint);
+			//endregion
+			
+			//region Find out a major URI part to compare with
+			const ns = namePrepared.split("/");
+			const cs = constraintPrepared.split("/");
+			
+			if(cs.length > 1) // Malformed constraint
+				return false;
+			
+			if(ns.length > 1) // Full URI string
+			{
+				for(let i = 0; i < ns.length; i++)
+				{
+					if((ns[i].length > 0) && (ns[i].charAt(ns[i].length - 1) !== ":"))
+					{
+						const nsPort = ns[i].split(":");
+						namePrepared = nsPort[0];
+						break;
+					}
+				}
+			}
+			//endregion
+			
+			const result = compareDNSName(namePrepared, constraintPrepared);
+			
+			if(result)
+			{
+				//region Make a "splitted" versions of "constraint" and "name"
+				const nameSplitted = namePrepared.split(".");
+				const constraintSplitted = constraintPrepared.split(".");
+				//endregion
+				
+				if(constraintSplitted[0].length === 0)
+					return true;
+				
+				return nameSplitted.length === constraintSplitted.length;
+			}
+			
+			return false;
+		}
+		
+		function compareIPAddress(name, constraint)
+		{
+			/// <summary>Compare two iPAddress values</summary>
+			/// <param name="name" type="in_window.org.pkijs.asn1.OCTETSTRING">iPAddress from name</param>
+			/// <param name="constraint" type="in_window.org.pkijs.asn1.OCTETSTRING">Constraint for iPAddress from name</param>
+			/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+			
+			//region Common variables
+			const nameView = new Uint8Array(name.valueBlock.valueHex);
+			const constraintView = new Uint8Array(constraint.valueBlock.valueHex);
+			//endregion
+			
+			//region Work with IPv4 addresses
+			if((nameView.length === 4) && (constraintView.length === 8))
+			{
+				for(let i = 0; i < 4; i++)
+				{
+					if((nameView[i] ^ constraintView[i]) & constraintView[i + 4])
+						return false;
+				}
+				
+				return true;
+			}
+			//endregion
+			
+			//region Work with IPv6 addresses
+			if((nameView.length === 16) && (constraintView.length === 32))
+			{
+				for(let i = 0; i < 16; i++)
+				{
+					if((nameView[i] ^ constraintView[i]) & constraintView[i + 16])
+						return false;
+				}
+				
+				return true;
+			}
+			//endregion
+			
+			return false;
+		}
+		
+		function compareDirectoryName(name, constraint)
+		{
+			/// <summary>Compare two directoryName values</summary>
+			/// <param name="name" type="in_window.org.pkijs.simpl.RDN">directoryName from name</param>
+			/// <param name="constraint" type="in_window.org.pkijs.simpl.RDN">Constraint for directoryName from name</param>
+			/// <param name="any" type="Boolean">Boolean flag - should be comparision interrupted after first match or we need to match all "constraints" parts</param>
+			/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
+			
+			//region Initial check
+			if((name.typesAndValues.length === 0) || (constraint.typesAndValues.length === 0))
+				return true;
+			
+			if(name.typesAndValues.length < constraint.typesAndValues.length)
+				return false;
+			//endregion
+			
+			//region Initial variables
+			let result = true;
+			let nameStart = 0;
+			//endregion
+			
+			for(let i = 0; i < constraint.typesAndValues.length; i++)
+			{
+				let localResult = false;
+				
+				for(let j = nameStart; j < name.typesAndValues.length; j++)
+				{
+					localResult = name.typesAndValues[j].isEqual(constraint.typesAndValues[i]);
+					
+					if(name.typesAndValues[j].type === constraint.typesAndValues[i].type)
+						result = result && localResult;
+					
+					if(localResult === true)
+					{
+						if((nameStart === 0) || (nameStart === j))
+						{
+							nameStart = j + 1;
+							break;
+						}
+						else // Structure of "name" must be the same with "constraint"
+							return false;
+					}
+				}
+				
+				if(localResult === false)
+					return false;
+			}
+			
+			return (nameStart === 0) ? false : result;
+		}
+		//endregion
+
+		try
+		{
+			//region Initial checks
+			if(this.certs.length === 0)
+				throw "Empty certificate array";
+			//endregion
+			
+			//region Get input variables
+			let passedWhenNotRevValues = false;
+
+			if("passedWhenNotRevValues" in parameters)
+				passedWhenNotRevValues = parameters.passedWhenNotRevValues;
+
+			let initialPolicySet = [];
+			initialPolicySet.push("2.5.29.32.0"); // "anyPolicy"
+			
+			let initialExplicitPolicy = false;
+			let initialPolicyMappingInhibit = false;
+			let initialInhibitPolicy = false;
+			
+			let initialPermittedSubtreesSet = []; // Array of "simpl.x509.GeneralSubtree"
+			let initialExcludedSubtreesSet = [];  // Array of "simpl.x509.GeneralSubtree"
+			let initialRequiredNameForms = [];    // Array of "simpl.x509.GeneralSubtree"
+			
+			if("initialPolicySet" in parameters)
+				initialPolicySet = parameters.initialPolicySet;
+			
+			if("initialExplicitPolicy" in parameters)
+				initialExplicitPolicy = parameters.initialExplicitPolicy;
+			
+			if("initialPolicyMappingInhibit" in parameters)
+				initialPolicyMappingInhibit = parameters.initialPolicyMappingInhibit;
+			
+			if("initialInhibitPolicy" in parameters)
+				initialInhibitPolicy = parameters.initialInhibitPolicy;
+			
+			if("initialPermittedSubtreesSet" in parameters)
+				initialPermittedSubtreesSet = parameters.initialPermittedSubtreesSet;
+			
+			if("initialExcludedSubtreesSet" in parameters)
+				initialExcludedSubtreesSet = parameters.initialExcludedSubtreesSet;
+			
+			if("initialRequiredNameForms" in parameters)
+				initialRequiredNameForms = parameters.initialRequiredNameForms;
+			
+			let explicitPolicyIndicator = initialExplicitPolicy;
+			let policyMappingInhibitIndicator = initialPolicyMappingInhibit;
+			let inhibitAnyPolicyIndicator = initialInhibitPolicy;
+			
+			const pendingConstraints = new Array(3);
+			pendingConstraints[0] = false; // For "explicitPolicyPending"
+			pendingConstraints[1] = false; // For "policyMappingInhibitPending"
+			pendingConstraints[2] = false; // For "inhibitAnyPolicyPending"
+			
+			let explicitPolicyPending = 0;
+			let policyMappingInhibitPending = 0;
+			let inhibitAnyPolicyPending = 0;
+			
+			let permittedSubtrees = initialPermittedSubtreesSet;
+			let excludedSubtrees = initialExcludedSubtreesSet;
+			const requiredNameForms = initialRequiredNameForms;
+			
+			let pathDepth = 1;
+			//endregion
+			
+			//region Sorting certificates in the chain array
+			this.certs = await this.sort(passedWhenNotRevValues);
+			//endregion
+			
+			//region Work with policies
 			//region Support variables
 			const allPolicies = []; // Array of all policies (string values)
 			allPolicies.push("2.5.29.32.0"); // Put "anyPolicy" at first place
@@ -1125,279 +1531,23 @@ export default class CertificateChainValidationEngine
 			//endregion
 			
 			//region Combine output object
-			return {
+			const policyResult = {
 				result: (userConstrPolicies.length > 0),
 				resultCode: 0,
 				resultMessage: (userConstrPolicies.length > 0) ? "" : "Zero \"userConstrPolicies\" array, no intersections with \"authConstrPolicies\"",
 				authConstrPolicies,
 				userConstrPolicies,
 				explicitPolicyIndicator,
-				policyMappings
+				policyMappings,
+				certificatePath: this.certs
 			};
+			
+			if(userConstrPolicies.length === 0)
+				return policyResult;
 			//endregion
-		});
-		//endregion
-		
-		//region Work with name constraints
-		sequence = sequence.then(policyResult =>
-		{
-			//region Auxiliary functions for name constraints checking
-			function compareDNSName(name, constraint)
-			{
-				/// <summary>Compare two dNSName values</summary>
-				/// <param name="name" type="String">DNS from name</param>
-				/// <param name="constraint" type="String">Constraint for DNS from name</param>
-				/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
-				
-				//region Make a "string preparation" for both name and constrain
-				const namePrepared = stringPrep(name);
-				const constraintPrepared = stringPrep(constraint);
-				//endregion
-				
-				//region Make a "splitted" versions of "constraint" and "name"
-				const nameSplitted = namePrepared.split(".");
-				const constraintSplitted = constraintPrepared.split(".");
-				//endregion
-				
-				//region Length calculation and additional check
-				const nameLen = nameSplitted.length;
-				const constrLen = constraintSplitted.length;
-				
-				if((nameLen === 0) || (constrLen === 0) || (nameLen < constrLen))
-					return false;
-				//endregion
-				
-				//region Check that no part of "name" has zero length
-				for(let i = 0; i < nameLen; i++)
-				{
-					if(nameSplitted[i].length === 0)
-						return false;
-				}
-				//endregion
-				
-				//region Check that no part of "constraint" has zero length
-				for(let i = 0; i < constrLen; i++)
-				{
-					if(constraintSplitted[i].length === 0)
-					{
-						if(i === 0)
-						{
-							if(constrLen === 1)
-								return false;
-							
-							continue;
-						}
-						
-						return false;
-					}
-				}
-				//endregion
-				
-				//region Check that "name" has a tail as "constraint"
-				
-				for(let i = 0; i < constrLen; i++)
-				{
-					if(constraintSplitted[constrLen - 1 - i].length === 0)
-						continue;
-					
-					if(nameSplitted[nameLen - 1 - i].localeCompare(constraintSplitted[constrLen - 1 - i]) !== 0)
-						return false;
-				}
-				//endregion
-				
-				return true;
-			}
-			
-			function compareRFC822Name(name, constraint)
-			{
-				/// <summary>Compare two rfc822Name values</summary>
-				/// <param name="name" type="String">E-mail address from name</param>
-				/// <param name="constraint" type="String">Constraint for e-mail address from name</param>
-				/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
-				
-				//region Make a "string preparation" for both name and constrain
-				const namePrepared = stringPrep(name);
-				const constraintPrepared = stringPrep(constraint);
-				//endregion
-				
-				//region Make a "splitted" versions of "constraint" and "name"
-				const nameSplitted = namePrepared.split("@");
-				const constraintSplitted = constraintPrepared.split("@");
-				//endregion
-				
-				//region Splitted array length checking
-				if((nameSplitted.length === 0) || (constraintSplitted.length === 0) || (nameSplitted.length < constraintSplitted.length))
-					return false;
-				//endregion
-				
-				if(constraintSplitted.length === 1)
-				{
-					const result = compareDNSName(nameSplitted[1], constraintSplitted[0]);
-					
-					if(result)
-					{
-						//region Make a "splitted" versions of domain name from "constraint" and "name"
-						const ns = nameSplitted[1].split(".");
-						const cs = constraintSplitted[0].split(".");
-						//endregion
-						
-						if(cs[0].length === 0)
-							return true;
-						
-						return ns.length === cs.length;
-					}
-					
-					return false;
-				}
-				
-				return (namePrepared.localeCompare(constraintPrepared) === 0);
-			}
-			
-			function compareUniformResourceIdentifier(name, constraint)
-			{
-				/// <summary>Compare two uniformResourceIdentifier values</summary>
-				/// <param name="name" type="String">uniformResourceIdentifier from name</param>
-				/// <param name="constraint" type="String">Constraint for uniformResourceIdentifier from name</param>
-				/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
-				
-				//region Make a "string preparation" for both name and constrain
-				let namePrepared = stringPrep(name);
-				const constraintPrepared = stringPrep(constraint);
-				//endregion
-				
-				//region Find out a major URI part to compare with
-				const ns = namePrepared.split("/");
-				const cs = constraintPrepared.split("/");
-				
-				if(cs.length > 1) // Malformed constraint
-					return false;
-				
-				if(ns.length > 1) // Full URI string
-				{
-					for(let i = 0; i < ns.length; i++)
-					{
-						if((ns[i].length > 0) && (ns[i].charAt(ns[i].length - 1) !== ":"))
-						{
-							const nsPort = ns[i].split(":");
-							namePrepared = nsPort[0];
-							break;
-						}
-					}
-				}
-				//endregion
-				
-				const result = compareDNSName(namePrepared, constraintPrepared);
-				
-				if(result)
-				{
-					//region Make a "splitted" versions of "constraint" and "name"
-					const nameSplitted = namePrepared.split(".");
-					const constraintSplitted = constraintPrepared.split(".");
-					//endregion
-					
-					if(constraintSplitted[0].length === 0)
-						return true;
-					
-					return nameSplitted.length === constraintSplitted.length;
-				}
-				
-				return false;
-			}
-			
-			function compareIPAddress(name, constraint)
-			{
-				/// <summary>Compare two iPAddress values</summary>
-				/// <param name="name" type="in_window.org.pkijs.asn1.OCTETSTRING">iPAddress from name</param>
-				/// <param name="constraint" type="in_window.org.pkijs.asn1.OCTETSTRING">Constraint for iPAddress from name</param>
-				/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
-				
-				//region Common variables
-				const nameView = new Uint8Array(name.valueBlock.valueHex);
-				const constraintView = new Uint8Array(constraint.valueBlock.valueHex);
-				//endregion
-				
-				//region Work with IPv4 addresses
-				if((nameView.length === 4) && (constraintView.length === 8))
-				{
-					for(let i = 0; i < 4; i++)
-					{
-						if((nameView[i] ^ constraintView[i]) & constraintView[i + 4])
-							return false;
-					}
-					
-					return true;
-				}
-				//endregion
-				
-				//region Work with IPv6 addresses
-				if((nameView.length === 16) && (constraintView.length === 32))
-				{
-					for(let i = 0; i < 16; i++)
-					{
-						if((nameView[i] ^ constraintView[i]) & constraintView[i + 16])
-							return false;
-					}
-					
-					return true;
-				}
-				//endregion
-				
-				return false;
-			}
-			
-			function compareDirectoryName(name, constraint)
-			{
-				/// <summary>Compare two directoryName values</summary>
-				/// <param name="name" type="in_window.org.pkijs.simpl.RDN">directoryName from name</param>
-				/// <param name="constraint" type="in_window.org.pkijs.simpl.RDN">Constraint for directoryName from name</param>
-				/// <param name="any" type="Boolean">Boolean flag - should be comparision interrupted after first match or we need to match all "constraints" parts</param>
-				/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
-				
-				//region Initial check
-				if((name.typesAndValues.length === 0) || (constraint.typesAndValues.length === 0))
-					return true;
-				
-				if(name.typesAndValues.length < constraint.typesAndValues.length)
-					return false;
-				//endregion
-				
-				//region Initial variables
-				let result = true;
-				let nameStart = 0;
-				//endregion
-				
-				for(let i = 0; i < constraint.typesAndValues.length; i++)
-				{
-					let localResult = false;
-					
-					for(let j = nameStart; j < name.typesAndValues.length; j++)
-					{
-						localResult = name.typesAndValues[j].isEqual(constraint.typesAndValues[i]);
-						
-						if(name.typesAndValues[j].type === constraint.typesAndValues[i].type)
-							result = result && localResult;
-						
-						if(localResult === true)
-						{
-							if((nameStart === 0) || (nameStart === j))
-							{
-								nameStart = j + 1;
-								break;
-							}
-							else // Structure of "name" must be the same with "constraint"
-								return false;
-						}
-					}
-					
-					if(localResult === false)
-						return false;
-				}
-				
-				return (nameStart === 0) ? false : result;
-			}
-			
 			//endregion
 			
+			//region Work with name constraints
 			//region Check a result from "policy checking" part
 			if(policyResult.result === false)
 				return policyResult;
@@ -1445,24 +1595,24 @@ export default class CertificateChainValidationEngine
 					switch(requiredNameForms[j].base.type)
 					{
 						case 4: // directoryName
+						{
+							if(requiredNameForms[j].base.value.typesAndValues.length !== this.certs[i].subject.typesAndValues.length)
+								continue;
+							
+							formFound = true;
+							
+							for(let k = 0; k < this.certs[i].subject.typesAndValues.length; k++)
 							{
-								if(requiredNameForms[j].base.value.typesAndValues.length !== this.certs[i].subject.typesAndValues.length)
-									continue;
-								
-								formFound = true;
-								
-								for(let k = 0; k < this.certs[i].subject.typesAndValues.length; k++)
+								if(this.certs[i].subject.typesAndValues[k].type !== requiredNameForms[j].base.value.typesAndValues[k].type)
 								{
-									if(this.certs[i].subject.typesAndValues[k].type !== requiredNameForms[j].base.value.typesAndValues[k].type)
-									{
-										formFound = false;
-										break;
-									}
-								}
-								
-								if(formFound === true)
+									formFound = false;
 									break;
+								}
 							}
+							
+							if(formFound === true)
+								break;
+						}
 							break;
 						default: // ??? Probably here we should reject the certificate ???
 					}
@@ -1474,7 +1624,7 @@ export default class CertificateChainValidationEngine
 					policyResult.resultCode = 21;
 					policyResult.resultMessage = "No neccessary name form found";
 					
-					return Promise.reject(policyResult);
+					throw policyResult;
 				}
 				//endregion
 				
@@ -1627,7 +1777,7 @@ export default class CertificateChainValidationEngine
 						policyResult.resultCode = 41;
 						policyResult.resultMessage = "Failed to meet \"permitted sub-trees\" name constraint";
 						
-						return Promise.reject(policyResult);
+						throw policyResult;
 					}
 				}
 				//endregion
@@ -1652,11 +1802,11 @@ export default class CertificateChainValidationEngine
 							}
 							else // Try to find out "emailAddress" inside "subject"
 							{
-								for(let k = 0; k < this.subject.typesAndValues.length; k++)
+								for(let k = 0; k < this.certs[i].subject.typesAndValues.length; k++)
 								{
-									if((this.subject.typesAndValues[k].type === "1.2.840.113549.1.9.1") ||    // PKCS#9 e-mail address
-										(this.subject.typesAndValues[k].type === "0.9.2342.19200300.100.1.3")) // RFC1274 "rfc822Mailbox" e-mail address
-										excluded = excluded || compareRFC822Name(this.subject.typesAndValues[k].value.valueBlock.value, excludedSubtrees[j].base.value);
+									if((this.certs[i].subject.typesAndValues[k].type === "1.2.840.113549.1.9.1") ||    // PKCS#9 e-mail address
+										(this.certs[i].subject.typesAndValues[k].type === "0.9.2342.19200300.100.1.3")) // RFC1274 "rfc822Mailbox" e-mail address
+										excluded = excluded || compareRFC822Name(this.certs[i].subject.typesAndValues[k].value.valueBlock.value, excludedSubtrees[j].base.value);
 								}
 							}
 							break;
@@ -1717,7 +1867,7 @@ export default class CertificateChainValidationEngine
 					policyResult.resultCode = 42;
 					policyResult.resultMessage = "Failed to meet \"excluded sub-trees\" name constraint";
 					
-					return Promise.reject(policyResult);
+					throw policyResult;
 				}
 				//endregion
 				
@@ -1729,11 +1879,9 @@ export default class CertificateChainValidationEngine
 			//endregion
 			
 			return policyResult;
-		});
-		//endregion
-		
-		//region Error handling stub
-		sequence = sequence.then(result => result, error =>
+			//endregion
+		}
+		catch(error)
 		{
 			if(error instanceof Object)
 			{
@@ -1755,10 +1903,7 @@ export default class CertificateChainValidationEngine
 				resultCode: -1,
 				resultMessage: error
 			};
-		});
-		//endregion
-		
-		return sequence;
+		}
 	}
 	//**********************************************************************************
 }

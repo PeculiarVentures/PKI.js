@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import GeneralName from "./GeneralName";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
+import { getParametersValue, clearProps } from "pvutils";
+import GeneralName from "./GeneralName.js";
+import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -12,7 +12,7 @@ export default class DistributionPoint
 	/**
 	 * Constructor for DistributionPoint class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 * @property {Object} [distributionPoint]
 	 * @property {Object} [reasons]
 	 * @property {Object} [cRLIssuer]
@@ -23,21 +23,21 @@ export default class DistributionPoint
 		if("distributionPoint" in parameters)
 			/**
 			 * @type {Array.<GeneralName>}
-			 * @description distributionPoint
+			 * @desc distributionPoint
 			 */
 			this.distributionPoint = getParametersValue(parameters, "distributionPoint", DistributionPoint.defaultValues("distributionPoint"));
 
 		if("reasons" in parameters)
 			/**
 			 * @type {BitString}
-			 * @description values
+			 * @desc values
 			 */
 			this.reasons = getParametersValue(parameters, "reasons", DistributionPoint.defaultValues("reasons"));
 
 		if("cRLIssuer" in parameters)
 			/**
 			 * @type {Array.<GeneralName>}
-			 * @description cRLIssuer
+			 * @desc cRLIssuer
 			 */
 			this.cRLIssuer = getParametersValue(parameters, "cRLIssuer", DistributionPoint.defaultValues("cRLIssuer"));
 		//endregion
@@ -68,32 +68,36 @@ export default class DistributionPoint
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * DistributionPoint ::= SEQUENCE {
+	 *    distributionPoint       [0]     DistributionPointName OPTIONAL,
+	 *    reasons                 [1]     ReasonFlags OPTIONAL,
+	 *    cRLIssuer               [2]     GeneralNames OPTIONAL }
+	 *
+	 * DistributionPointName ::= CHOICE {
+	 *    fullName                [0]     GeneralNames,
+	 *    nameRelativeToCRLIssuer [1]     RelativeDistinguishedName }
+	 *
+	 * ReasonFlags ::= BIT STRING {
+	 *    unused                  (0),
+	 *    keyCompromise           (1),
+	 *    cACompromise            (2),
+	 *    affiliationChanged      (3),
+	 *    superseded              (4),
+	 *    cessationOfOperation    (5),
+	 *    certificateHold         (6),
+	 *    privilegeWithdrawn      (7),
+	 *    aACompromise            (8) }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//DistributionPoint ::= SEQUENCE {
-		//    distributionPoint       [0]     DistributionPointName OPTIONAL,
-		//    reasons                 [1]     ReasonFlags OPTIONAL,
-		//    cRLIssuer               [2]     GeneralNames OPTIONAL }
-		//
-		//DistributionPointName ::= CHOICE {
-		//    fullName                [0]     GeneralNames,
-		//    nameRelativeToCRLIssuer [1]     RelativeDistinguishedName }
-		//
-		//ReasonFlags ::= BIT STRING {
-		//    unused                  (0),
-		//    keyCompromise           (1),
-		//    cACompromise            (2),
-		//    affiliationChanged      (3),
-		//    superseded              (4),
-		//    cessationOfOperation    (5),
-		//    certificateHold         (6),
-		//    privilegeWithdrawn      (7),
-		//    aACompromise            (8) }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -176,6 +180,16 @@ export default class DistributionPoint
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"distributionPoint",
+			"distributionPointNames",
+			"reasons",
+			"cRLIssuer",
+			"cRLIssuerNames"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -202,10 +216,11 @@ export default class DistributionPoint
 
 			if(asn1.result.distributionPoint.idBlock.tagNumber === 1) // RDN variant
 			{
-				asn1.result.distributionPoint.idBlock.tagClass = 1; // UNIVERSAL
-				asn1.result.distributionPoint.idBlock.tagNumber = 16; // SEQUENCE
-
-				this.distributionPoint = new RelativeDistinguishedNames({ schema: asn1.result.distributionPoint });
+				this.distributionPoint = new RelativeDistinguishedNames({
+					schema: new asn1js.Sequence({
+						value: asn1.result.distributionPoint.valueBlock.value
+					})
+				});
 			}
 		}
 

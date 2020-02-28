@@ -1,0 +1,19 @@
+{
+  "compact": "false",
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "browsers": [ // Based on data from https://caniuse.com/#feat=cryptography
+            "Chrome >= 53",
+            "Firefox >= 47",
+            //"Edge >= 12", // Edge has incorrect or not complete WebCrypto API implementation (at least in v17)
+            "Safari >= 11",
+            "iOS >= 11.2"
+          ]
+        }
+      }
+    ]
+  ]
+}

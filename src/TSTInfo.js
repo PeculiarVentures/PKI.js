@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, isEqualBuffer } from "pvutils";
-import { getCrypto, getAlgorithmByOID } from "./common";
-import MessageImprint from "./MessageImprint";
-import Accuracy from "./Accuracy";
-import GeneralName from "./GeneralName";
-import Extension from "./Extension";
+import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
+import { getCrypto, getAlgorithmByOID } from "./common.js";
+import MessageImprint from "./MessageImprint.js";
+import Accuracy from "./Accuracy.js";
+import GeneralName from "./GeneralName.js";
+import Extension from "./Extension.js";
 //**************************************************************************************
 /**
  * Class from RFC3161
@@ -15,69 +15,69 @@ export default class TSTInfo
 	/**
 	 * Constructor for TSTInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", TSTInfo.defaultValues("version"));
 		/**
 		 * @type {string}
-		 * @description policy
+		 * @desc policy
 		 */
 		this.policy = getParametersValue(parameters, "policy", TSTInfo.defaultValues("policy"));
 		/**
 		 * @type {MessageImprint}
-		 * @description messageImprint
+		 * @desc messageImprint
 		 */
 		this.messageImprint = getParametersValue(parameters, "messageImprint", TSTInfo.defaultValues("messageImprint"));
 		/**
 		 * @type {Integer}
-		 * @description serialNumber
+		 * @desc serialNumber
 		 */
 		this.serialNumber = getParametersValue(parameters, "serialNumber", TSTInfo.defaultValues("serialNumber"));
 		/**
 		 * @type {Date}
-		 * @description genTime
+		 * @desc genTime
 		 */
 		this.genTime = getParametersValue(parameters, "genTime", TSTInfo.defaultValues("genTime"));
 
 		if("accuracy" in parameters)
 			/**
 			 * @type {Accuracy}
-			 * @description accuracy
+			 * @desc accuracy
 			 */
 			this.accuracy = getParametersValue(parameters, "accuracy", TSTInfo.defaultValues("accuracy"));
 
 		if("ordering" in parameters)
 			/**
 			 * @type {boolean}
-			 * @description ordering
+			 * @desc ordering
 			 */
 			this.ordering = getParametersValue(parameters, "ordering", TSTInfo.defaultValues("ordering"));
 
 		if("nonce" in parameters)
 			/**
 			 * @type {Integer}
-			 * @description nonce
+			 * @desc nonce
 			 */
 			this.nonce = getParametersValue(parameters, "nonce", TSTInfo.defaultValues("nonce"));
 
 		if("tsa" in parameters)
 			/**
 			 * @type {GeneralName}
-			 * @description tsa
+			 * @desc tsa
 			 */
 			this.tsa = getParametersValue(parameters, "tsa", TSTInfo.defaultValues("tsa"));
 
 		if("extensions" in parameters)
 			/**
 			 * @type {Array.<Extension>}
-			 * @description extensions
+			 * @desc extensions
 			 */
 			this.extensions = getParametersValue(parameters, "extensions", TSTInfo.defaultValues("extensions"));
 		//endregion
@@ -156,24 +156,28 @@ export default class TSTInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * TSTInfo ::= SEQUENCE  {
+	 *   version                      INTEGER  { v1(1) },
+	 *   policy                       TSAPolicyId,
+	 *   messageImprint               MessageImprint,
+	 *   serialNumber                 INTEGER,
+	 *   genTime                      GeneralizedTime,
+	 *   accuracy                     Accuracy                 OPTIONAL,
+	 *   ordering                     BOOLEAN             DEFAULT FALSE,
+	 *   nonce                        INTEGER                  OPTIONAL,
+	 *   tsa                          [0] GeneralName          OPTIONAL,
+	 *   extensions                   [1] IMPLICIT Extensions  OPTIONAL  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//TSTInfo ::= SEQUENCE  {
-		//   version                      INTEGER  { v1(1) },
-		//   policy                       TSAPolicyId,
-		//   messageImprint               MessageImprint,
-		//   serialNumber                 INTEGER,
-		//   genTime                      GeneralizedTime,
-		//   accuracy                     Accuracy                 OPTIONAL,
-		//   ordering                     BOOLEAN             DEFAULT FALSE,
-		//   nonce                        INTEGER                  OPTIONAL,
-		//   tsa                          [0] GeneralName          OPTIONAL,
-		//   extensions                   [1] IMPLICIT Extensions  OPTIONAL  }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -250,6 +254,21 @@ export default class TSTInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"TSTInfo.version",
+			"TSTInfo.policy",
+			"TSTInfo.messageImprint",
+			"TSTInfo.serialNumber",
+			"TSTInfo.genTime",
+			"TSTInfo.accuracy",
+			"TSTInfo.ordering",
+			"TSTInfo.nonce",
+			"TSTInfo.tsa",
+			"TSTInfo.extensions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -257,7 +276,7 @@ export default class TSTInfo
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for TST_INFO");
+			throw new Error("Object's schema was not verified against input data for TSTInfo");
 		//endregion
 
 		//region Get internal properties from parsed schema
@@ -377,8 +396,8 @@ export default class TSTInfo
 
 		let data;
 
-		let notBefore;
-		let notAfter;
+		let notBefore = null;
+		let notAfter = null;
 		//endregion
 
 		//region Get a "crypto" extension
@@ -400,6 +419,20 @@ export default class TSTInfo
 			notAfter = parameters.notAfter;
 		//endregion
 
+		//region Check date
+		if(notBefore !== null)
+		{
+			if(this.genTime < notBefore)
+				return Promise.reject("Generation time for TSTInfo object is less than notBefore value");
+		}
+		
+		if(notAfter !== null)
+		{
+			if(this.genTime > notAfter)
+				return Promise.reject("Generation time for TSTInfo object is more than notAfter value");
+		}
+		//endregion
+		
 		//region Find hashing algorithm
 		const shaAlgorithm = getAlgorithmByOID(this.messageImprint.hashAlgorithm.algorithmId);
 		if(("name" in shaAlgorithm) === false)
@@ -407,10 +440,11 @@ export default class TSTInfo
 		//endregion
 
 		//region Calculate message digest for input "data" buffer
+		// noinspection JSCheckFunctionSignatures
 		sequence = sequence.then(() =>
 			crypto.digest(shaAlgorithm.name, new Uint8Array(data))
-		).then(result =>
-			isEqualBuffer(result, this.messageImprint.hashedMessage.valueBlock.valueHex)
+		).then(
+			result => isEqualBuffer(result, this.messageImprint.hashedMessage.valueBlock.valueHex)
 		);
 		//endregion
 

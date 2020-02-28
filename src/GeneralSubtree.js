@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import GeneralName from "./GeneralName";
+import { getParametersValue, clearProps } from "pvutils";
+import GeneralName from "./GeneralName.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -11,27 +11,27 @@ export default class GeneralSubtree
 	/**
 	 * Constructor for GeneralSubtree class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {GeneralName}
-		 * @description base
+		 * @desc base
 		 */
 		this.base = getParametersValue(parameters, "base", GeneralSubtree.defaultValues("base"));
 
 		/**
 		 * @type {number|Integer}
-		 * @description base
+		 * @desc base
 		 */
 		this.minimum = getParametersValue(parameters, "minimum", GeneralSubtree.defaultValues("minimum"));
 
 		if("maximum" in parameters)
 			/**
 			 * @type {number|Integer}
-			 * @description minimum
+			 * @desc minimum
 			 */
 			this.maximum = getParametersValue(parameters, "maximum", GeneralSubtree.defaultValues("maximum"));
 		//endregion
@@ -62,19 +62,23 @@ export default class GeneralSubtree
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * GeneralSubtree ::= SEQUENCE {
+	 *    base                    GeneralName,
+	 *    minimum         [0]     BaseDistance DEFAULT 0,
+	 *    maximum         [1]     BaseDistance OPTIONAL }
+	 *
+	 * BaseDistance ::= INTEGER (0..MAX)
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//GeneralSubtree ::= SEQUENCE {
-		//    base                    GeneralName,
-		//    minimum         [0]     BaseDistance DEFAULT 0,
-		//    maximum         [1]     BaseDistance OPTIONAL }
-		//
-		//BaseDistance ::= INTEGER (0..MAX)
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -114,6 +118,14 @@ export default class GeneralSubtree
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"base",
+			"minimum",
+			"maximum"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -131,7 +143,7 @@ export default class GeneralSubtree
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for ");
+			throw new Error("Object's schema was not verified against input data for GeneralSubtree");
 		//endregion
 
 		//region Get internal properties from parsed schema

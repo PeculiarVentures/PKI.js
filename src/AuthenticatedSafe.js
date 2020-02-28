@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import ContentInfo from "./ContentInfo";
-import SafeContents from "./SafeContents";
-import EnvelopedData from "./EnvelopedData";
-import EncryptedData from "./EncryptedData";
+import { getParametersValue, utilConcatBuf, clearProps } from "pvutils";
+import ContentInfo from "./ContentInfo.js";
+import SafeContents from "./SafeContents.js";
+import EnvelopedData from "./EnvelopedData.js";
+import EncryptedData from "./EncryptedData.js";
 //**************************************************************************************
 /**
  * Class from RFC7292
@@ -14,21 +14,21 @@ export default class AuthenticatedSafe
 	/**
 	 * Constructor for AuthenticatedSafe class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<ContentInfo>}
-		 * @description safeContents
+		 * @desc safeContents
 		 */
 		this.safeContents = getParametersValue(parameters, "safeContents", AuthenticatedSafe.defaultValues("safeContents"));
 
 		if("parsedValue" in parameters)
 			/**
 			 * @type {*}
-			 * @description parsedValue
+			 * @desc parsedValue
 			 */
 			this.parsedValue = getParametersValue(parameters, "parsedValue", AuthenticatedSafe.defaultValues("parsedValue"));
 		//endregion
@@ -75,17 +75,21 @@ export default class AuthenticatedSafe
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AuthenticatedSafe ::= SEQUENCE OF ContentInfo
+	 * -- Data if unencrypted
+	 * -- EncryptedData if password-encrypted
+	 * -- EnvelopedData if public key-encrypted
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//AuthenticatedSafe ::= SEQUENCE OF ContentInfo
-		//-- Data if unencrypted
-		//-- EncryptedData if password-encrypted
-		//-- EnvelopedData if public key-encrypted
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -110,6 +114,12 @@ export default class AuthenticatedSafe
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"contentInfos"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -190,8 +200,20 @@ export default class AuthenticatedSafe
 							return Promise.reject("Wrong type of \"this.safeContents[j].content\"");
 						//endregion
 						
+						//region Check we have "constructive encoding" for AuthSafe content
+						let authSafeContent = new ArrayBuffer(0);
+						
+						if(content.content.valueBlock.isConstructed)
+						{
+							for(const contentValue of content.content.valueBlock.value)
+								authSafeContent = utilConcatBuf(authSafeContent, contentValue.valueBlock.valueHex);
+						}
+						else
+							authSafeContent = content.content.valueBlock.valueHex;
+						//endregion
+						
 						//region Parse internal ASN.1 data
-						const asn1 = asn1js.fromBER(content.content.valueBlock.valueHex);
+						const asn1 = asn1js.fromBER(authSafeContent);
 						if(asn1.offset === (-1))
 							return Promise.reject("Error during parsing of ASN.1 data inside \"content.content\"");
 						//endregion
@@ -221,6 +243,7 @@ export default class AuthenticatedSafe
 						if(("recipientKey" in parameters.safeContents[index]) === false)
 							return Promise.reject("Absent mandatory parameter \"recipientKey\" in \"parameters.safeContents[j]\"");
 						
+						// noinspection JSUnresolvedVariable
 						const recipientKey = parameters.safeContents[index].recipientKey;
 						//endregion
 						
@@ -233,6 +256,9 @@ export default class AuthenticatedSafe
 						);
 						
 						sequence = sequence.then(
+							/**
+							 * @param {ArrayBuffer} result
+							 */
 							result =>
 							{
 								const asn1 = asn1js.fromBER(result);
@@ -276,6 +302,9 @@ export default class AuthenticatedSafe
 						
 						//region Initialize internal data
 						sequence = sequence.then(
+							/**
+							 * @param {ArrayBuffer} result
+							 */
 							result =>
 							{
 								const asn1 = asn1js.fromBER(result);
@@ -297,7 +326,7 @@ export default class AuthenticatedSafe
 				//endregion   
 				//region default 
 				default:
-					throw new Error(`Unknown \"contentType\" for AuthenticatedSafe: " ${content.contentType}`);
+					throw new Error(`Unknown "contentType" for AuthenticatedSafe: " ${content.contentType}`);
 				//endregion 
 			}
 		}
@@ -424,7 +453,7 @@ export default class AuthenticatedSafe
 							case (parameters.safeContents[index].encryptionAlgorithm.name.toLowerCase() === "aes-gcm"):
 								break;
 							default:
-								return Promise.reject(`Incorrect parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\": ${parameters.safeContents[index].encryptionAlgorithm}`);
+								return Promise.reject(`Incorrect parameter "encryptionAlgorithm" in "parameters.safeContents[i]": ${parameters.safeContents[index].encryptionAlgorithm}`);
 						}
 						
 						switch(true)
@@ -434,7 +463,7 @@ export default class AuthenticatedSafe
 							case (parameters.safeContents[index].encryptionAlgorithm.length === 256):
 								break;
 							default:
-								return Promise.reject(`Incorrect parameter \"encryptionAlgorithm.length\" in \"parameters.safeContents[i]\": ${parameters.safeContents[index].encryptionAlgorithm.length}`);
+								return Promise.reject(`Incorrect parameter "encryptionAlgorithm.length" in "parameters.safeContents[i]": ${parameters.safeContents[index].encryptionAlgorithm.length}`);
 						}
 						//endregion
 						
@@ -466,7 +495,7 @@ export default class AuthenticatedSafe
 				//endregion 
 				//region default 
 				default:
-					return Promise.reject(`Incorrect value for \"content.privacyMode\": ${content.privacyMode}`);
+					return Promise.reject(`Incorrect value for "content.privacyMode": ${content.privacyMode}`);
 				//endregion 
 			}
 		}

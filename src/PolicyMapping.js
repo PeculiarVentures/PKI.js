@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -10,19 +10,19 @@ export default class PolicyMapping
 	/**
 	 * Constructor for PolicyMapping class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description issuerDomainPolicy
+		 * @desc issuerDomainPolicy
 		 */
 		this.issuerDomainPolicy = getParametersValue(parameters, "issuerDomainPolicy", PolicyMapping.defaultValues("issuerDomainPolicy"));
 		/**
 		 * @type {string}
-		 * @description subjectDomainPolicy
+		 * @desc subjectDomainPolicy
 		 */
 		this.subjectDomainPolicy = getParametersValue(parameters, "subjectDomainPolicy", PolicyMapping.defaultValues("subjectDomainPolicy"));
 		//endregion
@@ -51,16 +51,20 @@ export default class PolicyMapping
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PolicyMapping ::= SEQUENCE {
+	 *    issuerDomainPolicy      CertPolicyId,
+	 *    subjectDomainPolicy     CertPolicyId }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//PolicyMapping ::= SEQUENCE {
-		//    issuerDomainPolicy      CertPolicyId,
-		//    subjectDomainPolicy     CertPolicyId }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -84,6 +88,13 @@ export default class PolicyMapping
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"issuerDomainPolicy",
+			"subjectDomainPolicy"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

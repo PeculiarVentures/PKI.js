@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
-import SingleResponse from "./SingleResponse";
-import Extension from "./Extension";
-import Extensions from "./Extensions";
+import { getParametersValue, clearProps } from "pvutils";
+import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import SingleResponse from "./SingleResponse.js";
+import Extension from "./Extension.js";
+import Extensions from "./Extensions.js";
 //**************************************************************************************
 /**
  * Class from RFC6960
@@ -14,36 +14,36 @@ export default class ResponseData
 	/**
 	 * Constructor for ResponseData class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {ArrayBuffer}
-		 * @description tbs
+		 * @desc tbs
 		 */
 		this.tbs = getParametersValue(parameters, "tbs", ResponseData.defaultValues("tbs"));
 		/**
 		 * @type {Object}
-		 * @description responderID
+		 * @desc responderID
 		 */
 		this.responderID = getParametersValue(parameters, "responderID", ResponseData.defaultValues("responderID"));
 		/**
 		 * @type {Date}
-		 * @description producedAt
+		 * @desc producedAt
 		 */
 		this.producedAt = getParametersValue(parameters, "producedAt", ResponseData.defaultValues("producedAt"));
 		/**
 		 * @type {Array.<SingleResponse>}
-		 * @description responses
+		 * @desc responses
 		 */
 		this.responses = getParametersValue(parameters, "responses", ResponseData.defaultValues("responses"));
 
 		if("responseExtensions" in parameters)
 			/**
 			 * @type {Array.<Extension>}
-			 * @description responseExtensions
+			 * @desc responseExtensions
 			 */
 			this.responseExtensions = getParametersValue(parameters, "responseExtensions", ResponseData.defaultValues("responseExtensions"));
 		//endregion
@@ -100,19 +100,23 @@ export default class ResponseData
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * ResponseData ::= SEQUENCE {
+	 *    version              [0] EXPLICIT Version DEFAULT v1,
+	 *    responderID              ResponderID,
+	 *    producedAt               GeneralizedTime,
+	 *    responses                SEQUENCE OF SingleResponse,
+	 *    responseExtensions   [1] EXPLICIT Extensions OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//ResponseData ::= SEQUENCE {
-		//    version              [0] EXPLICIT Version DEFAULT v1,
-		//    responderID              ResponderID,
-		//    producedAt               GeneralizedTime,
-		//    responses                SEQUENCE OF SingleResponse,
-		//    responseExtensions   [1] EXPLICIT Extensions OPTIONAL }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -191,6 +195,17 @@ export default class ResponseData
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"ResponseData",
+			"ResponseData.version",
+			"ResponseData.responderID",
+			"ResponseData.producedAt",
+			"ResponseData.responses",
+			"ResponseData.responseExtensions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -198,7 +213,7 @@ export default class ResponseData
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for ocsp.ResponseData");
+			throw new Error("Object's schema was not verified against input data for ResponseData");
 		//endregion
 
 		//region Get internal properties from parsed schema
@@ -283,8 +298,14 @@ export default class ResponseData
 			
 			if("responseExtensions" in this)
 			{
-				outputArray.push(new asn1js.Sequence({
-					value: Array.from(this.responseExtensions, element => element.toSchema())
+				outputArray.push(new asn1js.Constructed({
+					idBlock: {
+						tagClass: 3, // CONTEXT-SPECIFIC
+						tagNumber: 1 // [1]
+					},
+					value: [new asn1js.Sequence({
+						value: Array.from(this.responseExtensions, element => element.toSchema())
+					})]
 				}));
 			}
 			

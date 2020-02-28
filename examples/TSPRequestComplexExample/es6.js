@@ -1,9 +1,11 @@
+/* eslint-disable no-undef,no-unreachable,no-unused-vars */
 import * as asn1js from "asn1js";
 import { bufferToHexCodes, arrayBufferToString, toBase64 } from "pvutils";
 import { setEngine } from "../../src/common";
 import TimeStampReq from "../../src/TimeStampReq";
 import MessageImprint from "../../src/MessageImprint";
 import AlgorithmIdentifier from "../../src/AlgorithmIdentifier";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let tspReqBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created TSP request 
 //*********************************************************************************
@@ -22,7 +24,7 @@ function formatPEM(pemString)
 			count = 0;
 		}
 		
-		resultString = resultString + pemString[i];
+		resultString += pemString[i];
 	}
 	
 	return resultString;
@@ -75,6 +77,7 @@ function createTSPReq()
 		resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(tspReqBuffer)))}`;
 		resultString = `${resultString}\r\n-----END TSP REQUEST-----\r\n\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("new_signed_data").innerHTML = resultString;
 		
 		parseTSPReq();
@@ -128,14 +131,17 @@ function parseTSPReq()
 	
 	const row = imprintTable.insertRow(imprintTable.rows.length);
 	const cell0 = row.insertCell(0);
+	// noinspection InnerHTMLJS
 	cell0.innerHTML = hashAlgorithm;
 	const cell1 = row.insertCell(1);
+	// noinspection InnerHTMLJS
 	cell1.innerHTML = bufferToHexCodes(tspReqSimpl.messageImprint.hashedMessage.valueBlock.valueHex);
 	//endregion 
 	
 	//region Put information about policy 
 	if("reqPolicy" in tspReqSimpl)
 	{
+		// noinspection InnerHTMLJS
 		document.getElementById("tsp-req-policy").innerHTML = tspReqSimpl.reqPolicy;
 		document.getElementById("tsp-req-pol").style.display = "block";
 	}
@@ -144,6 +150,7 @@ function parseTSPReq()
 	//region Put information about nonce 
 	if("nonce" in tspReqSimpl)
 	{
+		// noinspection InnerHTMLJS
 		document.getElementById("tsp-req-nonce").innerHTML = bufferToHexCodes(tspReqSimpl.nonce.valueBlock.valueHex);
 		document.getElementById("tsp-req-non").style.display = "block";
 	}
@@ -152,7 +159,8 @@ function parseTSPReq()
 	//region Put information about existence of "certReq" flag
 	if("certReq" in tspReqSimpl)
 	{
-		document.getElementById("tsp-req-cert-req").innerHTML = tspReqSimpl.certReq;
+		// noinspection InnerHTMLJS
+		document.getElementById("tsp-req-cert-req").innerHTML = (tspReqSimpl.certReq) ? "true" : "false";
 		document.getElementById("tsp-req-cert").style.display = "block";
 	}
 	//endregion 
@@ -166,6 +174,7 @@ function parseTSPReq()
 		{
 			const rowInner = extensionTableInner.insertRow(extensionTableInner.rows.length);
 			const cell0Inner = rowInner.insertCell(0);
+			// noinspection InnerHTMLJS
 			cell0Inner.innerHTML = tspReqSimpl.extensions[i].extnID;
 		}
 		
@@ -182,9 +191,11 @@ function handleFileBrowse(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		function(event)
 		{
+			// noinspection JSUnresolvedVariable
 			tspReqBuffer = event.target.result;
 			parseTSPReq();
 		};
@@ -196,6 +207,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	createTSPReq();
 	handleFileBrowse();
 	setEngine();
@@ -208,6 +220,7 @@ context("TSP Request Complex Example", () =>
 		return createTSPReqInternal().then(() =>
 		{
 			const asn1 = asn1js.fromBER(tspReqBuffer);
+			// noinspection JSUnusedLocalSymbols
 			const tspRequest = new TimeStampReq({ schema: asn1.result });
 		});
 	});

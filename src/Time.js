@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -10,7 +10,7 @@ export default class Time
 	/**
 	 * Constructor for Time class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 * @property {number} [type] 0 - UTCTime; 1 - GeneralizedTime; 2 - empty value
 	 * @property {Date} [value] Value of the TIME class
 	 */
@@ -19,12 +19,12 @@ export default class Time
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description 0 - UTCTime; 1 - GeneralizedTime; 2 - empty value
+		 * @desc 0 - UTCTime; 1 - GeneralizedTime; 2 - empty value
 		 */
 		this.type = getParametersValue(parameters, "type", Time.defaultValues("type"));
 		/**
 		 * @type {Date}
-		 * @description Value of the TIME class
+		 * @desc Value of the TIME class
 		 */
 		this.value = getParametersValue(parameters, "value", Time.defaultValues("value"));
 		//endregion
@@ -53,7 +53,15 @@ export default class Time
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Time ::= CHOICE {
+     *   utcTime        UTCTime,
+     *   generalTime    GeneralizedTime }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @param {boolean} optional Flag that current schema should be optional
 	 * @returns {Object} asn1js schema object
@@ -83,6 +91,13 @@ export default class Time
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"utcTimeName",
+			"generalTimeName"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema, schema, Time.schema({
 			names: {
@@ -92,7 +107,7 @@ export default class Time
 		}));
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for TIME");
+			throw new Error("Object's schema was not verified against input data for Time");
 		//endregion
 
 		//region Get internal properties from parsed schema

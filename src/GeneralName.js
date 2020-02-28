@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
+import { getParametersValue, clearProps } from "pvutils";
+import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 //**************************************************************************************
-//region Additional asn1js schema elements existing inside GENERAL_NAME schema
+//region Additional asn1js schema elements existing inside GeneralName schema
 //**************************************************************************************
 /**
  * Schema for "builtInStandardAttributes" of "ORAddress"
@@ -240,21 +240,21 @@ export default class GeneralName
 	/**
 	 * Constructor for GeneralName class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 * @property {number} [type] value type - from a tagged value (0 for "otherName", 1 for "rfc822Name" etc.)
-	 * @property {Object} [value] asn1js object having GENERAL_NAME value (type depends on "type" value)
+	 * @property {Object} [value] asn1js object having GeneralName value (type depends on "type" value)
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description value type - from a tagged value (0 for "otherName", 1 for "rfc822Name" etc.)
+		 * @desc value type - from a tagged value (0 for "otherName", 1 for "rfc822Name" etc.)
 		 */
 		this.type = getParametersValue(parameters, "type", GeneralName.defaultValues("type"));
 		/**
 		 * @type {Object}
-		 * @description asn1js object having GENERAL_NAME value (type depends on "type" value)
+		 * @desc asn1js object having GeneralName value (type depends on "type" value)
 		 */
 		this.value = getParametersValue(parameters, "value", GeneralName.defaultValues("value"));
 		//endregion
@@ -301,23 +301,27 @@ export default class GeneralName
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * GeneralName ::= Choice {
+	 *    otherName                       [0]     OtherName,
+	 *    rfc822Name                      [1]     IA5String,
+	 *    dNSName                         [2]     IA5String,
+	 *    x400Address                     [3]     ORAddress,
+	 *    directoryName                   [4]     value,
+	 *    ediPartyName                    [5]     EDIPartyName,
+	 *    uniformResourceIdentifier       [6]     IA5String,
+	 *    iPAddress                       [7]     OCTET STRING,
+	 *    registeredID                    [8]     OBJECT IDENTIFIER }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//GeneralName ::= Choice {
-		//    otherName                       [0]     OtherName,
-		//    rfc822Name                      [1]     IA5String,
-		//    dNSName                         [2]     IA5String,
-		//    x400Address                     [3]     ORAddress,
-		//    directoryName                   [4]     value,
-		//    ediPartyName                    [5]     EDIPartyName,
-		//    uniformResourceIdentifier       [6]     IA5String,
-		//    iPAddress                       [7]     OCTET STRING,
-		//    registeredID                    [8]     OBJECT IDENTIFIER }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -454,6 +458,21 @@ export default class GeneralName
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"blockName",
+			"otherName",
+			"rfc822Name",
+			"dNSName",
+			"x400Address",
+			"directoryName",
+			"ediPartyName",
+			"uniformResourceIdentifier",
+			"iPAddress",
+			"registeredID"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -478,7 +497,7 @@ export default class GeneralName
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for GENERAL_NAME");
+			throw new Error("Object's schema was not verified against input data for GeneralName");
 		//endregion
 
 		//region Get internal properties from parsed schema
@@ -603,13 +622,20 @@ export default class GeneralName
 	toJSON()
 	{
 		const _object = {
-			type: this.type
+			type: this.type,
+			value: ""
 		};
 
 		if((typeof this.value) === "string")
 			_object.value = this.value;
 		else
-			_object.value = this.value.toJSON();
+		{
+			try
+			{
+				_object.value = this.value.toJSON();
+			}
+			catch(ex){}
+		}
 
 		return _object;
 	}

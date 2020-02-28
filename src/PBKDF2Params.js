@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
+import { getParametersValue, clearProps } from "pvutils";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 //**************************************************************************************
 /**
  * Class from RFC2898
@@ -11,31 +11,35 @@ export default class PBKDF2Params
 	/**
 	 * Constructor for PBKDF2Params class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Object}
-		 * @description salt
+		 * @desc salt
 		 */
 		this.salt = getParametersValue(parameters, "salt", PBKDF2Params.defaultValues("salt"));
 		/**
 		 * @type {number}
-		 * @description iterationCount
+		 * @desc iterationCount
 		 */
 		this.iterationCount = getParametersValue(parameters, "iterationCount", PBKDF2Params.defaultValues("iterationCount"));
-		/**
-		 * @type {number}
-		 * @description keyLength
-		 */
-		this.keyLength = getParametersValue(parameters, "keyLength", PBKDF2Params.defaultValues("keyLength"));
-		/**
-		 * @type {AlgorithmIdentifier}
-		 * @description prf
-		 */
-		this.prf = getParametersValue(parameters, "prf", PBKDF2Params.defaultValues("prf"));
+		
+		if("keyLength" in parameters)
+			/**
+			 * @type {number}
+			 * @desc keyLength
+			 */
+			this.keyLength = getParametersValue(parameters, "keyLength", PBKDF2Params.defaultValues("keyLength"));
+		
+		if("prf" in parameters)
+			/**
+			 * @type {AlgorithmIdentifier}
+			 * @desc prf
+			 */
+			this.prf = getParametersValue(parameters, "prf", PBKDF2Params.defaultValues("prf"));
 		//endregion
 
 		//region If input argument array contains "schema" for this object
@@ -59,28 +63,35 @@ export default class PBKDF2Params
 			case "keyLength":
 				return 0;
 			case "prf":
-				return new AlgorithmIdentifier();
+				return new AlgorithmIdentifier({
+					algorithmId: "1.3.14.3.2.26", // SHA-1
+					algorithmParams: new asn1js.Null()
+				});
 			default:
 				throw new Error(`Invalid member name for PBKDF2Params class: ${memberName}`);
 		}
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PBKDF2-params ::= SEQUENCE {
+	 *    salt CHOICE {
+	 *        specified OCTET STRING,
+	 *        otherSource AlgorithmIdentifier },
+	 *  iterationCount INTEGER (1..MAX),
+	 *  keyLength INTEGER (1..MAX) OPTIONAL,
+	 *  prf AlgorithmIdentifier
+	 *    DEFAULT { algorithm hMAC-SHA1, parameters NULL } }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//PBKDF2-params ::= SEQUENCE {
-		//    salt CHOICE {
-		//        specified OCTET STRING,
-		//        otherSource AlgorithmIdentifier },
-		//  iterationCount INTEGER (1..MAX),
-		//  keyLength INTEGER (1..MAX) OPTIONAL,
-		//  prf AlgorithmIdentifier
-		//    DEFAULT { algorithm hMAC-SHA1, parameters NULL } }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -121,6 +132,15 @@ export default class PBKDF2Params
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"salt",
+			"iterationCount",
+			"keyLength",
+			"prf"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -145,7 +165,7 @@ export default class PBKDF2Params
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for PBKDF2_params");
+			throw new Error("Object's schema was not verified against input data for PBKDF2Params");
 		//endregion
 
 		//region Get internal properties from parsed schema
@@ -172,11 +192,17 @@ export default class PBKDF2Params
 		outputArray.push(this.salt);
 		outputArray.push(new asn1js.Integer({ value: this.iterationCount }));
 		
-		if(PBKDF2Params.defaultValues("keyLength") !== this.keyLength)
-			outputArray.push(new asn1js.Integer({ value: this.keyLength }));
+		if("keyLength" in this)
+		{
+			if(PBKDF2Params.defaultValues("keyLength") !== this.keyLength)
+				outputArray.push(new asn1js.Integer({ value: this.keyLength }));
+		}
 		
-		if(PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false)
-			outputArray.push(this.prf.toSchema());
+		if("prf" in this)
+		{
+			if(PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false)
+				outputArray.push(this.prf.toSchema());
+		}
 		//endregion 
 		
 		//region Construct and return new ASN.1 schema for this object 
@@ -196,12 +222,18 @@ export default class PBKDF2Params
 			salt: this.salt.toJSON(),
 			iterationCount: this.iterationCount
 		};
-
-		if(PBKDF2Params.defaultValues("keyLength") !== this.keyLength)
-			_object.keyLength = this.keyLength;
-
-		if(PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false)
-			_object.prf = this.prf.toJSON();
+		
+		if("keyLength" in this)
+		{
+			if(PBKDF2Params.defaultValues("keyLength") !== this.keyLength)
+				_object.keyLength = this.keyLength;
+		}
+		
+		if("prf" in this)
+		{
+			if(PBKDF2Params.defaultValues("prf").isEqual(this.prf) === false)
+				_object.prf = this.prf.toJSON();
+		}
 
 		return _object;
 	}

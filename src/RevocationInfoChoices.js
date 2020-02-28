@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import CertificateRevocationList from "./CertificateRevocationList";
-import OtherRevocationInfoFormat from "./OtherRevocationInfoFormat";
+import { getParametersValue, clearProps } from "pvutils";
+import CertificateRevocationList from "./CertificateRevocationList.js";
+import OtherRevocationInfoFormat from "./OtherRevocationInfoFormat.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -12,19 +12,19 @@ export default class RevocationInfoChoices
 	/**
 	 * Constructor for RevocationInfoChoices class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<CertificateRevocationList>}
-		 * @description crls
+		 * @desc crls
 		 */
 		this.crls = getParametersValue(parameters, "crls", RevocationInfoChoices.defaultValues("crls"));
 		/**
 		 * @type {Array.<OtherRevocationInfoFormat>}
-		 * @description otherRevocationInfos
+		 * @desc otherRevocationInfos
 		 */
 		this.otherRevocationInfos = getParametersValue(parameters, "otherRevocationInfos", RevocationInfoChoices.defaultValues("otherRevocationInfos"));
 		//endregion
@@ -34,7 +34,6 @@ export default class RevocationInfoChoices
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -52,21 +51,24 @@ export default class RevocationInfoChoices
 				throw new Error(`Invalid member name for RevocationInfoChoices class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RevocationInfoChoices ::= SET OF RevocationInfoChoice
+	 *
+	 * RevocationInfoChoice ::= CHOICE {
+	 *    crl CertificateList,
+	 *    other [1] IMPLICIT OtherRevocationInfoFormat }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RevocationInfoChoices ::= SET OF RevocationInfoChoice
-		
-		//RevocationInfoChoice ::= CHOICE {
-		//    crl CertificateList,
-		//    other [1] IMPLICIT OtherRevocationInfoFormat }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -98,7 +100,6 @@ export default class RevocationInfoChoices
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -106,6 +107,12 @@ export default class RevocationInfoChoices
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"crls"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -117,7 +124,7 @@ export default class RevocationInfoChoices
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CSM_REVOCATION_INFO_CHOICES");
+			throw new Error("Object's schema was not verified against input data for RevocationInfoChoices");
 		//endregion
 		
 		//region Get internal properties from parsed schema
@@ -131,7 +138,6 @@ export default class RevocationInfoChoices
 		
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -161,7 +167,6 @@ export default class RevocationInfoChoices
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -174,7 +179,6 @@ export default class RevocationInfoChoices
 			otherRevocationInfos: Array.from(this.otherRevocationInfos, element => element.toJSON())
 		};
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

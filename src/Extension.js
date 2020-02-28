@@ -1,19 +1,23 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import SubjectDirectoryAttributes from "./SubjectDirectoryAttributes";
-import PrivateKeyUsagePeriod from "./PrivateKeyUsagePeriod";
-import AltName from "./AltName";
-import BasicConstraints from "./BasicConstraints";
-import IssuingDistributionPoint from "./IssuingDistributionPoint";
-import GeneralNames from "./GeneralNames";
-import NameConstraints from "./NameConstraints";
-import CRLDistributionPoints from "./CRLDistributionPoints";
-import CertificatePolicies from "./CertificatePolicies";
-import PolicyMappings from "./PolicyMappings";
-import AuthorityKeyIdentifier from "./AuthorityKeyIdentifier";
-import PolicyConstraints from "./PolicyConstraints";
-import ExtKeyUsage from "./ExtKeyUsage";
-import InfoAccess from "./InfoAccess";
+import { getParametersValue, clearProps } from "pvutils";
+import SubjectDirectoryAttributes from "./SubjectDirectoryAttributes.js";
+import PrivateKeyUsagePeriod from "./PrivateKeyUsagePeriod.js";
+import AltName from "./AltName.js";
+import BasicConstraints from "./BasicConstraints.js";
+import IssuingDistributionPoint from "./IssuingDistributionPoint.js";
+import GeneralNames from "./GeneralNames.js";
+import NameConstraints from "./NameConstraints.js";
+import CRLDistributionPoints from "./CRLDistributionPoints.js";
+import CertificatePolicies from "./CertificatePolicies.js";
+import PolicyMappings from "./PolicyMappings.js";
+import AuthorityKeyIdentifier from "./AuthorityKeyIdentifier.js";
+import PolicyConstraints from "./PolicyConstraints.js";
+import ExtKeyUsage from "./ExtKeyUsage.js";
+import InfoAccess from "./InfoAccess.js";
+import SignedCertificateTimestampList from "./SignedCertificateTimestampList.js";
+import CertificateTemplate from "./CertificateTemplate.js";
+import CAVersion from "./CAVersion.js";
+import QCStatements from "./QCStatements.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -24,24 +28,24 @@ export default class Extension
 	/**
 	 * Constructor for Extension class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description extnID
+		 * @desc extnID
 		 */
 		this.extnID = getParametersValue(parameters, "extnID", Extension.defaultValues("extnID"));
 		/**
 		 * @type {boolean}
-		 * @description critical
+		 * @desc critical
 		 */
 		this.critical = getParametersValue(parameters, "critical", Extension.defaultValues("critical"));
 		/**
 		 * @type {OctetString}
-		 * @description extnValue
+		 * @desc extnValue
 		 */
 		if("extnValue" in parameters)
 			this.extnValue = new asn1js.OctetString({ valueHex: parameters.extnValue });
@@ -51,7 +55,7 @@ export default class Extension
 		if("parsedValue" in parameters)
 			/**
 			 * @type {Object}
-			 * @description parsedValue
+			 * @desc parsedValue
 			 */
 			this.parsedValue = getParametersValue(parameters, "parsedValue", Extension.defaultValues("parsedValue"));
 		//endregion
@@ -84,18 +88,22 @@ export default class Extension
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * Extension  ::=  SEQUENCE  {
+	 *    extnID      OBJECT IDENTIFIER,
+	 *    critical    BOOLEAN DEFAULT FALSE,
+	 *    extnValue   OCTET STRING
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//Extension  ::=  SEQUENCE  {
-		//    extnID      OBJECT IDENTIFIER,
-		//    critical    BOOLEAN DEFAULT FALSE,
-		//    extnValue   OCTET STRING
-		//}
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -124,6 +132,14 @@ export default class Extension
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"extnID",
+			"critical",
+			"extnValue"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		let asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -137,7 +153,7 @@ export default class Extension
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for EXTENSION");
+			throw new Error("Object's schema was not verified against input data for Extension");
 		//endregion
 
 		//region Get internal properties from parsed schema
@@ -154,7 +170,15 @@ export default class Extension
 		switch(this.extnID)
 		{
 			case "2.5.29.9": // SubjectDirectoryAttributes
-				this.parsedValue = new SubjectDirectoryAttributes({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new SubjectDirectoryAttributes({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new SubjectDirectoryAttributes();
+					this.parsedValue.parsingError = "Incorrectly formated SubjectDirectoryAttributes";
+				}
 				break;
 			case "2.5.29.14": // SubjectKeyIdentifier
 				this.parsedValue = asn1.result; // Should be just a simple OCTETSTRING
@@ -163,14 +187,38 @@ export default class Extension
 				this.parsedValue = asn1.result; // Should be just a simple BITSTRING
 				break;
 			case "2.5.29.16": // PrivateKeyUsagePeriod
-				this.parsedValue = new PrivateKeyUsagePeriod({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new PrivateKeyUsagePeriod({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new PrivateKeyUsagePeriod();
+					this.parsedValue.parsingError = "Incorrectly formated PrivateKeyUsagePeriod";
+				}
 				break;
 			case "2.5.29.17": // SubjectAltName
 			case "2.5.29.18": // IssuerAltName
-				this.parsedValue = new AltName({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new AltName({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new AltName();
+					this.parsedValue.parsingError = "Incorrectly formated AltName";
+				}
 				break;
 			case "2.5.29.19": // BasicConstraints
-				this.parsedValue = new BasicConstraints({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new BasicConstraints({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new BasicConstraints();
+					this.parsedValue.parsingError = "Incorrectly formated BasicConstraints";
+				}
 				break;
 			case "2.5.29.20": // CRLNumber
 			case "2.5.29.27": // BaseCRLNumber (delta CRL indicator)
@@ -183,39 +231,170 @@ export default class Extension
 				this.parsedValue = asn1.result; // Should be just a simple GeneralizedTime
 				break;
 			case "2.5.29.28": // IssuingDistributionPoint
-				this.parsedValue = new IssuingDistributionPoint({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new IssuingDistributionPoint({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new IssuingDistributionPoint();
+					this.parsedValue.parsingError = "Incorrectly formated IssuingDistributionPoint";
+				}
 				break;
 			case "2.5.29.29": // CertificateIssuer
-				this.parsedValue = new GeneralNames({ schema: asn1.result }); // Should be just a simple
+				try
+				{
+					this.parsedValue = new GeneralNames({ schema: asn1.result }); // Should be just a simple
+				}
+				catch(ex)
+				{
+					this.parsedValue = new GeneralNames();
+					this.parsedValue.parsingError = "Incorrectly formated GeneralNames";
+				}
 				break;
 			case "2.5.29.30": // NameConstraints
-				this.parsedValue = new NameConstraints({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new NameConstraints({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new NameConstraints();
+					this.parsedValue.parsingError = "Incorrectly formated NameConstraints";
+				}
 				break;
 			case "2.5.29.31": // CRLDistributionPoints
 			case "2.5.29.46": // FreshestCRL
-				this.parsedValue = new CRLDistributionPoints({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new CRLDistributionPoints({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new CRLDistributionPoints();
+					this.parsedValue.parsingError = "Incorrectly formated CRLDistributionPoints";
+				}
 				break;
 			case "2.5.29.32": // CertificatePolicies
-				this.parsedValue = new CertificatePolicies({ schema: asn1.result });
+			case "1.3.6.1.4.1.311.21.10": // szOID_APPLICATION_CERT_POLICIES - Microsoft-specific OID
+				try
+				{
+					this.parsedValue = new CertificatePolicies({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new CertificatePolicies();
+					this.parsedValue.parsingError = "Incorrectly formated CertificatePolicies";
+				}
 				break;
 			case "2.5.29.33": // PolicyMappings
-				this.parsedValue = new PolicyMappings({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new PolicyMappings({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new PolicyMappings();
+					this.parsedValue.parsingError = "Incorrectly formated CertificatePolicies";
+				}
 				break;
 			case "2.5.29.35": // AuthorityKeyIdentifier
-				this.parsedValue = new AuthorityKeyIdentifier({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new AuthorityKeyIdentifier({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new AuthorityKeyIdentifier();
+					this.parsedValue.parsingError = "Incorrectly formated AuthorityKeyIdentifier";
+				}
 				break;
 			case "2.5.29.36": // PolicyConstraints
-				this.parsedValue = new PolicyConstraints({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new PolicyConstraints({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new PolicyConstraints();
+					this.parsedValue.parsingError = "Incorrectly formated PolicyConstraints";
+				}
 				break;
 			case "2.5.29.37": // ExtKeyUsage
-				this.parsedValue = new ExtKeyUsage({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new ExtKeyUsage({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new ExtKeyUsage();
+					this.parsedValue.parsingError = "Incorrectly formated ExtKeyUsage";
+				}
 				break;
 			case "2.5.29.54": // InhibitAnyPolicy
 				this.parsedValue = asn1.result; // Should be just a simple INTEGER
 				break;
 			case "1.3.6.1.5.5.7.1.1": // AuthorityInfoAccess
 			case "1.3.6.1.5.5.7.1.11": // SubjectInfoAccess
-				this.parsedValue = new InfoAccess({ schema: asn1.result });
+				try
+				{
+					this.parsedValue = new InfoAccess({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new InfoAccess();
+					this.parsedValue.parsingError = "Incorrectly formated InfoAccess";
+				}
+				break;
+			case "1.3.6.1.4.1.11129.2.4.2": // SignedCertificateTimestampList
+				try
+				{
+					this.parsedValue = new SignedCertificateTimestampList({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new SignedCertificateTimestampList();
+					this.parsedValue.parsingError = "Incorrectly formated SignedCertificateTimestampList";
+				}
+				break;
+			case "1.3.6.1.4.1.311.20.2": // szOID_ENROLL_CERTTYPE_EXTENSION - Microsoft-specific extension
+				this.parsedValue = asn1.result; // Used to be simple Unicode string
+				break;
+			case "1.3.6.1.4.1.311.21.2": // szOID_CERTSRV_PREVIOUS_CERT_HASH - Microsoft-specific extension
+				this.parsedValue = asn1.result; // Used to be simple OctetString
+				break;
+			case "1.3.6.1.4.1.311.21.7": // szOID_CERTIFICATE_TEMPLATE - Microsoft-specific extension
+				try
+				{
+					this.parsedValue = new CertificateTemplate({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new CertificateTemplate();
+					this.parsedValue.parsingError = "Incorrectly formated CertificateTemplate";
+				}
+				break;
+			case "1.3.6.1.4.1.311.21.1": // szOID_CERTSRV_CA_VERSION - Microsoft-specific extension
+				try
+				{
+					this.parsedValue = new CAVersion({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new CAVersion();
+					this.parsedValue.parsingError = "Incorrectly formated CAVersion";
+				}
+				break;
+			case "1.3.6.1.5.5.7.1.3": // QCStatements
+				try
+				{
+					this.parsedValue = new QCStatements({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new QCStatements();
+					this.parsedValue.parsingError = "Incorrectly formated QCStatements";
+				}
 				break;
 			default:
 		}
@@ -262,7 +441,10 @@ export default class Extension
 			object.critical = this.critical;
 
 		if("parsedValue" in this)
-			object.parsedValue = this.parsedValue.toJSON();
+		{
+			if("toJSON" in this.parsedValue)
+				object.parsedValue = this.parsedValue.toJSON();
+		}
 
 		return object;
 	}

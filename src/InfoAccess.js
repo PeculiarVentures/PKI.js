@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import AccessDescription from "./AccessDescription";
+import { getParametersValue, clearProps } from "pvutils";
+import AccessDescription from "./AccessDescription.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -11,14 +11,14 @@ export default class InfoAccess
 	/**
 	 * Constructor for InfoAccess class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<AccessDescription>}
-		 * @description accessDescriptions
+		 * @desc accessDescriptions
 		 */
 		this.accessDescriptions = getParametersValue(parameters, "accessDescriptions", InfoAccess.defaultValues("accessDescriptions"));
 		//endregion
@@ -45,18 +45,19 @@ export default class InfoAccess
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AuthorityInfoAccessSyntax  ::=
+	 * SEQUENCE SIZE (1..MAX) OF AccessDescription
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// AuthorityInfoAccess OID ::= 1.3.6.1.5.5.7.1.1
-		// SubjectInfoAccess OID ::= 1.3.6.1.5.5.7.1.11
-		//
-		//AuthorityInfoAccessSyntax  ::=
-		//SEQUENCE SIZE (1..MAX) OF AccessDescription
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -81,6 +82,12 @@ export default class InfoAccess
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"accessDescriptions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

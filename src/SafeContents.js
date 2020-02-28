@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import SafeBag from "./SafeBag";
+import { getParametersValue, clearProps } from "pvutils";
+import SafeBag from "./SafeBag.js";
 //**************************************************************************************
 /**
  * Class from RFC7292
@@ -11,14 +11,14 @@ export default class SafeContents
 	/**
 	 * Constructor for SafeContents class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<SafeBag>}
-		 * @description safeBags
+		 * @desc safeBags
 		 */
 		this.safeBags = getParametersValue(parameters, "safeBags", SafeContents.defaultValues("safeBags"));
 		//endregion
@@ -61,14 +61,18 @@ export default class SafeContents
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * SafeContents ::= SEQUENCE OF SafeBag
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//SafeContents ::= SEQUENCE OF SafeBag
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -93,6 +97,12 @@ export default class SafeContents
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"safeBags"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

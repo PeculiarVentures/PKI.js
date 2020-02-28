@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -10,19 +10,19 @@ export default class OtherRecipientInfo
 	/**
 	 * Constructor for OtherRecipientInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description oriType
+		 * @desc oriType
 		 */
 		this.oriType = getParametersValue(parameters, "oriType", OtherRecipientInfo.defaultValues("oriType"));
 		/**
 		 * @type {*}
-		 * @description oriValue
+		 * @desc oriValue
 		 */
 		this.oriValue = getParametersValue(parameters, "oriValue", OtherRecipientInfo.defaultValues("oriValue"));
 		//endregion
@@ -69,16 +69,20 @@ export default class OtherRecipientInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * OtherRecipientInfo ::= SEQUENCE {
+	 *    oriType OBJECT IDENTIFIER,
+	 *    oriValue ANY DEFINED BY oriType }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//OtherRecipientInfo ::= SEQUENCE {
-		//    oriType OBJECT IDENTIFIER,
-		//    oriValue ANY DEFINED BY oriType }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -102,6 +106,13 @@ export default class OtherRecipientInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"oriType",
+			"oriValue"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

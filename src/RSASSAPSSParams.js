@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
+import { getParametersValue, clearProps } from "pvutils";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 //**************************************************************************************
 /**
  * Class from RFC4055
@@ -11,29 +11,29 @@ export default class RSASSAPSSParams
 	/**
 	 * Constructor for RSASSAPSSParams class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description Algorithms of hashing (DEFAULT sha1)
+		 * @desc Algorithms of hashing (DEFAULT sha1)
 		 */
 		this.hashAlgorithm = getParametersValue(parameters, "hashAlgorithm", RSASSAPSSParams.defaultValues("hashAlgorithm"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description Algorithm of "mask generaion function (MGF)" (DEFAULT mgf1SHA1)
+		 * @desc Algorithm of "mask generaion function (MGF)" (DEFAULT mgf1SHA1)
 		 */
 		this.maskGenAlgorithm = getParametersValue(parameters, "maskGenAlgorithm", RSASSAPSSParams.defaultValues("maskGenAlgorithm"));
 		/**
 		 * @type {number}
-		 * @description Salt length (DEFAULT 20)
+		 * @desc Salt length (DEFAULT 20)
 		 */
 		this.saltLength = getParametersValue(parameters, "saltLength", RSASSAPSSParams.defaultValues("saltLength"));
 		/**
 		 * @type {number}
-		 * @description (DEFAULT 1)
+		 * @desc (DEFAULT 1)
 		 */
 		this.trailerField = getParametersValue(parameters, "trailerField", RSASSAPSSParams.defaultValues("trailerField"));
 		//endregion
@@ -75,18 +75,22 @@ export default class RSASSAPSSParams
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RSASSA-PSS-params  ::=  Sequence  {
+	 *    hashAlgorithm      [0] HashAlgorithm DEFAULT sha1Identifier,
+	 *    maskGenAlgorithm   [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
+	 *    saltLength         [2] Integer DEFAULT 20,
+	 *    trailerField       [3] Integer DEFAULT 1  }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RSASSA-PSS-params  ::=  Sequence  {
-		//    hashAlgorithm      [0] HashAlgorithm DEFAULT sha1Identifier,
-		//    maskGenAlgorithm   [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
-		//    saltLength         [2] Integer DEFAULT 20,
-		//    trailerField       [3] Integer DEFAULT 1  }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -142,6 +146,15 @@ export default class RSASSAPSSParams
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"hashAlgorithm",
+			"maskGenAlgorithm",
+			"saltLength",
+			"trailerField"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -164,7 +177,7 @@ export default class RSASSAPSSParams
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for RSASSA_PSS_params");
+			throw new Error("Object's schema was not verified against input data for RSASSAPSSParams");
 		//endregion
 
 		//region Get internal properties from parsed schema

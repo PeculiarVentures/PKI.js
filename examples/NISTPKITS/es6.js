@@ -1,9 +1,11 @@
+/* eslint-disable no-undef,no-unused-vars,no-unreachable */
 import * as asn1js from "asn1js";
 import { stringToArrayBuffer, fromBase64 } from "pvutils";
 import { setEngine } from "../../src/common";
 import Certificate from "../../src/Certificate";
 import CertificateRevocationList from "../../src/CertificateRevocationList";
 import CertificateChainValidationEngine from "../../src/CertificateChainValidationEngine";
+//<nodewebcryptoossl>
 //**************************************************************************************
 //region Testing constants
 //**************************************************************************************
@@ -960,6 +962,7 @@ context("PKITS's certificates parsing test", () =>
 	function parsingCheck(buffer)
 	{
 		const asn1 = asn1js.fromBER(buffer);
+		// noinspection JSUnusedLocalSymbols
 		const cert = new Certificate({ schema: asn1.result });
 	}
 	
@@ -967,10 +970,12 @@ context("PKITS's certificates parsing test", () =>
 	
 	for(let i = 0; i < keys.length; i++)
 	{
+		// noinspection AnonymousFunctionJS
 		const runningFunction = (buffer, func) =>
 		{
 			return () =>
 			{
+				// noinspection JSCheckFunctionSignatures
 				assert.doesNotThrow(() =>
 				{
 					func(buffer);
@@ -991,6 +996,7 @@ context("PKITS's CRL parsing test", () =>
 	function parsingCheck(buffer)
 	{
 		const asn1 = asn1js.fromBER(buffer);
+		// noinspection JSUnusedLocalSymbols
 		const crl = new CertificateRevocationList({ schema: asn1.result });
 	}
 	
@@ -998,10 +1004,12 @@ context("PKITS's CRL parsing test", () =>
 	
 	for(let i = 0; i < keys.length; i++)
 	{
+		// noinspection AnonymousFunctionJS
 		const runningFunction = (buffer, func) =>
 		{
 			return () =>
 			{
+				// noinspection JSCheckFunctionSignatures
 				assert.doesNotThrow(() =>
 				{
 					func(buffer);
@@ -1022,6 +1030,7 @@ context("PKITS's certificate pairs parsing test", () =>
 	function parsingCheck(buffer)
 	{
 		const asn1 = asn1js.fromBER(buffer);
+		// noinspection JSUnusedLocalSymbols
 		const cert = new Certificate({ schema: asn1.result });
 	}
 	
@@ -1029,6 +1038,7 @@ context("PKITS's certificate pairs parsing test", () =>
 	
 	for(let i = 0; i < keys.length; i++)
 	{
+		// noinspection AnonymousFunctionJS
 		const runningFunction = (buffer, func) =>
 		{
 			return () =>
@@ -1054,6 +1064,7 @@ context("PKITS's certificate pairs parsing test", () =>
 					
 					if(name !== null)
 					{
+						// noinspection JSCheckFunctionSignatures
 						assert.doesNotThrow(() =>
 						{
 							func(value.valueBlock.value[0].valueBeforeDecode);
@@ -1091,6 +1102,7 @@ function simpleVerification(params)
 			}
 		}
 		
+		// noinspection JSCheckFunctionSignatures
 		assert.doesNotThrow(initializeTrustedCertificates, Error, "Successfully initialize trusted root certificates");
 		//endregion
 		
@@ -1104,6 +1116,7 @@ function simpleVerification(params)
 			}
 		}
 		
+		// noinspection JSCheckFunctionSignatures
 		assert.doesNotThrow(initializeIntermediateCertificates, Error, "Successfully initialize intermediate and end entity certificates");
 		//endregion
 		
@@ -1117,6 +1130,7 @@ function simpleVerification(params)
 			}
 		}
 		
+		// noinspection JSCheckFunctionSignatures
 		assert.doesNotThrow(initializeCRLs, Error, "Successfully initialize CRLs");
 		//endregion
 		
@@ -1133,6 +1147,8 @@ function simpleVerification(params)
 				{
 					if(!result.result)
 						return Promise.reject(`Successfull verification expected, but FAILED return: ${result.resultMessage}`);
+					
+					return Promise.resolve();
 				},
 				error => Promise.reject(error)
 			);
@@ -1143,8 +1159,10 @@ function simpleVerification(params)
 			{
 				if(result.result)
 					return Promise.reject("Fail on verification expected, but SUCCESS return");
+				
+				return Promise.resolve();
 			},
-			error => Promise.resolve()
+			() => Promise.resolve()
 		);
 	};
 }
@@ -1200,6 +1218,7 @@ context("NIST PKITS tests", () =>
 		}));
 		
 		// Currently (2015, September) WebCrypto can not handle DSA signatures
+		// noinspection ES6ModulesDependencies
 		it.skip("4.1.4 Valid DSA Signatures Test4", simpleVerification({
 			trustedCertificates: [
 				"TrustAnchorRootCertificate.crt"
@@ -5586,6 +5605,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	setEngine();
 });
 //*********************************************************************************

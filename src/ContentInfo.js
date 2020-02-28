@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -10,19 +10,19 @@ export default class ContentInfo
 	/**
 	 * Constructor for ContentInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description contentType
+		 * @desc contentType
 		 */
 		this.contentType = getParametersValue(parameters, "contentType", ContentInfo.defaultValues("contentType"));
 		/**
 		 * @type {Any}
-		 * @description content
+		 * @desc content
 		 */
 		this.content = getParametersValue(parameters, "content", ContentInfo.defaultValues("content"));
 		//endregion
@@ -69,16 +69,20 @@ export default class ContentInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * ContentInfo ::= SEQUENCE {
+	 *    contentType ContentType,
+	 *    content [0] EXPLICIT ANY DEFINED BY contentType }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//ContentInfo ::= SEQUENCE {
-		//    contentType ContentType,
-		//    content [0] EXPLICIT ANY DEFINED BY contentType }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -112,6 +116,13 @@ export default class ContentInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"contentType",
+			"content"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -119,7 +130,7 @@ export default class ContentInfo
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CMS_CONTENT_INFO");
+			throw new Error("Object's schema was not verified against input data for ContentInfo");
 		//endregion
 
 		//region Get internal properties from parsed schema

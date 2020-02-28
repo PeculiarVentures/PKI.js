@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64 } from "pvutils";
-import ECPublicKey from "./ECPublicKey";
+import { getParametersValue, toBase64, arrayBufferToString, stringToArrayBuffer, fromBase64, clearProps } from "pvutils";
+import ECPublicKey from "./ECPublicKey.js";
 //**************************************************************************************
 /**
  * Class from RFC5915
@@ -9,35 +9,35 @@ export default class ECPrivateKey
 {
 	//**********************************************************************************
 	/**
-	 * Constructor for ECCPrivateKey class
+	 * Constructor for ECPrivateKey class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", ECPrivateKey.defaultValues("version"));
 		/**
 		 * @type {OctetString}
-		 * @description privateKey
+		 * @desc privateKey
 		 */
 		this.privateKey = getParametersValue(parameters, "privateKey", ECPrivateKey.defaultValues("privateKey"));
 
 		if("namedCurve" in parameters)
 			/**
 			 * @type {string}
-			 * @description namedCurve
+			 * @desc namedCurve
 			 */
 			this.namedCurve = getParametersValue(parameters, "namedCurve", ECPrivateKey.defaultValues("namedCurve"));
 
 		if("publicKey" in parameters)
 			/**
 			 * @type {ECPublicKey}
-			 * @description publicKey
+			 * @desc publicKey
 			 */
 			this.publicKey = getParametersValue(parameters, "publicKey", ECPrivateKey.defaultValues("publicKey"));
 		//endregion
@@ -98,19 +98,23 @@ export default class ECPrivateKey
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * ECPrivateKey ::= SEQUENCE {
+	 * version        INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
+	 * privateKey     OCTET STRING,
+	 * parameters [0] ECParameters {{ NamedCurve }} OPTIONAL,
+	 * publicKey  [1] BIT STRING OPTIONAL
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// ECPrivateKey ::= SEQUENCE {
-		// version        INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
-		// privateKey     OCTET STRING,
-		// parameters [0] ECParameters {{ NamedCurve }} OPTIONAL,
-		// publicKey  [1] BIT STRING OPTIONAL
-		// }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -156,6 +160,15 @@ export default class ECPrivateKey
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"version",
+			"privateKey",
+			"namedCurve",
+			"publicKey"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -260,7 +273,7 @@ export default class ECPrivateKey
 
 		const privateKeyJSON = {
 			crv: crvName,
-			d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, true)
+			d: toBase64(arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, false)
 		};
 
 		if("publicKey" in this)
@@ -305,7 +318,21 @@ export default class ECPrivateKey
 			throw new Error("Absent mandatory parameter \"crv\"");
 
 		if("d" in json)
-			this.privateKey = new asn1js.OctetString({ valueHex: stringToArrayBuffer(fromBase64(json.d, true)).slice(0, coodinateLength) });
+		{
+			const convertBuffer = stringToArrayBuffer(fromBase64(json.d, true));
+			
+			if(convertBuffer.byteLength < coodinateLength)
+			{
+				const buffer = new ArrayBuffer(coodinateLength);
+				const view = new Uint8Array(buffer);
+				const convertBufferView = new Uint8Array(convertBuffer);
+				view.set(convertBufferView, 1);
+				
+				this.privateKey = new asn1js.OctetString({ valueHex: buffer });
+			}
+			else
+				this.privateKey = new asn1js.OctetString({ valueHex: convertBuffer.slice(0, coodinateLength) });
+		}
 		else
 			throw new Error("Absent mandatory parameter \"d\"");
 

@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import GeneralName from "./GeneralName";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
+import { getParametersValue, clearProps } from "pvutils";
+import GeneralName from "./GeneralName.js";
+import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -12,7 +12,7 @@ export default class IssuingDistributionPoint
 	/**
 	 * Constructor for IssuingDistributionPoint class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
@@ -20,38 +20,38 @@ export default class IssuingDistributionPoint
 		if("distributionPoint" in parameters)
 			/**
 			 * @type {Array.<GeneralName>|RelativeDistinguishedNames}
-			 * @description distributionPoint
+			 * @desc distributionPoint
 			 */
 			this.distributionPoint = getParametersValue(parameters, "distributionPoint", IssuingDistributionPoint.defaultValues("distributionPoint"));
 
 		/**
 		 * @type {boolean}
-		 * @description onlyContainsUserCerts
+		 * @desc onlyContainsUserCerts
 		 */
 		this.onlyContainsUserCerts = getParametersValue(parameters, "onlyContainsUserCerts", IssuingDistributionPoint.defaultValues("onlyContainsUserCerts"));
 
 		/**
 		 * @type {boolean}
-		 * @description onlyContainsCACerts
+		 * @desc onlyContainsCACerts
 		 */
 		this.onlyContainsCACerts = getParametersValue(parameters, "onlyContainsCACerts", IssuingDistributionPoint.defaultValues("onlyContainsCACerts"));
 
 		if("onlySomeReasons" in parameters)
 			/**
 			 * @type {number}
-			 * @description onlySomeReasons
+			 * @desc onlySomeReasons
 			 */
 			this.onlySomeReasons = getParametersValue(parameters, "onlySomeReasons", IssuingDistributionPoint.defaultValues("onlySomeReasons"));
 
 		/**
 		 * @type {boolean}
-		 * @description indirectCRL
+		 * @desc indirectCRL
 		 */
 		this.indirectCRL = getParametersValue(parameters, "indirectCRL", IssuingDistributionPoint.defaultValues("indirectCRL"));
 
 		/**
 		 * @type {boolean}
-		 * @description onlyContainsAttributeCerts
+		 * @desc onlyContainsAttributeCerts
 		 */
 		this.onlyContainsAttributeCerts = getParametersValue(parameters, "onlyContainsAttributeCerts", IssuingDistributionPoint.defaultValues("onlyContainsAttributeCerts"));
 		//endregion
@@ -88,33 +88,35 @@ export default class IssuingDistributionPoint
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * IssuingDistributionPoint ::= SEQUENCE {
+	 *    distributionPoint          [0] DistributionPointName OPTIONAL,
+	 *    onlyContainsUserCerts      [1] BOOLEAN DEFAULT FALSE,
+	 *    onlyContainsCACerts        [2] BOOLEAN DEFAULT FALSE,
+	 *    onlySomeReasons            [3] ReasonFlags OPTIONAL,
+	 *    indirectCRL                [4] BOOLEAN DEFAULT FALSE,
+	 *    onlyContainsAttributeCerts [5] BOOLEAN DEFAULT FALSE }
+	 *
+	 * ReasonFlags ::= BIT STRING {
+	 *    unused                  (0),
+	 *    keyCompromise           (1),
+	 *    cACompromise            (2),
+	 *    affiliationChanged      (3),
+	 *    superseded              (4),
+	 *    cessationOfOperation    (5),
+	 *    certificateHold         (6),
+	 *    privilegeWithdrawn      (7),
+	 *    aACompromise            (8) }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// IssuingDistributionPoint OID ::= 2.5.29.28
-		//
-		//IssuingDistributionPoint ::= SEQUENCE {
-		//    distributionPoint          [0] DistributionPointName OPTIONAL,
-		//    onlyContainsUserCerts      [1] BOOLEAN DEFAULT FALSE,
-		//    onlyContainsCACerts        [2] BOOLEAN DEFAULT FALSE,
-		//    onlySomeReasons            [3] ReasonFlags OPTIONAL,
-		//    indirectCRL                [4] BOOLEAN DEFAULT FALSE,
-		//    onlyContainsAttributeCerts [5] BOOLEAN DEFAULT FALSE }
-		//
-		//ReasonFlags ::= BIT STRING {
-		//    unused                  (0),
-		//    keyCompromise           (1),
-		//    cACompromise            (2),
-		//    affiliationChanged      (3),
-		//    superseded              (4),
-		//    cessationOfOperation    (5),
-		//    certificateHold         (6),
-		//    privilegeWithdrawn      (7),
-		//    aACompromise            (8) }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -215,6 +217,18 @@ export default class IssuingDistributionPoint
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"distributionPoint",
+			"distributionPointNames",
+			"onlyContainsUserCerts",
+			"onlyContainsCACerts",
+			"onlySomeReasons",
+			"indirectCRL",
+			"onlyContainsAttributeCerts"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -245,10 +259,11 @@ export default class IssuingDistributionPoint
 					break;
 				case (asn1.result.distributionPoint.idBlock.tagNumber === 1): // RDN variant
 					{
-						asn1.result.distributionPoint.idBlock.tagClass = 1; // UNIVERSAL
-						asn1.result.distributionPoint.idBlock.tagNumber = 16; // SEQUENCE
-
-						this.distributionPoint = new RelativeDistinguishedNames({ schema: asn1.result.distributionPoint });
+						this.distributionPoint = new RelativeDistinguishedNames({
+							schema: new asn1js.Sequence({
+								value: asn1.result.distributionPoint.valueBlock.value
+							})
+						});
 					}
 					break;
 				default:
@@ -319,7 +334,13 @@ export default class IssuingDistributionPoint
 				value.idBlock.tagNumber = 1; // [1]
 			}
 			
-			outputArray.push(value);
+			outputArray.push(new asn1js.Constructed({
+				idBlock: {
+					tagClass: 3, // CONTEXT-SPECIFIC
+					tagNumber: 0 // [0]
+				},
+				value: [value]
+			}));
 		}
 		
 		if(this.onlyContainsUserCerts !== IssuingDistributionPoint.defaultValues("onlyContainsUserCerts"))

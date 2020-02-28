@@ -1,8 +1,10 @@
+/* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import { arrayBufferToString, stringToArrayBuffer, fromBase64, toBase64, isEqualBuffer } from "pvutils";
 import { setEngine } from "../../src/common";
 import EnvelopedData from "../../src/EnvelopedData";
 import ContentInfo from "../../src/ContentInfo";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let encryptionVariant = 2;
 const encryptionAlgorithm = {
@@ -81,17 +83,17 @@ function envelopedEncryptInternal()
 	cmsEnveloped.addRecipientByPreDefinedData(preDefinedDataBuffer, {}, encryptionVariant);
 	
 	return cmsEnveloped.encrypt(encryptionAlgorithm, valueBuffer).
-	then(
-		() =>
-		{
-			const cmsContentSimpl = new ContentInfo();
-			cmsContentSimpl.contentType = "1.2.840.113549.1.7.3";
-			cmsContentSimpl.content = cmsEnveloped.toSchema();
-			
-			cmsEnvelopedBuffer = cmsContentSimpl.toSchema().toBER(false);
-		},
-		error => Promise.reject(`ERROR DURING ENCRYPTION PROCESS: ${error}`)
-	);
+		then(
+			() =>
+			{
+				const cmsContentSimpl = new ContentInfo();
+				cmsContentSimpl.contentType = "1.2.840.113549.1.7.3";
+				cmsContentSimpl.content = cmsEnveloped.toSchema();
+				
+				cmsEnvelopedBuffer = cmsContentSimpl.toSchema().toBER(false);
+			},
+			error => Promise.reject(`ERROR DURING ENCRYPTION PROCESS: ${error}`)
+		);
 }
 //*********************************************************************************
 function envelopedEncrypt()
@@ -106,6 +108,7 @@ function envelopedEncrypt()
 		resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(cmsEnvelopedBuffer)))}`;
 		resultString = `${resultString}\r\n-----END CMS-----\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("encrypted_content").innerHTML = resultString;
 		
 		alert("Encryption process finished successfully");
@@ -169,13 +172,15 @@ function envelopedDecrypt()
 {
 	return Promise.resolve().then(() =>
 	{
-		preDefinedDataBuffer = stringToArrayBuffer(document.getElementById("password").value)
+		preDefinedDataBuffer = stringToArrayBuffer(document.getElementById("password").value);
 		
+		// noinspection InnerHTMLJS
 		let encodedCMSEnveloped = document.getElementById("encrypted_content").innerHTML;
-		let clearEncodedCMSEnveloped = encodedCMSEnveloped.replace(/(-----(BEGIN|END)( NEW)? CMS-----|\n)/g, '');
+		let clearEncodedCMSEnveloped = encodedCMSEnveloped.replace(/(-----(BEGIN|END)( NEW)? CMS-----|\n)/g, "");
 		cmsEnvelopedBuffer = stringToArrayBuffer(fromBase64(clearEncodedCMSEnveloped));
 	}).then(() => envelopedDecryptInternal()).then(result =>
 	{
+		// noinspection InnerHTMLJS
 		document.getElementById("decrypted_content").innerHTML = arrayBufferToString(result);
 	});
 }
@@ -234,6 +239,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	envelopedEncrypt();
 	envelopedDecrypt();
 	handleContentEncAlgOnChange();

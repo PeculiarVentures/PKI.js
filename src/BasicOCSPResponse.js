@@ -1,55 +1,47 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, isEqualBuffer } from "pvutils";
-import {
-	getAlgorithmByOID,
-	getOIDByAlgorithm,
-	getAlgorithmParameters,
-	getCrypto,
-	createECDSASignatureFromCMS,
-	getHashAlgorithm,
-	createCMSECDSASignature
-} from "./common";
-import ResponseData from "./ResponseData";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import Certificate from "./Certificate";
-import CertID from "./CertID";
-import RSASSAPSSParams from "./RSASSAPSSParams";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
-import CertificateChainValidationEngine from "./CertificateChainValidationEngine";
+import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
+import { getAlgorithmByOID, getCrypto, getEngine } from "./common.js";
+import ResponseData from "./ResponseData.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import Certificate from "./Certificate.js";
+import CertID from "./CertID.js";
+import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import CertificateChainValidationEngine from "./CertificateChainValidationEngine.js";
 //**************************************************************************************
 /**
  * Class from RFC6960
  */
-export default class BasicOCSPResponse {
+export default class BasicOCSPResponse
+{
 	//**********************************************************************************
 	/**
 	 * Constructor for BasicOCSPResponse class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {ResponseData}
-		 * @description tbsResponseData
+		 * @desc tbsResponseData
 		 */
 		this.tbsResponseData = getParametersValue(parameters, "tbsResponseData", BasicOCSPResponse.defaultValues("tbsResponseData"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description signatureAlgorithm
+		 * @desc signatureAlgorithm
 		 */
 		this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", BasicOCSPResponse.defaultValues("signatureAlgorithm"));
 		/**
 		 * @type {BitString}
-		 * @description signature
+		 * @desc signature
 		 */
 		this.signature = getParametersValue(parameters, "signature", BasicOCSPResponse.defaultValues("signature"));
 		
 		if("certs" in parameters)
 			/**
 			 * @type {Array.<Certificate>}
-			 * @description certs
+			 * @desc certs
 			 */
 			this.certs = getParametersValue(parameters, "certs", BasicOCSPResponse.defaultValues("certs"));
 		//endregion
@@ -59,7 +51,6 @@ export default class BasicOCSPResponse {
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -81,7 +72,6 @@ export default class BasicOCSPResponse {
 				throw new Error(`Invalid member name for BasicOCSPResponse class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -94,6 +84,7 @@ export default class BasicOCSPResponse {
 		{
 			case "type":
 				{
+					// noinspection OverlyComplexBooleanExpressionJS
 					let comparisonResult = ((ResponseData.compareWithDefault("tbs", memberValue.tbs)) &&
 					(ResponseData.compareWithDefault("responderID", memberValue.responderID)) &&
 					(ResponseData.compareWithDefault("producedAt", memberValue.producedAt)) &&
@@ -114,21 +105,24 @@ export default class BasicOCSPResponse {
 				throw new Error(`Invalid member name for BasicOCSPResponse class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * BasicOCSPResponse       ::= SEQUENCE {
+	 *    tbsResponseData      ResponseData,
+	 *    signatureAlgorithm   AlgorithmIdentifier,
+	 *    signature            BIT STRING,
+	 *    certs            [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//BasicOCSPResponse       ::= SEQUENCE {
-		//    tbsResponseData      ResponseData,
-		//    signatureAlgorithm   AlgorithmIdentifier,
-		//    signature            BIT STRING,
-		//    certs            [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -171,7 +165,6 @@ export default class BasicOCSPResponse {
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -179,6 +172,15 @@ export default class BasicOCSPResponse {
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"BasicOCSPResponse.tbsResponseData",
+			"BasicOCSPResponse.signatureAlgorithm",
+			"BasicOCSPResponse.signature",
+			"BasicOCSPResponse.certs"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -186,7 +188,7 @@ export default class BasicOCSPResponse {
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for OCSP_BASIC_RESPONSE");
+			throw new Error("Object's schema was not verified against input data for BasicOCSPResponse");
 		//endregion
 		
 		//region Get internal properties from parsed schema
@@ -198,7 +200,6 @@ export default class BasicOCSPResponse {
 			this.certs = Array.from(asn1.result["BasicOCSPResponse.certs"], element => new Certificate({ schema: element }));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -237,7 +238,6 @@ export default class BasicOCSPResponse {
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -256,7 +256,6 @@ export default class BasicOCSPResponse {
 		
 		return _object;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Get OCSP response status for specific certificate
@@ -316,7 +315,7 @@ export default class BasicOCSPResponse {
 					if(response.certID.isEqual(id))
 					{
 						result.isForCertificate = true;
-						
+
 						try
 						{
 							switch(response.certStatus.idBlock.isConstructed)
@@ -357,130 +356,57 @@ export default class BasicOCSPResponse {
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Make signature for current OCSP Basic Response
 	 * @param {Object} privateKey Private key for "subjectPublicKeyInfo" structure
-	 * @param {string} [hashAlgorithm] Hashing algorithm. Default SHA-1
+	 * @param {string} [hashAlgorithm="SHA-1"] Hashing algorithm. Default SHA-1
 	 * @returns {Promise}
 	 */
-	sign(privateKey, hashAlgorithm)
+	sign(privateKey, hashAlgorithm = "SHA-1")
 	{
+		//region Initial checking
 		//region Get a private key from function parameter
 		if(typeof privateKey === "undefined")
 			return Promise.reject("Need to provide a private key for signing");
 		//endregion
-		
-		//region Get hashing algorithm
-		if(typeof hashAlgorithm === "undefined")
-			hashAlgorithm = "SHA-1";
-		else
-		{
-			//region Simple check for supported algorithm
-			const oid = getOIDByAlgorithm({ name: hashAlgorithm });
-			if(oid === "")
-				return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
-			//endregion
-		}
 		//endregion
 		
-		//region Get a "default parameters" for current algorithm
-		const defParams = getAlgorithmParameters(privateKey.algorithm.name, "sign");
-		defParams.algorithm.hash.name = hashAlgorithm;
+		//region Initial variables
+		let sequence = Promise.resolve();
+		let parameters;
+		
+		const engine = getEngine();
 		//endregion
 		
-		//region Fill internal structures base on "privateKey" and "hashAlgorithm"
-		switch(privateKey.algorithm.name.toUpperCase())
+		//region Get a "default parameters" for current algorithm and set correct signature algorithm
+		sequence = sequence.then(() => engine.subtle.getSignatureParameters(privateKey, hashAlgorithm));
+		
+		sequence = sequence.then(result =>
 		{
-			case "RSASSA-PKCS1-V1_5":
-			case "ECDSA":
-				this.signatureAlgorithm.algorithmId = getOIDByAlgorithm(defParams.algorithm);
-				break;
-			case "RSA-PSS":
-				{
-					//region Set "saltLength" as a length (in octets) of hash function result
-					switch(hashAlgorithm.toUpperCase())
-					{
-						case "SHA-256":
-							defParams.algorithm.saltLength = 32;
-							break;
-						case "SHA-384":
-							defParams.algorithm.saltLength = 48;
-							break;
-						case "SHA-512":
-							defParams.algorithm.saltLength = 64;
-							break;
-						default:
-					}
-					//endregion
-					
-					//region Fill "RSASSA_PSS_params" object
-					const paramsObject = {};
-					
-					if(hashAlgorithm.toUpperCase() !== "SHA-1")
-					{
-						const hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
-						if(hashAlgorithmOID === "")
-							return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
-						
-						paramsObject.hashAlgorithm = new AlgorithmIdentifier({
-							algorithmId: hashAlgorithmOID,
-							algorithmParams: new asn1js.Null()
-						});
-						
-						paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
-							algorithmId: "1.2.840.113549.1.1.8", // MGF1
-							algorithmParams: paramsObject.hashAlgorithm.toSchema()
-						});
-					}
-					
-					if(defParams.algorithm.saltLength !== 20)
-						paramsObject.saltLength = defParams.algorithm.saltLength;
-					
-					const pssParameters = new RSASSAPSSParams(paramsObject);
-					//endregion
-					
-					//region Automatically set signature algorithm
-					this.signatureAlgorithm = new AlgorithmIdentifier({
-						algorithmId: "1.2.840.113549.1.1.10",
-						algorithmParams: pssParameters.toSchema()
-					});
-					//endregion
-				}
-				break;
-			default:
-				return Promise.reject(`Unsupported signature algorithm: ${privateKey.algorithm.name}`);
-		}
+			parameters = result.parameters;
+			this.signatureAlgorithm = result.signatureAlgorithm;
+		});
 		//endregion
 		
 		//region Create TBS data for signing
-		this.tbsResponseData.tbs = this.tbsResponseData.toSchema(true).toBER(false);
-		//endregion
-		
-		//region Get a "crypto" extension
-		const crypto = getCrypto();
-		if(typeof crypto === "undefined")
-			return Promise.reject("Unable to create WebCrypto object");
+		sequence = sequence.then(() =>
+		{
+			this.tbsResponseData.tbs = this.tbsResponseData.toSchema(true).toBER(false);
+		});
 		//endregion
 		
 		//region Signing TBS data on provided private key
-		return crypto.sign(defParams.algorithm,
-			privateKey,
-			new Uint8Array(this.tbsResponseData.tbs)).then(result =>
-			{
-				//region Special case for ECDSA algorithm
-				if(defParams.algorithm.name === "ECDSA")
-					result = createCMSECDSASignature(result);
-				//endregion
-				
-				this.signature = new asn1js.BitString({ valueHex: result });
-			}, error =>
-				Promise.reject(`Signing error: ${error}`)
-		);
+		sequence = sequence.then(() => engine.subtle.signWithPrivateKey(this.tbsResponseData.tbs, privateKey, parameters));
+		
+		sequence = sequence.then(result =>
+		{
+			this.signature = new asn1js.BitString({ valueHex: result });
+		});
 		//endregion
+		
+		return sequence;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Verify existing OCSP Basic Response
@@ -489,23 +415,23 @@ export default class BasicOCSPResponse {
 	 */
 	verify(parameters = {})
 	{
-		//region Check amount of certificates
-		if(("certs" in this) === false)
-			return Promise.reject("No certificates attached to the BasicOCSPResponce");
-		//endregion
-		
-		//region Global variables (used in "promises")
+		//region Initial variables
 		let signerCert = null;
-		
-		const tbsView = new Uint8Array(this.tbsResponseData.tbs);
 		
 		let certIndex = -1;
 		
 		let sequence = Promise.resolve();
 		
-		let shaAlgorithm = "";
-		
 		let trustedCerts = [];
+		
+		const _this = this;
+		
+		const engine = getEngine();
+		//endregion
+		
+		//region Check amount of certificates
+		if(("certs" in this) === false)
+			return Promise.reject("No certificates attached to the BasicOCSPResponce");
 		//endregion
 		
 		//region Get input values
@@ -513,72 +439,7 @@ export default class BasicOCSPResponse {
 			trustedCerts = parameters.trustedCerts;
 		//endregion
 		
-		//region Get a "crypto" extension
-		const crypto = getCrypto();
-		if(typeof crypto === "undefined")
-			return Promise.reject("Unable to create WebCrypto object");
-		//endregion
-		
-		//region Find a correct hashing algorithm
-		shaAlgorithm = getHashAlgorithm(this.signatureAlgorithm);
-		if(shaAlgorithm === "")
-			return Promise.reject(`Unsupported signature algorithm: ${this.signatureAlgorithm.algorithmId}`);
-		//endregion
-		
-		//region Find correct value for "responderID"
-		let responderType = 0;
-		let responderId = {};
-		
-		if(this.tbsResponseData.responderID instanceof RelativeDistinguishedNames) // [1] Name
-		{
-			responderType = 0;
-			responderId = this.tbsResponseData.responderID;
-		}
-		else
-		{
-			if(this.tbsResponseData.responderID instanceof asn1js.OctetString) // [2] KeyHash
-			{
-				responderType = 1;
-				responderId = this.tbsResponseData.responderID;
-			}
-			else
-				return Promise.reject("Wrong value for responderID");
-		}
-		//endregion
-		
-		//region Compare responderID with all certificates one-by-one
-		if(responderType === 0) // By Name
-		{
-			sequence = sequence.then(() =>
-			{
-				for(const [index, certificate] of this.certs.entries())
-				{
-					if(certificate.subject.isEqual(responderId))
-					{
-						certIndex = index;
-						break;
-					}
-				}
-			});
-		}
-		else  // By KeyHash
-		{
-			sequence = sequence.then(() => Promise.all(Array.from(this.certs, element =>
-				crypto.digest({ name: "sha-1" }, new Uint8Array(element.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex)))).then(results =>
-				{
-					for(const [index, certificate] of this.certs.entries())
-					{
-						if(isEqualBuffer(results[index], responderId.valueBlock.valueHex))
-						{
-							certIndex = index;
-							break;
-						}
-					}
-				}));
-		}
-		//endregion
-		
-		//region Make additional verification for signer's certificate
+		//region Aux functions
 		/**
 		 * Check CA flag for the certificate
 		 * @param {Certificate} cert Certificate to find CA flag for
@@ -610,7 +471,50 @@ export default class BasicOCSPResponse {
 			
 			return null;
 		}
+		//endregion
+
+		//region Get a "crypto" extension
+		const crypto = getCrypto();
+		if(typeof crypto === "undefined")
+			return Promise.reject("Unable to create WebCrypto object");
+		//endregion
 		
+		//region Find correct value for "responderID"
+		switch(true)
+		{
+			case (this.tbsResponseData.responderID instanceof RelativeDistinguishedNames): // [1] Name
+				sequence = sequence.then(() =>
+				{
+					for(const [index, certificate] of _this.certs.entries())
+					{
+						if(certificate.subject.isEqual(_this.tbsResponseData.responderID))
+						{
+							certIndex = index;
+							break;
+						}
+					}
+				});
+				break;
+			case (this.tbsResponseData.responderID instanceof asn1js.OctetString): // [2] KeyHash
+				sequence = sequence.then(() => Promise.all(Array.from(_this.certs, element =>
+					crypto.digest({ name: "sha-1" }, new Uint8Array(element.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex)))).then(results =>
+				{
+					for(const [index, ] of _this.certs.entries())
+					{
+						if(isEqualBuffer(results[index], _this.tbsResponseData.responderID.valueBlock.valueHex))
+						{
+							certIndex = index;
+							break;
+						}
+					}
+				}));
+				break;
+			default:
+				return Promise.reject("Wrong value for responderID");
+		}
+		//endregion
+		
+		//region Make additional verification for signer's certificate
 		sequence = sequence.then(() =>
 		{
 			if(certIndex === (-1))
@@ -618,7 +522,7 @@ export default class BasicOCSPResponse {
 			
 			signerCert = this.certs[certIndex];
 			
-			return Promise.all(Array.from(this.certs, element => checkCA(element))).then(promiseResults =>
+			return Promise.all(Array.from(_this.certs, element => checkCA(element))).then(promiseResults =>
 			{
 				const additionalCerts = [];
 				additionalCerts.push(signerCert);
@@ -649,114 +553,10 @@ export default class BasicOCSPResponse {
 		});
 		//endregion
 		
-		//region Import public key from responder certificate
-		sequence = sequence.then(() =>
-		{
-			//region Get information about public key algorithm and default parameters for import
-			let algorithmId;
-			if(this.certs[certIndex].signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
-				algorithmId = this.certs[certIndex].signatureAlgorithm.algorithmId;
-			else
-				algorithmId = this.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmId;
-			
-			const algorithmObject = getAlgorithmByOID(algorithmId);
-			if(("name" in algorithmObject) === false)
-				return Promise.reject(`Unsupported public key algorithm: ${algorithmId}`);
-			
-			const algorithmName = algorithmObject.name;
-			
-			const algorithm = getAlgorithmParameters(algorithmName, "importkey");
-			if("hash" in algorithm.algorithm)
-				algorithm.algorithm.hash.name = shaAlgorithm;
-			
-			//region Special case for ECDSA
-			if(algorithmName === "ECDSA")
-			{
-				//region Get information about named curve
-				if((this.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmParams instanceof asn1js.ObjectIdentifier) === false)
-					return Promise.reject("Incorrect type for ECDSA public key parameters");
-				
-				const curveObject = getAlgorithmByOID(this.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
-				if(("name" in curveObject) === false)
-					return Promise.reject(`Unsupported named curve algorithm: ${this.certs[certIndex].subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
-				//endregion
-				
-				algorithm.algorithm.namedCurve = curveObject.name;
-			}
-			//endregion
-			//endregion
-			
-			const publicKeyInfoSchema = this.certs[certIndex].subjectPublicKeyInfo.toSchema();
-			const publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
-			const publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
-			
-			return crypto.importKey("spki", publicKeyInfoView, algorithm.algorithm, true, algorithm.usages);
-		});
-		//endregion
-		
-		//region Verifying TBS part of BasicOCSPResponce
-		sequence = sequence.then(publicKey =>
-		{
-			//region Get default algorithm parameters for verification
-			const algorithm = getAlgorithmParameters(publicKey.algorithm.name, "verify");
-			if("hash" in algorithm.algorithm)
-				algorithm.algorithm.hash.name = shaAlgorithm;
-			//endregion
-			
-			//region Special case for ECDSA signatures
-			let signatureValue = this.signature.valueBlock.valueHex;
-			
-			if(publicKey.algorithm.name === "ECDSA")
-			{
-				const asn1 = asn1js.fromBER(signatureValue);
-				signatureValue = createECDSASignatureFromCMS(asn1.result);
-			}
-			//endregion
-			
-			//region Special case for RSA-PSS
-			if(publicKey.algorithm.name === "RSA-PSS")
-			{
-				let pssParameters;
-				
-				try
-				{
-					pssParameters = new RSASSAPSSParams({ schema: this.signatureAlgorithm.algorithmParams });
-				}
-				catch(ex)
-				{
-					return Promise.reject(ex);
-				}
-				
-				if("saltLength" in pssParameters)
-					algorithm.algorithm.saltLength = pssParameters.saltLength;
-				else
-					algorithm.algorithm.saltLength = 20;
-				
-				let hashAlgo = "SHA-1";
-				
-				if("hashAlgorithm" in pssParameters)
-				{
-					const hashAlgorithm = getAlgorithmByOID(pssParameters.hashAlgorithm.algorithmId);
-					if(("name" in hashAlgorithm) === false)
-						return Promise.reject(`Unrecognized hash algorithm: ${pssParameters.hashAlgorithm.algorithmId}`);
-					
-					hashAlgo = hashAlgorithm.name;
-				}
-				
-				algorithm.algorithm.hash.name = hashAlgo;
-			}
-			//endregion
-			
-			return crypto.verify(algorithm.algorithm,
-				publicKey,
-				new Uint8Array(signatureValue),
-				tbsView);
-		});
-		//endregion
+		sequence = sequence.then(() => engine.subtle.verifyWithPublicKey(this.tbsResponseData.tbs, this.signature, this.certs[certIndex].subjectPublicKeyInfo, this.signatureAlgorithm));
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

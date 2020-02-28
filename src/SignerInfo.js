@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import SignedAndUnsignedAttributes from "./SignedAndUnsignedAttributes";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
+import { getParametersValue, clearProps } from "pvutils";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import SignedAndUnsignedAttributes from "./SignedAndUnsignedAttributes.js";
+import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -13,49 +13,49 @@ export default class SignerInfo
 	/**
 	 * Constructor for SignerInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", SignerInfo.defaultValues("version"));
 		/**
 		 * @type {Object}
-		 * @description sid
+		 * @desc sid
 		 */
 		this.sid = getParametersValue(parameters, "sid", SignerInfo.defaultValues("sid"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description digestAlgorithm
+		 * @desc digestAlgorithm
 		 */
 		this.digestAlgorithm = getParametersValue(parameters, "digestAlgorithm", SignerInfo.defaultValues("digestAlgorithm"));
 		
 		if("signedAttrs" in parameters)
 			/**
 			 * @type {SignedAndUnsignedAttributes}
-			 * @description signedAttrs
+			 * @desc signedAttrs
 			 */
 			this.signedAttrs = getParametersValue(parameters, "signedAttrs", SignerInfo.defaultValues("signedAttrs"));
 		
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description digestAlgorithm
+		 * @desc digestAlgorithm
 		 */
 		this.signatureAlgorithm = getParametersValue(parameters, "signatureAlgorithm", SignerInfo.defaultValues("signatureAlgorithm"));
 		/**
 		 * @type {OctetString}
-		 * @description signature
+		 * @desc signature
 		 */
 		this.signature = getParametersValue(parameters, "signature", SignerInfo.defaultValues("signature"));
 		
 		if("unsignedAttrs" in parameters)
 			/**
 			 * @type {SignedAndUnsignedAttributes}
-			 * @description unsignedAttrs
+			 * @desc unsignedAttrs
 			 */
 			this.unsignedAttrs = getParametersValue(parameters, "unsignedAttrs", SignerInfo.defaultValues("unsignedAttrs"));
 		//endregion
@@ -131,26 +131,31 @@ export default class SignerInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * SignerInfo ::= SEQUENCE {
+	 *    version CMSVersion,
+	 *    sid SignerIdentifier,
+	 *    digestAlgorithm DigestAlgorithmIdentifier,
+	 *    signedAttrs [0] IMPLICIT SignedAttributes OPTIONAL,
+	 *    signatureAlgorithm SignatureAlgorithmIdentifier,
+	 *    signature SignatureValue,
+	 *    unsignedAttrs [1] IMPLICIT UnsignedAttributes OPTIONAL }
+	 *
+	 * SignerIdentifier ::= CHOICE {
+	 *    issuerAndSerialNumber IssuerAndSerialNumber,
+	 *    subjectKeyIdentifier [0] SubjectKeyIdentifier }
+	 *
+	 * SubjectKeyIdentifier ::= OCTET STRING
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//SignerInfo ::= SEQUENCE {
-		//    version CMSVersion,
-		//    sid SignerIdentifier,
-		//    digestAlgorithm DigestAlgorithmIdentifier,
-		//    signedAttrs [0] IMPLICIT SignedAttributes OPTIONAL,
-		//    signatureAlgorithm SignatureAlgorithmIdentifier,
-		//    signature SignatureValue,
-		//    unsignedAttrs [1] IMPLICIT UnsignedAttributes OPTIONAL }
-		//
-		//SignerIdentifier ::= CHOICE {
-		//    issuerAndSerialNumber IssuerAndSerialNumber,
-		//    subjectKeyIdentifier [0] SubjectKeyIdentifier }
-		//
-		//SubjectKeyIdentifier ::= OCTET STRING
 
 		/**
 		 * @type {Object}
@@ -222,6 +227,18 @@ export default class SignerInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"SignerInfo.version",
+			"SignerInfo.sid",
+			"SignerInfo.digestAlgorithm",
+			"SignerInfo.signedAttrs",
+			"SignerInfo.signatureAlgorithm",
+			"SignerInfo.signature",
+			"SignerInfo.unsignedAttrs"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -229,7 +246,7 @@ export default class SignerInfo
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CMS_SIGNER_INFO");
+			throw new Error("Object's schema was not verified against input data for SignerInfo");
 		//endregion
 
 		//region Get internal properties from parsed schema

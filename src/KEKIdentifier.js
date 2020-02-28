@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import OtherKeyAttribute from "./OtherKeyAttribute";
+import { getParametersValue, clearProps } from "pvutils";
+import OtherKeyAttribute from "./OtherKeyAttribute.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -11,27 +11,27 @@ export default class KEKIdentifier
 	/**
 	 * Constructor for KEKIdentifier class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {OctetString}
-		 * @description keyIdentifier
+		 * @desc keyIdentifier
 		 */
 		this.keyIdentifier = getParametersValue(parameters, "keyIdentifier", KEKIdentifier.defaultValues("keyIdentifier"));
 
 		if("date" in parameters)
 			/**
 			 * @type {GeneralizedTime}
-			 * @description date
+			 * @desc date
 			 */
 			this.date = getParametersValue(parameters, "date", KEKIdentifier.defaultValues("date"));
 		if("other" in parameters)
 			/**
 			 * @type {OtherKeyAttribute}
-			 * @description other
+			 * @desc other
 			 */
 			this.other = getParametersValue(parameters, "other", KEKIdentifier.defaultValues("other"));
 		//endregion
@@ -73,6 +73,7 @@ export default class KEKIdentifier
 			case "keyIdentifier":
 				return (memberValue.isEqual(KEKIdentifier.defaultValues("keyIdentifier")));
 			case "date":
+				// noinspection OverlyComplexBooleanExpressionJS
 				return ((memberValue.year === 0) &&
 						(memberValue.month === 0) &&
 						(memberValue.day === 0) &&
@@ -89,17 +90,21 @@ export default class KEKIdentifier
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * KEKIdentifier ::= SEQUENCE {
+	 *    keyIdentifier OCTET STRING,
+	 *    date GeneralizedTime OPTIONAL,
+	 *    other OtherKeyAttribute OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//KEKIdentifier ::= SEQUENCE {
-		//    keyIdentifier OCTET STRING,
-		//    date GeneralizedTime OPTIONAL,
-		//    other OtherKeyAttribute OPTIONAL }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -128,6 +133,14 @@ export default class KEKIdentifier
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"keyIdentifier",
+			"date",
+			"other"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

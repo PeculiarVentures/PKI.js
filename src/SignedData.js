@@ -1,27 +1,18 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, utilConcatBuf, isEqualBuffer } from "pvutils";
-import {
-	getCrypto,
-	getOIDByAlgorithm,
-	createCMSECDSASignature,
-	getAlgorithmByOID,
-	createECDSASignatureFromCMS,
-	getAlgorithmParameters
-} from "./common";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import EncapsulatedContentInfo from "./EncapsulatedContentInfo";
-import Certificate from "./Certificate";
-import OtherCertificateFormat from "./OtherCertificateFormat";
-import CertificateRevocationList from "./CertificateRevocationList";
-import OtherRevocationInfoFormat from "./OtherRevocationInfoFormat";
-import SignerInfo from "./SignerInfo";
-import CertificateSet from "./CertificateSet";
-import RevocationInfoChoices from "./RevocationInfoChoices";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
-import TSTInfo from "./TSTInfo";
-import CertificateChainValidationEngine from "./CertificateChainValidationEngine";
-import BasicOCSPResponse from "./BasicOCSPResponse";
-import RSASSAPSSParams from "./RSASSAPSSParams";
+import { getParametersValue, utilConcatBuf, isEqualBuffer, clearProps } from "pvutils";
+import { getCrypto, getEngine, getOIDByAlgorithm, getAlgorithmByOID } from "./common.js";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import EncapsulatedContentInfo from "./EncapsulatedContentInfo.js";
+import Certificate from "./Certificate.js";
+import CertificateRevocationList from "./CertificateRevocationList.js";
+import OtherRevocationInfoFormat from "./OtherRevocationInfoFormat.js";
+import SignerInfo from "./SignerInfo.js";
+import CertificateSet from "./CertificateSet.js";
+import RevocationInfoChoices from "./RevocationInfoChoices.js";
+import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
+import TSTInfo from "./TSTInfo.js";
+import CertificateChainValidationEngine from "./CertificateChainValidationEngine.js";
+import BasicOCSPResponse from "./BasicOCSPResponse.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -32,44 +23,51 @@ export default class SignedData
 	/**
 	 * Constructor for SignedData class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", SignedData.defaultValues("version"));
 		/**
 		 * @type {Array.<AlgorithmIdentifier>}
-		 * @description digestAlgorithms
+		 * @desc digestAlgorithms
 		 */
 		this.digestAlgorithms = getParametersValue(parameters, "digestAlgorithms", SignedData.defaultValues("digestAlgorithms"));
 		/**
 		 * @type {EncapsulatedContentInfo}
-		 * @description encapContentInfo
+		 * @desc encapContentInfo
 		 */
 		this.encapContentInfo = getParametersValue(parameters, "encapContentInfo", SignedData.defaultValues("encapContentInfo"));
 		
 		if("certificates" in parameters)
 			/**
 			 * @type {Array.<Certificate|OtherCertificateFormat>}
-			 * @description certificates
+			 * @desc certificates
 			 */
 			this.certificates = getParametersValue(parameters, "certificates", SignedData.defaultValues("certificates"));
 		
 		if("crls" in parameters)
 			/**
 			 * @type {Array.<CertificateRevocationList|OtherRevocationInfoFormat>}
-			 * @description crls
+			 * @desc crls
 			 */
 			this.crls = getParametersValue(parameters, "crls", SignedData.defaultValues("crls"));
 		
+		if("ocsps" in parameters)
+			/**
+			 * @type {Array.<BasicOCSPResponse>}
+			 * @desc crls
+			 */
+			this.ocsps = getParametersValue(parameters, "ocsps", SignedData.defaultValues("ocsps"));
+
 		/**
 		 * @type {Array.<SignerInfo>}
-		 * @description signerInfos
+		 * @desc signerInfos
 		 */
 		this.signerInfos = getParametersValue(parameters, "signerInfos", SignedData.defaultValues("signerInfos"));
 		//endregion
@@ -79,7 +77,6 @@ export default class SignedData
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Return default values for all class members
@@ -99,13 +96,14 @@ export default class SignedData
 				return [];
 			case "crls":
 				return [];
+			case "ocsps":
+				return [];
 			case "signerInfos":
 				return [];
 			default:
 				throw new Error(`Invalid member name for SignedData class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Compare values with default values for all class members
@@ -123,29 +121,33 @@ export default class SignedData
 			case "digestAlgorithms":
 			case "certificates":
 			case "crls":
+			case "ocsps":
 			case "signerInfos":
 				return (memberValue.length === 0);
 			default:
 				throw new Error(`Invalid member name for SignedData class: ${memberName}`);
 		}
 	}
-	
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * SignedData ::= SEQUENCE {
+	 *    version CMSVersion,
+	 *    digestAlgorithms DigestAlgorithmIdentifiers,
+	 *    encapContentInfo EncapsulatedContentInfo,
+	 *    certificates [0] IMPLICIT CertificateSet OPTIONAL,
+	 *    crls [1] IMPLICIT RevocationInfoChoices OPTIONAL,
+	 *    signerInfos SignerInfos }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//SignedData ::= SEQUENCE {
-		//    version CMSVersion,
-		//    digestAlgorithms DigestAlgorithmIdentifiers,
-		//    encapContentInfo EncapsulatedContentInfo,
-		//    certificates [0] IMPLICIT CertificateSet OPTIONAL,
-		//    crls [1] IMPLICIT RevocationInfoChoices OPTIONAL,
-		//    signerInfos SignerInfos }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -157,7 +159,7 @@ export default class SignedData
 		 * @property {string} [signerInfos]
 		 */
 		const names = getParametersValue(parameters, "names", {});
-		
+
 		if(("optional" in names) === false)
 			names.optional = false;
 		
@@ -180,16 +182,13 @@ export default class SignedData
 					}
 				}),
 				new asn1js.Constructed({
+					name: (names.certificates || "SignedData.certificates"),
 					optional: true,
 					idBlock: {
 						tagClass: 3, // CONTEXT-SPECIFIC
 						tagNumber: 0 // [0]
 					},
-					value: CertificateSet.schema(names.certificates || {
-						names: {
-							certificates: "SignedData.certificates"
-						}
-					}).valueBlock.value
+					value: CertificateSet.schema().valueBlock.value
 				}), // IMPLICIT CertificateSet
 				new asn1js.Constructed({
 					optional: true,
@@ -214,7 +213,6 @@ export default class SignedData
 			]
 		}));
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
@@ -222,6 +220,17 @@ export default class SignedData
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"SignedData.version",
+			"SignedData.digestAlgorithms",
+			"SignedData.encapContentInfo",
+			"SignedData.certificates",
+			"SignedData.crls",
+			"SignedData.signerInfos"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -229,7 +238,7 @@ export default class SignedData
 		);
 		
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CMS_SIGNED_DATA");
+			throw new Error("Object's schema was not verified against input data for SignedData");
 		//endregion
 		
 		//region Get internal properties from parsed schema
@@ -242,24 +251,12 @@ export default class SignedData
 		
 		if("SignedData.certificates" in asn1.result)
 		{
-			this.certificates = Array.from(asn1.result["SignedData.certificates"], certificate =>
-			{
-				if(certificate.idBlock.tagClass === 1)
-					return new Certificate({ schema: certificate });
-				
-				if((certificate.idBlock.tagClass === 3) && (certificate.idBlock.tagNumber === 3))
-				{
-					//region Create SEQUENCE from [3]
-					certificate.idBlock.tagClass = 1; // UNIVERSAL
-					certificate.idBlock.tagNumber = 16; // SEQUENCE
-					//endregion
-					
-					return new OtherCertificateFormat({ schema: certificate });
-				}
-				//else // For now we would ignore "AttributeCertificateV1" and "AttributeCertificateV1"
-				
-				return new Certificate();
+			const certificateSet = new CertificateSet({
+				schema: new asn1js.Set({
+					value: asn1.result["SignedData.certificates"].valueBlock.value
+				})
 			});
+			this.certificates = certificateSet.certificates.slice(0); // Copy all just for making comfortable access
 		}
 		
 		if("SignedData.crls" in asn1.result)
@@ -282,7 +279,6 @@ export default class SignedData
 			this.signerInfos = Array.from(asn1.result["SignedData.signerInfos"], signerInfoSchema => new SignerInfo({ schema: signerInfoSchema }));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
@@ -305,25 +301,15 @@ export default class SignedData
 		
 		if("certificates" in this)
 		{
+			const certificateSet = new CertificateSet({ certificates: this.certificates });
+			const certificateSetSchema = certificateSet.toSchema();
+			
 			outputArray.push(new asn1js.Constructed({
 				idBlock: {
-					tagClass: 3, // CONTEXT-SPECIFIC
-					tagNumber: 0 // [0]
+					tagClass: 3,
+					tagNumber: 0
 				},
-				value: Array.from(this.certificates, certificate =>
-				{
-					if(certificate instanceof OtherCertificateFormat)
-					{
-						const certificateSchema = certificate.toSchema(encodeFlag);
-						
-						certificateSchema.idBlock.tagClass = 3;
-						certificateSchema.idBlock.tagNumber = 3;
-						
-						return certificateSchema;
-					}
-					
-					return certificate.toSchema(encodeFlag);
-				})
+				value: certificateSetSchema.valueBlock.value
 			}));
 		}
 		
@@ -364,7 +350,6 @@ export default class SignedData
 		}));
 		//endregion
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
@@ -388,18 +373,18 @@ export default class SignedData
 		
 		return _object;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Verify current SignedData value
-	 * @param signer
-	 * @param data
-	 * @param trustedCerts
-	 * @param checkDate
-	 * @param checkChain
-	 * @param includeSignerCertificate
-	 * @param extendedMode
-	 * @returns {*}
+	 * @param {Object} [param={}]
+	 * @param {Number} [param.signer = -1] Index of the signer which information we need to verify
+	 * @param {ArrayBuffer} [param.data=new ArrayBuffer(0)]
+	 * @param {Array.<Certificate>} [param.trustedCerts=[]]
+	 * @param {Date} [param.checkDate=new Date()]
+	 * @param {Boolean} [param.checkChain=false]
+	 * @param {Boolean} [param.extendedMode=false]
+	 * @param {?Function} [findOrigin=null]
+	 * @param {?Function} [findIssuer=null]
 	 */
 	verify({
 		signer = (-1),
@@ -407,27 +392,33 @@ export default class SignedData
 		trustedCerts = [],
 		checkDate = (new Date()),
 		checkChain = false,
-		includeSignerCertificate = false,
-		extendedMode = false
+		extendedMode = false,
+		passedWhenNotRevValues = false,
+		findOrigin = null,
+		findIssuer = null
 	} = {})
 	{
-		//region Global variables 
+		//region Global variables
 		let sequence = Promise.resolve();
 		
 		let messageDigestValue = new ArrayBuffer(0);
 		
-		let publicKey;
-		
 		let shaAlgorithm = "";
 		
 		let signerCertificate = {};
+		
+		let timestampSerial = null;
+		
+		let certificatePath = [];
+		
+		const engine = getEngine();
 		//endregion
 		
-		//region Get a "crypto" extension 
+		//region Get a "crypto" extension
 		const crypto = getCrypto();
 		if(typeof crypto === "undefined")
 			return Promise.reject("Unable to create WebCrypto object");
-		//endregion 
+		//endregion
 		
 		//region Get a signer number
 		if(signer === (-1))
@@ -446,9 +437,9 @@ export default class SignedData
 			
 			return Promise.reject("Unable to get signer index from input parameters");
 		}
-		//endregion 
+		//endregion
 		
-		//region Check that certificates field was included in signed data 
+		//region Check that certificates field was included in signed data
 		if(("certificates" in this) === false)
 		{
 			if(extendedMode)
@@ -465,9 +456,9 @@ export default class SignedData
 			
 			return Promise.reject("No certificates attached to this signed data");
 		}
-		//endregion 
+		//endregion
 		
-		//region Find a certificate for specified signer 
+		//region Find a certificate for specified signer
 		if(this.signerInfos[signer].sid instanceof IssuerAndSerialNumber)
 		{
 			sequence = sequence.then(() =>
@@ -550,9 +541,9 @@ export default class SignedData
 				})
 			);
 		}
-		//endregion 
+		//endregion
 		
-		//region Verify internal digest in case of "tSTInfo" content type 
+		//region Verify internal digest in case of "tSTInfo" content type
 		sequence = sequence.then(() =>
 		{
 			if(this.encapContentInfo.eContentType === "1.2.840.113549.1.9.16.1.4")
@@ -574,6 +565,11 @@ export default class SignedData
 				{
 					return false;
 				}
+				//endregion
+				
+				//region Change "checkDate" and append "timestampSerial"
+				checkDate = tstInfo.genTime;
+				timestampSerial = tstInfo.serialNumber.valueBlock.valueHex;
 				//endregion
 				
 				//region Check that we do have detached data content
@@ -600,28 +596,31 @@ export default class SignedData
 			
 			return true;
 		});
-		//endregion 
+		//endregion
 		
-		//region Make additional verification for signer's certificate 
+		//region Make additional verification for signer's certificate
 		function checkCA(cert)
 		{
 			/// <param name="cert" type="in_window.org.pkijs.simpl.CERT">Certificate to find CA flag for</param>
 			
-			//region Do not include signer's certificate 
+			//region Do not include signer's certificate
 			if((cert.issuer.isEqual(signerCertificate.issuer) === true) && (cert.serialNumber.isEqual(signerCertificate.serialNumber) === true))
 				return null;
-			//endregion 
+			//endregion
 			
 			let isCA = false;
 			
-			for(const extension of cert.extensions)
+			if("extensions" in cert)
 			{
-				if(extension.extnID === "2.5.29.19") // BasicConstraints
+				for(const extension of cert.extensions)
 				{
-					if("cA" in extension.parsedValue)
+					if(extension.extnID === "2.5.29.19") // BasicConstraints
 					{
-						if(extension.parsedValue.cA === true)
-							isCA = true;
+						if("cA" in extension.parsedValue)
+						{
+							if(extension.parsedValue.cA === true)
+								isCA = true;
+						}
 					}
 				}
 			}
@@ -636,97 +635,91 @@ export default class SignedData
 		{
 			sequence = sequence.then(result =>
 			{
-				//region Veify result of previous operation
+				//region Verify result of previous operation
 				if(result === false)
 					return false;
 				//endregion
 				
-				return Promise.all(Array.from(this.certificates.filter(certificate => (certificate instanceof Certificate)), certificate => checkCA(certificate)))
-					.then(promiseResults =>
+				const promiseResults = Array.from(this.certificates.filter(certificate => (certificate instanceof Certificate)), certificate => checkCA(certificate));
+				
+				const certificateChainValidationEngineParameters = {
+					checkDate,
+					certs: Array.from(promiseResults.filter(_result => (_result !== null))),
+					trustedCerts
+				};
+				
+				if(findIssuer !== null)
+					certificateChainValidationEngineParameters.findIssuer = findIssuer;
+				
+				if(findOrigin !== null)
+					certificateChainValidationEngineParameters.findOrigin = findOrigin;
+				
+				const certificateChainEngine = new CertificateChainValidationEngine(certificateChainValidationEngineParameters);
+				
+				certificateChainEngine.certs.push(signerCertificate);
+				
+				if("crls" in this)
+				{
+					for(const crl of this.crls)
 					{
-						const certificateChainEngine = new CertificateChainValidationEngine({
-							checkDate,
-							certs: Array.from(promiseResults.filter(_result => (_result !== null))),
-							trustedCerts
-						});
-						
-						certificateChainEngine.certs.push(signerCertificate);
-						
-						if("crls" in this)
+						if("thisUpdate" in crl)
+							certificateChainEngine.crls.push(crl);
+						else // Assumed "revocation value" has "OtherRevocationInfoFormat"
 						{
-							for(const crl of this.crls)
-							{
-								if(crl instanceof CertificateRevocationList)
-									certificateChainEngine.crls.push(crl);
-								else // Assumed "revocation value" has "OtherRevocationInfoFormat"
-								{
-									if(crl.otherRevInfoFormat === "1.3.6.1.5.5.7.48.1.1") // Basic OCSP response
-										certificateChainEngine.ocsps.push(new BasicOCSPResponse({ schema: crl.otherRevInfo }));
-								}
-							}
+							if(crl.otherRevInfoFormat === "1.3.6.1.5.5.7.48.1.1") // Basic OCSP response
+								certificateChainEngine.ocsps.push(new BasicOCSPResponse({ schema: crl.otherRevInfo }));
 						}
-						
-						if("ocsps" in this)
-							certificateChainEngine.ocsps.push(...(this.ocsps));
-						
-						return certificateChainEngine.verify().then(verificationResult =>
-						{
-							if(verificationResult.result === true)
-								return Promise.resolve(true);
-							
-							if(extendedMode)
-							{
-								return Promise.reject({
-									date: checkDate,
-									code: 5,
-									message: `Validation of signer's certificate failed: ${verificationResult.resultMessage}`,
-									signatureVerified: null,
-									signerCertificate,
-									signerCertificateVerified: false
-								});
-							}
-							
-							return Promise.reject("Validation of signer's certificate failed");
-						}, error =>
-						{
-							if(extendedMode)
-							{
-								return Promise.reject({
-									date: checkDate,
-									code: 5,
-									message: `Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`,
-									signatureVerified: null,
-									signerCertificate,
-									signerCertificateVerified: false
-								});
-							}
-							
-							return Promise.reject(`Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`);
-						});
-					}, promiseError =>
+					}
+				}
+				
+				if("ocsps" in this)
+					certificateChainEngine.ocsps.push(...(this.ocsps));
+				
+				return certificateChainEngine.verify({ passedWhenNotRevValues }).then(verificationResult =>
+				{
+					if("certificatePath" in verificationResult)
+						certificatePath = verificationResult.certificatePath;
+					
+					if(verificationResult.result === true)
+						return Promise.resolve(true);
+					
+					if(extendedMode)
 					{
-						if(extendedMode)
-						{
-							return Promise.reject({
-								date: checkDate,
-								code: 6,
-								message: `Error during checking certificates for CA flag: ${promiseError}`,
-								signatureVerified: null,
-								signerCertificate,
-								signerCertificateVerified: null
-							});
-						}
-						
-						return Promise.reject(`Error during checking certificates for CA flag: ${promiseError}`);
-					});
+						return Promise.reject({
+							date: checkDate,
+							code: 5,
+							message: `Validation of signer's certificate failed: ${verificationResult.resultMessage}`,
+							signatureVerified: null,
+							signerCertificate,
+							signerCertificateVerified: false
+						});
+					}
+					
+					return Promise.reject("Validation of signer's certificate failed");
+				}, error =>
+				{
+					if(extendedMode)
+					{
+						return Promise.reject({
+							date: checkDate,
+							code: 5,
+							message: `Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`,
+							signatureVerified: null,
+							signerCertificate,
+							signerCertificateVerified: false
+						});
+					}
+					
+					return Promise.reject(`Validation of signer's certificate failed with error: ${((error instanceof Object) ? error.resultMessage : error)}`);
+				});
 			});
 		}
-		//endregion 
+		//endregion
 		
-		//region Find signer's hashing algorithm 
+		//region Find signer's hashing algorithm
 		sequence = sequence.then(result =>
 		{
-			//region Veify result of previous operation
+			//region Verify result of previous operation
 			if(result === false)
 				return false;
 			//endregion
@@ -753,12 +746,12 @@ export default class SignedData
 			
 			return true;
 		});
-		//endregion 
+		//endregion
 		
-		//region Create correct data block for verification 
+		//region Create correct data block for verification
 		sequence = sequence.then(result =>
 		{
-			//region Veify result of previous operation
+			//region Verify result of previous operation
 			if(result === false)
 				return false;
 			//endregion
@@ -777,7 +770,7 @@ export default class SignedData
 					}
 				}
 				else
-					data = this.encapContentInfo.eContent.valueBlock.valueHex;
+					data = this.encapContentInfo.eContent.valueBlock.valueBeforeDecode;
 			}
 			else // Detached data
 			{
@@ -864,207 +857,57 @@ export default class SignedData
 			
 			return true;
 		});
-		//endregion 
+		//endregion
 		
-		//region Import public key from signer's certificate 
+		//region Verify "message-digest" attribute in case of "signedAttrs"
 		sequence = sequence.then(result =>
 		{
-			//region Veify result of previous operation
+			//region Verify result of previous operation
 			if(result === false)
 				return false;
 			//endregion
 			
-			//region Get information about public key algorithm and default parameters for import
-			let algorithmId;
-			if(signerCertificate.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
-				algorithmId = signerCertificate.signatureAlgorithm.algorithmId;
-			else
-				algorithmId = signerCertificate.subjectPublicKeyInfo.algorithm.algorithmId;
-			
-			const algorithmObject = getAlgorithmByOID(algorithmId);
-			if(("name" in algorithmObject) === false)
-			{
-				if(extendedMode)
-				{
-					return Promise.reject({
-						date: checkDate,
-						code: 11,
-						message: `Unsupported public key algorithm: ${algorithmId}`,
-						signatureVerified: null,
-						signerCertificate,
-						signerCertificateVerified: true
-					});
-				}
-				
-				return Promise.reject(`Unsupported public key algorithm: ${algorithmId}`);
-			}
-			
-			const algorithm = getAlgorithmParameters(algorithmObject.name, "importkey");
-			if("hash" in algorithm.algorithm)
-				algorithm.algorithm.hash.name = shaAlgorithm;
-			
-			//region Special case for ECDSA
-			if(algorithmObject.name === "ECDSA")
-			{
-				//region Get information about named curve
-				let algorithmParamsChecked = false;
-				
-				if(("algorithmParams" in signerCertificate.subjectPublicKeyInfo.algorithm) === true)
-				{
-					if("idBlock" in signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams)
-					{
-						if((signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
-							algorithmParamsChecked = true;
-					}
-				}
-				
-				if(algorithmParamsChecked === false)
-					return Promise.reject("Incorrect type for ECDSA public key parameters");
-				
-				const curveObject = getAlgorithmByOID(signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
-				if(("name" in curveObject) === false)
-					return Promise.reject(`Unsupported named curve algorithm: ${signerCertificate.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
-				//endregion
-				
-				algorithm.algorithm.namedCurve = curveObject.name;
-			}
-			//endregion
-			//endregion
-			
-			const publicKeyInfoSchema = signerCertificate.subjectPublicKeyInfo.toSchema();
-			const publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
-			const publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
-			
-			return crypto.importKey("spki", publicKeyInfoView, algorithm.algorithm, true, algorithm.usages);
-		});
-		//endregion 
-		
-		//region Verify signer's signature 
-		sequence = sequence.then(result =>
-		{
-			// #region Veify result of previous operation
-			if(typeof result === "boolean")
-				return false;
-			// #endregion
-			
-			publicKey = result;
-			
-			// #region Verify "message-digest" attribute in case of "signedAttrs"
 			if("signedAttrs" in this.signerInfos[signer])
 				return crypto.digest(shaAlgorithm, new Uint8Array(data));
 			
 			return true;
-			// #endregion
-		}).then(result =>
-		{
-			// #region Verify result of previous operation
-			if(result === false)
-				return false;
-			// #endregion
-			
-			if("signedAttrs" in this.signerInfos[signer])
+		}).then(
+			/**
+			 * @param {ArrayBuffer} result
+			 */
+			result =>
 			{
-				if(isEqualBuffer(result, messageDigestValue))
-				{
-					data = this.signerInfos[signer].signedAttrs.encodedValue;
-					return true;
-				}
+				//region Verify result of previous operation
+				if(result === false)
+					return false;
+				//endregion
 				
-				return false;
-			}
-			
-			return true;
-		}).then(result =>
-		{
-			//region Check result of previous operation
-			if(result === false)
-				return false;
-			//endregion
-			
-			//region Get default algorithm parameters for verification
-			const algorithm = getAlgorithmParameters(publicKey.algorithm.name, "verify");
-			if("hash" in algorithm.algorithm)
-				algorithm.algorithm.hash.name = shaAlgorithm;
-			//endregion
-			
-			//region Special case for RSA-PSS
-			if(publicKey.algorithm.name === "RSA-PSS")
-			{
-				let pssParameters;
-				
-				try
+				if("signedAttrs" in this.signerInfos[signer])
 				{
-					pssParameters = new RSASSAPSSParams({ schema: this.signerInfos[signer].signatureAlgorithm.algorithmParams });
-				}
-				catch(ex)
-				{
-					if(extendedMode)
+					if(isEqualBuffer(result, messageDigestValue))
 					{
-						return Promise.reject({
-							date: checkDate,
-							code: 12,
-							message: ex,
-							signatureVerified: null,
-							signerCertificate,
-							signerCertificateVerified: true
-						});
+						data = this.signerInfos[signer].signedAttrs.encodedValue;
+						return true;
 					}
 					
-					return Promise.reject(ex);
+					return false;
 				}
 				
-				if("saltLength" in pssParameters)
-					algorithm.algorithm.saltLength = pssParameters.saltLength;
-				else
-					algorithm.algorithm.saltLength = 20;
-				
-				let hashName = "SHA-1";
-				
-				if("hashAlgorithm" in pssParameters)
-				{
-					const hashAlgorithm = getAlgorithmByOID(pssParameters.hashAlgorithm.algorithmId);
-					if(("name" in hashAlgorithm) === false)
-					{
-						if(extendedMode)
-						{
-							return Promise.reject({
-								date: checkDate,
-								code: 13,
-								message: `Unrecognized hash algorithm: ${pssParameters.hashAlgorithm.algorithmId}`,
-								signatureVerified: null,
-								signerCertificate,
-								signerCertificateVerified: true
-							});
-						}
-						
-						return Promise.reject(`Unrecognized hash algorithm: ${pssParameters.hashAlgorithm.algorithmId}`);
-					}
-					
-					hashName = hashAlgorithm.name;
-				}
-				
-				algorithm.algorithm.hash.name = hashName;
-			}
-			//endregion
-			
-			//region Special case for ECDSA signatures
-			let signatureValue = this.signerInfos[signer].signature.valueBlock.valueHex;
-			
-			if(publicKey.algorithm.name === "ECDSA")
-			{
-				const asn1 = asn1js.fromBER(signatureValue);
-				signatureValue = createECDSASignatureFromCMS(asn1.result);
-			}
-			//endregion
-			
-			return crypto.verify(algorithm.algorithm,
-				publicKey,
-				new Uint8Array(signatureValue),
-				new Uint8Array(data));
-		});
-		//endregion 
+				return true;
+			});
+		//endregion
 		
-		//region Make a final result 
+		sequence = sequence.then(result =>
+		{
+			//region Verify result of previous operation
+			if(result === false)
+				return false;
+			//endregion
+			
+			return engine.subtle.verifyWithPublicKey(data, this.signerInfos[signer].signature, signerCertificate.subjectPublicKeyInfo, signerCertificate.signatureAlgorithm, shaAlgorithm);
+		});
+		
+		//region Make a final result
 		sequence = sequence.then(result =>
 		{
 			if(extendedMode)
@@ -1075,7 +918,9 @@ export default class SignedData
 					message: "",
 					signatureVerified: result,
 					signerCertificate,
-					signerCertificateVerified: true
+					timestampSerial,
+					signerCertificateVerified: true,
+					certificatePath
 				};
 			}
 			
@@ -1093,47 +938,44 @@ export default class SignedData
 					message: `Error during verification: ${error.message}`,
 					signatureVerified: null,
 					signerCertificate,
+					timestampSerial,
 					signerCertificateVerified: true
 				});
 			}
 			
 			return Promise.reject(error);
 		});
-		//endregion 
+		//endregion
 		
 		return sequence;
 	}
-	
 	//**********************************************************************************
 	/**
 	 * Signing current SignedData
 	 * @param {key} privateKey Private key for "subjectPublicKeyInfo" structure
 	 * @param {number} signerIndex Index number (starting from 0) of signer index to make signature for
-	 * @param {string} [hashAlgorithm] Hashing algorithm. Default SHA-1
+	 * @param {string} [hashAlgorithm="SHA-1"] Hashing algorithm. Default SHA-1
 	 * @param {ArrayBuffer} [data] Detached data
 	 * @returns {*}
 	 */
-	sign(privateKey, signerIndex, hashAlgorithm, data)
+	sign(privateKey, signerIndex, hashAlgorithm = "SHA-1", data = (new ArrayBuffer(0)))
 	{
-		//region Initial variables
-		data = data || new ArrayBuffer(0);
-		let hashAlgorithmOID = "";
-		//endregion
-		
-		//region Get a private key from function parameter
+		//region Initial checking
 		if(typeof privateKey === "undefined")
 			return Promise.reject("Need to provide a private key for signing");
 		//endregion
 		
-		//region Get hashing algorithm
-		if(typeof hashAlgorithm === "undefined")
-			hashAlgorithm = "SHA-1";
+		//region Initial variables
+		let sequence = Promise.resolve();
+		let parameters;
+		
+		const engine = getEngine();
+		//endregion
 		
 		//region Simple check for supported algorithm
-		hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
+		const hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
 		if(hashAlgorithmOID === "")
 			return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
-		//endregion
 		//endregion
 		
 		//region Append information about hash algorithm
@@ -1151,139 +993,75 @@ export default class SignedData
 		});
 		//endregion
 		
-		//region Get a "default parameters" for current algorithm
-		const defParams = getAlgorithmParameters(privateKey.algorithm.name, "sign");
-		defParams.algorithm.hash.name = hashAlgorithm;
-		//endregion
+		//region Get a "default parameters" for current algorithm and set correct signature algorithm
+		sequence = sequence.then(() => engine.subtle.getSignatureParameters(privateKey, hashAlgorithm));
 		
-		//region Fill internal structures base on "privateKey" and "hashAlgorithm"
-		switch(privateKey.algorithm.name.toUpperCase())
+		sequence = sequence.then(result =>
 		{
-			case "RSASSA-PKCS1-V1_5":
-			case "ECDSA":
-				this.signerInfos[signerIndex].signatureAlgorithm.algorithmId = getOIDByAlgorithm(defParams.algorithm);
-				break;
-			case "RSA-PSS":
-				{
-				//region Set "saltLength" as a length (in octets) of hash function result
-					switch(hashAlgorithm.toUpperCase())
-				{
-						case "SHA-256":
-							defParams.algorithm.saltLength = 32;
-							break;
-						case "SHA-384":
-							defParams.algorithm.saltLength = 48;
-							break;
-						case "SHA-512":
-							defParams.algorithm.saltLength = 64;
-							break;
-						default:
-					}
-				//endregion
-				
-				//region Fill "RSASSA_PSS_params" object
-					const paramsObject = {};
-				
-					if(hashAlgorithm.toUpperCase() !== "SHA-1")
-				{
-						hashAlgorithmOID = getOIDByAlgorithm({ name: hashAlgorithm });
-						if(hashAlgorithmOID === "")
-							return Promise.reject(`Unsupported hash algorithm: ${hashAlgorithm}`);
-					
-						paramsObject.hashAlgorithm = new AlgorithmIdentifier({
-							algorithmId: hashAlgorithmOID,
-							algorithmParams: new asn1js.Null()
-						});
-					
-						paramsObject.maskGenAlgorithm = new AlgorithmIdentifier({
-							algorithmId: "1.2.840.113549.1.1.8", // MGF1
-							algorithmParams: paramsObject.hashAlgorithm.toSchema()
-						});
-					}
-				
-					if(defParams.algorithm.saltLength !== 20)
-						paramsObject.saltLength = defParams.algorithm.saltLength;
-				
-					const pssParameters = new RSASSAPSSParams(paramsObject);
-				//endregion
-				
-				//region Automatically set signature algorithm
-					this.signerInfos[signerIndex].signatureAlgorithm = new AlgorithmIdentifier({
-						algorithmId: "1.2.840.113549.1.1.10",
-						algorithmParams: pssParameters.toSchema()
-					});
-				//endregion
-				}
-				break;
-			default:
-				return Promise.reject(`Unsupported signature algorithm: ${privateKey.algorithm.name}`);
-		}
+			parameters = result.parameters;
+			this.signerInfos[signerIndex].signatureAlgorithm = result.signatureAlgorithm;
+		});
 		//endregion
 		
 		//region Create TBS data for signing
-		if("signedAttrs" in this.signerInfos[signerIndex])
+		sequence = sequence.then(() =>
 		{
-			if(this.signerInfos[signerIndex].signedAttrs.encodedValue.byteLength !== 0)
-				data = this.signerInfos[signerIndex].signedAttrs.encodedValue;
+			if("signedAttrs" in this.signerInfos[signerIndex])
+			{
+				if(this.signerInfos[signerIndex].signedAttrs.encodedValue.byteLength !== 0)
+					data = this.signerInfos[signerIndex].signedAttrs.encodedValue;
+				else
+				{
+					data = this.signerInfos[signerIndex].signedAttrs.toSchema(true).toBER(false);
+					
+					//region Change type from "[0]" to "SET" acordingly to standard
+					const view = new Uint8Array(data);
+					view[0] = 0x31;
+					//endregion
+				}
+			}
 			else
 			{
-				data = this.signerInfos[signerIndex].signedAttrs.toSchema(true).toBER(false);
-				
-				//region Change type from "[0]" to "SET" acordingly to standard
-				const view = new Uint8Array(data);
-				view[0] = 0x31;
-				//endregion
-			}
-		}
-		else
-		{
-			if("eContent" in this.encapContentInfo) // Attached data
-			{
-				if((this.encapContentInfo.eContent.idBlock.tagClass === 1) &&
-					(this.encapContentInfo.eContent.idBlock.tagNumber === 4))
+				if("eContent" in this.encapContentInfo) // Attached data
 				{
-					if(this.encapContentInfo.eContent.idBlock.isConstructed === false)
-						data = this.encapContentInfo.eContent.valueBlock.valueHex;
-					else
+					if((this.encapContentInfo.eContent.idBlock.tagClass === 1) &&
+						(this.encapContentInfo.eContent.idBlock.tagNumber === 4))
 					{
-						for(const content of this.encapContentInfo.eContent.valueBlock.value)
-							data = utilConcatBuf(data, content.valueBlock.valueHex);
+						if(this.encapContentInfo.eContent.idBlock.isConstructed === false)
+							data = this.encapContentInfo.eContent.valueBlock.valueHex;
+						else
+						{
+							for(const content of this.encapContentInfo.eContent.valueBlock.value)
+								data = utilConcatBuf(data, content.valueBlock.valueHex);
+						}
 					}
+					else
+						data = this.encapContentInfo.eContent.valueBlock.valueBeforeDecode;
 				}
-				else
-					data = this.encapContentInfo.eContent.valueBlock.valueHex;
+				else // Detached data
+				{
+					if(data.byteLength === 0) // Check that "data" already provided by function parameter
+						return Promise.reject("Missed detached data input array");
+				}
 			}
-			else // Detached data
-			{
-				if(data.byteLength === 0) // Check that "data" already provided by function parameter
-					return Promise.reject("Missed detached data input array");
-			}
-		}
-		//endregion
-		
-		//region Get a "crypto" extension
-		const crypto = getCrypto();
-		if(typeof crypto === "undefined")
-			return Promise.reject("Unable to create WebCrypto object");
+			
+			return Promise.resolve();
+		});
 		//endregion
 		
 		//region Signing TBS data on provided private key
-		return crypto.sign(defParams.algorithm,
-			privateKey,
-			new Uint8Array(data)).then(result =>
+		sequence = sequence.then(() => engine.subtle.signWithPrivateKey(data, privateKey, parameters));
+		
+		sequence = sequence.then(result =>
 		{
-			//region Special case for ECDSA algorithm
-				if(defParams.algorithm.name === "ECDSA")
-					result = createCMSECDSASignature(result);
-			//endregion
+			this.signerInfos[signerIndex].signature = new asn1js.OctetString({ valueHex: result });
 			
-				this.signerInfos[signerIndex].signature = new asn1js.OctetString({ valueHex: result });
-			
-				return result;
-			}, error => Promise.reject(`Signing error: ${error}`));
+			return result;
+		});
 		//endregion
+		
+		return sequence;
 	}
-	
 	//**********************************************************************************
 }
 //**************************************************************************************

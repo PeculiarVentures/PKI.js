@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import Certificate from "./Certificate";
-import RecipientIdentifier from "./RecipientIdentifier";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
+import { getParametersValue, clearProps } from "pvutils";
+import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
+import Certificate from "./Certificate.js";
+import RecipientIdentifier from "./RecipientIdentifier.js";
+import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -14,34 +14,34 @@ export default class KeyTransRecipientInfo
 	/**
 	 * Constructor for KeyTransRecipientInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {number}
-		 * @description version
+		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", KeyTransRecipientInfo.defaultValues("version"));
 		/**
 		 * @type {RecipientIdentifier}
-		 * @description rid
+		 * @desc rid
 		 */
 		this.rid = getParametersValue(parameters, "rid", KeyTransRecipientInfo.defaultValues("rid"));
 		/**
 		 * @type {AlgorithmIdentifier}
-		 * @description keyEncryptionAlgorithm
+		 * @desc keyEncryptionAlgorithm
 		 */
 		this.keyEncryptionAlgorithm = getParametersValue(parameters, "keyEncryptionAlgorithm", KeyTransRecipientInfo.defaultValues("keyEncryptionAlgorithm"));
 		/**
 		 * @type {OctetString}
-		 * @description encryptedKey
+		 * @desc encryptedKey
 		 */
 		this.encryptedKey = getParametersValue(parameters, "encryptedKey", KeyTransRecipientInfo.defaultValues("encryptedKey"));
 		/**
 		 * @type {Certificate}
-		 * @description recipientCertificate For some reasons we need to store recipient's certificate here
+		 * @desc recipientCertificate For some reasons we need to store recipient's certificate here
 		 */
 		this.recipientCertificate = getParametersValue(parameters, "recipientCertificate", KeyTransRecipientInfo.defaultValues("recipientCertificate"));
 		//endregion
@@ -99,18 +99,22 @@ export default class KeyTransRecipientInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * KeyTransRecipientInfo ::= SEQUENCE {
+	 *    version CMSVersion,  -- always set to 0 or 2
+	 *    rid RecipientIdentifier,
+	 *    keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
+	 *    encryptedKey EncryptedKey }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//KeyTransRecipientInfo ::= SEQUENCE {
-		//    version CMSVersion,  -- always set to 0 or 2
-		//    rid RecipientIdentifier,
-		//    keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
-		//    encryptedKey EncryptedKey }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -138,6 +142,15 @@ export default class KeyTransRecipientInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"version",
+			"rid",
+			"keyEncryptionAlgorithm",
+			"encryptedKey"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

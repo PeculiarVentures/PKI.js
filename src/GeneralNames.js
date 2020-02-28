@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import GeneralName from "./GeneralName";
+import { getParametersValue, clearProps } from "pvutils";
+import GeneralName from "./GeneralName.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -11,14 +11,14 @@ export default class GeneralNames
 	/**
 	 * Constructor for GeneralNames class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<GeneralName>}
-		 * @description Array of "general names"
+		 * @desc Array of "general names"
 		 */
 		this.names = getParametersValue(parameters, "names", GeneralNames.defaultValues("names"));
 		//endregion
@@ -45,11 +45,18 @@ export default class GeneralNames
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
+	 * @param {boolean} [optional=false] Flag would be element optional or not
 	 * @returns {Object} asn1js schema object
 	 */
-	static schema(parameters = {})
+	static schema(parameters = {}, optional = false)
 	{
 		/**
 		 * @type {Object}
@@ -57,11 +64,13 @@ export default class GeneralNames
 		 * @property {string} generalTimeName Name for "generalTimeName" choice
 		 */
 		const names = getParametersValue(parameters, "names", {});
-
+		
 		return (new asn1js.Sequence({
+			optional,
+			name: (names.blockName || ""),
 			value: [
 				new asn1js.Repeated({
-					name: (names.blockName || "names"),
+					name: (names.generalNames || ""),
 					value: GeneralName.schema()
 				})
 			]
@@ -74,10 +83,22 @@ export default class GeneralNames
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"names",
+			"generalNames"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
-			GeneralNames.schema()
+			GeneralNames.schema({
+				names: {
+					blockName: "names",
+					generalNames: "generalNames"
+				}
+			})
 		);
 
 		if(asn1.verified === false)
@@ -85,7 +106,7 @@ export default class GeneralNames
 		//endregion
 
 		//region Get internal properties from parsed schema
-		this.names = Array.from(asn1.result.names, element => new GeneralName({ schema: element }));
+		this.names = Array.from(asn1.result.generalNames, element => new GeneralName({ schema: element }));
 		//endregion
 	}
 	//**********************************************************************************

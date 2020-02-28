@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import ResponseBytes from "./ResponseBytes";
-import BasicOCSPResponse from "./BasicOCSPResponse";
+import { getParametersValue, clearProps } from "pvutils";
+import ResponseBytes from "./ResponseBytes.js";
+import BasicOCSPResponse from "./BasicOCSPResponse.js";
 //**************************************************************************************
 /**
  * Class from RFC6960
@@ -12,21 +12,21 @@ export default class OCSPResponse
 	/**
 	 * Constructor for OCSPResponse class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Enumerated}
-		 * @description responseStatus
+		 * @desc responseStatus
 		 */
 		this.responseStatus = getParametersValue(parameters, "responseStatus", OCSPResponse.defaultValues("responseStatus"));
 
 		if("responseBytes" in parameters)
 			/**
 			 * @type {ResponseBytes}
-			 * @description responseBytes
+			 * @desc responseBytes
 			 */
 			this.responseBytes = getParametersValue(parameters, "responseBytes", OCSPResponse.defaultValues("responseBytes"));
 		//endregion
@@ -74,26 +74,30 @@ export default class OCSPResponse
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * OCSPResponse ::= SEQUENCE {
+	 *    responseStatus         OCSPResponseStatus,
+	 *    responseBytes          [0] EXPLICIT ResponseBytes OPTIONAL }
+	 *
+	 * OCSPResponseStatus ::= ENUMERATED {
+	 *    successful            (0),  -- Response has valid confirmations
+	 *    malformedRequest      (1),  -- Illegal confirmation request
+	 *    internalError         (2),  -- Internal error in issuer
+	 *    tryLater              (3),  -- Try again later
+	 *    -- (4) is not used
+	 *    sigRequired           (5),  -- Must sign the request
+	 *    unauthorized          (6)   -- Request unauthorized
+	 * }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//OCSPResponse ::= SEQUENCE {
-		//    responseStatus         OCSPResponseStatus,
-		//    responseBytes          [0] EXPLICIT ResponseBytes OPTIONAL }
-		//
-		//OCSPResponseStatus ::= ENUMERATED {
-		//    successful            (0),  -- Response has valid confirmations
-		//    malformedRequest      (1),  -- Illegal confirmation request
-		//    internalError         (2),  -- Internal error in issuer
-		//    tryLater              (3),  -- Try again later
-		//    -- (4) is not used
-		//    sigRequired           (5),  -- Must sign the request
-		//    unauthorized          (6)   -- Request unauthorized
-		//}
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -130,6 +134,13 @@ export default class OCSPResponse
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"responseStatus",
+			"responseBytes"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -137,7 +148,7 @@ export default class OCSPResponse
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for OCSP_RESPONSE");
+			throw new Error("Object's schema was not verified against input data for OCSPResponse");
 		//endregion
 
 		//region Get internal properties from parsed schema
@@ -253,9 +264,10 @@ export default class OCSPResponse
 	//**********************************************************************************
 	/**
 	 * Verify current OCSP Response
+	 * @param {Certificate|null} issuerCertificate In order to decrease size of resp issuer cert could be ommited. In such case you need manually provide it.
 	 * @returns {Promise}
 	 */
-	verify()
+	verify(issuerCertificate = null)
 	{
 		//region Check that ResponseBytes exists in the object
 		if(("responseBytes" in this) === false)
@@ -268,6 +280,14 @@ export default class OCSPResponse
 			const asn1 = asn1js.fromBER(this.responseBytes.response.valueBlock.valueHex);
 			const basicResponse = new BasicOCSPResponse({ schema: asn1.result });
 
+			if(issuerCertificate !== null)
+			{
+				if(("certs" in basicResponse) === false)
+					basicResponse.certs = [];
+				
+				basicResponse.certs.push(issuerCertificate);
+			}
+			
 			return basicResponse.verify();
 		}
 

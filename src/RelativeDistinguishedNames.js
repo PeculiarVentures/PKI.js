@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, isEqualBuffer } from "pvutils";
-import AttributeTypeAndValue from "./AttributeTypeAndValue";
+import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
+import AttributeTypeAndValue from "./AttributeTypeAndValue.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -11,7 +11,7 @@ export default class RelativeDistinguishedNames
 	/**
 	 * Constructor for RelativeDistinguishedNames class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 * @property {Array.<AttributeTypeAndValue>} [typesAndValues] Array of "type and value" objects
 	 * @property {ArrayBuffer} [valueBeforeDecode] Value of the RDN before decoding from schema
 	 */
@@ -20,12 +20,12 @@ export default class RelativeDistinguishedNames
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<AttributeTypeAndValue>}
-		 * @description Array of "type and value" objects
+		 * @desc Array of "type and value" objects
 		 */
 		this.typesAndValues = getParametersValue(parameters, "typesAndValues", RelativeDistinguishedNames.defaultValues("typesAndValues"));
 		/**
 		 * @type {ArrayBuffer}
-		 * @description Value of the RDN before decoding from schema
+		 * @desc Value of the RDN before decoding from schema
 		 */
 		this.valueBeforeDecode = getParametersValue(parameters, "valueBeforeDecode", RelativeDistinguishedNames.defaultValues("valueBeforeDecode"));
 		//endregion
@@ -72,17 +72,21 @@ export default class RelativeDistinguishedNames
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RDNSequence ::= Sequence OF RelativeDistinguishedName
+	 *
+	 * RelativeDistinguishedName ::=
+	 * SET SIZE (1..MAX) OF AttributeTypeAndValue
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RDNSequence ::= Sequence OF RelativeDistinguishedName
-		//
-		//RelativeDistinguishedName ::=
-		//SET SIZE (1..MAX) OF AttributeTypeAndValue
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName] Name for entire block
@@ -116,10 +120,14 @@ export default class RelativeDistinguishedNames
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"RDN",
+			"typesAndValues"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
-		/**
-		 * @type {{verified: boolean}|{verified: boolean, result: {RDN: Object, typesAndValues: Array.<Object>}}}
-		 */
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
 			RelativeDistinguishedNames.schema({
@@ -131,13 +139,14 @@ export default class RelativeDistinguishedNames
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for RDN");
+			throw new Error("Object's schema was not verified against input data for RelativeDistinguishedNames");
 		//endregion
 
 		//region Get internal properties from parsed schema
 		if("typesAndValues" in asn1.result) // Could be a case when there is no "types and values"
 			this.typesAndValues = Array.from(asn1.result.typesAndValues, element => new AttributeTypeAndValue({ schema: element }));
 
+		// noinspection JSUnresolvedVariable
 		this.valueBeforeDecode = asn1.result.RDN.valueBeforeDecode;
 		//endregion
 	}

@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import CertID from "./CertID";
-import Extension from "./Extension";
-import Extensions from "./Extensions";
+import { getParametersValue, clearProps } from "pvutils";
+import CertID from "./CertID.js";
+import Extension from "./Extension.js";
+import Extensions from "./Extensions.js";
 //**************************************************************************************
 /**
  * Class from RFC6960
@@ -13,38 +13,38 @@ export default class SingleResponse
 	/**
 	 * Constructor for SingleResponse class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {CertID}
-		 * @description certID
+		 * @desc certID
 		 */
 		this.certID = getParametersValue(parameters, "certID", SingleResponse.defaultValues("certID"));
 		/**
 		 * @type {Object}
-		 * @description certStatus
+		 * @desc certStatus
 		 */
 		this.certStatus = getParametersValue(parameters, "certStatus", SingleResponse.defaultValues("certStatus"));
 		/**
 		 * @type {Date}
-		 * @description thisUpdate
+		 * @desc thisUpdate
 		 */
 		this.thisUpdate = getParametersValue(parameters, "thisUpdate", SingleResponse.defaultValues("thisUpdate"));
 
 		if("nextUpdate" in parameters)
 			/**
 			 * @type {Date}
-			 * @description nextUpdate
+			 * @desc nextUpdate
 			 */
 			this.nextUpdate = getParametersValue(parameters, "nextUpdate", SingleResponse.defaultValues("nextUpdate"));
 
 		if("singleExtensions" in parameters)
 			/**
 			 * @type {Array.<Extension>}
-			 * @description singleExtensions
+			 * @desc singleExtensions
 			 */
 			this.singleExtensions = getParametersValue(parameters, "singleExtensions", SingleResponse.defaultValues("singleExtensions"));
 		//endregion
@@ -87,6 +87,7 @@ export default class SingleResponse
 		switch(memberName)
 		{
 			case "certID":
+				// noinspection OverlyComplexBooleanExpressionJS
 				return ((CertID.compareWithDefault("hashAlgorithm", memberValue.hashAlgorithm)) &&
 						(CertID.compareWithDefault("issuerNameHash", memberValue.issuerNameHash)) &&
 						(CertID.compareWithDefault("issuerKeyHash", memberValue.issuerKeyHash)) &&
@@ -102,30 +103,34 @@ export default class SingleResponse
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * SingleResponse ::= SEQUENCE {
+	 *    certID                       CertID,
+	 *    certStatus                   CertStatus,
+	 *    thisUpdate                   GeneralizedTime,
+	 *    nextUpdate         [0]       EXPLICIT GeneralizedTime OPTIONAL,
+	 *    singleExtensions   [1]       EXPLICIT Extensions OPTIONAL }
+	 *
+	 * CertStatus ::= CHOICE {
+	 *    good        [0]     IMPLICIT NULL,
+	 *    revoked     [1]     IMPLICIT RevokedInfo,
+	 *    unknown     [2]     IMPLICIT UnknownInfo }
+	 *
+	 * RevokedInfo ::= SEQUENCE {
+	 *    revocationTime              GeneralizedTime,
+	 *    revocationReason    [0]     EXPLICIT CRLReason OPTIONAL }
+	 *
+	 * UnknownInfo ::= NULL
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//SingleResponse ::= SEQUENCE {
-		//    certID                       CertID,
-		//    certStatus                   CertStatus,
-		//    thisUpdate                   GeneralizedTime,
-		//    nextUpdate         [0]       EXPLICIT GeneralizedTime OPTIONAL,
-		//    singleExtensions   [1]       EXPLICIT Extensions OPTIONAL }
-		//
-		//CertStatus ::= CHOICE {
-		//    good        [0]     IMPLICIT NULL,
-		//    revoked     [1]     IMPLICIT RevokedInfo,
-		//    unknown     [2]     IMPLICIT UnknownInfo }
-		//
-		//RevokedInfo ::= SEQUENCE {
-		//    revocationTime              GeneralizedTime,
-		//    revocationReason    [0]     EXPLICIT CRLReason OPTIONAL }
-		//
-		//UnknownInfo ::= NULL
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -150,7 +155,7 @@ export default class SingleResponse
 								tagNumber: 0 // [0]
 							},
 							lenBlockLength: 1 // The length contains one byte 0x00
-						}), // IMPLICIT NULL (no "value_block")
+						}), // IMPLICIT NULL (no "valueBlock")
 						new asn1js.Constructed({
 							name: (names.certStatus || ""),
 							idBlock: {
@@ -176,7 +181,7 @@ export default class SingleResponse
 								tagNumber: 2 // [2]
 							},
 							lenBlock: { length: 1 }
-						}) // IMPLICIT NULL (no "value_block")
+						}) // IMPLICIT NULL (no "valueBlock")
 					]
 				}),
 				new asn1js.GeneralizedTime({ name: (names.thisUpdate || "") }),
@@ -206,6 +211,16 @@ export default class SingleResponse
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"certID",
+			"certStatus",
+			"thisUpdate",
+			"nextUpdate",
+			"singleExtensions"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -258,7 +273,15 @@ export default class SingleResponse
 		outputArray.push(this.certStatus);
 		outputArray.push(new asn1js.GeneralizedTime({ valueDate: this.thisUpdate }));
 		if("nextUpdate" in this)
-			outputArray.push(new asn1js.GeneralizedTime({ valueDate: this.nextUpdate }));
+		{
+			outputArray.push(new asn1js.Constructed({
+				idBlock: {
+					tagClass: 3, // CONTEXT-SPECIFIC
+					tagNumber: 0 // [0]
+				},
+				value: [new asn1js.GeneralizedTime({ valueDate: this.nextUpdate })]
+			}));
+		}
 
 		if("singleExtensions" in this)
 		{

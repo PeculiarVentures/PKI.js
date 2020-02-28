@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import KeyTransRecipientInfo from "./KeyTransRecipientInfo";
-import KeyAgreeRecipientInfo from "./KeyAgreeRecipientInfo";
-import KEKRecipientInfo from "./KEKRecipientInfo";
-import PasswordRecipientinfo from "./PasswordRecipientinfo";
-import OtherRecipientInfo from "./OtherRecipientInfo";
+import { getParametersValue, clearProps } from "pvutils";
+import KeyTransRecipientInfo from "./KeyTransRecipientInfo.js";
+import KeyAgreeRecipientInfo from "./KeyAgreeRecipientInfo.js";
+import KEKRecipientInfo from "./KEKRecipientInfo.js";
+import PasswordRecipientinfo from "./PasswordRecipientinfo.js";
+import OtherRecipientInfo from "./OtherRecipientInfo.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -15,21 +15,21 @@ export default class RecipientInfo
 	/**
 	 * Constructor for RecipientInfo class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description variant
+		 * @desc variant
 		 */
 		this.variant = getParametersValue(parameters, "variant", RecipientInfo.defaultValues("variant"));
 
 		if("value" in parameters)
 			/**
 			 * @type {*}
-			 * @description value
+			 * @desc value
 			 */
 			this.value = getParametersValue(parameters, "value", RecipientInfo.defaultValues("value"));
 		//endregion
@@ -76,19 +76,23 @@ export default class RecipientInfo
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * RecipientInfo ::= CHOICE {
+	 *    ktri KeyTransRecipientInfo,
+	 *    kari [1] KeyAgreeRecipientInfo,
+	 *    kekri [2] KEKRecipientInfo,
+	 *    pwri [3] PasswordRecipientinfo,
+	 *    ori [4] OtherRecipientInfo }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//RecipientInfo ::= CHOICE {
-		//    ktri KeyTransRecipientInfo,
-		//    kari [1] KeyAgreeRecipientInfo,
-		//    kekri [2] KEKRecipientInfo,
-		//    pwri [3] PasswordRecipientinfo,
-		//    ori [4] OtherRecipientInfo }
-		
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -147,6 +151,12 @@ export default class RecipientInfo
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"blockName"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -158,7 +168,7 @@ export default class RecipientInfo
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for CMS_RECIPIENT_INFO");
+			throw new Error("Object's schema was not verified against input data for RecipientInfo");
 		//endregion
 
 		//region Get internal properties from parsed schema
@@ -170,29 +180,28 @@ export default class RecipientInfo
 		else
 		{
 			//region Create "SEQUENCE" from "ASN1_CONSTRUCTED"
-			const tagNumber = asn1.result.blockName.idBlock.tagNumber;
-
-			asn1.result.blockName.idBlock.tagClass = 1; // UNIVERSAL
-			asn1.result.blockName.idBlock.tagNumber = 16; // SEQUENCE
+			const blockSequence = new asn1js.Sequence({
+				value: asn1.result.blockName.valueBlock.value
+			});
 			//endregion
 
-			switch(tagNumber)
+			switch(asn1.result.blockName.idBlock.tagNumber)
 			{
 				case 1:
 					this.variant = 2;
-					this.value = new KeyAgreeRecipientInfo({ schema: asn1.result.blockName });
+					this.value = new KeyAgreeRecipientInfo({ schema: blockSequence });
 					break;
 				case 2:
 					this.variant = 3;
-					this.value = new KEKRecipientInfo({ schema: asn1.result.blockName });
+					this.value = new KEKRecipientInfo({ schema: blockSequence });
 					break;
 				case 3:
 					this.variant = 4;
-					this.value = new PasswordRecipientinfo({ schema: asn1.result.blockName });
+					this.value = new PasswordRecipientinfo({ schema: blockSequence });
 					break;
 				case 4:
 					this.variant = 5;
-					this.value = new OtherRecipientInfo({ schema: asn1.result.blockName });
+					this.value = new OtherRecipientInfo({ schema: blockSequence });
 					break;
 				default:
 					throw new Error("Incorrect structure of RecipientInfo block");

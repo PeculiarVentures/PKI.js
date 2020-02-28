@@ -1,5 +1,6 @@
+/* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
-import { arrayBufferToString, stringToArrayBuffer, utilConcatBuf } from "pvutils";
+import { arrayBufferToString, stringToArrayBuffer } from "pvutils";
 import { getCrypto, getAlgorithmParameters } from "../../src/common";
 import Certificate from "../../src/Certificate";
 import EnvelopedData from "../../src/EnvelopedData";
@@ -7,12 +8,16 @@ import ContentInfo from "../../src/ContentInfo";
 import AttributeTypeAndValue from "../../src/AttributeTypeAndValue";
 import BasicConstraints from "../../src/BasicConstraints";
 import Extension from "../../src/Extension";
+
+import MimeNode from "emailjs-mime-builder";
+import parse from "emailjs-mime-parser";
 //*********************************************************************************
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT 
 const trustedCertificates = []; // Array of root certificates from "CA Bundle"
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-v1_5";
+let oaepHashAlg = "SHA-1";
 
 const encAlg = {
 	name: "AES-CBC",
@@ -44,6 +49,7 @@ function formatPEM(pemString)
 //*********************************************************************************
 //region Create CERT  
 //*********************************************************************************
+// noinspection FunctionWithInconsistentReturnsJS
 function createCertificate()
 {
 	//region Initial variables
@@ -107,8 +113,8 @@ function createCertificate()
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
-	bitView[0] = bitView[0] | 0x02; // Key usage "cRLSign" flag
-	bitView[0] = bitView[0] | 0x04; // Key usage "keyCertSign" flag
+	bitView[0] |= 0x02; // Key usage "cRLSign" flag
+	bitView[0] |= 0x04; // Key usage "keyCertSign" flag
 	
 	const keyUsage = new asn1js.BitString({ valueHex: bitArray });
 	
@@ -153,11 +159,11 @@ function createCertificate()
 	
 	//region Signing final certificate
 	sequence = sequence.then(() =>
-			certificate.sign(privateKey, hashAlg),
-		error =>
-		{
-			alert(`Error during exporting public key: ${error}`);
-		});
+		certificate.sign(privateKey, hashAlg),
+	error =>
+	{
+		alert(`Error during exporting public key: ${error}`);
+	});
 	//endregion
 	
 	//region Encode and store certificate
@@ -173,6 +179,7 @@ function createCertificate()
 		
 		trustedCertificates.push(certificate);
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("new_signed_data").innerHTML = resultString;
 		
 		alert("Certificate created successfully!");
@@ -191,6 +198,7 @@ function createCertificate()
 	//region Store exported key on Web page
 	sequence = sequence.then(result =>
 	{
+		// noinspection JSCheckFunctionSignatures
 		const privateKeyString = String.fromCharCode.apply(null, new Uint8Array(result));
 		
 		let resultString = "";
@@ -199,6 +207,7 @@ function createCertificate()
 		resultString = `${resultString}${formatPEM(window.btoa(privateKeyString))}`;
 		resultString = `${resultString}\r\n-----END PRIVATE KEY-----\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("pkcs8_key").innerHTML = resultString;
 		
 		alert("Private key exported successfully!");
@@ -218,6 +227,7 @@ function createCertificate()
 function smimeEncrypt()
 {
 	//region Decode input certificate 
+	// noinspection InnerHTMLJS
 	const encodedCertificate = document.getElementById("new_signed_data").innerHTML;
 	const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 	certificateBuffer = stringToArrayBuffer(window.atob(clearEncodedCertificate));
@@ -228,9 +238,9 @@ function smimeEncrypt()
 	
 	const cmsEnveloped = new EnvelopedData();
 	
-	cmsEnveloped.addRecipientByCertificate(certSimpl);
+	cmsEnveloped.addRecipientByCertificate(certSimpl, { oaepHashAlgorithm: oaepHashAlg });
 	
-	cmsEnveloped.encrypt(encAlg, stringToArrayBuffer(document.getElementById("content").value)).then(
+	return cmsEnveloped.encrypt(encAlg, stringToArrayBuffer(document.getElementById("content").value)).then(
 		() =>
 		{
 			const cmsContentSimpl = new ContentInfo();
@@ -241,8 +251,8 @@ function smimeEncrypt()
 			const ber = schema.toBER(false);
 			
 			// Insert enveloped data into new Mime message
-			const Mimebuilder = window["emailjs-mime-builder"];
-			const mimeBuilder = new Mimebuilder("application/pkcs7-mime; name=smime.p7m; smime-type=enveloped-data")
+			// noinspection JSUnresolvedFunction
+			const mimeBuilder = new MimeNode("application/pkcs7-mime; name=smime.p7m; smime-type=enveloped-data; charset=binary")
 				.setHeader("content-description", "Enveloped Data")
 				.setHeader("content-disposition", "attachment; filename=smime.p7m")
 				.setHeader("content-transfer-encoding", "base64")
@@ -250,9 +260,9 @@ function smimeEncrypt()
 			mimeBuilder.setHeader("from", "sender@example.com");
 			mimeBuilder.setHeader("to", "recipient@example.com");
 			mimeBuilder.setHeader("subject", "Example S/MIME encrypted message");
-			const mimeMessage = mimeBuilder.build();
 			
-			document.getElementById("encrypted_content").innerHTML = mimeMessage;
+			// noinspection InnerHTMLJS
+			document.getElementById("encrypted_content").innerHTML = mimeBuilder.build();
 			
 			alert("Encryption process finished successfully");
 		},
@@ -266,8 +276,8 @@ function smimeEncrypt()
 //*********************************************************************************
 function smimeDecrypt()
 {
-	//region Decode input certificate 
-	const encodedCertificate = document.getElementById("new_signed_data").innerHTML;
+	//region Decode input certificate
+	const encodedCertificate = document.getElementById("new_signed_data").value;
 	const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 	certificateBuffer = stringToArrayBuffer(window.atob(clearEncodedCertificate));
 	
@@ -276,35 +286,38 @@ function smimeDecrypt()
 	//endregion 
 	
 	//region Decode input private key 
-	const encodedPrivateKey = document.getElementById("pkcs8_key").innerHTML;
+	const encodedPrivateKey = document.getElementById("pkcs8_key").value;
 	const clearPrivateKey = encodedPrivateKey.replace(/(-----(BEGIN|END)( NEW)? PRIVATE KEY-----|\n)/g, "");
 	const privateKeyBuffer = stringToArrayBuffer(window.atob(clearPrivateKey));
 	//endregion 
 	
 	//region Parse S/MIME message to get CMS enveloped content 
-	
-	// Parse MIME message and extract the envelope data
-	const parser = new MimeParser();
-	
-	const mimeMessage = document.getElementById("encrypted_content").innerHTML;
-	parser.write(mimeMessage);
-	parser.end();
+	const parser = parse(document.getElementById("encrypted_content").value);
 	//endregion
 	
-	// Note: MimeParser handles the base64 decoding to get us back a buffer
-	const cmsEnvelopedBuffer = utilConcatBuf(new ArrayBuffer(0), parser.node.content);
+	//region Make all CMS data
+	// noinspection JSUnresolvedVariable
+	asn1 = asn1js.fromBER(parser.content.buffer);
+	if(asn1.offset === (-1))
+	{
+		alert("Unable to parse your data. Please check you have \"Content-Type: charset=binary\" in your S/MIME message");
+		return;
+	}
 	
-	asn1 = asn1js.fromBER(cmsEnvelopedBuffer);
 	const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
 	const cmsEnvelopedSimp = new EnvelopedData({ schema: cmsContentSimpl.content });
 	//endregion 
 	
-	cmsEnvelopedSimp.decrypt(0,
+	return cmsEnvelopedSimp.decrypt(0,
 		{
 			recipientCertificate: certSimpl,
 			recipientPrivateKey: privateKeyBuffer
 		}).then(
-		result => { document.getElementById("decrypted_content").innerHTML = arrayBufferToString(result); },
+		result =>
+		{
+			// noinspection InnerHTMLJS
+			document.getElementById("decrypted_content").innerHTML = arrayBufferToString(result);
+		},
 		error => alert(`ERROR DURING DECRYPTION PROCESS: ${error}`)
 	);
 }
@@ -383,10 +396,32 @@ function handleEncLenOnChange()
 	}
 }
 //*********************************************************************************
+function handleOAEPHashAlgOnChange()
+{
+	const hashOption = document.getElementById("oaep_hash_alg").value;
+	switch(hashOption)
+	{
+		case "alg_SHA1":
+			oaepHashAlg = "sha-1";
+			break;
+		case "alg_SHA256":
+			oaepHashAlg = "sha-256";
+			break;
+		case "alg_SHA384":
+			oaepHashAlg = "sha-384";
+			break;
+		case "alg_SHA512":
+			oaepHashAlg = "sha-512";
+			break;
+		default:
+	}
+}
+//*********************************************************************************
 context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	createCertificate();
 	smimeEncrypt();
 	smimeDecrypt();
@@ -394,6 +429,6 @@ context("Hack for Rollup.js", () =>
 	handleSignAlgOnChange();
 	handleEncAlgOnChange();
 	handleEncLenOnChange();
-	setEngine();
+	handleOAEPHashAlgOnChange();
 });
 //*********************************************************************************

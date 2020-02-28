@@ -1,5 +1,6 @@
+/* eslint-disable no-undef,no-unreachable,no-unused-vars */
 import * as asn1js from "asn1js";
-import { bufferToHexCodes, fromBase64, toBase64,arrayBufferToString } from "pvutils";
+import { bufferToHexCodes, toBase64,arrayBufferToString } from "pvutils";
 import { setEngine } from "../../src/common";
 import OCSPRequest from "../../src/OCSPRequest";
 import GeneralName from "../../src/GeneralName";
@@ -9,6 +10,7 @@ import Request from "../../src/Request";
 import CertID from "../../src/CertID";
 import AlgorithmIdentifier from "../../src/AlgorithmIdentifier";
 import Extension from "../../src/Extension";
+//<nodewebcryptoossl>
 //*********************************************************************************
 let ocspReqBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created OCSP request
 //*********************************************************************************
@@ -106,6 +108,7 @@ function createOCSPReq()
 		resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(ocspReqBuffer)))}`;
 		resultString = `${resultString}\r\n-----END OCSP REQUEST-----\r\n\r\n`;
 		
+		// noinspection InnerHTMLJS
 		document.getElementById("new_signed_data").innerHTML = resultString;
 		
 		parseOCSPReq();
@@ -157,6 +160,7 @@ function parseOCSPReq()
 			case 1: // rfc822Name
 			case 2: // dNSName
 			case 6: // uniformResourceIdentifier
+				// noinspection InnerHTMLJS
 				document.getElementById("ocsp-req-name-simpl").innerHTML = ocspReqSimpl.tbsRequest.requestorName.value.valueBlock.value;
 				document.getElementById("ocsp-req-nm-simpl").style.display = "block";
 				break;
@@ -164,12 +168,14 @@ function parseOCSPReq()
 				{
 					const view = new Uint8Array(ocspReqSimpl.tbsRequest.requestorName.value.valueBlock.valueHex);
 					
+					// noinspection InnerHTMLJS
 					document.getElementById("ocsp-req-name-simpl").innerHTML = `${view[0].toString()}.${view[1].toString()}.${view[2].toString()}.${view[3].toString()}`;
 					document.getElementById("ocsp-req-nm-simpl").style.display = "block";
 				}
 				break;
 			case 3: // x400Address
 			case 5: // ediPartyName
+				// noinspection InnerHTMLJS
 				document.getElementById("ocsp-req-name-simpl").innerHTML = (ocspReqSimpl.tbsRequest.requestorName.type === 3) ? "<type \"x400Address\">" : "<type \"ediPartyName\">";
 				document.getElementById("ocsp-req-nm-simpl").style.display = "block";
 				break;
@@ -177,8 +183,8 @@ function parseOCSPReq()
 				{
 					const rdnmap = {
 						"2.5.4.6": "C",
-						"2.5.4.10": "OU",
-						"2.5.4.11": "O",
+						"2.5.4.10": "O",
+						"2.5.4.11": "OU",
 						"2.5.4.3": "CN",
 						"2.5.4.7": "L",
 						"2.5.4.8": "S",
@@ -199,8 +205,10 @@ function parseOCSPReq()
 						
 						const row = requestorTable.insertRow(requestorTable.rows.length);
 						const cell0 = row.insertCell(0);
+						// noinspection InnerHTMLJS
 						cell0.innerHTML = typeval;
 						const cell1 = row.insertCell(1);
+						// noinspection InnerHTMLJS
 						cell1.innerHTML = subjval;
 					}
 					
@@ -217,6 +225,7 @@ function parseOCSPReq()
 	{
 		const row = requestsTable.insertRow(requestsTable.rows.length);
 		const cell0 = row.insertCell(0);
+		// noinspection InnerHTMLJS
 		cell0.innerHTML = bufferToHexCodes(ocspReqSimpl.tbsRequest.requestList[i].reqCert.serialNumber.valueBlock.valueHex);
 	}
 	//endregion 
@@ -228,6 +237,7 @@ function parseOCSPReq()
 		{
 			const row = extensionTable.insertRow(extensionTable.rows.length);
 			const cell0 = row.insertCell(0);
+			// noinspection InnerHTMLJS
 			cell0.innerHTML = ocspReqSimpl.tbsRequest.requestExtensions[i].extnID;
 		}
 		
@@ -244,9 +254,11 @@ function handleFileBrowse(evt)
 	
 	const currentFiles = evt.target.files;
 	
+	// noinspection AnonymousFunctionJS
 	tempReader.onload =
 		function(event)
 		{
+			// noinspection JSUnresolvedVariable
 			ocspReqBuffer = event.target.result;
 			parseOCSPReq();
 		};
@@ -258,6 +270,7 @@ context("Hack for Rollup.js", () =>
 {
 	return;
 	
+	// noinspection UnreachableCodeJS
 	createOCSPReq();
 	handleFileBrowse();
 	setEngine();
@@ -270,6 +283,7 @@ context("OCSP Request Complex Example", () =>
 		return createOCSPReqInternal().then(() =>
 		{
 			const asn1 = asn1js.fromBER(ocspReqBuffer);
+			// noinspection JSUnusedLocalSymbols
 			const ocspRequest = new OCSPRequest({ schema: asn1.result });
 		});
 	});

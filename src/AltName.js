@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
-import GeneralName from "./GeneralName";
+import { getParametersValue, clearProps } from "pvutils";
+import GeneralName from "./GeneralName.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -11,14 +11,14 @@ export default class AltName
 	/**
 	 * Constructor for AltName class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<GeneralName>}
-		 * @description type
+		 * @desc Array of alternative names in GeneralName type
 		 */
 		this.altNames = getParametersValue(parameters, "altNames", AltName.defaultValues("altNames"));
 		//endregion
@@ -45,17 +45,18 @@ export default class AltName
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * AltName ::= GeneralNames
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// SubjectAltName OID ::= 2.5.29.17
-		// IssuerAltName OID ::= 2.5.29.18
-		//
-		// AltName ::= GeneralNames
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -80,6 +81,12 @@ export default class AltName
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"altNames"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

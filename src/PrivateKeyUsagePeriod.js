@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -10,7 +10,7 @@ export default class PrivateKeyUsagePeriod
 	/**
 	 * Constructor for PrivateKeyUsagePeriod class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
@@ -18,14 +18,14 @@ export default class PrivateKeyUsagePeriod
 		if("notBefore" in parameters)
 			/**
 			 * @type {Date}
-			 * @description notBefore
+			 * @desc notBefore
 			 */
 			this.notBefore = getParametersValue(parameters, "notBefore", PrivateKeyUsagePeriod.defaultValues("notBefore"));
 
 		if("notAfter" in parameters)
 			/**
 			 * @type {Date}
-			 * @description notAfter
+			 * @desc notAfter
 			 */
 			this.notAfter = getParametersValue(parameters, "notAfter", PrivateKeyUsagePeriod.defaultValues("notAfter"));
 		//endregion
@@ -54,19 +54,23 @@ export default class PrivateKeyUsagePeriod
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * PrivateKeyUsagePeriod OID ::= 2.5.29.16
+	 *
+	 * PrivateKeyUsagePeriod ::= SEQUENCE {
+	 *    notBefore       [0]     GeneralizedTime OPTIONAL,
+	 *    notAfter        [1]     GeneralizedTime OPTIONAL }
+	 * -- either notBefore or notAfter MUST be present
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		// PrivateKeyUsagePeriod OID ::= 2.5.29.16
-		//
-		//PrivateKeyUsagePeriod ::= SEQUENCE {
-		//    notBefore       [0]     GeneralizedTime OPTIONAL,
-		//    notAfter        [1]     GeneralizedTime OPTIONAL }
-		//-- either notBefore or notAfter MUST be present
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -104,6 +108,13 @@ export default class PrivateKeyUsagePeriod
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"notBefore",
+			"notAfter"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue } from "pvutils";
+import { getParametersValue, clearProps } from "pvutils";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -10,21 +10,21 @@ export default class OtherKeyAttribute
 	/**
 	 * Constructor for OtherKeyAttribute class
 	 * @param {Object} [parameters={}]
-	 * @property {Object} [schema] asn1js parsed value
+	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
 	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
-		 * @description keyAttrId
+		 * @desc keyAttrId
 		 */
 		this.keyAttrId = getParametersValue(parameters, "keyAttrId", OtherKeyAttribute.defaultValues("keyAttrId"));
 
 		if("keyAttr" in parameters)
 			/**
 			 * @type {*}
-			 * @description keyAttr
+			 * @desc keyAttr
 			 */
 			this.keyAttr = getParametersValue(parameters, "keyAttr", OtherKeyAttribute.defaultValues("keyAttr"));
 		//endregion
@@ -71,16 +71,20 @@ export default class OtherKeyAttribute
 	}
 	//**********************************************************************************
 	/**
-	 * Return value of asn1js schema for current class
+	 * Return value of pre-defined ASN.1 schema for current class
+	 *
+	 * ASN.1 schema:
+	 * ```asn1
+	 * OtherKeyAttribute ::= SEQUENCE {
+	 *    keyAttrId OBJECT IDENTIFIER,
+	 *    keyAttr ANY DEFINED BY keyAttrId OPTIONAL }
+	 * ```
+	 *
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
 	static schema(parameters = {})
 	{
-		//OtherKeyAttribute ::= SEQUENCE {
-		//    keyAttrId OBJECT IDENTIFIER,
-		//    keyAttr ANY DEFINED BY keyAttrId OPTIONAL }
-
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName]
@@ -109,6 +113,13 @@ export default class OtherKeyAttribute
 	 */
 	fromSchema(schema)
 	{
+		//region Clear input data first
+		clearProps(schema, [
+			"keyAttrId",
+			"keyAttr"
+		]);
+		//endregion
+		
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -144,7 +155,7 @@ export default class OtherKeyAttribute
 		outputArray.push(new asn1js.ObjectIdentifier({ value: this.keyAttrId }));
 
 		if("keyAttr" in this)
-			outputArray.push(this.keyAttr.toSchema());
+			outputArray.push(this.keyAttr);
 		//endregion
 
 		//region Construct and return new ASN.1 schema for this object

@@ -5,6 +5,9 @@
     <meta charset="utf-8" />
     <title>PKCS#12 Simple Example</title>
 
+    <script type="application/javascript" src="../../node_modules/babel-polyfill/dist/polyfill.js"></script>
+    <script type="text/javascript" src="bundle.js"></script>
+
     <style type="text/css">
         body {
             background: #EFEFEF;
@@ -139,8 +142,6 @@
             border: 1px solid black;
         }
     </style>
-
-    <script type="text/javascript" src="bundle.js"></script>
 </head>
 <body>
     <div class="wrapper">
@@ -153,7 +154,7 @@
 
                 <p>You can parse the Password-Based Privacy Protection variant PKIjs creates using this command:</p>
 
-                <p>openssl pkcs12 -in pkijs_pkcs12.p12 -nomacver</p>
+                <p>openssl pkcs12 -in pkijs_pkcs12.p12</p>
             </div>
         </fieldset>
     </div>
