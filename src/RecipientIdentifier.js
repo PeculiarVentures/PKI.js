@@ -101,13 +101,13 @@ export default class RecipientIdentifier
 						blockName: (names.blockName || "")
 					}
 				}),
-				new asn1js.Constructed({
+				new asn1js.Primitive({
 					name: (names.blockName || ""),
 					idBlock: {
 						tagClass: 3, // CONTEXT-SPECIFIC
 						tagNumber: 0 // [0]
 					},
-					value: [new asn1js.OctetString()]
+					value: new asn1js.OctetString()
 				})
 			]
 		}));
@@ -148,7 +148,7 @@ export default class RecipientIdentifier
 		else
 		{
 			this.variant = 2;
-			this.value = asn1.result.blockName.valueBlock.value[0];
+			this.value = asn1.result;
 		}
 		//endregion
 	}
@@ -165,12 +165,12 @@ export default class RecipientIdentifier
 			case 1:
 				return this.value.toSchema();
 			case 2:
-				return new asn1js.Constructed({
+				return new asn1js.Primitive({
 					idBlock: {
 						tagClass: 3, // CONTEXT-SPECIFIC
 						tagNumber: 0 // [0]
 					},
-					value: [this.value]
+					value: this.value
 				});
 			default:
 				return new asn1js.Any();
