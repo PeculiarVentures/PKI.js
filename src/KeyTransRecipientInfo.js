@@ -180,7 +180,7 @@ export default class KeyTransRecipientInfo
 		this.version = asn1.result.version.valueBlock.valueDec;
 
 		if(asn1.result.rid.idBlock.tagClass === 3)
-			this.rid = asn1.result.rid.valueBlock.value[0]; // SubjectKeyIdentifier
+			this.rid = new asn1js.OctetString({ valueHex: asn1.result.rid.valueBlock.valueHex }); // SubjectKeyIdentifier
 		else
 			this.rid = new IssuerAndSerialNumber({ schema: asn1.result.rid });
 
@@ -210,12 +210,12 @@ export default class KeyTransRecipientInfo
 			this.version = 2;
 			
 			outputArray.push(new asn1js.Integer({ value: this.version }));
-			outputArray.push(new asn1js.Constructed({
+			outputArray.push(new asn1js.Primitive({
 				idBlock: {
 					tagClass: 3, // CONTEXT-SPECIFIC
 					tagNumber: 0 // [0]
 				},
-				value: [this.rid]
+				valueHex: this.rid.valueHex
 			}));
 		}
 		
