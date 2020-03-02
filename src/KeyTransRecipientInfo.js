@@ -215,7 +215,7 @@ export default class KeyTransRecipientInfo
 					tagClass: 3, // CONTEXT-SPECIFIC
 					tagNumber: 0 // [0]
 				},
-				valueHex: this.rid.valueHex
+				valueHex: this.rid.valueBlock.valueHex
 			}));
 		}
 		

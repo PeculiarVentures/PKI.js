@@ -169,7 +169,7 @@ export default class RecipientIdentifier
 						tagClass: 3, // CONTEXT-SPECIFIC
 						tagNumber: 0 // [0]
 					},
-					valueHex: this.value.valueHex
+					valueHex: this.value.valueBlock.valueHex
 				});
 			default:
 				return new asn1js.Any();
