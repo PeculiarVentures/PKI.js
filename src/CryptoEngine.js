@@ -330,7 +330,7 @@ export default class CryptoEngine
 											jwk.alg = "RS512";
 											break;
 										default:
-											return Promise.reject(`Incorrect public key algorithm: ${publicKeyInfo.algorithm.algorithmId}`);
+											return Promise.reject(`Incorrect hash algorithm: ${algorithm.hash.name.toUpperCase()}`);
 									}
 								}
 								//endregion
@@ -394,7 +394,7 @@ export default class CryptoEngine
 											jwk.alg = "RSA-OAEP-512";
 											break;
 										default:
-											return Promise.reject(`Incorrect public key algorithm: ${publicKeyInfo.algorithm.algorithmId}`);
+											return Promise.reject(`Incorrect hash algorithm: ${algorithm.hash.name.toUpperCase()}`);
 									}
 								}
 								
