@@ -18,6 +18,7 @@ import SignedCertificateTimestampList from "./SignedCertificateTimestampList.js"
 import CertificateTemplate from "./CertificateTemplate.js";
 import CAVersion from "./CAVersion.js";
 import QCStatements from "./QCStatements.js";
+import AdobeTimestamp from "./AdobeTimestamp.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -394,6 +395,17 @@ export default class Extension
 				{
 					this.parsedValue = new QCStatements();
 					this.parsedValue.parsingError = "Incorrectly formated QCStatements";
+				}
+				break;
+			case "1.2.840.113583.1.1.9.1": // Adobe time-stamp X509 extension
+				try
+				{
+					this.parsedValue = new AdobeTimestamp({ schema: asn1.result });
+				}
+				catch(ex)
+				{
+					this.parsedValue = new AdobeTimestamp();
+					this.parsedValue.parsingError = "Incorrectly formated AdobeTimestamp";
 				}
 				break;
 			default:

@@ -4,6 +4,8 @@ import AccessDescription from "./AccessDescription.js";
 export { AccessDescription };
 import Accuracy from "./Accuracy.js";
 export { Accuracy };
+import AdobeTimestamp from "./AdobeTimestamp.js";
+export { AdobeTimestamp };
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 export { AlgorithmIdentifier };
 import AltName from "./AltName.js";
