@@ -88,6 +88,20 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
+	it("AdobeTimestamp", () =>
+	{
+		results["AdobeTimestamp"] = new pkijs.AdobeTimestamp({
+			schema: (new pkijs.AdobeTimestamp({
+				version: 1,
+				location: new pkijs.GeneralName({
+					type: 6,
+					value: fakeString
+				}),
+				requiresAuth: false,
+			})).toSchema()
+		});
+	});
+
 	it("AlgorithmIdentifier", () =>
 	{
 		results["AlgorithmIdentifier"] = new pkijs.AlgorithmIdentifier({
