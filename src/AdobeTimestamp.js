@@ -7,13 +7,13 @@ import GeneralName from "./GeneralName.js";
  */
 export default class AdobeTimestamp
 {
-  //**********************************************************************************
+	//**********************************************************************************
 	/**
 	 * Constructor for AdobeTimestamp class
 	 * @param {Object} [parameters={}]
 	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
-  constructor(parameters = {})
+	constructor(parameters = {})
 	{
 		//region Internal properties of the object
 		/**
@@ -34,12 +34,12 @@ export default class AdobeTimestamp
 			this.requiresAuth = getParametersValue(parameters, "requiresAuth", AdobeTimestamp.defaultValues("requiresAuth"));
 		//endregion
 
-    //region If input argument array contains "schema" for this object
-    if("schema" in parameters)
-      this.fromSchema(parameters.schema);
-    //endregion
-  }
-  //**********************************************************************************
+		//region If input argument array contains "schema" for this object
+		if("schema" in parameters)
+			this.fromSchema(parameters.schema);
+		//endregion
+	}
+	//**********************************************************************************
 	/**
 	 * Return default values for all class members
 	 * @param {string} memberName String name for a class member
@@ -58,7 +58,7 @@ export default class AdobeTimestamp
 				throw new Error(`Invalid member name for AdobeTimestamp class: ${memberName}`);
 		}
 	}
-  //**********************************************************************************
+	//**********************************************************************************
 	/**
 	 * Return value of pre-defined ASN.1 schema for current class
 	 *
@@ -75,11 +75,11 @@ export default class AdobeTimestamp
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
-  static schema(parameters = {})
+	static schema(parameters = {})
 	{
-    const names = getParametersValue(parameters, "names", {});
+		const names = getParametersValue(parameters, "names", {});
 
-    return (new asn1js.Sequence({
+		return (new asn1js.Sequence({
 			name: (names.blockName || ""),
 			value: [
 				new asn1js.Integer({
@@ -88,15 +88,15 @@ export default class AdobeTimestamp
 						tagClass: 1, // CONTEXT-SPECIFIC
 						tagNumber: 2 // [2]
 					}
-        }),
-        new asn1js.Primitive({
+				}),
+				new asn1js.Primitive({
 					name: (names.location || ""),
 					idBlock: {
 						tagClass: 3, // CONTEXT-SPECIFIC
 						tagNumber: 6 // [6]
 					}
-        }),
-        new asn1js.Boolean({
+				}),
+				new asn1js.Boolean({
 					name: (names.requiresAuth || ""),
 					optional: true,
 					idBlock: {
@@ -106,23 +106,23 @@ export default class AdobeTimestamp
 				})
 			]
 		}));
-  }
-  //**********************************************************************************
+	}
+	//**********************************************************************************
 	/**
 	 * Convert parsed asn1js object into current class
 	 * @param {!Object} schema
 	 */
-  fromSchema(schema)
+	fromSchema(schema)
 	{
-    //region Clear input data first
+		//region Clear input data first
 		clearProps(schema, [
 			"version",
 			"location",
 			"requiresAuth"
 		]);
-    //endregion
-    
-    //region Check the schema is valid
+		//endregion
+		
+		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
 			AdobeTimestamp.schema({
@@ -132,21 +132,21 @@ export default class AdobeTimestamp
 					requiresAuth: "requiresAuth"
 				}
 			})
-    );
+		);
 
-    if(asn1.verified === false)
+		if(asn1.verified === false)
 			throw new Error("Object's schema was not verified against input data for AdobeTimestamp");
-    //endregion
-    
-    //region Get internal properties from parsed schema
-    this.version = asn1.result.version.valueBlock.valueDec;
+		//endregion
+		
+		//region Get internal properties from parsed schema
+		this.version = asn1.result.version.valueBlock.valueDec;
 		this.location = new GeneralName({ schema: asn1.result.location });
 		
 		if("requiresAuth" in asn1.result)
-    	this.requiresAuth = asn1.result.requiresAuth.valueBlock.value;
-    //endregion
-  }
-  //**********************************************************************************
+			this.requiresAuth = asn1.result.requiresAuth.valueBlock.value;
+		//endregion
+	}
+	//**********************************************************************************
 	/**
 	 * Convert current object to asn1js object and set correct values
 	 * @returns {Object} asn1js object
@@ -181,8 +181,8 @@ export default class AdobeTimestamp
 			value: outputArray
 		}));
 		//endregion
-  }
-  //**********************************************************************************
+	}
+	//**********************************************************************************
 	/**
 	 * Convertion for the class to JSON object
 	 * @returns {Object}
@@ -190,8 +190,8 @@ export default class AdobeTimestamp
 	toJSON()
 	{
 		const object = {
-      version: this.version,
-      location: this.location.toJSON(),
+			version: this.version,
+			location: this.location.toJSON(),
 		};
 		
 		if("requiresAuth" in this)
