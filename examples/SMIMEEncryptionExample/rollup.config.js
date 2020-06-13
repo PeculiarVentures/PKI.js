@@ -1,13 +1,12 @@
-import rollupNodeResolve from "rollup-plugin-node-resolve";
-import commonjs from "rollup-plugin-commonjs";
+import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
 import nodeBuiltins from "rollup-plugin-node-builtins";
 
 export default {
 	input: "es6.js",
 	plugins: [
-		rollupNodeResolve({
-			jsnext: true,
-			main: true,
+		resolve({
+			mainFields: [ 'jsnext', 'main' ],
 			preferBuiltins: false
 		}),
 		commonjs(),
@@ -24,8 +23,6 @@ window.handleHashAlgOnChange = handleHashAlgOnChange;
 window.handleSignAlgOnChange = handleSignAlgOnChange;
 window.handleEncAlgOnChange = handleEncAlgOnChange;
 window.handleEncLenOnChange = handleEncLenOnChange;
-window.handleOAEPHashAlgOnChange = handleOAEPHashAlgOnChange;
-
-function context(name, func) {}`
+window.handleOAEPHashAlgOnChange = handleOAEPHashAlgOnChange;`
 	}
 };

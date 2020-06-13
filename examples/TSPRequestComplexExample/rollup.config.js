@@ -1,9 +1,14 @@
-import rollupNodeResolve from "rollup-plugin-node-resolve";
+import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
 
 export default {
 	input: "es6.js",
 	plugins: [
-		rollupNodeResolve({ jsnext: true, main: true })
+		resolve({
+			mainFields: [ 'jsnext', 'main' ],
+			preferBuiltins: false
+		}),
+		commonjs()
 	],
 	output: [
 		{

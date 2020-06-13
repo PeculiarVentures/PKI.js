@@ -165,7 +165,7 @@ function createPKCS10Internal()
 	}, error => Promise.reject(`Error signing PKCS#10: ${error}`));
 }
 //*********************************************************************************
-function createPKCS10()
+export function createPKCS10()
 {
 	return Promise.resolve().then(() => createPKCS10Internal()).then(() =>
 	{
@@ -183,7 +183,7 @@ function createPKCS10()
 //*********************************************************************************
 //region Parse existing PKCS#10
 //*********************************************************************************
-function parsePKCS10()
+export function parsePKCS10()
 {
 	//region Initial activities
 	// noinspection InnerHTMLJS
@@ -342,7 +342,7 @@ function verifyPKCS10Internal()
 	//endregion
 }
 //*********************************************************************************
-function verifyPKCS10()
+export function verifyPKCS10()
 {
 	return Promise.resolve().then(() =>
 	{
@@ -358,7 +358,7 @@ function verifyPKCS10()
 //*********************************************************************************
 //endregion
 //*********************************************************************************
-function handleHashAlgOnChange()
+export function handleHashAlgOnChange()
 {
 	const hashOption = document.getElementById("hashAlg").value;
 	switch(hashOption)
@@ -379,7 +379,7 @@ function handleHashAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleSignAlgOnChange()
+export function handleSignAlgOnChange()
 {
 	const signOption = document.getElementById("signAlg").value;
 	switch(signOption)
@@ -396,19 +396,6 @@ function handleSignAlgOnChange()
 		default:
 	}
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	createPKCS10();
-	parsePKCS10();
-	verifyPKCS10();
-	handleHashAlgOnChange();
-	handleSignAlgOnChange();
-	setEngine();
-});
 //*********************************************************************************
 context("PKCS#10 Complex Example", () =>
 {

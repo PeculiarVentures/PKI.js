@@ -1,10 +1,13 @@
-import rollupNodeResolve from "rollup-plugin-node-resolve";
-import commonjs from "rollup-plugin-commonjs";
+import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
 
 export default {
 	input: "es6.js",
 	plugins: [
-		rollupNodeResolve({ jsnext: true, main: true }),
+		resolve({
+			mainFields: [ 'jsnext', 'main' ],
+			preferBuiltins: false
+		}),
 		commonjs()
 	],
 	output: {
@@ -13,8 +16,6 @@ export default {
 		outro: `
 window.verifySMIME = verifySMIME;
 window.handleMIMEFile = handleMIMEFile;
-window.handleCABundle = handleCABundle;
-
-function context(name, func) {}`
+window.handleCABundle = handleCABundle;`
 	}
 };

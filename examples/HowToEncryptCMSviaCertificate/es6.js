@@ -187,7 +187,7 @@ function createCertificateInternal()
 	return sequence;
 }
 //*********************************************************************************
-function createCertificate()
+export function createCertificate()
 {
 	return createCertificateInternal().then(() =>
 	{
@@ -256,7 +256,7 @@ function envelopedEncryptInternal()
 		);
 }
 //*********************************************************************************
-function envelopedEncrypt()
+export function envelopedEncrypt()
 {
 	return Promise.resolve().then(() =>
 	{
@@ -306,7 +306,7 @@ function envelopedDecryptInternal()
 	);
 }
 //*********************************************************************************
-function envelopedDecrypt()
+export function envelopedDecrypt()
 {
 	return Promise.resolve().then(() =>
 	{
@@ -333,7 +333,7 @@ function envelopedDecrypt()
 //*********************************************************************************
 //endregion 
 //*********************************************************************************
-function handleHashAlgOnChange()
+export function handleHashAlgOnChange()
 {
 	const hashOption = document.getElementById("hash_alg").value;
 	switch(hashOption)
@@ -354,7 +354,7 @@ function handleHashAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleSignAlgOnChange()
+export function handleSignAlgOnChange()
 {
 	const signOption = document.getElementById("sign_alg").value;
 	switch(signOption)
@@ -372,7 +372,7 @@ function handleSignAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleEncAlgOnChange()
+export function handleEncAlgOnChange()
 {
 	const encryptionAlgorithmSelect = document.getElementById("content_enc_alg").value;
 	switch(encryptionAlgorithmSelect)
@@ -387,7 +387,7 @@ function handleEncAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleEncLenOnChange()
+export function handleEncLenOnChange()
 {
 	const encryptionAlgorithmLengthSelect = document.getElementById("content_enc_alg_len").value;
 	switch(encryptionAlgorithmLengthSelect)
@@ -405,7 +405,7 @@ function handleEncLenOnChange()
 	}
 }
 //*********************************************************************************
-function handleOAEPHashAlgOnChange()
+export function handleOAEPHashAlgOnChange()
 {
 	const hashOption = document.getElementById("oaep_hash_alg").value;
 	switch(hashOption)
@@ -425,22 +425,6 @@ function handleOAEPHashAlgOnChange()
 		default:
 	}
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	createCertificate();
-	envelopedEncrypt();
-	envelopedDecrypt();
-	handleHashAlgOnChange();
-	handleSignAlgOnChange();
-	handleEncAlgOnChange();
-	handleEncLenOnChange();
-	handleOAEPHashAlgOnChange();
-	setEngine();
-});
 //*********************************************************************************
 context("How To Encrypt CMS via Certificate", () => {
 	//region Initial variables

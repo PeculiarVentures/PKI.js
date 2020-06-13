@@ -45,7 +45,7 @@ function formatPEM(pemString)
 	return resultString;
 }
 //*********************************************************************************
-function parseCertificate()
+export function parseCertificate()
 {
 	//region Initial check
 	if(certificateBuffer.byteLength === 0)
@@ -412,7 +412,7 @@ function createCertificateInternal()
 	return sequence;
 }
 //*********************************************************************************
-function createCertificate()
+export function createCertificate()
 {
 	return createCertificateInternal().then(() =>
 	{
@@ -496,7 +496,7 @@ function verifyCertificateInternal()
 	return sequence;
 }
 //*********************************************************************************
-function verifyCertificate()
+export function verifyCertificate()
 {
 	return verifyCertificateInternal().then(result =>
 	{
@@ -507,7 +507,7 @@ function verifyCertificate()
 	});
 }
 //*********************************************************************************
-function parseCAbundle(buffer)
+export function parseCAbundle(buffer)
 {
 	//region Initial variables
 	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
@@ -622,7 +622,7 @@ function parseCAbundle(buffer)
 	}
 }
 //*********************************************************************************
-function handleFileBrowse(evt)
+export function handleFileBrowse(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -640,7 +640,7 @@ function handleFileBrowse(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleTrustedCertsFile(evt)
+export function handleTrustedCertsFile(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -681,7 +681,7 @@ function handleTrustedCertsFile(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleInterCertsFile(evt)
+export function handleInterCertsFile(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -722,7 +722,7 @@ function handleInterCertsFile(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleCRLsFile(evt)
+export function handleCRLsFile(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -763,7 +763,7 @@ function handleCRLsFile(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleCABundle(evt)
+export function handleCABundle(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -780,7 +780,7 @@ function handleCABundle(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleHashAlgOnChange()
+export function handleHashAlgOnChange()
 {
 	const hashOption = document.getElementById("hash_alg").value;
 	switch(hashOption)
@@ -801,7 +801,7 @@ function handleHashAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleSignAlgOnChange()
+export function handleSignAlgOnChange()
 {
 	const signOption = document.getElementById("sign_alg").value;
 	switch(signOption)
@@ -818,25 +818,6 @@ function handleSignAlgOnChange()
 		default:
 	}
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	parseCertificate();
-	createCertificate();
-	verifyCertificate();
-	parseCAbundle();
-	handleFileBrowse();
-	handleTrustedCertsFile();
-	handleInterCertsFile();
-	handleCRLsFile();
-	handleCABundle();
-	handleHashAlgOnChange();
-	handleSignAlgOnChange();
-	setEngine();
-});
 //*********************************************************************************
 context("Certificate Complex Example", () =>
 {

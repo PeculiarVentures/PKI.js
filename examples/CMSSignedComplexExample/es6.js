@@ -51,7 +51,7 @@ function formatPEM(pemString)
 //*********************************************************************************
 //region Parse "CA Bundle" file
 //*********************************************************************************
-function parseCAbundle(buffer)
+export function parseCAbundle(buffer)
 {
 	//region Initial variables
 	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
@@ -170,7 +170,7 @@ function parseCAbundle(buffer)
 //*********************************************************************************
 //region Parse existing CMS_Signed
 //*********************************************************************************
-function parseCMSSigned()
+export function parseCMSSigned()
 {
 	//region Initial check
 	if(cmsSignedBuffer.byteLength === 0)
@@ -581,7 +581,7 @@ function createCMSSignedInternal()
 	return sequence;
 }
 //*********************************************************************************
-function createCMSSigned()
+export function createCMSSigned()
 {
 	return createCMSSignedInternal().then(() =>
 	{
@@ -651,7 +651,7 @@ function verifyCMSSignedInternal()
 	//endregion
 }
 //*********************************************************************************
-function verifyCMSSigned()
+export function verifyCMSSigned()
 {
 	//region Initial check
 	if(cmsSignedBuffer.byteLength === 0)
@@ -672,7 +672,7 @@ function verifyCMSSigned()
 //*********************************************************************************
 //region Functions handling file selection
 //*********************************************************************************
-function handleFileBrowse(evt)
+export function handleFileBrowse(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -690,7 +690,7 @@ function handleFileBrowse(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleParsingFile(evt)
+export function handleParsingFile(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -708,7 +708,7 @@ function handleParsingFile(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleCABundle(evt)
+export function handleCABundle(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -721,7 +721,7 @@ function handleCABundle(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleHashAlgOnChange()
+export function handleHashAlgOnChange()
 {
 	const hashOption = document.getElementById("hash_alg").value;
 	switch(hashOption)
@@ -742,7 +742,7 @@ function handleHashAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleSignAlgOnChange()
+export function handleSignAlgOnChange()
 {
 	const signOption = document.getElementById("sign_alg").value;
 	switch(signOption)
@@ -760,36 +760,17 @@ function handleSignAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleAddExtOnChange()
+export function handleAddExtOnChange()
 {
 	addExt = document.getElementById("add_ext").checked;
 }
 //*********************************************************************************
-function handleDetachedSignatureOnChange()
+export function handleDetachedSignatureOnChange()
 {
 	detachedSignature = document.getElementById("detached_signature").checked;
 }
 //*********************************************************************************
 //endregion
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	parseCMSSigned();
-	createCMSSigned();
-	verifyCMSSigned();
-	parseCAbundle();
-	handleFileBrowse();
-	handleParsingFile();
-	handleCABundle();
-	handleHashAlgOnChange();
-	handleSignAlgOnChange();
-	handleAddExtOnChange();
-	handleDetachedSignatureOnChange();
-	setEngine();
-});
 //*********************************************************************************
 context("CMS Signed Complex Example", () =>
 {

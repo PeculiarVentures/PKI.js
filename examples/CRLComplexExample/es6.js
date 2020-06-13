@@ -163,7 +163,7 @@ function createCRLInternal()
 	return sequence;
 }
 //*********************************************************************************
-function createCRL()
+export function createCRL()
 {
 	return Promise.resolve().then(() => createCRLInternal()).then(() =>
 	{
@@ -365,7 +365,7 @@ function verifyCRLInternal()
 	//endregion
 }
 //*********************************************************************************
-function verifyCRL()
+export function verifyCRL()
 {
 	return Promise.resolve().then(() => verifyCRLInternal()).then(result =>
 	{
@@ -378,7 +378,7 @@ function verifyCRL()
 //*********************************************************************************
 //endregion
 //*********************************************************************************
-function handleFileBrowse(evt)
+export function handleFileBrowse(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -395,7 +395,7 @@ function handleFileBrowse(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleIssuerCert(evt)
+export function handleIssuerCert(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -417,7 +417,7 @@ function handleIssuerCert(evt)
 }
 //*********************************************************************************
 // noinspection JSUnusedLocalSymbols
-function handleHashAlgOnChange()
+export function handleHashAlgOnChange()
 {
 	const hashOption = document.getElementById("hashAlg").value;
 	switch(hashOption)
@@ -439,7 +439,7 @@ function handleHashAlgOnChange()
 }
 //*********************************************************************************
 // noinspection JSUnusedLocalSymbols
-function handleSignAlgOnChange()
+export function handleSignAlgOnChange()
 {
 	const signOption = document.getElementById("signAlg").value;
 	switch(signOption)
@@ -456,18 +456,6 @@ function handleSignAlgOnChange()
 		default:
 	}
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	createCRL();
-	verifyCRL();
-	handleFileBrowse();
-	handleIssuerCert();
-	setEngine();
-});
 //*********************************************************************************
 context("CRL Complex Example", () =>
 {

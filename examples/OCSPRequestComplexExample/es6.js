@@ -98,7 +98,7 @@ function createOCSPReqInternal()
 	return Promise.resolve(true);
 }
 //*********************************************************************************
-function createOCSPReq()
+export function createOCSPReq()
 {
 	return Promise.resolve().then(() => createOCSPReqInternal()).then(() =>
 	{
@@ -248,7 +248,7 @@ function parseOCSPReq()
 //*********************************************************************************
 //endregion 
 //*********************************************************************************
-function handleFileBrowse(evt)
+export function handleFileBrowse(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -265,16 +265,6 @@ function handleFileBrowse(evt)
 	
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	createOCSPReq();
-	handleFileBrowse();
-	setEngine();
-});
 //*********************************************************************************
 context("OCSP Request Complex Example", () =>
 {

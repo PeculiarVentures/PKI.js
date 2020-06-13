@@ -67,7 +67,7 @@ function createTSPReqInternal()
 	return Promise.resolve(true);
 }
 //*********************************************************************************
-function createTSPReq()
+export function createTSPReq()
 {
 	return Promise.resolve().then(() => createTSPReqInternal()).then(() =>
 	{
@@ -185,7 +185,7 @@ function parseTSPReq()
 //*********************************************************************************
 //endregion 
 //*********************************************************************************
-function handleFileBrowse(evt)
+export function handleFileBrowse(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -202,16 +202,6 @@ function handleFileBrowse(evt)
 	
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	createTSPReq();
-	handleFileBrowse();
-	setEngine();
-});
 //*********************************************************************************
 context("TSP Request Complex Example", () =>
 {

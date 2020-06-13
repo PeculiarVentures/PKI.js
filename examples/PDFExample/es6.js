@@ -274,7 +274,7 @@ function parseCAbundle(buffer)
 	}
 }
 //*********************************************************************************
-function handleFileBrowse(evt)
+export function handleFileBrowse(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -286,7 +286,7 @@ function handleFileBrowse(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleCABundle(evt)
+export function handleCABundle(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -297,14 +297,4 @@ function handleCABundle(evt)
 	
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	handleFileBrowse();
-	handleCABundle();
-	setEngine();
-});
 //*********************************************************************************

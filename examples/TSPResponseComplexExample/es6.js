@@ -295,7 +295,7 @@ function createTSPRespInternal()
 	//endregion
 }
 //*********************************************************************************
-function createTSPResp()
+export function createTSPResp()
 {
 	return Promise.resolve().then(() => createTSPRespInternal()).then(() =>
 	{
@@ -583,7 +583,7 @@ function verifyTSPRespInternal()
 	//endregion
 }
 //*********************************************************************************
-function verifyTSPResp()
+export function verifyTSPResp()
 {
 	return Promise.resolve().then(() =>  verifyTSPRespInternal()).then(
 		result =>
@@ -718,7 +718,7 @@ function parseCAbundle(buffer)
 //*********************************************************************************
 //endregion
 //*********************************************************************************
-function handleFileBrowse(evt)
+export function handleFileBrowse(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -736,7 +736,7 @@ function handleFileBrowse(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleCABundle(evt)
+export function handleCABundle(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -753,7 +753,7 @@ function handleCABundle(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleHashAlgOnChange()
+export function handleHashAlgOnChange()
 {
 	const hashOption = document.getElementById("hash_alg").value;
 	switch(hashOption)
@@ -774,7 +774,7 @@ function handleHashAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleSignAlgOnChange()
+export function handleSignAlgOnChange()
 {
 	const signOption = document.getElementById("sign_alg").value;
 	switch(signOption)
@@ -791,21 +791,6 @@ function handleSignAlgOnChange()
 		default:
 	}
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	createTSPResp();
-	parseTSPResp();
-	verifyTSPResp();
-	handleFileBrowse();
-	handleCABundle();
-	handleHashAlgOnChange();
-	handleSignAlgOnChange();
-	setEngine();
-});
 //*********************************************************************************
 context("TSP Response Complex Example", () =>
 {

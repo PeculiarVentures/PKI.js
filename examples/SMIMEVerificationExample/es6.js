@@ -130,7 +130,7 @@ function parseCAbundle(buffer)
 //*********************************************************************************
 //region Verify SMIME signature
 //*********************************************************************************
-function verifySMIME()
+export function verifySMIME()
 {
 	//region Parse MIME contents to find signature and detached data
 	const parser = parse(document.getElementById("smime_message").value);
@@ -200,7 +200,7 @@ function verifySMIME()
 //*********************************************************************************
 //region Functions handling file selection
 //*********************************************************************************
-function handleMIMEFile(evt)
+export function handleMIMEFile(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -216,7 +216,7 @@ function handleMIMEFile(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleCABundle(evt)
+export function handleCABundle(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -229,14 +229,4 @@ function handleCABundle(evt)
 }
 //*********************************************************************************
 //endregion
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	verifySMIME();
-	handleMIMEFile();
-	handleCABundle();
-});
 //*********************************************************************************

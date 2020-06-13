@@ -96,7 +96,7 @@ function envelopedEncryptInternal()
 		);
 }
 //*********************************************************************************
-function envelopedEncrypt()
+export function envelopedEncrypt()
 {
 	return Promise.resolve().then(() =>
 	{
@@ -168,7 +168,7 @@ function envelopedDecryptInternal()
 		});
 }
 //*********************************************************************************
-function envelopedDecrypt()
+export function envelopedDecrypt()
 {
 	return Promise.resolve().then(() =>
 	{
@@ -187,7 +187,7 @@ function envelopedDecrypt()
 //*********************************************************************************
 //endregion
 //*********************************************************************************
-function handleContentEncAlgOnChange()
+export function handleContentEncAlgOnChange()
 {
 	const encryptionAlgorithmSelect = document.getElementById("content_enc_alg").value;
 	switch(encryptionAlgorithmSelect)
@@ -202,7 +202,7 @@ function handleContentEncAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleContentEncLenOnChange()
+export function handleContentEncLenOnChange()
 {
 	const encryptionAlgorithmLengthSelect = document.getElementById("content_enc_alg_len").value;
 	switch(encryptionAlgorithmLengthSelect)
@@ -220,7 +220,7 @@ function handleContentEncLenOnChange()
 	}
 }
 //*********************************************************************************
-function handleContentTypeOnChange()
+export function handleContentTypeOnChange()
 {
 	const encryptionSelect = document.getElementById("content_type").value;
 	switch(encryptionSelect)
@@ -234,19 +234,6 @@ function handleContentTypeOnChange()
 		default:
 	}
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	envelopedEncrypt();
-	envelopedDecrypt();
-	handleContentEncAlgOnChange();
-	handleContentEncLenOnChange();
-	handleContentTypeOnChange();
-	setEngine();
-});
 //*********************************************************************************
 context("How To Encrypt CMS via Password", () =>
 {

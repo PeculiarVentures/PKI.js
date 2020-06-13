@@ -125,7 +125,7 @@ function passwordBasedIntegrityInternal(password, hash = "SHA-256")
 	return sequence;
 }
 //*********************************************************************************
-function passwordBasedIntegrity(password)
+export function passwordBasedIntegrity(password)
 {
 	if(typeof password === "undefined")
 		password = document.getElementById("password2").value;
@@ -245,7 +245,7 @@ function certificateBasedIntegrityInternal()
 	return sequence;
 }
 //*********************************************************************************
-function certificateBasedIntegrity()
+export function certificateBasedIntegrity()
 {
 	return Promise.resolve().then(() => certificateBasedIntegrityInternal()).then(result =>
 	{
@@ -270,7 +270,7 @@ function noPrivacyInternal(password)
 	return passwordBasedIntegrityInternal(password);
 }
 //*********************************************************************************
-function noPrivacy()
+export function noPrivacy()
 {
 	return passwordBasedIntegrity(document.getElementById("password3").value); // Same with previous example
 }
@@ -358,7 +358,7 @@ function passwordPrivacyInternal(password)
 	return sequence;
 }
 //*********************************************************************************
-function passwordPrivacy()
+export function passwordPrivacy()
 {
 	return Promise.resolve().then(() => passwordPrivacyInternal(document.getElementById("password4").value)).then(result =>
 	{
@@ -457,7 +457,7 @@ function certificatePrivacyInternal(password)
 	return sequence;
 }
 //*********************************************************************************
-function certificatePrivacy()
+export function certificatePrivacy()
 {
 	return Promise.resolve().then(() => certificatePrivacyInternal(document.getElementById("password5").value)).then(result =>
 	{
@@ -659,7 +659,7 @@ function openSSLLikeInternal(password)
 	return sequence;
 }
 //*********************************************************************************
-function openSSLLike()
+export function openSSLLike()
 {
 	return Promise.resolve().then(() => openSSLLikeInternal(document.getElementById("password1").value)).then(result =>
 	{
@@ -762,7 +762,7 @@ function parsePKCS12(buffer)
 	});
 }
 //*********************************************************************************
-function handlePKCS12(evt)
+export function handlePKCS12(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -778,22 +778,6 @@ function handlePKCS12(evt)
 	
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	passwordBasedIntegrity();
-	certificateBasedIntegrity();
-	noPrivacy();
-	passwordPrivacy();
-	certificatePrivacy();
-	openSSLLike();
-	parsePKCS12();
-	handlePKCS12();
-	setEngine();
-});
 //**********************************************************************************
 context("PKCS#12 Simple Example", () =>
 {

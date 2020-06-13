@@ -240,7 +240,7 @@ function createOCSPRespInternal()
 	//endregion
 }
 //*********************************************************************************
-function createOCSPResp()
+export function createOCSPResp()
 {
 	return Promise.resolve().then(() => createOCSPRespInternal()).then(() =>
 	{
@@ -273,7 +273,7 @@ function createOCSPResp()
 //*********************************************************************************
 //region Parse existing OCSP response 
 //*********************************************************************************
-function parseOCSPResp()
+export function parseOCSPResp()
 {
 	//region Initial variables 
 	let ocspBasicResp;
@@ -527,7 +527,7 @@ function verifyOCSPRespInternal()
 	//endregion
 }
 //*********************************************************************************
-function verifyOCSPResp()
+export function verifyOCSPResp()
 {
 	return Promise.resolve().then(() => verifyOCSPRespInternal()).then(
 		result =>
@@ -545,7 +545,7 @@ function verifyOCSPResp()
 //*********************************************************************************
 //region Parse "CA Bundle" file 
 //*********************************************************************************
-function parseCAbundle(buffer)
+export function parseCAbundle(buffer)
 {
 	//region Initial variables 
 	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
@@ -662,7 +662,7 @@ function parseCAbundle(buffer)
 //*********************************************************************************
 //endregion 
 //*********************************************************************************
-function handleFileBrowse(evt)
+export function handleFileBrowse(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -680,7 +680,7 @@ function handleFileBrowse(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleCABundle(evt)
+export function handleCABundle(evt)
 {
 	const tempReader = new FileReader();
 	
@@ -692,7 +692,7 @@ function handleCABundle(evt)
 	tempReader.readAsArrayBuffer(currentFiles[0]);
 }
 //*********************************************************************************
-function handleHashAlgOnChange()
+export function handleHashAlgOnChange()
 {
 	const hashOption = document.getElementById("hash_alg").value;
 	switch(hashOption)
@@ -713,7 +713,7 @@ function handleHashAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleSignAlgOnChange()
+export function handleSignAlgOnChange()
 {
 	const signOption = document.getElementById("sign_alg").value;
 	switch(signOption)
@@ -730,21 +730,6 @@ function handleSignAlgOnChange()
 		default:
 	}
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	createOCSPResp();
-	verifyOCSPResp();
-	parseCAbundle();
-	handleFileBrowse();
-	handleCABundle();
-	handleHashAlgOnChange();
-	handleSignAlgOnChange();
-	setEngine();
-});
 //*********************************************************************************
 context("OCSP Response Complex Example", () =>
 {

@@ -225,7 +225,7 @@ async function createOpenSSLPrivateKeyInternal()
 	//endregion
 }
 //*********************************************************************************
-function createOpenSSLPrivateKey()
+export function createOpenSSLPrivateKey()
 {
 	return Promise.resolve().
 		then(() =>
@@ -284,7 +284,7 @@ async function parseOpenSSLPrivateKeyInternal()
 	}
 }
 //*********************************************************************************
-async function parseOpenSSLPrivateKey()
+export async function parseOpenSSLPrivateKey()
 {
 	return Promise.resolve().
 		then(() =>
@@ -364,7 +364,7 @@ async function parseOpenSSLPrivateKey()
 //*********************************************************************************
 //endregion
 //*********************************************************************************
-function handleContentEncLenOnChange()
+export function handleContentEncLenOnChange()
 {
 	const encryptionAlgorithmLengthSelect = document.getElementById("content_enc_alg_len").value;
 	switch(encryptionAlgorithmLengthSelect)
@@ -381,17 +381,6 @@ function handleContentEncLenOnChange()
 		default:
 	}
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	createOpenSSLPrivateKey();
-	parseOpenSSLPrivateKey();
-	handleContentEncLenOnChange();
-	setEngine();
-});
 //*********************************************************************************
 context("OpenSSL Encrypted Private Key", () =>
 {

@@ -156,7 +156,7 @@ function createP7BInternal()
 	return sequence;
 }
 //*********************************************************************************
-function createP7B()
+export function createP7B()
 {
 	return Promise.resolve().then(() => createP7BInternal()).then(() =>
 	{
@@ -172,7 +172,7 @@ function createP7B()
 //*********************************************************************************
 //endregion
 //*********************************************************************************
-function handleHashAlgOnChange()
+export function handleHashAlgOnChange()
 {
 	const hashOption = document.getElementById("hashAlg").value;
 	switch(hashOption)
@@ -193,7 +193,7 @@ function handleHashAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleSignAlgOnChange()
+export function handleSignAlgOnChange()
 {
 	const signOption = document.getElementById("signAlg").value;
 	switch(signOption)
@@ -210,17 +210,6 @@ function handleSignAlgOnChange()
 		default:
 	}
 }
-//*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
-	return;
-	
-	// noinspection UnreachableCodeJS
-	createP7B();
-	handleHashAlgOnChange();
-	handleSignAlgOnChange();
-	setEngine();
-});
 //*********************************************************************************
 context("P7B Simple Example", () =>
 {
