@@ -1,7 +1,7 @@
 /* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import { arrayBufferToString, stringToArrayBuffer } from "pvutils";
-import { getCrypto, getAlgorithmParameters } from "../../src/common";
+import { getCrypto, getAlgorithmParameters, formatPEM } from "../../src/common";
 import Certificate from "../../src/Certificate";
 import EnvelopedData from "../../src/EnvelopedData";
 import ContentInfo from "../../src/ContentInfo";
@@ -23,29 +23,6 @@ const encAlg = {
 	name: "AES-CBC",
 	length: 128
 };
-//*********************************************************************************
-//region Auxiliary functions 
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	const stringLength = pemString.length;
-	let resultString = "";
-	
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-		
-		resultString = `${resultString}${pemString[i]}`;
-	}
-	
-	return resultString;
-}
-//*********************************************************************************
-//endregion
 //*********************************************************************************
 //region Create CERT  
 //*********************************************************************************

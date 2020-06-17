@@ -15,7 +15,7 @@ import CertificateChainValidationEngine from "./pkijs/CertificateChainValidation
 // noinspection JSFileReferences
 import CertificateRevocationList from "./pkijs/CertificateRevocationList.js";
 // noinspection JSFileReferences
-import { getCrypto, getAlgorithmParameters } from "./pkijs/common.js";
+import { getCrypto, getAlgorithmParameters, formatPEM } from "./pkijs/common.js";
 // noinspection JSFileReferences
 import BasicConstraints from "./pkijs/BasicConstraints.js";
 //*********************************************************************************
@@ -27,28 +27,6 @@ const crls = []; // Array of CRLs for all certificates (trusted + intermediate)
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-v1_5";
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	/// <summary>Format string in order to have each line with length equal to 63</summary>
-	/// <param name="pemString" type="String">String to format</param>
-	
-	const stringLength = pemString.length;
-	let resultString = "";
-	
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-		
-		resultString = `${resultString}${pemString[i]}`;
-	}
-	
-	return resultString;
-}
 //*********************************************************************************
 function parseCertificate()
 {

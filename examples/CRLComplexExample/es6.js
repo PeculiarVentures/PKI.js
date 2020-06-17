@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars,no-undef,no-unreachable */
 import { arrayBufferToString, bufferToHexCodes, toBase64 } from "pvutils";
-import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
+import { getCrypto, getAlgorithmParameters, setEngine, formatPEM } from "../../src/common";
 import * as asn1js from "asn1js";
 import Certificate from "../../src/Certificate";
 import CertificateRevocationList from "../../src/CertificateRevocationList";
@@ -20,29 +20,6 @@ let issuerPublicKey = null;
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-V1_5";
-//*********************************************************************************
-//region Auxiliary functions
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	const stringLength = pemString.length;
-	let resultString = "";
-	
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-		
-		resultString = `${resultString}${pemString[i]}`;
-	}
-	
-	return resultString;
-}
-//*********************************************************************************
-//endregion
 //*********************************************************************************
 //region Create CRL
 //*********************************************************************************

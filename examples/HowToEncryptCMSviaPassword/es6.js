@@ -1,7 +1,7 @@
 /* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import { arrayBufferToString, stringToArrayBuffer, fromBase64, toBase64, isEqualBuffer } from "pvutils";
-import { setEngine } from "../../src/common";
+import { setEngine, formatPEM } from "../../src/common";
 import EnvelopedData from "../../src/EnvelopedData";
 import ContentInfo from "../../src/ContentInfo";
 //<nodewebcryptoossl>
@@ -15,29 +15,6 @@ const encryptionAlgorithm = {
 let preDefinedDataBuffer = new ArrayBuffer(0);
 let valueBuffer = new ArrayBuffer(0);
 let cmsEnvelopedBuffer = new ArrayBuffer(0);
-//*********************************************************************************
-//region Auxiliary functions
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	const stringLength = pemString.length;
-	let resultString = "";
-	
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-		
-		resultString = `${resultString}${pemString[i]}`;
-	}
-	
-	return resultString;
-}
-//*********************************************************************************
-//endregion
 //*********************************************************************************
 //region Encrypt input data
 //*********************************************************************************
