@@ -1,7 +1,8 @@
 /* eslint-disable no-undef,no-unreachable,no-unused-vars */
 import * as asn1js from "asn1js";
 import { utilConcatBuf, stringToArrayBuffer, fromBase64, toBase64, arrayBufferToString, bufferToHexCodes } from "pvutils";
-import { setEngine, getCrypto, formatPEM } from "../../src/common.js";
+import { setEngine, getCrypto } from "../../src/common.js";
+import { formatPEM } from "../examples_common.js";
 import RSAPrivateKey from "../../src/RSAPrivateKey.js";
 //<nodewebcryptoossl>
 //*********************************************************************************

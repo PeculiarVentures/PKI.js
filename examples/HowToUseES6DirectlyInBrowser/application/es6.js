@@ -15,7 +15,9 @@ import CertificateChainValidationEngine from "./pkijs/CertificateChainValidation
 // noinspection JSFileReferences
 import CertificateRevocationList from "./pkijs/CertificateRevocationList.js";
 // noinspection JSFileReferences
-import { getCrypto, getAlgorithmParameters, formatPEM } from "./pkijs/common.js";
+import { getCrypto, getAlgorithmParameters } from "./pkijs/common.js";
+// noinspection JSFileReferences
+import { formatPEM } from "./pkijs/examples_common.js";
 // noinspection JSFileReferences
 import BasicConstraints from "./pkijs/BasicConstraints.js";
 //*********************************************************************************

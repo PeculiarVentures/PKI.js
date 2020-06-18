@@ -1,7 +1,8 @@
 /* eslint-disable no-undef,no-unreachable,no-unused-vars */
 import * as asn1js from "asn1js";
 import { bufferToHexCodes, stringToArrayBuffer, arrayBufferToString, toBase64 } from "pvutils";
-import { getCrypto, getAlgorithmParameters, setEngine, formatPEM } from "../../src/common";
+import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
+import { formatPEM } from "../examples_common";
 import OCSPResponse from "../../src/OCSPResponse";
 import BasicOCSPResponse from "../../src/BasicOCSPResponse";
 import Certificate from "../../src/Certificate";
