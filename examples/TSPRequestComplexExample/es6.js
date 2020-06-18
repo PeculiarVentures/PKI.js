@@ -5,7 +5,7 @@ import { setEngine } from "../../src/common";
 import TimeStampReq from "../../src/TimeStampReq";
 import MessageImprint from "../../src/MessageImprint";
 import AlgorithmIdentifier from "../../src/AlgorithmIdentifier";
-import { formatPEM } from "../examples_common";
+import { formatPEM } from "../../examples/examples_common";
 //<nodewebcryptoossl>
 //*********************************************************************************
 let tspReqBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created TSP request 

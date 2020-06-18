@@ -2,7 +2,7 @@
 import * as asn1js from "asn1js";
 import { arrayBufferToString, stringToArrayBuffer, fromBase64, toBase64, isEqualBuffer } from "pvutils";
 import { setEngine } from "../../src/common";
-import { formatPEM } from "../examples_common";
+import { formatPEM } from "../../examples/examples_common";
 import EnvelopedData from "../../src/EnvelopedData";
 import ContentInfo from "../../src/ContentInfo";
 //<nodewebcryptoossl>

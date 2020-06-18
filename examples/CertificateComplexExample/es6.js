@@ -8,7 +8,7 @@ import RSAPublicKey from "../../src/RSAPublicKey.js";
 import CertificateChainValidationEngine from "../../src/CertificateChainValidationEngine.js";
 import CertificateRevocationList from "../../src/CertificateRevocationList.js";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common.js";
-import { formatPEM } from "../examples_common.js";
+import { formatPEM } from "../../examples/examples_common.js";
 import BasicConstraints from "../../src/BasicConstraints.js";
 import ExtKeyUsage from "../../src/ExtKeyUsage.js";
 import CertificateTemplate from "../../src/CertificateTemplate.js";

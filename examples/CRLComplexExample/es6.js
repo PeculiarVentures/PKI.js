@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars,no-undef,no-unreachable */
 import { arrayBufferToString, bufferToHexCodes, toBase64 } from "pvutils";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
-import { formatPEM } from "../examples_common";
+import { formatPEM } from "../../examples/examples_common";
 import * as asn1js from "asn1js";
 import Certificate from "../../src/Certificate";
 import CertificateRevocationList from "../../src/CertificateRevocationList";

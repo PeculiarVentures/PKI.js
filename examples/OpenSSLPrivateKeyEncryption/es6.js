@@ -2,7 +2,7 @@
 import * as asn1js from "asn1js";
 import { utilConcatBuf, stringToArrayBuffer, fromBase64, toBase64, arrayBufferToString, bufferToHexCodes } from "pvutils";
 import { setEngine, getCrypto } from "../../src/common.js";
-import { formatPEM } from "../examples_common.js";
+import { formatPEM } from "../../examples/examples_common.js";
 import RSAPrivateKey from "../../src/RSAPrivateKey.js";
 //<nodewebcryptoossl>
 //*********************************************************************************

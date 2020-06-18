@@ -1,7 +1,7 @@
 /* eslint-disable no-undef,no-unreachable */
 import * as asn1js from "asn1js";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
-import { formatPEM } from "../examples_common";
+import { formatPEM } from "../../examples/examples_common";
 import { arrayBufferToString, toBase64 } from "pvutils";
 import Certificate from "../../src/Certificate";
 import AttributeTypeAndValue from "../../src/AttributeTypeAndValue";

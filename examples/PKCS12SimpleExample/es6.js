@@ -2,7 +2,7 @@
 import * as asn1js from "asn1js";
 import { stringToArrayBuffer, arrayBufferToString, fromBase64, toBase64 } from "pvutils";
 import { getCrypto, getAlgorithmParameters, getRandomValues, setEngine } from "../../src/common";
-import { formatPEM } from "../examples_common";
+import { formatPEM } from "../../examples/examples_common";
 import Certificate from "../../src/Certificate";
 import PrivateKeyInfo from "../../src/PrivateKeyInfo";
 import AuthenticatedSafe from "../../src/AuthenticatedSafe";

@@ -2,7 +2,7 @@
 import * as asn1js from "asn1js";
 import { arrayBufferToString, stringToArrayBuffer } from "pvutils";
 import { getCrypto, getAlgorithmParameters } from "../../src/common";
-import { formatPEM } from "../examples_common";
+import { formatPEM } from "../../examples/examples_common";
 import Certificate from "../../src/Certificate";
 import EnvelopedData from "../../src/EnvelopedData";
 import ContentInfo from "../../src/ContentInfo";

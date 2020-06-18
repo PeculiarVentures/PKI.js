@@ -2,7 +2,7 @@
 import * as asn1js from "asn1js";
 import { bufferToHexCodes, toBase64,arrayBufferToString } from "pvutils";
 import { setEngine } from "../../src/common";
-import { formatPEM } from "../examples_common";
+import { formatPEM } from "../../examples/examples_common";
 import OCSPRequest from "../../src/OCSPRequest";
 import GeneralName from "../../src/GeneralName";
 import RelativeDistinguishedNames from "../../src/RelativeDistinguishedNames";
