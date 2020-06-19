@@ -2,6 +2,7 @@
 import * as asn1js from "asn1js";
 import { bufferToHexCodes, toBase64,arrayBufferToString } from "pvutils";
 import { setEngine } from "../../src/common";
+import { formatPEM } from "../../examples/examples_common";
 import OCSPRequest from "../../src/OCSPRequest";
 import GeneralName from "../../src/GeneralName";
 import RelativeDistinguishedNames from "../../src/RelativeDistinguishedNames";
@@ -13,32 +14,6 @@ import Extension from "../../src/Extension";
 //<nodewebcryptoossl>
 //*********************************************************************************
 let ocspReqBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created OCSP request
-//*********************************************************************************
-//region Auxiliary functions
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	/// <summary>Format string in order to have each line with length equal to 63</summary>
-	/// <param name="pemString" type="String">String to format</param>
-	
-	const stringLength = pemString.length;
-	let resultString = "";
-	
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-		
-		resultString = `${resultString}${pemString[i]}`;
-	}
-	
-	return resultString;
-}
-//*********************************************************************************
-//endregion
 //*********************************************************************************
 //region Create OCSP request  
 //*********************************************************************************

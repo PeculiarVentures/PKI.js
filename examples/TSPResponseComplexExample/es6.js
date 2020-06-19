@@ -2,6 +2,7 @@
 import * as asn1js from "asn1js";
 import { stringToArrayBuffer, arrayBufferToString, bufferToHexCodes, toBase64 } from "pvutils";
 import { getCrypto, getAlgorithmParameters, setEngine, getOIDByAlgorithm } from "../../src/common";
+import { formatPEM } from "../../examples/examples_common";
 import Certificate from "../../src/Certificate";
 import AttributeTypeAndValue from "../../src/AttributeTypeAndValue";
 import Extension from "../../src/Extension";
@@ -28,29 +29,6 @@ const testData = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-V1_5";
-//*********************************************************************************
-//region Auxiliary functions
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	const stringLength = pemString.length;
-	let resultString = "";
-	
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-		
-		resultString += pemString[i];
-	}
-	
-	return resultString;
-}
-//*********************************************************************************
-//endregion
 //*********************************************************************************
 //region Create TSP response
 //*********************************************************************************

@@ -2,6 +2,7 @@
 import * as asn1js from "asn1js";
 import { stringToArrayBuffer, arrayBufferToString, fromBase64, toBase64 } from "pvutils";
 import { getCrypto, getAlgorithmParameters, getRandomValues, setEngine } from "../../src/common";
+import { formatPEM } from "../../examples/examples_common";
 import Certificate from "../../src/Certificate";
 import PrivateKeyInfo from "../../src/PrivateKeyInfo";
 import AuthenticatedSafe from "../../src/AuthenticatedSafe";
@@ -22,25 +23,6 @@ const privateKeyBASE64 = "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDioS
 //endregion 
 //*********************************************************************************
 //region Auxiliary functions 
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	const stringLength = pemString.length;
-	let resultString = "";
-	
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-		
-		resultString = `${resultString}${pemString[i]}`;
-	}
-	
-	return resultString;
-}
 //*********************************************************************************
 function destroyClickedElement(event)
 {

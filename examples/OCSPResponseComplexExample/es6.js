@@ -2,6 +2,7 @@
 import * as asn1js from "asn1js";
 import { bufferToHexCodes, stringToArrayBuffer, arrayBufferToString, toBase64 } from "pvutils";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common";
+import { formatPEM } from "../../examples/examples_common";
 import OCSPResponse from "../../src/OCSPResponse";
 import BasicOCSPResponse from "../../src/BasicOCSPResponse";
 import Certificate from "../../src/Certificate";
@@ -20,29 +21,6 @@ let trustedCertificates = []; // Array of root certificates from "CA Bundle"
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-V1_5";
-//*********************************************************************************
-//region Auxiliary functions 
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	const stringLength = pemString.length;
-	let resultString = "";
-	
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-		
-		resultString += pemString[i];
-	}
-	
-	return resultString;
-}
-//*********************************************************************************
-//endregion
 //*********************************************************************************
 //region Create OCSP response 
 //*********************************************************************************

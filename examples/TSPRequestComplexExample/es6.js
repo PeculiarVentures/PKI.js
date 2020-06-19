@@ -5,32 +5,10 @@ import { setEngine } from "../../src/common";
 import TimeStampReq from "../../src/TimeStampReq";
 import MessageImprint from "../../src/MessageImprint";
 import AlgorithmIdentifier from "../../src/AlgorithmIdentifier";
+import { formatPEM } from "../../examples/examples_common";
 //<nodewebcryptoossl>
 //*********************************************************************************
 let tspReqBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created TSP request 
-//*********************************************************************************
-//region Auxiliary functions 
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	const stringLength = pemString.length;
-	let resultString = "";
-	
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-		
-		resultString += pemString[i];
-	}
-	
-	return resultString;
-}
-//*********************************************************************************
-//endregion
 //*********************************************************************************
 //region Create TSP request  
 //*********************************************************************************

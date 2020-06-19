@@ -8,6 +8,7 @@ import RSAPublicKey from "../../src/RSAPublicKey.js";
 import CertificateChainValidationEngine from "../../src/CertificateChainValidationEngine.js";
 import CertificateRevocationList from "../../src/CertificateRevocationList.js";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common.js";
+import { formatPEM } from "../../examples/examples_common.js";
 import BasicConstraints from "../../src/BasicConstraints.js";
 import ExtKeyUsage from "../../src/ExtKeyUsage.js";
 import CertificateTemplate from "../../src/CertificateTemplate.js";
@@ -22,28 +23,6 @@ const crls = []; // Array of CRLs for all certificates (trusted + intermediate)
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-v1_5";
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	/// <summary>Format string in order to have each line with length equal to 63</summary>
-	/// <param name="pemString" type="String">String to format</param>
-	
-	const stringLength = pemString.length;
-	let resultString = "";
-	
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-		
-		resultString = `${resultString}${pemString[i]}`;
-	}
-	
-	return resultString;
-}
 //*********************************************************************************
 function parseCertificate()
 {

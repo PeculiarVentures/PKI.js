@@ -2,6 +2,7 @@
 import * as asn1js from "asn1js";
 import { utilConcatBuf, stringToArrayBuffer, fromBase64, toBase64, arrayBufferToString, bufferToHexCodes } from "pvutils";
 import { setEngine, getCrypto } from "../../src/common.js";
+import { formatPEM } from "../../examples/examples_common.js";
 import RSAPrivateKey from "../../src/RSAPrivateKey.js";
 //<nodewebcryptoossl>
 //*********************************************************************************
@@ -9,28 +10,6 @@ let privateKeyData = new ArrayBuffer(0);
 let passwordBuffer = new ArrayBuffer(0);
 let ivBuffer = new ArrayBuffer(0);
 let aesKeyLength = 16;
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	/// <summary>Format string in order to have each line with length equal to 63</summary>
-	/// <param name="pemString" type="String">String to format</param>
-
-	const stringLength = pemString.length;
-	let resultString = "";
-
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-
-		resultString = `${resultString}${pemString[i]}`;
-	}
-
-	return resultString;
-}
 //*********************************************************************************
 function md5(data, offset, length)
 {

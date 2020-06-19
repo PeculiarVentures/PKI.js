@@ -2,6 +2,7 @@
 import * as asn1js from "asn1js";
 import { arrayBufferToString, stringToArrayBuffer, toBase64, fromBase64 } from "pvutils";
 import { getCrypto, getAlgorithmParameters, setEngine } from "../../src/common.js";
+import { formatPEM } from "../../examples/examples_common.js";
 import CertificationRequest from "../../src/CertificationRequest.js";
 import AttributeTypeAndValue from "../../src/AttributeTypeAndValue.js";
 import Attribute from "../../src/Attribute.js";
@@ -16,32 +17,6 @@ let pkcs10Buffer = new ArrayBuffer(0);
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-V1_5";
-//*********************************************************************************
-//region Auxiliary functions
-//*********************************************************************************
-function formatPEM(pemString)
-{
-	/// <summary>Format string in order to have each line with length equal to 63</summary>
-	/// <param name="pemString" type="String">String to format</param>
-	
-	const stringLength = pemString.length;
-	let resultString = "";
-	
-	for(let i = 0, count = 0; i < stringLength; i++, count++)
-	{
-		if(count > 63)
-		{
-			resultString = `${resultString}\r\n`;
-			count = 0;
-		}
-		
-		resultString = `${resultString}${pemString[i]}`;
-	}
-	
-	return resultString;
-}
-//*********************************************************************************
-//endregion
 //*********************************************************************************
 //region Create PKCS#10
 //*********************************************************************************
