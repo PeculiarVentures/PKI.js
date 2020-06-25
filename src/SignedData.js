@@ -293,7 +293,7 @@ export default class SignedData
 		
 		//region Create array of digest algorithms
 		outputArray.push(new asn1js.Set({
-			value: Array.from(this.digestAlgorithms, algorithm => algorithm.toSchema(encodeFlag))
+			value: Array.from(this.digestAlgorithms, algorithm => algorithm.toSchema())
 		}));
 		//endregion
 		
@@ -324,7 +324,7 @@ export default class SignedData
 				{
 					if(crl instanceof OtherRevocationInfoFormat)
 					{
-						const crlSchema = crl.toSchema(encodeFlag);
+						const crlSchema = crl.toSchema();
 						
 						crlSchema.idBlock.tagClass = 3;
 						crlSchema.idBlock.tagNumber = 1;
@@ -339,7 +339,7 @@ export default class SignedData
 		
 		//region Create array of signer infos
 		outputArray.push(new asn1js.Set({
-			value: Array.from(this.signerInfos, signerInfo => signerInfo.toSchema(encodeFlag))
+			value: Array.from(this.signerInfos, signerInfo => signerInfo.toSchema())
 		}));
 		//endregion
 		//endregion
