@@ -5,6 +5,9 @@
     <meta charset="utf-8" />
     <title>CMS Signed Data complex example</title>
 
+    <script type="application/javascript" src="polyfill.js"></script>
+    <script type="text/javascript" src="CMSSigned_complex_example.js"></script>
+
     <style type="text/css">
         body{background:#EFEFEF;font:normal 14px/16px Helvetica, Arial, sans-serif;}
         .wrapper{
@@ -118,8 +121,6 @@
         border: 1px solid black; 
        }
     </style>
-
-    <script type="text/javascript" src="CMSSigned_complex_example.js"></script>
 </head>
 
 <body>
@@ -150,7 +151,7 @@
             </p>
             <p>
                 <label for="sign_alg" style="font-weight:bold">Signature algorithm:</label>
-                <select id="sign_alg" onchange="handleSignAlgOnChange">
+                <select id="sign_alg" onchange="handleSignAlgOnChange()">
                     <option value="alg_RSA15">RSASSA-PKCS1-v1_5</option>
                     <option value="alg_RSA2">RSA-PSS</option>
                     <option value="alg_ECDSA">ECDSA</option>
