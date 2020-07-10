@@ -1,8 +1,8 @@
 {
-  "compact": "false",
+  "compact": false,
   "presets": [
     [
-      "env",
+      "@babel/preset-env",
       {
         "targets": {
           "browsers": [ // Based on data from https://caniuse.com/#feat=cryptography
