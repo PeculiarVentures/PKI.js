@@ -1,6 +1,6 @@
 # PKIjs
 
-[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/PeculiarVentures/PKI.js/blob/master/LICENSE) 
+[![License](https://img.shields.io/badge/license-BSD-green.svg?style=flat)](https://github.com/PeculiarVentures/PKI.js/blob/master/LICENSE) 
 [![CircleCI](https://circleci.com/gh/PeculiarVentures/PKI.js/tree/master.svg?style=svg)](https://circleci.com/gh/PeculiarVentures/PKI.js/tree/master)
  [![Known Vulnerabilities](https://snyk.io/test/github/PeculiarVentures/PKI.js/badge.svg)](https://snyk.io/test/github/PeculiarVentures/PKI.js) [![Coverage Status](https://coveralls.io/repos/github/PeculiarVentures/PKI.js/badge.svg)](https://coveralls.io/github/PeculiarVentures/PKI.js) 
 
@@ -9,12 +9,12 @@
 
 
 
-Public Key Infrastructure (PKI) is the basis of how identity and key management is performed on the web today. PKIjs is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto ([_**Web Cryptography API**_](http://www.w3.org/TR/WebCryptoAPI/)) and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins.
+Public Key Infrastructure (PKI) is the basis of how identity and key management are performed on the web today. PKIjs is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto ([_**Web Cryptography API**_](http://www.w3.org/TR/WebCryptoAPI/)) and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins.
 
-New version of the PKIjs based on using ES6 (ES2015) and was designed with these aims in mind:
+New versions of the PKIjs are based on ES6 (ES2015) and are designed with these aims in mind:
 
-* Most modern language environment using all ES6 features;
-* Simplification of usage PKIjs inside Node.je environment;
+* Most modern language environments are using all ES6 features;
+* Simplification of using PKIjs inside Node.js environment;
 * Ability to use only that parts of library code which are needed in user environment (minification of used code);
 * Increasing level of documentation inside library;
 * Ability to transpline library code into ES5 code;
@@ -22,7 +22,7 @@ New version of the PKIjs based on using ES6 (ES2015) and was designed with these
 
 In the new version of library we have some new features:
 
-* New version of "certificate chaing verification engine" passed almost all tests from NIST PKITS. Tests are also shipped with the library;
+* New version of "certificate chain verification engine" passed almost all tests from NIST PKITS. Tests are also shipped with the library;
 * Internal "WebCrypto shim" making it possible to work with "spki/pkcs8" formats in any environment;
 
 ## Features And Additional information
@@ -43,7 +43,7 @@ In the new version of library we have some new features:
   * All extension types of X.509 certificates (BasicConstraints, CertificatePolicies, AuthorityKeyIdentifier etc.);
   * All "support types" for OCSP requests and responces;
   * All "support types" for Time-Stamping Protocol (TSP) requests and responces;
-* **Has own certification chain verification engine, built in pure JavaScript, with help from Promises and Web Cryptography API latest standard implementation;**
+* **Has own certificate chain verification engine, built in pure JavaScript, with help from Promises and Web Cryptography API latest standard implementation;**
 * Working with **all** Web Cryptography API signature algorithms:
   * RSASSA-PKCS1-v1_5;
   * RSA-PSS;
