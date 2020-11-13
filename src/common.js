@@ -59,11 +59,14 @@ export function setEngine(name, crypto, subtle)
 	//region We are in browser
 	else
 	{
-		engine = {
-			name: name,
-			crypto: crypto,
-			subtle: subtle
-		};
+		if(engine.name !== name)
+		{
+			engine = {
+				name: name,
+				crypto: crypto,
+				subtle: subtle
+			};
+		}
 	}
 	//endregion
 }
