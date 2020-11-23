@@ -1,5 +1,6 @@
 # PKIjs
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8960dbcfe8f143cab977fd000778d5ce)](https://app.codacy.com/gh/e7cdb440-fee7-11ea-adc1-0242ac120002/PKI.js?utm_source=github.com&utm_medium=referral&utm_content=e7cdb440-fee7-11ea-adc1-0242ac120002/PKI.js&utm_campaign=Badge_Grade_Settings)
 [![License](https://img.shields.io/badge/license-BSD-green.svg?style=flat)](https://github.com/PeculiarVentures/PKI.js/blob/master/LICENSE) 
 [![CircleCI](https://circleci.com/gh/PeculiarVentures/PKI.js/tree/master.svg?style=svg)](https://circleci.com/gh/PeculiarVentures/PKI.js/tree/master)
  [![Known Vulnerabilities](https://snyk.io/test/github/PeculiarVentures/PKI.js/badge.svg)](https://snyk.io/test/github/PeculiarVentures/PKI.js) [![Coverage Status](https://coveralls.io/repos/github/PeculiarVentures/PKI.js/badge.svg)](https://coveralls.io/github/PeculiarVentures/PKI.js) 
