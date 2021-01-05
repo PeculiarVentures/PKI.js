@@ -1839,7 +1839,8 @@ export default class CryptoEngine
 		const ivView = new Uint8Array(ivBuffer);
 		this.getRandomValues(ivView);
 		
-		const saltBuffer = new ArrayBuffer(64);
+		const saltLength = 'saltLength' in parameters ? parameters.saltLength : 64;
+		const saltBuffer = new ArrayBuffer(saltLength);
 		const saltView = new Uint8Array(saltBuffer);
 		this.getRandomValues(saltView);
 		
