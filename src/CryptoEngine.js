@@ -406,6 +406,19 @@ export default class CryptoEngine
 								//endregion
 							}
 							break;
+						case "RSAES-PKCS1-V1_5":
+							{
+								jwk.kty = "RSA";
+								jwk.ext = extractable;
+								jwk.key_ops = keyUsages;
+								jwk.alg = "PS1";
+
+								const publicKeyJSON = publicKeyInfo.toJSON();
+
+								for(const key of Object.keys(publicKeyJSON))
+									jwk[key] = publicKeyJSON[key];
+							}
+							break;
 						default:
 							return Promise.reject(`Incorrect algorithm name: ${algorithm.name.toUpperCase()}`);
 					}
@@ -564,6 +577,23 @@ export default class CryptoEngine
 								//region Create RSA Private Key elements
 								const privateKeyJSON = privateKeyInfo.toJSON();
 								
+								for(const key of Object.keys(privateKeyJSON))
+									jwk[key] = privateKeyJSON[key];
+								//endregion
+							}
+							break;
+						case "RSAES-PKCS1-V1_5":
+							{
+								keyUsages = ["decrypt"]; // Override existing keyUsages value since the key is a private key
+
+								jwk.kty = "RSA";
+								jwk.ext = extractable;
+								jwk.key_ops = keyUsages;
+								jwk.alg = "PS1";
+
+								//region Create RSA Private Key elements
+								const privateKeyJSON = privateKeyInfo.toJSON();
+
 								for(const key of Object.keys(privateKeyJSON))
 									jwk[key] = privateKeyJSON[key];
 								//endregion
@@ -882,6 +912,9 @@ export default class CryptoEngine
 		switch(oid)
 		{
 			case "1.2.840.113549.1.1.1":
+				return {
+					name: "RSAES-PKCS1-v1_5"
+				};
 			case "1.2.840.113549.1.1.5":
 				return {
 					name: "RSASSA-PKCS1-v1_5",
@@ -1110,6 +1143,9 @@ export default class CryptoEngine
 		
 		switch(algorithm.name.toUpperCase())
 		{
+			case "RSAES-PKCS1-V1_5":
+				result = "1.2.840.113549.1.1.1";
+				break;
 			case "RSASSA-PKCS1-V1_5":
 				switch(algorithm.hash.name.toUpperCase())
 				{

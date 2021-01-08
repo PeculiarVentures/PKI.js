@@ -354,41 +354,64 @@ export default class EnvelopedData
 		
 		if(("kekEncryptionLength" in encryptionParameters) === false)
 			encryptionParameters.kekEncryptionLength = 256;
-		//endregion 
+
+		if(("useOAEP" in encryptionParameters) === false)
+			encryptionParameters.useOAEP = true;
+		//endregion
 		
 		//region Add new "recipient" depends on "variant" and certificate type 
 		switch(variant)
 		{
 			case 1: // Key transport scheme
 				{
-					//region keyEncryptionAlgorithm
-					const oaepOID = getOIDByAlgorithm({
-						name: "RSA-OAEP"
-					});
-					if(oaepOID === "")
-						throw new Error("Can not find OID for OAEP");
-					//endregion
+					let algorithmId;
+					let algorithmParams;
 
-					//region RSAES-OAEP-params
-					const hashOID = getOIDByAlgorithm({
-						name: encryptionParameters.oaepHashAlgorithm
-					});
-					if(hashOID === "")
-						throw new Error(`Unknown OAEP hash algorithm: ${encryptionParameters.oaepHashAlgorithm}`);
-				
-					const hashAlgorithm = new AlgorithmIdentifier({
-						algorithmId: hashOID,
-						algorithmParams: new asn1js.Null()
-					});
-				
-					const rsaOAEPParams = new RSAESOAEPParams({
-						hashAlgorithm,
-						maskGenAlgorithm: new AlgorithmIdentifier({
-							algorithmId: "1.2.840.113549.1.1.8", // id-mgf1
-							algorithmParams: hashAlgorithm.toSchema()
-						})
-					});
-					//endregion
+					if(encryptionParameters.useOAEP === true)
+					{
+						//region keyEncryptionAlgorithm
+						algorithmId = getOIDByAlgorithm({
+							name: "RSA-OAEP"
+						});
+						if(algorithmId === "")
+							throw new Error("Can not find OID for RSA-OAEP");
+						//endregion
+
+						//region RSAES-OAEP-params
+						const hashOID = getOIDByAlgorithm({
+							name: encryptionParameters.oaepHashAlgorithm
+						});
+						if(hashOID === "")
+							throw new Error(`Unknown OAEP hash algorithm: ${encryptionParameters.oaepHashAlgorithm}`);
+
+						const hashAlgorithm = new AlgorithmIdentifier({
+							algorithmId: hashOID,
+							algorithmParams: new asn1js.Null()
+						});
+
+						const rsaOAEPParams = new RSAESOAEPParams({
+							hashAlgorithm,
+							maskGenAlgorithm: new AlgorithmIdentifier({
+								algorithmId: "1.2.840.113549.1.1.8", // id-mgf1
+								algorithmParams: hashAlgorithm.toSchema()
+							})
+						});
+
+						algorithmParams = rsaOAEPParams.toSchema();
+						//endregion
+					}
+					else // Use old RSAES-PKCS1-v1_5 schema instead
+					{
+						//region keyEncryptionAlgorithm
+						algorithmId = getOIDByAlgorithm({
+							name: "RSAES-PKCS1-v1_5"
+						});
+						if(algorithmId === "")
+							throw new Error("Can not find OID for RSAES-PKCS1-v1_5");
+						//endregion
+
+						algorithmParams = new asn1js.Null();
+					}
 
 					//region KeyTransRecipientInfo
 					const keyInfo = new KeyTransRecipientInfo({
@@ -398,8 +421,8 @@ export default class EnvelopedData
 							serialNumber: certificate.serialNumber
 						}),
 						keyEncryptionAlgorithm: new AlgorithmIdentifier({
-							algorithmId: oaepOID,
-							algorithmParams: rsaOAEPParams.toSchema()
+							algorithmId,
+							algorithmParams
 						}),
 						recipientCertificate: certificate
 						// "encryptedKey" will be calculated in "encrypt" function
@@ -941,70 +964,44 @@ export default class EnvelopedData
 			
 			return currentSequence;
 		}
-		
-		function SubKeyTransRecipientInfo(index)
+
+		async function SubKeyTransRecipientInfo(index)
 		{
-			//region Initial variables
-			let currentSequence = Promise.resolve();
-			//endregion
-			
-			//region Get recipient's public key
-			currentSequence = currentSequence.then(() =>
+			const algorithmParameters = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
+			if("name" in algorithmParameters === false)
+				throw new Error(`Unknown keyEncryptionAlgorithm: ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+
+			//region RSA-OAEP case
+			if(algorithmParameters.name === "RSA-OAEP")
 			{
-				//region Check we have a correct algorithm here
-				const oaepOID = getOIDByAlgorithm({
-					name: "RSA-OAEP"
-				});
-				if(oaepOID === "")
-					throw new Error("Can not find OID for OAEP");
-
-				if(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId !== oaepOID)
-					throw new Error("Not supported encryption scheme, only RSA-OAEP is supported for key transport encryption scheme");
-				//endregion
-
-				//region Get current used SHA algorithm
 				const schema = _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams;
 				const rsaOAEPParams = new RSAESOAEPParams({ schema });
-				
-				const hashAlgorithm = getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId);
-				if(("name" in hashAlgorithm) === false)
-					return Promise.reject(`Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`);
-				//endregion
-				
-				return _this.recipientInfos[index].value.recipientCertificate.getPublicKey({
+
+				algorithmParameters.hash = getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId);
+				if(("name" in algorithmParameters.hash) === false)
+					throw new Error(`Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`);
+			}
+			//endregion
+
+			try
+			{
+				const publicKey = await _this.recipientInfos[index].value.recipientCertificate.getPublicKey({
 					algorithm: {
-						algorithm: {
-							name: "RSA-OAEP",
-							hash: {
-								name: hashAlgorithm.name
-							}
-						},
+						algorithm: algorithmParameters,
 						usages: ["encrypt", "wrapKey"]
 					}
 				});
-			}, error =>
-				Promise.reject(error));
-			//endregion
-			//region Encrypt early exported session key on recipient's public key
-			currentSequence = currentSequence.then(result =>
-				crypto.encrypt(result.algorithm, result, exportedSessionKey),
-			error =>
-				Promise.reject(error)
-			);
-			//endregion
-			
-			//region Append all neccessary data to current CMS_RECIPIENT_INFO object
-			currentSequence = currentSequence.then(result =>
-			{
+
+				const encryptedKey = await crypto.encrypt(publicKey.algorithm, publicKey, exportedSessionKey);
+
 				//region RecipientEncryptedKey
-				_this.recipientInfos[index].value.encryptedKey = new asn1js.OctetString({ valueHex: result });
+				_this.recipientInfos[index].value.encryptedKey = new asn1js.OctetString({valueHex: encryptedKey});
 				//endregion
-			}, error =>
-				Promise.reject(error)
-			);
-			//endregion
-			
-			return currentSequence;
+			}
+			catch(ex)
+			{
+				const jjj = 0;
+			}
 		}
 		
 		function SubKEKRecipientInfo(index)
@@ -1424,72 +1421,54 @@ export default class EnvelopedData
 			
 			return currentSequence;
 		}
-		
-		function SubKeyTransRecipientInfo(index)
+
+		async function SubKeyTransRecipientInfo(index)
 		{
-			//region Initial variables
-			let currentSequence = Promise.resolve();
-			//endregion
-			
-			//region Import recipient's private key
-			currentSequence = currentSequence.then(() =>
+			if(("recipientPrivateKey" in decryptionParameters) === false)
+				throw new Error("Parameter \"recipientPrivateKey\" is mandatory for \"KeyTransRecipientInfo\"");
+
+			const algorithmParameters = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
+			if("name" in algorithmParameters === false)
+				throw new Error(`Unknown keyEncryptionAlgorithm: ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+
+			//region RSA-OAEP case
+			if(algorithmParameters.name === "RSA-OAEP")
 			{
-				if(("recipientPrivateKey" in decryptionParameters) === false)
-					return Promise.reject("Parameter \"recipientPrivateKey\" is mandatory for \"KeyTransRecipientInfo\"");
-					
-				//region Get current used SHA algorithm
 				const schema = _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams;
 				const rsaOAEPParams = new RSAESOAEPParams({ schema });
-					
-				const hashAlgorithm = getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId);
-				if(("name" in hashAlgorithm) === false)
-					return Promise.reject(`Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`);
-				//endregion
-					
-				return crypto.importKey("pkcs8",
-					decryptionParameters.recipientPrivateKey,
-					{
-						name: "RSA-OAEP",
-						hash: {
-							name: hashAlgorithm.name
-						}
-					},
-					true,
-					["decrypt"]);
-			}, error =>
-				Promise.reject(error)
-			);
+
+				algorithmParameters.hash = getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId);
+				if(("name" in algorithmParameters.hash) === false)
+					throw new Error(`Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`);
+			}
 			//endregion
-			//region Decrypt encrypted session key
-			currentSequence = currentSequence.then(result =>
-				crypto.decrypt(result.algorithm,
-					result,
-					_this.recipientInfos[index].value.encryptedKey.valueBlock.valueHex
-				), error =>
-				Promise.reject(error)
+
+			const privateKey = await crypto.importKey(
+				"pkcs8",
+				decryptionParameters.recipientPrivateKey,
+				algorithmParameters,
+				true,
+				["decrypt"]
 			);
-			//endregion
-			//region Import decrypted session key
-			currentSequence = currentSequence.then(result =>
-			{
-				//region Get WebCrypto form of content encryption algorithm
-				const contentEncryptionAlgorithm = getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
-				if(("name" in contentEncryptionAlgorithm) === false)
-					return Promise.reject(`Incorrect "contentEncryptionAlgorithm": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
-				//endregion
-					
-				return crypto.importKey("raw",
-					result,
-					contentEncryptionAlgorithm,
-					true,
-					["decrypt"]
-				);
-			}, error =>
-				Promise.reject(error)
+
+			const sessionKey = await crypto.decrypt(
+				privateKey.algorithm,
+				privateKey,
+				_this.recipientInfos[index].value.encryptedKey.valueBlock.valueHex
 			);
+
+			//region Get WebCrypto form of content encryption algorithm
+			const contentEncryptionAlgorithm = getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
+			if(("name" in contentEncryptionAlgorithm) === false)
+				throw new Error(`Incorrect "contentEncryptionAlgorithm": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 			//endregion
-			
-			return currentSequence;
+
+			return crypto.importKey("raw",
+				sessionKey,
+				contentEncryptionAlgorithm,
+				true,
+				["decrypt"]
+			);
 		}
 		
 		function SubKEKRecipientInfo(index)
