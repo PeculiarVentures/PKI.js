@@ -1342,6 +1342,7 @@ export default class CryptoEngine
 		
 		switch(algorithmName.toUpperCase())
 		{
+			case "RSAES-PKCS1-V1_5":
 			case "RSASSA-PKCS1-V1_5":
 				switch(operation.toLowerCase())
 				{
