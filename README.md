@@ -17,7 +17,7 @@ New versions of the PKIjs are based on ES6 (ES2015) and are designed with these 
 * Simplification of using PKIjs inside Node.js environment;
 * Ability to use only that parts of library code which are needed in user environment (minification of used code);
 * Increasing level of documentation inside library;
-* Ability to transpline library code into ES5 code;
+* Ability to transpile library code into ES5 code;
 * Enterprise-level quality of code and testing;
 
 In the new version of library we have some new features:
@@ -32,7 +32,7 @@ In the new version of library we have some new features:
 * First "crypto-related" library completely written on ES6 (ES2015);
 * First and **ONLY** open-source JS library with full support for all "Suite B" algorithms in CMS messages;
 * First library with support for CMS Enveloped data (encrypt/decrypt) in pure JavaScript + Web Cryptography API;
-* Fully object-oriented. Inheritence is used everywhere in the lib;
+* Fully object-oriented. Inheritance is used everywhere in the lib;
 * Working with HTML5 data objects (ArrayBuffer, Uint8Array, Promises, Web Cryptography API, etc.);
 * Has a complete set of helpers for working with types like:
   * GeneralName;
@@ -285,7 +285,7 @@ _**WARNING**_: if you would try to build PKI.js code for Node version <= 4 then 
 
 ### How to use PKI.js ES6 files directly in browser
 
-Currently there is a posibility to use ES6 modules directly from Web pages, without any transpilations (Babel, Rollup etc.). In order to do this all used files must point to direct or relative names and should be achievable via browser. Almost all modern browsers would support the "native ES6 modules". You could check [_**this link to caniuse site**_](https://caniuse.com/#feat=es6-module) for current status.
+Currently there is a possibility to use ES6 modules directly from Web pages, without any transpilations (Babel, Rollup etc.). In order to do this all used files must point to direct or relative names and should be achievable via browser. Almost all modern browsers would support the "native ES6 modules". You could check [_**this link to caniuse site**_](https://caniuse.com/#feat=es6-module) for current status.
  
 You could check [_**full-featured example here**_](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser). And please carefully read [_**this README**_](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser/README.md) before run it.
  
@@ -328,7 +328,7 @@ window.handleFileBrowseCreateEncrypted = handleFileBrowseCreateEncrypted;
 ```
 - Now you need to run your application as Node.js application. It is necessary just because modern CORS would prevent you from loading files from local filesystem;
 
-OK, now you are ready to launch your favorite Node.js Web Server and have fun with direct links to your wounderful PKI.js application! You could check [_**full-featured example here**_](). And please carefully read [_**this README**_]() before run it.
+OK, now you are ready to launch your favorite Node.js Web Server and have fun with direct links to your wonderful PKI.js application! You could check [_**full-featured example here**_](). And please carefully read [_**this README**_]() before run it.
 
 ### More examples
 
@@ -366,7 +366,7 @@ npm run test:node
 * Web Crypto support in browsers is always improving. Please check [_**this page**_](http://caniuse.com/#feat=cryptography) for information about Web Cryptography API browser support.
 
 ## Suitability
-There are several commercial products, enterprise solitions as well as open source project based on versions of PKIjs. You should, however, do your own code and security review before utilization in a production application before utilizing any open source library to ensure it will meet your needs.
+There are several commercial products, enterprise solutions as well as open source project based on versions of PKIjs. You should, however, do your own code and security review before utilization in a production application before utilizing any open source library to ensure it will meet your needs.
 
 ## Bug Reporting
 Please report bugs either as pull requests or as issues in the issue tracker. PKIjs has a full disclosure vulnerability policy. Please do NOT attempt to report any security vulnerability in this code privately to anybody.
