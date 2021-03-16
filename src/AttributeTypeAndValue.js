@@ -189,20 +189,23 @@ export default class AttributeTypeAndValue
 				return false;
 
 			//region Check we do have both strings
-			let isString = false;
+			let isString = [false, false];
 			const thisName = this.value.constructor.blockName();
+      for(const name of stringBlockNames)
+      {
+        if(thisName === name)
+        {
+          isString[0] = true;
+        }
+        if(compareTo.value.constructor.blockName() === name)
+        {
+          isString[1] = true;
+        }
+      }
+      if(isString[0] ^ isString[1])
+        return false;
 
-			if(thisName === compareTo.value.constructor.blockName())
-			{
-				for(const name of stringBlockNames)
-				{
-					if(thisName === name)
-					{
-						isString = true;
-						break;
-					}
-				}
-			}
+      isString = (isString[0] && isString[1]);
 			//endregion
 
 			if(isString)
