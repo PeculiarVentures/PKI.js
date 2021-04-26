@@ -173,7 +173,17 @@ export default class OCSPRequest
 		
 		outputArray.push(this.tbsRequest.toSchema(encodeFlag));
 		if("optionalSignature" in this)
-			outputArray.push(this.optionalSignature.toSchema());
+			outputArray.push(
+				new asn1js.Constructed({
+					optional: true,
+					idBlock: {
+						tagClass: 3, // CONTEXT-SPECIFIC
+						tagNumber: 0 // [0]
+					},
+					value: [
+						this.optionalSignature.toSchema()
+					]
+				}));
 		//endregion
 		
 		//region Construct and return new ASN.1 schema for this object
