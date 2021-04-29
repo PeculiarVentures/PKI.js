@@ -5,7 +5,7 @@ import ResponseData from "./ResponseData.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import Certificate from "./Certificate.js";
 import CertID from "./CertID.js";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import DistinguishedName from "./DistinguishedName.js";
 import CertificateChainValidationEngine from "./CertificateChainValidationEngine.js";
 //**************************************************************************************
 /**
@@ -482,7 +482,7 @@ export default class BasicOCSPResponse
 		//region Find correct value for "responderID"
 		switch(true)
 		{
-			case (this.tbsResponseData.responderID instanceof RelativeDistinguishedNames): // [1] Name
+			case (this.tbsResponseData.responderID instanceof DistinguishedName): // [1] Name
 				sequence = sequence.then(() =>
 				{
 					for(const [index, certificate] of _this.certs.entries())

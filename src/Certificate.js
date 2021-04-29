@@ -2,7 +2,7 @@ import * as asn1js from "asn1js";
 import { getParametersValue, bufferToHexCodes, clearProps } from "pvutils";
 import { getCrypto, getEngine } from "./common.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import DistinguishedName from "./DistinguishedName.js";
 import Time from "./Time.js";
 import PublicKeyInfo from "./PublicKeyInfo.js";
 import Extension from "./Extension.js";
@@ -63,7 +63,7 @@ function tbsCertificate(parameters = {})
 					blockName: "tbsCertificate.signature"
 				}
 			}),
-			RelativeDistinguishedNames.schema(names.issuer || {
+			DistinguishedName.schema(names.issuer || {
 				names: {
 					blockName: "tbsCertificate.issuer"
 				}
@@ -85,7 +85,7 @@ function tbsCertificate(parameters = {})
 					})
 				]
 			}),
-			RelativeDistinguishedNames.schema(names.subject || {
+			DistinguishedName.schema(names.subject || {
 				names: {
 					blockName: "tbsCertificate.subject"
 				}
@@ -162,7 +162,7 @@ export default class Certificate
 		 */
 		this.signature = getParametersValue(parameters, "signature", Certificate.defaultValues("signature"));
 		/**
-		 * @type {RelativeDistinguishedNames}
+		 * @type {DistinguishedName}
 		 * @desc The issuer field identifies the entity that has signed and issued the certificate
 		 */
 		this.issuer = getParametersValue(parameters, "issuer", Certificate.defaultValues("issuer"));
@@ -177,7 +177,7 @@ export default class Certificate
 		 */
 		this.notAfter = getParametersValue(parameters, "notAfter", Certificate.defaultValues("notAfter"));
 		/**
-		 * @type {RelativeDistinguishedNames}
+		 * @type {DistinguishedName}
 		 * @desc The subject field identifies the entity associated with the public key stored in the subject public key field
 		 */
 		this.subject = getParametersValue(parameters, "subject", Certificate.defaultValues("subject"));
@@ -243,13 +243,13 @@ export default class Certificate
 			case "signature":
 				return new AlgorithmIdentifier();
 			case "issuer":
-				return new RelativeDistinguishedNames();
+				return new DistinguishedName();
 			case "notBefore":
 				return new Time();
 			case "notAfter":
 				return new Time();
 			case "subject":
-				return new RelativeDistinguishedNames();
+				return new DistinguishedName();
 			case "subjectPublicKeyInfo":
 				return new PublicKeyInfo();
 			case "issuerUniqueID":
@@ -360,10 +360,10 @@ export default class Certificate
 			this.version = asn1.result["tbsCertificate.version"].valueBlock.valueDec;
 		this.serialNumber = asn1.result["tbsCertificate.serialNumber"];
 		this.signature = new AlgorithmIdentifier({ schema: asn1.result["tbsCertificate.signature"] });
-		this.issuer = new RelativeDistinguishedNames({ schema: asn1.result["tbsCertificate.issuer"] });
+		this.issuer = new DistinguishedName({ schema: asn1.result["tbsCertificate.issuer"] });
 		this.notBefore = new Time({ schema: asn1.result["tbsCertificate.notBefore"] });
 		this.notAfter = new Time({ schema: asn1.result["tbsCertificate.notAfter"] });
-		this.subject = new RelativeDistinguishedNames({ schema: asn1.result["tbsCertificate.subject"] });
+		this.subject = new DistinguishedName({ schema: asn1.result["tbsCertificate.subject"] });
 		this.subjectPublicKeyInfo = new PublicKeyInfo({ schema: asn1.result["tbsCertificate.subjectPublicKeyInfo"] });
 		if("tbsCertificate.issuerUniqueID" in asn1.result)
 			this.issuerUniqueID = asn1.result["tbsCertificate.issuerUniqueID"].valueBlock.valueHex;

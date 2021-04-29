@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
 import GeneralName from "./GeneralName.js";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import DistinguishedName from "./DistinguishedName.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -142,7 +142,7 @@ export default class DistributionPoint
 										tagClass: 3, // CONTEXT-SPECIFIC
 										tagNumber: 1 // [1]
 									},
-									value: RelativeDistinguishedNames.schema().valueBlock.value
+									value: DistinguishedName.schema().valueBlock.value
 								})
 							]
 						})
@@ -216,7 +216,7 @@ export default class DistributionPoint
 
 			if(asn1.result.distributionPoint.idBlock.tagNumber === 1) // RDN variant
 			{
-				this.distributionPoint = new RelativeDistinguishedNames({
+				this.distributionPoint = new DistinguishedName({
 					schema: new asn1js.Sequence({
 						value: asn1.result.distributionPoint.valueBlock.value
 					})

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import DistinguishedName from "./DistinguishedName.js";
 //**************************************************************************************
 //region Additional asn1js schema elements existing inside GeneralName schema
 //**************************************************************************************
@@ -381,7 +381,7 @@ export default class GeneralName
 						tagNumber: 4 // [4]
 					},
 					name: (names.blockName || ""),
-					value: [RelativeDistinguishedNames.schema(names.directoryName || {})]
+					value: [DistinguishedName.schema(names.directoryName || {})]
 				}),
 				new asn1js.Constructed({
 					idBlock: {
@@ -526,7 +526,7 @@ export default class GeneralName
 				this.value = asn1.result.blockName;
 				break;
 			case 4: // directoryName
-				this.value = new RelativeDistinguishedNames({ schema: asn1.result.directoryName });
+				this.value = new DistinguishedName({ schema: asn1.result.directoryName });
 				break;
 			case 5: // ediPartyName
 				this.value = asn1.result.ediPartyName;

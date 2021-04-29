@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import DistinguishedName from "./DistinguishedName.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -17,7 +17,7 @@ export default class IssuerAndSerialNumber
 	{
 		//region Internal properties of the object
 		/**
-		 * @type {RelativeDistinguishedNames}
+		 * @type {DistinguishedName}
 		 * @desc issuer
 		 */
 		this.issuer = getParametersValue(parameters, "issuer", IssuerAndSerialNumber.defaultValues("issuer"));
@@ -43,7 +43,7 @@ export default class IssuerAndSerialNumber
 		switch(memberName)
 		{
 			case "issuer":
-				return new RelativeDistinguishedNames();
+				return new DistinguishedName();
 			case "serialNumber":
 				return new asn1js.Integer();
 			default:
@@ -79,7 +79,7 @@ export default class IssuerAndSerialNumber
 		return (new asn1js.Sequence({
 			name: (names.blockName || ""),
 			value: [
-				RelativeDistinguishedNames.schema(names.issuer || {}),
+				DistinguishedName.schema(names.issuer || {}),
 				new asn1js.Integer({ name: (names.serialNumber || "") })
 			]
 		}));
@@ -118,7 +118,7 @@ export default class IssuerAndSerialNumber
 		//endregion
 
 		//region Get internal properties from parsed schema
-		this.issuer = new RelativeDistinguishedNames({ schema: asn1.result.issuer });
+		this.issuer = new DistinguishedName({ schema: asn1.result.issuer });
 		this.serialNumber = asn1.result.serialNumber;
 		//endregion
 	}

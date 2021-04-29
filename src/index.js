@@ -46,6 +46,8 @@ import CryptoEngine from "./CryptoEngine.js";
 export { CryptoEngine };
 import DigestInfo from "./DigestInfo.js";
 export { DigestInfo };
+import DistinguishedName from "./DistinguishedName.js";
+export { DistinguishedName };
 import DistributionPoint from "./DistributionPoint.js";
 export { DistributionPoint };
 import ECCCMSSharedInfo from "./ECCCMSSharedInfo.js";

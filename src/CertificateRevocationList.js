@@ -2,7 +2,7 @@ import * as asn1js from "asn1js";
 import { getParametersValue, bufferToHexCodes, clearProps } from "pvutils";
 import { getEngine } from "./common.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import DistinguishedName from "./DistinguishedName.js";
 import Time from "./Time.js";
 import RevokedCertificate from "./RevokedCertificate.js";
 import Extensions from "./Extensions.js";
@@ -52,7 +52,7 @@ function tbsCertList(parameters = {})
 					blockName: "tbsCertList.signature"
 				}
 			}),
-			RelativeDistinguishedNames.schema(names.issuer || {
+			DistinguishedName.schema(names.issuer || {
 				names: {
 					blockName: "tbsCertList.issuer"
 				}
@@ -129,7 +129,7 @@ export default class CertificateRevocationList {
 		 */
 		this.signature = getParametersValue(parameters, "signature", CertificateRevocationList.defaultValues("signature"));
 		/**
-		 * @type {RelativeDistinguishedNames}
+		 * @type {DistinguishedName}
 		 * @desc issuer
 		 */
 		this.issuer = getParametersValue(parameters, "issuer", CertificateRevocationList.defaultValues("issuer"));
@@ -193,7 +193,7 @@ export default class CertificateRevocationList {
 			case "signature":
 				return new AlgorithmIdentifier();
 			case "issuer":
-				return new RelativeDistinguishedNames();
+				return new DistinguishedName();
 			case "thisUpdate":
 				return new Time();
 			case "nextUpdate":
@@ -287,7 +287,7 @@ export default class CertificateRevocationList {
 		if("tbsCertList.version" in asn1.result)
 			this.version = asn1.result["tbsCertList.version"].valueBlock.valueDec;
 		this.signature = new AlgorithmIdentifier({ schema: asn1.result["tbsCertList.signature"] });
-		this.issuer = new RelativeDistinguishedNames({ schema: asn1.result["tbsCertList.issuer"] });
+		this.issuer = new DistinguishedName({ schema: asn1.result["tbsCertList.issuer"] });
 		this.thisUpdate = new Time({ schema: asn1.result["tbsCertList.thisUpdate"] });
 		if("tbsCertList.nextUpdate" in asn1.result)
 			this.nextUpdate = new Time({ schema: asn1.result["tbsCertList.nextUpdate"] });
