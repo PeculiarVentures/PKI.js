@@ -219,11 +219,23 @@ export default class AttributeTypeAndValue {
 	//**********************************************************************************
 	/**
 	 * Convert an AttributeTypeAndValue to a human-readable string
-	 * based on RFC4514
+	 * based on RFC4514, with escaping charaters
+	 * @returns {string}
 	 */
 	toString() {
-		console.log(this.value)
-		return `${AttributeTypeDictionnary[this.type] || this.type}=${this.value.valueBlock.value}`
+		let value = this.value.valueBlock.value
+		
+		value = value.replace(/(["+,;<>\\=])/g, "\\$1")
+
+		if (value.startsWith(" ") || value.startsWith("#")) {
+			value = "\\" + value
+		}
+		if (value.endsWith(" ")) {
+			value = value.substring(0, value.length - 1) + "\\" + value.substring(value.length - 1)
+		}
+		
+		
+		return `${AttributeTypeDictionnary[this.type] || this.type}=${value}`
 	}
 }
 //**************************************************************************************
