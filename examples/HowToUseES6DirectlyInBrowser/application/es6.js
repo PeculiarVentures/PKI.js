@@ -204,7 +204,7 @@ function createCertificateInternal() {
 	certificate.serialNumber = new asn1js.Integer({ value: 1 });
 	// noinspection JSUnresolvedFunction
 	certificate.issuer.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[
+		typesAndValues: [
 			new AttributeTypeAndValue({
 				type: "2.5.4.6", // Country name
 				value: new asn1js.PrintableString({ value: "RU" })
@@ -212,7 +212,7 @@ function createCertificateInternal() {
 	}));
 	// noinspection JSUnresolvedFunction
 	certificate.issuer.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[
+		typesAndValues: [
 			new AttributeTypeAndValue({
 				type: "2.5.4.3", // Common name
 				value: new asn1js.BmpString({ value: "Test" })
@@ -220,7 +220,7 @@ function createCertificateInternal() {
 	}));
 	// noinspection JSUnresolvedFunction
 	certificate.subject.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[
+		typesAndValues: [
 			new AttributeTypeAndValue({
 				type: "2.5.4.6", // Country name
 				value: new asn1js.PrintableString({ value: "RU" })
@@ -228,7 +228,7 @@ function createCertificateInternal() {
 	}));
 	// noinspection JSUnresolvedFunction
 	certificate.subject.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[
+		typesAndValues: [
 			new AttributeTypeAndValue({
 				type: "2.5.4.3", // Common name
 				value: new asn1js.BmpString({ value: "Test" })

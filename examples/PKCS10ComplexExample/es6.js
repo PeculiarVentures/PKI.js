@@ -40,13 +40,13 @@ function createPKCS10Internal() {
 	//region Put a static values
 	pkcs10.version = 0;
 	pkcs10.subject.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[new AttributeTypeAndValue({
+		typesAndValues: [new AttributeTypeAndValue({
 			type: "2.5.4.6",
 			value: new asn1js.PrintableString({ value: "RU" })
 		})]
 	}));
 	pkcs10.subject.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[new AttributeTypeAndValue({
+		typesAndValues: [new AttributeTypeAndValue({
 			type: "2.5.4.3",
 			value: new asn1js.Utf8String({ value: "Simple test (простой тест)" })
 		})]

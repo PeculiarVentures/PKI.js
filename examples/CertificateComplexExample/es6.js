@@ -195,25 +195,25 @@ function createCertificateInternal() {
 	certificate.version = 2;
 	certificate.serialNumber = new asn1js.Integer({ value: 1 });
 	certificate.issuer.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[new AttributeTypeAndValue({
+		typesAndValues: [new AttributeTypeAndValue({
 			type: "2.5.4.6", // Country name
 			value: new asn1js.PrintableString({ value: "RU" })
 		})]
 	}));
 	certificate.issuer.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[new AttributeTypeAndValue({
+		typesAndValues: [new AttributeTypeAndValue({
 			type: "2.5.4.3", // Common name
 			value: new asn1js.BmpString({ value: "Test" })
 		})]
 	}));
 	certificate.subject.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[new AttributeTypeAndValue({
+		typesAndValues: [new AttributeTypeAndValue({
 			type: "2.5.4.6", // Country name
 			value: new asn1js.PrintableString({ value: "RU" })
 		})]
 	}));
 	certificate.subject.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[new AttributeTypeAndValue({
+		typesAndValues: [new AttributeTypeAndValue({
 			type: "2.5.4.3", // Common name
 			value: new asn1js.BmpString({ value: "Test" })
 		})]

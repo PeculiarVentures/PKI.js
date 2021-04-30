@@ -46,7 +46,7 @@ function createCRLInternal() {
 	crlSimpl.version = 1;
 
 	crlSimpl.issuer.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[
+		typesAndValues: [
 			new AttributeTypeAndValue({
 				type: "2.5.4.6", // Country name
 				value: new asn1js.PrintableString({
@@ -55,7 +55,7 @@ function createCRLInternal() {
 			})]
 	}));
 	crlSimpl.issuer.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
-		typesAndValues =[
+		typesAndValues: [
 			new AttributeTypeAndValue({
 				type: "2.5.4.3", // Common name
 				value: new asn1js.BmpString({
