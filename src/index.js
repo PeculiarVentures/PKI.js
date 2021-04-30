@@ -12,6 +12,8 @@ import Attribute from "./Attribute.js";
 export { Attribute };
 import AttributeTypeAndValue from "./AttributeTypeAndValue.js";
 export { AttributeTypeAndValue };
+import AttributeTypeDictionnary from "./AttributeTypeDictionnary.js";
+export { AttributeTypeDictionnary };
 import AuthenticatedSafe from "./AuthenticatedSafe.js";
 export { AuthenticatedSafe };
 import AuthorityKeyIdentifier from "./AuthorityKeyIdentifier.js";
