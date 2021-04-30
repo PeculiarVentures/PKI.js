@@ -187,5 +187,12 @@ export default class DistinguishedName {
 		return false;
 	}
 	//**********************************************************************************
+	/**
+	 * Convert a Distinguished Name to a human-readable string
+	 * based on RFC4514
+	 */
+	toString() {
+		return this.relativeDistinguishedNames.map(rdn => rdn.toString()).join(",")
+	}
 }
  //**************************************************************************************

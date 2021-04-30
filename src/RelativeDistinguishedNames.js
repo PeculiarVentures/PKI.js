@@ -191,5 +191,13 @@ export default class RelativeDistinguishedNames {
 		return false;
 	}
 	//**********************************************************************************
+	/**
+	 * Convert a Distinguished Name to a human-readable string
+ 	 * based on RFC4514
+	 */
+	toString() {
+		return this.typesAndValues.map(tv => tv.toString()).join("+")
+	}
+
 }
 //**************************************************************************************
