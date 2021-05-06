@@ -7,7 +7,7 @@ import OCSPRequest from "../../src/OCSPRequest";
 import GeneralName from "../../src/GeneralName";
 import RelativeDistinguishedNames from "../../src/RelativeDistinguishedNames";
 import AttributeTypeAndValue from "../../src/AttributeTypeAndValue";
-import AttributeTypeDictionnary from "../../src/AttributeTypeDictionnary";
+import AttributeTypeDictionary from "../../src/AttributeTypeDictionary";
 import Request from "../../src/Request";
 import CertID from "../../src/CertID";
 import AlgorithmIdentifier from "../../src/AlgorithmIdentifier";
@@ -165,7 +165,7 @@ function parseOCSPReq() {
 				{
 					for (let rdn of ocspReqSimpl.tbsRequest.requestorName.value) {
 						for (let i = 0; i < rdn.typesAndValues.length; i++) {
-							let typeval = AttributeTypeDictionnary[rdn.typesAndValues[i].type];
+							let typeval = AttributeTypeDictionary.get(rdn.typesAndValues[i].type);
 							if (typeof typeval === "undefined")
 								typeval = rdn.typesAndValues[i].type;
 

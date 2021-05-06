@@ -196,7 +196,7 @@ export default class RelativeDistinguishedNames {
  	 * based on RFC4514
 	 */
 	toString() {
-		return this.typesAndValues.map(tv => tv.toString()).join("+")
+		return this.typesAndValues.map(tv => tv.toString()).join("+");
 	}
 
 }

@@ -18,7 +18,7 @@ import ContentInfo from "../../src/ContentInfo";
 import TimeStampResp from "../../src/TimeStampResp";
 import PKIStatusInfo from "../../src/PKIStatusInfo";
 import BasicConstraints from "../../src/BasicConstraints";
-import { AttributeTypeDictionnary } from "../../src/AttributeTypeDictionnary";
+import AttributeTypeDictionary from "../../src/AttributeTypeDictionary";
 //<nodewebcryptoossl>
 //*********************************************************************************
 let tspResponseBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created TSP response
@@ -480,7 +480,7 @@ function parseTSPResp() {
 
 					for (const rdn of tstInfoSimpl.tsa.value)
 					for (let i = 0; i < rdn.typesAndValues.length; i++) {
-						let typeval = AttributeTypeDictionnary[rdn.typesAndValues[i].type];
+						let typeval = AttributeTypeDictionary.get(rdn.typesAndValues[i].type);
 						if (typeof typeval === "undefined")
 							typeval = rdn.typesAndValues[i].type;
 

@@ -13,7 +13,7 @@ import SignerInfo from "../../src/SignerInfo";
 import IssuerAndSerialNumber from "../../src/IssuerAndSerialNumber";
 import SignedAndUnsignedAttributes from "../../src/SignedAndUnsignedAttributes";
 import ContentInfo from "../../src/ContentInfo";
-import { AttributeTypeDictionnary } from "../../src/AttributeTypeDictionnary";
+import AttributeTypeDictionnary from "../../src/AttributeTypeDictionary";
 import RelativeDistinguishedNames from "../../src/RelativeDistinguishedNames";
 //<nodewebcryptoossl>
 //*********************************************************************************

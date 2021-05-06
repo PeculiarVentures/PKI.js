@@ -13,7 +13,7 @@ import BasicConstraints from "../../src/BasicConstraints.js";
 import ExtKeyUsage from "../../src/ExtKeyUsage.js";
 import CertificateTemplate from "../../src/CertificateTemplate.js";
 import CAVersion from "../../src/CAVersion.js";
-import AttributeTypeDictionnary from "../../src/AttributeTypeDictionnary"
+import AttributeTypeDictionary from "../../src/AttributeTypeDictionary.js";
 import RelativeDistinguishedNames from "../../src/RelativeDistinguishedNames.js";
 //<nodewebcryptoossl>
 //*********************************************************************************
@@ -58,7 +58,7 @@ function parseCertificate() {
 	//region Put information about X.509 certificate issuer
 	for (const rdn of certificate.issuer) {
 		for (const typeAndValue of rdn) {
-			let typeval = AttributeTypeDictionnary[typeAndValue.type];
+			let typeval = AttributeTypeDictionary.get(typeAndValue.type);
 			if (typeof typeval === "undefined")
 				typeval = typeAndValue.type;
 
@@ -78,7 +78,7 @@ function parseCertificate() {
 	//region Put information about X.509 certificate subject
 	for (const rdn of certificate.subject) {
 		for (const typeAndValue of rdn) {
-			let typeval = AttributeTypeDictionnary[typeAndValue.type];
+			let typeval = AttributeTypeDictionary.get(typeAndValue.type);
 			if (typeof typeval === "undefined")
 				typeval = typeAndValue.type;
 

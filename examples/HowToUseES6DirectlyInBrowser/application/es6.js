@@ -20,7 +20,7 @@ import { getCrypto, getAlgorithmParameters } from "./pkijs/common.js";
 import { formatPEM } from "./pkijs/examples_common.js";
 // noinspection JSFileReferences
 import BasicConstraints from "./pkijs/BasicConstraints.js";
-import { AttributeTypeDictionnary } from "../../../src/AttributeTypeDictionnary.js";
+import AttributeTypeDictionary from "../../../src/AttributeTypeDictionary.js";
 import RelativeDistinguishedNames from "../../../src/RelativeDistinguishedNames.js";
 //*********************************************************************************
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT
@@ -65,7 +65,7 @@ function parseCertificate() {
 
 	for (const rdn of certificate.issuer) {
 		for (const typeAndValue of rdn.typesAndValues) {
-			let typeval = AttributeTypeDictionnary[typeAndValue.type];
+			let typeval = AttributeTypeDictionary.get(typeAndValue.type);
 			if (typeof typeval === "undefined")
 				typeval = typeAndValue.type;
 

@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
 import { stringPrep } from "./common.js";
-import { AttributeTypeDictionnary } from "./AttributeTypeDictionnary"
+import AttributeTypeDictionary from "./AttributeTypeDictionary";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -223,19 +223,19 @@ export default class AttributeTypeAndValue {
 	 * @returns {string}
 	 */
 	toString() {
-		let value = this.value.valueBlock.value
+		let value = this.value.valueBlock.value;
 		
-		value = value.replace(/(["+,;<>\\=])/g, "\\$1")
+		value = value.replace(/(["+,;<>\\=])/g, "\\$1");
 
 		if (value.startsWith(" ") || value.startsWith("#")) {
-			value = "\\" + value
+			value = "\\" + value;
 		}
 		if (value.endsWith(" ")) {
-			value = value.substring(0, value.length - 1) + "\\" + value.substring(value.length - 1)
+			value = value.substring(0, value.length - 1) + "\\" + value.substring(value.length - 1);
 		}
 		
 		
-		return `${AttributeTypeDictionnary[this.type] || this.type}=${value}`
+		return `${AttributeTypeDictionary.get(this.type)}=${value}`;
 	}
 }
 //**************************************************************************************

@@ -1000,7 +1000,7 @@ export default class EnvelopedData
 			}
 			catch(ex)
 			{
-				const jjj = 0;
+				const jjj = 0; // eslint-disable-line no-unused-vars
 			}
 		}
 		
@@ -1345,7 +1345,7 @@ export default class EnvelopedData
 						return Promise.reject(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
 						//endregion
 						
-						//region Translate AES-KW length to ArrayBuffer
+					//region Translate AES-KW length to ArrayBuffer
 					let kwLength = KWalgorithm.length;
 					
 					const kwLengthBuffer = new ArrayBuffer(4);

@@ -11,7 +11,7 @@ import RevokedCertificate from "../../src/RevokedCertificate";
 import Extension from "../../src/Extension";
 import Extensions from "../../src/Extensions";
 import PublicKeyInfo from "../../src/PublicKeyInfo";
-import AttributeTypeDictionnary from "../../src/AttributeTypeDictionnary";
+import AttributeTypeDictionary from "../../src/AttributeTypeDictionary";
 import RelativeDistinguishedNames from "../../src/RelativeDistinguishedNames";
 //<nodewebcryptoossl>
 //*********************************************************************************
@@ -199,7 +199,7 @@ function parseCRL() {
 	//region Put information about CRL issuer
 	for (const rdn of crlSimpl.issuer) {
 		for (const typeAndValue of typesAndValues) {
-			let typeval = AttributeTypeDictionnary[typeAndValue.type];
+			let typeval = AttributeTypeDictionary.get(typeAndValue.type);
 			if (typeof typeval === "undefined") {
 				typeval = typeAndValue.type;
 			}

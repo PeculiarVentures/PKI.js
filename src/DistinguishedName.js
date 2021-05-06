@@ -19,7 +19,7 @@ export default class DistinguishedName {
 		 * @type {Array.<RelativeDistinguishedNames>}
 		 * @desc Array of "Relative Distinguished Names" objects
 		 */
-		this.relativeDistinguishedNames = getParametersValue(parameters, "relativeDistinguishedNames", DistinguishedName.defaultValues("relativeDistinguishedNames"))
+		this.relativeDistinguishedNames = getParametersValue(parameters, "relativeDistinguishedNames", DistinguishedName.defaultValues("relativeDistinguishedNames"));
 		/**
 		 * @type {ArrayBuffer}
 		 * @desc Value of the DN before decoding from schema
@@ -192,7 +192,7 @@ export default class DistinguishedName {
 	 * based on RFC4514
 	 */
 	toString() {
-		return this.relativeDistinguishedNames.map(rdn => rdn.toString()).join(",")
+		return this.relativeDistinguishedNames.map(rdn => rdn.toString()).join(",");
 	}
 }
- //**************************************************************************************
+//**************************************************************************************
