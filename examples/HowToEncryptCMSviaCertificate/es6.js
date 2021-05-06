@@ -11,6 +11,7 @@ import BasicConstraints from "../../src/BasicConstraints.js";
 import Extension from "../../src/Extension.js";
 import OriginatorInfo from "../../src/OriginatorInfo.js";
 import CertificateSet from "../../src/CertificateSet.js";
+import RelativeDistinguishedNames from "../../src/RelativeDistinguishedNames.js";
 //<nodewebcryptoossl>
 //*********************************************************************************
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT 

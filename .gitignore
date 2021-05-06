@@ -8,3 +8,5 @@ coverage
 docs
 
 .vscode/
+examples/**/bundle.js
+test/**/*.js

@@ -19,6 +19,7 @@ import TimeStampResp from "../../src/TimeStampResp";
 import PKIStatusInfo from "../../src/PKIStatusInfo";
 import BasicConstraints from "../../src/BasicConstraints";
 import AttributeTypeDictionary from "../../src/AttributeTypeDictionary";
+import RelativeDistinguishedNames from "../../src/RelativeDistinguishedNames";
 //<nodewebcryptoossl>
 //*********************************************************************************
 let tspResponseBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created TSP response
