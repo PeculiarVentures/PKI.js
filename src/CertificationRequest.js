@@ -124,7 +124,7 @@ export default class CertificationRequest
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "tbs":
 				return new ArrayBuffer(0);

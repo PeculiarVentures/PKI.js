@@ -45,7 +45,7 @@ export default class AuthenticatedSafe
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "safeContents":
 				return [];
@@ -63,7 +63,7 @@ export default class AuthenticatedSafe
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "safeContents":
 				return (memberValue.length === 0);
@@ -190,7 +190,7 @@ export default class AuthenticatedSafe
 		
 		for(const [index, content] of this.safeContents.entries())
 		{
-			switch(content.contentType)
+			switch (content.contentType)
 			{
 				//region data 
 				case "1.2.840.113549.1.7.1":
@@ -382,7 +382,7 @@ export default class AuthenticatedSafe
 				return Promise.reject("The \"content.value\" must has \"SafeContents\" type");
 			//endregion 
 			
-			switch(content.privacyMode)
+			switch (content.privacyMode)
 			{
 				//region No privacy 
 				case 0:
@@ -447,7 +447,7 @@ export default class AuthenticatedSafe
 						if(("encryptionAlgorithm" in parameters.safeContents[index]) === false)
 							return Promise.reject("Absent mandatory parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\"");
 						
-						switch(true)
+						switch (true)
 						{
 							case (parameters.safeContents[index].encryptionAlgorithm.name.toLowerCase() === "aes-cbc"):
 							case (parameters.safeContents[index].encryptionAlgorithm.name.toLowerCase() === "aes-gcm"):
@@ -456,7 +456,7 @@ export default class AuthenticatedSafe
 								return Promise.reject(`Incorrect parameter "encryptionAlgorithm" in "parameters.safeContents[i]": ${parameters.safeContents[index].encryptionAlgorithm}`);
 						}
 						
-						switch(true)
+						switch (true)
 						{
 							case (parameters.safeContents[index].encryptionAlgorithm.length === 128):
 							case (parameters.safeContents[index].encryptionAlgorithm.length === 192):

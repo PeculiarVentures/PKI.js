@@ -54,7 +54,7 @@ export default class DistributionPoint
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "distributionPoint":
 				return [];

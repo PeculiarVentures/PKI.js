@@ -48,7 +48,7 @@ export default class RevokedCertificate
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "userCertificate":
 				return new asn1js.Integer();

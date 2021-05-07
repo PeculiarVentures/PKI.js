@@ -61,7 +61,7 @@ export default class SingleResponse
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "certID":
 				return new CertID();
@@ -84,7 +84,7 @@ export default class SingleResponse
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "certID":
 				// noinspection OverlyComplexBooleanExpressionJS

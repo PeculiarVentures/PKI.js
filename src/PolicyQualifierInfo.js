@@ -39,7 +39,7 @@ export default class PolicyQualifierInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "policyQualifierId":
 				return "";

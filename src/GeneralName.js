@@ -271,7 +271,7 @@ export default class GeneralName
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "type":
 				return 9;
@@ -289,7 +289,7 @@ export default class GeneralName
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "type":
 				return (memberValue === GeneralName.defaultValues(memberName));
@@ -503,7 +503,7 @@ export default class GeneralName
 		//region Get internal properties from parsed schema
 		this.type = asn1.result.blockName.idBlock.tagNumber;
 
-		switch(this.type)
+		switch (this.type)
 		{
 			case 0: // otherName
 				this.value = asn1.result.blockName;
@@ -558,7 +558,7 @@ export default class GeneralName
 	toSchema()
 	{
 		//region Construct and return new ASN.1 schema for this object
-		switch(this.type)
+		switch (this.type)
 		{
 			case 0:
 			case 3:
@@ -634,7 +634,8 @@ export default class GeneralName
 			{
 				_object.value = this.value.toJSON();
 			}
-			catch(ex){}
+			catch(ex)
+			{}
 		}
 
 		return _object;

@@ -40,7 +40,7 @@ export default class CAVersion
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "certificateIndex":
 			case "keyIndex":
@@ -81,7 +81,7 @@ export default class CAVersion
 		let value = schema.valueBlock.valueHex.slice(0);
 		const valueView = new Uint8Array(value);
 
-		switch(true)
+		switch (true)
 		{
 			case (value.byteLength < 4):
 				{

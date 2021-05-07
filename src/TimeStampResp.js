@@ -44,7 +44,7 @@ export default class TimeStampResp
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "status":
 				return new PKIStatusInfo();
@@ -62,7 +62,7 @@ export default class TimeStampResp
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "status":
 				return ((PKIStatusInfo.compareWithDefault("status", memberValue.status)) &&

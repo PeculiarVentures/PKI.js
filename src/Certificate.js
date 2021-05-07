@@ -232,7 +232,7 @@ export default class Certificate
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "tbs":
 				return new ArrayBuffer(0);

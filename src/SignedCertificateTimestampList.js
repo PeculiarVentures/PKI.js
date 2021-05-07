@@ -69,7 +69,7 @@ export class SignedCertificateTimestamp
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 0;
@@ -127,7 +127,7 @@ export class SignedCertificateTimestamp
 			//endregion
 			
 			//region Hash algorithm
-			switch((stream.getBlock(1))[0])
+			switch ((stream.getBlock(1))[0])
 			{
 				case 0:
 					this.hashAlgorithm = "none";
@@ -156,7 +156,7 @@ export class SignedCertificateTimestamp
 			//endregion
 			
 			//region Signature algorithm
-			switch((stream.getBlock(1))[0])
+			switch ((stream.getBlock(1))[0])
 			{
 				case 0:
 					this.signatureAlgorithm = "anonymous";
@@ -228,7 +228,7 @@ export class SignedCertificateTimestamp
 		
 		let _hashAlgorithm;
 		
-		switch(this.hashAlgorithm.toLowerCase())
+		switch (this.hashAlgorithm.toLowerCase())
 		{
 			case "none":
 				_hashAlgorithm = 0;
@@ -259,7 +259,7 @@ export class SignedCertificateTimestamp
 		
 		let _signatureAlgorithm;
 		
-		switch(this.signatureAlgorithm.toLowerCase())
+		switch (this.signatureAlgorithm.toLowerCase())
 		{
 			case "anonymous":
 				_signatureAlgorithm = 0;
@@ -415,7 +415,7 @@ export default class SignedCertificateTimestampList
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "timestamps":
 				return [];
@@ -431,7 +431,7 @@ export default class SignedCertificateTimestampList
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "timestamps":
 				return (memberValue.length === 0);
@@ -573,7 +573,7 @@ export async function verifySCTsForCertificate(certificate, issuerCertificate, l
 	//region Remove certificate extension
 	for(let i = 0; i < certificate.extensions.length; i++)
 	{
-		switch(certificate.extensions[i].extnID)
+		switch (certificate.extensions[i].extnID)
 		{
 			case "1.3.6.1.4.1.11129.2.4.2":
 				{

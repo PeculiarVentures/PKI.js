@@ -45,7 +45,7 @@ export default class RSAPublicKey
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "modulus":
 				return new asn1js.Integer();

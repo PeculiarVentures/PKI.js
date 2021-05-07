@@ -58,7 +58,7 @@ export default class PasswordRecipientinfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return (-1);
@@ -82,7 +82,7 @@ export default class PasswordRecipientinfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return (memberValue === (-1));

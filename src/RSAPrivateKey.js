@@ -86,7 +86,7 @@ export default class RSAPrivateKey
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 0;

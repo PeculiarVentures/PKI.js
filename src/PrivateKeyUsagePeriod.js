@@ -42,7 +42,7 @@ export default class PrivateKeyUsagePeriod
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "notBefore":
 				return new Date();

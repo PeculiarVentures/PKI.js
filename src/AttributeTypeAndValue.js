@@ -6,14 +6,16 @@ import AttributeTypeDictionary from "./AttributeTypeDictionary";
 /**
  * Class from RFC5280
  */
-export default class AttributeTypeAndValue {
+export default class AttributeTypeAndValue 
+{
 	//**********************************************************************************
 	/**
 	 * Constructor for AttributeTypeAndValue class
 	 * @param {Object} [parameters={}]
 	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
-	constructor(parameters = {}) {
+	constructor(parameters = {}) 
+	{
 		//region Internal properties of the object
 		/**
 		 * @type {string}
@@ -28,7 +30,7 @@ export default class AttributeTypeAndValue {
 		//endregion
 
 		//region If input argument array contains "schema" for this object
-		if ("schema" in parameters)
+		if("schema" in parameters)
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
@@ -37,8 +39,10 @@ export default class AttributeTypeAndValue {
 	 * Return default values for all class members
 	 * @param {string} memberName String name for a class member
 	 */
-	static defaultValues(memberName) {
-		switch (memberName) {
+	static defaultValues(memberName) 
+	{
+		switch (memberName) 
+		{
 			case "type":
 				return "";
 			case "value":
@@ -65,7 +69,8 @@ export default class AttributeTypeAndValue {
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
-	static schema(parameters = {}) {
+	static schema(parameters = {}) 
+	{
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName] Name for entire block
@@ -83,7 +88,8 @@ export default class AttributeTypeAndValue {
 		}));
 	}
 	//**********************************************************************************
-	static blockName() {
+	static blockName() 
+	{
 		return "AttributeTypeAndValue";
 	}
 	//**********************************************************************************
@@ -91,7 +97,8 @@ export default class AttributeTypeAndValue {
 	 * Convert parsed asn1js object into current class
 	 * @param {!Object} schema
 	 */
-	fromSchema(schema) {
+	fromSchema(schema) 
+	{
 		//region Clear input data first
 		clearProps(schema, [
 			"type",
@@ -110,7 +117,7 @@ export default class AttributeTypeAndValue {
 			})
 		);
 
-		if (asn1.verified === false)
+		if(asn1.verified === false)
 			throw new Error("Object's schema was not verified against input data for AttributeTypeAndValue");
 		//endregion
 
@@ -125,7 +132,8 @@ export default class AttributeTypeAndValue {
 	 * Convert current object to asn1js object and set correct values
 	 * @returns {Object} asn1js object
 	 */
-	toSchema() {
+	toSchema() 
+	{
 		//region Construct and return new ASN.1 schema for this object
 		return (new asn1js.Sequence({
 			value: [
@@ -140,12 +148,13 @@ export default class AttributeTypeAndValue {
 	 * Convertion for the class to JSON object
 	 * @returns {Object}
 	 */
-	toJSON() {
+	toJSON() 
+	{
 		const _object = {
 			type: this.type
 		};
 
-		if (Object.keys(this.value).length !== 0)
+		if(Object.keys(this.value).length !== 0)
 			_object.value = this.value.toJSON();
 		else
 			_object.value = this.value;
@@ -158,7 +167,8 @@ export default class AttributeTypeAndValue {
 	 * @param {(AttributeTypeAndValue|ArrayBuffer)} compareTo The value compare to current
 	 * @returns {boolean}
 	 */
-	isEqual(compareTo) {
+	isEqual(compareTo) 
+	{
 		const stringBlockNames = [
 			asn1js.Utf8String.blockName(),
 			asn1js.BmpString.blockName(),
@@ -174,44 +184,49 @@ export default class AttributeTypeAndValue {
 			asn1js.CharacterString.blockName()
 		];
 
-		if (compareTo.constructor.blockName() === AttributeTypeAndValue.blockName()) {
-			if (this.type !== compareTo.type)
+		if(compareTo.constructor.blockName() === AttributeTypeAndValue.blockName()) 
+		{
+			if(this.type !== compareTo.type)
 				return false;
 
 			//region Check we do have both strings
 			let isString = [false, false];
 			const thisName = this.value.constructor.blockName();
-			for (const name of stringBlockNames) {
-				if (thisName === name) {
+			for(const name of stringBlockNames) 
+			{
+				if(thisName === name) 
+				{
 					isString[0] = true;
 				}
-				if (compareTo.value.constructor.blockName() === name) {
+				if(compareTo.value.constructor.blockName() === name) 
+				{
 					isString[1] = true;
 				}
 			}
-			if (isString[0] ^ isString[1])
+			if(isString[0] ^ isString[1])
 				return false;
 
 			isString = (isString[0] && isString[1]);
 			//endregion
 
-			if (isString) {
+			if(isString) 
+			{
 				const value1 = stringPrep(this.value.valueBlock.value);
 				const value2 = stringPrep(compareTo.value.valueBlock.value);
 
-				if (value1.localeCompare(value2) !== 0)
+				if(value1.localeCompare(value2) !== 0)
 					return false;
 			}
 			else // Comparing as two ArrayBuffers
 			{
-				if (isEqualBuffer(this.value.valueBeforeDecode, compareTo.value.valueBeforeDecode) === false)
+				if(isEqualBuffer(this.value.valueBeforeDecode, compareTo.value.valueBeforeDecode) === false)
 					return false;
 			}
 
 			return true;
 		}
 
-		if (compareTo instanceof ArrayBuffer)
+		if(compareTo instanceof ArrayBuffer)
 			return isEqualBuffer(this.value.valueBeforeDecode, compareTo);
 
 		return false;
@@ -219,18 +234,21 @@ export default class AttributeTypeAndValue {
 	//**********************************************************************************
 	/**
 	 * Convert an AttributeTypeAndValue to a human-readable string
-	 * based on RFC4514, with escaping charaters
+	 * based on RFC4514, with escaping characters
 	 * @returns {string}
 	 */
-	toString() {
+	toString() 
+	{
 		let value = this.value.valueBlock.value;
 		
 		value = value.replace(/(["+,;<>\\=])/g, "\\$1");
 
-		if (value.startsWith(" ") || value.startsWith("#")) {
+		if(value.startsWith(" ") || value.startsWith("#")) 
+		{
 			value = "\\" + value;
 		}
-		if (value.endsWith(" ")) {
+		if(value.endsWith(" ")) 
+		{
 			value = value.substring(0, value.length - 1) + "\\" + value.substring(value.length - 1);
 		}
 		

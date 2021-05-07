@@ -35,7 +35,7 @@ export default class Extensions
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "extensions":
 				return [];

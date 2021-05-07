@@ -41,7 +41,7 @@ export default class OtherKeyAttribute
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "keyAttrId":
 				return "";
@@ -59,7 +59,7 @@ export default class OtherKeyAttribute
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "keyAttrId":
 				return (memberValue === "");

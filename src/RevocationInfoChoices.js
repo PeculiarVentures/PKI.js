@@ -41,7 +41,7 @@ export default class RevocationInfoChoices
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "crls":
 				return [];

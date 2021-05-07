@@ -46,7 +46,7 @@ export default class OCSPRequest
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "tbsRequest":
 				return new TBSRequest();
@@ -64,7 +64,7 @@ export default class OCSPRequest
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "tbsRequest":
 				// noinspection OverlyComplexBooleanExpressionJS

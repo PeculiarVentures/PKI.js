@@ -35,7 +35,7 @@ export default class CertificatePolicies
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "certificatePolicies":
 				return [];

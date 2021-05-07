@@ -1,11 +1,10 @@
 /* eslint-disable no-undef,no-unreachable */
-import* as asn1js from"asn1js";
-import* as pkijs from"../src/index.js";
+import * as asn1js from "asn1js";
+import * as pkijs from "../src/index.js";
 
-const{ Crypto } = require("@peculiar/webcrypto");
+const { Crypto } = require("@peculiar/webcrypto");
 const webcrypto = new Crypto();
 
-const assert = require("assert");
 pkijs.setEngine("newEngine", webcrypto, new pkijs.CryptoEngine({ name: "", crypto: webcrypto, subtle: webcrypto.subtle }));
 //*********************************************************************************
 context("PKIjs functional testing", () => 

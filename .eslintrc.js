@@ -45,7 +45,12 @@ module.exports = {
 		],
 		"keyword-spacing": [
 			"error",
-			{ "after": false }
+			{ "overrides": {
+				"if": { "after": false },
+				"for": { "after": false },
+				"while": { "after": false },
+				"catch": { "after": false },
+			}} 
 		]
 	}
 };

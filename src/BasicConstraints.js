@@ -43,7 +43,7 @@ export default class BasicConstraints
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "cA":
 				return false;

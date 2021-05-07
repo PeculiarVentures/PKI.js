@@ -54,7 +54,7 @@ export default class PublicKeyInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "algorithm":
 				return new AlgorithmIdentifier();
@@ -133,7 +133,7 @@ export default class PublicKeyInfo
 		this.algorithm = new AlgorithmIdentifier({ schema: asn1.result.algorithm });
 		this.subjectPublicKey = asn1.result.subjectPublicKey;
 		
-		switch(this.algorithm.algorithmId)
+		switch (this.algorithm.algorithmId)
 		{
 			case "1.2.840.10045.2.1": // ECDSA
 				if("algorithmParams" in this.algorithm)
@@ -147,7 +147,8 @@ export default class PublicKeyInfo
 								schema: this.subjectPublicKey.valueBlock.valueHex
 							});
 						}
-						catch(ex){} // Could be a problems during recognision of internal public key data here. Let's ignore them.
+						catch(ex)
+						{} // Could be a problems during recognision of internal public key data here. Let's ignore them.
 					}
 				}
 				break;
@@ -160,7 +161,8 @@ export default class PublicKeyInfo
 						{
 							this.parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
 						}
-						catch(ex){} // Could be a problems during recognision of internal public key data here. Let's ignore them.
+						catch(ex)
+						{} // Could be a problems during recognision of internal public key data here. Let's ignore them.
 					}
 				}
 				break;
@@ -204,7 +206,7 @@ export default class PublicKeyInfo
 		//region Making JWK
 		const jwk = {};
 		
-		switch(this.algorithm.algorithmId)
+		switch (this.algorithm.algorithmId)
 		{
 			case "1.2.840.10045.2.1": // ECDSA
 				jwk.kty = "EC";
@@ -232,7 +234,7 @@ export default class PublicKeyInfo
 	{
 		if("kty" in json)
 		{
-			switch(json.kty.toUpperCase())
+			switch (json.kty.toUpperCase())
 			{
 				case "EC":
 					this.parsedKey = new ECPublicKey({ json });

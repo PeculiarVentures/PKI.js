@@ -49,7 +49,7 @@ export default class Accuracy
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "seconds":
 			case "millis":
@@ -67,7 +67,7 @@ export default class Accuracy
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "seconds":
 			case "millis":

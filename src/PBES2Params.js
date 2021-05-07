@@ -40,7 +40,7 @@ export default class PBES2Params
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "keyDerivationFunc":
 				return new AlgorithmIdentifier();

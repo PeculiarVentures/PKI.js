@@ -42,7 +42,7 @@ export default class AlgorithmIdentifier
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "algorithmId":
 				return "";
@@ -60,7 +60,7 @@ export default class AlgorithmIdentifier
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "algorithmId":
 				return (memberValue === "");

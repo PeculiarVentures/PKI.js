@@ -41,7 +41,7 @@ export class QCStatement
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "id":
 				return "";
@@ -59,7 +59,7 @@ export class QCStatement
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "id":
 				return (memberValue === "");
@@ -212,7 +212,7 @@ export default class QCStatements
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "values":
 				return [];
@@ -228,7 +228,7 @@ export default class QCStatements
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "values":
 				return (memberValue.length === 0);

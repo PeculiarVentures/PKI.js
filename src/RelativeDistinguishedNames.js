@@ -5,7 +5,8 @@ import AttributeTypeAndValue from "./AttributeTypeAndValue.js";
 /**
  * Class from RFC5280
  */
-export default class RelativeDistinguishedNames {
+export default class RelativeDistinguishedNames 
+{
 	//**********************************************************************************
 	/**
 	 * Constructor for RelativeDistinguishedNames class
@@ -14,7 +15,8 @@ export default class RelativeDistinguishedNames {
 	 * @property {Array.<AttributeTypeAndValue>} [typesAndValues] Array of "type and value" objects
 	 * @property {ArrayBuffer} [valueBeforeDecode] Value of the RDN before decoding from schema
 	 */
-	constructor(parameters = {}) {
+	constructor(parameters = {}) 
+	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<AttributeTypeAndValue>}
@@ -29,7 +31,7 @@ export default class RelativeDistinguishedNames {
 		//endregion
 
 		//region If input argument array contains "schema" for this object
-		if ("schema" in parameters)
+		if("schema" in parameters)
 			this.fromSchema(parameters.schema);
 		//endregion
 	}
@@ -38,8 +40,10 @@ export default class RelativeDistinguishedNames {
 	 * Return default values for all class members
 	 * @param {string} memberName String name for a class member
 	 */
-	static defaultValues(memberName) {
-		switch (memberName) {
+	static defaultValues(memberName) 
+	{
+		switch (memberName) 
+		{
 			case "typesAndValues":
 				return [];
 			case "valueBeforeDecode":
@@ -54,8 +58,10 @@ export default class RelativeDistinguishedNames {
 	 * @param {string} memberName String name for a class member
 	 * @param {*} memberValue Value to compare with default value
 	 */
-	static compareWithDefault(memberName, memberValue) {
-		switch (memberName) {
+	static compareWithDefault(memberName, memberValue) 
+	{
+		switch (memberName) 
+		{
 			case "typesAndValues":
 				return (memberValue.length === 0);
 			case "valueBeforeDecode":
@@ -79,7 +85,8 @@ export default class RelativeDistinguishedNames {
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
-	static schema(parameters = {}) {
+	static schema(parameters = {}) 
+	{
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName] Name for entire block
@@ -104,7 +111,8 @@ export default class RelativeDistinguishedNames {
 	 * Convert parsed asn1js object into current class
 	 * @param {!Object} schema
 	 */
-	fromSchema(schema) {
+	fromSchema(schema) 
+	{
 		//region Clear input data first
 		clearProps(schema, [
 			"RDN",
@@ -123,12 +131,12 @@ export default class RelativeDistinguishedNames {
 			})
 		);
 
-		if (asn1.verified === false)
+		if(asn1.verified === false)
 			throw new Error("Object's schema was not verified against input data for RelativeDistinguishedNames");
 		//endregion
 
 		//region Get internal properties from parsed schema
-		if ("typesAndValues" in asn1.result) // Could be a case when there is no "types and values"
+		if("typesAndValues" in asn1.result) // Could be a case when there is no "types and values"
 			this.typesAndValues = Array.from(asn1.result.typesAndValues, element => new AttributeTypeAndValue({ schema: element }));
 
 		// noinspection JSUnresolvedVariable
@@ -140,9 +148,10 @@ export default class RelativeDistinguishedNames {
 	 * Convert current object to asn1js object and set correct values
 	 * @returns {Object} asn1js object
 	 */
-	toSchema() {
+	toSchema() 
+	{
 		//region Decode stored TBS value
-		if (this.valueBeforeDecode.byteLength === 0) // No stored encoded array, create "from scratch"
+		if(this.valueBeforeDecode.byteLength === 0) // No stored encoded array, create "from scratch"
 		{
 			return new asn1js.Set({
 				value: Array.from(this.typesAndValues, element => element.toSchema())
@@ -161,7 +170,8 @@ export default class RelativeDistinguishedNames {
 	 * Convertion for the class to JSON object
 	 * @returns {Object}
 	 */
-	toJSON() {
+	toJSON() 
+	{
 		return {
 			typesAndValues: Array.from(this.typesAndValues, element => element.toJSON())
 		};
@@ -172,20 +182,23 @@ export default class RelativeDistinguishedNames {
 	 * @param {(RelativeDistinguishedNames|ArrayBuffer)} compareTo The value compare to current
 	 * @returns {boolean}
 	 */
-	isEqual(compareTo) {
-		if (compareTo instanceof RelativeDistinguishedNames) {
-			if (this.typesAndValues.length !== compareTo.typesAndValues.length)
+	isEqual(compareTo) 
+	{
+		if(compareTo instanceof RelativeDistinguishedNames) 
+		{
+			if(this.typesAndValues.length !== compareTo.typesAndValues.length)
 				return false;
 
-			for (const [index, typeAndValue] of this.typesAndValues.entries()) {
-				if (typeAndValue.isEqual(compareTo.typesAndValues[index]) === false)
+			for(const [index, typeAndValue] of this.typesAndValues.entries()) 
+			{
+				if(typeAndValue.isEqual(compareTo.typesAndValues[index]) === false)
 					return false;
 			}
 
 			return true;
 		}
 
-		if (compareTo instanceof ArrayBuffer)
+		if(compareTo instanceof ArrayBuffer)
 			return isEqualBuffer(this.valueBeforeDecode, compareTo);
 
 		return false;
@@ -195,7 +208,8 @@ export default class RelativeDistinguishedNames {
 	 * Convert a Distinguished Name to a human-readable string
  	 * based on RFC4514
 	 */
-	toString() {
+	toString() 
+	{
 		return this.typesAndValues.map(tv => tv.toString()).join("+");
 	}
 

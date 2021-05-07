@@ -66,7 +66,7 @@ export default class PrivateKeyInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 0;
@@ -183,7 +183,7 @@ export default class PrivateKeyInfo
 		if("attributes" in asn1.result)
 			this.attributes = Array.from(asn1.result.attributes, element => new Attribute({ schema: element }));
 
-		switch(this.privateKeyAlgorithm.algorithmId)
+		switch (this.privateKeyAlgorithm.algorithmId)
 		{
 			case "1.2.840.113549.1.1.1": // RSA
 				{
@@ -271,7 +271,7 @@ export default class PrivateKeyInfo
 		//region Making JWK
 		const jwk = {};
 
-		switch(this.privateKeyAlgorithm.algorithmId)
+		switch (this.privateKeyAlgorithm.algorithmId)
 		{
 			case "1.2.840.10045.2.1": // ECDSA
 				jwk.kty = "EC";
@@ -299,7 +299,7 @@ export default class PrivateKeyInfo
 	{
 		if("kty" in json)
 		{
-			switch(json.kty.toUpperCase())
+			switch (json.kty.toUpperCase())
 			{
 				case "EC":
 					this.parsedKey = new ECPrivateKey({ json });

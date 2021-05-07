@@ -39,7 +39,7 @@ export default class ResponseBytes
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "responseType":
 				return "";
@@ -57,7 +57,7 @@ export default class ResponseBytes
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "responseType":
 				return (memberValue === "");

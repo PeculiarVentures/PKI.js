@@ -4,7 +4,8 @@ import { getParametersValue, clearProps } from "pvutils";
 /**
  * Class from RFC2986
  */
-export default class Attribute {
+export default class Attribute 
+{
 	//**********************************************************************************
 	/**
 	 * Constructor for Attribute class
@@ -38,7 +39,7 @@ export default class Attribute {
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "type":
 				return "";
@@ -56,7 +57,7 @@ export default class Attribute {
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "type":
 				return (memberValue === "");

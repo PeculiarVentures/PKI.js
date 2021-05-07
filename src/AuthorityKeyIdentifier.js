@@ -50,7 +50,7 @@ export default class AuthorityKeyIdentifier
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "keyIdentifier":
 				return new asn1js.OctetString();

@@ -79,7 +79,7 @@ export default class EnvelopedData
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 0;
@@ -103,7 +103,7 @@ export default class EnvelopedData
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return (memberValue === EnvelopedData.defaultValues(memberName));
@@ -360,7 +360,7 @@ export default class EnvelopedData
 		//endregion
 		
 		//region Add new "recipient" depends on "variant" and certificate type 
-		switch(variant)
+		switch (variant)
 		{
 			case 1: // Key transport scheme
 				{
@@ -560,7 +560,7 @@ export default class EnvelopedData
 		//endregion
 		
 		//region Add new recipient based on passed variant
-		switch(variant)
+		switch (variant)
 		{
 			case 1: // KEKRecipientInfo
 				{
@@ -788,7 +788,7 @@ export default class EnvelopedData
 				
 				const curveOID = curveObject.valueBlock.toString();
 				
-				switch(curveOID)
+				switch (curveOID)
 				{
 					case "1.2.840.10045.3.1.7":
 						recipientCurve = "P-256";
@@ -1174,7 +1174,7 @@ export default class EnvelopedData
 				let currentSequence = Promise.resolve();
 				//endregion
 					
-				switch(this.recipientInfos[i].variant)
+				switch (this.recipientInfos[i].variant)
 				{
 					case 1: // KeyTransRecipientInfo
 						currentSequence = SubKeyTransRecipientInfo(i);
@@ -1261,7 +1261,7 @@ export default class EnvelopedData
 					return Promise.reject(`Incorrect "recipientCertificate" for index ${index}`);
 				curveOID = curveObject.valueBlock.toString();
 					
-				switch(curveOID)
+				switch (curveOID)
 				{
 					case "1.2.840.10045.3.1.7":
 						recipientCurve = "P-256";
@@ -1640,7 +1640,7 @@ export default class EnvelopedData
 			let currentSequence = Promise.resolve();
 			//endregion
 				
-			switch(this.recipientInfos[recipientIndex].variant)
+			switch (this.recipientInfos[recipientIndex].variant)
 			{
 				case 1: // KeyTransRecipientInfo
 					currentSequence = SubKeyTransRecipientInfo(recipientIndex);

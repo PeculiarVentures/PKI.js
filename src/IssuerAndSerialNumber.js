@@ -40,7 +40,7 @@ export default class IssuerAndSerialNumber
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "issuer":
 				return new DistinguishedName();

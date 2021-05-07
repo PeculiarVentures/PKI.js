@@ -56,7 +56,7 @@ export default class KEKRecipientInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 0;
@@ -80,7 +80,7 @@ export default class KEKRecipientInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "KEKRecipientInfo":
 				return (memberValue === KEKRecipientInfo.defaultValues("version"));

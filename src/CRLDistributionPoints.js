@@ -35,7 +35,7 @@ export default class CRLDistributionPoints
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "distributionPoints":
 				return [];

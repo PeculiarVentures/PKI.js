@@ -6,14 +6,16 @@ import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
 /**
  * Class from RFC5280
  */
-export default class DistinguishedName {
+export default class DistinguishedName 
+{
 	//**********************************************************************************
 	/**
 	 * Constructor for DistinguishedName class
 	 * @param {Object} [parameters={}]
 	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
 	 */
-	constructor(parameters = {}) {
+	constructor(parameters = {}) 
+	{
 		//region Internal properties of the object
 		/**
 		 * @type {Array.<RelativeDistinguishedNames>}
@@ -28,7 +30,7 @@ export default class DistinguishedName {
 		//endregion
 
 		//region If input argument array contains "schema" for this object
-		if ("schema" in parameters)
+		if("schema" in parameters)
 			this.fromSchema(parameters.schema);
 		//endregion
 
@@ -38,8 +40,10 @@ export default class DistinguishedName {
 	 * Return default values for all class members
 	 * @param {string} memberName String name for a class member
 	 */
-	static defaultValues(memberName) {
-		switch (memberName) {
+	static defaultValues(memberName) 
+	{
+		switch (memberName) 
+		{
 			case "relativeDistinguishedNames":
 				return [];
 			case "valueBeforeDecode":
@@ -54,8 +58,10 @@ export default class DistinguishedName {
 	 * @param {string} memberName String name for a class member
 	 * @param {*} memberValue Value to compare with default value
 	 */
-	static compareWithDefault(memberName, memberValue) {
-		switch (memberName) {
+	static compareWithDefault(memberName, memberValue) 
+	{
+		switch (memberName) 
+		{
 			case "relativeDistinguishedNames":
 				return (memberValue.length === 0);
 			case "valueBeforeDecode":
@@ -76,7 +82,8 @@ export default class DistinguishedName {
 	 * @param {Object} parameters Input parameters for the schema
 	 * @returns {Object} asn1js schema object
 	 */
-	static schema(parameters = {}) {
+	static schema(parameters = {}) 
+	{
 		/**
 		 * @type {Object}
 		 * @property {string} [blockName] Name for entire block
@@ -100,7 +107,8 @@ export default class DistinguishedName {
 	 * Convert parsed asn1js object into current class
 	 * @param {!Object} schema
 	 */
-	fromSchema(schema) {
+	fromSchema(schema) 
+	{
 		//region Clear input data first
 		clearProps(schema, [
 			"DN",
@@ -119,12 +127,12 @@ export default class DistinguishedName {
 			})
 		);
 
-		if (asn1.verified === false)
+		if(asn1.verified === false)
 			throw new Error("Object's schema was not verified against input data for DistinguishedNames");
 		//endregion
 
 		//region Get internal properties from parsed schema
-		if ("RDNSequence" in asn1.result) // Could be a case when there is no "types and values"
+		if("RDNSequence" in asn1.result) // Could be a case when there is no "types and values"
 			this.relativeDistinguishedNames = Array.from(asn1.result.RDNSequence, element => new RelativeDistinguishedNames({ schema: element }));
 
 		// noinspection JSUnresolvedVariable
@@ -136,9 +144,10 @@ export default class DistinguishedName {
 	 * Convert current object to asn1js object and set correct values
 	 * @returns {Object} asn1js object
 	 */
-	toSchema() {
+	toSchema() 
+	{
 		//region Decode stored TBS value
-		if (this.valueBeforeDecode.byteLength === 0) // No stored encoded array, create "from scratch"
+		if(this.valueBeforeDecode.byteLength === 0) // No stored encoded array, create "from scratch"
 		{
 			return (new asn1js.Sequence({
 				value: Array.from(this.relativeDistinguishedNames, element => element.toSchema())
@@ -157,7 +166,8 @@ export default class DistinguishedName {
 	 * Convertion for the class to JSON object
 	 * @returns {Object}
 	 */
-	toJSON() {
+	toJSON() 
+	{
 		return {
 			relativeDistinguishedNames: Array.from(this.relativeDistinguishedNames, element => element.toJSON())
 		};
@@ -168,20 +178,23 @@ export default class DistinguishedName {
 	 * @param {(RelativeDistinguishedNames|ArrayBuffer)} compareTo The value compare to current
 	 * @returns {boolean}
 	 */
-	isEqual(compareTo) {
-		if (compareTo instanceof DistinguishedName) {
-			if (this.relativeDistinguishedNames.length !== compareTo.relativeDistinguishedNames.length)
+	isEqual(compareTo) 
+	{
+		if(compareTo instanceof DistinguishedName) 
+		{
+			if(this.relativeDistinguishedNames.length !== compareTo.relativeDistinguishedNames.length)
 				return false;
 
-			for (const [index, relativeDistinguishedName] of this.relativeDistinguishedNames.entries()) {
-				if (relativeDistinguishedName.isEqual(compareTo.relativeDistinguishedNames[index]) === false)
+			for(const [index, relativeDistinguishedName] of this.relativeDistinguishedNames.entries()) 
+			{
+				if(relativeDistinguishedName.isEqual(compareTo.relativeDistinguishedNames[index]) === false)
 					return false;
 			}
 
 			return true;
 		}
 
-		if (compareTo instanceof ArrayBuffer)
+		if(compareTo instanceof ArrayBuffer)
 			return isEqualBuffer(this.valueBeforeDecode, compareTo);
 
 		return false;
@@ -191,7 +204,8 @@ export default class DistinguishedName {
 	 * Convert a Distinguished Name to a human-readable string
 	 * based on RFC4514
 	 */
-	toString() {
+	toString() 
+	{
 		return this.relativeDistinguishedNames.map(rdn => rdn.toString()).join(",");
 	}
 }

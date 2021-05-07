@@ -68,7 +68,7 @@ export default class IssuingDistributionPoint
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "distributionPoint":
 				return [];
@@ -252,7 +252,7 @@ export default class IssuingDistributionPoint
 		//region Get internal properties from parsed schema
 		if("distributionPoint" in asn1.result)
 		{
-			switch(true)
+			switch (true)
 			{
 				case (asn1.result.distributionPoint.idBlock.tagNumber === 0): // GENERAL_NAMES variant
 					this.distributionPoint = Array.from(asn1.result.distributionPointNames, element => new GeneralName({ schema: element }));

@@ -65,7 +65,7 @@ export default class TBSRequest
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "tbs":
 				return new ArrayBuffer(0);
@@ -88,7 +88,7 @@ export default class TBSRequest
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "tbs":
 				return (memberValue.byteLength === 0);

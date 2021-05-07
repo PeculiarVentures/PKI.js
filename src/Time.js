@@ -41,7 +41,7 @@ export default class Time
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "type":
 				return 0;

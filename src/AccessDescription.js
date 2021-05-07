@@ -40,7 +40,7 @@ export default class AccessDescription
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "accessMethod":
 				return "";

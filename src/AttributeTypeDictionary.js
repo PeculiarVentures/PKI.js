@@ -62,14 +62,17 @@ const defaultValues = new Map([
 /**
  * Map from RFC4519. Extract of AttributeType names with their corresponding OIDs.
  */
-export default class AttributeTypeDictionary {
+export default class AttributeTypeDictionary 
+{
 	/**
 	 * Gets the Attribute Type Name corresponding to an OID
 	 * @param {string} oid 
 	 * @returns {string} - Returns the Attribute Type name if found, else the OID itself
 	 */
-	static get(oid) {
-		if (!defaultValues.has(oid)) {
+	static get(oid) 
+	{
+		if(!defaultValues.has(oid)) 
+		{
 			return oid;
 		}
 		return defaultValues.get(oid);
@@ -80,9 +83,12 @@ export default class AttributeTypeDictionary {
 	 * @param {string} value - Attribute Type name
 	 * @returns {(string|null)} Returns the Attribute Type OID or null if not found
 	 */
-	static getOID(value) {
-		for (const [oid, val] of defaultValues) {
-			if (val === value) {
+	static getOID(value) 
+	{
+		for(const [oid, val] of defaultValues) 
+		{
+			if(val === value) 
+			{
 				return oid;
 			}
 		}
@@ -94,7 +100,8 @@ export default class AttributeTypeDictionary {
 	 * @param {string} oid - OID to set 
 	 * @param {string} value - Name
 	 */
-	static set(oid, value) {
+	static set(oid, value) 
+	{
 		defaultValues.set(oid, value);
 	}
 
@@ -103,8 +110,10 @@ export default class AttributeTypeDictionary {
 	 * Register multiple Attribute Type OID/Name entries
 	 * @param {Array<Array<string>>} entries - Array of entries that contains the [OID, name] pair
 	 */
-	static register(entries) {
-		for (const [oid, value] of entries) {
+	static register(entries) 
+	{
+		for(const [oid, value] of entries) 
+		{
 			AttributeTypeDictionary.set(oid, value);
 		}
 	}

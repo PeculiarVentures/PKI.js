@@ -43,7 +43,7 @@ export default class OCSPResponse
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "responseStatus":
 				return new asn1js.Enumerated();
@@ -61,7 +61,7 @@ export default class OCSPResponse
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "responseStatus":
 				return (memberValue.isEqual(OCSPResponse.defaultValues(memberName)));

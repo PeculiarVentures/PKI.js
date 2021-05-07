@@ -47,7 +47,7 @@ export default class MacData
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "mac":
 				return new DigestInfo();
@@ -67,7 +67,7 @@ export default class MacData
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "mac":
 				return ((DigestInfo.compareWithDefault("digestAlgorithm", memberValue.digestAlgorithm)) &&

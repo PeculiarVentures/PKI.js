@@ -65,7 +65,7 @@ export default class PFX
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 3;
@@ -87,7 +87,7 @@ export default class PFX
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return (memberValue === PFX.defaultValues(memberName));
@@ -268,7 +268,7 @@ export default class PFX
 			return Promise.reject("Absent mandatory parameter \"authenticatedSafe\" in \"parsedValue\"");
 		//endregion
 		
-		switch(this.parsedValue.integrityMode)
+		switch (this.parsedValue.integrityMode)
 		{
 			//region HMAC-based integrity
 			case 0:
@@ -486,7 +486,7 @@ export default class PFX
 		//region Create value for "this.parsedValue.authenticatedSafe" and check integrity 
 		this.parsedValue = {};
 		
-		switch(this.authSafe.contentType)
+		switch (this.authSafe.contentType)
 		{
 			//region data 
 			case "1.2.840.113549.1.7.1":

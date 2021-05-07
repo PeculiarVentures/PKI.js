@@ -42,7 +42,7 @@ export default class RecipientIdentifier
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "variant":
 				return (-1);
@@ -60,7 +60,7 @@ export default class RecipientIdentifier
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "variant":
 				return (memberValue === (-1));
@@ -159,7 +159,7 @@ export default class RecipientIdentifier
 	toSchema()
 	{
 		//region Construct and return new ASN.1 schema for this object
-		switch(this.variant)
+		switch (this.variant)
 		{
 			case 1:
 				return this.value.toSchema();

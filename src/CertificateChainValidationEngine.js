@@ -225,7 +225,7 @@ export default class CertificateChainValidationEngine
 	 */
 	defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "trustedCerts":
 				return [];
@@ -584,7 +584,7 @@ export default class CertificateChainValidationEngine
 					{
 						ocspResult = await findOCSP(path[i], path[i + 1]);
 						
-						switch(ocspResult)
+						switch (ocspResult)
 						{
 							case 0:
 								continue;
@@ -670,7 +670,7 @@ export default class CertificateChainValidationEngine
 						{
 							for(const extension of issuerCertificate.extensions)
 							{
-								switch(extension.extnID)
+								switch (extension.extnID)
 								{
 									case "2.5.29.31": // CRLDistributionPoints
 									case "2.5.29.46": // FreshestCRL
@@ -1046,10 +1046,10 @@ export default class CertificateChainValidationEngine
 			/// <returns type="Boolean">Boolean result - valid or invalid the "name" against the "constraint"</returns>
 			
 			//region Initial check
-			if((name.typesAndValues.length === 0) || (constraint.typesAndValues.length === 0))
+			if((name.relativeDistinguishedNames.length === 0) || (constraint.relativeDistinguishedNames.length === 0))
 				return true;
 			
-			if(name.typesAndValues.length < constraint.typesAndValues.length)
+			if(name.relativeDistinguishedNames.length < constraint.relativeDistinguishedNames.length)
 				return false;
 			//endregion
 			
@@ -1058,17 +1058,14 @@ export default class CertificateChainValidationEngine
 			let nameStart = 0;
 			//endregion
 			
-			for(let i = 0; i < constraint.typesAndValues.length; i++)
+			for(let i = 0; i < constraint.relativeDistinguishedNames.length; i++)
 			{
 				let localResult = false;
 				
-				for(let j = nameStart; j < name.typesAndValues.length; j++)
+				for(let j = nameStart; j < name.relativeDistinguishedNames.length; j++)
 				{
-					localResult = name.typesAndValues[j].isEqual(constraint.typesAndValues[i]);
-					
-					if(name.typesAndValues[j].type === constraint.typesAndValues[i].type)
-						result = result && localResult;
-					
+					localResult = name.relativeDistinguishedNames[j].isEqual(constraint.relativeDistinguishedNames[i]);
+										
 					if(localResult === true)
 					{
 						if((nameStart === 0) || (nameStart === j))
@@ -1592,7 +1589,7 @@ export default class CertificateChainValidationEngine
 				
 				for(let j = 0; j < requiredNameForms.length; j++)
 				{
-					switch(requiredNameForms[j].base.type)
+					switch (requiredNameForms[j].base.type)
 					{
 						case 4: // directoryName
 						{
@@ -1639,7 +1636,7 @@ export default class CertificateChainValidationEngine
 				
 				for(let j = 0; j < permittedSubtrees.length; j++)
 				{
-					switch(permittedSubtrees[j].base.type)
+					switch (permittedSubtrees[j].base.type)
 					{
 						//region rfc822Name
 						case 1:
@@ -1682,7 +1679,7 @@ export default class CertificateChainValidationEngine
 					
 					for(let j = 0; j < group.length; j++)
 					{
-						switch(p)
+						switch (p)
 						{
 							//region rfc822Name
 							case 0:
@@ -1788,7 +1785,7 @@ export default class CertificateChainValidationEngine
 				
 				for(let j = 0; j < excludedSubtrees.length; j++)
 				{
-					switch(excludedSubtrees[j].base.type)
+					switch (excludedSubtrees[j].base.type)
 					{
 						//region rfc822Name
 						case 1:

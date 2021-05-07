@@ -35,7 +35,7 @@ export default class PolicyMappings
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "mappings":
 				return [];

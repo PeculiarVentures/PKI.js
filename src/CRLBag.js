@@ -47,7 +47,7 @@ export default class CRLBag
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "crlId":
 				return "";
@@ -67,7 +67,7 @@ export default class CRLBag
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "crlId":
 				return (memberValue === "");
@@ -151,7 +151,7 @@ export default class CRLBag
 		this.crlId = asn1.result.crlId.valueBlock.toString();
 		this.crlValue = asn1.result.crlValue;
 		
-		switch(this.crlId)
+		switch (this.crlId)
 		{
 			case "1.2.840.113549.1.9.23.1": // x509CRL
 				{
