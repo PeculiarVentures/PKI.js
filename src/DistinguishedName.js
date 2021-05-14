@@ -208,5 +208,32 @@ export default class DistinguishedName
 	{
 		return this.relativeDistinguishedNames.map(rdn => rdn.toString()).join(",");
 	}
+	//**********************************************************************************
+
+	/**
+	 * @type {RelativeDistinguishedNames}
+	 * @deprecated
+	 */
+	get typesAndValues() 
+	{
+		if(this.relativeDistinguishedNames.length === 0) 
+		{
+			this.relativeDistinguishedNames.push(new RelativeDistinguishedNames());
+		}
+		return this.relativeDistinguishedNames[0];
+	}
+
+	/**
+	 * @type {RelativeDistinguishedNames}
+	 * @deprecated
+	 */
+	set typesAndValues(value) 
+	{
+		if(this.relativeDistinguishedNames.length === 0) 
+		{
+			this.relativeDistinguishedNames.push(new RelativeDistinguishedNames());
+		}
+		this.relativeDistinguishedNames[0] = value;
+	}
 }
 //**************************************************************************************

@@ -1586,7 +1586,6 @@ export default class CertificateChainValidationEngine
 				
 				//region Checking for "required name forms"
 				let formFound = (requiredNameForms.length <= 0);
-				
 				for(let j = 0; j < requiredNameForms.length; j++)
 				{
 					switch (requiredNameForms[j].base.type)
@@ -1696,14 +1695,15 @@ export default class CertificateChainValidationEngine
 								}
 								else // Try to find out "emailAddress" inside "subject"
 								{
-									for(let k = 0; k < this.certs[i].subject.typesAndValues.length; k++)
+									const emailAddresses =this.certs[i].subject
+										.relativeDistinguishedNames
+										.reduce((accumulator, { typesAndValues }) => [...accumulator, ...typesAndValues], [])
+										.filter(({ type }) => type === "1.2.840.113549.1.9.1" || type === "0.9.2342.19200300.100.1.3");
+
+									for(let k = 0; k < emailAddresses.length; k++)
 									{
-										if((this.certs[i].subject.typesAndValues[k].type === "1.2.840.113549.1.9.1") ||    // PKCS#9 e-mail address
-											(this.certs[i].subject.typesAndValues[k].type === "0.9.2342.19200300.100.1.3")) // RFC1274 "rfc822Mailbox" e-mail address
-										{
-											valueExists = true;
-											groupPermitted = groupPermitted || compareRFC822Name(this.certs[i].subject.typesAndValues[k].value.valueBlock.value, group[j].base.value);
-										}
+										valueExists = true;
+										groupPermitted = groupPermitted || compareRFC822Name(emailAddresses[k].value.valueBlock.value, group[j].base.value);
 									}
 								}
 								break;
