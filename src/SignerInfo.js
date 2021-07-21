@@ -182,7 +182,7 @@ export default class SignerInfo
 									blockName: "SignerInfo.sid"
 								}
 							}),
-							new asn1js.Constructed({
+							new asn1js.Primitive({
 								optional: true,
 								name: (names.sid || "SignerInfo.sid"),
 								idBlock: {
