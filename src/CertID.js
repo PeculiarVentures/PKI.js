@@ -51,7 +51,7 @@ export default class CertID
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "hashAlgorithm":
 				return new AlgorithmIdentifier();
@@ -72,7 +72,7 @@ export default class CertID
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "hashAlgorithm":
 				return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));

@@ -35,7 +35,7 @@ export default class GeneralNames
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "names":
 				return [];

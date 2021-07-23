@@ -39,7 +39,7 @@ export default class PolicyMapping
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "issuerDomainPolicy":
 				return "";

@@ -2,7 +2,7 @@ import * as asn1js from "asn1js";
 import { getParametersValue, bufferToHexCodes, clearProps } from "pvutils";
 import { getEngine } from "./common.js";
 import PublicKeyInfo from "./PublicKeyInfo.js";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import DistinguishedName from "./DistinguishedName.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import Attribute from "./Attribute.js";
 //**************************************************************************************
@@ -30,7 +30,7 @@ function CertificationRequestInfo(parameters = {})
 		name: (names.CertificationRequestInfo || "CertificationRequestInfo"),
 		value: [
 			new asn1js.Integer({ name: (names.CertificationRequestInfoVersion || "CertificationRequestInfo.version") }),
-			RelativeDistinguishedNames.schema(names.subject || {
+			DistinguishedName.schema(names.subject || {
 				names: {
 					blockName: "CertificationRequestInfo.subject"
 				}
@@ -83,7 +83,7 @@ export default class CertificationRequest
 		 */
 		this.version = getParametersValue(parameters, "version", CertificationRequest.defaultValues("version"));
 		/**
-		 * @type {RelativeDistinguishedNames}
+		 * @type {DistinguishedName}
 		 * @desc subject
 		 */
 		this.subject = getParametersValue(parameters, "subject", CertificationRequest.defaultValues("subject"));
@@ -124,14 +124,14 @@ export default class CertificationRequest
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "tbs":
 				return new ArrayBuffer(0);
 			case "version":
 				return 0;
 			case "subject":
-				return new RelativeDistinguishedNames();
+				return new DistinguishedName();
 			case "subjectPublicKeyInfo":
 				return new PublicKeyInfo();
 			case "attributes":
@@ -218,7 +218,7 @@ export default class CertificationRequest
 		this.tbs = asn1.result.CertificationRequestInfo.valueBeforeDecode;
 		
 		this.version = asn1.result["CertificationRequestInfo.version"].valueBlock.valueDec;
-		this.subject = new RelativeDistinguishedNames({ schema: asn1.result["CertificationRequestInfo.subject"] });
+		this.subject = new DistinguishedName({ schema: asn1.result["CertificationRequestInfo.subject"] });
 		this.subjectPublicKeyInfo = new PublicKeyInfo({ schema: asn1.result["CertificationRequestInfo.subjectPublicKeyInfo"] });
 		if("CertificationRequestInfo.attributes" in asn1.result)
 			this.attributes = Array.from(asn1.result["CertificationRequestInfo.attributes"], element => new Attribute({ schema: element }));

@@ -48,7 +48,7 @@ export default class CertificateTemplate
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "templateID":
 				return "";

@@ -49,7 +49,7 @@ export default class EncryptedData
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 0;
@@ -69,7 +69,7 @@ export default class EncryptedData
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return (memberValue === 0);

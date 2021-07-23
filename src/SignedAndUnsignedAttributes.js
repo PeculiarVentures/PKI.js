@@ -45,7 +45,7 @@ export default class SignedAndUnsignedAttributes
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "type":
 				return (-1);
@@ -65,7 +65,7 @@ export default class SignedAndUnsignedAttributes
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "type":
 				return (memberValue === SignedAndUnsignedAttributes.defaultValues("type"));

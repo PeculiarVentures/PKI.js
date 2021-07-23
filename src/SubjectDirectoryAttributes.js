@@ -35,7 +35,7 @@ export default class SubjectDirectoryAttributes
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "attributes":
 				return [];

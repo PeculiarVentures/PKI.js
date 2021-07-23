@@ -48,7 +48,7 @@ export default class Signature
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "signatureAlgorithm":
 				return new AlgorithmIdentifier();
@@ -68,7 +68,7 @@ export default class Signature
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "signatureAlgorithm":
 				return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));

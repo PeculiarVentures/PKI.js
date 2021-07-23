@@ -47,6 +47,7 @@ Name of each class equals to name from RFC document. Here is a table with PKI.js
 |CertificationRequest|RFC2986|
 |ContentInfo|RFC5652|
 |DigestInfo|RFC3447|
+|DistinguishedName|RFC5280|
 |DistributionPoint|RFC5280|
 |ECCCMSSharedInfo|RFC6318|
 |ECPrivateKey|RFC5915|

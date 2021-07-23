@@ -83,7 +83,7 @@ export default class EncryptedContentInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "contentType":
 				return "";
@@ -103,7 +103,7 @@ export default class EncryptedContentInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "contentType":
 				return (memberValue === "");

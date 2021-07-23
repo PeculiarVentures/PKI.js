@@ -44,7 +44,7 @@ export default class OriginatorInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "certs":
 				return new CertificateSet();
@@ -62,7 +62,7 @@ export default class OriginatorInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "certs":
 				return (memberValue.certificates.length === 0);

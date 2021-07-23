@@ -42,7 +42,7 @@ export default class PolicyConstraints
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "requireExplicitPolicy":
 				return 0;

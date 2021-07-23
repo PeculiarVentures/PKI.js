@@ -42,7 +42,7 @@ export default class PolicyInformation
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "policyIdentifier":
 				return "";

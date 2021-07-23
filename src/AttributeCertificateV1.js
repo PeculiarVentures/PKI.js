@@ -43,7 +43,7 @@ export class AttCertValidityPeriod
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "notBeforeTime":
 			case "notAfterTime":
@@ -195,7 +195,7 @@ export class IssuerSerial
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "issuer":
 				return new GeneralNames();
@@ -420,7 +420,7 @@ export class AttributeCertificateInfoV1
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 0;
@@ -745,7 +745,7 @@ export default class AttributeCertificateV1
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "acinfo":
 				return new AttributeCertificateInfoV1();

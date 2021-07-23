@@ -1,39 +1,39 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, isEqualBuffer, clearProps } from "pvutils";
-import AttributeTypeAndValue from "./AttributeTypeAndValue.js";
+import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
+
 //**************************************************************************************
 /**
  * Class from RFC5280
  */
-export default class RelativeDistinguishedNames 
+export default class DistinguishedName 
 {
 	//**********************************************************************************
 	/**
-	 * Constructor for RelativeDistinguishedNames class
+	 * Constructor for DistinguishedName class
 	 * @param {Object} [parameters={}]
 	 * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
-	 * @property {Array.<AttributeTypeAndValue>} [typesAndValues] Array of "type and value" objects
-	 * @property {ArrayBuffer} [valueBeforeDecode] Value of the RDN before decoding from schema
 	 */
 	constructor(parameters = {}) 
 	{
 		//region Internal properties of the object
 		/**
-		 * @type {Array.<AttributeTypeAndValue>}
-		 * @desc Array of "type and value" objects
+		 * @type {Array.<RelativeDistinguishedNames>}
+		 * @desc Array of "Relative Distinguished Names" objects
 		 */
-		this.typesAndValues = getParametersValue(parameters, "typesAndValues", RelativeDistinguishedNames.defaultValues("typesAndValues"));
+		this.relativeDistinguishedNames = getParametersValue(parameters, "relativeDistinguishedNames", DistinguishedName.defaultValues("relativeDistinguishedNames"));
 		/**
 		 * @type {ArrayBuffer}
-		 * @desc Value of the RDN before decoding from schema
+		 * @desc Value of the DN before decoding from schema
 		 */
-		this.valueBeforeDecode = getParametersValue(parameters, "valueBeforeDecode", RelativeDistinguishedNames.defaultValues("valueBeforeDecode"));
+		this.valueBeforeDecode = getParametersValue(parameters, "valueBeforeDecode", DistinguishedName.defaultValues("valueBeforeDecode"));
 		//endregion
 
 		//region If input argument array contains "schema" for this object
 		if("schema" in parameters)
 			this.fromSchema(parameters.schema);
 		//endregion
+
 	}
 	//**********************************************************************************
 	/**
@@ -44,12 +44,12 @@ export default class RelativeDistinguishedNames
 	{
 		switch (memberName) 
 		{
-			case "typesAndValues":
+			case "relativeDistinguishedNames":
 				return [];
 			case "valueBeforeDecode":
 				return new ArrayBuffer(0);
 			default:
-				throw new Error(`Invalid member name for RelativeDistinguishedNames class: ${memberName}`);
+				throw new Error(`Invalid member name for DistinguishedName class: ${memberName}`);
 		}
 	}
 	//**********************************************************************************
@@ -62,12 +62,12 @@ export default class RelativeDistinguishedNames
 	{
 		switch (memberName) 
 		{
-			case "typesAndValues":
+			case "relativeDistinguishedNames":
 				return (memberValue.length === 0);
 			case "valueBeforeDecode":
 				return (memberValue.byteLength === 0);
 			default:
-				throw new Error(`Invalid member name for RelativeDistinguishedNames class: ${memberName}`);
+				throw new Error(`Invalid member name for DistinguishedName class: ${memberName}`);
 		}
 	}
 	//**********************************************************************************
@@ -77,9 +77,6 @@ export default class RelativeDistinguishedNames
 	 * ASN.1 schema:
 	 * ```asn1
 	 * RDNSequence ::= Sequence OF RelativeDistinguishedName
-	 *
-	 * RelativeDistinguishedName ::=
-	 * SET SIZE (1..MAX) OF AttributeTypeAndValue
 	 * ```
 	 *
 	 * @param {Object} parameters Input parameters for the schema
@@ -91,20 +88,19 @@ export default class RelativeDistinguishedNames
 		 * @type {Object}
 		 * @property {string} [blockName] Name for entire block
 		 * @property {string} [repeatedSequence] Name for "repeatedSequence" block
-		 * @property {string} [repeatedSet] Name for "repeatedSet" block
-		 * @property {string} [typeAndValue] Name for "typeAndValue" block
+		 * @property {string} [rDNSequences] Name for "rDNSequences" block
 		 */
 		const names = getParametersValue(parameters, "names", {});
 
-		return new asn1js.Set({
+		return (new asn1js.Sequence({
 			name: (names.blockName || ""),
 			value: [
 				new asn1js.Repeated({
-					name: (names.repeatedSet || ""),
-					value: AttributeTypeAndValue.schema(names.typeAndValue || {})
+					name: (names.repeatedSequence || ""),
+					value: RelativeDistinguishedNames.schema(names.rDNSequence),
 				})
 			]
-		});
+		}));
 	}
 	//**********************************************************************************
 	/**
@@ -115,32 +111,32 @@ export default class RelativeDistinguishedNames
 	{
 		//region Clear input data first
 		clearProps(schema, [
-			"RDN",
-			"typesAndValues"
+			"DN",
+			"RDNSequence"
 		]);
 		//endregion
 
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
-			RelativeDistinguishedNames.schema({
+			DistinguishedName.schema({
 				names: {
-					blockName: "RDN",
-					repeatedSet: "typesAndValues"
+					blockName: "DN",
+					repeatedSequence: "RDNSequence",
 				}
 			})
 		);
 
 		if(asn1.verified === false)
-			throw new Error("Object's schema was not verified against input data for RelativeDistinguishedNames");
+			throw new Error("Object's schema was not verified against input data for DistinguishedNames");
 		//endregion
 
 		//region Get internal properties from parsed schema
-		if("typesAndValues" in asn1.result) // Could be a case when there is no "types and values"
-			this.typesAndValues = Array.from(asn1.result.typesAndValues, element => new AttributeTypeAndValue({ schema: element }));
+		if("RDNSequence" in asn1.result) // Could be a case when there is no "types and values"
+			this.relativeDistinguishedNames = Array.from(asn1.result.RDNSequence, element => new RelativeDistinguishedNames({ schema: element }));
 
 		// noinspection JSUnresolvedVariable
-		this.valueBeforeDecode = asn1.result.RDN.valueBeforeDecode;
+		this.valueBeforeDecode = asn1.result.DN.valueBeforeDecode;
 		//endregion
 	}
 	//**********************************************************************************
@@ -153,9 +149,9 @@ export default class RelativeDistinguishedNames
 		//region Decode stored TBS value
 		if(this.valueBeforeDecode.byteLength === 0) // No stored encoded array, create "from scratch"
 		{
-			return new asn1js.Set({
-				value: Array.from(this.typesAndValues, element => element.toSchema())
-			});
+			return (new asn1js.Sequence({
+				value: Array.from(this.relativeDistinguishedNames, element => element.toSchema())
+			}));
 		}
 
 		const asn1 = asn1js.fromBER(this.valueBeforeDecode);
@@ -173,7 +169,7 @@ export default class RelativeDistinguishedNames
 	toJSON() 
 	{
 		return {
-			typesAndValues: Array.from(this.typesAndValues, element => element.toJSON())
+			relativeDistinguishedNames: Array.from(this.relativeDistinguishedNames, element => element.toJSON())
 		};
 	}
 	//**********************************************************************************
@@ -184,14 +180,14 @@ export default class RelativeDistinguishedNames
 	 */
 	isEqual(compareTo) 
 	{
-		if(compareTo instanceof RelativeDistinguishedNames) 
+		if(compareTo instanceof DistinguishedName) 
 		{
-			if(this.typesAndValues.length !== compareTo.typesAndValues.length)
+			if(this.relativeDistinguishedNames.length !== compareTo.relativeDistinguishedNames.length)
 				return false;
 
-			for(const [index, typeAndValue] of this.typesAndValues.entries()) 
+			for(const [index, relativeDistinguishedName] of this.relativeDistinguishedNames.entries()) 
 			{
-				if(typeAndValue.isEqual(compareTo.typesAndValues[index]) === false)
+				if(relativeDistinguishedName.isEqual(compareTo.relativeDistinguishedNames[index]) === false)
 					return false;
 			}
 
@@ -206,12 +202,38 @@ export default class RelativeDistinguishedNames
 	//**********************************************************************************
 	/**
 	 * Convert a Distinguished Name to a human-readable string
- 	 * based on RFC4514
+	 * based on RFC4514
 	 */
 	toString() 
 	{
-		return this.typesAndValues.map(tv => tv.toString()).join("+");
+		return this.relativeDistinguishedNames.map(rdn => rdn.toString()).join(",");
+	}
+	//**********************************************************************************
+
+	/**
+	 * @type {RelativeDistinguishedNames}
+	 * @deprecated
+	 */
+	get typesAndValues() 
+	{
+		if(this.relativeDistinguishedNames.length === 0) 
+		{
+			this.relativeDistinguishedNames.push(new RelativeDistinguishedNames());
+		}
+		return this.relativeDistinguishedNames[0];
 	}
 
+	/**
+	 * @type {RelativeDistinguishedNames}
+	 * @deprecated
+	 */
+	set typesAndValues(value) 
+	{
+		if(this.relativeDistinguishedNames.length === 0) 
+		{
+			this.relativeDistinguishedNames.push(new RelativeDistinguishedNames());
+		}
+		this.relativeDistinguishedNames[0] = value;
+	}
 }
 //**************************************************************************************

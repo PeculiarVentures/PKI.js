@@ -40,7 +40,7 @@ export default class OriginatorPublicKey
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "algorithm":
 				return new AlgorithmIdentifier();
@@ -58,7 +58,7 @@ export default class OriginatorPublicKey
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "algorithm":
 			case "publicKey":

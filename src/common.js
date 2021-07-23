@@ -301,7 +301,7 @@ export function createECDSASignatureFromCMS(cmsSignature)
 	const sValue = cmsSignature.valueBlock.value[1].convertFromDER();
 	
 	//region Check the lengths of two parts are equal
-	switch(true)
+	switch (true)
 	{
 		case (rValue.valueBlock.valueHex.byteLength < sValue.valueBlock.valueHex.byteLength):
 			{
@@ -400,7 +400,7 @@ export function getHashAlgorithm(signatureAlgorithm)
 export function kdfWithCounter(hashFunction, Zbuffer, Counter, SharedInfo)
 {
 	//region Check of input parameters
-	switch(hashFunction.toUpperCase())
+	switch (hashFunction.toUpperCase())
 	{
 		case "SHA-1":
 		case "SHA-256":
@@ -477,7 +477,7 @@ export function kdf(hashFunction, Zbuffer, keydatalen, SharedInfo)
 	//endregion
 	
 	//region Check of input parameters
-	switch(hashFunction.toUpperCase())
+	switch (hashFunction.toUpperCase())
 	{
 		case "SHA-1":
 			hashLength = 160; // In bits

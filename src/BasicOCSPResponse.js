@@ -5,7 +5,7 @@ import ResponseData from "./ResponseData.js";
 import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import Certificate from "./Certificate.js";
 import CertID from "./CertID.js";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import DistinguishedName from "./DistinguishedName.js";
 import CertificateChainValidationEngine from "./CertificateChainValidationEngine.js";
 //**************************************************************************************
 /**
@@ -58,7 +58,7 @@ export default class BasicOCSPResponse
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "tbsResponseData":
 				return new ResponseData();
@@ -80,7 +80,7 @@ export default class BasicOCSPResponse
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "type":
 				{
@@ -318,7 +318,7 @@ export default class BasicOCSPResponse
 
 						try
 						{
-							switch(response.certStatus.idBlock.isConstructed)
+							switch (response.certStatus.idBlock.isConstructed)
 							{
 								case true:
 									if(response.certStatus.idBlock.tagNumber === 1)
@@ -326,7 +326,7 @@ export default class BasicOCSPResponse
 									
 									break;
 								case false:
-									switch(response.certStatus.idBlock.tagNumber)
+									switch (response.certStatus.idBlock.tagNumber)
 									{
 										case 0: // good
 											result.status = 0;
@@ -480,9 +480,9 @@ export default class BasicOCSPResponse
 		//endregion
 		
 		//region Find correct value for "responderID"
-		switch(true)
+		switch (true)
 		{
-			case (this.tbsResponseData.responderID instanceof RelativeDistinguishedNames): // [1] Name
+			case (this.tbsResponseData.responderID instanceof DistinguishedName): // [1] Name
 				sequence = sequence.then(() =>
 				{
 					for(const [index, certificate] of _this.certs.entries())

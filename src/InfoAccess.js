@@ -35,7 +35,7 @@ export default class InfoAccess
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "accessDescriptions":
 				return [];

@@ -48,7 +48,7 @@ export default class ECCCMSSharedInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "keyInfo":
 				return new AlgorithmIdentifier();
@@ -68,7 +68,7 @@ export default class ECCCMSSharedInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "keyInfo":
 			case "entityUInfo":

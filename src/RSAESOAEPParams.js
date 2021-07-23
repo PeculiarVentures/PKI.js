@@ -45,7 +45,7 @@ export default class RSAESOAEPParams
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "hashAlgorithm":
 				return new AlgorithmIdentifier({

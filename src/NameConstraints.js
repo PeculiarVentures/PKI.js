@@ -43,7 +43,7 @@ export default class NameConstraints
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "permittedSubtrees":
 				return [];

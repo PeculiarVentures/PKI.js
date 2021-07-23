@@ -69,7 +69,7 @@ export default class TimeStampReq
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 0;
@@ -95,7 +95,7 @@ export default class TimeStampReq
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 			case "reqPolicy":

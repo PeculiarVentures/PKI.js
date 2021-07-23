@@ -76,7 +76,7 @@ export default class EncapsulatedContentInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "eContentType":
 				return "";
@@ -94,7 +94,7 @@ export default class EncapsulatedContentInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "eContentType":
 				return (memberValue === "");

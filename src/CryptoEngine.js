@@ -22,7 +22,7 @@ function makePKCS12B2Key(cryptoEngine, hashAlgorithm, keyLength, password, salt,
 	//endregion
 	
 	//region Get "u" and "v" values
-	switch(hashAlgorithm.toUpperCase())
+	switch (hashAlgorithm.toUpperCase())
 	{
 		case "SHA-1":
 			u = 20; // 160
@@ -254,7 +254,7 @@ export default class CryptoEngine
 			keyData = keyData.buffer;
 		//endregion
 		
-		switch(format.toLowerCase())
+		switch (format.toLowerCase())
 		{
 			case "raw":
 				return this.subtle.importKey("raw", keyData, algorithm, extractable, keyUsages);
@@ -276,12 +276,12 @@ export default class CryptoEngine
 
 
 					// noinspection FallThroughInSwitchStatementJS
-					switch(algorithm.name.toUpperCase())
+					switch (algorithm.name.toUpperCase())
 					{
 						case "RSA-PSS":
 							{
 								//region Get information about used hash function
-								switch(algorithm.hash.name.toUpperCase())
+								switch (algorithm.hash.name.toUpperCase())
 								{
 									case "SHA-1":
 										jwk.alg = "PS1";
@@ -315,7 +315,7 @@ export default class CryptoEngine
 								//region Get information about used hash function
 								if(("alg" in jwk) === false)
 								{
-									switch(algorithm.hash.name.toUpperCase())
+									switch (algorithm.hash.name.toUpperCase())
 									{
 										case "SHA-1":
 											jwk.alg = "RS1";
@@ -379,7 +379,7 @@ export default class CryptoEngine
 									jwk.alg = "RSA-OAEP";
 								else
 								{
-									switch(algorithm.hash.name.toUpperCase())
+									switch (algorithm.hash.name.toUpperCase())
 									{
 										case "SHA-1":
 											jwk.alg = "RSA-OAEP";
@@ -448,12 +448,12 @@ export default class CryptoEngine
 
 					// noinspection FallThroughInSwitchStatementJS
 					// noinspection FallThroughInSwitchStatementJS
-					switch(algorithm.name.toUpperCase())
+					switch (algorithm.name.toUpperCase())
 					{
 						case "RSA-PSS":
 							{
 								//region Get information about used hash function
-								switch(algorithm.hash.name.toUpperCase())
+								switch (algorithm.hash.name.toUpperCase())
 								{
 									case "SHA-1":
 										jwk.alg = "PS1";
@@ -489,7 +489,7 @@ export default class CryptoEngine
 								//region Get information about used hash function
 								if(("alg" in jwk) === false)
 								{
-									switch(algorithm.hash.name.toUpperCase())
+									switch (algorithm.hash.name.toUpperCase())
 									{
 										case "SHA-1":
 											jwk.alg = "RS1";
@@ -554,7 +554,7 @@ export default class CryptoEngine
 									jwk.alg = "RSA-OAEP";
 								else
 								{
-									switch(algorithm.hash.name.toUpperCase())
+									switch (algorithm.hash.name.toUpperCase())
 									{
 										case "SHA-1":
 											jwk.alg = "RSA-OAEP";
@@ -647,7 +647,7 @@ export default class CryptoEngine
 		}
 		//endregion
 		
-		switch(format.toLowerCase())
+		switch (format.toLowerCase())
 		{
 			case "raw":
 				return this.subtle.exportKey("raw", key);
@@ -706,10 +706,10 @@ export default class CryptoEngine
 	 */
 	convert(inputFormat, outputFormat, keyData, algorithm, extractable, keyUsages)
 	{
-		switch(inputFormat.toLowerCase())
+		switch (inputFormat.toLowerCase())
 		{
 			case "raw":
-				switch(outputFormat.toLowerCase())
+				switch (outputFormat.toLowerCase())
 				{
 					case "raw":
 						return Promise.resolve(keyData);
@@ -729,7 +729,7 @@ export default class CryptoEngine
 						return Promise.reject(`Incorrect outputFormat: ${outputFormat}`);
 				}
 			case "spki":
-				switch(outputFormat.toLowerCase())
+				switch (outputFormat.toLowerCase())
 				{
 					case "raw":
 						return Promise.resolve()
@@ -747,7 +747,7 @@ export default class CryptoEngine
 						return Promise.reject(`Incorrect outputFormat: ${outputFormat}`);
 				}
 			case "pkcs8":
-				switch(outputFormat.toLowerCase())
+				switch (outputFormat.toLowerCase())
 				{
 					case "raw":
 						return Promise.resolve()
@@ -765,7 +765,7 @@ export default class CryptoEngine
 						return Promise.reject(`Incorrect outputFormat: ${outputFormat}`);
 				}
 			case "jwk":
-				switch(outputFormat.toLowerCase())
+				switch (outputFormat.toLowerCase())
 				{
 					case "raw":
 						return Promise.resolve()
@@ -909,7 +909,7 @@ export default class CryptoEngine
 	 */
 	getAlgorithmByOID(oid)
 	{
-		switch(oid)
+		switch (oid)
 		{
 			case "1.2.840.113549.1.1.1":
 				return {
@@ -1141,13 +1141,13 @@ export default class CryptoEngine
 	{
 		let result = "";
 		
-		switch(algorithm.name.toUpperCase())
+		switch (algorithm.name.toUpperCase())
 		{
 			case "RSAES-PKCS1-V1_5":
 				result = "1.2.840.113549.1.1.1";
 				break;
 			case "RSASSA-PKCS1-V1_5":
-				switch(algorithm.hash.name.toUpperCase())
+				switch (algorithm.hash.name.toUpperCase())
 				{
 					case "SHA-1":
 						result = "1.2.840.113549.1.1.5";
@@ -1171,7 +1171,7 @@ export default class CryptoEngine
 				result = "1.2.840.113549.1.1.7";
 				break;
 			case "ECDSA":
-				switch(algorithm.hash.name.toUpperCase())
+				switch (algorithm.hash.name.toUpperCase())
 				{
 					case "SHA-1":
 						result = "1.2.840.10045.4.1";
@@ -1189,7 +1189,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "ECDH":
-				switch(algorithm.kdf.toUpperCase()) // Non-standard addition - hash algorithm of KDF function
+				switch (algorithm.kdf.toUpperCase()) // Non-standard addition - hash algorithm of KDF function
 				{
 					case "SHA-1":
 						result = "1.3.133.16.840.63.0.2"; // dhSinglePass-stdDH-sha1kdf-scheme
@@ -1209,7 +1209,7 @@ export default class CryptoEngine
 			case "AES-CTR":
 				break;
 			case "AES-CBC":
-				switch(algorithm.length)
+				switch (algorithm.length)
 				{
 					case 128:
 						result = "2.16.840.1.101.3.4.1.2";
@@ -1226,7 +1226,7 @@ export default class CryptoEngine
 			case "AES-CMAC":
 				break;
 			case "AES-GCM":
-				switch(algorithm.length)
+				switch (algorithm.length)
 				{
 					case 128:
 						result = "2.16.840.1.101.3.4.1.6";
@@ -1241,7 +1241,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "AES-CFB":
-				switch(algorithm.length)
+				switch (algorithm.length)
 				{
 					case 128:
 						result = "2.16.840.1.101.3.4.1.4";
@@ -1256,7 +1256,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "AES-KW":
-				switch(algorithm.length)
+				switch (algorithm.length)
 				{
 					case 128:
 						result = "2.16.840.1.101.3.4.1.5";
@@ -1271,7 +1271,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "HMAC":
-				switch(algorithm.hash.name.toUpperCase())
+				switch (algorithm.hash.name.toUpperCase())
 				{
 					case "SHA-1":
 						result = "1.2.840.113549.2.7";
@@ -1340,11 +1340,11 @@ export default class CryptoEngine
 			usages: []
 		};
 		
-		switch(algorithmName.toUpperCase())
+		switch (algorithmName.toUpperCase())
 		{
 			case "RSAES-PKCS1-V1_5":
 			case "RSASSA-PKCS1-V1_5":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "generatekey":
 						result = {
@@ -1383,7 +1383,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "RSA-PSS":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "sign":
 					case "verify":
@@ -1433,7 +1433,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "RSA-OAEP":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "encrypt":
 					case "decrypt":
@@ -1479,7 +1479,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "ECDSA":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "generatekey":
 						result = {
@@ -1521,7 +1521,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "ECDH":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "exportkey":
 					case "importkey":
@@ -1555,7 +1555,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "AES-CTR":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "importkey":
 					case "exportkey":
@@ -1589,7 +1589,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "AES-CBC":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "importkey":
 					case "exportkey":
@@ -1622,7 +1622,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "AES-GCM":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "importkey":
 					case "exportkey":
@@ -1655,7 +1655,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "AES-KW":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "importkey":
 					case "exportkey":
@@ -1680,7 +1680,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "HMAC":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "sign":
 					case "verify":
@@ -1715,7 +1715,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "HKDF":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "derivekey":
 						result = {
@@ -1738,7 +1738,7 @@ export default class CryptoEngine
 				}
 				break;
 			case "PBKDF2":
-				switch(operation.toLowerCase())
+				switch (operation.toLowerCase())
 				{
 					case "derivekey":
 						result = {
@@ -1775,7 +1775,7 @@ export default class CryptoEngine
 	{
 		let result = "";
 		
-		switch(signatureAlgorithm.algorithmId)
+		switch (signatureAlgorithm.algorithmId)
 		{
 			case "1.2.840.10045.4.1": // ecdsa-with-SHA1
 			case "1.2.840.113549.1.1.5":
@@ -2129,7 +2129,7 @@ export default class CryptoEngine
 		//region Choose correct length for HMAC key
 		let length;
 		
-		switch(parameters.hashAlgorithm.toLowerCase())
+		switch (parameters.hashAlgorithm.toLowerCase())
 		{
 			case "sha-1":
 				length = 160;
@@ -2215,7 +2215,7 @@ export default class CryptoEngine
 		//region Choose correct length for HMAC key
 		let length;
 		
-		switch(parameters.hashAlgorithm.toLowerCase())
+		switch (parameters.hashAlgorithm.toLowerCase())
 		{
 			case "sha-1":
 				length = 160;
@@ -2296,7 +2296,7 @@ export default class CryptoEngine
 		//endregion
 		
 		//region Fill internal structures base on "privateKey" and "hashAlgorithm"
-		switch(privateKey.algorithm.name.toUpperCase())
+		switch (privateKey.algorithm.name.toUpperCase())
 		{
 			case "RSASSA-PKCS1-V1_5":
 			case "ECDSA":
@@ -2305,7 +2305,7 @@ export default class CryptoEngine
 			case "RSA-PSS":
 				{
 					//region Set "saltLength" as a length (in octets) of hash function result
-					switch(hashAlgorithm.toUpperCase())
+					switch (hashAlgorithm.toUpperCase())
 					{
 						case "SHA-256":
 							parameters.algorithm.saltLength = 32;

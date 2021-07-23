@@ -48,7 +48,7 @@ export default class ECPublicKey
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "x":
 			case "y":
@@ -67,7 +67,7 @@ export default class ECPublicKey
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "x":
 			case "y":
@@ -107,7 +107,7 @@ export default class ECPublicKey
 		//region Get internal properties from parsed schema
 		let coordinateLength;
 
-		switch(this.namedCurve)
+		switch (this.namedCurve)
 		{
 			case "1.2.840.10045.3.1.7": // P-256
 				coordinateLength = 32;
@@ -152,7 +152,7 @@ export default class ECPublicKey
 	{
 		let crvName = "";
 
-		switch(this.namedCurve)
+		switch (this.namedCurve)
 		{
 			case "1.2.840.10045.3.1.7": // P-256
 				crvName = "P-256";
@@ -183,7 +183,7 @@ export default class ECPublicKey
 
 		if("crv" in json)
 		{
-			switch(json.crv.toUpperCase())
+			switch (json.crv.toUpperCase())
 			{
 				case "P-256":
 					this.namedCurve = "1.2.840.10045.3.1.7";

@@ -11,6 +11,7 @@ import Extensions from "../../src/Extensions.js";
 import RSAPublicKey from "../../src/RSAPublicKey.js";
 import GeneralNames from "../../src/GeneralNames.js";
 import GeneralName from "../../src/GeneralName.js";
+import RelativeDistinguishedNames from "../../src/RelativeDistinguishedNames.js";
 //<nodewebcryptoossl>
 //*********************************************************************************
 let pkcs10Buffer = new ArrayBuffer(0);
@@ -20,34 +21,37 @@ let signAlg = "RSASSA-PKCS1-V1_5";
 //*********************************************************************************
 //region Create PKCS#10
 //*********************************************************************************
-function createPKCS10Internal()
-{
+function createPKCS10Internal() {
 	//region Initial variables
 	let sequence = Promise.resolve();
-	
+
 	const pkcs10 = new CertificationRequest();
-	
+
 	let publicKey;
 	let privateKey;
 	//endregion
-	
+
 	//region Get a "crypto" extension
 	const crypto = getCrypto();
-	if(typeof crypto === "undefined")
+	if (typeof crypto === "undefined")
 		return Promise.reject("No WebCrypto extension found");
 	//endregion
-	
+
 	//region Put a static values
 	pkcs10.version = 0;
-	pkcs10.subject.typesAndValues.push(new AttributeTypeAndValue({
-		type: "2.5.4.6",
-		value: new asn1js.PrintableString({ value: "RU" })
+	pkcs10.subject.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
+		typesAndValues: [new AttributeTypeAndValue({
+			type: "2.5.4.6",
+			value: new asn1js.PrintableString({ value: "RU" })
+		})]
 	}));
-	pkcs10.subject.typesAndValues.push(new AttributeTypeAndValue({
-		type: "2.5.4.3",
-		value: new asn1js.Utf8String({ value: "Simple test (простой тест)" })
+	pkcs10.subject.relativeDistinguishedNames.push(new RelativeDistinguishedNames({
+		typesAndValues: [new AttributeTypeAndValue({
+			type: "2.5.4.3",
+			value: new asn1js.Utf8String({ value: "Simple test (простой тест)" })
+		})]
 	}));
-	
+
 	const altNames = new GeneralNames({
 		names: [
 			new GeneralName({
@@ -68,41 +72,38 @@ function createPKCS10Internal()
 			}),
 		]
 	});
-	
+
 	pkcs10.attributes = [];
 	//endregion
-	
+
 	//region Create a new key pair
-	sequence = sequence.then(() =>
-	{
+	sequence = sequence.then(() => {
 		//region Get default algorithm parameters for key generation
 		const algorithm = getAlgorithmParameters(signAlg, "generatekey");
-		if("hash" in algorithm.algorithm)
+		if ("hash" in algorithm.algorithm)
 			algorithm.algorithm.hash.name = hashAlg;
 		//endregion
-		
+
 		return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 	});
 	//endregion
-	
+
 	//region Store new key in an interim variables
-	sequence = sequence.then(keyPair =>
-	{
+	sequence = sequence.then(keyPair => {
 		publicKey = keyPair.publicKey;
 		privateKey = keyPair.privateKey;
 	},
-	error => Promise.reject((`Error during key generation: ${error}`))
+		error => Promise.reject((`Error during key generation: ${error}`))
 	);
 	//endregion
-	
+
 	//region Exporting public key into "subjectPublicKeyInfo" value of PKCS#10
 	sequence = sequence.then(() => pkcs10.subjectPublicKeyInfo.importKey(publicKey));
 	//endregion
-	
+
 	//region SubjectKeyIdentifier
 	sequence = sequence.then(() => crypto.digest({ name: "SHA-1" }, pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex))
-		.then(result =>
-		{
+		.then(result => {
 			pkcs10.attributes.push(new Attribute({
 				type: "1.2.840.113549.1.9.14", // pkcs-9-at-extensionRequest
 				values: [(new Extensions({
@@ -128,28 +129,25 @@ function createPKCS10Internal()
 		}
 		);
 	//endregion
-	
+
 	//region Signing final PKCS#10 request
 	sequence = sequence.then(() => pkcs10.sign(privateKey, hashAlg), error => Promise.reject(`Error during exporting public key: ${error}`));
 	//endregion
-	
-	return sequence.then(() =>
-	{
+
+	return sequence.then(() => {
 		pkcs10Buffer = pkcs10.toSchema().toBER(false);
-		
+
 	}, error => Promise.reject(`Error signing PKCS#10: ${error}`));
 }
 //*********************************************************************************
-function createPKCS10()
-{
-	return Promise.resolve().then(() => createPKCS10Internal()).then(() =>
-	{
+function createPKCS10() {
+	return Promise.resolve().then(() => createPKCS10Internal()).then(() => {
 		let resultString = "-----BEGIN CERTIFICATE REQUEST-----\r\n";
 		resultString = `${resultString}${formatPEM(toBase64(arrayBufferToString(pkcs10Buffer)))}`;
 		resultString = `${resultString}\r\n-----END CERTIFICATE REQUEST-----\r\n`;
-		
+
 		document.getElementById("pem-text-block").value = resultString;
-		
+
 		parsePKCS10();
 	});
 }
@@ -158,81 +156,66 @@ function createPKCS10()
 //*********************************************************************************
 //region Parse existing PKCS#10
 //*********************************************************************************
-function parsePKCS10()
-{
+function parsePKCS10() {
 	//region Initial activities
 	// noinspection InnerHTMLJS
 	document.getElementById("pkcs10-subject").innerHTML = "";
 	// noinspection InnerHTMLJS
 	document.getElementById("pkcs10-exten").innerHTML = "";
-	
+
 	document.getElementById("pkcs10-data-block").style.display = "none";
 	document.getElementById("pkcs10-attributes").style.display = "none";
 	//endregion
-	
+
 	//region Decode existing PKCS#10
 	const stringPEM = document.getElementById("pem-text-block").value.replace(/(-----(BEGIN|END) CERTIFICATE REQUEST-----|\n)/g, "");
-	
+
 	const asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64((stringPEM))));
 	const pkcs10 = new CertificationRequest({ schema: asn1.result });
 	//endregion
-	
+
 	//region Parse and display information about "subject"
-	const typemap = {
-		"2.5.4.6": "C",
-		"2.5.4.11": "OU",
-		"2.5.4.10": "O",
-		"2.5.4.3": "CN",
-		"2.5.4.7": "L",
-		"2.5.4.8": "ST",
-		"2.5.4.12": "T",
-		"2.5.4.42": "GN",
-		"2.5.4.43": "I",
-		"2.5.4.4": "SN",
-		"1.2.840.113549.1.9.1": "E-mail"
-	};
-	
-	for(let i = 0; i < pkcs10.subject.typesAndValues.length; i++)
-	{
-		let typeval = typemap[pkcs10.subject.typesAndValues[i].type];
-		if(typeof typeval === "undefined")
-			typeval = pkcs10.subject.typesAndValues[i].type;
-		
-		const subjval = pkcs10.subject.typesAndValues[i].value.valueBlock.value;
-		const ulrow = `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
-		
-		// noinspection InnerHTMLJS
-		document.getElementById("pkcs10-subject").innerHTML = document.getElementById("pkcs10-subject").innerHTML + ulrow;
-		if(typeval === "CN")
-		{
+
+	for (const rdn of pkcs10.subject) {
+		for (let i = 0; i < rdn.typesAndValues.length; i++) {
+			let typeval = typemap[rdn.typesAndValues[i].type];
+			if (typeof typeval === "undefined")
+				typeval = rdn.typesAndValues[i].type;
+
+			const subjval = rdn.typesAndValues[i].value.valueBlock.value;
+			const ulrow = `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
+
 			// noinspection InnerHTMLJS
-			document.getElementById("pkcs10-subject-cn").innerHTML = subjval;
+			document.getElementById("pkcs10-subject").innerHTML = document.getElementById("pkcs10-subject").innerHTML + ulrow;
+			if (typeval === "CN") {
+				// noinspection InnerHTMLJS
+				document.getElementById("pkcs10-subject-cn").innerHTML = subjval;
+			}
 		}
 	}
 	//endregion
-	
+
 	//region Put information about public key size
 	let publicKeySize = "< unknown >";
-	
-	if(pkcs10.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1))
-	{
+
+	if (pkcs10.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1)) {
 		const asn1PublicKey = asn1js.fromBER(pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
 		const rsaPublicKeySimple = new RSAPublicKey({ schema: asn1PublicKey.result });
 		const modulusView = new Uint8Array(rsaPublicKeySimple.modulus.valueBlock.valueHex);
 		let modulusBitLength = 0;
-		
-		if(modulusView[0] === 0x00)
+
+		if (modulusView[0] === 0x00)
 			modulusBitLength = (rsaPublicKeySimple.modulus.valueBlock.valueHex.byteLength - 1) * 8;
 		else
 			modulusBitLength = rsaPublicKeySimple.modulus.valueBlock.valueHex.byteLength * 8;
-		
+
 		publicKeySize = modulusBitLength.toString();
 	}
-	
+
 	// noinspection InnerHTMLJS
 	document.getElementById("keysize").innerHTML = publicKeySize;
 	//endregion
-	
+
 	//region Put information about signature algorithm
 	const algomap = {
 		"1.2.840.113549.1.1.2": "MD2 with RSA",
@@ -250,27 +233,24 @@ function parsePKCS10()
 		"1.2.840.113549.1.1.13": "SHA512 with RSA"
 	};
 	let signatureAlgorithm = algomap[pkcs10.signatureAlgorithm.algorithmId];
-	if(typeof signatureAlgorithm === "undefined")
+	if (typeof signatureAlgorithm === "undefined")
 		signatureAlgorithm = pkcs10.signatureAlgorithm.algorithmId;
 	else
 		signatureAlgorithm = `${signatureAlgorithm} (${pkcs10.signatureAlgorithm.algorithmId})`;
-	
+
 	// noinspection InnerHTMLJS
 	document.getElementById("sig-algo").innerHTML = signatureAlgorithm;
 	//endregion
-	
+
 	//region Put information about PKCS#10 attributes
-	if("attributes" in pkcs10)
-	{
-		for(let i = 0; i < pkcs10.attributes.length; i++)
-		{
+	if ("attributes" in pkcs10) {
+		for (let i = 0; i < pkcs10.attributes.length; i++) {
 			const typeval = pkcs10.attributes[i].type;
 			let subjval = "";
-			
-			for(let j = 0; j < pkcs10.attributes[i].values.length; j++)
-			{
+
+			for (let j = 0; j < pkcs10.attributes[i].values.length; j++) {
 				// noinspection OverlyComplexBooleanExpressionJS
-				if((pkcs10.attributes[i].values[j] instanceof asn1js.Utf8String) ||
+				if ((pkcs10.attributes[i].values[j] instanceof asn1js.Utf8String) ||
 					(pkcs10.attributes[i].values[j] instanceof asn1js.BmpString) ||
 					(pkcs10.attributes[i].values[j] instanceof asn1js.UniversalString) ||
 					(pkcs10.attributes[i].values[j] instanceof asn1js.NumericString) ||
@@ -281,23 +261,22 @@ function parsePKCS10()
 					(pkcs10.attributes[i].values[j] instanceof asn1js.GraphicString) ||
 					(pkcs10.attributes[i].values[j] instanceof asn1js.VisibleString) ||
 					(pkcs10.attributes[i].values[j] instanceof asn1js.GeneralString) ||
-					(pkcs10.attributes[i].values[j] instanceof asn1js.CharacterString))
-				{
+					(pkcs10.attributes[i].values[j] instanceof asn1js.CharacterString)) {
 					subjval = subjval + ((subjval.length === 0) ? "" : ";") + pkcs10.attributes[i].values[j].valueBlock.value;
 				}
 				else
 					subjval = subjval + ((subjval.length === 0) ? "" : ";") + pkcs10.attributes[i].values[j].constructor.blockName();
 			}
-			
+
 			const ulrow = `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
 			// noinspection InnerHTMLJS
 			document.getElementById("pkcs10-exten").innerHTML = document.getElementById("pkcs10-exten").innerHTML + ulrow;
 		}
-		
+
 		document.getElementById("pkcs10-attributes").style.display = "block";
 	}
 	//endregion
-	
+
 	document.getElementById("pkcs10-data-block").style.display = "block";
 }
 //*********************************************************************************
@@ -305,39 +284,32 @@ function parsePKCS10()
 //*********************************************************************************
 //region Verify existing PKCS#10
 //*********************************************************************************
-function verifyPKCS10Internal()
-{
+function verifyPKCS10Internal() {
 	//region Decode existing PKCS#10
 	const asn1 = asn1js.fromBER(pkcs10Buffer);
 	const pkcs10 = new CertificationRequest({ schema: asn1.result });
 	//endregion
-	
+
 	//region Verify PKCS#10
 	return pkcs10.verify();
 	//endregion
 }
 //*********************************************************************************
-function verifyPKCS10()
-{
-	return Promise.resolve().then(() =>
-	{
+function verifyPKCS10() {
+	return Promise.resolve().then(() => {
 		pkcs10Buffer = stringToArrayBuffer(fromBase64(document.getElementById("pem-text-block").value.replace(/(-----(BEGIN|END) CERTIFICATE REQUEST-----|\n)/g, "")));
-	}).then(() => verifyPKCS10Internal()).then(result =>
-	{
+	}).then(() => verifyPKCS10Internal()).then(result => {
 		alert(`Verification passed: ${result}`);
-	}, error =>
-	{
+	}, error => {
 		alert(`Error during verification: ${error}`);
 	});
 }
 //*********************************************************************************
 //endregion
 //*********************************************************************************
-function handleHashAlgOnChange()
-{
+function handleHashAlgOnChange() {
 	const hashOption = document.getElementById("hashAlg").value;
-	switch(hashOption)
-	{
+	switch (hashOption) {
 		case "alg_SHA1":
 			hashAlg = "sha-1";
 			break;
@@ -354,11 +326,9 @@ function handleHashAlgOnChange()
 	}
 }
 //*********************************************************************************
-function handleSignAlgOnChange()
-{
+function handleSignAlgOnChange() {
 	const signOption = document.getElementById("signAlg").value;
-	switch(signOption)
-	{
+	switch (signOption) {
 		case "alg_RSA15":
 			signAlg = "RSASSA-PKCS1-V1_5";
 			break;
@@ -372,10 +342,9 @@ function handleSignAlgOnChange()
 	}
 }
 //*********************************************************************************
-context("Hack for Rollup.js", () =>
-{
+context("Hack for Rollup.js", () => {
 	return;
-	
+
 	// noinspection UnreachableCodeJS
 	createPKCS10();
 	parsePKCS10();
@@ -385,50 +354,44 @@ context("Hack for Rollup.js", () =>
 	setEngine();
 });
 //*********************************************************************************
-context("PKCS#10 Complex Example", () =>
-{
+context("PKCS#10 Complex Example", () => {
 	//region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
-	
+
 	const algorithmsMap = new Map([
 		["SHA-1 + RSASSA-PKCS1-V1_5", "1.2.840.113549.1.1.5"],
 		["SHA-256 + RSASSA-PKCS1-V1_5", "1.2.840.113549.1.1.11"],
 		["SHA-384 + RSASSA-PKCS1-V1_5", "1.2.840.113549.1.1.12"],
 		["SHA-512 + RSASSA-PKCS1-V1_5", "1.2.840.113549.1.1.13"],
-		
+
 		["SHA-1 + ECDSA", "1.2.840.10045.4.1"],
 		["SHA-256 + ECDSA", "1.2.840.10045.4.3.2"],
 		["SHA-384 + ECDSA", "1.2.840.10045.4.3.3"],
 		["SHA-512 + ECDSA", "1.2.840.10045.4.3.4"],
-		
+
 		["SHA-1 + RSA-PSS", "1.2.840.113549.1.1.10"],
 		["SHA-256 + RSA-PSS", "1.2.840.113549.1.1.10"],
 		["SHA-384 + RSA-PSS", "1.2.840.113549.1.1.10"],
 		["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"]
 	]);
 	//endregion
-	
-	signAlgs.forEach(_signAlg =>
-	{
-		hashAlgs.forEach(_hashAlg =>
-		{
+
+	signAlgs.forEach(_signAlg => {
+		hashAlgs.forEach(_hashAlg => {
 			const testName = `${_hashAlg} + ${_signAlg}`;
-			
-			it(testName, () =>
-			{
+
+			it(testName, () => {
 				hashAlg = _hashAlg;
 				signAlg = _signAlg;
-				
-				return createPKCS10Internal().then(() =>
-				{
+
+				return createPKCS10Internal().then(() => {
 					const asn1 = asn1js.fromBER(pkcs10Buffer);
 					const pkcs10 = new CertificationRequest({ schema: asn1.result });
-					
+
 					assert.equal(pkcs10.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);
-					
-					return verifyPKCS10Internal().then(result =>
-					{
+
+					return verifyPKCS10Internal().then(result => {
 						assert.equal(result, true, "PKCS#10 must be verified sucessfully");
 					});
 				});

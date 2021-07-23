@@ -38,7 +38,7 @@ export default class CertificateSet
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "certificates":
 				return [];
@@ -156,7 +156,7 @@ export default class CertificateSet
 			});
 			//endregion
 
-			switch(initialTagNumber)
+			switch (initialTagNumber)
 			{
 				case 1:
 					return new AttributeCertificateV1({ schema: elementSequence });
@@ -183,7 +183,7 @@ export default class CertificateSet
 		return (new asn1js.Set({
 			value: Array.from(this.certificates, element =>
 			{
-				switch(true)
+				switch (true)
 				{
 					case (element instanceof Certificate):
 						return element.toSchema();

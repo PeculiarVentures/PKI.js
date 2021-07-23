@@ -57,7 +57,7 @@ export class ObjectDigestInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "digestedObjectType":
 				return new asn1js.Enumerated();
@@ -254,7 +254,7 @@ export class V2Form
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "issuerName":
 				return new GeneralNames();
@@ -488,7 +488,7 @@ export class Holder
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "baseCertificateID":
 				return new IssuerSerial();
@@ -769,7 +769,7 @@ export class AttributeCertificateInfoV2
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 1;
@@ -929,7 +929,7 @@ export class AttributeCertificateInfoV2
 		this.version = asn1.result.version.valueBlock.valueDec;
 		this.holder = new Holder({ schema: asn1.result.holder });
 		
-		switch(asn1.result.issuer.idBlock.tagClass)
+		switch (asn1.result.issuer.idBlock.tagClass)
 		{
 			case 3: // V2Form
 				this.issuer = new V2Form({
@@ -1061,7 +1061,7 @@ export default class AttributeCertificateV2
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "acinfo":
 				return new AttributeCertificateInfoV2();

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import DistinguishedName from "./DistinguishedName.js";
 import SingleResponse from "./SingleResponse.js";
 import Extension from "./Extension.js";
 import Extensions from "./Extensions.js";
@@ -60,7 +60,7 @@ export default class ResponseData
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "tbs":
 				return new ArrayBuffer(0);
@@ -83,7 +83,7 @@ export default class ResponseData
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "tbs":
 				return (memberValue.byteLength === 0);
@@ -148,7 +148,7 @@ export default class ResponseData
 								tagClass: 3, // CONTEXT-SPECIFIC
 								tagNumber: 1 // [1]
 							},
-							value: [RelativeDistinguishedNames.schema(names.ResponseDataByName || {
+							value: [DistinguishedName.schema(names.ResponseDataByName || {
 								names: {
 									blockName: "ResponseData.byName"
 								}
@@ -223,7 +223,7 @@ export default class ResponseData
 			this.version = asn1.result["ResponseData.version"].valueBlock.valueDec;
 
 		if(asn1.result["ResponseData.responderID"].idBlock.tagNumber === 1)
-			this.responderID = new RelativeDistinguishedNames({ schema: asn1.result["ResponseData.responderID"].valueBlock.value[0] });
+			this.responderID = new DistinguishedName({ schema: asn1.result["ResponseData.responderID"].valueBlock.value[0] });
 		else
 			this.responderID = asn1.result["ResponseData.responderID"].valueBlock.value[0]; // OCTETSTRING
 
@@ -269,7 +269,7 @@ export default class ResponseData
 				}));
 			}
 			
-			if(this.responderID instanceof RelativeDistinguishedNames)
+			if(this.responderID instanceof DistinguishedName)
 			{
 				outputArray.push(new asn1js.Constructed({
 					idBlock: {

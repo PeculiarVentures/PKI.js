@@ -39,7 +39,7 @@ export default class SecretBag
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "secretTypeId":
 				return "";
@@ -57,7 +57,7 @@ export default class SecretBag
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "secretTypeId":
 				return (memberValue === "");

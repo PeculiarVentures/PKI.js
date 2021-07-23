@@ -35,7 +35,7 @@ export default class RecipientEncryptedKeys
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "encryptedKeys":
 				return [];
@@ -51,7 +51,7 @@ export default class RecipientEncryptedKeys
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "encryptedKeys":
 				return (memberValue.length === 0);

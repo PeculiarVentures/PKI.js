@@ -50,7 +50,7 @@ export default class RSASSAPSSParams
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "hashAlgorithm":
 				return new AlgorithmIdentifier({

@@ -54,7 +54,7 @@ export default class PBKDF2Params
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "salt":
 				return {};

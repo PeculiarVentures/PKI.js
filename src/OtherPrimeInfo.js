@@ -48,7 +48,7 @@ export default class OtherPrimeInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "prime":
 				return new asn1js.Integer();

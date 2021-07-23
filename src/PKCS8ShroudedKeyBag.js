@@ -50,7 +50,7 @@ export default class PKCS8ShroudedKeyBag
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "encryptionAlgorithm":
 				return (new AlgorithmIdentifier());
@@ -70,7 +70,7 @@ export default class PKCS8ShroudedKeyBag
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "encryptionAlgorithm":
 				return ((AlgorithmIdentifier.compareWithDefault("algorithmId", memberValue.algorithmId)) &&

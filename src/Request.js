@@ -43,7 +43,7 @@ export default class Request
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "reqCert":
 				return new CertID();
@@ -61,7 +61,7 @@ export default class Request
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "reqCert":
 				return (memberValue.isEqual(Request.defaultValues(memberName)));

@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
 import GeneralName from "./GeneralName.js";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames.js";
+import DistinguishedName from "./DistinguishedName.js";
 //**************************************************************************************
 /**
  * Class from RFC5280
@@ -19,7 +19,7 @@ export default class IssuingDistributionPoint
 		//region Internal properties of the object
 		if("distributionPoint" in parameters)
 			/**
-			 * @type {Array.<GeneralName>|RelativeDistinguishedNames}
+			 * @type {Array.<GeneralName>|DistinguishedName}
 			 * @desc distributionPoint
 			 */
 			this.distributionPoint = getParametersValue(parameters, "distributionPoint", IssuingDistributionPoint.defaultValues("distributionPoint"));
@@ -68,7 +68,7 @@ export default class IssuingDistributionPoint
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "distributionPoint":
 				return [];
@@ -161,7 +161,7 @@ export default class IssuingDistributionPoint
 										tagClass: 3, // CONTEXT-SPECIFIC
 										tagNumber: 1 // [1]
 									},
-									value: RelativeDistinguishedNames.schema().valueBlock.value
+									value: DistinguishedName.schema().valueBlock.value
 								})
 							]
 						})
@@ -252,14 +252,14 @@ export default class IssuingDistributionPoint
 		//region Get internal properties from parsed schema
 		if("distributionPoint" in asn1.result)
 		{
-			switch(true)
+			switch (true)
 			{
 				case (asn1.result.distributionPoint.idBlock.tagNumber === 0): // GENERAL_NAMES variant
 					this.distributionPoint = Array.from(asn1.result.distributionPointNames, element => new GeneralName({ schema: element }));
 					break;
 				case (asn1.result.distributionPoint.idBlock.tagNumber === 1): // RDN variant
 					{
-						this.distributionPoint = new RelativeDistinguishedNames({
+						this.distributionPoint = new DistinguishedName({
 							schema: new asn1js.Sequence({
 								value: asn1.result.distributionPoint.valueBlock.value
 							})

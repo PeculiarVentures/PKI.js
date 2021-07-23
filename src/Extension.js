@@ -72,7 +72,7 @@ export default class Extension
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "extnID":
 				return "";
@@ -167,7 +167,7 @@ export default class Extension
 		if(asn1.offset === (-1))
 			return;
 
-		switch(this.extnID)
+		switch (this.extnID)
 		{
 			case "2.5.29.9": // SubjectDirectoryAttributes
 				try

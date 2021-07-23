@@ -40,7 +40,7 @@ export default class RecipientEncryptedKey
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "rid":
 				return new KeyAgreeRecipientIdentifier();
@@ -58,7 +58,7 @@ export default class RecipientEncryptedKey
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "rid":
 				return ((memberValue.variant === (-1)) && (("value" in memberValue) === false));

@@ -39,7 +39,7 @@ export default class OtherRevocationInfoFormat
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "otherRevInfoFormat":
 				return "";

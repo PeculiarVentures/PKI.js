@@ -35,7 +35,7 @@ export default class SafeContents
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "safeBags":
 				return [];
@@ -51,7 +51,7 @@ export default class SafeContents
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "safeBags":
 				return (memberValue.length === 0);

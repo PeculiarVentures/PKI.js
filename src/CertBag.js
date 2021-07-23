@@ -48,7 +48,7 @@ export default class CertBag
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "certId":
 				return "";
@@ -68,7 +68,7 @@ export default class CertBag
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "certId":
 				return (memberValue === "");
@@ -152,7 +152,7 @@ export default class CertBag
 		this.certId = asn1.result.certId.valueBlock.toString();
 		this.certValue = asn1.result.certValue;
 		
-		switch(this.certId)
+		switch (this.certId)
 		{
 			case "1.2.840.113549.1.9.22.1": // x509Certificate
 				{

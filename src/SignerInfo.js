@@ -72,7 +72,7 @@ export default class SignerInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 0;
@@ -100,7 +100,7 @@ export default class SignerInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return (SignerInfo.defaultValues("version") === memberValue);

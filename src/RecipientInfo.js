@@ -46,7 +46,7 @@ export default class RecipientInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "variant":
 				return (-1);
@@ -64,7 +64,7 @@ export default class RecipientInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "variant":
 				return (memberValue === RecipientInfo.defaultValues(memberName));
@@ -185,7 +185,7 @@ export default class RecipientInfo
 			});
 			//endregion
 
-			switch(asn1.result.blockName.idBlock.tagNumber)
+			switch (asn1.result.blockName.idBlock.tagNumber)
 			{
 				case 1:
 					this.variant = 2;
@@ -219,7 +219,7 @@ export default class RecipientInfo
 		//region Construct and return new ASN.1 schema for this object
 		const _schema = this.value.toSchema();
 
-		switch(this.variant)
+		switch (this.variant)
 		{
 			case 1:
 				return _schema;

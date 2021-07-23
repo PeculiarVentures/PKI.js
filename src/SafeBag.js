@@ -53,7 +53,7 @@ export default class SafeBag
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "bagId":
 				return "";
@@ -73,7 +73,7 @@ export default class SafeBag
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "bagId":
 				return (memberValue === "");
@@ -169,7 +169,7 @@ export default class SafeBag
 		//region Get internal properties from parsed schema
 		this.bagId = asn1.result.bagId.valueBlock.toString();
 		
-		switch(this.bagId)
+		switch (this.bagId)
 		{
 			case "1.2.840.113549.1.12.10.1.1": // keyBag
 				this.bagValue = new PrivateKeyInfo({ schema: asn1.result.bagValue });

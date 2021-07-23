@@ -49,7 +49,7 @@ export default class RecipientKeyIdentifier
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "subjectKeyIdentifier":
 				return new asn1js.OctetString();
@@ -69,7 +69,7 @@ export default class RecipientKeyIdentifier
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "subjectKeyIdentifier":
 				return (memberValue.isEqual(RecipientKeyIdentifier.defaultValues("subjectKeyIdentifier")));

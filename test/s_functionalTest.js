@@ -5,10 +5,9 @@ import * as pkijs from "../src/index.js";
 const { Crypto } = require("@peculiar/webcrypto");
 const webcrypto = new Crypto();
 
-const assert = require("assert");
 pkijs.setEngine("newEngine", webcrypto, new pkijs.CryptoEngine({ name: "", crypto: webcrypto, subtle: webcrypto.subtle }));
 //*********************************************************************************
-context("PKIjs functional testing", () =>
+context("PKIjs functional testing", () => 
 {
 	//region Initial variables
 	const results = {};
@@ -17,7 +16,7 @@ context("PKIjs functional testing", () =>
 	const fakeOID = "1.2.3.4.5";
 	//endregion
 
-	it("GeneralName", () =>
+	it("GeneralName", () => 
 	{
 		// results["GeneralName0"] = new pkijs.GeneralName({
 		// 	schema: (new pkijs.GeneralName({
@@ -62,7 +61,7 @@ context("PKIjs functional testing", () =>
 		// });
 	});
 
-	it("AuthorityKeyIdentifier", () =>
+	it("AuthorityKeyIdentifier", () => 
 	{
 		results["AuthorityKeyIdentifier"] = new pkijs.AuthorityKeyIdentifier({
 			schema: (new pkijs.AuthorityKeyIdentifier({
@@ -77,7 +76,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("Accuracy", () =>
+	it("Accuracy", () => 
 	{
 		results["Accuracy"] = new pkijs.Accuracy({
 			schema: (new pkijs.Accuracy({
@@ -88,7 +87,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("AlgorithmIdentifier", () =>
+	it("AlgorithmIdentifier", () => 
 	{
 		results["AlgorithmIdentifier"] = new pkijs.AlgorithmIdentifier({
 			schema: (new pkijs.AlgorithmIdentifier({
@@ -98,7 +97,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("Attribute", () =>
+	it("Attribute", () => 
 	{
 		results["Attribute"] = new pkijs.Attribute({
 			schema: (new pkijs.Attribute({
@@ -110,7 +109,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("AccessDescription", () =>
+	it("AccessDescription", () => 
 	{
 		results["AccessDescription"] = new pkijs.AccessDescription({
 			schema: (new pkijs.AccessDescription({
@@ -120,7 +119,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("AltName", () =>
+	it("AltName", () => 
 	{
 		results["AltName"] = new pkijs.AltName({
 			schema: (new pkijs.AltName({
@@ -133,7 +132,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("Attribute", () =>
+	it("Attribute", () => 
 	{
 		results["Attribute"] = new pkijs.Attribute({
 			schema: (new pkijs.Attribute({
@@ -146,7 +145,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("BasicConstraints", () =>
+	it("BasicConstraints", () => 
 	{
 		results["BasicConstraints"] = new pkijs.BasicConstraints({
 			schema: (new pkijs.BasicConstraints({
@@ -156,7 +155,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("AttributeTypeAndValue", () =>
+	it("AttributeTypeAndValue", () => 
 	{
 		results["AttributeTypeAndValue"] = new pkijs.AttributeTypeAndValue({
 			schema: (new pkijs.AttributeTypeAndValue({
@@ -166,7 +165,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("CertID", () =>
+	it("CertID", () => 
 	{
 		results["CertID"] = new pkijs.CertID({
 			schema: (new pkijs.CertID({
@@ -178,7 +177,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("PolicyQualifierInfo", () =>
+	it("PolicyQualifierInfo", () => 
 	{
 		results["PolicyQualifierInfo"] = new pkijs.PolicyQualifierInfo({
 			schema: (new pkijs.PolicyQualifierInfo({
@@ -188,7 +187,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("PolicyInformation", () =>
+	it("PolicyInformation", () => 
 	{
 		results["PolicyInformation"] = new pkijs.PolicyInformation({
 			schema: (new pkijs.PolicyInformation({
@@ -202,7 +201,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("CertificatePolicies", () =>
+	it("CertificatePolicies", () => 
 	{
 		results["CertificatePolicies"] = new pkijs.CertificatePolicies({
 			schema: (new pkijs.CertificatePolicies({
@@ -215,7 +214,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("ContentInfo", () =>
+	it("ContentInfo", () => 
 	{
 		results["ContentInfo"] = new pkijs.ContentInfo({
 			schema: (new pkijs.ContentInfo({
@@ -225,7 +224,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("DigestInfo", () =>
+	it("DigestInfo", () => 
 	{
 		results["DigestInfo"] = new pkijs.DigestInfo({
 			schema: (new pkijs.DigestInfo({
@@ -235,7 +234,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("RelativeDistinguishedNames", () =>
+	it("RelativeDistinguishedNames", () => 
 	{
 		results["RelativeDistinguishedNames"] = new pkijs.RelativeDistinguishedNames({
 			schema: (new pkijs.RelativeDistinguishedNames({
@@ -249,7 +248,21 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("DistributionPoint", () =>
+	it("DistinguishedName", () => 
+	{
+		results["DistinguishedName"] = new pkijs.DistinguishedName({
+			schema: (new pkijs.DistinguishedName({
+				relativeDistinguishedNames: [
+					results["RelativeDistinguishedNames"],
+					results["RelativeDistinguishedNames"],
+					results["RelativeDistinguishedNames"]
+				],
+				//valueBeforeDecode - should be missing because of "toSchema" internal functionality
+			})).toSchema()
+		});
+	});
+
+	it("DistributionPoint", () => 
 	{
 		results["DistributionPoint"] = new pkijs.DistributionPoint({
 			schema: (new pkijs.DistributionPoint({
@@ -268,7 +281,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("ECCCMSSharedInfo", () =>
+	it("ECCCMSSharedInfo", () => 
 	{
 		results["ECCCMSSharedInfo"] = new pkijs.ECCCMSSharedInfo({
 			schema: (new pkijs.ECCCMSSharedInfo({
@@ -279,7 +292,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("ECPublicKey", () =>
+	it("ECPublicKey", () => 
 	{
 		results["ECPublicKey"] = new pkijs.ECPublicKey({
 			schema: (new pkijs.ECPublicKey({
@@ -291,7 +304,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("ECPrivateKey", () =>
+	it("ECPrivateKey", () => 
 	{
 		results["ECPrivateKey"] = new pkijs.ECPrivateKey({
 			schema: (new pkijs.ECPrivateKey({
@@ -303,7 +316,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("EncapsulatedContentInfo", () =>
+	it("EncapsulatedContentInfo", () => 
 	{
 		results["EncapsulatedContentInfo"] = new pkijs.EncapsulatedContentInfo({
 			schema: (new pkijs.EncapsulatedContentInfo({
@@ -313,7 +326,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("EncryptedContentInfo", () =>
+	it("EncryptedContentInfo", () => 
 	{
 		results["EncryptedContentInfo"] = new pkijs.EncryptedContentInfo({
 			schema: (new pkijs.EncryptedContentInfo({
@@ -324,7 +337,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("EncryptedData", () =>
+	it("EncryptedData", () => 
 	{
 		results["EncryptedData"] = new pkijs.EncryptedData({
 			schema: (new pkijs.EncryptedData({
@@ -339,7 +352,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("Extension", () =>
+	it("Extension", () => 
 	{
 		results["Extension"] = new pkijs.Extension({
 			schema: (new pkijs.Extension({
@@ -350,7 +363,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("Extensions", () =>
+	it("Extensions", () => 
 	{
 		results["Extensions"] = new pkijs.Extensions({
 			schema: (new pkijs.Extensions({
@@ -363,7 +376,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("ExtKeyUsage", () =>
+	it("ExtKeyUsage", () => 
 	{
 		results["ExtKeyUsage"] = new pkijs.ExtKeyUsage({
 			schema: (new pkijs.ExtKeyUsage({
@@ -376,7 +389,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("GeneralNames", () =>
+	it("GeneralNames", () => 
 	{
 		results["GeneralNames"] = new pkijs.GeneralNames({
 			schema: (new pkijs.GeneralNames({
@@ -389,7 +402,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("GeneralSubtree", () =>
+	it("GeneralSubtree", () => 
 	{
 		results["GeneralSubtree"] = new pkijs.GeneralSubtree({
 			schema: (new pkijs.GeneralSubtree({
@@ -400,7 +413,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("InfoAccess", () =>
+	it("InfoAccess", () => 
 	{
 		results["InfoAccess"] = new pkijs.InfoAccess({
 			schema: (new pkijs.InfoAccess({
@@ -413,17 +426,17 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("IssuerAndSerialNumber", () =>
+	it("IssuerAndSerialNumber", () => 
 	{
 		results["IssuerAndSerialNumber"] = new pkijs.IssuerAndSerialNumber({
 			schema: (new pkijs.IssuerAndSerialNumber({
-				issuer: results["RelativeDistinguishedNames"],
+				issuer: results["DistinguishedName"],
 				serialNumber: new asn1js.Integer({ value: 10 })
 			})).toSchema()
 		});
 	});
 
-	it("IssuingDistributionPoint", () =>
+	it("IssuingDistributionPoint", () => 
 	{
 		results["IssuingDistributionPoint1"] = new pkijs.IssuingDistributionPoint({
 			schema: (new pkijs.IssuingDistributionPoint({
@@ -442,7 +455,7 @@ context("PKIjs functional testing", () =>
 
 		results["IssuingDistributionPoint2"] = new pkijs.IssuingDistributionPoint({
 			schema: (new pkijs.IssuingDistributionPoint({
-				distributionPoint: results["RelativeDistinguishedNames"],
+				distributionPoint: results["DistinguishedName"],
 				onlyContainsUserCerts: true,
 				onlyContainsCACerts: false,
 				onlySomeReasons: 10,
@@ -452,7 +465,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("OtherKeyAttribute", () =>
+	it("OtherKeyAttribute", () => 
 	{
 		results["OtherKeyAttribute"] = new pkijs.OtherKeyAttribute({
 			schema: (new pkijs.OtherKeyAttribute({
@@ -462,7 +475,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("KEKIdentifier", () =>
+	it("KEKIdentifier", () => 
 	{
 		results["KEKIdentifier"] = new pkijs.KEKIdentifier({
 			schema: (new pkijs.KEKIdentifier({
@@ -473,7 +486,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("KEKRecipientInfo", () =>
+	it("KEKRecipientInfo", () => 
 	{
 		results["KEKRecipientInfo"] = new pkijs.KEKRecipientInfo({
 			schema: (new pkijs.KEKRecipientInfo({
@@ -486,7 +499,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("RecipientKeyIdentifier", () =>
+	it("RecipientKeyIdentifier", () => 
 	{
 		results["RecipientKeyIdentifier"] = new pkijs.RecipientKeyIdentifier({
 			schema: (new pkijs.RecipientKeyIdentifier({
@@ -497,7 +510,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("KeyAgreeRecipientIdentifier", () =>
+	it("KeyAgreeRecipientIdentifier", () => 
 	{
 		results["KeyAgreeRecipientIdentifier1"] = new pkijs.KeyAgreeRecipientIdentifier({
 			schema: (new pkijs.KeyAgreeRecipientIdentifier({
@@ -514,7 +527,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("MacData", () =>
+	it("MacData", () => 
 	{
 		results["MacData"] = new pkijs.MacData({
 			schema: (new pkijs.MacData({
@@ -525,7 +538,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("MessageImprint", () =>
+	it("MessageImprint", () => 
 	{
 		results["MessageImprint"] = new pkijs.MessageImprint({
 			schema: (new pkijs.MessageImprint({
@@ -535,7 +548,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("NameConstraints", () =>
+	it("NameConstraints", () => 
 	{
 		results["NameConstraints"] = new pkijs.NameConstraints({
 			schema: (new pkijs.NameConstraints({
@@ -553,7 +566,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("OriginatorPublicKey", () =>
+	it("OriginatorPublicKey", () => 
 	{
 		results["OriginatorPublicKey"] = new pkijs.OriginatorPublicKey({
 			schema: (new pkijs.OriginatorPublicKey({
@@ -563,7 +576,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("OriginatorIdentifierOrKey", () =>
+	it("OriginatorIdentifierOrKey", () => 
 	{
 		results["OriginatorIdentifierOrKey1"] = new pkijs.OriginatorIdentifierOrKey({
 			schema: (new pkijs.OriginatorIdentifierOrKey({
@@ -587,7 +600,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("OtherPrimeInfo", () =>
+	it("OtherPrimeInfo", () => 
 	{
 		results["OtherPrimeInfo"] = new pkijs.OtherPrimeInfo({
 			schema: (new pkijs.OtherPrimeInfo({
@@ -598,7 +611,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("OtherRecipientInfo", () =>
+	it("OtherRecipientInfo", () => 
 	{
 		results["OtherRecipientInfo"] = new pkijs.OtherRecipientInfo({
 			schema: (new pkijs.OtherRecipientInfo({
@@ -608,7 +621,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("OtherRevocationInfoFormat", () =>
+	it("OtherRevocationInfoFormat", () => 
 	{
 		results["OtherRevocationInfoFormat"] = new pkijs.OtherRevocationInfoFormat({
 			schema: (new pkijs.OtherRevocationInfoFormat({
@@ -618,7 +631,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("PasswordRecipientinfo", () =>
+	it("PasswordRecipientinfo", () => 
 	{
 		results["PasswordRecipientinfo"] = new pkijs.PasswordRecipientinfo({
 			schema: (new pkijs.PasswordRecipientinfo({
@@ -631,7 +644,7 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-	it("PBES2Params", () =>
+	it("PBES2Params", () => 
 	{
 		results["PBES2Params"] = new pkijs.PBES2Params({
 			schema: (new pkijs.PBES2Params({
@@ -641,30 +654,30 @@ context("PKIjs functional testing", () =>
 		});
 	});
 
-/*
-	it("PBKDF2Params", () =>
-	{
-		results["PBKDF2Params1"] = new pkijs.PBKDF2Params({
-			schema: (new pkijs.PBKDF2Params({
-				salt: new asn1js.OctetString({ valueHex: fakeHex }),
-				iterationCount: 10,
-				keyLength: 10,
-				prf: results["AlgorithmIdentifier"]
-			})).toSchema()
+	/*
+		it("PBKDF2Params", () =>
+		{
+			results["PBKDF2Params1"] = new pkijs.PBKDF2Params({
+				schema: (new pkijs.PBKDF2Params({
+					salt: new asn1js.OctetString({ valueHex: fakeHex }),
+					iterationCount: 10
+					keyLength: 10,
+					prf: results["AlgorithmIdentifier"]
+				})).toSchema()
+			});
+	
+			results["PBKDF2Params2"] = new pkijs.PBKDF2Params({
+				schema: (new pkijs.PBKDF2Params({
+					salt: results["AlgorithmIdentifier"],
+					iterationCount: 10,
+					keyLength: 10,
+					prf: results["AlgorithmIdentifier"]
+				})).toSchema()
+			});
 		});
+	*/
 
-		results["PBKDF2Params2"] = new pkijs.PBKDF2Params({
-			schema: (new pkijs.PBKDF2Params({
-				salt: results["AlgorithmIdentifier"],
-				iterationCount: 10,
-				keyLength: 10,
-				prf: results["AlgorithmIdentifier"]
-			})).toSchema()
-		});
-	});
-*/
-
-	it("__template__", () =>
+	it("__template__", () => 
 	{
 		results["AuthorityKeyIdentifier"] = new pkijs.AuthorityKeyIdentifier({
 			schema: (new pkijs.AuthorityKeyIdentifier({

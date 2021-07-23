@@ -58,7 +58,7 @@ export default class KeyTransRecipientInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return (-1);
@@ -82,7 +82,7 @@ export default class KeyTransRecipientInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return (memberValue === KeyTransRecipientInfo.defaultValues("version"));

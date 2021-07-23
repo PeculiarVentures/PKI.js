@@ -40,7 +40,7 @@ export default class MessageImprint
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "hashAlgorithm":
 				return new AlgorithmIdentifier();
@@ -58,7 +58,7 @@ export default class MessageImprint
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "hashAlgorithm":
 				return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));

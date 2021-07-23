@@ -48,7 +48,7 @@ export default class PKIStatusInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "status":
 				return 2;
@@ -68,7 +68,7 @@ export default class PKIStatusInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "status":
 				return (memberValue === PKIStatusInfo.defaultValues(memberName));

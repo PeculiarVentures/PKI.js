@@ -34,7 +34,7 @@ export default class ExtKeyUsage
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "keyPurposes":
 				return [];

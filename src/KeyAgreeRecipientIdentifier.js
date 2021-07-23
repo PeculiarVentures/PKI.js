@@ -41,7 +41,7 @@ export default class KeyAgreeRecipientIdentifier
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "variant":
 				return (-1);
@@ -59,7 +59,7 @@ export default class KeyAgreeRecipientIdentifier
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "variant":
 				return (memberValue === (-1));
@@ -168,7 +168,7 @@ export default class KeyAgreeRecipientIdentifier
 	toSchema()
 	{
 		//region Construct and return new ASN.1 schema for this object
-		switch(this.variant)
+		switch (this.variant)
 		{
 			case 1:
 				return this.value.toSchema();

@@ -39,7 +39,7 @@ export default class ContentInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "contentType":
 				return "";
@@ -57,7 +57,7 @@ export default class ContentInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "contentType":
 				return (memberValue === "");

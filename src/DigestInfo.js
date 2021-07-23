@@ -40,7 +40,7 @@ export default class DigestInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "digestAlgorithm":
 				return new AlgorithmIdentifier();
@@ -58,7 +58,7 @@ export default class DigestInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "digestAlgorithm":
 				return ((AlgorithmIdentifier.compareWithDefault("algorithmId", memberValue.algorithmId)) &&

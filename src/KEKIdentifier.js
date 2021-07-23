@@ -48,7 +48,7 @@ export default class KEKIdentifier
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "keyIdentifier":
 				return new asn1js.OctetString();
@@ -68,7 +68,7 @@ export default class KEKIdentifier
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "keyIdentifier":
 				return (memberValue.isEqual(KEKIdentifier.defaultValues("keyIdentifier")));

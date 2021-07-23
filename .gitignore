@@ -6,3 +6,7 @@ build
 coverage
 .vs
 docs
+
+.vscode/
+examples/**/bundle.js
+test/**/*.js

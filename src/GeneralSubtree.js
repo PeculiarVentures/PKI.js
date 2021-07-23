@@ -48,7 +48,7 @@ export default class GeneralSubtree
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "base":
 				return new GeneralName();

@@ -58,7 +58,7 @@ export default class ECPrivateKey
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return 1;
@@ -80,7 +80,7 @@ export default class ECPrivateKey
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "version":
 				return (memberValue === ECPrivateKey.defaultValues(memberName));
@@ -257,7 +257,7 @@ export default class ECPrivateKey
 
 		let crvName = "";
 
-		switch(this.namedCurve)
+		switch (this.namedCurve)
 		{
 			case "1.2.840.10045.3.1.7": // P-256
 				crvName = "P-256";
@@ -297,7 +297,7 @@ export default class ECPrivateKey
 
 		if("crv" in json)
 		{
-			switch(json.crv.toUpperCase())
+			switch (json.crv.toUpperCase())
 			{
 				case "P-256":
 					this.namedCurve = "1.2.840.10045.3.1.7";

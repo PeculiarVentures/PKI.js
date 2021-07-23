@@ -39,7 +39,7 @@ export default class OtherRecipientInfo
 	 */
 	static defaultValues(memberName)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "oriType":
 				return "";
@@ -57,7 +57,7 @@ export default class OtherRecipientInfo
 	 */
 	static compareWithDefault(memberName, memberValue)
 	{
-		switch(memberName)
+		switch (memberName)
 		{
 			case "oriType":
 				return (memberValue === "");
