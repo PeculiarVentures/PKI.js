@@ -182,15 +182,28 @@ export default class SignerInfo
 									blockName: "SignerInfo.sid"
 								}
 							}),
-							new asn1js.Primitive({
-								optional: true,
-								name: (names.sid || "SignerInfo.sid"),
-								idBlock: {
-									tagClass: 3, // CONTEXT-SPECIFIC
-									tagNumber: 0 // [0]
-								},
-								value: [new asn1js.OctetString()]
-							})
+							new asn1js.Choice({
+								value: [
+									new asn1js.Constructed({
+										optional: true,
+										name: (names.sid || "SignerInfo.sid"),
+										idBlock: {
+											tagClass: 3, // CONTEXT-SPECIFIC
+											tagNumber: 0 // [0]
+										},
+										value: [new asn1js.OctetString()]
+									}),
+									new asn1js.Primitive({
+										optional: true,
+										name: (names.sid || "SignerInfo.sid"),
+										idBlock: {
+											tagClass: 3, // CONTEXT-SPECIFIC
+											tagNumber: 0 // [0]
+										},
+										value: [new asn1js.OctetString()]
+									}),
+								]
+							}),
 						]
 					}),
 					AlgorithmIdentifier.schema(names.digestAlgorithm || {
