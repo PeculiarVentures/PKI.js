@@ -493,23 +493,31 @@ export default class SignedData
 		}
 		else // Find by SubjectKeyIdentifier
 		{
-			sequence = sequence.then(() =>
-				Promise.all(Array.from(this.certificates.filter(certificate => (certificate instanceof Certificate)), certificate =>
-					crypto.digest({ name: "sha-1" }, new Uint8Array(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex)))
-				).then(results =>
-				{
-					for(const [index, certificate] of this.certificates.entries())
-					{
-						if((certificate instanceof Certificate) === false)
+			sequence = (async () => {
+				try {
+					const sid = this.signerInfos[signer].sid;
+					const keyId = sid.idBlock.isConstructed
+						? sid.valueBlock.value[0].valueBlock.valueHex // EXPLICIT OCTET STRING
+						: sid.valueBlock.valueHex; // IMPLICIT OCTET STRING
+
+					for (const certificate of this.certificates) {
+						if (!(certificate instanceof Certificate)) {
 							continue;
-						
-						if(isEqualBuffer(results[index], this.signerInfos[signer].sid.valueBlock.valueHex))
+						}
+					
+						const digest = await crypto.digest({ name: "sha-1" }, new Uint8Array(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
+						if(isEqualBuffer(digest, keyId))
 						{
 							signerCertificate = certificate;
-							return Promise.resolve();
+							break;
 						}
 					}
 					
+					if (!signerCertificate) {
+						throw new Error("Signing certificate not found");
+					}
+				}
+				catch (e) {
 					if(extendedMode)
 					{
 						return Promise.reject({
@@ -522,24 +530,9 @@ export default class SignedData
 						});
 					}
 					
-					return Promise.reject("Unable to find signer certificate");
-				}, () =>
-				{
-					if(extendedMode)
-					{
-						return Promise.reject({
-							date: checkDate,
-							code: 3,
-							message: "Unable to find signer certificate",
-							signatureVerified: null,
-							signerCertificate: null,
-							signerCertificateVerified: null
-						});
-					}
-					
-					return Promise.reject("Unable to find signer certificate");
-				})
-			);
+					throw "Unable to find signer certificate";
+				}
+			})();
 		}
 		//endregion
 		
