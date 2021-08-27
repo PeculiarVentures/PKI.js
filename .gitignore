@@ -5,4 +5,5 @@ build
 .nyc_output
 coverage
 .vs
+.vscode
 docs
