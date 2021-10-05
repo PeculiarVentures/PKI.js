@@ -53,6 +53,12 @@ export default class KeyAgreeRecipientInfo
 		 */
 		this.recipientCertificate = getParametersValue(parameters, "recipientCertificate", KeyAgreeRecipientInfo.defaultValues("recipientCertificate"));
 		//endregion
+		/**
+		 * @type {CryptoKey}
+		 * @desc recipientPublicKey
+		 */
+		this.recipientPublicKey = getParametersValue(parameters, "recipientPublicKey", KeyAgreeRecipientInfo.defaultValues("recipientPublicKey"));
+		//endregion
 
 		//region If input argument array contains "schema" for this object
 		if("schema" in parameters)
@@ -80,6 +86,8 @@ export default class KeyAgreeRecipientInfo
 				return new RecipientEncryptedKeys();
 			case "recipientCertificate":
 				return new Certificate();
+			case "recipientPublicKey":
+				return null;
 			default:
 				throw new Error(`Invalid member name for KeyAgreeRecipientInfo class: ${memberName}`);
 		}
@@ -106,6 +114,8 @@ export default class KeyAgreeRecipientInfo
 				return (memberValue.encryptedKeys.length === 0);
 			case "recipientCertificate":
 				return false; // For now leave it as is
+			case "recipientPublicKey":
+				return false;
 			default:
 				throw new Error(`Invalid member name for KeyAgreeRecipientInfo class: ${memberName}`);
 		}

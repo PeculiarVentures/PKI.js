@@ -9,6 +9,7 @@ import AlgorithmIdentifier from "./AlgorithmIdentifier.js";
 import RSAESOAEPParams from "./RSAESOAEPParams.js";
 import KeyTransRecipientInfo from "./KeyTransRecipientInfo.js";
 import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
+import RecipientKeyIdentifier from "./RecipientKeyIdentifier.js";
 import RecipientEncryptedKey from "./RecipientEncryptedKey.js";
 import KeyAgreeRecipientIdentifier from "./KeyAgreeRecipientIdentifier.js";
 import KeyAgreeRecipientInfo from "./KeyAgreeRecipientInfo.js";
@@ -20,6 +21,16 @@ import PasswordRecipientinfo from "./PasswordRecipientinfo.js";
 import ECCCMSSharedInfo from "./ECCCMSSharedInfo.js";
 import OriginatorIdentifierOrKey from "./OriginatorIdentifierOrKey.js";
 import OriginatorPublicKey from "./OriginatorPublicKey.js";
+//**************************************************************************************
+const defaultEncryptionParams = {
+	kdfAlgorithm: "SHA-512",
+	kekEncryptionLength: 256
+};
+const curveLengthByName = {
+	"P-256": 256,
+	"P-384": 384,
+	"P-521": 528
+};
 //**************************************************************************************
 /**
  * Class from RFC5652
@@ -329,10 +340,14 @@ export default class EnvelopedData
 	 */
 	addRecipientByCertificate(certificate, parameters, variant)
 	{
-		//region Initial variables 
-		const encryptionParameters = parameters || {};
-		//endregion 
-		
+		//region Initialize encryption parameters
+		const encryptionParameters = Object.assign(
+			{ useOAEP: true, oaepHashAlgorithm: "SHA-512" },
+			defaultEncryptionParams,
+			parameters || {}
+		);
+		//endregion
+
 		//region Check type of certificate
 		if(certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1))
 			variant = 1; // For the moment it is the only variant for RSA-based certificates
@@ -343,20 +358,6 @@ export default class EnvelopedData
 			else
 				throw new Error(`Unknown type of certificate's public key: ${certificate.subjectPublicKeyInfo.algorithm.algorithmId}`);
 		}
-		//endregion 
-		
-		//region Initialize encryption parameters 
-		if(("oaepHashAlgorithm" in encryptionParameters) === false)
-			encryptionParameters.oaepHashAlgorithm = "SHA-512";
-		
-		if(("kdfAlgorithm" in encryptionParameters) === false)
-			encryptionParameters.kdfAlgorithm = "SHA-512";
-		
-		if(("kekEncryptionLength" in encryptionParameters) === false)
-			encryptionParameters.kekEncryptionLength = 256;
-
-		if(("useOAEP" in encryptionParameters) === false)
-			encryptionParameters.useOAEP = true;
 		//endregion
 		
 		//region Add new "recipient" depends on "variant" and certificate type 
@@ -439,68 +440,18 @@ export default class EnvelopedData
 				break;
 			case 2: // Key agreement scheme
 				{
-					//region RecipientEncryptedKey
-					const encryptedKey = new RecipientEncryptedKey({
-						rid: new KeyAgreeRecipientIdentifier({
-							variant: 1,
-							value: new IssuerAndSerialNumber({
-								issuer: certificate.issuer,
-								serialNumber: certificate.serialNumber
-							})
+					const recipientIdentifier = new KeyAgreeRecipientIdentifier({
+						variant: 1,
+						value: new IssuerAndSerialNumber({
+							issuer: certificate.issuer,
+							serialNumber: certificate.serialNumber
 						})
-					// "encryptedKey" will be calculated in "encrypt" function
 					});
-					//endregion
-				
-					//region keyEncryptionAlgorithm
-					const aesKWoid = getOIDByAlgorithm({
-						name: "AES-KW",
-						length: encryptionParameters.kekEncryptionLength
-					});
-					if(aesKWoid === "")
-						throw new Error(`Unknown length for key encryption algorithm: ${encryptionParameters.kekEncryptionLength}`);
-				
-					const aesKW = new AlgorithmIdentifier({
-						algorithmId: aesKWoid,
-						algorithmParams: new asn1js.Null()
-					});
-					//endregion
-
-					//region KeyAgreeRecipientInfo
-					const ecdhOID = getOIDByAlgorithm({
-						name: "ECDH",
-						kdf: encryptionParameters.kdfAlgorithm
-					});
-					if(ecdhOID === "")
-						throw new Error(`Unknown KDF algorithm: ${encryptionParameters.kdfAlgorithm}`);
-				
-					// In fact there is no need in so long UKM, but RFC2631
-					// has requirement that "UserKeyMaterial" must be 512 bits long
-					const ukmBuffer = new ArrayBuffer(64);
-					const ukmView = new Uint8Array(ukmBuffer);
-					getRandomValues(ukmView); // Generate random values in 64 bytes long buffer
-				
-					const keyInfo = new KeyAgreeRecipientInfo({
-						version: 3,
-						// "originator" will be calculated in "encrypt" function because ephemeral key would be generated there
-						ukm: new asn1js.OctetString({ valueHex: ukmBuffer }),
-						keyEncryptionAlgorithm: new AlgorithmIdentifier({
-							algorithmId: ecdhOID,
-							algorithmParams: aesKW.toSchema()
-						}),
-						recipientEncryptedKeys: new RecipientEncryptedKeys({
-							encryptedKeys: [encryptedKey]
-						}),
-						recipientCertificate: certificate
-					});
-					//endregion
-
-					//region Final values for "CMS_ENVELOPED_DATA"
-					this.recipientInfos.push(new RecipientInfo({
-						variant: 2,
-						value: keyInfo
-					}));
-					//endregion
+					this._addKeyAgreeRecipientInfo(
+						recipientIdentifier,
+						encryptionParameters,
+						{recipientCertificate: certificate}
+					);
 				}
 				break;
 			default:
@@ -674,6 +625,97 @@ export default class EnvelopedData
 	}
 	//**********************************************************************************
 	/**
+	 * Add a "RecipientInfo" using a KeyAgreeRecipientInfo of type RecipientKeyIdentifier.
+	 * @param {CryptoKey} [key] Recipient's public key
+	 * @param {ArrayBuffer} [keyId] The id for the recipient's public key
+	 * @param {Object} [parameters] Additional parameters for "fine tuning" the encryption process
+	 */
+	addRecipientByKeyIdentifier(key, keyId, parameters)
+	{
+		//region Initialize encryption parameters
+		const encryptionParameters = Object.assign({}, defaultEncryptionParams, parameters || {});
+		//endregion
+
+		const recipientIdentifier = new KeyAgreeRecipientIdentifier({
+			variant: 2,
+			value: new RecipientKeyIdentifier({
+				subjectKeyIdentifier: new asn1js.OctetString({valueHex: keyId}),
+			})
+		});
+		this._addKeyAgreeRecipientInfo(
+			recipientIdentifier,
+			encryptionParameters,
+			{recipientPublicKey: key}
+		);
+	}
+	//**********************************************************************************
+	/**
+	 * Add a "RecipientInfo" using a KeyAgreeRecipientInfo of type RecipientKeyIdentifier.
+	 * @param {KeyAgreeRecipientIdentifier} [recipientIdentifier] Recipient identifier
+	 * @param {Object} [encryptionParameters] Additional parameters for "fine tuning" the encryption process
+	 * @param {Object} [extraRecipientInfoParams] Additional params for KeyAgreeRecipientInfo
+	 */
+	_addKeyAgreeRecipientInfo(recipientIdentifier, encryptionParameters, extraRecipientInfoParams)
+	{
+		//region RecipientEncryptedKey
+		const encryptedKey = new RecipientEncryptedKey({
+			rid: recipientIdentifier
+			// "encryptedKey" will be calculated in "encrypt" function
+		});
+		//endregion
+
+		//region keyEncryptionAlgorithm
+		const aesKWoid = getOIDByAlgorithm({
+			name: "AES-KW",
+			length: encryptionParameters.kekEncryptionLength
+		});
+		if (aesKWoid === "")
+			throw new Error(`Unknown length for key encryption algorithm: ${encryptionParameters.kekEncryptionLength}`);
+
+		const aesKW = new AlgorithmIdentifier({
+			algorithmId: aesKWoid,
+			algorithmParams: new asn1js.Null()
+		});
+		//endregion
+
+		//region KeyAgreeRecipientInfo
+		const ecdhOID = getOIDByAlgorithm({
+			name: "ECDH",
+			kdf: encryptionParameters.kdfAlgorithm
+		});
+		if (ecdhOID === "")
+			throw new Error(`Unknown KDF algorithm: ${encryptionParameters.kdfAlgorithm}`);
+
+		// In fact there is no need in so long UKM, but RFC2631
+		// has requirement that "UserKeyMaterial" must be 512 bits long
+		const ukmBuffer = new ArrayBuffer(64);
+		const ukmView = new Uint8Array(ukmBuffer);
+		getRandomValues(ukmView); // Generate random values in 64 bytes long buffer
+
+		const recipientInfoParams = {
+			version: 3,
+			// "originator" will be calculated in "encrypt" function because ephemeral key would be generated there
+			ukm: new asn1js.OctetString({valueHex: ukmBuffer}),
+			keyEncryptionAlgorithm: new AlgorithmIdentifier({
+				algorithmId: ecdhOID,
+				algorithmParams: aesKW.toSchema()
+			}),
+			recipientEncryptedKeys: new RecipientEncryptedKeys({
+				encryptedKeys: [encryptedKey]
+			})
+		};
+		const keyInfo = new KeyAgreeRecipientInfo(Object.assign(recipientInfoParams, extraRecipientInfoParams));
+		//endregion
+
+		//region Final values for "CMS_ENVELOPED_DATA"
+		this.recipientInfos.push(new RecipientInfo({
+			variant: 2,
+			value: keyInfo
+		}));
+		//endregion
+	}
+	//**********************************************************************************
+	/**
 	 * Create a new CMS Enveloped Data content with encrypted data
 	 * @param {Object} contentEncryptionAlgorithm WebCrypto algorithm. For the moment here could be only "AES-CBC" or "AES-GCM" algorithms.
 	 * @param {ArrayBuffer} contentToEncrypt Content to encrypt
@@ -768,57 +810,73 @@ export default class EnvelopedData
 		{
 			//region Initial variables
 			let currentSequence = Promise.resolve();
-			
+
+			const recipientInfo = _this.recipientInfos[index];
+
 			let ecdhPublicKey;
 			let ecdhPrivateKey;
-			
+
+			let recipientPublicKey;
 			let recipientCurve;
 			let recipientCurveLength;
 			
 			let exportedECDHPublicKey;
 			//endregion
-			
-			//region Get "namedCurve" parameter from recipient's certificate
+
+			//region Get public key and named curve from recipient's certificate or public key
 			currentSequence = currentSequence.then(() =>
 			{
-				const curveObject = _this.recipientInfos[index].value.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
-				
-				if(curveObject.constructor.blockName() !== asn1js.ObjectIdentifier.blockName())
-					return Promise.reject(`Incorrect "recipientCertificate" for index ${index}`);
-				
-				const curveOID = curveObject.valueBlock.toString();
-				
-				switch(curveOID)
-				{
-					case "1.2.840.10045.3.1.7":
-						recipientCurve = "P-256";
-						recipientCurveLength = 256;
-						break;
-					case "1.3.132.0.34":
-						recipientCurve = "P-384";
-						recipientCurveLength = 384;
-						break;
-					case "1.3.132.0.35":
-						recipientCurve = "P-521";
-						recipientCurveLength = 528;
-						break;
-					default:
-						return Promise.reject(`Incorrect curve OID for index ${index}`);
+				if (recipientInfo.value.recipientPublicKey) {
+					recipientCurve = recipientInfo.value.recipientPublicKey.algorithm.namedCurve;
+					return recipientInfo.value.recipientPublicKey;
+
+				} else {
+					const curveObject = recipientInfo.value.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
+
+					if (curveObject.constructor.blockName() !== asn1js.ObjectIdentifier.blockName())
+						return Promise.reject(`Incorrect "recipientCertificate" for index ${index}`);
+
+					const curveOID = curveObject.valueBlock.toString();
+
+					switch (curveOID) {
+						case "1.2.840.10045.3.1.7":
+							recipientCurve = "P-256";
+							break;
+						case "1.3.132.0.34":
+							recipientCurve = "P-384";
+							break;
+						case "1.3.132.0.35":
+							recipientCurve = "P-521";
+							break;
+						default:
+							return Promise.reject(`Incorrect curve OID for index ${index}`);
+					}
+
+					return recipientInfo.value.recipientCertificate.getPublicKey({
+						algorithm: {
+							algorithm: {
+								name: "ECDH",
+								namedCurve: recipientCurve
+							},
+							usages: []
+						}
+					});
 				}
-				
-				return recipientCurve;
 			}, error =>
 				Promise.reject(error));
 			//endregion
 			
 			//region Generate ephemeral ECDH key
-			currentSequence = currentSequence.then(result =>
-				crypto.generateKey({
-					name: "ECDH",
-					namedCurve: result
-				},
-				true,
-				["deriveBits"]),
+			currentSequence = currentSequence.then(result => {
+				recipientPublicKey = result;
+				recipientCurveLength = curveLengthByName[recipientCurve];
+
+				return crypto.generateKey(
+					{name: "ECDH", namedCurve: recipientCurve},
+					true,
+					["deriveBits"]
+				);
+			},
 			error =>
 				Promise.reject(error)
 			);
@@ -834,28 +892,18 @@ export default class EnvelopedData
 			error =>
 				Promise.reject(error));
 			//endregion
-			
-			//region Import recipient's public key
+
+			//region Save public key of ephemeral ECDH key pair
 			currentSequence = currentSequence.then(result =>
 			{
 				exportedECDHPublicKey = result;
-				
-				return _this.recipientInfos[index].value.recipientCertificate.getPublicKey({
-					algorithm: {
-						algorithm: {
-							name: "ECDH",
-							namedCurve: recipientCurve
-						},
-						usages: []
-					}
-				});
 			}, error =>
 				Promise.reject(error));
 			//endregion
 			//region Create shared secret
-			currentSequence = currentSequence.then(result => crypto.deriveBits({
+			currentSequence = currentSequence.then(() => crypto.deriveBits({
 				name: "ECDH",
-				public: result
+				public: recipientPublicKey
 			},
 			ecdhPrivateKey,
 			recipientCurveLength),
@@ -871,8 +919,8 @@ export default class EnvelopedData
 				result =>
 				{
 					//region Get length of used AES-KW algorithm
-					const aesKWAlgorithm = new AlgorithmIdentifier({ schema: _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams });
-					
+					const aesKWAlgorithm = new AlgorithmIdentifier({ schema: recipientInfo.value.keyEncryptionAlgorithm.algorithmParams });
+
 					const KWalgorithm = getAlgorithmByOID(aesKWAlgorithm.algorithmId);
 					if(("name" in KWalgorithm) === false)
 						return Promise.reject(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
@@ -902,7 +950,7 @@ export default class EnvelopedData
 							 */
 							algorithmParams: new asn1js.Null()
 						}),
-						entityUInfo: _this.recipientInfos[index].value.ukm,
+						entityUInfo: recipientInfo.value.ukm,
 						suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
 					});
 					
@@ -910,9 +958,9 @@ export default class EnvelopedData
 					//endregion
 					
 					//region Get SHA algorithm used together with ECDH
-					const ecdhAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
+					const ecdhAlgorithm = getAlgorithmByOID(recipientInfo.value.keyEncryptionAlgorithm.algorithmId);
 					if(("name" in ecdhAlgorithm) === false)
-						return Promise.reject(`Incorrect OID for key encryption algorithm: ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+						return Promise.reject(`Incorrect OID for key encryption algorithm: ${recipientInfo.value.keyEncryptionAlgorithm.algorithmId}`);
 					//endregion
 					
 					return kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
@@ -942,18 +990,15 @@ export default class EnvelopedData
 				const originator = new OriginatorIdentifierOrKey();
 				originator.variant = 3;
 				originator.value = new OriginatorPublicKey({ schema: asn1.result });
-				// There is option when we can stay with ECParameters, but here index prefer to avoid the params
-				if("algorithmParams" in originator.value.algorithm)
-					delete originator.value.algorithm.algorithmParams;
-					
-				_this.recipientInfos[index].value.originator = originator;
+
+				recipientInfo.value.originator = originator;
 				//endregion
 					
 				//region RecipientEncryptedKey
 				/*
 				 We will not support using of same ephemeral key for many recipients
 				 */
-				_this.recipientInfos[index].value.recipientEncryptedKeys.encryptedKeys[0].encryptedKey = new asn1js.OctetString({ valueHex: result });
+				recipientInfo.value.recipientEncryptedKeys.encryptedKeys[0].encryptedKey = new asn1js.OctetString({ valueHex: result });
 				//endregion
 
 				return {ecdhPrivateKey};
@@ -1244,23 +1289,31 @@ export default class EnvelopedData
 			
 			let ecdhPrivateKey;
 			//endregion
-			
+
+			const originator = _this.recipientInfos[index].value.originator;
+
 			//region Get "namedCurve" parameter from recipient's certificate
 			currentSequence = currentSequence.then(() =>
 			{
-				if(("recipientCertificate" in decryptionParameters) === false)
-					return Promise.reject("Parameter \"recipientCertificate\" is mandatory for \"KeyAgreeRecipientInfo\"");
-					
+				if ("recipientCertificate" in decryptionParameters) {
+					const curveObject = decryptionParameters.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
+					if(curveObject.constructor.blockName() !== asn1js.ObjectIdentifier.blockName()) {
+						return Promise.reject(`Incorrect "recipientCertificate" for index ${index}`);
+					}
+					curveOID = curveObject.valueBlock.toString();
+				} else if ("algorithmParams" in originator.value.algorithm) {
+					const curveObject = originator.value.algorithm.algorithmParams;
+					if(curveObject.constructor.blockName() !== asn1js.ObjectIdentifier.blockName()) {
+						return Promise.reject(`Incorrect originator for index ${index}`);
+					}
+					curveOID = curveObject.valueBlock.toString();
+				} else {
+					return Promise.reject("Parameter \"recipientCertificate\" is mandatory for \"KeyAgreeRecipientInfo\" if algorithm params are missing from originator");
+				}
+
 				if(("recipientPrivateKey" in decryptionParameters) === false)
 					return Promise.reject("Parameter \"recipientPrivateKey\" is mandatory for \"KeyAgreeRecipientInfo\"");
-					
-				const curveObject = decryptionParameters.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
-					
-					
-				if(curveObject.constructor.blockName() !== asn1js.ObjectIdentifier.blockName())
-					return Promise.reject(`Incorrect "recipientCertificate" for index ${index}`);
-				curveOID = curveObject.valueBlock.toString();
-					
+
 				switch(curveOID)
 				{
 					case "1.2.840.10045.3.1.7":
@@ -1298,12 +1351,12 @@ export default class EnvelopedData
 				ecdhPrivateKey = result;
 					
 				//region Change "OriginatorPublicKey" if "curve" parameter absent
-				if(("algorithmParams" in _this.recipientInfos[index].value.originator.value.algorithm) === false)
-					_this.recipientInfos[index].value.originator.value.algorithm.algorithmParams = new asn1js.ObjectIdentifier({ value: curveOID });
+				if(("algorithmParams" in originator.value.algorithm) === false)
+					originator.value.algorithm.algorithmParams = new asn1js.ObjectIdentifier({ value: curveOID });
 				//endregion
 				
 				//region Create ArrayBuffer with sender's public key
-				const buffer = _this.recipientInfos[index].value.originator.value.toSchema().toBER(false);
+				const buffer = originator.value.toSchema().toBER(false);
 				//endregion
 					
 				return crypto.importKey("spki",

@@ -10,11 +10,10 @@ export default {
 			file: "bundle.js",
 			format: "iife",
 			outro: `
-window.createCertificate = createCertificate;
+window.createKeyPair = createKeyPair;
 window.envelopedEncrypt = envelopedEncrypt;
 window.envelopedDecrypt = envelopedDecrypt;
-window.handleHashAlgOnChange = handleHashAlgOnChange;
-window.handleSignAlgOnChange = handleSignAlgOnChange;
+window.handleKeyAgreeAlgorithmOnChange = handleKeyAgreeAlgorithmOnChange;
 window.handleEncAlgOnChange = handleEncAlgOnChange;
 window.handleEncLenOnChange = handleEncLenOnChange;
 window.handleOAEPHashAlgOnChange = handleOAEPHashAlgOnChange;

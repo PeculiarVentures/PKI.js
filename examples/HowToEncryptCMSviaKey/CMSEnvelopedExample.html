@@ -110,47 +110,40 @@
             border-collapse:collapse;
             border-color:black;
         }
-       th { 
+       th {
         text-align:center;
         background: #ccc;
         padding: 5px;
         border: 1px solid black;
        }
-       td { 
+       td {
         padding: 5px;
-        border: 1px solid black; 
+        border: 1px solid black;
        }
     </style>
 </head>
 
 <body>
     <div class="wrapper">
-        <p class="header-block">Put existing data or create new X.509 certificate and private key</p>
+        <p class="header-block">Enter existing private key or generate one</p>
         <div id="output_div" class="border-block">
             <p>
-                <label for="hash_alg" style="font-weight:bold">Hashing algorithm:</label>
-                <select id="hash_alg" onchange="handleHashAlgOnChange()">
-                    <option value="alg_SHA1">SHA-1</option>
-                    <option value="alg_SHA256">SHA-256</option>
-                    <option value="alg_SHA384">SHA-384</option>
-                    <option value="alg_SHA512">SHA-512</option>
+                <label for="curve_name" style="font-weight:bold">Key agreement algorithm:</label>
+                <select id="curve_name" onchange="handleKeyAgreeAlgorithmOnChange()">
+                    <option value="ecdh_p256">ECDH P-256</option>
+                    <option value="ecdh_p384">ECDH P-384</option>
+                    <option value="ecdh_p521">ECDH P-521</option>
                 </select>
             </p>
             <p>
-                <label for="sign_alg" style="font-weight:bold">Signature algorithm:</label>
-                <select id="sign_alg" onchange="handleSignAlgOnChange()">
-                    <option value="alg_RSA15">RSASSA-PKCS1-v1_5</option>
-                    <option value="alg_RSA2">RSA-PSS</option>
-                    <option value="alg_ECDSA">ECDSA</option>
-                </select>
+                <a onclick="createKeyPair();">Create</a>
             </p>
-            <p>
-                <a onclick="createCertificate();">Create</a>
-            </p>
-            <label for="new_signed_data" style="font-weight:bold;float:left;">BASE-64 encoded certificate:</label>
-            <textarea id="new_signed_data">&lt;  Encoded certificate must be put here &gt;</textarea>
             <label for="pkcs8_key" style="font-weight:bold;float:left;">BASE-64 encoded PKCS#8 private key:</label>
             <textarea id="pkcs8_key">&lt; PKCS#8 private key must be put here &gt;</textarea>
+            <label for="pkcs8_key_pub" style="font-weight:bold;float:left;">BASE-64 encoded PKCS#8 public key:</label>
+            <textarea id="pkcs8_key_pub">&lt; PKCS#8 public key must be put here &gt;</textarea>
+            <label for="pkcs8_key_id" style="font-weight:bold;float:left;">BASE-64 encoded key pair id:</label>
+            <textarea id="pkcs8_key_id">&lt;  Encoded key id must be put here &gt;</textarea>
         </div>
     </div>
     <div class="wrapper">
@@ -176,7 +169,7 @@
                 </select>
             </p>
             <p>
-                <label for="oaep_hash_alg" style="font-weight:bold">RSA-OAEP Hashing Algorithm:</label>
+                <label for="oaep_hash_alg" style="font-weight:bold">KDF Hashing Algorithm:</label>
                 <select id="oaep_hash_alg" onchange="handleOAEPHashAlgOnChange()">
                     <option value="alg_SHA1">SHA-1</option>
                     <option value="alg_SHA256">SHA-256</option>
