@@ -7,6 +7,3 @@ coverage
 .vs
 .vscode
 docs
-examples/*/bundle.js
-test/s_*.js
-test/browser/*.js
