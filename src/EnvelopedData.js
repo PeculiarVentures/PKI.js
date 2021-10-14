@@ -942,13 +942,7 @@ export default class EnvelopedData
 					//region Create and encode "ECC-CMS-SharedInfo" structure
 					const eccInfo = new ECCCMSSharedInfo({
 						keyInfo: new AlgorithmIdentifier({
-							algorithmId: aesKWAlgorithm.algorithmId,
-							/*
-							 Initially RFC5753 says that AES algorithms have absent parameters.
-							 But since early implementations all put NULL here. Thus, in order to be
-							 "backward compatible", index also put NULL here.
-							 */
-							algorithmParams: new asn1js.Null()
+							algorithmId: aesKWAlgorithm.algorithmId
 						}),
 						entityUInfo: recipientInfo.value.ukm,
 						suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
