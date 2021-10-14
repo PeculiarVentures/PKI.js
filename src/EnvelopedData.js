@@ -1384,76 +1384,84 @@ export default class EnvelopedData
 			);
 			//endregion
 			//region Apply KDF function to shared secret
+			function applyKDF(includeAlgorithmParams) {
+				includeAlgorithmParams = includeAlgorithmParams || false;
+
+				//region Get length of used AES-KW algorithm
+				const aesKWAlgorithm = new AlgorithmIdentifier({ schema: _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams });
+
+				const KWalgorithm = getAlgorithmByOID(aesKWAlgorithm.algorithmId);
+				if(("name" in KWalgorithm) === false)
+					return Promise.reject(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
+				//endregion
+
+				//region Translate AES-KW length to ArrayBuffer
+				let kwLength = KWalgorithm.length;
+
+				const kwLengthBuffer = new ArrayBuffer(4);
+				const kwLengthView = new Uint8Array(kwLengthBuffer);
+
+				for(let j = 3; j >= 0; j--)
+				{
+					kwLengthView[j] = kwLength;
+					kwLength >>= 8;
+				}
+				//endregion
+
+				//region Create and encode "ECC-CMS-SharedInfo" structure
+				const keyInfoAlgorithm = {
+					algorithmId: aesKWAlgorithm.algorithmId
+				};
+				if (includeAlgorithmParams) {
+					keyInfoAlgorithm.algorithmParams = new asn1js.Null();
+				}
+				const eccInfo = new ECCCMSSharedInfo({
+					keyInfo: new AlgorithmIdentifier(keyInfoAlgorithm),
+					entityUInfo: _this.recipientInfos[index].value.ukm,
+					suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
+				});
+
+				const encodedInfo = eccInfo.toSchema().toBER(false);
+				//endregion
+
+				//region Get SHA algorithm used together with ECDH
+				const ecdhAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
+				if(("name" in ecdhAlgorithm) === false)
+					return Promise.reject(`Incorrect OID for key encryption algorithm: ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+				//endregion
+
+				return kdf(ecdhAlgorithm.kdf, sharedSecret, KWalgorithm.length, encodedInfo);
+			}
+			let sharedSecret;
 			currentSequence = currentSequence.then(
 				/**
 				 * @param {ArrayBuffer} result
 				 */
 				result =>
 				{
-					//region Get length of used AES-KW algorithm
-					const aesKWAlgorithm = new AlgorithmIdentifier({ schema: _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams });
-					
-					const KWalgorithm = getAlgorithmByOID(aesKWAlgorithm.algorithmId);
-					if(("name" in KWalgorithm) === false)
-						return Promise.reject(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
-						//endregion
-						
-						//region Translate AES-KW length to ArrayBuffer
-					let kwLength = KWalgorithm.length;
-					
-					const kwLengthBuffer = new ArrayBuffer(4);
-					const kwLengthView = new Uint8Array(kwLengthBuffer);
-					
-					for(let j = 3; j >= 0; j--)
-					{
-						kwLengthView[j] = kwLength;
-						kwLength >>= 8;
-					}
-					//endregion
-					
-					//region Create and encode "ECC-CMS-SharedInfo" structure
-					const eccInfo = new ECCCMSSharedInfo({
-						keyInfo: new AlgorithmIdentifier({
-							algorithmId: aesKWAlgorithm.algorithmId,
-							/*
-							 Initially RFC5753 says that AES algorithms have absent parameters.
-							 But since early implementations all put NULL here. Thus, in order to be
-							 "backward compatible", index also put NULL here.
-							 */
-							algorithmParams: new asn1js.Null()
-						}),
-						entityUInfo: _this.recipientInfos[index].value.ukm,
-						suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
-					});
-					
-					const encodedInfo = eccInfo.toSchema().toBER(false);
-					//endregion
-					
-					//region Get SHA algorithm used together with ECDH
-					const ecdhAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
-					if(("name" in ecdhAlgorithm) === false)
-						return Promise.reject(`Incorrect OID for key encryption algorithm: ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
-						//endregion
-						
-					return kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
+					sharedSecret = result;
+					return applyKDF();
 				},
 				error =>
 					Promise.reject(error)
 			);
 			//endregion
 			//region Import AES-KW key from result of KDF function
-			currentSequence = currentSequence.then(result =>
-				crypto.importKey("raw",
-					result,
+			function importAesKwKey(kdfResult) {
+				return crypto.importKey("raw",
+					kdfResult,
 					{ name: "AES-KW" },
 					true,
-					["unwrapKey"]),
-			error => Promise.reject(error)
+					["unwrapKey"]
+				);
+			}
+			currentSequence = currentSequence.then(
+				importAesKwKey,
+				error => Promise.reject(error)
 			);
 			//endregion
 			//region Finally unwrap session key
-			currentSequence = currentSequence.then(result =>
-			{
+			function unwrapSessionKey(aesKwKey) {
 				//region Get WebCrypto form of content encryption algorithm
 				const contentEncryptionAlgorithm = getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
 				if(("name" in contentEncryptionAlgorithm) === false)
@@ -1462,13 +1470,15 @@ export default class EnvelopedData
 					
 				return crypto.unwrapKey("raw",
 					_this.recipientInfos[index].value.recipientEncryptedKeys.encryptedKeys[0].encryptedKey.valueBlock.valueHex,
-					result,
+					aesKwKey,
 					{ name: "AES-KW" },
 					contentEncryptionAlgorithm,
 					true,
 					["decrypt"]);
-			}, error =>
-				Promise.reject(error)
+			}
+			currentSequence = currentSequence.then(
+				result => unwrapSessionKey(result).catch(() => applyKDF(true).then(importAesKwKey).then(unwrapSessionKey)),
+				error => Promise.reject(error)
 			);
 			//endregion
 			
