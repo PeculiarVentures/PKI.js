@@ -154,7 +154,7 @@ function envelopedEncryptInternal()
 		.then(() => {
 			//region Import public key
 			const algorithm = getKeyAgreeAlgorithmParams("importkey");
-			return crypto.importKey("spki", publicKeyBuffer, algorithm.algorithm, true, algorithm.usages);
+			return crypto.importKey("spki", publicKeyBuffer, algorithm.algorithm, true, []);
 			//endregion
 		})
 		.then((publicKey) => {
