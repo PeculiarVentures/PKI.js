@@ -35,7 +35,7 @@ const curveLengthByName = {
 /**
  * Class from RFC5652
  */
-export default class EnvelopedData 
+export default class EnvelopedData
 {
 	//**********************************************************************************
 	/**
@@ -51,14 +51,14 @@ export default class EnvelopedData
 		 * @desc version
 		 */
 		this.version = getParametersValue(parameters, "version", EnvelopedData.defaultValues("version"));
-		
+
 		if("originatorInfo" in parameters)
 			/**
 			 * @type {OriginatorInfo}
 			 * @desc originatorInfo
 			 */
 			this.originatorInfo = getParametersValue(parameters, "originatorInfo", EnvelopedData.defaultValues("originatorInfo"));
-		
+
 		/**
 		 * @type {Array.<RecipientInfo>}
 		 * @desc recipientInfos
@@ -69,7 +69,7 @@ export default class EnvelopedData
 		 * @desc encryptedContentInfo
 		 */
 		this.encryptedContentInfo = getParametersValue(parameters, "encryptedContentInfo", EnvelopedData.defaultValues("encryptedContentInfo"));
-		
+
 		if("unprotectedAttrs" in parameters)
 			/**
 			 * @type {Array.<Attribute>}
@@ -77,7 +77,7 @@ export default class EnvelopedData
 			 */
 			this.unprotectedAttrs = getParametersValue(parameters, "unprotectedAttrs", EnvelopedData.defaultValues("unprotectedAttrs"));
 		//endregion
-		
+
 		//region If input argument array contains "schema" for this object
 		if("schema" in parameters)
 			this.fromSchema(parameters.schema);
@@ -160,7 +160,7 @@ export default class EnvelopedData
 		 * @property {string} [unprotectedAttrs]
 		 */
 		const names = getParametersValue(parameters, "names", {});
-		
+
 		return (new asn1js.Sequence({
 			name: (names.blockName || ""),
 			value: [
@@ -215,7 +215,7 @@ export default class EnvelopedData
 			"unprotectedAttrs"
 		]);
 		//endregion
-		
+
 		//region Check the schema is valid
 		const asn1 = asn1js.compareSchema(schema,
 			schema,
@@ -233,14 +233,14 @@ export default class EnvelopedData
 				}
 			})
 		);
-		
+
 		if(asn1.verified === false)
 			throw new Error("Object's schema was not verified against input data for EnvelopedData");
 		//endregion
-		
+
 		//region Get internal properties from parsed schema
 		this.version = asn1.result.version.valueBlock.valueDec;
-		
+
 		if("originatorInfo" in asn1.result)
 		{
 			this.originatorInfo = new OriginatorInfo({
@@ -249,10 +249,10 @@ export default class EnvelopedData
 				})
 			});
 		}
-		
+
 		this.recipientInfos = Array.from(asn1.result.recipientInfos, element => new RecipientInfo({ schema: element }));
 		this.encryptedContentInfo = new EncryptedContentInfo({ schema: asn1.result.encryptedContentInfo });
-		
+
 		if("unprotectedAttrs" in asn1.result)
 			this.unprotectedAttrs = Array.from(asn1.result.unprotectedAttrs, element => new Attribute({ schema: element }));
 		//endregion
@@ -266,9 +266,9 @@ export default class EnvelopedData
 	{
 		//region Create array for output sequence
 		const outputArray = [];
-		
+
 		outputArray.push(new asn1js.Integer({ value: this.version }));
-		
+
 		if("originatorInfo" in this)
 		{
 			outputArray.push(new asn1js.Constructed({
@@ -280,13 +280,13 @@ export default class EnvelopedData
 				value: this.originatorInfo.toSchema().valueBlock.value
 			}));
 		}
-		
+
 		outputArray.push(new asn1js.Set({
 			value: Array.from(this.recipientInfos, element => element.toSchema())
 		}));
-		
+
 		outputArray.push(this.encryptedContentInfo.toSchema());
-		
+
 		if("unprotectedAttrs" in this)
 		{
 			outputArray.push(new asn1js.Constructed({
@@ -299,7 +299,7 @@ export default class EnvelopedData
 			}));
 		}
 		//endregion
-		
+
 		//region Construct and return new ASN.1 schema for this object
 		return (new asn1js.Sequence({
 			value: outputArray
@@ -316,16 +316,16 @@ export default class EnvelopedData
 		const _object = {
 			version: this.version
 		};
-		
+
 		if("originatorInfo" in this)
 			_object.originatorInfo = this.originatorInfo.toJSON();
-		
+
 		_object.recipientInfos = Array.from(this.recipientInfos, element => element.toJSON());
 		_object.encryptedContentInfo = this.encryptedContentInfo.toJSON();
-		
+
 		if("unprotectedAttrs" in this)
 			_object.unprotectedAttrs = Array.from(this.unprotectedAttrs, element => element.toJSON());
-		
+
 		return _object;
 	}
 	//**********************************************************************************
@@ -359,8 +359,8 @@ export default class EnvelopedData
 				throw new Error(`Unknown type of certificate's public key: ${certificate.subjectPublicKeyInfo.algorithm.algorithmId}`);
 		}
 		//endregion
-		
-		//region Add new "recipient" depends on "variant" and certificate type 
+
+		//region Add new "recipient" depends on "variant" and certificate type
 		switch(variant)
 		{
 			case 1: // Key transport scheme
@@ -429,7 +429,7 @@ export default class EnvelopedData
 						// "encryptedKey" will be calculated in "encrypt" function
 					});
 					//endregion
-				
+
 					//region Final values for "CMS_ENVELOPED_DATA"
 					this.recipientInfos.push(new RecipientInfo({
 						variant: 1,
@@ -457,8 +457,8 @@ export default class EnvelopedData
 			default:
 				throw new Error(`Unknown "variant" value: ${variant}`);
 		}
-		//endregion 
-		
+		//endregion
+
 		return true;
 	}
 	//**********************************************************************************
@@ -473,31 +473,31 @@ export default class EnvelopedData
 		//region Initial variables
 		const encryptionParameters = parameters || {};
 		//endregion
-		
+
 		//region Check initial parameters
 		if((preDefinedData instanceof ArrayBuffer) === false)
 			throw new Error("Please pass \"preDefinedData\" in ArrayBuffer type");
-		
+
 		if(preDefinedData.byteLength === 0)
 			throw new Error("Pre-defined data could have zero length");
 		//endregion
-		
+
 		//region Initialize encryption parameters
 		if(("keyIdentifier" in encryptionParameters) === false)
 		{
 			const keyIdentifierBuffer = new ArrayBuffer(16);
 			const keyIdentifierView = new Uint8Array(keyIdentifierBuffer);
 			getRandomValues(keyIdentifierView);
-			
+
 			encryptionParameters.keyIdentifier = keyIdentifierBuffer;
 		}
-		
+
 		if(("hmacHashAlgorithm" in encryptionParameters) === false)
 			encryptionParameters.hmacHashAlgorithm = "SHA-512";
-		
+
 		if(("iterationCount" in encryptionParameters) === false)
 			encryptionParameters.iterationCount = 2048;
-		
+
 		if(("keyEncryptionAlgorithm" in encryptionParameters) === false)
 		{
 			encryptionParameters.keyEncryptionAlgorithm = {
@@ -505,11 +505,11 @@ export default class EnvelopedData
 				length: 256
 			};
 		}
-		
+
 		if(("keyEncryptionAlgorithmParams" in encryptionParameters) === false)
 			encryptionParameters.keyEncryptionAlgorithmParams = new asn1js.Null();
 		//endregion
-		
+
 		//region Add new recipient based on passed variant
 		switch(variant)
 		{
@@ -674,7 +674,6 @@ export default class EnvelopedData
 
 		const aesKW = new AlgorithmIdentifier({
 			algorithmId: aesKWoid,
-			algorithmParams: new asn1js.Null()
 		});
 		//endregion
 
@@ -725,34 +724,34 @@ export default class EnvelopedData
 	{
 		//region Initial variables
 		let sequence = Promise.resolve();
-		
+
 		const ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
 		const ivView = new Uint8Array(ivBuffer);
 		getRandomValues(ivView);
-		
+
 		const contentView = new Uint8Array(contentToEncrypt);
-		
+
 		let sessionKey;
 		let encryptedContent;
 		let exportedSessionKey;
-		
+
 		const recipientsPromises = [];
-		
+
 		const _this = this;
 		//endregion
-		
+
 		//region Check for input parameters
 		const contentEncryptionOID = getOIDByAlgorithm(contentEncryptionAlgorithm);
 		if(contentEncryptionOID === "")
 			return Promise.reject("Wrong \"contentEncryptionAlgorithm\" value");
 		//endregion
-		
+
 		//region Get a "crypto" extension
 		const crypto = getCrypto();
 		if(typeof crypto === "undefined")
 			return Promise.reject("Unable to create WebCrypto object");
 		//endregion
-		
+
 		//region Generate new content encryption key
 		sequence = sequence.then(() =>
 			crypto.generateKey(contentEncryptionAlgorithm, true, ["encrypt"]));
@@ -761,7 +760,7 @@ export default class EnvelopedData
 		sequence = sequence.then(result =>
 		{
 			sessionKey = result;
-			
+
 			return crypto.encrypt({
 				name: contentEncryptionAlgorithm.name,
 				iv: ivView
@@ -777,14 +776,14 @@ export default class EnvelopedData
 			//region Create output OCTETSTRING with encrypted content
 			encryptedContent = result;
 			//endregion
-				
+
 			return crypto.exportKey("raw", sessionKey);
 		}, error =>
 			Promise.reject(error)
 		).then(result =>
 		{
 			exportedSessionKey = result;
-			
+
 			return true;
 		}, error =>
 			Promise.reject(error));
@@ -804,7 +803,7 @@ export default class EnvelopedData
 		}, error =>
 			Promise.reject(error));
 		//endregion
-		
+
 		//region Special sub-functions to work with each recipient's type
 		function SubKeyAgreeRecipientInfo(index)
 		{
@@ -819,7 +818,7 @@ export default class EnvelopedData
 			let recipientPublicKey;
 			let recipientCurve;
 			let recipientCurveLength;
-			
+
 			let exportedECDHPublicKey;
 			//endregion
 
@@ -865,7 +864,7 @@ export default class EnvelopedData
 			}, error =>
 				Promise.reject(error));
 			//endregion
-			
+
 			//region Generate ephemeral ECDH key
 			currentSequence = currentSequence.then(result => {
 				recipientPublicKey = result;
@@ -886,7 +885,7 @@ export default class EnvelopedData
 			{
 				ecdhPublicKey = result.publicKey;
 				ecdhPrivateKey = result.privateKey;
-					
+
 				return crypto.exportKey("spki", ecdhPublicKey);
 			},
 			error =>
@@ -910,7 +909,7 @@ export default class EnvelopedData
 			error =>
 				Promise.reject(error));
 			//endregion
-			
+
 			//region Apply KDF function to shared secret
 			currentSequence = currentSequence.then(
 				/**
@@ -925,44 +924,38 @@ export default class EnvelopedData
 					if(("name" in KWalgorithm) === false)
 						return Promise.reject(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
 					//endregion
-					
+
 					//region Translate AES-KW length to ArrayBuffer
 					let kwLength = KWalgorithm.length;
-					
+
 					const kwLengthBuffer = new ArrayBuffer(4);
 					const kwLengthView = new Uint8Array(kwLengthBuffer);
-					
+
 					for(let j = 3; j >= 0; j--)
 					{
 						kwLengthView[j] = kwLength;
 						kwLength >>= 8;
 					}
 					//endregion
-					
+
 					//region Create and encode "ECC-CMS-SharedInfo" structure
 					const eccInfo = new ECCCMSSharedInfo({
 						keyInfo: new AlgorithmIdentifier({
-							algorithmId: aesKWAlgorithm.algorithmId,
-							/*
-							 Initially RFC5753 says that AES algorithms have absent parameters.
-							 But since early implementations all put NULL here. Thus, in order to be
-							 "backward compatible", index also put NULL here.
-							 */
-							algorithmParams: new asn1js.Null()
+							algorithmId: aesKWAlgorithm.algorithmId
 						}),
 						entityUInfo: recipientInfo.value.ukm,
 						suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
 					});
-					
+
 					const encodedInfo = eccInfo.toSchema().toBER(false);
 					//endregion
-					
+
 					//region Get SHA algorithm used together with ECDH
 					const ecdhAlgorithm = getAlgorithmByOID(recipientInfo.value.keyEncryptionAlgorithm.algorithmId);
 					if(("name" in ecdhAlgorithm) === false)
 						return Promise.reject(`Incorrect OID for key encryption algorithm: ${recipientInfo.value.keyEncryptionAlgorithm.algorithmId}`);
 					//endregion
-					
+
 					return kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
 				},
 				error =>
@@ -986,14 +979,14 @@ export default class EnvelopedData
 			{
 				//region OriginatorIdentifierOrKey
 				const asn1 = asn1js.fromBER(exportedECDHPublicKey);
-					
+
 				const originator = new OriginatorIdentifierOrKey();
 				originator.variant = 3;
 				originator.value = new OriginatorPublicKey({ schema: asn1.result });
 
 				recipientInfo.value.originator = originator;
 				//endregion
-					
+
 				//region RecipientEncryptedKey
 				/*
 				 We will not support using of same ephemeral key for many recipients
@@ -1006,7 +999,7 @@ export default class EnvelopedData
 				Promise.reject(error)
 			);
 			//endregion
-			
+
 			return currentSequence;
 		}
 
@@ -1048,14 +1041,14 @@ export default class EnvelopedData
 				const jjj = 0;
 			}
 		}
-		
+
 		function SubKEKRecipientInfo(index)
 		{
 			//region Initial variables
 			let currentSequence = Promise.resolve();
 			let kekAlgorithm;
 			//endregion
-			
+
 			//region Import KEK from pre-defined data
 			currentSequence = currentSequence.then(() =>
 			{
@@ -1064,7 +1057,7 @@ export default class EnvelopedData
 				if(("name" in kekAlgorithm) === false)
 					return Promise.reject(`Incorrect OID for "keyEncryptionAlgorithm": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
 					//endregion
-					
+
 				return crypto.importKey("raw",
 					new Uint8Array(_this.recipientInfos[index].value.preDefinedKEK),
 					kekAlgorithm,
@@ -1074,7 +1067,7 @@ export default class EnvelopedData
 				Promise.reject(error)
 			);
 			//endregion
-			
+
 			//region Wrap previously exported session key
 			currentSequence = currentSequence.then(result =>
 				crypto.wrapKey("raw", sessionKey, result, kekAlgorithm),
@@ -1092,10 +1085,10 @@ export default class EnvelopedData
 				Promise.reject(error)
 			);
 			//endregion
-			
+
 			return currentSequence;
 		}
-		
+
 		function SubPasswordRecipientinfo(index)
 		{
 			//region Initial variables
@@ -1103,16 +1096,16 @@ export default class EnvelopedData
 			let pbkdf2Params;
 			let kekAlgorithm;
 			//endregion
-			
+
 			//region Check that we have encoded "keyDerivationAlgorithm" plus "PBKDF2_params" in there
 			currentSequence = currentSequence.then(() =>
 			{
 				if(("keyDerivationAlgorithm" in _this.recipientInfos[index].value) === false)
 					return Promise.reject("Please append encoded \"keyDerivationAlgorithm\"");
-					
+
 				if(("algorithmParams" in _this.recipientInfos[index].value.keyDerivationAlgorithm) === false)
 					return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
-					
+
 				try
 				{
 					pbkdf2Params = new PBKDF2Params({ schema: _this.recipientInfos[index].value.keyDerivationAlgorithm.algorithmParams });
@@ -1121,7 +1114,7 @@ export default class EnvelopedData
 				{
 					return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
 				}
-					
+
 				return Promise.resolve();
 			}, error =>
 				Promise.reject(error)
@@ -1131,7 +1124,7 @@ export default class EnvelopedData
 			currentSequence = currentSequence.then(() =>
 			{
 				const passwordView = new Uint8Array(_this.recipientInfos[index].value.password);
-					
+
 				return crypto.importKey("raw",
 					passwordView,
 					"PBKDF2",
@@ -1149,28 +1142,28 @@ export default class EnvelopedData
 				if(("name" in kekAlgorithm) === false)
 					return Promise.reject(`Incorrect OID for "keyEncryptionAlgorithm": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
 				//endregion
-				
+
 				//region Get HMAC hash algorithm
 				let hmacHashAlgorithm = "SHA-1";
-					
+
 				if("prf" in pbkdf2Params)
 				{
 					const algorithm = getAlgorithmByOID(pbkdf2Params.prf.algorithmId);
 					if(("name" in algorithm) === false)
 						return Promise.reject("Incorrect OID for HMAC hash algorithm");
-						
+
 					hmacHashAlgorithm = algorithm.hash.name;
 				}
 				//endregion
-				
+
 				//region Get PBKDF2 "salt" value
 				const saltView = new Uint8Array(pbkdf2Params.salt.valueBlock.valueHex);
 				//endregion
-					
+
 				//region Get PBKDF2 iterations count
 				const iterations = pbkdf2Params.iterationCount;
 				//endregion
-					
+
 				return crypto.deriveKey({
 					name: "PBKDF2",
 					hash: {
@@ -1204,12 +1197,12 @@ export default class EnvelopedData
 				Promise.reject(error)
 			);
 			//endregion
-			
+
 			return currentSequence;
 		}
-		
+
 		//endregion
-		
+
 		//region Create special routines for each "recipient"
 		sequence = sequence.then(() =>
 		{
@@ -1218,7 +1211,7 @@ export default class EnvelopedData
 				//region Initial variables
 				let currentSequence = Promise.resolve();
 				//endregion
-					
+
 				switch(this.recipientInfos[i].variant)
 				{
 					case 1: // KeyTransRecipientInfo
@@ -1236,16 +1229,16 @@ export default class EnvelopedData
 					default:
 						return Promise.reject(`Uknown recipient type in array with index ${i}`);
 				}
-					
+
 				recipientsPromises.push(currentSequence);
 			}
-				
+
 			return Promise.all(recipientsPromises);
 		}, error =>
 			Promise.reject(error)
 		);
 		//endregion
-		
+
 		return sequence;
 	}
 	//**********************************************************************************
@@ -1259,34 +1252,34 @@ export default class EnvelopedData
 	{
 		//region Initial variables
 		let sequence = Promise.resolve();
-		
+
 		const decryptionParameters = parameters || {};
-		
+
 		const _this = this;
 		//endregion
-		
+
 		//region Check for input parameters
 		if((recipientIndex + 1) > this.recipientInfos.length)
 			return Promise.reject(`Maximum value for "index" is: ${this.recipientInfos.length - 1}`);
 		//endregion
-		
+
 		//region Get a "crypto" extension
 		const crypto = getCrypto();
 		if(typeof crypto === "undefined")
 			return Promise.reject("Unable to create WebCrypto object");
 		//endregion
-		
+
 		//region Special sub-functions to work with each recipient's type
 		function SubKeyAgreeRecipientInfo(index)
 		{
 			//region Initial variables
 			let currentSequence = Promise.resolve();
-			
+
 			let recipientCurve;
 			let recipientCurveLength;
-			
+
 			let curveOID;
-			
+
 			let ecdhPrivateKey;
 			//endregion
 
@@ -1331,7 +1324,7 @@ export default class EnvelopedData
 					default:
 						return Promise.reject(`Incorrect curve OID for index ${index}`);
 				}
-					
+
 				return crypto.importKey("pkcs8",
 					decryptionParameters.recipientPrivateKey,
 					{
@@ -1349,16 +1342,16 @@ export default class EnvelopedData
 			currentSequence = currentSequence.then(result =>
 			{
 				ecdhPrivateKey = result;
-					
+
 				//region Change "OriginatorPublicKey" if "curve" parameter absent
 				if(("algorithmParams" in originator.value.algorithm) === false)
 					originator.value.algorithm.algorithmParams = new asn1js.ObjectIdentifier({ value: curveOID });
 				//endregion
-				
+
 				//region Create ArrayBuffer with sender's public key
 				const buffer = originator.value.toSchema().toBER(false);
 				//endregion
-					
+
 				return crypto.importKey("spki",
 					buffer,
 					{
@@ -1384,94 +1377,104 @@ export default class EnvelopedData
 			);
 			//endregion
 			//region Apply KDF function to shared secret
+			function applyKDF(includeAlgorithmParams) {
+				includeAlgorithmParams = includeAlgorithmParams || false;
+
+				//region Get length of used AES-KW algorithm
+				const aesKWAlgorithm = new AlgorithmIdentifier({ schema: _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams });
+
+				const KWalgorithm = getAlgorithmByOID(aesKWAlgorithm.algorithmId);
+				if(("name" in KWalgorithm) === false)
+					return Promise.reject(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
+				//endregion
+
+				//region Translate AES-KW length to ArrayBuffer
+				let kwLength = KWalgorithm.length;
+
+				const kwLengthBuffer = new ArrayBuffer(4);
+				const kwLengthView = new Uint8Array(kwLengthBuffer);
+
+				for(let j = 3; j >= 0; j--)
+				{
+					kwLengthView[j] = kwLength;
+					kwLength >>= 8;
+				}
+				//endregion
+
+				//region Create and encode "ECC-CMS-SharedInfo" structure
+				const keyInfoAlgorithm = {
+					algorithmId: aesKWAlgorithm.algorithmId
+				};
+				if (includeAlgorithmParams) {
+					keyInfoAlgorithm.algorithmParams = new asn1js.Null();
+				}
+				const eccInfo = new ECCCMSSharedInfo({
+					keyInfo: new AlgorithmIdentifier(keyInfoAlgorithm),
+					entityUInfo: _this.recipientInfos[index].value.ukm,
+					suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
+				});
+
+				const encodedInfo = eccInfo.toSchema().toBER(false);
+				//endregion
+
+				//region Get SHA algorithm used together with ECDH
+				const ecdhAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
+				if(("name" in ecdhAlgorithm) === false)
+					return Promise.reject(`Incorrect OID for key encryption algorithm: ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
+				//endregion
+
+				return kdf(ecdhAlgorithm.kdf, sharedSecret, KWalgorithm.length, encodedInfo);
+			}
+			let sharedSecret;
 			currentSequence = currentSequence.then(
 				/**
 				 * @param {ArrayBuffer} result
 				 */
 				result =>
 				{
-					//region Get length of used AES-KW algorithm
-					const aesKWAlgorithm = new AlgorithmIdentifier({ schema: _this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams });
-					
-					const KWalgorithm = getAlgorithmByOID(aesKWAlgorithm.algorithmId);
-					if(("name" in KWalgorithm) === false)
-						return Promise.reject(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
-						//endregion
-						
-						//region Translate AES-KW length to ArrayBuffer
-					let kwLength = KWalgorithm.length;
-					
-					const kwLengthBuffer = new ArrayBuffer(4);
-					const kwLengthView = new Uint8Array(kwLengthBuffer);
-					
-					for(let j = 3; j >= 0; j--)
-					{
-						kwLengthView[j] = kwLength;
-						kwLength >>= 8;
-					}
-					//endregion
-					
-					//region Create and encode "ECC-CMS-SharedInfo" structure
-					const eccInfo = new ECCCMSSharedInfo({
-						keyInfo: new AlgorithmIdentifier({
-							algorithmId: aesKWAlgorithm.algorithmId,
-							/*
-							 Initially RFC5753 says that AES algorithms have absent parameters.
-							 But since early implementations all put NULL here. Thus, in order to be
-							 "backward compatible", index also put NULL here.
-							 */
-							algorithmParams: new asn1js.Null()
-						}),
-						entityUInfo: _this.recipientInfos[index].value.ukm,
-						suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
-					});
-					
-					const encodedInfo = eccInfo.toSchema().toBER(false);
-					//endregion
-					
-					//region Get SHA algorithm used together with ECDH
-					const ecdhAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
-					if(("name" in ecdhAlgorithm) === false)
-						return Promise.reject(`Incorrect OID for key encryption algorithm: ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
-						//endregion
-						
-					return kdf(ecdhAlgorithm.kdf, result, KWalgorithm.length, encodedInfo);
+					sharedSecret = result;
+					return applyKDF();
 				},
 				error =>
 					Promise.reject(error)
 			);
 			//endregion
 			//region Import AES-KW key from result of KDF function
-			currentSequence = currentSequence.then(result =>
-				crypto.importKey("raw",
-					result,
+			function importAesKwKey(kdfResult) {
+				return crypto.importKey("raw",
+					kdfResult,
 					{ name: "AES-KW" },
 					true,
-					["unwrapKey"]),
-			error => Promise.reject(error)
+					["unwrapKey"]
+				);
+			}
+			currentSequence = currentSequence.then(
+				importAesKwKey,
+				error => Promise.reject(error)
 			);
 			//endregion
 			//region Finally unwrap session key
-			currentSequence = currentSequence.then(result =>
-			{
+			function unwrapSessionKey(aesKwKey) {
 				//region Get WebCrypto form of content encryption algorithm
 				const contentEncryptionAlgorithm = getAlgorithmByOID(_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId);
 				if(("name" in contentEncryptionAlgorithm) === false)
 					return Promise.reject(`Incorrect "contentEncryptionAlgorithm": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 					//endregion
-					
+
 				return crypto.unwrapKey("raw",
 					_this.recipientInfos[index].value.recipientEncryptedKeys.encryptedKeys[0].encryptedKey.valueBlock.valueHex,
-					result,
+					aesKwKey,
 					{ name: "AES-KW" },
 					contentEncryptionAlgorithm,
 					true,
 					["decrypt"]);
-			}, error =>
-				Promise.reject(error)
+			}
+			currentSequence = currentSequence.then(
+				result => unwrapSessionKey(result).catch(() => applyKDF(true).then(importAesKwKey).then(unwrapSessionKey)),
+				error => Promise.reject(error)
 			);
 			//endregion
-			
+
 			return currentSequence;
 		}
 
@@ -1523,26 +1526,26 @@ export default class EnvelopedData
 				["decrypt"]
 			);
 		}
-		
+
 		function SubKEKRecipientInfo(index)
 		{
 			//region Initial variables
 			let currentSequence = Promise.resolve();
 			let kekAlgorithm;
 			//endregion
-			
+
 			//region Import KEK from pre-defined data
 			currentSequence = currentSequence.then(() =>
 			{
 				if(("preDefinedData" in decryptionParameters) === false)
 					return Promise.reject("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\"");
-					
+
 				//region Get WebCrypto form of "keyEncryptionAlgorithm"
 				kekAlgorithm = getAlgorithmByOID(_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId);
 				if(("name" in kekAlgorithm) === false)
 					return Promise.reject(`Incorrect OID for "keyEncryptionAlgorithm": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
 				//endregion
-					
+
 				return crypto.importKey("raw",
 					decryptionParameters.preDefinedData,
 					kekAlgorithm,
@@ -1560,7 +1563,7 @@ export default class EnvelopedData
 				if(("name" in contentEncryptionAlgorithm) === false)
 					return Promise.reject(`Incorrect "contentEncryptionAlgorithm": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 				//endregion
-					
+
 				return crypto.unwrapKey("raw",
 					_this.recipientInfos[index].value.encryptedKey.valueBlock.valueHex,
 					result,
@@ -1572,10 +1575,10 @@ export default class EnvelopedData
 				Promise.reject(error)
 			);
 			//endregion
-			
+
 			return currentSequence;
 		}
-		
+
 		function SubPasswordRecipientinfo(index)
 		{
 			//region Initial variables
@@ -1583,19 +1586,19 @@ export default class EnvelopedData
 			let pbkdf2Params;
 			let kekAlgorithm;
 			//endregion
-			
+
 			//region Derive PBKDF2 key from "password" buffer
 			currentSequence = currentSequence.then(() =>
 			{
 				if(("preDefinedData" in decryptionParameters) === false)
 					return Promise.reject("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\"");
-					
+
 				if(("keyDerivationAlgorithm" in _this.recipientInfos[index].value) === false)
 					return Promise.reject("Please append encoded \"keyDerivationAlgorithm\"");
-					
+
 				if(("algorithmParams" in _this.recipientInfos[index].value.keyDerivationAlgorithm) === false)
 					return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
-					
+
 				try
 				{
 					pbkdf2Params = new PBKDF2Params({ schema: _this.recipientInfos[index].value.keyDerivationAlgorithm.algorithmParams });
@@ -1604,7 +1607,7 @@ export default class EnvelopedData
 				{
 					return Promise.reject("Incorrectly encoded \"keyDerivationAlgorithm\"");
 				}
-					
+
 				return crypto.importKey("raw",
 					decryptionParameters.preDefinedData,
 					"PBKDF2",
@@ -1622,28 +1625,28 @@ export default class EnvelopedData
 				if(("name" in kekAlgorithm) === false)
 					return Promise.reject(`Incorrect OID for "keyEncryptionAlgorithm": ${_this.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId}`);
 				//endregion
-				
+
 				//region Get HMAC hash algorithm
 				let hmacHashAlgorithm = "SHA-1";
-					
+
 				if("prf" in pbkdf2Params)
 				{
 					const algorithm = getAlgorithmByOID(pbkdf2Params.prf.algorithmId);
 					if(("name" in algorithm) === false)
 						return Promise.reject("Incorrect OID for HMAC hash algorithm");
-						
+
 					hmacHashAlgorithm = algorithm.hash.name;
 				}
 				//endregion
-				
+
 				//region Get PBKDF2 "salt" value
 				const saltView = new Uint8Array(pbkdf2Params.salt.valueBlock.valueHex);
 				//endregion
-					
+
 				//region Get PBKDF2 iterations count
 				const iterations = pbkdf2Params.iterationCount;
 				//endregion
-					
+
 				return crypto.deriveKey({
 					name: "PBKDF2",
 					hash: {
@@ -1668,7 +1671,7 @@ export default class EnvelopedData
 				if(("name" in contentEncryptionAlgorithm) === false)
 					return Promise.reject(`Incorrect "contentEncryptionAlgorithm": ${_this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 					//endregion
-					
+
 				return crypto.unwrapKey("raw",
 					_this.recipientInfos[index].value.encryptedKey.valueBlock.valueHex,
 					result,
@@ -1680,19 +1683,19 @@ export default class EnvelopedData
 				Promise.reject(error)
 			);
 			//endregion
-			
+
 			return currentSequence;
 		}
-		
+
 		//endregion
-		
+
 		//region Perform steps, specific to each type of session key encryption
 		sequence = sequence.then(() =>
 		{
 			//region Initial variables
 			let currentSequence = Promise.resolve();
 			//endregion
-				
+
 			switch(this.recipientInfos[recipientIndex].variant)
 			{
 				case 1: // KeyTransRecipientInfo
@@ -1710,13 +1713,13 @@ export default class EnvelopedData
 				default:
 					return Promise.reject(`Uknown recipient type in array with index ${recipientIndex}`);
 			}
-				
+
 			return currentSequence;
 		}, error =>
 			Promise.reject(error)
 		);
 		//endregion
-		
+
 		//region Finally decrypt data by session key
 		sequence = sequence.then(result =>
 		{
@@ -1725,15 +1728,15 @@ export default class EnvelopedData
 			if(("name" in contentEncryptionAlgorithm) === false)
 				return Promise.reject(`Incorrect "contentEncryptionAlgorithm": ${this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
 			//endregion
-			
+
 			//region Get "intialization vector" for content encryption algorithm
 			const ivBuffer = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
 			const ivView = new Uint8Array(ivBuffer);
 			//endregion
-			
+
 			//region Create correct data block for decryption
 			let dataBuffer = new ArrayBuffer(0);
-				
+
 			if(this.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false)
 				dataBuffer = this.encryptedContentInfo.encryptedContent.valueBlock.valueHex;
 			else
@@ -1742,7 +1745,7 @@ export default class EnvelopedData
 					dataBuffer = utilConcatBuf(dataBuffer, content.valueBlock.valueHex);
 			}
 			//endregion
-				
+
 			return crypto.decrypt({
 				name: contentEncryptionAlgorithm.name,
 				iv: ivView
@@ -1753,7 +1756,7 @@ export default class EnvelopedData
 			Promise.reject(error)
 		);
 		//endregion
-		
+
 		return sequence;
 	}
 	//**********************************************************************************
