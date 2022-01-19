@@ -96,7 +96,9 @@ export default class CertificateSet
 										tagClass: 3, // CONTEXT-SPECIFIC
 										tagNumber: 1 // [1]
 									},
-									value: AttributeCertificateV1.schema().valueBlock.value
+									value: [
+										new asn1js.Sequence
+									]
 								}),
 								new asn1js.Constructed({
 									idBlock: {
@@ -159,7 +161,13 @@ export default class CertificateSet
 			switch(initialTagNumber)
 			{
 				case 1:
-					return new AttributeCertificateV1({ schema: elementSequence });
+					// WARN: It's possible that CMS contains AttributeCertificateV2 instead of AttributeCertificateV1
+					// Check the certificate version
+					if (elementSequence.valueBlock.value[0].valueBlock.value[0].valueBlock.valueDec === 1) {
+						return new AttributeCertificateV2({ schema: elementSequence });
+					} else {
+						return new AttributeCertificateV1({ schema: elementSequence });
+					}
 				case 2:
 					return new AttributeCertificateV2({ schema: elementSequence });
 				case 3:

@@ -177,10 +177,10 @@ export class ObjectDigestInfo
 		});
 		
 		if("otherObjectTypeID" in this)
-			result.value.push(this.otherObjectTypeID);
+			result.valueBlock.value.push(this.otherObjectTypeID);
 		
-		result.value.push(this.digestAlgorithm.toSchema());
-		result.value.push(this.objectDigest);
+		result.valueBlock.value.push(this.digestAlgorithm.toSchema());
+		result.valueBlock.value.push(this.objectDigest);
 		
 		return result;
 	}

@@ -13,12 +13,16 @@ import IssuerAndSerialNumber from "./IssuerAndSerialNumber.js";
 import TSTInfo from "./TSTInfo.js";
 import CertificateChainValidationEngine from "./CertificateChainValidationEngine.js";
 import BasicOCSPResponse from "./BasicOCSPResponse.js";
+import OtherCertificateFormat from "./OtherCertificateFormat.js";
+import AttributeCertificateV1 from "./AttributeCertificateV1.js";
+import AttributeCertificateV2 from "./AttributeCertificateV2.js";
 //**************************************************************************************
 /**
  * Class from RFC5652
  */
 export default class SignedData 
 {
+
 	//**********************************************************************************
 	/**
 	 * Constructor for SignedData class
@@ -289,6 +293,35 @@ export default class SignedData
 		//region Create array for output sequence
 		const outputArray = [];
 		
+		// IF ((certificates is present) AND
+		// 	(any certificates with a type of other are present)) OR
+		// 	((crls is present) AND
+		// 	(any crls with a type of other are present))
+		// THEN version MUST be 5
+		// ELSE
+		// 	IF (certificates is present) AND
+		// 			(any version 2 attribute certificates are present)
+		// 	THEN version MUST be 4
+		// 	ELSE
+		// 			IF ((certificates is present) AND
+		// 				(any version 1 attribute certificates are present)) OR
+		// 				(any SignerInfo structures are version 3) OR
+		// 				(encapContentInfo eContentType is other than id-data)
+		// 			THEN version MUST be 3
+		// 			ELSE version MUST be 1
+		if ((this.certificates && this.certificates.length && this.certificates.some(o => o instanceof OtherCertificateFormat))
+			|| (this.crls && this.crls.length && this.crls.some(o => o instanceof OtherRevocationInfoFormat))) {
+			this.version = 5;
+		} else if (this.certificates && this.certificates.length && this.certificates.some(o => o instanceof AttributeCertificateV2)) {
+			this.version = 4;
+		} else if ((this.certificates && this.certificates.length && this.certificates.some(o => o instanceof AttributeCertificateV1))
+			|| this.signerInfos.some(o => o.version === 3)
+			|| this.encapContentInfo.eContentType !== SignedData.ID_DATA) {
+			this.version = 3;
+		} else {
+			this.version = 1;
+		}
+
 		outputArray.push(new asn1js.Integer({ value: this.version }));
 		
 		//region Create array of digest algorithms
@@ -1057,4 +1090,6 @@ export default class SignedData
 	}
 	//**********************************************************************************
 }
+
+SignedData.ID_DATA = "1.2.840.113549.1.7.1";
 //**************************************************************************************
