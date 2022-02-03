@@ -2296,7 +2296,7 @@ export default class CryptoEngine
 		//endregion
 		
 		//region Fill internal structures base on "privateKey" and "hashAlgorithm"
-		switch(privateKey.algorithm.name.toUpperCase())
+		switch(parameters.algorithm.name.toUpperCase())
 		{
 			case "RSASSA-PKCS1-V1_5":
 			case "ECDSA":
