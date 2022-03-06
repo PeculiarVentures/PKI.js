@@ -86,7 +86,7 @@
     "build:examples:es5": "npm run ex1:es5 && npm run ex2:es5 && npm run ex3 && npm run ex4:es5 && npm run ex5:es5 && npm run ex6:es5 && npm run ex7:es5 && npm run ex8:es5 && npm run ex9:es5 && npm run ex10:es5 && npm run ex11:es5 && npm run ex12:es5 && npm run ex13:es5 && npm run ex14:es5 && npm run ex15:es5 && npm run ex16:es5 && npm run ex18:es5 && npm run ex19:es5",
     "build:tests": "npm run build:examples",
     "build:docs": "esdoc",
-    "test": "cross-env NODE_ENV=test nyc mocha",
+    "test": "cross-env NODE_ENV=test nyc mocha test/s_*.js test/n_*.js",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
