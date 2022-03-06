@@ -687,7 +687,7 @@ context("PKIjs functional testing", () =>
 				signedData = new pkijs.SignedData({ schema: asn.result });
 			});
 
-			it("IssuerAndSerialNumber", async () => {		
+			it("IssuerAndSerialNumber", async () => {
 				const ok = await signedData.verify({
 					checkChain: false,
 					checkDate: false,
@@ -706,7 +706,7 @@ context("PKIjs functional testing", () =>
 				});
 				assert.deepEqual(ok, true);
 			});
-			
+
 			it("Constructed KeyIdentifier", async () => {
 				const ok = await signedData.verify({
 					checkChain: false,
@@ -716,8 +716,60 @@ context("PKIjs functional testing", () =>
 				});
 				assert.deepEqual(ok, true);
 			});
-			
+
 		});
+
+	});
+
+	context("ECPublicKey", () => {
+
+		const vectors = {
+			"P-256": {
+				raw: "3059301306072a8648ce3d020106082a8648ce3d03010703420004d0687590a50fc3af8b09477f0437371f06c72b11f1d210bbec40903c01ec167ab1ac3b778061ddaa096446afb2e53715b134e8bf98775a49257cb1bc04b2e9fe",
+			},
+			"P-384": {
+				raw: "3076301006072a8648ce3d020106052b81040022036200048464e0d0ed55ff5e2607dbb9bed89f27d811b530432bf6f22d06a310d77e8ed92d65f8872ced06e4f8fe36e9e91b2ad955db6397b98f9272a7b632b6c7a01de864f28a5fbe183766b80e3e323c6dc85c4d73f2824fead7200987d79e2c254ab8",
+			},
+			"P-521": {
+				raw: "30819b301006072a8648ce3d020106052b810400230381860004001eace97a29b73a7d1168f542787accf2d391c32283a7e7a3df09af86aeced5a9b096bc4872ac8e1fce773331b38a37378fbe7d51d3f25a8e8dd4624902fed63cac018301ae136b17f4c0f046d9801585379343e0768ebce91d75c3f7b442bd6c0fddd1c302d3576fc73ca0cb04c47d7f16cfd8c8904ba6f107d3f067c3b0e8456e75be",
+			},
+			"brainpoolP256r1": {
+				raw: "305a301406072a8648ce3d020106092b2403030208010107034200044baeaad70c42f62adb34034c6a57b66f8e77403e946144c38695d0ea174544b67fcf1a741931e6a193119b83dfadd73e13c66bc6e8d616d2ecd5254c127697b9",
+			},
+			"brainpoolP384r1": {
+				raw: "307a301406072a8648ce3d020106092b240303020801010b036200044e05063a6211a9161a3ca6669c80356aa31e12ae3e356b0efd4bc32c9543d4da1ec9272774d9ccd336dd09268f2999f7228474749a858c643c55e7358f682780f46d74f0ca335d802eac022c57bc0f69919f9484fa69c904dd468fd7dc1e1596",
+			},
+			"brainpoolP512r1": {
+				raw: "30819b301406072a8648ce3d020106092b240303020801010d03818200049d775c269b800e8ced30801b0c4be87e0cf6dbaf550b6ecc6ec8100d6939fa4ecb5d275a5b157d13ec6ae54729c2cb34396ea0fe131a090399f66f9637f6cd727ff23f64b3d3bc7b6323d3d4dffd721618a96761c5d07f73daee1ac5590f340c581ad45fd38052944d018631f47b964fc834f149fe1fa5585034e85834ec0cd4",
+			},
+		};
+
+		for (const namedCurve in vectors) {
+			if (Object.hasOwnProperty.call(vectors, namedCurve)) {
+				const vector = vectors[namedCurve];
+				const keyView = new Uint8Array(Buffer.from(vector.raw, "hex"));
+
+				it(namedCurve, () => {
+					const asnPki = asn1js.fromBER(keyView.buffer);
+					const pki = new pkijs.PublicKeyInfo({ schema: asnPki.result });
+					const crv = pkijs.ECNamedCurves.find(namedCurve);
+					assert.ok(crv);
+
+					const key = new pkijs.ECPublicKey({
+						namedCurve: crv.id,
+						schema: pki.subjectPublicKey.valueBlock.valueHex,
+					});
+
+					const jwk = key.toJSON();
+					assert.strictEqual(jwk.crv, namedCurve);
+
+					const keyCopy = new pkijs.ECPublicKey({ json: jwk });
+					const raw = keyCopy.toSchema().toBER();
+					assert.strictEqual(Buffer.from(raw).toString("hex"), Buffer.from(pki.subjectPublicKey.valueBlock.valueHex).toString("hex"));
+				});
+
+			}
+		}
 
 	});
 });
