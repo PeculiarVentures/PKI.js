@@ -7,3 +7,7 @@ coverage
 .vs
 .vscode
 docs
+
+# Build
+test/**/*.js
+examples/**/bundle.js
