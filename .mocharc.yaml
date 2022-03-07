@@ -1,0 +1,5 @@
+timeout: 10000
+require: '@babel/register'
+spec:
+  - test/n_*.js
+  - test/s_*.js

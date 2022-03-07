@@ -1,11 +1,14 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, utilConcatBuf, isEqualBuffer, toBase64, fromBase64, arrayBufferToString, stringToArrayBuffer } from "pvutils";
+import ECNamedCurves from "./ECNamedCurves";
 //**************************************************************************************
+
 /**
  * Class from RFC5480
  */
 export default class ECPublicKey
 {
+
 	//**********************************************************************************
 	/**
 	 * Constructor for ECCPublicKey class
@@ -105,26 +108,15 @@ export default class ECPublicKey
 		//endregion
 
 		//region Get internal properties from parsed schema
-		let coordinateLength;
-
-		switch(this.namedCurve)
-		{
-			case "1.2.840.10045.3.1.7": // P-256
-				coordinateLength = 32;
-				break;
-			case "1.3.132.0.34": // P-384
-				coordinateLength = 48;
-				break;
-			case "1.3.132.0.35": // P-521
-				coordinateLength = 66;
-				break;
-			default:
-				throw new Error(`Incorrect curve OID: ${this.namedCurve}`);
+		const namedCurve = ECNamedCurves.find(this.namedCurve);
+		if (!namedCurve) {
+			throw new Error(`Incorrect curve OID: ${this.namedCurve}`);
 		}
+		const coordinateLength = namedCurve.size;
 
 		if(schema.byteLength !== (coordinateLength * 2 + 1))
 			throw new Error("Object's schema was not verified against input data for ECPublicKey");
-		
+
 		this.x = schema.slice(1, coordinateLength + 1);
 		this.y = schema.slice(1 + coordinateLength, coordinateLength * 2 + 1);
 		//endregion
@@ -145,29 +137,15 @@ export default class ECPublicKey
 	}
 	//**********************************************************************************
 	/**
-	 * Convertion for the class to JSON object
+	 * Conversion for the class to JSON object
 	 * @returns {Object}
 	 */
 	toJSON()
 	{
-		let crvName = "";
-
-		switch(this.namedCurve)
-		{
-			case "1.2.840.10045.3.1.7": // P-256
-				crvName = "P-256";
-				break;
-			case "1.3.132.0.34": // P-384
-				crvName = "P-384";
-				break;
-			case "1.3.132.0.35": // P-521
-				crvName = "P-521";
-				break;
-			default:
-		}
+		const namedCurve = ECNamedCurves.find(this.namedCurve);
 
 		return {
-			crv: crvName,
+			crv: namedCurve ? namedCurve.name : this.namedCurve,
 			x: toBase64(arrayBufferToString(this.x), true, true, false),
 			y: toBase64(arrayBufferToString(this.y), true, true, false)
 		};
@@ -179,25 +157,14 @@ export default class ECPublicKey
 	 */
 	fromJSON(json)
 	{
-		let coodinateLength = 0;
+		let coordinateLength = 0;
 
 		if("crv" in json)
 		{
-			switch(json.crv.toUpperCase())
-			{
-				case "P-256":
-					this.namedCurve = "1.2.840.10045.3.1.7";
-					coodinateLength = 32;
-					break;
-				case "P-384":
-					this.namedCurve = "1.3.132.0.34";
-					coodinateLength = 48;
-					break;
-				case "P-521":
-					this.namedCurve = "1.3.132.0.35";
-					coodinateLength = 66;
-					break;
-				default:
+			const namedCurve = ECNamedCurves.find(json.crv);
+			if (namedCurve) {
+				this.namedCurve = namedCurve.id;
+				coordinateLength = namedCurve.size;
 			}
 		}
 		else
@@ -206,16 +173,16 @@ export default class ECPublicKey
 		if("x" in json)
 		{
 			const convertBuffer = stringToArrayBuffer(fromBase64(json.x, true));
-			
-			if(convertBuffer.byteLength < coodinateLength)
+
+			if(convertBuffer.byteLength < coordinateLength)
 			{
-				this.x = new ArrayBuffer(coodinateLength);
+				this.x = new ArrayBuffer(coordinateLength);
 				const view = new Uint8Array(this.x);
 				const convertBufferView = new Uint8Array(convertBuffer);
 				view.set(convertBufferView, 1);
 			}
 			else
-				this.x = convertBuffer.slice(0, coodinateLength);
+				this.x = convertBuffer.slice(0, coordinateLength);
 		}
 		else
 			throw new Error("Absent mandatory parameter \"x\"");
@@ -223,16 +190,16 @@ export default class ECPublicKey
 		if("y" in json)
 		{
 			const convertBuffer = stringToArrayBuffer(fromBase64(json.y, true));
-			
-			if(convertBuffer.byteLength < coodinateLength)
+
+			if(convertBuffer.byteLength < coordinateLength)
 			{
-				this.y = new ArrayBuffer(coodinateLength);
+				this.y = new ArrayBuffer(coordinateLength);
 				const view = new Uint8Array(this.y);
 				const convertBufferView = new Uint8Array(convertBuffer);
 				view.set(convertBufferView, 1);
 			}
 			else
-				this.y = convertBuffer.slice(0, coodinateLength);
+				this.y = convertBuffer.slice(0, coordinateLength);
 		}
 		else
 			throw new Error("Absent mandatory parameter \"y\"");

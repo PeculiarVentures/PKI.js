@@ -13,9 +13,7 @@ import PFX from "../../src/PFX";
 import Attribute from "../../src/Attribute";
 import PKCS8ShroudedKeyBag from "../../src/PKCS8ShroudedKeyBag";
 import NodeEngine from "./NodeEngine";
-//*********************************************************************************
-const nodeEngine = new NodeEngine();
-setEngine(nodeEngine.name, nodeEngine.crypto, nodeEngine.subtle);
+
 //*********************************************************************************
 //region Global variables
 //*********************************************************************************
@@ -28,41 +26,41 @@ const attributePrivateKeyBASE64 = "MDgCAQAwDwYNKwYBBAGWZAMGg30FbgQiBCAShWZocFw8W
 let certSimpl;
 let pkcs8Simpl;
 //*********************************************************************************
-//endregion 
+//endregion
 //*********************************************************************************
 function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 {
 	//region Initial variables
 	let sequence = Promise.resolve();
-	
+
 	const keyLocalIDBuffer = new ArrayBuffer(4);
 	const keyLocalIDView = new Uint8Array(keyLocalIDBuffer);
-	
+
 	getRandomValues(keyLocalIDView);
-	
+
 	const certLocalIDBuffer = new ArrayBuffer(4);
 	const certLocalIDView = new Uint8Array(certLocalIDBuffer);
-	
+
 	getRandomValues(certLocalIDView);
-	
+
 	//region "KeyUsage" attribute
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
-	
+
 	bitView[0] |= 0x80;
-	
+
 	const keyUsage = new asn1js.BitString({
 		valueHex: bitArray,
 		unusedBits: 7
 	});
 	//endregion
-	
+
 	const passwordConverted = stringToArrayBuffer(password);
-	
+
 	const contentEncryptionAlgorithm = (getAlgorithmParameters(inputAlgorithm, "encrypt")).algorithm;
 	if(("name" in contentEncryptionAlgorithm) === false)
 		return Promise.reject(`No support for selected algorithm: ${inputAlgorithm}`);
-	
+
 	const makeInternalValuesParameters = {
 		password: passwordConverted,
 		contentEncryptionAlgorithm,
@@ -70,7 +68,7 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		iterationCount: 2048
 	};
 	//endregion
-	
+
 	//region Add "keyUsage" attribute
 	pkcs8Simpl.attributes = [
 		new Attribute({
@@ -81,7 +79,7 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		})
 	];
 	//endregion
-	
+
 	//region Put initial values for PKCS#12 structures
 	const pkcs12 = new PFX({
 		parsedValue: {
@@ -161,13 +159,13 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		}
 	});
 	//endregion
-	
+
 	//region Encode internal values for "PKCS8ShroudedKeyBag"
 	sequence = sequence.then(
 		() => pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.makeInternalValues(makeInternalValuesParameters)
 	);
 	//endregion
-	
+
 	//region Encode internal values for all "SafeContents" firts (create all "Privacy Protection" envelopes)
 	sequence = sequence.then(
 		() => pkcs12.parsedValue.authenticatedSafe.makeInternalValues({
@@ -180,7 +178,7 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		})
 	);
 	//endregion
-	
+
 	//region Encode internal values for "Integrity Protection" envelope
 	sequence = sequence.then(
 		() => pkcs12.makeInternalValues({
@@ -191,11 +189,11 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		})
 	);
 	//endregion
-	
+
 	//region Save encoded data
 	sequence = sequence.then(() => pkcs12.toSchema().toBER(false));
 	//endregion
-	
+
 	return sequence;
 }
 //*********************************************************************************
@@ -203,35 +201,35 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 {
 	//region Initial variables
 	let sequence = Promise.resolve();
-	
+
 	const keyLocalIDBuffer = new ArrayBuffer(4);
 	const keyLocalIDView = new Uint8Array(keyLocalIDBuffer);
-	
+
 	getRandomValues(keyLocalIDView);
-	
+
 	const certLocalIDBuffer = new ArrayBuffer(4);
 	const certLocalIDView = new Uint8Array(certLocalIDBuffer);
-	
+
 	getRandomValues(certLocalIDView);
-	
+
 	//region "KeyUsage" attribute
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
-	
+
 	bitView[0] |= 0x80;
-	
+
 	const keyUsage = new asn1js.BitString({
 		valueHex: bitArray,
 		unusedBits: 7
 	});
 	//endregion
-	
+
 	const passwordConverted = stringToArrayBuffer(password);
-	
+
 	const contentEncryptionAlgorithm = (getAlgorithmParameters(inputAlgorithm, "encrypt")).algorithm;
 	if(("name" in contentEncryptionAlgorithm) === false)
 		return Promise.reject(`No support for selected algorithm: ${inputAlgorithm}`);
-	
+
 	const makeInternalValuesParameters = {
 		password: passwordConverted,
 		contentEncryptionAlgorithm,
@@ -240,7 +238,7 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		iterationCount: 2048
 	};
 	//endregion
-	
+
 	//region Add "keyUsage" attribute
 	pkcs8Simpl.attributes = [
 		new Attribute({
@@ -251,7 +249,7 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		})
 	];
 	//endregion
-	
+
 	//region Put initial values for PKCS#12 structures
 	const pkcs12 = new PFX({
 		parsedValue: {
@@ -331,13 +329,13 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		}
 	});
 	//endregion
-	
+
 	//region Encode internal values for "PKCS8ShroudedKeyBag"
 	sequence = sequence.then(
 		() => pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.makeInternalValues(makeInternalValuesParameters)
 	);
 	//endregion
-	
+
 	//region Encode internal values for all "SafeContents" firts (create all "Privacy Protection" envelopes)
 	sequence = sequence.then(
 		() => pkcs12.parsedValue.authenticatedSafe.makeInternalValues({
@@ -350,7 +348,7 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		})
 	);
 	//endregion
-	
+
 	//region Encode internal values for "Integrity Protection" envelope
 	sequence = sequence.then(
 		() => pkcs12.makeInternalValues({
@@ -361,11 +359,11 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		})
 	);
 	//endregion
-	
+
 	//region Save encoded data
 	sequence = sequence.then(() => pkcs12.toSchema().toBER(false));
 	//endregion
-	
+
 	return sequence;
 }
 //*********************************************************************************
@@ -373,15 +371,15 @@ function parsePKCS12(buffer, password)
 {
 	//region Initial variables
 	let sequence = Promise.resolve();
-	
+
 	const passwordConverted = stringToArrayBuffer(password);
 	//endregion
-	
+
 	//region Parse internal PKCS#12 values
 	const asn1 = asn1js.fromBER(buffer);
 	const pkcs12 = new PFX({ schema: asn1.result });
 	//endregion
-	
+
 	//region Parse "AuthenticatedSafe" value of PKCS#12 data
 	sequence = sequence.then(
 		() => pkcs12.parseInternalValues({
@@ -390,7 +388,7 @@ function parsePKCS12(buffer, password)
 		})
 	);
 	//endregion
-	
+
 	//region Parse "SafeContents" values
 	sequence = sequence.then(
 		() => pkcs12.parsedValue.authenticatedSafe.parseInternalValues({
@@ -405,7 +403,7 @@ function parsePKCS12(buffer, password)
 		})
 	);
 	//endregion
-	
+
 	//region Parse "PKCS8ShroudedKeyBag" value
 	sequence = sequence.then(() =>
 	{
@@ -423,26 +421,33 @@ function parsePKCS12(buffer, password)
 		}
 	});
 	//endregion
-	
+
 	//region Store parsed value to Web page
 	sequence = sequence.then(
 		() => pkcs12
 	);
 	//endregion
-	
+
 	return sequence;
 }
 //**********************************************************************************
 context("Node.js PKCS#12 Example", () =>
 {
+
+	before(() =>
+	{
+		const nodeEngine = new NodeEngine();
+		setEngine(nodeEngine.name, nodeEngine.crypto, nodeEngine.subtle);
+	});
+
 	//region Initial variables
 	const password = "Demo";
 	//endregion
-	
+
 	it("Parse Windows-like PKCS#12 data", () =>
 	{
 		let sequence = Promise.resolve();
-		
+
 		sequence = sequence.then(() =>
 		{
 			// Windows RC2
@@ -456,18 +461,18 @@ context("Node.js PKCS#12 Example", () =>
 			const windowsP12 = "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";
 			return parsePKCS12(stringToArrayBuffer(fromBase64(windowsP12)), "password");
 		});
-		
+
 		return sequence;
 	});
-	
+
 	it("X.509 Certificate, RC2-40-CBC algorithm", () =>
 	{
 		let asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509CertificateBASE64)));
 		certSimpl = new Certificate({ schema: asn1.result });
-		
+
 		asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509PrivateKeyBASE64)));
 		pkcs8Simpl = new PrivateKeyInfo({ schema: asn1.result });
-		
+
 		return windowsLike(password, "RC2-40-CBC", "SHA-1").then(result =>
 		{
 			//console.log(`X.509 Certificate, RC2-40-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
@@ -479,10 +484,10 @@ context("Node.js PKCS#12 Example", () =>
 	{
 		let asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509CertificateBASE64)));
 		certSimpl = new Certificate({ schema: asn1.result });
-		
+
 		asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509PrivateKeyBASE64)));
 		pkcs8Simpl = new PrivateKeyInfo({ schema: asn1.result });
-		
+
 		return openSSLLike(password, "DES-EDE3-CBC", "SHA-1").then(result =>
 		{
 			//console.log(`X.509 Certificate, DES-EDE3-CBC algorithm, SHA-1 PKCS#12: ${toBase64(arrayBufferToString(result))}`);
@@ -501,45 +506,45 @@ context("Node.js PKCS#12 Example", () =>
 			return parsePKCS12(result, password);
 		});
 	});
-	
+
 	it("Attribute Certificate, DES-EDE3-CBC algorithm", () =>
 	{
 		let asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(attributeCertificateBASE64)));
 		certSimpl = new AttributeCertificateV2({ schema: asn1.result });
-		
+
 		asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(attributePrivateKeyBASE64)));
 		pkcs8Simpl = new PrivateKeyInfo({ schema: asn1.result });
-		
+
 		return openSSLLike(password, "DES-EDE3-CBC").then(result =>
 		{
 			//console.log(`Attribute Certificate, DES-EDE3-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		});
 	});
-	
+
 	it("X.509 Certificate, AES-256-CBC algorithm", () =>
 	{
 		let asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509CertificateBASE64)));
 		certSimpl = new Certificate({ schema: asn1.result });
-		
+
 		asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(x509PrivateKeyBASE64)));
 		pkcs8Simpl = new PrivateKeyInfo({ schema: asn1.result });
-		
+
 		return openSSLLike(password, "AES-256-CBC").then(result =>
 		{
 			//console.log(`X.509 Certificate, AES-256-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
 			return parsePKCS12(result, password);
 		});
 	});
-	
+
 	it("Attribute Certificate, AES-256-CBC algorithm", () =>
 	{
 		let asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(attributeCertificateBASE64)));
 		certSimpl = new AttributeCertificateV2({ schema: asn1.result });
-		
+
 		asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64(attributePrivateKeyBASE64)));
 		pkcs8Simpl = new PrivateKeyInfo({ schema: asn1.result });
-		
+
 		return openSSLLike(password, "AES-256-CBC").then(result =>
 		{
 			//console.log(`Attribute Certificate, AES-256-CBC algorithm PKCS#12: ${toBase64(arrayBufferToString(result))}`);
