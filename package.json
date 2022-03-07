@@ -43,8 +43,15 @@
   "engines": {
     "node": ">=6.0.0"
   },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "build",
+    "src"
+  ],
   "scripts": {
-    "build": "babel src --compact=false --out-dir build --source-maps",
+    "build": "babel src --compact=false --out-dir build",
+    "build:dev": "babel src --compact=false --out-dir build --source-maps",
     "watch": "babel src --compact=false --out-dir build --source-maps --watch",
     "ex1": "cd examples/CMSSignedComplexExample && npm run build && cd ../..",
     "ex1:es5": "cd examples/CMSSignedComplexExample && npm run build:es5 && cd ../..",
