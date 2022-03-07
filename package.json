@@ -28,7 +28,7 @@
     "esdoc": "^1.1.0",
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^7.13.0",
-    "mocha": "^8.2.1",
+    "mocha": "^9.2.1",
     "nyc": "^15.1.0",
     "rollup": "1.12.3",
     "rollup-plugin-commonjs": "10.0.0",
