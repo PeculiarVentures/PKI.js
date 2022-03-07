@@ -1,4 +1,4 @@
-timeout: 4000
+timeout: 10000
 require: '@babel/register'
 spec:
   - test/n_*.js
