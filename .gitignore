@@ -10,3 +10,4 @@ docs
 # Build
 test/**/*.js
 examples/**/bundle.js
+.DS_Store
