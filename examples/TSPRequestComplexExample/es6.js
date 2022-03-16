@@ -10,15 +10,15 @@ import { formatPEM } from "../../examples/examples_common";
 //*********************************************************************************
 let tspReqBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created TSP request 
 //*********************************************************************************
-//region Create TSP request  
+//#region Create TSP request  
 //*********************************************************************************
 function createTSPReqInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	const tspReqSimpl = new TimeStampReq();
-	//endregion
+	//#endregion
 	
-	//region Put static variables
+	//#region Put static variables
 	const fictionBuffer = new ArrayBuffer(4);
 	const fictionView = new Uint8Array(fictionBuffer);
 	fictionView[0] = 0x7F;
@@ -36,11 +36,11 @@ function createTSPReqInternal()
 	tspReqSimpl.reqPolicy = "1.1.1";
 	tspReqSimpl.certReq = true;
 	tspReqSimpl.nonce = new asn1js.Integer({ valueHex: fictionBuffer });
-	//endregion
+	//#endregion
 	
-	//region Encode TSP request and put on the Web page
+	//#region Encode TSP request and put on the Web page
 	tspReqBuffer = tspReqSimpl.toSchema().toBER(false);
-	//endregion
+	//#endregion
 	
 	return Promise.resolve(true);
 }
@@ -64,21 +64,21 @@ function createTSPReq()
 	});
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Parse existing TSP request  
+//#region Parse existing TSP request  
 //*********************************************************************************
 function parseTSPReq()
 {
-	//region Initial check 
+	//#region Initial check 
 	if(tspReqBuffer.byteLength === 0)
 	{
 		alert("Nothing to parse!");
 		return;
 	}
-	//endregion 
+	//#endregion 
 	
-	//region Initial activities 
+	//#region Initial activities 
 	document.getElementById("tsp-req-extn-div").style.display = "none";
 	
 	const imprintTable = document.getElementById("tsp-req-imprint");
@@ -88,14 +88,14 @@ function parseTSPReq()
 	const extensionTable = document.getElementById("tsp-req-extn-table");
 	while(extensionTable.rows.length > 1)
 		extensionTable.deleteRow(extensionTable.rows.length - 1);
-	//endregion
+	//#endregion
 	
-	//region Decode existing TSP request
+	//#region Decode existing TSP request
 	const asn1 = asn1js.fromBER(tspReqBuffer);
 	const tspReqSimpl = new TimeStampReq({ schema: asn1.result });
-	//endregion 
+	//#endregion 
 	
-	//region Put information about message imprint 
+	//#region Put information about message imprint 
 	const dgstmap = {
 		"1.3.14.3.2.26": "SHA-1",
 		"2.16.840.1.101.3.4.2.1": "SHA-256",
@@ -114,36 +114,36 @@ function parseTSPReq()
 	const cell1 = row.insertCell(1);
 	// noinspection InnerHTMLJS
 	cell1.innerHTML = bufferToHexCodes(tspReqSimpl.messageImprint.hashedMessage.valueBlock.valueHex);
-	//endregion 
+	//#endregion 
 	
-	//region Put information about policy 
+	//#region Put information about policy 
 	if("reqPolicy" in tspReqSimpl)
 	{
 		// noinspection InnerHTMLJS
 		document.getElementById("tsp-req-policy").innerHTML = tspReqSimpl.reqPolicy;
 		document.getElementById("tsp-req-pol").style.display = "block";
 	}
-	//endregion 
+	//#endregion 
 	
-	//region Put information about nonce 
+	//#region Put information about nonce 
 	if("nonce" in tspReqSimpl)
 	{
 		// noinspection InnerHTMLJS
 		document.getElementById("tsp-req-nonce").innerHTML = bufferToHexCodes(tspReqSimpl.nonce.valueBlock.valueHex);
 		document.getElementById("tsp-req-non").style.display = "block";
 	}
-	//endregion 
+	//#endregion 
 	
-	//region Put information about existence of "certReq" flag
+	//#region Put information about existence of "certReq" flag
 	if("certReq" in tspReqSimpl)
 	{
 		// noinspection InnerHTMLJS
 		document.getElementById("tsp-req-cert-req").innerHTML = (tspReqSimpl.certReq) ? "true" : "false";
 		document.getElementById("tsp-req-cert").style.display = "block";
 	}
-	//endregion 
+	//#endregion 
 	
-	//region Put information about TST info extensions 
+	//#region Put information about TST info extensions 
 	if("extensions" in tspReqSimpl)
 	{
 		const extensionTableInner = document.getElementById("resp-extensions");
@@ -158,10 +158,10 @@ function parseTSPReq()
 		
 		document.getElementById("tsp-req-extn-div").style.display = "block";
 	}
-	//endregion   
+	//#endregion   
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
 function handleFileBrowse(evt)
 {

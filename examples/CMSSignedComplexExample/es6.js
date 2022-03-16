@@ -27,11 +27,11 @@ let detachedSignature = false;
 
 const trustedCertificates = []; // Array of root certificates from "CA Bundle"
 //*********************************************************************************
-//region Parse "CA Bundle" file
+//#region Parse "CA Bundle" file
 //*********************************************************************************
 function parseCAbundle(buffer)
 {
-	//region Initial variables
+	//#region Initial variables
 	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 	
 	const startChars = "-----BEGIN CERTIFICATE-----";
@@ -47,7 +47,7 @@ function parseCAbundle(buffer)
 	let started = false;
 	
 	let certBodyEncoded = "";
-	//endregion
+	//#endregion
 	
 	for(let i = 0; i < view.length; i++)
 	{
@@ -59,7 +59,7 @@ function parseCAbundle(buffer)
 			{
 				if(String.fromCharCode(view[i]) === "-")
 				{
-					//region Decoded trustedCertificates
+					//#region Decoded trustedCertificates
 					const asn1 = asn1js.fromBER(stringToArrayBuffer(window.atob(certBodyEncoded)));
 					try
 					{
@@ -70,14 +70,14 @@ function parseCAbundle(buffer)
 						alert("Wrong certificate format");
 						return;
 					}
-					//endregion
+					//#endregion
 					
-					//region Set all "flag variables"
+					//#region Set all "flag variables"
 					certBodyEncoded = "";
 					
 					started = false;
 					waitForEnd = true;
-					//endregion
+					//#endregion
 				}
 			}
 		}
@@ -144,21 +144,21 @@ function parseCAbundle(buffer)
 	}
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Parse existing CMS_Signed
+//#region Parse existing CMS_Signed
 //*********************************************************************************
 function parseCMSSigned()
 {
-	//region Initial check
+	//#region Initial check
 	if(cmsSignedBuffer.byteLength === 0)
 	{
 		alert("Nothing to parse!");
 		return;
 	}
-	//endregion
+	//#endregion
 	
-	//region Initial activities
+	//#region Initial activities
 	// noinspection InnerHTMLJS
 	document.getElementById("cms-dgst-algos").innerHTML = "";
 	
@@ -172,15 +172,15 @@ function parseCMSSigned()
 	const crlsTable = document.getElementById("cms-rev-lists");
 	while(crlsTable.rows.length > 1)
 		crlsTable.deleteRow(crlsTable.rows.length - 1);
-	//endregion
+	//#endregion
 	
-	//region Decode existing CMS Signed Data
+	//#region Decode existing CMS Signed Data
 	const asn1 = asn1js.fromBER(cmsSignedBuffer);
 	const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
 	const cmsSignedSimpl = new SignedData({ schema: cmsContentSimpl.content });
-	//endregion
+	//#endregion
 	
-	//region Put information about digest algorithms in the CMS Signed Data
+	//#region Put information about digest algorithms in the CMS Signed Data
 	const dgstmap = {
 		"1.3.14.3.2.26": "SHA-1",
 		"2.16.840.1.101.3.4.2.1": "SHA-256",
@@ -199,9 +199,9 @@ function parseCMSSigned()
 		// noinspection InnerHTMLJS
 		document.getElementById("cms-dgst-algos").innerHTML = document.getElementById("cms-dgst-algos").innerHTML + ulrow;
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about encapsulated content type
+	//#region Put information about encapsulated content type
 	const contypemap = {
 		"1.3.6.1.4.1.311.2.1.4": "Authenticode signing information",
 		"1.2.840.113549.1.7.1": "Data content"
@@ -213,9 +213,9 @@ function parseCMSSigned()
 	
 	// noinspection InnerHTMLJS
 	document.getElementById("cms-encap-type").innerHTML = eContentType;
-	//endregion
+	//#endregion
 	
-	//region Put information about included certificates
+	//#region Put information about included certificates
 	const rdnmap = {
 		"2.5.4.6": "C",
 		"2.5.4.10": "O",
@@ -260,9 +260,9 @@ function parseCMSSigned()
 		
 		document.getElementById("cms-certs").style.display = "block";
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about included CRLs
+	//#region Put information about included CRLs
 	if("crls" in cmsSignedSimpl)
 	{
 		for(let j = 0; j < cmsSignedSimpl.crls.length; j++)
@@ -290,23 +290,23 @@ function parseCMSSigned()
 		
 		document.getElementById("cms-certs").style.display = "block";
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about number of signers
+	//#region Put information about number of signers
 	// noinspection InnerHTMLJS
 	document.getElementById("cms-signs").innerHTML = cmsSignedSimpl.signerInfos.length.toString();
-	//endregion
+	//#endregion
 	
 	document.getElementById("cms-signed-data-block").style.display = "block";
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Create CMS_Signed
+//#region Create CMS_Signed
 //*********************************************************************************
 function createCMSSignedInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 	
 	const certSimpl = new Certificate();
@@ -314,15 +314,15 @@ function createCMSSignedInternal()
 	
 	let publicKey;
 	let privateKey;
-	//endregion
+	//#endregion
 	
-	//region Get a "crypto" extension
+	//#region Get a "crypto" extension
 	const crypto = getCrypto();
 	if(typeof crypto === "undefined")
 		return Promise.reject("No WebCrypto extension found");
-	//endregion
+	//#endregion
 	
-	//region Put a static values
+	//#region Put a static values
 	certSimpl.version = 2;
 	certSimpl.serialNumber = new asn1js.Integer({ value: 1 });
 	certSimpl.issuer.typesAndValues.push(new AttributeTypeAndValue({
@@ -347,7 +347,7 @@ function createCMSSignedInternal()
 	
 	certSimpl.extensions = []; // Extensions are not a part of certificate by default, it's an optional array
 	
-	//region "KeyUsage" extension
+	//#region "KeyUsage" extension
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
@@ -362,25 +362,25 @@ function createCMSSignedInternal()
 		extnValue: keyUsage.toBER(false),
 		parsedValue: keyUsage // Parsed value for well-known extensions
 	}));
-	//endregion
-	//endregion
+	//#endregion
+	//#endregion
 	
-	//region Create a new key pair
+	//#region Create a new key pair
 	sequence = sequence.then(
 		() =>
 		{
-			//region Get default algorithm parameters for key generation
+			//#region Get default algorithm parameters for key generation
 			const algorithm = getAlgorithmParameters(signAlg, "generatekey");
 			if("hash" in algorithm.algorithm)
 				algorithm.algorithm.hash.name = hashAlg;
-			//endregion
+			//#endregion
 			
 			return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 		}
 	);
-	//endregion
+	//#endregion
 	
-	//region Store new key in an interim variables
+	//#region Store new key in an interim variables
 	sequence = sequence.then(
 		keyPair =>
 		{
@@ -389,22 +389,22 @@ function createCMSSignedInternal()
 		},
 		error => Promise.reject(`Error during key generation: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Exporting public key into "subjectPublicKeyInfo" value of certificate
+	//#region Exporting public key into "subjectPublicKeyInfo" value of certificate
 	sequence = sequence.then(
 		() => certSimpl.subjectPublicKeyInfo.importKey(publicKey)
 	);
-	//endregion
+	//#endregion
 	
-	//region Signing final certificate
+	//#region Signing final certificate
 	sequence = sequence.then(
 		() => certSimpl.sign(privateKey, hashAlg),
 		error => Promise.reject(`Error during exporting public key: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Encode and store certificate
+	//#region Encode and store certificate
 	sequence = sequence.then(
 		() =>
 		{
@@ -413,15 +413,15 @@ function createCMSSignedInternal()
 		},
 		error => Promise.reject(`Error during signing: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Exporting private key
+	//#region Exporting private key
 	sequence = sequence.then(
 		() => crypto.exportKey("pkcs8", privateKey)
 	);
-	//endregion
+	//#endregion
 	
-	//region Store exported key on Web page
+	//#region Store exported key on Web page
 	sequence = sequence.then(
 		result =>
 		{
@@ -429,18 +429,18 @@ function createCMSSignedInternal()
 		},
 		error => Promise.reject(`Error during exporting of private key: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Check if user wants us to include signed extensions
+	//#region Check if user wants us to include signed extensions
 	if(addExt)
 	{
-		//region Create a message digest
+		//#region Create a message digest
 		sequence = sequence.then(
 			() => crypto.digest({ name: hashAlg }, new Uint8Array(dataBuffer))
 		);
-		//endregion
+		//#endregion
 		
-		//region Combine all signed extensions
+		//#region Combine all signed extensions
 		sequence = sequence.then(
 			result =>
 			{
@@ -470,11 +470,11 @@ function createCMSSignedInternal()
 				return signedAttr;
 			}
 		);
-		//endregion
+		//#endregion
 	}
-	//endregion
+	//#endregion
 	
-	//region Initialize CMS Signed Data structures and sign it
+	//#region Initialize CMS Signed Data structures and sign it
 	sequence = sequence.then(
 		result =>
 		{
@@ -517,9 +517,9 @@ function createCMSSignedInternal()
 			return cmsSignedSimpl.sign(privateKey, 0, hashAlg, dataBuffer);
 		}
 	);
-	//endregion
+	//#endregion
 	
-	//region Create final result
+	//#region Create final result
 	sequence.then(
 		() =>
 		{
@@ -532,7 +532,7 @@ function createCMSSignedInternal()
 			
 			const _cmsSignedSchema = cmsContentSimp.toSchema();
 			
-			//region Make length of some elements in "indefinite form"
+			//#region Make length of some elements in "indefinite form"
 			_cmsSignedSchema.lenBlock.isIndefiniteForm = true;
 			
 			const block1 = _cmsSignedSchema.valueBlock.value[1];
@@ -548,13 +548,13 @@ function createCMSSignedInternal()
 				block3.valueBlock.value[1].lenBlock.isIndefiniteForm = true;
 				block3.valueBlock.value[1].valueBlock.value[0].lenBlock.isIndefiniteForm = true;
 			}
-			//endregion
+			//#endregion
 			
 			cmsSignedBuffer = _cmsSignedSchema.toBER(false);
 		},
 		error => Promise.reject(`Erorr during signing of CMS Signed Data: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
 	return sequence;
 }
@@ -597,26 +597,26 @@ function createCMSSigned()
 	});
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Verify existing CMS_Signed
+//#region Verify existing CMS_Signed
 //*********************************************************************************
 function verifyCMSSignedInternal()
 {
-	//region Initial check
+	//#region Initial check
 	if(cmsSignedBuffer.byteLength === 0)
 		return Promise.reject("Nothing to verify!");
-	//endregion
+	//#endregion
 	
 	return Promise.resolve().then(() =>
 	{
-		//region Decode existing CMS_Signed
+		//#region Decode existing CMS_Signed
 		const asn1 = asn1js.fromBER(cmsSignedBuffer);
 		const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
 		const cmsSignedSimpl = new SignedData({ schema: cmsContentSimpl.content });
-		//endregion
+		//#endregion
 		
-		//region Verify CMS_Signed
+		//#region Verify CMS_Signed
 		const verificationParameters = {
 			signer: 0,
 			trustedCerts: trustedCertificates
@@ -626,18 +626,18 @@ function verifyCMSSignedInternal()
 		
 		return cmsSignedSimpl.verify(verificationParameters);
 	});
-	//endregion
+	//#endregion
 }
 //*********************************************************************************
 function verifyCMSSigned()
 {
-	//region Initial check
+	//#region Initial check
 	if(cmsSignedBuffer.byteLength === 0)
 	{
 		alert("Nothing to verify!");
 		return Promise.resolve();
 	}
-	//endregion
+	//#endregion
 	
 	return verifyCMSSignedInternal().
 		then(
@@ -646,9 +646,9 @@ function verifyCMSSigned()
 		);
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Functions handling file selection
+//#region Functions handling file selection
 //*********************************************************************************
 function handleFileBrowse(evt)
 {
@@ -748,7 +748,7 @@ function handleDetachedSignatureOnChange()
 	detachedSignature = document.getElementById("detached_signature").checked;
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
 context("Hack for Rollup.js", () =>
 {
@@ -771,14 +771,14 @@ context("Hack for Rollup.js", () =>
 //*********************************************************************************
 context("CMS Signed Complex Example", () =>
 {
-	//region Initial variables
+	//#region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
 	const addExts = [false, true];
 	const detachedSignatures = [false, true];
 	
 	dataBuffer = (new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09])).buffer;
-	//endregion
+	//#endregion
 	
 	signAlgs.forEach(_signAlg =>
 	{
@@ -799,12 +799,12 @@ context("CMS Signed Complex Example", () =>
 						
 						return createCMSSignedInternal().then(() =>
 						{
-							//region Simple test for decoding data
+							//#region Simple test for decoding data
 							const asn1 = asn1js.fromBER(cmsSignedBuffer);
 							const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
 							// noinspection JSUnusedLocalSymbols
 							const cmsSignedSimpl = new SignedData({ schema: cmsContentSimpl.content });
-							//endregion
+							//#endregion
 							
 							return verifyCMSSignedInternal().then(result =>
 							{
@@ -821,14 +821,14 @@ context("CMS Signed Complex Example", () =>
 	{
 		const testData = "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";
 		
-		//region Simple test for decoding data
+		//#region Simple test for decoding data
 		cmsSignedBuffer = stringToArrayBuffer(fromBase64(testData));
 		
 		const asn1 = asn1js.fromBER(cmsSignedBuffer);
 		const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
 		// noinspection JSUnusedLocalSymbols
 		const cmsSignedSimpl = new SignedData({ schema: cmsContentSimpl.content });
-		//endregion
+		//#endregion
 		
 		return verifyCMSSignedInternal().then(result =>
 		{

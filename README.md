@@ -172,16 +172,16 @@ const certificateBinary = certificate.toSchema().toBER(false);
 ### Parse a X.509 certificate
 
 ```javascript
-    //region Parsing raw data as a X.509 certificate object
+    //#region Parsing raw data as a X.509 certificate object
     const asn1 = asn1js.fromBER(buffer);
     const certificate = new Certificate({ schema: asn1.result });
-    //endregion
+    //#endregion
 ```
 
 ### Create a X.509 certificate
 
 ```javascript
-    //region Creation of a new X.509 certificate
+    //#region Creation of a new X.509 certificate
     certificate.serialNumber = new asn1js.Integer({ value: 1 });
     certificate.issuer.typesAndValues.push(new AttributeTypeAndValue({
         type: "2.5.4.6", // Country name
@@ -205,7 +205,7 @@ const certificateBinary = certificate.toSchema().toBER(false);
 
     certificate.extensions = []; // Extensions are not a part of certificate by default, it's an optional array
 
-    //region "BasicConstraints" extension
+    //#region "BasicConstraints" extension
     const basicConstr = new BasicConstraints({
         cA: true,
         pathLenConstraint: 3
@@ -217,9 +217,9 @@ const certificateBinary = certificate.toSchema().toBER(false);
         extnValue: basicConstr.toSchema().toBER(false),
         parsedValue: basicConstr // Parsed value for well-known extensions
     }));
-    //endregion
+    //#endregion
 
-    //region "KeyUsage" extension
+    //#region "KeyUsage" extension
     const bitArray = new ArrayBuffer(1);
     const bitView = new Uint8Array(bitArray);
 
@@ -234,14 +234,14 @@ const certificateBinary = certificate.toSchema().toBER(false);
         extnValue: keyUsage.toBER(false),
         parsedValue: keyUsage // Parsed value for well-known extensions
     }));
-    //endregion
-    //endregion
+    //#endregion
+    //#endregion
 ```
 
 ### Create signed CMS message
 
 ```javascript
-    //region Creation of a new CMS Signed Data
+    //#region Creation of a new CMS Signed Data
     cmsSigned = new SignedData({
         encapContentInfo: new EncapsulatedContentInfo({
             eContentType: "1.2.840.113549.1.7.1", // "data" content type
@@ -259,7 +259,7 @@ const certificateBinary = certificate.toSchema().toBER(false);
     });
 
     return cmsSigned.sign(privateKey, 0, hashAlgorithm);
-    //endregion
+    //#endregion
 
 ```
 

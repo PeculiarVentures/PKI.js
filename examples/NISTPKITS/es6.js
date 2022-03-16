@@ -6,9 +6,9 @@ import Certificate from "../../src/Certificate";
 import CertificateRevocationList from "../../src/CertificateRevocationList";
 import CertificateChainValidationEngine from "../../src/CertificateChainValidationEngine";
 //<nodewebcryptoossl>
-//**************************************************************************************
-//region Testing constants
-//**************************************************************************************
+
+//#region Testing constants
+
 const PKITS = {
 	certpairs: {
 		"anyPolicyCACertforwardcrossCertificatePair.cp": "MIIDk6CCA48wggOLMIICc6ADAgECAgEmMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNVBAYTAlVTMR8wHQYDVQQKExZUZXN0IENlcnRpZmljYXRlcyAyMDExMRUwEwYDVQQDEwxUcnVzdCBBbmNob3IwHhcNMTAwMTAxMDgzMDAwWhcNMzAxMjMxMDgzMDAwWjBFMQswCQYDVQQGEwJVUzEfMB0GA1UEChMWVGVzdCBDZXJ0aWZpY2F0ZXMgMjAxMTEVMBMGA1UEAxMMYW55UG9saWN5IENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvugn3U80zcC88V4+KbMsCee/4FHBBKupp8Gb+eF5dctW06181KhOoFaijm4XisbJgcUxEc85E1mNlEGjEeGj9JYzYnuvuE44v4kmMxjBmEI+TFeMBNc0hciiVpwfEBFpP1peN+c8C2YCi0j73VkxoeJG6nzvKAce24PcC2l7Q01ueptDOakDb5vCq/w6Oi77jSLU0dVOBUOTaYfcdBs/OHYLenYIiuE+/wgOnFlx2QSQBoxQr5zNe3c4QyerN6spI5nxRXF2Ni0mg54ODY+rSo2pvBbeVcvr480f/NTrd+vc2rPlt58fJNLjbU6UQgrwW1SURDdXb8kFAQ12W6DBewIDAQABo4GFMIGCMB8GA1UdIwQYMBaAFOR9X9FclYYILAWuvnW2ZafZXahmMB0GA1UdDgQWBBS7yd7IHJXnQuKQoo6uA1yrJGB+hTAOBgNVHQ8BAf8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAMBgNVHSQEBTADgAEAMBEGA1UdIAQKMAgwBgYEVR0gADANBgkqhkiG9w0BAQsFAAOCAQEAPXUg8E6BdqWMzDkC+YBcEsYs/HjOFf9SZPns2Vbdj+NsNvozGCVmv9ixfJSjw27c+R2ps72bB/N9yYuue4et1KO53aOVHVURnP7u7M8M/M/z277CMDRRiUpqEe+AVNF51RnkWE3pjuLI/lvoirgZvoBuEkurn13RFdGxU6GABYGjTFM7mzh7u+HMocJAseRNsPWD8ctbRp7toV8JPfQ+kU9SEEd/CQPm11b/ypx6NuzR+l6BqJW07PATr9HCS6HjAOizNdAmjvI6wXIa2fv6it0zc9LzSy5XTWrrsGZbYzoXqgBTdqBviC7MwLD/d3sX47D13tCrkKNptpbfwZv84M==",
@@ -943,19 +943,19 @@ const PKITS = {
 		"WrongCRLCACRL.crl": "MIIB4zCBzAIBATANBgkqhkiG9w0BAQsFADBFMQswCQYDVQQGEwJVUzEfMB0GA1UEChMWVGVzdCBDZXJ0aWZpY2F0ZXMgMjAxMTEVMBMGA1UEAxMMVHJ1c3QgQW5jaG9yFw0xMDAxMDEwODMwMDBaFw0zMDEyMzEwODMwMDBaMCIwIAIBaBcNMTAwMTAxMDgzMDAwWjAMMAoGA1UdFQQDCgEBoC8wLTAfBgNVHSMEGDAWgBTkfV/RXJWGCCwFrr51tmWn2V2oZjAKBgNVHRQEAwIBATANBgkqhkiG9w0BAQsFAAOCAQEAqxkdtbsha7bhTM3wtzeelTjR1IGQgK4R8Psc2fw2NOydlq8PeSc3qitHV6m4dqHzchQlytYprOK4dRitEh+RYY4UKUNu+OQQ5VFLSvuC0Wv3xn2w29VqpQtavBFfJ8Lst9520pece6x86fB9L6VP4YNGIrLc+7hEjEDALJs+ttPoxNNXGMApQQi5xyZEksXQAo60ZdH/r95ldVCa7U2OVXO1MCuZlWQRlql0Bi3CzE26cW1jccEdU6yQ0ONKNuROR+6NsXZ2Qm2ClHEGWFJAZ/CWB7NjQ9maNkoioZb4IB2AKPKBcb0mT3TYspgT8zcZSP5DLC8iVOrcx2SLSvd35s==",
 	}
 };
-//**************************************************************************************
-//endregion
-//**************************************************************************************
-//region Aux functions
-//**************************************************************************************
+
+//#endregion
+
+//#region Aux functions
+
 function pkitsToArrayBuffer(pkitsValue)
 {
 	return stringToArrayBuffer(fromBase64(pkitsValue));
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Context for PKITS's certificates parsing test
+//#region Context for PKITS's certificates parsing test
 //*********************************************************************************
 context("PKITS's certificates parsing test", () =>
 {
@@ -979,7 +979,7 @@ context("PKITS's certificates parsing test", () =>
 				assert.doesNotThrow(() =>
 				{
 					func(buffer);
-				}, Error, "Correct convertion to CERT");
+				}, Error, "Correct conversion to CERT");
 			};
 		};
 		
@@ -987,9 +987,9 @@ context("PKITS's certificates parsing test", () =>
 	}
 });
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Context for PKITS's CRL parsing test
+//#region Context for PKITS's CRL parsing test
 //*********************************************************************************
 context("PKITS's CRL parsing test", () =>
 {
@@ -1013,7 +1013,7 @@ context("PKITS's CRL parsing test", () =>
 				assert.doesNotThrow(() =>
 				{
 					func(buffer);
-				}, Error, "Correct convertion to CRL");
+				}, Error, "Correct conversion to CRL");
 			};
 		};
 		
@@ -1021,9 +1021,9 @@ context("PKITS's CRL parsing test", () =>
 	}
 });
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Context for PKITS's certificate pairs parsing test
+//#region Context for PKITS's certificate pairs parsing test
 //*********************************************************************************
 context("PKITS's certificate pairs parsing test", () =>
 {
@@ -1047,20 +1047,20 @@ context("PKITS's certificate pairs parsing test", () =>
 				
 				for(let j = 0; j < asn1.result.valueBlock.value.length; j++)
 				{
-					//region Initial variables
+					//#region Initial variables
 					const value = asn1.result.valueBlock.value[j];
 					let name = null;
-					//endregion
+					//#endregion
 					
-					//region Check that we have "forward" certificate
+					//#region Check that we have "forward" certificate
 					if(value.idBlock.tagNumber === 0)
 						name = "FORWARD";
-					//endregion
+					//#endregion
 					
-					//region Check that we have "reverse" certificate
+					//#region Check that we have "reverse" certificate
 					if(value.idBlock.tagNumber === 1)
 						name = "REVERSE";
-					//endregion
+					//#endregion
 					
 					if(name !== null)
 					{
@@ -1068,7 +1068,7 @@ context("PKITS's certificate pairs parsing test", () =>
 						assert.doesNotThrow(() =>
 						{
 							func(value.valueBlock.value[0].valueBeforeDecode);
-						}, Error, `Correct convertion to CERT for ${name}`);
+						}, Error, `Correct conversion to CERT for ${name}`);
 					}
 				}
 			};
@@ -1078,21 +1078,21 @@ context("PKITS's certificate pairs parsing test", () =>
 	}
 });
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Context for NIST PKITS tests
+//#region Context for NIST PKITS tests
 //*********************************************************************************
 function simpleVerification(params)
 {
 	return () =>
 	{
-		//region Initial variables
+		//#region Initial variables
 		const trustedCerts = [];
 		const certs = [];
 		const crls = [];
-		//endregion
+		//#endregion
 		
-		//region Initialize certificates
+		//#region Initialize certificates
 		function initializeTrustedCertificates()
 		{
 			for(let i = 0; i < params.trustedCertificates.length; i++)
@@ -1104,9 +1104,9 @@ function simpleVerification(params)
 		
 		// noinspection JSCheckFunctionSignatures
 		assert.doesNotThrow(initializeTrustedCertificates, Error, "Successfully initialize trusted root certificates");
-		//endregion
+		//#endregion
 		
-		//region Initialize intermediate and end entity certificates
+		//#region Initialize intermediate and end entity certificates
 		function initializeIntermediateCertificates()
 		{
 			for(let i = 0; i < params.certificates.length; i++)
@@ -1118,9 +1118,9 @@ function simpleVerification(params)
 		
 		// noinspection JSCheckFunctionSignatures
 		assert.doesNotThrow(initializeIntermediateCertificates, Error, "Successfully initialize intermediate and end entity certificates");
-		//endregion
+		//#endregion
 		
-		//region Initialize CRLs
+		//#region Initialize CRLs
 		function initializeCRLs()
 		{
 			for(let i = 0; i < params.crls.length; i++)
@@ -1132,7 +1132,7 @@ function simpleVerification(params)
 		
 		// noinspection JSCheckFunctionSignatures
 		assert.doesNotThrow(initializeCRLs, Error, "Successfully initialize CRLs");
-		//endregion
+		//#endregion
 		
 		const certChain = new CertificateChainValidationEngine({
 			trustedCerts,
@@ -1169,7 +1169,7 @@ function simpleVerification(params)
 //*********************************************************************************
 context("NIST PKITS tests", () =>
 {
-	//region 4.1 Signature Verification
+	//#region 4.1 Signature Verification
 	context("4.1 Signature Verification", () =>
 	{
 		it("4.1.1 Valid Signatures Test1", simpleVerification({
@@ -1266,9 +1266,9 @@ context("NIST PKITS tests", () =>
 			successExpected: false
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.2 Validity Periods
+	//#region 4.2 Validity Periods
 	context("4.2 Validity Periods", () =>
 	{
 		it("4.2.1 Invalid CA notBefore Date Test1", simpleVerification({
@@ -1391,9 +1391,9 @@ context("NIST PKITS tests", () =>
 			successExpected: true
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.3 Verifying Name Chaining
+	//#region 4.3 Verifying Name Chaining
 	context("4.3 Verifying Name Chaining", () =>
 	{
 		it("4.3.1 Invalid Name Chaining EE Test1", simpleVerification({
@@ -1562,9 +1562,9 @@ context("NIST PKITS tests", () =>
 			successExpected: true
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.4 Basic Certificate Revocation Tests
+	//#region 4.4 Basic Certificate Revocation Tests
 	context("4.4 Basic Certificate Revocation Tests", () =>
 	{
 		it("4.4.1 Missing CRL Test1", simpleVerification({
@@ -1890,9 +1890,9 @@ context("NIST PKITS tests", () =>
 			successExpected: false
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.5 Verifying Paths with Self-Issued Certificates
+	//#region 4.5 Verifying Paths with Self-Issued Certificates
 	context("4.5 Verifying Paths with Self-Issued Certificates", () =>
 	{
 		it("4.5.1 Valid Basic Self-Issued Old With New Test1", simpleVerification({
@@ -2032,9 +2032,9 @@ context("NIST PKITS tests", () =>
 			successExpected: false
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.6 Verifying Basic Constraints
+	//#region 4.6 Verifying Basic Constraints
 	context("4.6 Verifying Basic Constraints", () =>
 	{
 		it("4.6.1 Invalid Missing basicConstraints Test1", simpleVerification({
@@ -2343,9 +2343,9 @@ context("NIST PKITS tests", () =>
 			successExpected: true
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.7 Key Usage
+	//#region 4.7 Key Usage
 	context("4.7 Key Usage", () =>
 	{
 		it("4.7.1 Invalid keyUsage Critical keyCertSign False Test1", simpleVerification({
@@ -2423,12 +2423,12 @@ context("NIST PKITS tests", () =>
 			successExpected: false
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.8 Certificate Policies
+	//#region 4.8 Certificate Policies
 	context("4.8 Certificate Policies", () =>
 	{
-		//region Policies list
+		//#region Policies list
 		
 		//2.16.840.1.101.3.2.1.48.1                NIST test-policy-1
 		//2.16.840.1.101.3.2.1.48.2                NIST test-policy-2
@@ -2437,7 +2437,7 @@ context("NIST PKITS tests", () =>
 		//2.16.840.1.101.3.2.1.48.5                NIST test-policy-5
 		//2.16.840.1.101.3.2.1.48.6                NIST test-policy-6
 		
-		//endregion
+		//#endregion
 		
 		context("4.8.1 All Certificates Same Policy Test1", () =>
 		{
@@ -3181,9 +3181,9 @@ context("NIST PKITS tests", () =>
 			}));
 		});
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.9 Require Explicit Policy
+	//#region 4.9 Require Explicit Policy
 	context("4.9 Require Explicit Policy", () =>
 	{
 		it("4.9.1 Valid RequireExplicitPolicy Test1", simpleVerification({
@@ -3348,9 +3348,9 @@ context("NIST PKITS tests", () =>
 			successExpected: false
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.10 Policy Mappings
+	//#region 4.10 Policy Mappings
 	context("4.10 Policy Mappings", () =>
 	{
 		context("4.10.1 Valid Policy Mapping Test1", () =>
@@ -3779,9 +3779,9 @@ context("NIST PKITS tests", () =>
 			}));
 		});
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.11 Inhibit Policy Mapping
+	//#region 4.11 Inhibit Policy Mapping
 	context("4.11 Inhibit Policy Mapping", () =>
 	{
 		it("4.11.1 Invalid inhibitPolicyMapping Test1", simpleVerification({
@@ -3995,9 +3995,9 @@ context("NIST PKITS tests", () =>
 			successExpected: false
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.12 Inhibit Any Policy
+	//#region 4.12 Inhibit Any Policy
 	context("4.12 Inhibit Any Policy", () =>
 	{
 		context("4.12.1 Invalid inhibitAnyPolicy Test1", () =>
@@ -4229,9 +4229,9 @@ context("NIST PKITS tests", () =>
 			}));
 		});
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.13 Name Constraints
+	//#region 4.13 Name Constraints
 	context("4.13 Name Constraints", () =>
 	{
 		it("4.13.1 Valid DN nameConstraints Test1", simpleVerification({
@@ -4829,9 +4829,9 @@ context("NIST PKITS tests", () =>
 			successExpected: false
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.14 Distribution Points
+	//#region 4.14 Distribution Points
 	context("4.14 Distribution Points", () =>
 	{
 		it("4.14.1 Valid distributionPoint Test1", simpleVerification({
@@ -5396,9 +5396,9 @@ context("NIST PKITS tests", () =>
 			successExpected: false
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.15 Delta-CRLs
+	//#region 4.15 Delta-CRLs
 	context("4.15 Delta-CRLs", () =>
 	{
 		// TODO: Fix later
@@ -5564,9 +5564,9 @@ context("NIST PKITS tests", () =>
 			successExpected: false
 		}));
 	});
-	//endregion
+	//#endregion
 	
-	//region 4.16 Private Certificate Extensions
+	//#region 4.16 Private Certificate Extensions
 	context("4.16 Private Certificate Extensions", () =>
 	{
 		it("4.16.1 Valid Unknown Not Critical Certificate Extension Test1", simpleVerification({
@@ -5596,10 +5596,10 @@ context("NIST PKITS tests", () =>
 			successExpected: false
 		}));
 	});
-	//endregion
+	//#endregion
 });
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
 context("Hack for Rollup.js", () =>
 {

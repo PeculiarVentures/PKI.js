@@ -25,30 +25,30 @@ const encAlg = {
 	length: 128
 };
 //*********************************************************************************
-//region Create CERT  
+//#region Create CERT  
 //*********************************************************************************
 // noinspection FunctionWithInconsistentReturnsJS
 function createCertificate()
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 	
 	const certificate = new Certificate();
 	
 	let publicKey;
 	let privateKey;
-	//endregion
+	//#endregion
 	
-	//region Get a "crypto" extension
+	//#region Get a "crypto" extension
 	const crypto = getCrypto();
 	if(typeof crypto === "undefined")
 	{
 		alert("No WebCrypto extension found");
 		return;
 	}
-	//endregion
+	//#endregion
 	
-	//region Put a static values
+	//#region Put a static values
 	certificate.version = 2;
 	certificate.serialNumber = new asn1js.Integer({ value: 1 });
 	certificate.issuer.typesAndValues.push(new AttributeTypeAndValue({
@@ -73,7 +73,7 @@ function createCertificate()
 	
 	certificate.extensions = []; // Extensions are not a part of certificate by default, it"s an optional array
 	
-	//region "BasicConstraints" extension
+	//#region "BasicConstraints" extension
 	const basicConstr = new BasicConstraints({
 		cA: true,
 		pathLenConstraint: 3
@@ -85,9 +85,9 @@ function createCertificate()
 		extnValue: basicConstr.toSchema().toBER(false),
 		parsedValue: basicConstr // Parsed value for well-known extensions
 	}));
-	//endregion
+	//#endregion
 	
-	//region "KeyUsage" extension
+	//#region "KeyUsage" extension
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
@@ -102,23 +102,23 @@ function createCertificate()
 		extnValue: keyUsage.toBER(false),
 		parsedValue: keyUsage // Parsed value for well-known extensions
 	}));
-	//endregion
-	//endregion
+	//#endregion
+	//#endregion
 	
-	//region Create a new key pair
+	//#region Create a new key pair
 	sequence = sequence.then(() =>
 	{
-		//region Get default algorithm parameters for key generation
+		//#region Get default algorithm parameters for key generation
 		const algorithm = getAlgorithmParameters(signAlg, "generatekey");
 		if("hash" in algorithm.algorithm)
 			algorithm.algorithm.hash.name = hashAlg;
-		//endregion
+		//#endregion
 		
 		return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 	});
-	//endregion
+	//#endregion
 	
-	//region Store new key in an interim variables
+	//#region Store new key in an interim variables
 	sequence = sequence.then(keyPair =>
 	{
 		publicKey = keyPair.publicKey;
@@ -127,24 +127,24 @@ function createCertificate()
 	{
 		alert(`Error during key generation: ${error}`);
 	});
-	//endregion
+	//#endregion
 	
-	//region Exporting public key into "subjectPublicKeyInfo" value of certificate
+	//#region Exporting public key into "subjectPublicKeyInfo" value of certificate
 	sequence = sequence.then(() =>
 		certificate.subjectPublicKeyInfo.importKey(publicKey)
 	);
-	//endregion
+	//#endregion
 	
-	//region Signing final certificate
+	//#region Signing final certificate
 	sequence = sequence.then(() =>
 		certificate.sign(privateKey, hashAlg),
 	error =>
 	{
 		alert(`Error during exporting public key: ${error}`);
 	});
-	//endregion
+	//#endregion
 	
-	//region Encode and store certificate
+	//#region Encode and store certificate
 	sequence = sequence.then(() =>
 	{
 		certificateBuffer = certificate.toSchema(true).toBER(false);
@@ -165,15 +165,15 @@ function createCertificate()
 	{
 		alert(`Error during signing: ${error}`);
 	});
-	//endregion
+	//#endregion
 	
-	//region Exporting private key
+	//#region Exporting private key
 	sequence = sequence.then(() =>
 		crypto.exportKey("pkcs8", privateKey)
 	);
-	//endregion
+	//#endregion
 	
-	//region Store exported key on Web page
+	//#region Store exported key on Web page
 	sequence = sequence.then(result =>
 	{
 		// noinspection JSCheckFunctionSignatures
@@ -193,18 +193,18 @@ function createCertificate()
 	{
 		alert(`Error during exporting of private key: ${error}`);
 	});
-	//endregion
+	//#endregion
 	
 	return sequence;
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Encrypt input data and format as S/MIME message
+//#region Encrypt input data and format as S/MIME message
 //*********************************************************************************
 function smimeEncrypt()
 {
-	//region Decode input certificate 
+	//#region Decode input certificate 
 	// noinspection InnerHTMLJS
 	const encodedCertificate = document.getElementById("new_signed_data").innerHTML;
 	const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
@@ -212,7 +212,7 @@ function smimeEncrypt()
 	
 	const asn1 = asn1js.fromBER(certificateBuffer);
 	const certSimpl = new Certificate({ schema: asn1.result });
-	//endregion 
+	//#endregion 
 	
 	const cmsEnveloped = new EnvelopedData();
 	
@@ -248,32 +248,32 @@ function smimeEncrypt()
 	);
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Decrypt input data 
+//#region Decrypt input data 
 //*********************************************************************************
 function smimeDecrypt()
 {
-	//region Decode input certificate
+	//#region Decode input certificate
 	const encodedCertificate = document.getElementById("new_signed_data").value;
 	const clearEncodedCertificate = encodedCertificate.replace(/(-----(BEGIN|END)( NEW)? CERTIFICATE-----|\n)/g, "");
 	certificateBuffer = stringToArrayBuffer(window.atob(clearEncodedCertificate));
 	
 	let asn1 = asn1js.fromBER(certificateBuffer);
 	const certSimpl = new Certificate({ schema: asn1.result });
-	//endregion 
+	//#endregion 
 	
-	//region Decode input private key 
+	//#region Decode input private key 
 	const encodedPrivateKey = document.getElementById("pkcs8_key").value;
 	const clearPrivateKey = encodedPrivateKey.replace(/(-----(BEGIN|END)( NEW)? PRIVATE KEY-----|\n)/g, "");
 	const privateKeyBuffer = stringToArrayBuffer(window.atob(clearPrivateKey));
-	//endregion 
+	//#endregion 
 	
-	//region Parse S/MIME message to get CMS enveloped content 
+	//#region Parse S/MIME message to get CMS enveloped content 
 	const parser = parse(document.getElementById("encrypted_content").value);
-	//endregion
+	//#endregion
 	
-	//region Make all CMS data
+	//#region Make all CMS data
 	// noinspection JSUnresolvedVariable
 	asn1 = asn1js.fromBER(parser.content.buffer);
 	if(asn1.offset === (-1))
@@ -284,7 +284,7 @@ function smimeDecrypt()
 	
 	const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
 	const cmsEnvelopedSimp = new EnvelopedData({ schema: cmsContentSimpl.content });
-	//endregion 
+	//#endregion 
 	
 	return cmsEnvelopedSimp.decrypt(0,
 		{
@@ -300,7 +300,7 @@ function smimeDecrypt()
 	);
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
 function handleHashAlgOnChange()
 {

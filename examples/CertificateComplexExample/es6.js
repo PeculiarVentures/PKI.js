@@ -26,15 +26,15 @@ let signAlg = "RSASSA-PKCS1-v1_5";
 //*********************************************************************************
 function parseCertificate()
 {
-	//region Initial check
+	//#region Initial check
 	if(certificateBuffer.byteLength === 0)
 	{
 		alert("Nothing to parse!");
 		return;
 	}
-	//endregion
+	//#endregion
 	
-	//region Initial activities
+	//#region Initial activities
 	document.getElementById("cert-extn-div").style.display = "none";
 	
 	const issuerTable = document.getElementById("cert-issuer-table");
@@ -48,14 +48,14 @@ function parseCertificate()
 	const extensionTable = document.getElementById("cert-extn-table");
 	while(extensionTable.rows.length > 1)
 		extensionTable.deleteRow(extensionTable.rows.length - 1);
-	//endregion
+	//#endregion
 	
-	//region Decode existing X.509 certificate
+	//#region Decode existing X.509 certificate
 	const asn1 = asn1js.fromBER(certificateBuffer);
 	const certificate = new Certificate({ schema: asn1.result });
-	//endregion
+	//#endregion
 	
-	//region Put information about X.509 certificate issuer
+	//#region Put information about X.509 certificate issuer
 	const rdnmap = {
 		"2.5.4.6": "C",
 		"2.5.4.10": "O",
@@ -86,9 +86,9 @@ function parseCertificate()
 		// noinspection InnerHTMLJS
 		cell1.innerHTML = subjval;
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about X.509 certificate subject
+	//#region Put information about X.509 certificate subject
 	for(const typeAndValue of certificate.subject.typesAndValues)
 	{
 		let typeval = rdnmap[typeAndValue.type];
@@ -105,24 +105,24 @@ function parseCertificate()
 		// noinspection InnerHTMLJS
 		cell1.innerHTML = subjval;
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about X.509 certificate serial number
+	//#region Put information about X.509 certificate serial number
 	// noinspection InnerHTMLJS
 	document.getElementById("cert-serial-number").innerHTML = bufferToHexCodes(certificate.serialNumber.valueBlock.valueHex);
-	//endregion
+	//#endregion
 	
-	//region Put information about issuance date
+	//#region Put information about issuance date
 	// noinspection InnerHTMLJS
 	document.getElementById("cert-not-before").innerHTML = certificate.notBefore.value.toString();
-	//endregion
+	//#endregion
 	
-	//region Put information about expiration date
+	//#region Put information about expiration date
 	// noinspection InnerHTMLJS
 	document.getElementById("cert-not-after").innerHTML = certificate.notAfter.value.toString();
-	//endregion
+	//#endregion
 	
-	//region Put information about subject public key size
+	//#region Put information about subject public key size
 	let publicKeySize = "< unknown >";
 	
 	if(certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1))
@@ -143,9 +143,9 @@ function parseCertificate()
 	
 	// noinspection InnerHTMLJS
 	document.getElementById("cert-keysize").innerHTML = publicKeySize;
-	//endregion
+	//#endregion
 	
-	//region Put information about signature algorithm
+	//#region Put information about signature algorithm
 	const algomap = {
 		"1.2.840.113549.1.1.2": "MD2 with RSA",
 		"1.2.840.113549.1.1.4": "MD5 with RSA",
@@ -170,9 +170,9 @@ function parseCertificate()
 	
 	// noinspection InnerHTMLJS
 	document.getElementById("cert-sign-algo").innerHTML = signatureAlgorithm;
-	//endregion
+	//#endregion
 	
-	//region Put information about certificate extensions
+	//#region Put information about certificate extensions
 	if("extensions" in certificate)
 	{
 		for(let i = 0; i < certificate.extensions.length; i++)
@@ -185,12 +185,12 @@ function parseCertificate()
 		
 		document.getElementById("cert-extn-div").style.display = "block";
 	}
-	//endregion
+	//#endregion
 }
 //*********************************************************************************
 function createCertificateInternal()
 {
-	//region Initial variables 
+	//#region Initial variables 
 	let sequence = Promise.resolve();
 	
 	const certificate = new Certificate();
@@ -199,15 +199,15 @@ function createCertificateInternal()
 	let privateKey;
 	
 	trustedCertificates = [];
-	//endregion
+	//#endregion
 	
-	//region Get a "crypto" extension 
+	//#region Get a "crypto" extension 
 	const crypto = getCrypto();
 	if(typeof crypto === "undefined")
 		return Promise.reject("No WebCrypto extension found");
-	//endregion
+	//#endregion
 	
-	//region Put a static values 
+	//#region Put a static values 
 	certificate.version = 2;
 	certificate.serialNumber = new asn1js.Integer({ value: 1 });
 	certificate.issuer.typesAndValues.push(new AttributeTypeAndValue({
@@ -232,7 +232,7 @@ function createCertificateInternal()
 	
 	certificate.extensions = []; // Extensions are not a part of certificate by default, it's an optional array
 	
-	//region "BasicConstraints" extension
+	//#region "BasicConstraints" extension
 	const basicConstr = new BasicConstraints({
 		cA: true,
 		pathLenConstraint: 3
@@ -244,9 +244,9 @@ function createCertificateInternal()
 		extnValue: basicConstr.toSchema().toBER(false),
 		parsedValue: basicConstr // Parsed value for well-known extensions
 	}));
-	//endregion 
+	//#endregion 
 	
-	//region "KeyUsage" extension 
+	//#region "KeyUsage" extension 
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
@@ -261,9 +261,9 @@ function createCertificateInternal()
 		extnValue: keyUsage.toBER(false),
 		parsedValue: keyUsage // Parsed value for well-known extensions
 	}));
-	//endregion
+	//#endregion
 	
-	//region "ExtendedKeyUsage" extension
+	//#region "ExtendedKeyUsage" extension
 	const extKeyUsage = new ExtKeyUsage({
 		keyPurposes: [
 			"2.5.29.37.0",       // anyExtendedKeyUsage
@@ -284,10 +284,10 @@ function createCertificateInternal()
 		extnValue: extKeyUsage.toSchema().toBER(false),
 		parsedValue: extKeyUsage // Parsed value for well-known extensions
 	}));
-	//endregion
+	//#endregion
 
 
-	//region Microsoft-specific extensions
+	//#region Microsoft-specific extensions
 	const certType = new asn1js.Utf8String({ value: "certType" });
 
 	certificate.extensions.push(new Extension({
@@ -331,62 +331,62 @@ function createCertificateInternal()
 		extnValue: caVersion.toSchema().toBER(false),
 		parsedValue: caVersion // Parsed value for well-known extensions
 	}));
-	//endregion
-	//endregion
+	//#endregion
+	//#endregion
 	
-	//region Create a new key pair 
+	//#region Create a new key pair 
 	sequence = sequence.then(() =>
 	{
-		//region Get default algorithm parameters for key generation
+		//#region Get default algorithm parameters for key generation
 		const algorithm = getAlgorithmParameters(signAlg, "generatekey");
 		if("hash" in algorithm.algorithm)
 			algorithm.algorithm.hash.name = hashAlg;
-		//endregion
+		//#endregion
 		
 		return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 	});
-	//endregion 
+	//#endregion 
 	
-	//region Store new key in an interim variables
+	//#region Store new key in an interim variables
 	sequence = sequence.then(keyPair =>
 	{
 		publicKey = keyPair.publicKey;
 		privateKey = keyPair.privateKey;
 	}, error => Promise.reject(`Error during key generation: ${error}`));
-	//endregion 
+	//#endregion 
 	
-	//region Exporting public key into "subjectPublicKeyInfo" value of certificate 
+	//#region Exporting public key into "subjectPublicKeyInfo" value of certificate 
 	sequence = sequence.then(() =>
 		certificate.subjectPublicKeyInfo.importKey(publicKey)
 	);
-	//endregion 
+	//#endregion 
 	
-	//region Signing final certificate 
+	//#region Signing final certificate 
 	sequence = sequence.then(() =>
 		certificate.sign(privateKey, hashAlg),
 	error => Promise.reject(`Error during exporting public key: ${error}`));
-	//endregion 
+	//#endregion 
 	
-	//region Encode and store certificate 
+	//#region Encode and store certificate 
 	sequence = sequence.then(() =>
 	{
 		trustedCertificates.push(certificate);
 		certificateBuffer = certificate.toSchema(true).toBER(false);
 	}, error => Promise.reject(`Error during signing: ${error}`));
-	//endregion 
+	//#endregion 
 	
-	//region Exporting private key 
+	//#region Exporting private key 
 	sequence = sequence.then(() =>
 		crypto.exportKey("pkcs8", privateKey)
 	);
-	//endregion 
+	//#endregion 
 	
-	//region Store exported key on Web page 
+	//#region Store exported key on Web page 
 	sequence = sequence.then(result =>
 	{
 		privateKeyBuffer = result;
 	}, error => Promise.reject(`Error during exporting of private key: ${error}`));
-	//endregion
+	//#endregion
 	
 	return sequence;
 }
@@ -426,51 +426,51 @@ function createCertificate()
 //*********************************************************************************
 function verifyCertificateInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
-	//endregion
+	//#endregion
 	
-	//region Major activities
+	//#region Major activities
 	sequence = sequence.then(() =>
 	{
-		//region Initial check
+		//#region Initial check
 		if(certificateBuffer.byteLength === 0)
 			return Promise.resolve({ result: false });
-		//endregion
+		//#endregion
 		
-		//region Decode existing CERT
+		//#region Decode existing CERT
 		const asn1 = asn1js.fromBER(certificateBuffer);
 		const certificate = new Certificate({ schema: asn1.result });
-		//endregion
+		//#endregion
 		
-		//region Create certificate's array (end-user certificate + intermediate certificates)
+		//#region Create certificate's array (end-user certificate + intermediate certificates)
 		const certificates = [];
 		certificates.push(...intermadiateCertificates);
 		certificates.push(certificate);
-		//endregion
+		//#endregion
 		
-		//region Make a copy of trusted certificates array
+		//#region Make a copy of trusted certificates array
 		const trustedCerts = [];
 		trustedCerts.push(...trustedCertificates);
-		//endregion
+		//#endregion
 		
-		//region Create new X.509 certificate chain object
+		//#region Create new X.509 certificate chain object
 		const certChainVerificationEngine = new CertificateChainValidationEngine({
 			trustedCerts,
 			certs: certificates,
 			crls
 		});
-		//endregion
+		//#endregion
 		
-		//region Verify CERT
+		//#region Verify CERT
 		return certChainVerificationEngine.verify();
-		//endregion
+		//#endregion
 	});
-	//endregion
+	//#endregion
 	
-	//region Error handling stub
+	//#region Error handling stub
 	sequence = sequence.then(result => result, () => Promise.resolve(false));
-	//endregion
+	//#endregion
 	
 	return sequence;
 }
@@ -488,7 +488,7 @@ function verifyCertificate()
 //*********************************************************************************
 function parseCAbundle(buffer)
 {
-	//region Initial variables
+	//#region Initial variables
 	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 	
 	const startChars = "-----BEGIN CERTIFICATE-----";
@@ -504,7 +504,7 @@ function parseCAbundle(buffer)
 	let started = false;
 	
 	let certBodyEncoded = "";
-	//endregion
+	//#endregion
 	
 	for(let i = 0; i < view.length; i++)
 	{
@@ -516,7 +516,7 @@ function parseCAbundle(buffer)
 			{
 				if(String.fromCharCode(view[i]) === "-")
 				{
-					//region Decoded trustedCertificates
+					//#region Decoded trustedCertificates
 					const asn1 = asn1js.fromBER(stringToArrayBuffer(window.atob(certBodyEncoded)));
 					try
 					{
@@ -527,14 +527,14 @@ function parseCAbundle(buffer)
 						alert("Wrong certificate format");
 						return;
 					}
-					//endregion
+					//#endregion
 					
-					//region Set all "flag variables"
+					//#region Set all "flag variables"
 					certBodyEncoded = "";
 					
 					started = false;
 					waitForEnd = true;
-					//endregion
+					//#endregion
 				}
 			}
 		}
@@ -819,7 +819,7 @@ context("Hack for Rollup.js", () =>
 //*********************************************************************************
 context("Certificate Complex Example", () =>
 {
-	//region Initial variables
+	//#region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
 	
@@ -839,7 +839,7 @@ context("Certificate Complex Example", () =>
 		["SHA-384 + RSA-PSS", "1.2.840.113549.1.1.10"],
 		["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"]
 	]);
-	//endregion
+	//#endregion
 	
 	signAlgs.forEach(_signAlg =>
 	{

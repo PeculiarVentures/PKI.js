@@ -22,11 +22,11 @@ let trustedCertificates = []; // Array of root certificates from "CA Bundle"
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-V1_5";
 //*********************************************************************************
-//region Create OCSP response 
+//#region Create OCSP response 
 //*********************************************************************************
 function createOCSPRespInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 	
 	const ocspRespSimpl = new OCSPResponse();
@@ -36,15 +36,15 @@ function createOCSPRespInternal()
 	
 	let publicKey;
 	let privateKey;
-	//endregion
+	//#endregion
 	
-	//region Get a "crypto" extension
+	//#region Get a "crypto" extension
 	const crypto = getCrypto();
 	if(typeof crypto === "undefined")
 		return Promise.reject("No WebCrypto extension found");
-	//endregion
+	//#endregion
 	
-	//region Put a static values
+	//#region Put a static values
 	certSimpl.version = 2;
 	certSimpl.serialNumber = new asn1js.Integer({ value: 1 });
 	certSimpl.issuer.typesAndValues.push(new AttributeTypeAndValue({
@@ -69,7 +69,7 @@ function createOCSPRespInternal()
 	
 	certSimpl.extensions = []; // Extensions are not a part of certificate by default, it's an optional array
 	
-	//region "BasicConstraints" extension
+	//#region "BasicConstraints" extension
 	const basicConstr = new BasicConstraints({
 		cA: true,
 		pathLenConstraint: 3
@@ -81,9 +81,9 @@ function createOCSPRespInternal()
 		extnValue: basicConstr.toSchema().toBER(false),
 		parsedValue: basicConstr // Parsed value for well-known extensions
 	}));
-	//endregion
+	//#endregion
 	
-	//region "KeyUsage" extension
+	//#region "KeyUsage" extension
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
@@ -98,25 +98,25 @@ function createOCSPRespInternal()
 		extnValue: keyUsage.toBER(false),
 		parsedValue: keyUsage // Parsed value for well-known extensions
 	}));
-	//endregion
-	//endregion
+	//#endregion
+	//#endregion
 	
-	//region Create a new key pair
+	//#region Create a new key pair
 	sequence = sequence.then(
 		() =>
 		{
-			//region Get default algorithm parameters for key generation
+			//#region Get default algorithm parameters for key generation
 			const algorithm = getAlgorithmParameters(signAlg, "generatekey");
 			if("hash" in algorithm.algorithm)
 				algorithm.algorithm.hash.name = hashAlg;
-			//endregion
+			//#endregion
 			
 			return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 		}
 	);
-	//endregion
+	//#endregion
 	
-	//region Store new key in an interim variables
+	//#region Store new key in an interim variables
 	sequence = sequence.then(
 		keyPair =>
 		{
@@ -125,22 +125,22 @@ function createOCSPRespInternal()
 		},
 		error => Promise.reject(`Error during key generation: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Exporting public key into "subjectPublicKeyInfo" value of certificate
+	//#region Exporting public key into "subjectPublicKeyInfo" value of certificate
 	sequence = sequence.then(
 		() => certSimpl.subjectPublicKeyInfo.importKey(publicKey)
 	);
-	//endregion
+	//#endregion
 	
-	//region Signing final certificate
+	//#region Signing final certificate
 	sequence = sequence.then(
 		() => certSimpl.sign(privateKey, hashAlg),
 		error => Promise.reject(`Error during exporting public key: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Encode and store certificate
+	//#region Encode and store certificate
 	sequence = sequence.then(
 		() =>
 		{
@@ -149,15 +149,15 @@ function createOCSPRespInternal()
 		},
 		error => Promise.reject(`Error during signing: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Exporting private key
+	//#region Exporting private key
 	sequence = sequence.then(
 		() => crypto.exportKey("pkcs8", privateKey)
 	);
-	//endregion
+	//#endregion
 	
-	//region Store exported key on Web page
+	//#region Store exported key on Web page
 	sequence = sequence.then(
 		result =>
 		{
@@ -165,9 +165,9 @@ function createOCSPRespInternal()
 		},
 		error => Promise.reject(`Error during exporting of private key: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Create specific TST info structure to sign
+	//#region Create specific TST info structure to sign
 	sequence = sequence.then(
 		() =>
 		{
@@ -203,9 +203,9 @@ function createOCSPRespInternal()
 			return ocspBasicResp.sign(privateKey, hashAlg);
 		}
 	);
-	//endregion
+	//#endregion
 	
-	//region Finally create completed OCSP response structure
+	//#region Finally create completed OCSP response structure
 	return sequence.then(
 		() =>
 		{
@@ -215,7 +215,7 @@ function createOCSPRespInternal()
 			ocspResponseBuffer = ocspRespSimpl.toSchema().toBER(false);
 		}
 	);
-	//endregion
+	//#endregion
 }
 //*********************************************************************************
 function createOCSPResp()
@@ -247,17 +247,17 @@ function createOCSPResp()
 	});
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Parse existing OCSP response 
+//#region Parse existing OCSP response 
 //*********************************************************************************
 function parseOCSPResp()
 {
-	//region Initial variables 
+	//#region Initial variables 
 	let ocspBasicResp;
-	//endregion 
+	//#endregion 
 	
-	//region Initial activities 
+	//#region Initial activities 
 	document.getElementById("ocsp-resp-extensions").style.display = "none";
 	document.getElementById("ocsp-resp-rspid-rdn").style.display = "none";
 	document.getElementById("ocsp-resp-rspid-simpl").style.display = "none";
@@ -273,14 +273,14 @@ function parseOCSPResp()
 	const responsesTable = document.getElementById("ocsp-resp-attr-table");
 	while(extensionTable.rows.length > 1)
 		extensionTable.deleteRow(extensionTable.rows.length - 1);
-	//endregion
+	//#endregion
 	
-	//region Decode existing OCSP response 
+	//#region Decode existing OCSP response 
 	const asn1 = asn1js.fromBER(ocspResponseBuffer);
 	const ocspRespSimpl = new OCSPResponse({ schema: asn1.result });
-	//endregion 
+	//#endregion 
 	
-	//region Put information about overall response status 
+	//#region Put information about overall response status 
 	let status = "";
 	
 	switch(ocspRespSimpl.responseStatus.valueBlock.valueDec)
@@ -313,9 +313,9 @@ function parseOCSPResp()
 	
 	// noinspection InnerHTMLJS
 	document.getElementById("resp-status").innerHTML = status;
-	//endregion 
+	//#endregion 
 	
-	//region Check that we do have "responseBytes" 
+	//#region Check that we do have "responseBytes" 
 	if("responseBytes" in ocspRespSimpl)
 	{
 		const asn1Basic = asn1js.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHex);
@@ -323,9 +323,9 @@ function parseOCSPResp()
 	}
 	else
 		return; // Nothing else to display - only status information exists
-	//endregion 
+	//#endregion 
 	
-	//region Put information about signature algorithm 
+	//#region Put information about signature algorithm 
 	const algomap = {
 		"1.2.840.113549.2.1": "MD2",
 		"1.2.840.113549.1.1.2": "MD2 with RSA",
@@ -353,9 +353,9 @@ function parseOCSPResp()
 	
 	// noinspection InnerHTMLJS
 	document.getElementById("sig-algo").innerHTML = signatureAlgorithm;
-	//endregion 
+	//#endregion 
 	
-	//region Put information about "Responder ID" 
+	//#region Put information about "Responder ID" 
 	if(ocspBasicResp.tbsResponseData.responderID instanceof RelativeDistinguishedNames)
 	{
 		const typemap = {
@@ -405,14 +405,14 @@ function parseOCSPResp()
 			return;
 		}
 	}
-	//endregion 
+	//#endregion 
 	
-	//region Put information about a time when the response was produced 
+	//#region Put information about a time when the response was produced 
 	// noinspection InnerHTMLJS
 	document.getElementById("prod-at").innerHTML = ocspBasicResp.tbsResponseData.producedAt.toString();
-	//endregion 
+	//#endregion 
 	
-	//region Put information about extensions of the OCSP response 
+	//#region Put information about extensions of the OCSP response 
 	if("responseExtensions" in ocspBasicResp)
 	{
 		const extenmap = {
@@ -443,9 +443,9 @@ function parseOCSPResp()
 		
 		document.getElementById("ocsp-resp-extensions").style.display = "block";
 	}
-	//endregion 
+	//#endregion 
 	
-	//region Put information about OCSP responses
+	//#region Put information about OCSP responses
 	for(let i = 0; i < ocspBasicResp.tbsResponseData.responses.length; i++)
 	{
 		const typeval = bufferToHexCodes(ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHex);
@@ -472,22 +472,22 @@ function parseOCSPResp()
 		// noinspection InnerHTMLJS
 		cell1.innerHTML = subjval;
 	}
-	//endregion 
+	//#endregion 
 	
 	document.getElementById("ocsp-resp-data-block").style.display = "block";
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Verify existing OCSP response 
+//#region Verify existing OCSP response 
 //*********************************************************************************
 function verifyOCSPRespInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	let ocspBasicResp;
-	//endregion
+	//#endregion
 	
-	//region Decode existing OCSP response
+	//#region Decode existing OCSP response
 	const asn1 = asn1js.fromBER(ocspResponseBuffer);
 	const ocspRespSimpl = new OCSPResponse({ schema: asn1.result });
 	
@@ -498,11 +498,11 @@ function verifyOCSPRespInternal()
 	}
 	else
 		return Promise.reject("No \"ResponseBytes\" in the OCSP Response - nothing to verify");
-	//endregion
+	//#endregion
 	
-	//region Verify OCSP response
+	//#region Verify OCSP response
 	return ocspBasicResp.verify({ trustedCerts: trustedCertificates });
-	//endregion
+	//#endregion
 }
 //*********************************************************************************
 function verifyOCSPResp()
@@ -519,13 +519,13 @@ function verifyOCSPResp()
 	);
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Parse "CA Bundle" file 
+//#region Parse "CA Bundle" file 
 //*********************************************************************************
 function parseCAbundle(buffer)
 {
-	//region Initial variables 
+	//#region Initial variables 
 	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 	
 	const startChars = "-----BEGIN CERTIFICATE-----";
@@ -541,7 +541,7 @@ function parseCAbundle(buffer)
 	let started = false;
 	
 	let certBodyEncoded = "";
-	//endregion 
+	//#endregion 
 	
 	for(let i = 0; i < view.length; i++)
 	{
@@ -553,7 +553,7 @@ function parseCAbundle(buffer)
 			{
 				if(String.fromCharCode(view[i]) === "-")
 				{
-					//region Decoded trustedCertificates 
+					//#region Decoded trustedCertificates 
 					const asn1 = asn1js.fromBER(stringToArrayBuffer(window.atob(certBodyEncoded)));
 					try
 					{
@@ -564,14 +564,14 @@ function parseCAbundle(buffer)
 						alert("Wrong certificate format");
 						return;
 					}
-					//endregion 
+					//#endregion 
 					
-					//region Set all "flag variables" 
+					//#region Set all "flag variables" 
 					certBodyEncoded = "";
 					
 					started = false;
 					waitForEnd = true;
-					//endregion 
+					//#endregion 
 				}
 			}
 		}
@@ -638,7 +638,7 @@ function parseCAbundle(buffer)
 	}
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
 function handleFileBrowse(evt)
 {
@@ -726,10 +726,10 @@ context("Hack for Rollup.js", () =>
 //*********************************************************************************
 context("OCSP Response Complex Example", () =>
 {
-	//region Initial variables
+	//#region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
-	//endregion
+	//#endregion
 	
 	signAlgs.forEach(_signAlg =>
 	{

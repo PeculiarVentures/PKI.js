@@ -7,3 +7,11 @@ coverage
 .vs
 .vscode
 docs
+
+bundle.js
+test/browser/*.js
+test/s_*.js
+test/n_*.js
+
+*.log
+.DS_Store

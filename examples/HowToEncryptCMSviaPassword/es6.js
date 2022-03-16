@@ -17,11 +17,11 @@ let preDefinedDataBuffer = new ArrayBuffer(0);
 let valueBuffer = new ArrayBuffer(0);
 let cmsEnvelopedBuffer = new ArrayBuffer(0);
 //*********************************************************************************
-//region Encrypt input data
+//#region Encrypt input data
 //*********************************************************************************
 function envelopedEncryptInternal()
 {
-	//region Get input pre-defined data
+	//#region Get input pre-defined data
 	/*
 	 This is an example only and we consider that key encryption algorithm
 	 has key length in 256 bits (default value).
@@ -54,7 +54,7 @@ function envelopedEncryptInternal()
 			preDefinedDataBuffer = newPreDefinedDataBuffer;
 		}
 	}
-	//endregion
+	//#endregion
 	
 	const cmsEnveloped = new EnvelopedData();
 	
@@ -93,13 +93,13 @@ function envelopedEncrypt()
 	});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Decrypt input data
+//#region Decrypt input data
 //*********************************************************************************
 function envelopedDecryptInternal()
 {
-	//region Get input pre-defined data
+	//#region Get input pre-defined data
 	/*
 	 This is an example only and we consider that key encryption algorithm
 	 has key length in 256 bits (default value).
@@ -132,13 +132,13 @@ function envelopedDecryptInternal()
 			preDefinedDataBuffer = newPreDefinedDataBuffer;
 		}
 	}
-	//endregion
+	//#endregion
 	
-	//region Decode CMS Enveloped content
+	//#region Decode CMS Enveloped content
 	const asn1 = asn1js.fromBER(cmsEnvelopedBuffer);
 	const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
 	const cmsEnvelopedSimp = new EnvelopedData({ schema: cmsContentSimpl.content });
-	//endregion
+	//#endregion
 	
 	return cmsEnvelopedSimp.decrypt(0,
 		{
@@ -163,7 +163,7 @@ function envelopedDecrypt()
 	});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
 function handleContentEncAlgOnChange()
 {
@@ -228,14 +228,14 @@ context("Hack for Rollup.js", () =>
 //*********************************************************************************
 context("How To Encrypt CMS via Password", () =>
 {
-	//region Initial variables
+	//#region Initial variables
 	const encryptionVariants = [1, 2];
 	const encAlgs = ["AES-CBC", "AES-GCM"];
 	const encLens = [128, 192, 256];
 	
 	valueBuffer = (new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09])).buffer;
 	preDefinedDataBuffer = (new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09])).buffer;
-	//endregion
+	//#endregion
 	
 	encAlgs.forEach(_encAlg =>
 	{

@@ -16,26 +16,26 @@ let cmsSignedBuffer = new ArrayBuffer(0);
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-v1_5";
 //*********************************************************************************
-//region Create P7B Data
+//#region Create P7B Data
 //*********************************************************************************
 function createP7BInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 	
 	const certSimpl = new Certificate();
 	
 	let publicKey;
 	let privateKey;
-	//endregion
+	//#endregion
 	
-	//region Get a "crypto" extension
+	//#region Get a "crypto" extension
 	const crypto = getCrypto();
 	if(typeof crypto === "undefined")
 		return Promise.reject("No WebCrypto extension found");
-	//endregion
+	//#endregion
 	
-	//region Put a static values
+	//#region Put a static values
 	certSimpl.version = 2;
 	certSimpl.serialNumber = new asn1js.Integer({ value: 1 });
 	
@@ -61,7 +61,7 @@ function createP7BInternal()
 	
 	certSimpl.extensions = []; // Extensions are not a part of certificate by default, it's an optional array
 	
-	//region "KeyUsage" extension
+	//#region "KeyUsage" extension
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	bitView[0] |= 0x02; // Key usage "cRLSign" flag
@@ -74,39 +74,39 @@ function createP7BInternal()
 		extnValue: keyUsage.toBER(false),
 		parsedValue: keyUsage // Parsed value for well-known extensions
 	}));
-	//endregion
-	//endregion
+	//#endregion
+	//#endregion
 	
-	//region Create a new key pair
+	//#region Create a new key pair
 	sequence = sequence.then(() =>
 	{
-		//region Get default algorithm parameters for key generation
+		//#region Get default algorithm parameters for key generation
 		const algorithm = getAlgorithmParameters(signAlg, "generatekey");
 		if("hash" in algorithm.algorithm)
 			algorithm.algorithm.hash.name = hashAlg;
-		//endregion
+		//#endregion
 		
 		return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 	});
-	//endregion
+	//#endregion
 	
-	//region Store new key in an interim variables
+	//#region Store new key in an interim variables
 	sequence = sequence.then((keyPair) =>
 	{
 		publicKey = keyPair.publicKey;
 		privateKey = keyPair.privateKey;
 	});
-	//endregion
+	//#endregion
 	
-	//region Exporting public key into "subjectPublicKeyInfo" value of certificate
+	//#region Exporting public key into "subjectPublicKeyInfo" value of certificate
 	sequence = sequence.then(() => certSimpl.subjectPublicKeyInfo.importKey(publicKey));
-	//endregion
+	//#endregion
 	
-	//region Signing final certificate
+	//#region Signing final certificate
 	sequence = sequence.then(() => certSimpl.sign(privateKey, hashAlg));
-	//endregion
+	//#endregion
 	
-	//region Encode final ContentInfo
+	//#region Encode final ContentInfo
 	sequence = sequence.then(() =>
 	{
 		const cmsContentSimp = new ContentInfo({
@@ -126,7 +126,7 @@ function createP7BInternal()
 		
 		cmsSignedBuffer = cmsContentSimp.toSchema().toBER(false);
 	});
-	//endregion
+	//#endregion
 	
 	return sequence;
 }
@@ -145,7 +145,7 @@ function createP7B()
 	});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
 function handleHashAlgOnChange()
 {
@@ -199,10 +199,10 @@ context("Hack for Rollup.js", () =>
 //*********************************************************************************
 context("P7B Simple Example", () =>
 {
-	//region Initial variables
+	//#region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
-	//endregion
+	//#endregion
 	
 	signAlgs.forEach(_signAlg =>
 	{

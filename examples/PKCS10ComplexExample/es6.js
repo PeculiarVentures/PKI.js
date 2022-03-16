@@ -18,26 +18,26 @@ let pkcs10Buffer = new ArrayBuffer(0);
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-V1_5";
 //*********************************************************************************
-//region Create PKCS#10
+//#region Create PKCS#10
 //*********************************************************************************
 function createPKCS10Internal()
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 	
 	const pkcs10 = new CertificationRequest();
 	
 	let publicKey;
 	let privateKey;
-	//endregion
+	//#endregion
 	
-	//region Get a "crypto" extension
+	//#region Get a "crypto" extension
 	const crypto = getCrypto();
 	if(typeof crypto === "undefined")
 		return Promise.reject("No WebCrypto extension found");
-	//endregion
+	//#endregion
 	
-	//region Put a static values
+	//#region Put a static values
 	pkcs10.version = 0;
 	pkcs10.subject.typesAndValues.push(new AttributeTypeAndValue({
 		type: "2.5.4.6",
@@ -70,22 +70,22 @@ function createPKCS10Internal()
 	});
 	
 	pkcs10.attributes = [];
-	//endregion
+	//#endregion
 	
-	//region Create a new key pair
+	//#region Create a new key pair
 	sequence = sequence.then(() =>
 	{
-		//region Get default algorithm parameters for key generation
+		//#region Get default algorithm parameters for key generation
 		const algorithm = getAlgorithmParameters(signAlg, "generatekey");
 		if("hash" in algorithm.algorithm)
 			algorithm.algorithm.hash.name = hashAlg;
-		//endregion
+		//#endregion
 		
 		return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 	});
-	//endregion
+	//#endregion
 	
-	//region Store new key in an interim variables
+	//#region Store new key in an interim variables
 	sequence = sequence.then(keyPair =>
 	{
 		publicKey = keyPair.publicKey;
@@ -93,13 +93,13 @@ function createPKCS10Internal()
 	},
 	error => Promise.reject((`Error during key generation: ${error}`))
 	);
-	//endregion
+	//#endregion
 	
-	//region Exporting public key into "subjectPublicKeyInfo" value of PKCS#10
+	//#region Exporting public key into "subjectPublicKeyInfo" value of PKCS#10
 	sequence = sequence.then(() => pkcs10.subjectPublicKeyInfo.importKey(publicKey));
-	//endregion
+	//#endregion
 	
-	//region SubjectKeyIdentifier
+	//#region SubjectKeyIdentifier
 	sequence = sequence.then(() => crypto.digest({ name: "SHA-1" }, pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex))
 		.then(result =>
 		{
@@ -127,11 +127,11 @@ function createPKCS10Internal()
 			}));
 		}
 		);
-	//endregion
+	//#endregion
 	
-	//region Signing final PKCS#10 request
+	//#region Signing final PKCS#10 request
 	sequence = sequence.then(() => pkcs10.sign(privateKey, hashAlg), error => Promise.reject(`Error during exporting public key: ${error}`));
-	//endregion
+	//#endregion
 	
 	return sequence.then(() =>
 	{
@@ -154,13 +154,13 @@ function createPKCS10()
 	});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Parse existing PKCS#10
+//#region Parse existing PKCS#10
 //*********************************************************************************
 function parsePKCS10()
 {
-	//region Initial activities
+	//#region Initial activities
 	// noinspection InnerHTMLJS
 	document.getElementById("pkcs10-subject").innerHTML = "";
 	// noinspection InnerHTMLJS
@@ -168,16 +168,16 @@ function parsePKCS10()
 	
 	document.getElementById("pkcs10-data-block").style.display = "none";
 	document.getElementById("pkcs10-attributes").style.display = "none";
-	//endregion
+	//#endregion
 	
-	//region Decode existing PKCS#10
+	//#region Decode existing PKCS#10
 	const stringPEM = document.getElementById("pem-text-block").value.replace(/(-----(BEGIN|END) CERTIFICATE REQUEST-----|\n)/g, "");
 	
 	const asn1 = asn1js.fromBER(stringToArrayBuffer(fromBase64((stringPEM))));
 	const pkcs10 = new CertificationRequest({ schema: asn1.result });
-	//endregion
+	//#endregion
 	
-	//region Parse and display information about "subject"
+	//#region Parse and display information about "subject"
 	const typemap = {
 		"2.5.4.6": "C",
 		"2.5.4.11": "OU",
@@ -209,9 +209,9 @@ function parsePKCS10()
 			document.getElementById("pkcs10-subject-cn").innerHTML = subjval;
 		}
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about public key size
+	//#region Put information about public key size
 	let publicKeySize = "< unknown >";
 	
 	if(pkcs10.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1))
@@ -231,9 +231,9 @@ function parsePKCS10()
 	
 	// noinspection InnerHTMLJS
 	document.getElementById("keysize").innerHTML = publicKeySize;
-	//endregion
+	//#endregion
 	
-	//region Put information about signature algorithm
+	//#region Put information about signature algorithm
 	const algomap = {
 		"1.2.840.113549.1.1.2": "MD2 with RSA",
 		"1.2.840.113549.1.1.4": "MD5 with RSA",
@@ -257,9 +257,9 @@ function parsePKCS10()
 	
 	// noinspection InnerHTMLJS
 	document.getElementById("sig-algo").innerHTML = signatureAlgorithm;
-	//endregion
+	//#endregion
 	
-	//region Put information about PKCS#10 attributes
+	//#region Put information about PKCS#10 attributes
 	if("attributes" in pkcs10)
 	{
 		for(let i = 0; i < pkcs10.attributes.length; i++)
@@ -296,25 +296,25 @@ function parsePKCS10()
 		
 		document.getElementById("pkcs10-attributes").style.display = "block";
 	}
-	//endregion
+	//#endregion
 	
 	document.getElementById("pkcs10-data-block").style.display = "block";
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Verify existing PKCS#10
+//#region Verify existing PKCS#10
 //*********************************************************************************
 function verifyPKCS10Internal()
 {
-	//region Decode existing PKCS#10
+	//#region Decode existing PKCS#10
 	const asn1 = asn1js.fromBER(pkcs10Buffer);
 	const pkcs10 = new CertificationRequest({ schema: asn1.result });
-	//endregion
+	//#endregion
 	
-	//region Verify PKCS#10
+	//#region Verify PKCS#10
 	return pkcs10.verify();
-	//endregion
+	//#endregion
 }
 //*********************************************************************************
 function verifyPKCS10()
@@ -331,7 +331,7 @@ function verifyPKCS10()
 	});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
 function handleHashAlgOnChange()
 {
@@ -387,7 +387,7 @@ context("Hack for Rollup.js", () =>
 //*********************************************************************************
 context("PKCS#10 Complex Example", () =>
 {
-	//region Initial variables
+	//#region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
 	
@@ -407,7 +407,7 @@ context("PKCS#10 Complex Example", () =>
 		["SHA-384 + RSA-PSS", "1.2.840.113549.1.1.10"],
 		["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"]
 	]);
-	//endregion
+	//#endregion
 	
 	signAlgs.forEach(_signAlg =>
 	{

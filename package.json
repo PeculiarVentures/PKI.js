@@ -20,24 +20,34 @@
     "@babel/preset-env": "^7.12.1",
     "@babel/register": "^7.12.1",
     "@peculiar/webcrypto": "^1.1.3",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "^17.0.19",
+    "@types/pvutils": "^1.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
+    "@typescript-eslint/parser": "^5.12.1",
     "babel-plugin-istanbul": "^6.0.0",
     "cross-env": "^7.0.2",
     "emailjs-mime-builder": "latest",
     "emailjs-mime-parser": "latest",
     "esdoc": "latest",
     "esdoc-standard-plugin": "latest",
-    "eslint": "^7.13.0",
-    "mocha": "^8.2.1",
+    "eslint": "^8.9.0",
+    "mocha": "^9.2.1",
     "nyc": "^15.1.0",
-    "rollup": "1.12.3",
-    "rollup-plugin-commonjs": "10.0.0",
+    "rollup": "2.68.0",
+    "rollup-plugin-commonjs": "10.1.0",
     "rollup-plugin-node-builtins": "2.1.2",
-    "rollup-plugin-node-resolve": "4.0.1"
+    "rollup-plugin-node-resolve": "5.2.0",
+    "rollup-plugin-typescript2": "^0.31.2",
+    "ts-node": "^10.5.0",
+    "typescript": "^4.5.5"
   },
   "dependencies": {
+    "@types/web": "^0.0.56",
     "asn1js": "^2.1.1",
-    "bytestreamjs": "^1.0.29",
-    "pvutils": "^1.0.17"
+    "bytestreamjs": "^1.1.3-beta.0",
+    "pvutils": "^1.1.2",
+    "tslib": "^2.3.1"
   },
   "engines": {
     "node": ">=6.0.0"

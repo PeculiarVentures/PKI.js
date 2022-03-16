@@ -30,11 +30,11 @@ const encAlg = {
 	length: 128
 };
 //*********************************************************************************
-//region Create CERT  
+//#region Create CERT  
 //*********************************************************************************
 function createCertificateInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 	
 	const certificate = new Certificate();
@@ -43,15 +43,15 @@ function createCertificateInternal()
 	let privateKey;
 	
 	trustedCertificates = [];
-	//endregion
+	//#endregion
 	
-	//region Get a "crypto" extension
+	//#region Get a "crypto" extension
 	const crypto = getCrypto();
 	if(typeof crypto === "undefined")
 		return Promise.reject("No WebCrypto extension found");
-	//endregion
+	//#endregion
 	
-	//region Put a static values
+	//#region Put a static values
 	certificate.version = 2;
 	certificate.serialNumber = new asn1js.Integer({ value: 1 });
 	certificate.issuer.typesAndValues.push(new AttributeTypeAndValue({
@@ -76,7 +76,7 @@ function createCertificateInternal()
 	
 	certificate.extensions = []; // Extensions are not a part of certificate by default, it's an optional array
 	
-	//region "BasicConstraints" extension
+	//#region "BasicConstraints" extension
 	const basicConstr = new BasicConstraints({
 		cA: true,
 		pathLenConstraint: 3
@@ -88,9 +88,9 @@ function createCertificateInternal()
 		extnValue: basicConstr.toSchema().toBER(false),
 		parsedValue: basicConstr // Parsed value for well-known extensions
 	}));
-	//endregion
+	//#endregion
 	
-	//region "KeyUsage" extension
+	//#region "KeyUsage" extension
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
@@ -105,62 +105,62 @@ function createCertificateInternal()
 		extnValue: keyUsage.toBER(false),
 		parsedValue: keyUsage // Parsed value for well-known extensions
 	}));
-	//endregion
-	//endregion
+	//#endregion
+	//#endregion
 	
-	//region Create a new key pair
+	//#region Create a new key pair
 	sequence = sequence.then(() =>
 	{
-		//region Get default algorithm parameters for key generation
+		//#region Get default algorithm parameters for key generation
 		const algorithm = getAlgorithmParameters(signAlg, "generatekey");
 		if("hash" in algorithm.algorithm)
 			algorithm.algorithm.hash.name = hashAlg;
-		//endregion
+		//#endregion
 		
 		return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 	});
-	//endregion
+	//#endregion
 	
-	//region Store new key in an interim variables
+	//#region Store new key in an interim variables
 	sequence = sequence.then(keyPair =>
 	{
 		publicKey = keyPair.publicKey;
 		privateKey = keyPair.privateKey;
 	}, error => Promise.reject(`Error during key generation: ${error}`));
-	//endregion
+	//#endregion
 	
-	//region Exporting public key into "subjectPublicKeyInfo" value of certificate
+	//#region Exporting public key into "subjectPublicKeyInfo" value of certificate
 	sequence = sequence.then(() =>
 		certificate.subjectPublicKeyInfo.importKey(publicKey)
 	);
-	//endregion
+	//#endregion
 	
-	//region Signing final certificate
+	//#region Signing final certificate
 	sequence = sequence.then(() =>
 		certificate.sign(privateKey, hashAlg),
 	error => Promise.reject(`Error during exporting public key: ${error}`));
-	//endregion
+	//#endregion
 	
-	//region Encode and store certificate
+	//#region Encode and store certificate
 	sequence = sequence.then(() =>
 	{
 		trustedCertificates.push(certificate);
 		certificateBuffer = certificate.toSchema(true).toBER(false);
 	}, error => Promise.reject(`Error during signing: ${error}`));
-	//endregion
+	//#endregion
 	
-	//region Exporting private key
+	//#region Exporting private key
 	sequence = sequence.then(() =>
 		crypto.exportKey("pkcs8", privateKey)
 	);
-	//endregion
+	//#endregion
 	
-	//region Store exported key on Web page
+	//#region Store exported key on Web page
 	sequence = sequence.then(result =>
 	{
 		privateKeyBuffer = result;
 	}, error => Promise.reject(`Error during exporting of private key: ${error}`));
-	//endregion
+	//#endregion
 	
 	return sequence;
 }
@@ -199,16 +199,16 @@ function createCertificate()
 	});
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Encrypt input data 
+//#region Encrypt input data 
 //*********************************************************************************
 function envelopedEncryptInternal()
 {
-	//region Decode input certificate
+	//#region Decode input certificate
 	const asn1 = asn1js.fromBER(certificateBuffer);
 	const certSimpl = new Certificate({ schema: asn1.result });
-	//endregion
+	//#endregion
 	
 	const cmsEnveloped = new EnvelopedData({
 		originatorInfo: new OriginatorInfo({
@@ -257,22 +257,22 @@ function envelopedEncrypt()
 	});
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Decrypt input data 
+//#region Decrypt input data 
 //*********************************************************************************
 function envelopedDecryptInternal()
 {
-	//region Decode input certificate
+	//#region Decode input certificate
 	let asn1 = asn1js.fromBER(certificateBuffer);
 	const certSimpl = new Certificate({ schema: asn1.result });
-	//endregion
+	//#endregion
 	
-	//region Decode CMS Enveloped content
+	//#region Decode CMS Enveloped content
 	asn1 = asn1js.fromBER(cmsEnvelopedBuffer);
 	const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
 	const cmsEnvelopedSimp = new EnvelopedData({ schema: cmsContentSimpl.content });
-	//endregion
+	//#endregion
 	
 	return cmsEnvelopedSimp.decrypt(0,
 		{
@@ -309,7 +309,7 @@ function envelopedDecrypt()
 	});
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
 function handleHashAlgOnChange()
 {
@@ -421,7 +421,7 @@ context("Hack for Rollup.js", () =>
 });
 //*********************************************************************************
 context("How To Encrypt CMS via Certificate", () => {
-	//region Initial variables
+	//#region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const oaepHashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
@@ -429,7 +429,7 @@ context("How To Encrypt CMS via Certificate", () => {
 	const encLens = [128, 192, 256];
 	
 	valueBuffer = (new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09])).buffer;
-	//endregion
+	//#endregion
 	
 	encAlgs.forEach(_encAlg =>
 	{

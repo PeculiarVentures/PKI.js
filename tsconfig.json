@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "CommonJS",
+    "lib": [
+      "DOM"
+    ],
+    "strict": true,
+    "importHelpers": true,
+    "noImplicitOverride": true,
+    "skipLibCheck": true,
+    "noErrorTruncation": true,
+    "experimentalDecorators": true
+  }
+}

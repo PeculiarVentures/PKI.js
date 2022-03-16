@@ -31,39 +31,39 @@ function getKeyAgreeAlgorithmParams(operation) {
 }
 
 //*********************************************************************************
-//region Create recipient's key pair
+//#region Create recipient's key pair
 //*********************************************************************************
 function createKeyPairInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 
 	let publicKey;
 	let privateKey;
-	//endregion
+	//#endregion
 
-	//region Validate "crypto" extension
+	//#region Validate "crypto" extension
 	if(typeof crypto === "undefined")
 		return Promise.reject("No WebCrypto extension found");
-	//endregion
+	//#endregion
 
-	//region Create a new key pair
+	//#region Create a new key pair
 	sequence = sequence.then(() =>
 	{
 		const algorithm = getKeyAgreeAlgorithmParams("generatekey");
 		return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 	});
-	//endregion
+	//#endregion
 
-	//region Store new key in an interim variables
+	//#region Store new key in an interim variables
 	sequence = sequence.then(keyPair =>
 	{
 		publicKey = keyPair.publicKey;
 		privateKey = keyPair.privateKey;
 	}, error => Promise.reject(`Error during key generation: ${error}`));
-	//endregion
+	//#endregion
 
-	//region Exporting private key
+	//#region Exporting private key
 	sequence = sequence.then(() =>
 		crypto.exportKey("pkcs8", privateKey)
 	);
@@ -71,9 +71,9 @@ function createKeyPairInternal()
 	{
 		privateKeyBuffer = result;
 	}, error => Promise.reject(`Error during exporting of private key: ${error}`));
-	//endregion
+	//#endregion
 
-	//region Exporting public key
+	//#region Exporting public key
 	sequence = sequence.then(() =>
 		crypto.exportKey("spki", publicKey)
 	);
@@ -81,9 +81,9 @@ function createKeyPairInternal()
 	{
 		publicKeyBuffer = result;
 	}, error => Promise.reject(`Error during exporting of public key: ${error}`));
-	//endregion
+	//#endregion
 
-	//region Export key id
+	//#region Export key id
 	sequence = sequence.then(() => {
 		const value = new ArrayBuffer(4);
 		return crypto.getRandomValues(new Uint8Array(value));
@@ -92,7 +92,7 @@ function createKeyPairInternal()
 	{
 		keyPairIdBuffer = result;
 	}, error => Promise.reject(`Error during exporting of private key: ${error}`));
-	//endregion
+	//#endregion
 
 	return sequence;
 }
@@ -101,7 +101,7 @@ function createKeyPair()
 {
 	return createKeyPairInternal().then(() =>
 	{
-		//region Set private key
+		//#region Set private key
 		const privateKeyString = String.fromCharCode.apply(null, new Uint8Array(privateKeyBuffer));
 
 		let privateKeyPem = "-----BEGIN PRIVATE KEY-----\r\n";
@@ -112,9 +112,9 @@ function createKeyPair()
 		document.getElementById("pkcs8_key").innerHTML = privateKeyPem;
 
 		alert("Private key exported successfully!");
-		//endregion
+		//#endregion
 
-		//region Set public key
+		//#region Set public key
 		const publicKeyString = String.fromCharCode.apply(null, new Uint8Array(publicKeyBuffer));
 
 		let publicKeyPem = "-----BEGIN PUBLIC KEY-----\r\n";
@@ -125,14 +125,14 @@ function createKeyPair()
 		document.getElementById("pkcs8_key_pub").innerHTML = publicKeyPem;
 
 		alert("Public key exported successfully!");
-		//endregion
+		//#endregion
 
-		//region Set key pair id
+		//#region Set key pair id
 		const keyPairIdString = String.fromCharCode.apply(null, new Uint8Array(privateKeyBuffer));
 		// noinspection InnerHTMLJS
 		document.getElementById("pkcs8_key_id").innerHTML = toBase64(keyPairIdString);
 		alert("Key pair id generated successfully!");
-		//endregion
+		//#endregion
 	}, error =>
 	{
 		if(error instanceof Object)
@@ -142,9 +142,9 @@ function createKeyPair()
 	});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Encrypt input data
+//#region Encrypt input data
 //*********************************************************************************
 function envelopedEncryptInternal()
 {
@@ -152,10 +152,10 @@ function envelopedEncryptInternal()
 
 	return Promise.resolve()
 		.then(() => {
-			//region Import public key
+			//#region Import public key
 			const algorithm = getKeyAgreeAlgorithmParams("importkey");
 			return crypto.importKey("spki", publicKeyBuffer, algorithm.algorithm, true, []);
-			//endregion
+			//#endregion
 		})
 		.then((publicKey) => {
 			cmsEnveloped.addRecipientByKeyIdentifier(publicKey, keyPairIdBuffer, { kdfAlgorithm: kdfHashAlg });
@@ -199,17 +199,17 @@ function envelopedEncrypt()
 	});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Decrypt input data
+//#region Decrypt input data
 //*********************************************************************************
 function envelopedDecryptInternal()
 {
-	//region Decode CMS Enveloped content
+	//#region Decode CMS Enveloped content
 	const asn1 = asn1js.fromBER(cmsEnvelopedBuffer);
 	const cmsContentSimpl = new ContentInfo({ schema: asn1.result });
 	const cmsEnvelopedSimp = new EnvelopedData({ schema: cmsContentSimpl.content });
-	//endregion
+	//#endregion
 
 	return cmsEnvelopedSimp.decrypt(0,
 		{
@@ -240,7 +240,7 @@ function envelopedDecrypt()
 	});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
 function handleKeyAgreeAlgorithmOnChange()
 {
@@ -330,14 +330,14 @@ context("Hack for Rollup.js", () =>
 });
 //*********************************************************************************
 context("How To Encrypt CMS via Key Identifier", () => {
-	//region Initial variables
+	//#region Initial variables
 	const kdfHashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const curveNames = ["P-256", "P-384", "P-521"];
 	const encAlgs = ["AES-CBC", "AES-GCM"];
 	const encLens = [128, 192, 256];
 
 	valueBuffer = (new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09])).buffer;
-	//endregion
+	//#endregion
 
 	encAlgs.forEach(_encAlg =>
 	{

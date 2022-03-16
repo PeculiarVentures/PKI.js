@@ -1,10 +1,10 @@
 const crypto = require("crypto");
-//**************************************************************************************
+
 function getRandomValues(length)
 {
 	return (new Uint8Array(crypto.randomBytes(length)));
 }
-//**************************************************************************************
+
 function pbkdf1(password, salt, iterationCount, keyLength, hashAlgorithm)
 {
 	let key = Buffer.concat([password, salt]);
@@ -14,7 +14,7 @@ function pbkdf1(password, salt, iterationCount, keyLength, hashAlgorithm)
 	
 	return key.slice(0, keyLength);
 }
-//**************************************************************************************
+
 /**
  * encryptUsingPBKDF2Password
  * @param {string} algorithm
@@ -28,28 +28,28 @@ function pbkdf1(password, salt, iterationCount, keyLength, hashAlgorithm)
  */
 function encryptUsingPBKDF2Password(algorithm, keyLength, password, salt, iterationCount, hashAlgorithm, iv, messageToEncrypt)
 {
-	//region Initial variables
+	//#region Initial variables
 	let cipher;
-	//endregion
+	//#endregion
 	
-	//region Make hash algorithm name to be Node-friendly
+	//#region Make hash algorithm name to be Node-friendly
 	hashAlgorithm = hashAlgorithm.replace("-", "");
-	//endregion
+	//#endregion
 	
-	//region Derive key using PBKDF2 algorithm
+	//#region Derive key using PBKDF2 algorithm
 	const key = crypto.pbkdf2Sync(Buffer.from(password), Buffer.from(salt), iterationCount, keyLength, hashAlgorithm);
-	//endregion
+	//#endregion
 	
-	//region Initialize cipher object
+	//#region Initialize cipher object
 	if(iv.byteLength)
 		cipher = crypto.createCipheriv(algorithm, key, Buffer.from(iv));
 	else
 		cipher = crypto.createCipher(algorithm, key);
-	//endregion
+	//#endregion
 	
 	return (new Uint8Array(Buffer.concat([cipher.update(Buffer.from(messageToEncrypt)), cipher.final()]))).buffer;
 }
-//**************************************************************************************
+
 /**
  * decryptUsingPBKDF2Password
  * @param {string} algorithm
@@ -63,43 +63,43 @@ function encryptUsingPBKDF2Password(algorithm, keyLength, password, salt, iterat
  */
 function decryptUsingPBKDF2Password(algorithm, keyLength, password, salt, iterationCount, hashAlgorithm, iv, messageToDecrypt)
 {
-	//region Initial variables
+	//#region Initial variables
 	let cipher;
-	//endregion
+	//#endregion
 	
-	//region Make hash algorithm name to be Node-friendly
+	//#region Make hash algorithm name to be Node-friendly
 	hashAlgorithm = hashAlgorithm.replace("-", "");
-	//endregion
+	//#endregion
 	
-	//region Derive key using PBKDF2 algorithm
+	//#region Derive key using PBKDF2 algorithm
 	const key = crypto.pbkdf2Sync(Buffer.from(password), Buffer.from(salt), iterationCount, keyLength, hashAlgorithm);
-	//endregion
+	//#endregion
 	
-	//region Initialize cipher object
+	//#region Initialize cipher object
 	if(iv.byteLength)
 		cipher = crypto.createDecipheriv(algorithm, key, Buffer.from(iv));
 	else
 		cipher = crypto.createDecipher(algorithm, key);
-	//endregion
+	//#endregion
 
 	return (new Uint8Array(Buffer.concat([cipher.update(Buffer.from(messageToDecrypt)), cipher.final()]))).buffer;
 }
-//**************************************************************************************
+
 function makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCount, id)
 {
-	//region Check input "method" value
+	//#region Check input "method" value
 	if((typeof id === "undefined"))
 		id = 3; // For MACing
-	//endregion
+	//#endregion
 
-	//region Initial variables
+	//#region Initial variables
 	let u;
 	let v;
 	
 	const result = [];
-	//endregion
+	//#endregion
 	
-	//region Get "u" and "v" values
+	//#region Get "u" and "v" values
 	switch(hashAlgorithm.toUpperCase())
 	{
 		case "SHA1":
@@ -121,10 +121,10 @@ function makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCoun
 		default:
 			throw new Error("Unsupported hashing algorithm");
 	}
-	//endregion
+	//#endregion
 	
-	//region Main algorithm making key
-	//region Transform password to UTF-8 like string
+	//#region Main algorithm making key
+	//#region Transform password to UTF-8 like string
 	const passwordViewInitial = new Uint8Array(password);
 	
 	const passwordTransformed = new ArrayBuffer((password.byteLength * 2) + 2);
@@ -140,17 +140,17 @@ function makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCoun
 	passwordTransformedView[passwordTransformedView.length - 1] = 0x00;
 	
 	password = passwordTransformed.slice(0);
-	//endregion
+	//#endregion
 	
-	//region Construct a string D (the "diversifier") by concatenating v/8 copies of ID
+	//#region Construct a string D (the "diversifier") by concatenating v/8 copies of ID
 	const D = new ArrayBuffer(v);
 	const dView = new Uint8Array(D);
 	
 	for(let i = 0; i < D.byteLength; i++)
 		dView[i] = id; // The ID value equal to "3" for MACing (see B.3 of standard)
-	//endregion
+	//#endregion
 	
-	//region Concatenate copies of the salt together to create a string S of length v * ceil(s / v) bytes (the final copy of the salt may be trunacted to create S)
+	//#region Concatenate copies of the salt together to create a string S of length v * ceil(s / v) bytes (the final copy of the salt may be trunacted to create S)
 	const saltLength = salt.byteLength;
 	
 	const sLen = v * Math.ceil(saltLength / v);
@@ -161,9 +161,9 @@ function makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCoun
 	
 	for(let i = 0; i < sLen; i++)
 		sView[i] = saltView[i % saltLength];
-	//endregion
+	//#endregion
 	
-	//region Concatenate copies of the password together to create a string P of length v * ceil(p / v) bytes (the final copy of the password may be truncated to create P)
+	//#region Concatenate copies of the password together to create a string P of length v * ceil(p / v) bytes (the final copy of the password may be truncated to create P)
 	const passwordLength = password.byteLength;
 	
 	const pLen = v * Math.ceil(passwordLength / v);
@@ -174,9 +174,9 @@ function makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCoun
 	
 	for(let i = 0; i < pLen; i++)
 		pView[i] = passwordView[i % passwordLength];
-	//endregion
+	//#endregion
 	
-	//region Set I=S||P to be the concatenation of S and P
+	//#region Set I=S||P to be the concatenation of S and P
 	const sPlusPLength = S.byteLength + P.byteLength;
 	
 	let I = new ArrayBuffer(sPlusPLength);
@@ -184,24 +184,24 @@ function makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCoun
 	
 	iView.set(sView);
 	iView.set(pView, sView.length);
-	//endregion
+	//#endregion
 	
-	//region Set c=ceil(n / u)
+	//#region Set c=ceil(n / u)
 	const c = Math.ceil((keyLength >> 3) / u);
-	//endregion
+	//#endregion
 	
-	//region For i=1, 2, ..., c, do the following:
+	//#region For i=1, 2, ..., c, do the following:
 	for(let i = 0; i <= c; i++)
 	{
-		//region Create contecanetion of D and I
+		//#region Create contecanetion of D and I
 		const dAndI = new ArrayBuffer(D.byteLength + I.byteLength);
 		const dAndIView = new Uint8Array(dAndI);
 		
 		dAndIView.set(dView);
 		dAndIView.set(iView, dView.length);
-		//endregion
+		//#endregion
 		
-		//region Make "iterationCount" rounds of hashing
+		//#region Make "iterationCount" rounds of hashing
 		let roundBuffer = Buffer.from(dAndI);
 		
 		for(let j = 0; j < iterationCount; j++)
@@ -210,17 +210,17 @@ function makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCoun
 			hash.update(roundBuffer);
 			roundBuffer = hash.digest();
 		}
-		//endregion
+		//#endregion
 		
-		//region Concatenate copies of Ai to create a string B of length v bits (the final copy of Ai may be truncated to create B)
+		//#region Concatenate copies of Ai to create a string B of length v bits (the final copy of Ai may be truncated to create B)
 		const B = new ArrayBuffer(v);
 		const bView = new Uint8Array(B);
 		
 		for(let j = 0; j < B.byteLength; j++)
 			bView[j] = roundBuffer[j % roundBuffer.length];
-		//endregion
+		//#endregion
 		
-		//region Make new I value
+		//#region Make new I value
 		const k = Math.ceil(saltLength / v) + Math.ceil(passwordLength / v);
 		const iRound = [];
 		
@@ -250,23 +250,23 @@ function makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCoun
 		iView = new Uint8Array(I);
 		
 		iView.set(iRound);
-		//endregion
+		//#endregion
 		
 		result.push(...roundBuffer);
 	}
-	//endregion
+	//#endregion
 	
-	//region Initialize final key
+	//#region Initialize final key
 	const resultBuffer = new ArrayBuffer(keyLength >> 3);
 	const resultView = new Uint8Array(resultBuffer);
 	
 	resultView.set((new Uint8Array(result)).slice(0, keyLength >> 3));
-	//endregion
-	//endregion
+	//#endregion
+	//#endregion
 	
 	return Buffer.from(resultBuffer);
 }
-//**************************************************************************************
+
 /**
  * encryptUsingPBKDF1Password
  * @param {string} algorithm
@@ -280,26 +280,26 @@ function makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCoun
  */
 function encryptUsingPBKDF1Password(algorithm, keyLength, ivLength, password, salt, iterationCount, messageToEncrypt, method)
 {
-	//region Check input "method" value
+	//#region Check input "method" value
 	if((typeof method === "undefined"))
 		method = "pkcs12";
-	//endregion
+	//#endregion
 	
-	//region Initial variables
+	//#region Initial variables
 	let key;
 	let iv;
-	//endregion
+	//#endregion
 	
-	//region Generate key and IV using selected generation method
+	//#region Generate key and IV using selected generation method
 	switch(method.toLowerCase())
 	{
-		//region PKCS#12 key derivation function
+		//#region PKCS#12 key derivation function
 		case "pkcs12":
 			key = makePKCS12B2Key("SHA1", keyLength << 3, password, salt, iterationCount, 1);
 			iv = makePKCS12B2Key("SHA1", ivLength << 3, password, salt, iterationCount, 2);
 			break;
-		//endregion
-		//region PKCS#5 key derivation function
+		//#endregion
+		//#region PKCS#5 key derivation function
 		default:
 			{
 				const pbkdf1Result = pbkdf1(Buffer.from(password), Buffer.from(salt), iterationCount, 16, "SHA1");
@@ -307,17 +307,17 @@ function encryptUsingPBKDF1Password(algorithm, keyLength, ivLength, password, sa
 				key = pbkdf1Result.slice(0, 8);
 				iv = pbkdf1Result.slice(8);
 			}
-		//endregion
+		//#endregion
 	}
-	//endregion
+	//#endregion
 	
-	//region Initialize cipher object
+	//#region Initialize cipher object
 	const cipher = crypto.createCipheriv(algorithm, key, iv);
-	//endregion
+	//#endregion
 	
 	return (new Uint8Array(Buffer.concat([cipher.update(Buffer.from(messageToEncrypt)), cipher.final()]))).buffer;
 }
-//**************************************************************************************
+
 /**
  * decryptUsingPBKDF1Password
  * @param {string} algorithm
@@ -331,26 +331,26 @@ function encryptUsingPBKDF1Password(algorithm, keyLength, ivLength, password, sa
  */
 function decryptUsingPBKDF1Password(algorithm, keyLength, ivLength, password, salt, iterationCount, messageToDecrypt, method)
 {
-	//region Check input "method" value
+	//#region Check input "method" value
 	if((typeof method === "undefined"))
 		method = "pkcs12";
-	//endregion
+	//#endregion
 	
-	//region Initial variables
+	//#region Initial variables
 	let key;
 	let iv;
-	//endregion
+	//#endregion
 	
-	//region Generate key and IV using selected generation method
+	//#region Generate key and IV using selected generation method
 	switch(method.toLowerCase())
 	{
-		//region PKCS#12 key derivation function
+		//#region PKCS#12 key derivation function
 		case "pkcs12":
 			key = makePKCS12B2Key("SHA1", keyLength << 3, password, salt, iterationCount, 1);
 			iv = makePKCS12B2Key("SHA1", ivLength << 3, password, salt, iterationCount, 2);
 			break;
-		//endregion
-		//region PKCS#5 key derivation function
+		//#endregion
+		//#region PKCS#5 key derivation function
 		default:
 			{
 				const pbkdf1Result = pbkdf1(Buffer.from(password), Buffer.from(salt), iterationCount, 16, "SHA1");
@@ -358,36 +358,36 @@ function decryptUsingPBKDF1Password(algorithm, keyLength, ivLength, password, sa
 				key = pbkdf1Result.slice(0, 8);
 				iv = pbkdf1Result.slice(8);
 			}
-		//endregion
+		//#endregion
 	}
-	//endregion
+	//#endregion
 	
-	//region Initialize cipher object
+	//#region Initialize cipher object
 	const cipher = crypto.createDecipheriv(algorithm, key, iv);
-	//endregion
+	//#endregion
 	
 	return (new Uint8Array(Buffer.concat([cipher.update(Buffer.from(messageToDecrypt)), cipher.final()]))).buffer;
 }
-//**************************************************************************************
+
 /**
  * Making MAC data using algorithm described in B.2 of PKCS#12 standard.
  */
 function stampDataWithPassword(hashAlgorithm, keyLength, password, salt, iterationCount, stampingData, method)
 {
-	//region Initial variables
+	//#region Initial variables
 	let key;
-	//endregion
+	//#endregion
 	
-	//region Check input "method" value
+	//#region Check input "method" value
 	if((typeof method === "undefined"))
 		method = "pkcs12";
-	//endregion
+	//#endregion
 	
-	//region Make hash algorithm name to be Node-friendly
+	//#region Make hash algorithm name to be Node-friendly
 	hashAlgorithm = hashAlgorithm.replace("-", "");
-	//endregion
+	//#endregion
 	
-	//region Derive key using PKCS#12 algorithm from B.2 item of standard
+	//#region Derive key using PKCS#12 algorithm from B.2 item of standard
 	switch(method.toLowerCase())
 	{
 		case "pbkdf2":
@@ -397,32 +397,32 @@ function stampDataWithPassword(hashAlgorithm, keyLength, password, salt, iterati
 		default:
 			key = makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCount);
 	}
-	//endregion
+	//#endregion
 
-	//region Making HMAC value
+	//#region Making HMAC value
 	const hmac = crypto.createHmac(hashAlgorithm, key);
 	hmac.update(Buffer.from(stampingData));
-	//endregion
+	//#endregion
 	
 	return (new Uint8Array(hmac.digest())).buffer;
 }
-//**************************************************************************************
+
 function verifyDataStampedWithPassword(hashAlgorithm, keyLength, password, salt, iterationCount, stampedData, signatureToVerify, method)
 {
-	//region Initial variables
+	//#region Initial variables
 	let key;
-	//endregion
+	//#endregion
 	
-	//region Check input "method" value
+	//#region Check input "method" value
 	if((typeof method === "undefined"))
 		method = "pkcs12";
-	//endregion
+	//#endregion
 	
-	//region Make hash algorithm name to be Node-friendly
+	//#region Make hash algorithm name to be Node-friendly
 	hashAlgorithm = hashAlgorithm.replace("-", "");
-	//endregion
+	//#endregion
 	
-	//region Derive key using PKCS#12 algorithm from B.2 item of standard
+	//#region Derive key using PKCS#12 algorithm from B.2 item of standard
 	switch(method.toLowerCase())
 	{
 		case "pbkdf2":
@@ -432,15 +432,15 @@ function verifyDataStampedWithPassword(hashAlgorithm, keyLength, password, salt,
 		default:
 			key = makePKCS12B2Key(hashAlgorithm, keyLength, password, salt, iterationCount);
 	}
-	//endregion
+	//#endregion
 	
-	//region Making HMAC value
+	//#region Making HMAC value
 	const hmac = crypto.createHmac(hashAlgorithm, key);
 	hmac.update(Buffer.from(stampedData));
 	const hmacValue = new Uint8Array(hmac.digest());
-	//endregion
+	//#endregion
 	
-	//region Compare HMAC digest with signature to verify
+	//#region Compare HMAC digest with signature to verify
 	const dataView = new Uint8Array(signatureToVerify);
 	
 	if(hmacValue.length !== dataView.length)
@@ -456,11 +456,11 @@ function verifyDataStampedWithPassword(hashAlgorithm, keyLength, password, salt,
 			break;
 		}
 	}
-	//endregion
+	//#endregion
 	
 	return result;
 }
-//**************************************************************************************
+
 module.exports.getRandomValues = getRandomValues;
 module.exports.encryptUsingPBKDF1Password = encryptUsingPBKDF1Password;
 module.exports.decryptUsingPBKDF1Password = decryptUsingPBKDF1Password;
@@ -468,4 +468,4 @@ module.exports.encryptUsingPBKDF2Password = encryptUsingPBKDF2Password;
 module.exports.decryptUsingPBKDF2Password = decryptUsingPBKDF2Password;
 module.exports.stampDataWithPassword = stampDataWithPassword;
 module.exports.verifyDataStampedWithPassword = verifyDataStampedWithPassword;
-//**************************************************************************************
+

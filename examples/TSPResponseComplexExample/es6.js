@@ -30,11 +30,11 @@ const testData = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-V1_5";
 //*********************************************************************************
-//region Create TSP response
+//#region Create TSP response
 //*********************************************************************************
 function createTSPRespInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 	
 	const certSimpl = new Certificate();
@@ -42,15 +42,15 @@ function createTSPRespInternal()
 	
 	let publicKey;
 	let privateKey;
-	//endregion
+	//#endregion
 	
-	//region Get a "crypto" extension
+	//#region Get a "crypto" extension
 	const crypto = getCrypto();
 	if(typeof crypto === "undefined")
 		return Promise.reject("No WebCrypto extension found");
-	//endregion
+	//#endregion
 	
-	//region Put a static values
+	//#region Put a static values
 	certSimpl.version = 2;
 	certSimpl.serialNumber = new asn1js.Integer({ value: 1 });
 	certSimpl.issuer.typesAndValues.push(new AttributeTypeAndValue({
@@ -75,7 +75,7 @@ function createTSPRespInternal()
 	
 	certSimpl.extensions = []; // Extensions are not a part of certificate by default, it's an optional array
 	
-	//region "BasicConstraints" extension
+	//#region "BasicConstraints" extension
 	const basicConstr = new BasicConstraints({
 		cA: true,
 		pathLenConstraint: 3
@@ -87,9 +87,9 @@ function createTSPRespInternal()
 		extnValue: basicConstr.toSchema().toBER(false),
 		parsedValue: basicConstr // Parsed value for well-known extensions
 	}));
-	//endregion
+	//#endregion
 	
-	//region "KeyUsage" extension
+	//#region "KeyUsage" extension
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
@@ -104,25 +104,25 @@ function createTSPRespInternal()
 		extnValue: keyUsage.toBER(false),
 		parsedValue: keyUsage // Parsed value for well-known extensions
 	}));
-	//endregion
-	//endregion
+	//#endregion
+	//#endregion
 	
-	//region Create a new key pair
+	//#region Create a new key pair
 	sequence = sequence.then(
 		() =>
 		{
-			//region Get default algorithm parameters for key generation
+			//#region Get default algorithm parameters for key generation
 			const algorithm = getAlgorithmParameters(signAlg, "generatekey");
 			if("hash" in algorithm.algorithm)
 				algorithm.algorithm.hash.name = hashAlg;
-			//endregion
+			//#endregion
 			
 			return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 		}
 	);
-	//endregion
+	//#endregion
 	
-	//region Store new key in an interim variables
+	//#region Store new key in an interim variables
 	sequence = sequence.then(
 		keyPair =>
 		{
@@ -131,22 +131,22 @@ function createTSPRespInternal()
 		},
 		error => Promise.reject(`Error during key generation: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Exporting public key into "subjectPublicKeyInfo" value of certificate
+	//#region Exporting public key into "subjectPublicKeyInfo" value of certificate
 	sequence = sequence.then(
 		() => certSimpl.subjectPublicKeyInfo.importKey(publicKey)
 	);
-	//endregion
+	//#endregion
 	
-	//region Signing final certificate
+	//#region Signing final certificate
 	sequence = sequence.then(
 		() => certSimpl.sign(privateKey, hashAlg),
 		error => Promise.reject(`Error during exporting public key: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Encode and store certificate
+	//#region Encode and store certificate
 	sequence = sequence.then(
 		() =>
 		{
@@ -155,15 +155,15 @@ function createTSPRespInternal()
 		},
 		error => Promise.reject(`Error during signing: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Exporting private key
+	//#region Exporting private key
 	sequence = sequence.then(
 		() => crypto.exportKey("pkcs8", privateKey)
 	);
-	//endregion
+	//#endregion
 	
-	//region Store exported key on Web page
+	//#region Store exported key on Web page
 	sequence = sequence.then(
 		result =>
 		{
@@ -171,15 +171,15 @@ function createTSPRespInternal()
 		},
 		error => Promise.reject(`Error during exporting of private key: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Hash "testData" value
+	//#region Hash "testData" value
 	sequence = sequence.then(
 		() => crypto.digest(hashAlg, testData)
 	);
-	//endregion
+	//#endregion
 	
-	//region Create specific TST info structure to sign
+	//#region Create specific TST info structure to sign
 	sequence = sequence.then(
 		result =>
 		{
@@ -211,9 +211,9 @@ function createTSPRespInternal()
 			return tstInfoSimpl.toSchema().toBER(false);
 		}
 	);
-	//endregion
+	//#endregion
 	
-	//region Initialize CMS Signed Data structures and sign it
+	//#region Initialize CMS Signed Data structures and sign it
 	sequence = sequence.then(
 		result =>
 		{
@@ -239,9 +239,9 @@ function createTSPRespInternal()
 			return cmsSignedSimpl.sign(privateKey, 0, hashAlg);
 		}
 	);
-	//endregion
+	//#endregion
 	
-	//region Create internal CMS Signed Data
+	//#region Create internal CMS Signed Data
 	sequence = sequence.then(
 		() =>
 		{
@@ -256,9 +256,9 @@ function createTSPRespInternal()
 		},
 		error => Promise.reject(`Erorr during signing of CMS Signed Data: ${error}`)
 	);
-	//endregion
+	//#endregion
 	
-	//region Finally create completed TSP response structure
+	//#region Finally create completed TSP response structure
 	return sequence.then(
 		result =>
 		{
@@ -270,7 +270,7 @@ function createTSPRespInternal()
 			tspResponseBuffer = tspRespSimpl.toSchema().toBER(false);
 		}
 	);
-	//endregion
+	//#endregion
 }
 //*********************************************************************************
 function createTSPResp()
@@ -302,13 +302,13 @@ function createTSPResp()
 	});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Parse existing TSP response
+//#region Parse existing TSP response
 //*********************************************************************************
 function parseTSPResp()
 {
-	//region Initial activities
+	//#region Initial activities
 	document.getElementById("resp-accur").style.display = "none";
 	document.getElementById("resp-ord").style.display = "none";
 	document.getElementById("resp-non").style.display = "none";
@@ -331,14 +331,14 @@ function parseTSPResp()
 	const extTable = document.getElementById("resp-extensions");
 	while(extTable.rows.length > 1)
 		extTable.deleteRow(extTable.rows.length - 1);
-	//endregion
+	//#endregion
 	
-	//region Decode existing TSP response
+	//#region Decode existing TSP response
 	const asn1 = asn1js.fromBER(tspResponseBuffer);
 	const tspRespSimpl = new TimeStampResp({ schema: asn1.result });
-	//endregion
+	//#endregion
 	
-	//region Put information about TSP response status
+	//#region Put information about TSP response status
 	let status = "";
 	
 	switch(tspRespSimpl.status.status)
@@ -366,9 +366,9 @@ function parseTSPResp()
 	
 	// noinspection InnerHTMLJS
 	document.getElementById("resp-status").innerHTML = status;
-	//endregion
+	//#endregion
 	
-	//region Parse internal CMS Signed Data
+	//#region Parse internal CMS Signed Data
 	if(("timeStampToken" in tspRespSimpl) === false)
 	{
 		alert("No additional info but PKIStatusInfo");
@@ -379,14 +379,14 @@ function parseTSPResp()
 	
 	const asn1TST = asn1js.fromBER(signedSimpl.encapContentInfo.eContent.valueBlock.valueHex);
 	const tstInfoSimpl = new TSTInfo({ schema: asn1TST.result });
-	//endregion
+	//#endregion
 	
-	//region Put information about policy
+	//#region Put information about policy
 	// noinspection InnerHTMLJS
 	document.getElementById("resp-policy").innerHTML = tstInfoSimpl.policy;
-	//endregion
+	//#endregion
 	
-	//region Put information about TST info message imprint
+	//#region Put information about TST info message imprint
 	const dgstmap = {
 		"1.3.14.3.2.26": "SHA-1",
 		"2.16.840.1.101.3.4.2.1": "SHA-256",
@@ -407,19 +407,19 @@ function parseTSPResp()
 	const cell1 = row.insertCell(1);
 	// noinspection InnerHTMLJS
 	cell1.innerHTML = bufferToHexCodes(tstInfoSimpl.messageImprint.hashedMessage.valueBlock.valueHex);
-	//endregion
+	//#endregion
 	
-	//region Put information about TST info serial number
+	//#region Put information about TST info serial number
 	// noinspection InnerHTMLJS
 	document.getElementById("resp-serial").innerHTML = bufferToHexCodes(tstInfoSimpl.serialNumber.valueBlock.valueHex);
-	//endregion
+	//#endregion
 	
-	//region Put information about the time when TST info was generated
+	//#region Put information about the time when TST info was generated
 	// noinspection InnerHTMLJS
 	document.getElementById("resp-time").innerHTML = tstInfoSimpl.genTime.toString();
-	//endregion
+	//#endregion
 	
-	//region Put information about TST info accuracy
+	//#region Put information about TST info accuracy
 	if("accuracy" in tstInfoSimpl)
 	{
 		const accuracyTable = document.getElementById("resp-accuracy");
@@ -437,27 +437,27 @@ function parseTSPResp()
 		
 		document.getElementById("resp-accur").style.display = "block";
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about TST info ordering
+	//#region Put information about TST info ordering
 	if("ordering" in tstInfoSimpl)
 	{
 		// noinspection InnerHTMLJS
 		document.getElementById("resp-ordering").innerHTML = tstInfoSimpl.ordering.toString();
 		document.getElementById("resp-ord").style.display = "block";
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about TST info nonce value
+	//#region Put information about TST info nonce value
 	if("nonce" in tstInfoSimpl)
 	{
 		// noinspection InnerHTMLJS
 		document.getElementById("resp-nonce").innerHTML = bufferToHexCodes(tstInfoSimpl.nonce.valueBlock.valueHex);
 		document.getElementById("resp-non").style.display = "block";
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about TST info TSA
+	//#region Put information about TST info TSA
 	if("tsa" in tstInfoSimpl)
 	{
 		switch(tstInfoSimpl.tsa.type)
@@ -525,9 +525,9 @@ function parseTSPResp()
 			default:
 		}
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about TST info extensions
+	//#region Put information about TST info extensions
 	if("extensions" in tstInfoSimpl)
 	{
 		const extensionTable = document.getElementById("resp-extensions");
@@ -542,23 +542,23 @@ function parseTSPResp()
 		
 		document.getElementById("resp-ext").style.display = "block";
 	}
-	//endregion
+	//#endregion
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Verify existing TSP response
+//#region Verify existing TSP response
 //*********************************************************************************
 function verifyTSPRespInternal()
 {
-	//region Decode existing TSP response
+	//#region Decode existing TSP response
 	const asn1 = asn1js.fromBER(tspResponseBuffer);
 	const tspRespSimpl = new TimeStampResp({ schema: asn1.result });
-	//endregion
+	//#endregion
 	
-	//region Verify TSP response
+	//#region Verify TSP response
 	return tspRespSimpl.verify({ signer: 0, trustedCerts: trustedCertificates, data: testData.buffer });
-	//endregion
+	//#endregion
 }
 //*********************************************************************************
 function verifyTSPResp()
@@ -575,13 +575,13 @@ function verifyTSPResp()
 	);
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Parse "CA Bundle" file
+//#region Parse "CA Bundle" file
 //*********************************************************************************
 function parseCAbundle(buffer)
 {
-	//region Initial variables
+	//#region Initial variables
 	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 	
 	const startChars = "-----BEGIN CERTIFICATE-----";
@@ -597,7 +597,7 @@ function parseCAbundle(buffer)
 	let started = false;
 	
 	let certBodyEncoded = "";
-	//endregion
+	//#endregion
 	
 	for(let i = 0; i < view.length; i++)
 	{
@@ -609,7 +609,7 @@ function parseCAbundle(buffer)
 			{
 				if(String.fromCharCode(view[i]) === "-")
 				{
-					//region Decoded trustedCertificates
+					//#region Decoded trustedCertificates
 					const asn1 = asn1js.fromBER(stringToArrayBuffer(window.atob(certBodyEncoded)));
 					try
 					{
@@ -620,14 +620,14 @@ function parseCAbundle(buffer)
 						alert("Wrong certificate format");
 						return;
 					}
-					//endregion
+					//#endregion
 					
-					//region Set all "flag variables"
+					//#region Set all "flag variables"
 					certBodyEncoded = "";
 					
 					started = false;
 					waitForEnd = true;
-					//endregion
+					//#endregion
 				}
 			}
 		}
@@ -694,7 +694,7 @@ function parseCAbundle(buffer)
 	}
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
 function handleFileBrowse(evt)
 {
@@ -787,10 +787,10 @@ context("Hack for Rollup.js", () =>
 //*********************************************************************************
 context("TSP Response Complex Example", () =>
 {
-	//region Initial variables
+	//#region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
-	//endregion
+	//#endregion
 	
 	signAlgs.forEach(_signAlg =>
 	{

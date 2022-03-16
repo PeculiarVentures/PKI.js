@@ -22,24 +22,24 @@ let issuerPublicKey = null;
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-V1_5";
 //*********************************************************************************
-//region Create CRL
+//#region Create CRL
 //*********************************************************************************
 function createCRLInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 	
 	let publicKey;
 	let privateKey;
-	//endregion
+	//#endregion
 	
-	//region Get a "crypto" extension
+	//#region Get a "crypto" extension
 	const crypto = getCrypto();
 	if(typeof crypto === "undefined")
 		return Promise.reject("No WebCrypto extension found");
-	//endregion
+	//#endregion
 	
-	//region Put a static values
+	//#region Put a static values
 	const crlSimpl = new CertificateRevocationList();
 	
 	crlSimpl.version = 1;
@@ -89,22 +89,22 @@ function createCRLInternal()
 			})).toBER(false)
 		})]
 	});
-	//endregion
+	//#endregion
 	
-	//region Create a new key pair
+	//#region Create a new key pair
 	sequence = sequence.then(() =>
 	{
-		//region Get default algorithm parameters for key generation
+		//#region Get default algorithm parameters for key generation
 		const algorithm = getAlgorithmParameters(signAlg, "generatekey");
 		if("hash" in algorithm.algorithm)
 			algorithm.algorithm.hash.name = hashAlg;
-		//endregion
+		//#endregion
 		
 		return crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 	});
-	//endregion
+	//#endregion
 	
-	//region Store new key in an interim variables
+	//#region Store new key in an interim variables
 	sequence = sequence.then(keyPair =>
 	{
 		publicKey = keyPair.publicKey;
@@ -113,30 +113,30 @@ function createCRLInternal()
 		issuerPublicKey = new PublicKeyInfo();
 		issuerPublicKey.importKey(publicKey);
 	});
-	//endregion
+	//#endregion
 	
-	//region Signing final CRL
+	//#region Signing final CRL
 	sequence = sequence.then(() => crlSimpl.sign(privateKey, hashAlg));
-	//endregion
+	//#endregion
 	
-	//region Encode and store CRL
+	//#region Encode and store CRL
 	sequence = sequence.then(() =>
 	{
 		crlBuffer = crlSimpl.toSchema(true).toBER(false);
 		
 	});
-	//endregion
+	//#endregion
 	
-	//region Exporting private key
+	//#region Exporting private key
 	sequence = sequence.then(() => crypto.exportKey("pkcs8", privateKey));
-	//endregion
+	//#endregion
 	
-	//region Store exported key on Web page
+	//#region Store exported key on Web page
 	sequence = sequence.then(result =>
 	{
 		privateKeyBuffer = result;
 	});
-	//endregion
+	//#endregion
 	
 	return sequence;
 }
@@ -160,21 +160,21 @@ function createCRL()
 	});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Parse existing CRL
+//#region Parse existing CRL
 //*********************************************************************************
 function parseCRL()
 {
-	//region Initial check
+	//#region Initial check
 	if(crlBuffer.byteLength === 0)
 	{
 		alert("Nothing to parse");
 		return;
 	}
-	//endregion
+	//#endregion
 	
-	//region Initial activities
+	//#region Initial activities
 	document.getElementById("crl-extn-div").style.display = "none";
 	
 	const revokedTable = document.getElementById("crl-rev-certs");
@@ -188,16 +188,16 @@ function parseCRL()
 	const issuerTable = document.getElementById("crl-issuer-table");
 	while(issuerTable.rows.length > 1)
 		issuerTable.deleteRow(issuerTable.rows.length - 1);
-	//endregion
+	//#endregion
 	
-	//region Decode existing CRL
+	//#region Decode existing CRL
 	const asn1 = asn1js.fromBER(crlBuffer);
 	const crlSimpl = new CertificateRevocationList({
 		schema: asn1.result
 	});
-	//endregion
+	//#endregion
 	
-	//region Put information about CRL issuer
+	//#region Put information about CRL issuer
 	const rdnmap = {
 		"2.5.4.6": "C",
 		"2.5.4.10": "O",
@@ -230,23 +230,23 @@ function parseCRL()
 		// noinspection InnerHTMLJS
 		cell1.innerHTML = subjval;
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about issuance date
+	//#region Put information about issuance date
 	// noinspection InnerHTMLJS
 	document.getElementById("crl-this-update").innerHTML = crlSimpl.thisUpdate.value.toString();
-	//endregion
+	//#endregion
 	
-	//region Put information about expiration date
+	//#region Put information about expiration date
 	if("nextUpdate" in crlSimpl)
 	{
 		// noinspection InnerHTMLJS
 		document.getElementById("crl-next-update").innerHTML = crlSimpl.nextUpdate.value.toString();
 		document.getElementById("crl-next-update-div").style.display = "block";
 	}
-	//endregion
+	//#endregion
 	
-	//region Put information about signature algorithm
+	//#region Put information about signature algorithm
 	const algomap = {
 		"1.2.840.113549.2.1": "MD2",
 		"1.2.840.113549.1.1.2": "MD2 with RSA",
@@ -274,9 +274,9 @@ function parseCRL()
 	
 	// noinspection InnerHTMLJS
 	document.getElementById("crl-sign-algo").innerHTML = signatureAlgorithm;
-	//endregion
+	//#endregion
 	
-	//region Put information about revoked certificates
+	//#region Put information about revoked certificates
 	if("revokedCertificates" in crlSimpl)
 	{
 		for(let i = 0; i < crlSimpl.revokedCertificates.length; i++)
@@ -292,8 +292,8 @@ function parseCRL()
 		
 		document.getElementById("crl-rev-certs-div").style.display = "block";
 	}
-	//endregion
-	//region Put information about CRL extensions
+	//#endregion
+	//#region Put information about CRL extensions
 	if("crlExtensions" in crlSimpl)
 	{
 		for(let i = 0; i < crlSimpl.crlExtensions.extensions.length; i++)
@@ -306,31 +306,31 @@ function parseCRL()
 		
 		document.getElementById("crl-extn-div").style.display = "block";
 	}
-	//endregion
+	//#endregion
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
-//region Verify existing CRL
+//#region Verify existing CRL
 //*********************************************************************************
 function verifyCRLInternal()
 {
-	//region Initial check
+	//#region Initial check
 	if(crlBuffer.byteLength === 0)
 		return Promise.reject("Nothing to verify");
 	
 	if((issuerCertificate === null) && (issuerPublicKey === null))
 		return Promise.reject("Load CRL's issuer certificate");
-	//endregion
+	//#endregion
 	
-	//region Decode existing CRL
+	//#region Decode existing CRL
 	const asn1 = asn1js.fromBER(crlBuffer);
 	const crlSimpl = new CertificateRevocationList({
 		schema: asn1.result
 	});
-	//endregion
+	//#endregion
 	
-	//region Verify CRL
+	//#region Verify CRL
 	const verifyObject = {};
 	
 	if(issuerCertificate !== null)
@@ -340,7 +340,7 @@ function verifyCRLInternal()
 		verifyObject.publicKeyInfo = issuerPublicKey;
 	
 	return crlSimpl.verify(verifyObject);
-	//endregion
+	//#endregion
 }
 //*********************************************************************************
 function verifyCRL()
@@ -354,7 +354,7 @@ function verifyCRL()
 	});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
 function handleFileBrowse(evt)
 {
@@ -449,7 +449,7 @@ context("Hack for Rollup.js", () =>
 //*********************************************************************************
 context("CRL Complex Example", () =>
 {
-	//region Initial variables
+	//#region Initial variables
 	const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 	const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
 	
@@ -469,7 +469,7 @@ context("CRL Complex Example", () =>
 		["SHA-384 + RSA-PSS", "1.2.840.113549.1.1.10"],
 		["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"]
 	]);
-	//endregion
+	//#endregion
 	
 	signAlgs.forEach(_signAlg =>
 	{

@@ -13,7 +13,7 @@ let aesKeyLength = 16;
 //*********************************************************************************
 function md5(data, offset, length)
 {
-	//region Initial variables
+	//#region Initial variables
 	const r = new Uint8Array([
 		7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
 		5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
@@ -42,7 +42,7 @@ function md5(data, offset, length)
 
 	let i;
 	let j;
-	//endregion
+	//#endregion
 
 	// pre-processing
 	if(data instanceof ArrayBuffer)
@@ -131,9 +131,9 @@ function md5(data, offset, length)
 //*********************************************************************************
 function openSSLBytesToKey(password, salt, keyLength, count)
 {
-	//region Initial variables
+	//#region Initial variables
 	const hashes = [];
-	//endregion
+	//#endregion
 
 	hashes.push(md5(utilConcatBuf(password, salt), 0));
 
@@ -157,41 +157,41 @@ function hex2b(hex)
 	return resultBuffer;
 }
 //*********************************************************************************
-//region Create OpenSSL Encrypted Private Key
+//#region Create OpenSSL Encrypted Private Key
 //*********************************************************************************
 async function createOpenSSLPrivateKeyInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	const algorithm = {
 		name: "AES-CBC",
 		length: aesKeyLength << 3
 	};
-	//endregion
+	//#endregion
 
-	//region Get a "crypto" extension
+	//#region Get a "crypto" extension
 	const crypto = getCrypto();
 	if(typeof crypto === "undefined")
 		throw new Error("No WebCrypto extension found");
-	//endregion
+	//#endregion
 
-	//region Generate IV
+	//#region Generate IV
 	ivBuffer = new ArrayBuffer(16);
 	const ivView = new Uint8Array(ivBuffer);
 
 	await crypto.getRandomValues(ivView);
 
 	algorithm.iv = ivBuffer.slice(0);
-	//endregion
+	//#endregion
 
-	//region Generate OpenSSL encryption key
+	//#region Generate OpenSSL encryption key
 	const openSSLKey = openSSLBytesToKey(passwordBuffer, ivBuffer.slice(0, 8), aesKeyLength, 1);
-	//endregion
+	//#endregion
 
-	//region Import OpenSSL key into crypto engine internals
+	//#region Import OpenSSL key into crypto engine internals
 	const key = await crypto.subtle.importKey("raw", openSSLKey, algorithm, false, ["encrypt", "decrypt"]);
-	//endregion
+	//#endregion
 
-	//region Finally encrypt privatekey
+	//#region Finally encrypt privatekey
 	try
 	{
 		privateKeyData = await crypto.subtle.encrypt(algorithm, key, new Uint8Array(privateKeyData));
@@ -201,7 +201,7 @@ async function createOpenSSLPrivateKeyInternal()
 		privateKeyData = new ArrayBuffer(0);
 		ivBuffer = new ArrayBuffer(0);
 	}
-	//endregion
+	//#endregion
 }
 //*********************************************************************************
 function createOpenSSLPrivateKey()
@@ -229,27 +229,27 @@ function createOpenSSLPrivateKey()
 		});
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Parse existing OpenSSL Encrypted Private Key
+//#region Parse existing OpenSSL Encrypted Private Key
 //*********************************************************************************
 async function parseOpenSSLPrivateKeyInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	const algorithm = {
 		name: "AES-CBC",
 		length: aesKeyLength >> 3,
 		iv: ivBuffer.slice(0)
 	};
-	//endregion
+	//#endregion
 
 	const openSSLKey = openSSLBytesToKey(passwordBuffer, ivBuffer.slice(0, 8), aesKeyLength, 1);
 
-	//region Get a "crypto" extension
+	//#region Get a "crypto" extension
 	const crypto = getCrypto();
 	if(typeof crypto === "undefined")
 		throw new Error("No WebCrypto extension found");
-	//endregion
+	//#endregion
 
 	const key = await crypto.subtle.importKey("raw", openSSLKey, algorithm, false, ["encrypt", "decrypt"]);
 
@@ -341,7 +341,7 @@ async function parseOpenSSLPrivateKey()
 		});
 }
 //*********************************************************************************
-//endregion
+//#endregion
 //*********************************************************************************
 function handleContentEncLenOnChange()
 {
@@ -374,11 +374,11 @@ context("Hack for Rollup.js", () =>
 //*********************************************************************************
 context("OpenSSL Encrypted Private Key", () =>
 {
-	//region Initial variables
+	//#region Initial variables
 	passwordBuffer = stringToArrayBuffer("password");
 
 	const encLens = [128, 192, 256];
-	//endregion
+	//#endregion
 
 	encLens.forEach(encLen =>
 	{

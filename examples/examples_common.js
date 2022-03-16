@@ -1,6 +1,6 @@
-//**************************************************************************************
-//region Auxilliary functions
-//**************************************************************************************
+
+//#region Auxilliary functions
+
 /**
  * Format string in order to have each line with length equal to 64
  * @param {string} pemString String to format
@@ -29,4 +29,4 @@ export function formatPEM(pemString)
 		return pemString;
 	}
 }
-//**************************************************************************************
+

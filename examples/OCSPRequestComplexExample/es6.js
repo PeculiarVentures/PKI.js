@@ -15,15 +15,15 @@ import Extension from "../../src/Extension";
 //*********************************************************************************
 let ocspReqBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created OCSP request
 //*********************************************************************************
-//region Create OCSP request  
+//#region Create OCSP request  
 //*********************************************************************************
 function createOCSPReqInternal()
 {
-	//region Initial variables
+	//#region Initial variables
 	const ocspReqSimpl = new OCSPRequest();
-	//endregion
+	//#endregion
 	
-	//region Put static variables
+	//#region Put static variables
 	ocspReqSimpl.tbsRequest.requestorName = new GeneralName({
 		type: 4,
 		value: new RelativeDistinguishedNames({
@@ -64,11 +64,11 @@ function createOCSPReqInternal()
 			extnValue: (new asn1js.OctetString({ valueHex: fictionBuffer })).toBER(false)
 		})
 	];
-	//endregion
+	//#endregion
 	
-	//region Encode OCSP request and put on the Web page
+	//#region Encode OCSP request and put on the Web page
 	ocspReqBuffer = ocspReqSimpl.toSchema(true).toBER(false);
-	//endregion
+	//#endregion
 	
 	return Promise.resolve(true);
 }
@@ -92,21 +92,21 @@ function createOCSPReq()
 	});
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
-//region Parse existing OCSP request  
+//#region Parse existing OCSP request  
 //*********************************************************************************
 function parseOCSPReq()
 {
-	//region Initial check 
+	//#region Initial check 
 	if(ocspReqBuffer.byteLength === 0)
 	{
 		alert("Nothing to parse!");
 		return;
 	}
-	//endregion 
+	//#endregion 
 	
-	//region Initial activities 
+	//#region Initial activities 
 	document.getElementById("ocsp-req-extn-div").style.display = "none";
 	
 	const requestsTable = document.getElementById("ocsp-req-requests");
@@ -120,14 +120,14 @@ function parseOCSPReq()
 	const requestorTable = document.getElementById("ocsp-req-name");
 	while(requestorTable.rows.length > 1)
 		requestorTable.deleteRow(requestorTable.rows.length - 1);
-	//endregion 
+	//#endregion 
 	
-	//region Decode existing OCSP request
+	//#region Decode existing OCSP request
 	const asn1 = asn1js.fromBER(ocspReqBuffer);
 	const ocspReqSimpl = new OCSPRequest({ schema: asn1.result });
-	//endregion 
+	//#endregion 
 	
-	//region Put information about OCSP request requestor 
+	//#region Put information about OCSP request requestor 
 	if("requestorName" in ocspReqSimpl.tbsRequest)
 	{
 		switch(ocspReqSimpl.tbsRequest.requestorName.type)
@@ -193,9 +193,9 @@ function parseOCSPReq()
 			default:
 		}
 	}
-	//endregion 
+	//#endregion 
 	
-	//region Put information about requests 
+	//#region Put information about requests 
 	for(let i = 0; i < ocspReqSimpl.tbsRequest.requestList.length; i++)
 	{
 		const row = requestsTable.insertRow(requestsTable.rows.length);
@@ -203,9 +203,9 @@ function parseOCSPReq()
 		// noinspection InnerHTMLJS
 		cell0.innerHTML = bufferToHexCodes(ocspReqSimpl.tbsRequest.requestList[i].reqCert.serialNumber.valueBlock.valueHex);
 	}
-	//endregion 
+	//#endregion 
 	
-	//region Put information about request extensions 
+	//#region Put information about request extensions 
 	if("requestExtensions" in ocspReqSimpl.tbsRequest)
 	{
 		for(let i = 0; i < ocspReqSimpl.tbsRequest.requestExtensions.length; i++)
@@ -218,10 +218,10 @@ function parseOCSPReq()
 		
 		document.getElementById("ocsp-req-extn-div").style.display = "block";
 	}
-	//endregion 
+	//#endregion 
 }
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
 function handleFileBrowse(evt)
 {

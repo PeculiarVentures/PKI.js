@@ -17,7 +17,7 @@ import NodeEngine from "./NodeEngine";
 const nodeEngine = new NodeEngine();
 setEngine(nodeEngine.name, nodeEngine.crypto, nodeEngine.subtle);
 //*********************************************************************************
-//region Global variables
+//#region Global variables
 //*********************************************************************************
 const x509CertificateBASE64 = "MIIDRDCCAi6gAwIBAgIBATALBgkqhkiG9w0BAQswODE2MAkGA1UEBhMCVVMwKQYDVQQDHiIAUABlAGMAdQBsAGkAYQByACAAVgBlAG4AdAB1AHIAZQBzMB4XDTEzMDEzMTIxMDAwMFoXDTE2MDEzMTIxMDAwMFowODE2MAkGA1UEBhMCVVMwKQYDVQQDHiIAUABlAGMAdQBsAGkAYQByACAAVgBlAG4AdAB1AHIAZQBzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4qEnCuFxZqTEM/8cYcaYxexT6+fAHan5/eGCFOe1Yxi0BjRuDooWBPX71+hmWK/MKrKpWTpA3ZDeWrQR2WIcaf/ypd6DAEEWWzlQgBYpEUj/o7cykNwIvZReU9JXCbZu0EmeZXzBm1mIcWYRdk17UdneIRUkU379wVJcKXKlgZsx8395UNeOMk11G5QaHzAafQ1ljEKB/x2xDgwFxNaKpSIq3LQFq0PxoYt/PBJDMfUSiWT5cFh1FdKITXQzxnIthFn+NVKicAWBRaSZCRQxcShX6KHpQ1Lmk0/7QoCcDOAmVSfUAaBl2w8bYpnobFSStyY0RJHBqNtnTV3JonGAHwIDAQABo10wWzAMBgNVHRMEBTADAQH/MAsGA1UdDwQEAwIA/zAdBgNVHQ4EFgQU5QmA6U960XL4SII2SEhCcxij0JYwHwYDVR0jBBgwFoAU5QmA6U960XL4SII2SEhCcxij0JYwCwYJKoZIhvcNAQELA4IBAQAikQls3LhY8rYQCZ+8jXrdaRTY3L5J3S2xzoAofkEnQNzNMClaWrZbY/KQ+gG25MIFwPOWZn/uYUKB2j0yHTRMPEAp/v5wawSqM2BkdnkGP4r5Etx9pe3mog2xNUBqSeopNNto7QgV0o1yYHtuMKQhNAzcFB1CGz25+lXv8VuuU1PoYNrTjiprkjLDgPurNXUjUh9AZl06+Cakoe75LEkuaZKuBQIMNLJFcM2ZSK/QAAaI0E1DovcsCctW8x/6Qk5fYwNu0jcIdng9dzKYXytzV53+OGxdK5mldyBBkyvTrbO8bWwYT3c+weB1huNpgnpRHJKMz5xVj0bbdnHir6uc";
 const attributeCertificateBASE64 = "MIIBkDCCATgCAQEwIqAgMBikFjAUMRIwEAYDVQQDDAlCYWNrZW5kQ0ECBAEAAAGgGjAYpBYwFDESMBAGA1UEAwwJQmFja2VuZENBMA8GDSsGAQQBlmQDBoN9BW4CBAYAAAEwIhgPMjAxNzA4MjkyMjAwMDBaGA85OTk5MTIzMTIzNTk1OVowGTAXBg0rBgEEAZZkAwaDfQVnMQYEBDEBAmowgZwwHwYDVR0jBBgwFoAUYHHiUMQRfF/MiTvN6ZE7mRndccAwFwYNKwYBBAGWZAMGg30FZQEB/wQDBAEFMBcGDSsGAQQBlmQDBoN9BWsBAf8EAwQBADAeBg0rBgEEAZZkAwaDfQVoAQH/BAoxCAwGRVpTMjIzMCcGDSsGAQQBlmQDBoN9BW8EFgQUAAAAAAAAAAAAAAAAAAAAAAAAAAAwDwYNKwYBBAGWZAMGg30FbgNBAIiBWMPICHnWqU0923pfv/B0P18XDMQPoPBvJE7btu6jZLjztJIGq5wssYuHvWCGstpOGvJSXDjdJdYweI0rMwM=";
@@ -28,11 +28,11 @@ const attributePrivateKeyBASE64 = "MDgCAQAwDwYNKwYBBAGWZAMGg30FbgQiBCAShWZocFw8W
 let certSimpl;
 let pkcs8Simpl;
 //*********************************************************************************
-//endregion 
+//#endregion 
 //*********************************************************************************
 function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 	
 	const keyLocalIDBuffer = new ArrayBuffer(4);
@@ -45,7 +45,7 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 	
 	getRandomValues(certLocalIDView);
 	
-	//region "KeyUsage" attribute
+	//#region "KeyUsage" attribute
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
@@ -55,7 +55,7 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		valueHex: bitArray,
 		unusedBits: 7
 	});
-	//endregion
+	//#endregion
 	
 	const passwordConverted = stringToArrayBuffer(password);
 	
@@ -69,9 +69,9 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		hmacHashAlgorithm: inputHashAlgorithm,
 		iterationCount: 2048
 	};
-	//endregion
+	//#endregion
 	
-	//region Add "keyUsage" attribute
+	//#region Add "keyUsage" attribute
 	pkcs8Simpl.attributes = [
 		new Attribute({
 			type: "2.5.29.15",
@@ -80,9 +80,9 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 			]
 		})
 	];
-	//endregion
+	//#endregion
 	
-	//region Put initial values for PKCS#12 structures
+	//#region Put initial values for PKCS#12 structures
 	const pkcs12 = new PFX({
 		parsedValue: {
 			integrityMode: 0, // Password-Based Integrity Mode
@@ -160,15 +160,15 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 			})
 		}
 	});
-	//endregion
+	//#endregion
 	
-	//region Encode internal values for "PKCS8ShroudedKeyBag"
+	//#region Encode internal values for "PKCS8ShroudedKeyBag"
 	sequence = sequence.then(
 		() => pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.makeInternalValues(makeInternalValuesParameters)
 	);
-	//endregion
+	//#endregion
 	
-	//region Encode internal values for all "SafeContents" firts (create all "Privacy Protection" envelopes)
+	//#region Encode internal values for all "SafeContents" firts (create all "Privacy Protection" envelopes)
 	sequence = sequence.then(
 		() => pkcs12.parsedValue.authenticatedSafe.makeInternalValues({
 			safeContents: [
@@ -179,9 +179,9 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 			]
 		})
 	);
-	//endregion
+	//#endregion
 	
-	//region Encode internal values for "Integrity Protection" envelope
+	//#region Encode internal values for "Integrity Protection" envelope
 	sequence = sequence.then(
 		() => pkcs12.makeInternalValues({
 			password: passwordConverted,
@@ -190,18 +190,18 @@ function openSSLLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 			hmacHashAlgorithm: inputHashAlgorithm
 		})
 	);
-	//endregion
+	//#endregion
 	
-	//region Save encoded data
+	//#region Save encoded data
 	sequence = sequence.then(() => pkcs12.toSchema().toBER(false));
-	//endregion
+	//#endregion
 	
 	return sequence;
 }
 //*********************************************************************************
 function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 	
 	const keyLocalIDBuffer = new ArrayBuffer(4);
@@ -214,7 +214,7 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 	
 	getRandomValues(certLocalIDView);
 	
-	//region "KeyUsage" attribute
+	//#region "KeyUsage" attribute
 	const bitArray = new ArrayBuffer(1);
 	const bitView = new Uint8Array(bitArray);
 	
@@ -224,7 +224,7 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		valueHex: bitArray,
 		unusedBits: 7
 	});
-	//endregion
+	//#endregion
 	
 	const passwordConverted = stringToArrayBuffer(password);
 	
@@ -239,9 +239,9 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 		pbeSchema: "PBES1",
 		iterationCount: 2048
 	};
-	//endregion
+	//#endregion
 	
-	//region Add "keyUsage" attribute
+	//#region Add "keyUsage" attribute
 	pkcs8Simpl.attributes = [
 		new Attribute({
 			type: "2.5.29.15",
@@ -250,9 +250,9 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 			]
 		})
 	];
-	//endregion
+	//#endregion
 	
-	//region Put initial values for PKCS#12 structures
+	//#region Put initial values for PKCS#12 structures
 	const pkcs12 = new PFX({
 		parsedValue: {
 			integrityMode: 0, // Password-Based Integrity Mode
@@ -330,15 +330,15 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 			})
 		}
 	});
-	//endregion
+	//#endregion
 	
-	//region Encode internal values for "PKCS8ShroudedKeyBag"
+	//#region Encode internal values for "PKCS8ShroudedKeyBag"
 	sequence = sequence.then(
 		() => pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.makeInternalValues(makeInternalValuesParameters)
 	);
-	//endregion
+	//#endregion
 	
-	//region Encode internal values for all "SafeContents" firts (create all "Privacy Protection" envelopes)
+	//#region Encode internal values for all "SafeContents" firts (create all "Privacy Protection" envelopes)
 	sequence = sequence.then(
 		() => pkcs12.parsedValue.authenticatedSafe.makeInternalValues({
 			safeContents: [
@@ -349,9 +349,9 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 			]
 		})
 	);
-	//endregion
+	//#endregion
 	
-	//region Encode internal values for "Integrity Protection" envelope
+	//#region Encode internal values for "Integrity Protection" envelope
 	sequence = sequence.then(
 		() => pkcs12.makeInternalValues({
 			password: passwordConverted,
@@ -360,38 +360,38 @@ function windowsLike(password, inputAlgorithm, inputHashAlgorithm = "SHA-256")
 			hmacHashAlgorithm: inputHashAlgorithm
 		})
 	);
-	//endregion
+	//#endregion
 	
-	//region Save encoded data
+	//#region Save encoded data
 	sequence = sequence.then(() => pkcs12.toSchema().toBER(false));
-	//endregion
+	//#endregion
 	
 	return sequence;
 }
 //*********************************************************************************
 function parsePKCS12(buffer, password)
 {
-	//region Initial variables
+	//#region Initial variables
 	let sequence = Promise.resolve();
 	
 	const passwordConverted = stringToArrayBuffer(password);
-	//endregion
+	//#endregion
 	
-	//region Parse internal PKCS#12 values
+	//#region Parse internal PKCS#12 values
 	const asn1 = asn1js.fromBER(buffer);
 	const pkcs12 = new PFX({ schema: asn1.result });
-	//endregion
+	//#endregion
 	
-	//region Parse "AuthenticatedSafe" value of PKCS#12 data
+	//#region Parse "AuthenticatedSafe" value of PKCS#12 data
 	sequence = sequence.then(
 		() => pkcs12.parseInternalValues({
 			password: passwordConverted,
 			checkIntegrity: true
 		})
 	);
-	//endregion
+	//#endregion
 	
-	//region Parse "SafeContents" values
+	//#region Parse "SafeContents" values
 	sequence = sequence.then(
 		() => pkcs12.parsedValue.authenticatedSafe.parseInternalValues({
 			safeContents: [
@@ -404,9 +404,9 @@ function parsePKCS12(buffer, password)
 			]
 		})
 	);
-	//endregion
+	//#endregion
 	
-	//region Parse "PKCS8ShroudedKeyBag" value
+	//#region Parse "PKCS8ShroudedKeyBag" value
 	sequence = sequence.then(() =>
 	{
 		try
@@ -422,22 +422,22 @@ function parsePKCS12(buffer, password)
 			});
 		}
 	});
-	//endregion
+	//#endregion
 	
-	//region Store parsed value to Web page
+	//#region Store parsed value to Web page
 	sequence = sequence.then(
 		() => pkcs12
 	);
-	//endregion
+	//#endregion
 	
 	return sequence;
 }
-//**********************************************************************************
+
 context("Node.js PKCS#12 Example", () =>
 {
-	//region Initial variables
+	//#region Initial variables
 	const password = "Demo";
-	//endregion
+	//#endregion
 	
 	it("Parse Windows-like PKCS#12 data", () =>
 	{
@@ -547,4 +547,4 @@ context("Node.js PKCS#12 Example", () =>
 		});
 	});
 });
-//**********************************************************************************
+
