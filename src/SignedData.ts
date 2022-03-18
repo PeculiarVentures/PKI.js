@@ -693,8 +693,8 @@ export default class SignedData implements Schema.SchemaCompatible {
 
       //#region Find signer's hashing algorithm
 
-      const signerInfoHashAlgorithm = common.getAlgorithmByOID(signerInfo.digestAlgorithm.algorithmId) as any;
-      if (!signerInfoHashAlgorithm.name) {
+      const signerInfoHashAlgorithm = common.getAlgorithmByOID(signerInfo.digestAlgorithm.algorithmId);
+      if (!("name" in signerInfoHashAlgorithm)) {
         throw new SignedDataVerifyError({
           date: checkDate,
           code: 7,

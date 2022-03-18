@@ -518,10 +518,7 @@ export default class PFX implements Schema.SchemaCompatible {
             //#endregion
 
             //#region Initial variables
-            const hashAlgorithm = common.getAlgorithmByOID(this.macData.mac.digestAlgorithm.algorithmId);
-            if (!("name" in hashAlgorithm)) {
-              throw new Error(`Unsupported digest algorithm: ${this.macData.mac.digestAlgorithm.algorithmId}`);
-            }
+            const hashAlgorithm = common.getAlgorithmByOID(this.macData.mac.digestAlgorithm.algorithmId, true, "digestAlgorithm");
             //#endregion
 
             //#region Call current crypto engine for verifying HMAC-based data stamp

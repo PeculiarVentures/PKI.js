@@ -780,10 +780,23 @@ export default class CryptoEngine {
   }
 
   /**
-   * Get WebCrypto algorithm by wel-known OID
-   * @param oid well-known OID to search for
+   * Gets WebCrypto algorithm by wel-known OID
+   * @param oid algorithm identifier
+   * @param safety if `true` throws exception on unknown algorithm identifier
+   * @param target name of the target
+   * @returns Returns WebCrypto algorithm or an empty object
    */
-  public getAlgorithmByOID(oid: string): Algorithm | object {
+  public getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety?: boolean, target?: string): T | object;
+  /**
+   * Gets WebCrypto algorithm by wel-known OID
+   * @param oid algorithm identifier
+   * @param safety if `true` throws exception on unknown algorithm identifier
+   * @param target name of the target
+   * @returns Returns WebCrypto algorithm
+   * @throws Throws {@link Error} exception if unknown algorithm identifier
+   */
+  public getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety: true, target?: string): T;
+  public getAlgorithmByOID(oid: string, safety = false, target?: string): any {
     switch (oid) {
       case "1.2.840.113549.1.1.1":
         return {
@@ -795,28 +808,28 @@ export default class CryptoEngine {
           hash: {
             name: "SHA-1"
           }
-        } as Algorithm;
+        };
       case "1.2.840.113549.1.1.11":
         return {
           name: "RSASSA-PKCS1-v1_5",
           hash: {
             name: "SHA-256"
           }
-        } as Algorithm;
+        };
       case "1.2.840.113549.1.1.12":
         return {
           name: "RSASSA-PKCS1-v1_5",
           hash: {
             name: "SHA-384"
           }
-        } as Algorithm;
+        };
       case "1.2.840.113549.1.1.13":
         return {
           name: "RSASSA-PKCS1-v1_5",
           hash: {
             name: "SHA-512"
           }
-        } as Algorithm;
+        };
       case "1.2.840.113549.1.1.10":
         return {
           name: "RSA-PSS"
@@ -832,53 +845,53 @@ export default class CryptoEngine {
           hash: {
             name: "SHA-1"
           }
-        } as Algorithm;
+        };
       case "1.2.840.10045.4.3.2":
         return {
           name: "ECDSA",
           hash: {
             name: "SHA-256"
           }
-        } as Algorithm;
+        };
       case "1.2.840.10045.4.3.3":
         return {
           name: "ECDSA",
           hash: {
             name: "SHA-384"
           }
-        } as Algorithm;
+        };
       case "1.2.840.10045.4.3.4":
         return {
           name: "ECDSA",
           hash: {
             name: "SHA-512"
           }
-        } as Algorithm;
+        };
       case "1.3.133.16.840.63.0.2":
         return {
           name: "ECDH",
           kdf: "SHA-1"
-        } as Algorithm;
+        };
       case "1.3.132.1.11.1":
         return {
           name: "ECDH",
           kdf: "SHA-256"
-        } as Algorithm;
+        };
       case "1.3.132.1.11.2":
         return {
           name: "ECDH",
           kdf: "SHA-384"
-        } as Algorithm;
+        };
       case "1.3.132.1.11.3":
         return {
           name: "ECDH",
           kdf: "SHA-512"
-        } as Algorithm;
+        };
       case "2.16.840.1.101.3.4.1.2":
         return {
           name: "AES-CBC",
           length: 128
-        } as Algorithm;
+        };
       case "2.16.840.1.101.3.4.1.22":
         return {
           name: "AES-CBC",
@@ -893,75 +906,75 @@ export default class CryptoEngine {
         return {
           name: "AES-GCM",
           length: 128
-        } as Algorithm;
+        };
       case "2.16.840.1.101.3.4.1.26":
         return {
           name: "AES-GCM",
           length: 192
-        } as Algorithm;
+        };
       case "2.16.840.1.101.3.4.1.46":
         return {
           name: "AES-GCM",
           length: 256
-        } as Algorithm;
+        };
       case "2.16.840.1.101.3.4.1.4":
         return {
           name: "AES-CFB",
           length: 128
-        } as Algorithm;
+        };
       case "2.16.840.1.101.3.4.1.24":
         return {
           name: "AES-CFB",
           length: 192
-        } as Algorithm;
+        };
       case "2.16.840.1.101.3.4.1.44":
         return {
           name: "AES-CFB",
           length: 256
-        } as Algorithm;
+        };
       case "2.16.840.1.101.3.4.1.5":
         return {
           name: "AES-KW",
           length: 128
-        } as Algorithm;
+        };
       case "2.16.840.1.101.3.4.1.25":
         return {
           name: "AES-KW",
           length: 192
-        } as Algorithm;
+        };
       case "2.16.840.1.101.3.4.1.45":
         return {
           name: "AES-KW",
           length: 256
-        } as Algorithm;
+        };
       case "1.2.840.113549.2.7":
         return {
           name: "HMAC",
           hash: {
             name: "SHA-1"
           }
-        } as Algorithm;
+        };
       case "1.2.840.113549.2.9":
         return {
           name: "HMAC",
           hash: {
             name: "SHA-256"
           }
-        } as Algorithm;
+        };
       case "1.2.840.113549.2.10":
         return {
           name: "HMAC",
           hash: {
             name: "SHA-384"
           }
-        } as Algorithm;
+        };
       case "1.2.840.113549.2.11":
         return {
           name: "HMAC",
           hash: {
             name: "SHA-512"
           }
-        } as Algorithm;
+        };
       case "1.2.840.113549.1.9.16.3.5":
         return {
           name: "DH"
@@ -1001,6 +1014,10 @@ export default class CryptoEngine {
         };
       //#endregion
       default:
+    }
+
+    if (safety) {
+      throw new Error(`Unsupported algorithm identifier ${target ? `for ${target} ` : ""}: ${oid}`);
     }
 
     return {};
@@ -1832,10 +1849,7 @@ export default class CryptoEngine {
       throw new Error("Incorrectly encoded \"pbkdf2Params\"");
     }
 
-    const contentEncryptionAlgorithm = this.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithmId);
-    if (!("name" in contentEncryptionAlgorithm)) {
-      throw new Error(`Incorrect OID for "contentEncryptionAlgorithm": ${pbes2Parameters.encryptionScheme.algorithmId}`);
-    }
+    const contentEncryptionAlgorithm = this.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithmId, true);
 
     const ivBuffer = pbes2Parameters.encryptionScheme.algorithmParams.valueBlock.valueHex;
     const ivView = new Uint8Array(ivBuffer);
@@ -1848,11 +1862,8 @@ export default class CryptoEngine {
     let hmacHashAlgorithm = "SHA-1";
 
     if (pbkdf2Params.prf) {
-      const algorithm = this.getAlgorithmByOID(pbkdf2Params.prf.algorithmId);
-      if (!("name" in algorithm))
-        throw new Error("Incorrect OID for HMAC hash algorithm");
-
-      hmacHashAlgorithm = (algorithm as any).hash.name;
+      const algorithm = this.getAlgorithmByOID<any>(pbkdf2Params.prf.algorithmId, true);
+      hmacHashAlgorithm = algorithm.hash.name;
     }
     //#endregion
 
@@ -2194,9 +2205,7 @@ export default class CryptoEngine {
     else
       algorithmId = publicKeyInfo.algorithm.algorithmId;
 
-    const algorithmObject = this.getAlgorithmByOID(algorithmId);
-    if (!("name" in algorithmObject))
-      throw new Error(`Unsupported public key algorithm: ${signatureAlgorithm.algorithmId}`);
+    const algorithmObject = this.getAlgorithmByOID(algorithmId, true);
 
     parameters.algorithm = this.getAlgorithmParameters(algorithmObject.name, "importKey");
     if ("hash" in parameters.algorithm.algorithm)
@@ -2216,10 +2225,7 @@ export default class CryptoEngine {
         }
       }
 
-      const curveObject = this.getAlgorithmByOID(publicKeyAlgorithmParams.valueBlock.toString());
-      if (!("name" in curveObject)) {
-        throw new Error(`Unsupported named curve algorithm: ${publicKeyAlgorithmParams.valueBlock.toString()}`);
-      }
+      const curveObject = this.getAlgorithmByOID(publicKeyAlgorithmParams.valueBlock.toString(), true);
       //#endregion
 
       parameters.algorithm.algorithm.namedCurve = curveObject.name;
@@ -2268,9 +2274,7 @@ export default class CryptoEngine {
       else
         algorithmId = publicKeyInfo.algorithm.algorithmId;
 
-      const algorithmObject = this.getAlgorithmByOID(algorithmId);
-      if (!("name" in algorithmObject))
-        throw new Error(`Unsupported public key algorithm: ${signatureAlgorithm.algorithmId}`);
+      const algorithmObject = this.getAlgorithmByOID(algorithmId, true);
 
       parameters.algorithm = this.getAlgorithmParameters(algorithmObject.name, "importKey");
       if ("hash" in parameters.algorithm.algorithm)
@@ -2292,9 +2296,7 @@ export default class CryptoEngine {
           throw new Error("Incorrect type for ECDSA public key parameters");
         }
 
-        const curveObject = this.getAlgorithmByOID(publicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
-        if (!("name" in curveObject))
-          throw new Error(`Unsupported named curve algorithm: ${publicKeyInfo.algorithm.algorithmParams.valueBlock.toString()}`);
+        const curveObject = this.getAlgorithmByOID(publicKeyInfo.algorithm.algorithmParams.valueBlock.toString(), true);
         //#endregion
 
         (parameters.algorithm.algorithm as any).namedCurve = curveObject.name;
@@ -2338,9 +2340,7 @@ export default class CryptoEngine {
       let hashAlgo = "SHA-1";
 
       if ("hashAlgorithm" in pssParameters) {
-        const hashAlgorithm = this.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithmId);
-        if (!("name" in hashAlgorithm))
-          throw new Error(`Unrecognized hash algorithm: ${pssParameters.hashAlgorithm.algorithmId}`);
+        const hashAlgorithm = this.getAlgorithmByOID(pssParameters.hashAlgorithm.algorithmId, true);
 
         hashAlgo = hashAlgorithm.name;
       }

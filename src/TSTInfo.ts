@@ -55,7 +55,7 @@ export interface TSTInfoParameters extends Schema.SchemaConstructor {
 }
 
 export interface TSTInfoVerifyParams {
-  data?: ArrayBuffer;
+  data: ArrayBuffer;
   notBefore?: Date;
   notAfter?: Date;
 }
@@ -402,46 +402,35 @@ export default class TSTInfo implements Schema.SchemaCompatible {
 
   /**
    * Verify current TST Info value
-   * @param parameters Input parameters
+   * @param params Input parameters
    */
-  public async verify(parameters: TSTInfoVerifyParams = {}): Promise<boolean> {
-    //#region Initial variables
-    const notBefore = parameters.notBefore || null;
-    const notAfter = parameters.notAfter || null;
-    //#endregion
-
-    //#region Get a "crypto" extension
-    const crypto = common.getCrypto(true);
-    //#endregion
+  public async verify(params: TSTInfoVerifyParams): Promise<boolean> {
 
     //#region Get initial parameters
-    if (!parameters.data)
+    if (!params.data) {
       throw new Error("\"data\" is a mandatory attribute for TST_INFO verification");
-    const data = parameters.data;
+    }
+    const data = params.data;
     //#endregion
 
     //#region Check date
-    if (notBefore !== null) {
-      if (this.genTime < notBefore)
+    if (params.notBefore) {
+      if (this.genTime < params.notBefore)
         throw new Error("Generation time for TSTInfo object is less than notBefore value");
     }
 
-    if (notAfter !== null) {
-      if (this.genTime > notAfter)
+    if (params.notAfter) {
+      if (this.genTime > params.notAfter)
         throw new Error("Generation time for TSTInfo object is more than notAfter value");
     }
     //#endregion
 
-    //#region Find hashing algorithm
-    const shaAlgorithm = common.getAlgorithmByOID(this.messageImprint.hashAlgorithm.algorithmId);
-    if (!("name" in shaAlgorithm))
-      throw new Error(`Unsupported signature algorithm: ${this.messageImprint.hashAlgorithm.algorithmId}`);
-    //#endregion
+    // Find hashing algorithm
+    const shaAlgorithm = common.getAlgorithmByOID(this.messageImprint.hashAlgorithm.algorithmId, true, "MessageImprint.hashAlgorithm");
 
-    //#region Calculate message digest for input "data" buffer
-    const hash = await crypto.digest(shaAlgorithm.name, new Uint8Array(data));
+    // Calculate message digest for input "data" buffer
+    const hash = await common.getCrypto(true).digest(shaAlgorithm.name, new Uint8Array(data));
     return pvutils.isEqualBuffer(hash, this.messageImprint.hashedMessage.valueBlock.valueHex);
-    //#endregion
   }
 
 }

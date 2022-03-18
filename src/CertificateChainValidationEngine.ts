@@ -434,7 +434,7 @@ export default class CertificateChainValidationEngine {
 		//#region Find OCSP for specific certificate
 		const findOCSP = async (certificate: Certificate, issuerCertificate: Certificate): Promise<number> => {
 			//#region Get hash algorithm from certificate
-			const hashAlgorithm = common.getAlgorithmByOID(certificate.signatureAlgorithm.algorithmId) as any;
+			const hashAlgorithm = common.getAlgorithmByOID<any>(certificate.signatureAlgorithm.algorithmId);
 			if (!hashAlgorithm.name) {
 				return 1;
 			}

@@ -840,13 +840,11 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
       //#region Get length of used AES-KW algorithm
       const aesKWAlgorithm = new AlgorithmIdentifier({ schema: recipientInfo.keyEncryptionAlgorithm.algorithmParams });
 
-      const KWalgorithm = common.getAlgorithmByOID(aesKWAlgorithm.algorithmId) as any;
-      if (!("name" in KWalgorithm))
-        throw new Error(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
+      const kwAlgorithm = common.getAlgorithmByOID<AesKeyAlgorithm>(aesKWAlgorithm.algorithmId, true, "aesKWAlgorithm");
       //#endregion
 
       //#region Translate AES-KW length to ArrayBuffer
-      let kwLength = KWalgorithm.length;
+      let kwLength = kwAlgorithm.length;
 
       const kwLengthBuffer = new ArrayBuffer(4);
       const kwLengthView = new Uint8Array(kwLengthBuffer);
@@ -870,12 +868,10 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
       //#endregion
 
       //#region Get SHA algorithm used together with ECDH
-      const ecdhAlgorithm = common.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId) as any;
-      if (("name" in ecdhAlgorithm) === false)
-        throw new Error(`Incorrect OID for key encryption algorithm: ${recipientInfo.keyEncryptionAlgorithm.algorithmId}`);
+      const ecdhAlgorithm = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "ecdhAlgorithm");
       //#endregion
 
-      const derivedKeyRaw = await common.kdf(ecdhAlgorithm.kdf, derivedBits, KWalgorithm.length, encodedInfo);
+      const derivedKeyRaw = await common.kdf(ecdhAlgorithm.kdf, derivedBits, kwAlgorithm.length, encodedInfo);
       //#endregion
       //#region Import AES-KW key from result of KDF function
       const awsKW = await crypto.importKey("raw", derivedKeyRaw, { name: "AES-KW" }, true, ["wrapKey"]);
@@ -883,7 +879,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
       //#region Finally wrap session key by using AES-KW algorithm
       const wrappedKey = await crypto.wrapKey("raw", sessionKey, awsKW, { name: "AES-KW" });
       //#endregion
-      //#region Append all neccessary data to current CMS_RECIPIENT_INFO object
+      //#region Append all necessary data to current CMS_RECIPIENT_INFO object
       //#region OriginatorIdentifierOrKey
       const asn1 = asn1js.fromBER(exportedECDHPublicKey);
 
@@ -907,9 +903,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
 
     const SubKeyTransRecipientInfo = async (index: number) => {
       const recipientInfo = this.recipientInfos[index].value as KeyTransRecipientInfo; // TODO Remove `as KeyTransRecipientInfo`
-      const algorithmParameters = common.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId) as any;
-      if ("name" in algorithmParameters === false)
-        throw new Error(`Unknown keyEncryptionAlgorithm: ${recipientInfo.keyEncryptionAlgorithm.algorithmId}`);
+      const algorithmParameters = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
 
       //#region RSA-OAEP case
       if (algorithmParameters.name === "RSA-OAEP") {
@@ -949,9 +943,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
       //#region Import KEK from pre-defined data
 
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = common.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId) as any;
-      if (("name" in kekAlgorithm) === false)
-        throw new Error(`Incorrect OID for "keyEncryptionAlgorithm": ${recipientInfo.keyEncryptionAlgorithm.algorithmId}`);
+      const kekAlgorithm = common.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
       //#endregion
 
       const kekKey = await crypto.importKey("raw",
@@ -1005,22 +997,16 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
       //#endregion
       //#region Derive key for "keyEncryptionAlgorithm"
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = common.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId) as any;
-      if (!kekAlgorithm.name) {
-        throw new Error(`Incorrect OID for "keyEncryptionAlgorithm": ${recipientInfo.keyEncryptionAlgorithm.algorithmId}`);
-      }
+      const kekAlgorithm = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
+
       //#endregion
 
       //#region Get HMAC hash algorithm
       let hmacHashAlgorithm = "SHA-1";
 
       if (pbkdf2Params.prf) {
-        const algorithm = common.getAlgorithmByOID(pbkdf2Params.prf.algorithmId) as any;
-        if (!algorithm.name) {
-          throw new Error("Incorrect OID for HMAC hash algorithm");
-        }
-
-        hmacHashAlgorithm = algorithm.hash.name;
+        const prfAlgorithm = common.getAlgorithmByOID<any>(pbkdf2Params.prf.algorithmId, true, "prfAlgorithm");
+        hmacHashAlgorithm = prfAlgorithm.hash.name;
       }
       //#endregion
 
@@ -1049,7 +1035,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
       //#region Wrap previously exported session key (Also too specific for KEK algorithm)
       const wrappedKey = await crypto.wrapKey("raw", sessionKey, derivedKey, kekAlgorithm);
       //#endregion
-      //#region Append all neccessary data to current CMS_RECIPIENT_INFO object
+      //#region Append all necessary data to current CMS_RECIPIENT_INFO object
       //#region RecipientEncryptedKey
       recipientInfo.encryptedKey = new asn1js.OctetString({ valueHex: wrappedKey });
       //#endregion
@@ -1198,14 +1184,11 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
         //#region Get length of used AES-KW algorithm
         const aesKWAlgorithm = new AlgorithmIdentifier({ schema: recipientInfo.keyEncryptionAlgorithm.algorithmParams });
 
-        const KWalgorithm = common.getAlgorithmByOID(aesKWAlgorithm.algorithmId) as any;
-        if (!KWalgorithm.name) {
-          throw new Error(`Incorrect OID for key encryption algorithm: ${aesKWAlgorithm.algorithmId}`);
-        }
+        const kwAlgorithm = common.getAlgorithmByOID<any>(aesKWAlgorithm.algorithmId, true, "kwAlgorithm");
         //#endregion
 
         //#region Translate AES-KW length to ArrayBuffer
-        let kwLength = KWalgorithm.length;
+        let kwLength = kwAlgorithm.length;
 
         const kwLengthBuffer = new ArrayBuffer(4);
         const kwLengthView = new Uint8Array(kwLengthBuffer);
@@ -1233,13 +1216,13 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
         //#endregion
 
         //#region Get SHA algorithm used together with ECDH
-        const ecdhAlgorithm = common.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId) as any;
+        const ecdhAlgorithm = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "ecdhAlgorithm");
         if (!ecdhAlgorithm.name) {
           throw new Error(`Incorrect OID for key encryption algorithm: ${recipientInfo.keyEncryptionAlgorithm.algorithmId}`);
         }
         //#endregion
 
-        return common.kdf(ecdhAlgorithm.kdf, sharedSecret, KWalgorithm.length, encodedInfo);
+        return common.kdf(ecdhAlgorithm.kdf, sharedSecret, kwAlgorithm.length, encodedInfo);
       }
 
       const kdfResult = await applyKDF();
@@ -1261,9 +1244,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
       const unwrapSessionKey = async (aesKwKey: CryptoKey) => {
         //#region Get WebCrypto form of content encryption algorithm
         const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-        const contentEncryptionAlgorithm = common.getAlgorithmByOID(algorithmId) as any;
-        if (!contentEncryptionAlgorithm.name)
-          throw new Error(`Incorrect "contentEncryptionAlgorithm": ${algorithmId}`);
+        const contentEncryptionAlgorithm = common.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
         //#endregion
 
         return crypto.unwrapKey("raw",
@@ -1291,10 +1272,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
         throw new Error("Parameter \"recipientPrivateKey\" is mandatory for \"KeyTransRecipientInfo\"");
       }
 
-      const algorithmParameters = common.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId) as any;
-      if (!algorithmParameters.name) {
-        throw new Error(`Unknown keyEncryptionAlgorithm: ${recipientInfo.keyEncryptionAlgorithm.algorithmId}`);
-      }
+      const algorithmParameters = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
 
       //#region RSA-OAEP case
       if (algorithmParameters.name === "RSA-OAEP") {
@@ -1323,7 +1301,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
 
       //#region Get WebCrypto form of content encryption algorithm
       const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-      const contentEncryptionAlgorithm = common.getAlgorithmByOID(algorithmId) as any;
+      const contentEncryptionAlgorithm = common.getAlgorithmByOID(algorithmId, true, "contentEncryptionAlgorithm");
       if (("name" in contentEncryptionAlgorithm) === false)
         throw new Error(`Incorrect "contentEncryptionAlgorithm": ${algorithmId}`);
       //#endregion
@@ -1346,10 +1324,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
         throw new Error("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\"");
 
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = common.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId) as any;
-      if (!kekAlgorithm.name) {
-        throw new Error(`Incorrect OID for "keyEncryptionAlgorithm": ${recipientInfo.keyEncryptionAlgorithm.algorithmId}`);
-      }
+      const kekAlgorithm = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
       //#endregion
 
       const importedKey = await crypto.importKey("raw",
@@ -1362,7 +1337,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
       //#region Unwrap previously exported session key
       //#region Get WebCrypto form of content encryption algorithm
       const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-      const contentEncryptionAlgorithm = common.getAlgorithmByOID(algorithmId) as any;
+      const contentEncryptionAlgorithm = common.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
       if (!contentEncryptionAlgorithm.name) {
         throw new Error(`Incorrect "contentEncryptionAlgorithm": ${algorithmId}`);
       }
@@ -1413,23 +1388,13 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
       //#endregion
       //#region Derive key for "keyEncryptionAlgorithm"
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = common.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId) as any;
-      if (("name" in kekAlgorithm) === false)
-        throw new Error(`Incorrect OID for "keyEncryptionAlgorithm": ${recipientInfo.keyEncryptionAlgorithm.algorithmId}`);
+      const kekAlgorithm = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
       //#endregion
 
-      //#region Get HMAC hash algorithm
-      let hmacHashAlgorithm = "SHA-1";
-
-      if (pbkdf2Params.prf) {
-        const algorithm = common.getAlgorithmByOID(pbkdf2Params.prf.algorithmId) as any;
-        if (!algorithm.name) {
-          throw new Error("Incorrect OID for HMAC hash algorithm");
-        }
-
-        hmacHashAlgorithm = algorithm.hash.name;
-      }
-      //#endregion
+      // Get HMAC hash algorithm
+      const hmacHashAlgorithm = pbkdf2Params.prf
+        ? common.getAlgorithmByOID<any>(pbkdf2Params.prf.algorithmId, true, "prfAlgorithm").hash.name
+        : "SHA-1";
 
       //#region Get PBKDF2 "salt" value
       const saltView = new Uint8Array(pbkdf2Params.salt.valueBlock.valueHex);
@@ -1455,10 +1420,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
       //#region Unwrap previously exported session key
       //#region Get WebCrypto form of content encryption algorithm
       const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-      const contentEncryptionAlgorithm = common.getAlgorithmByOID(algorithmId) as any;
-      if (!contentEncryptionAlgorithm.name) {
-        throw new Error(`Incorrect "contentEncryptionAlgorithm": ${algorithmId}`);
-      }
+      const contentEncryptionAlgorithm = common.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
       //#endregion
 
       return crypto.unwrapKey("raw",
@@ -1496,10 +1458,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
     //#region Finally decrypt data by session key
     //#region Get WebCrypto form of content encryption algorithm
     const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-    const contentEncryptionAlgorithm = common.getAlgorithmByOID(algorithmId);
-    if (!(contentEncryptionAlgorithm as any).name) {
-      throw new Error(`Incorrect "contentEncryptionAlgorithm": ${algorithmId}`);
-    }
+    const contentEncryptionAlgorithm = common.getAlgorithmByOID(algorithmId, true, "contentEncryptionAlgorithm");
     //#endregion
 
     //#region Get "initialization vector" for content encryption algorithm

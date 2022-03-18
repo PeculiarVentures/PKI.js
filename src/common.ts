@@ -140,7 +140,7 @@ export function getEngine(): CryptoEngine {
  * @param safety
  * @returns Reruns {@link CryptoEngine} or `undefined`
  */
-export function getCrypto(safety?: false): CryptoEngine | undefined;
+export function getCrypto(safety?: boolean): CryptoEngine | undefined;
 /**
  * Gets crypto subtle from the current "crypto engine"
  * @param safety
@@ -311,13 +311,16 @@ export function createECDSASignatureFromCMS(cmsSignature: asn1js.Sequence) {
 }
 
 /**
- * Get WebCrypto algorithm by wel-known OID
- * @param oid well-known OID to search for
- * @returns
+ * Gets WebCrypto algorithm by well-known OID
+ * @param oid algorithm identifier
+ * @param safety if true throws exception on unknown algorithm identifier
+ * @param target name of the target
+ * @returns WebCrypto algorithm or an empty object
  */
-export function getAlgorithmByOID(oid: string): object | Algorithm {
-  // TODO throw error if empty algorithm
-  return getEngine().subtle.getAlgorithmByOID(oid);
+export function getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety?: boolean, target?: string): T | object;
+export function getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety: true, target?: string): T;
+export function getAlgorithmByOID(oid: string, safety = false, target?: string): any {
+  return getEngine().subtle.getAlgorithmByOID(oid, safety, target);
 }
 
 /**

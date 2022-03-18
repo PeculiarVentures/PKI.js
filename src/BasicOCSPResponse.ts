@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import * as commonJs from "./common";
+import * as common from "./common";
 import ResponseData, { ResponseDataSchema } from "./ResponseData";
 import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import Certificate, { CertificateSchema, checkCA } from "./Certificate";
@@ -285,10 +285,7 @@ export default class BasicOCSPResponse implements Schema.SchemaCompatible {
 
     //#region Create all "certIDs" for input certificates
     for (const response of this.tbsResponseData.responses) {
-      const hashAlgorithm = commonJs.getAlgorithmByOID(response.certID.hashAlgorithm.algorithmId);
-      if (!("name" in hashAlgorithm)) {
-        throw new Error(`Wrong CertID hashing algorithm: ${response.certID.hashAlgorithm.algorithmId}`);
-      }
+      const hashAlgorithm = common.getAlgorithmByOID(response.certID.hashAlgorithm.algorithmId, true, "CertID.hashAlgorithm");
 
       if (!hashesObject[hashAlgorithm.name]) {
         hashesObject[hashAlgorithm.name] = 1;
@@ -360,7 +357,7 @@ export default class BasicOCSPResponse implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Initial variables
-    const engine = commonJs.getEngine();
+    const engine = common.getEngine();
     //#endregion
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
@@ -393,7 +390,7 @@ export default class BasicOCSPResponse implements Schema.SchemaCompatible {
     let certIndex = -1;
     const trustedCerts: Certificate[] = params.trustedCerts || [];
 
-    const engine = commonJs.getEngine();
+    const engine = common.getEngine();
     //#endregion
 
     //#region Check amount of certificates
@@ -403,7 +400,7 @@ export default class BasicOCSPResponse implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Get a "crypto" extension
-    const crypto = commonJs.getCrypto(true);
+    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Find correct value for "responderID"
