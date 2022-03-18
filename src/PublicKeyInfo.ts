@@ -271,7 +271,7 @@ export default class PublicKeyInfo implements Schema.SchemaCompatible {
 
       const crypto = getCrypto();
       if (typeof crypto === "undefined") {
-        return Promise.reject("Unable to create WebCrypto object");
+        throw new Error("Unable to create WebCrypto object");
       }
       const exportedKey = await crypto.exportKey("spki", publicKey);
       const asn1 = asn1js.fromBER(exportedKey);

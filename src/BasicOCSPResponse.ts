@@ -435,7 +435,7 @@ export default class BasicOCSPResponse implements Schema.SchemaCompatible {
 
     //#region Make additional verification for signer's certificate
     if (certIndex === (-1))
-      return Promise.reject("Correct certificate was not found in OCSP response");
+      throw new Error("Correct certificate was not found in OCSP response");
 
     signerCert = this.certs[certIndex];
 

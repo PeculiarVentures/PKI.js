@@ -430,7 +430,7 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
 	//#region Get a "crypto" extension
 	const crypto = common.getCrypto();
 	if (typeof crypto === "undefined")
-		return Promise.reject("Unable to create WebCrypto object");
+		throw new Error("Unable to create WebCrypto object");
 	//#endregion
 
 	//#region Remove certificate extension

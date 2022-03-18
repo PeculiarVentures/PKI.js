@@ -2328,14 +2328,7 @@ export default class CryptoEngine {
 
     //#region Special case for RSA-PSS
     if (publicKey.algorithm.name === "RSA-PSS") {
-      let pssParameters;
-
-      try {
-        pssParameters = new RSASSAPSSParams({ schema: signatureAlgorithm.algorithmParams });
-      }
-      catch (ex) {
-        return Promise.reject(ex);
-      }
+      const pssParameters = new RSASSAPSSParams({ schema: signatureAlgorithm.algorithmParams });
 
       if ("saltLength" in pssParameters)
         (algorithm.algorithm as any).saltLength = pssParameters.saltLength;
