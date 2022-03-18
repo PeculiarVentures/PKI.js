@@ -5,6 +5,7 @@ import ContentInfo, { ContentInfoSchema } from "./ContentInfo";
 import SignedData from "./SignedData";
 import * as Schema from "./Schema";
 import { id_ContentType_SignedData } from "./ObjectIdentifiers";
+import Certificate from "./Certificate";
 
 const STATUS = "status";
 const TIME_STAMP_TOKEN = "timeStampToken";
@@ -15,6 +16,12 @@ const CLEAR_PROPS = [
   TIME_STAMP_RESP_STATUS,
   TIME_STAMP_RESP_TOKEN
 ];
+
+export interface TimeStampRespVerifyParams {
+  signer?: number;
+  trustedCerts?: Certificate[];
+  data?: ArrayBuffer;
+}
 
 export interface TimeStampRespParameters extends Schema.SchemaConstructor {
   status?: PKIStatusInfo;
@@ -203,7 +210,7 @@ export default class TimeStampResp implements Schema.SchemaCompatible {
    * Verify current TSP Response
    * @param verificationParameters Input parameters for verification
    */
-  verify(verificationParameters = { signer: 0, trustedCerts: [], data: new ArrayBuffer(0) }): Promise<boolean> {
+  public async verify(verificationParameters: TimeStampRespVerifyParams = { signer: 0, trustedCerts: [], data: new ArrayBuffer(0) }): Promise<boolean> {
     this.assertContentType();
 
     // Verify internal signed data value

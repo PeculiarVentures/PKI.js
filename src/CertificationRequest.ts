@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { getEngine } from "./common.js";
+import { getEngine } from "./common";
 import PublicKeyInfo from "./PublicKeyInfo";
 import RelativeDistinguishedNames, { RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
 import AlgorithmIdentifier from "./AlgorithmIdentifier";

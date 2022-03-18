@@ -9,6 +9,7 @@ import Extensions, { ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 import Certificate from "./Certificate";
 import PublicKeyInfo from "./PublicKeyInfo";
+import { id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BaseCRLNumber, id_CertificateIssuer, id_CRLNumber, id_CRLReason, id_FreshestCRL, id_InvalidityDate, id_IssuerAltName, id_IssuingDistributionPoint } from "./ObjectIdentifiers";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -141,6 +142,18 @@ export interface CertificateRevocationListVerifyParams {
   publicKeyInfo?: PublicKeyInfo;
 }
 
+const WELL_KNOWN_EXTENSIONS = [
+  id_AuthorityKeyIdentifier,
+  id_IssuerAltName,
+  id_CRLNumber,
+  id_BaseCRLNumber,
+  id_IssuingDistributionPoint,
+  id_FreshestCRL,
+  id_AuthorityInfoAccess,
+  id_CRLReason,
+  id_InvalidityDate,
+  id_CertificateIssuer,
+];
 /**
  * Class from RFC5280
  */
@@ -515,7 +528,7 @@ export default class CertificateRevocationList implements Schema.SchemaCompatibl
       for (const extension of this.crlExtensions.extensions) {
         if (extension.critical) {
           // We can not be sure that unknown extension has no value for CRL signature
-          if (!extension.parsedValue)
+          if (!WELL_KNOWN_EXTENSIONS.includes(extension.extnID))
             return false;
         }
       }

@@ -1089,7 +1089,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
    */
   async decrypt(recipientIndex: number, parameters: {
     recipientCertificate?: Certificate;
-    recipientPrivateKey: BufferSource;
+    recipientPrivateKey?: BufferSource;
     preDefinedData?: BufferSource;
   }) {
     //#region Initial variables
@@ -1138,7 +1138,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
         throw new Error("Parameter \"recipientCertificate\" is mandatory for \"KeyAgreeRecipientInfo\" if algorithm params are missing from originator");
       }
 
-      if (("recipientPrivateKey" in decryptionParameters) === false)
+      if (!decryptionParameters.recipientPrivateKey)
         throw new Error("Parameter \"recipientPrivateKey\" is mandatory for \"KeyAgreeRecipientInfo\"");
 
       switch (curveOID) {

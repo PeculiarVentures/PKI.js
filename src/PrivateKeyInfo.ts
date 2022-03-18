@@ -242,7 +242,7 @@ export default class PrivateKeyInfo implements Schema.SchemaCompatible {
    */
   public toJSON(): JsonWebKey {
     //#region Return common value in case we do not have enough info fo making JWK
-    if (this.parsedKey) {
+    if (!this.parsedKey) {
       const object: any = {
         version: this.version,
         privateKeyAlgorithm: this.privateKeyAlgorithm.toJSON(),

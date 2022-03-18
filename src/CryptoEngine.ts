@@ -15,8 +15,8 @@ const SUBTLE = "subtle";
 
 export interface CryptoEngineParameters {
   name?: string;
-  crypto?: CryptoEngine;
-  subtle?: CryptoEngine;
+  crypto?: CryptoEngine | Crypto;
+  subtle?: CryptoEngine | SubtleCrypto;
 }
 export interface CryptoEngineAlgorithmParams {
   algorithm: Algorithm | object;
@@ -166,7 +166,7 @@ async function makePKCS12B2Key(cryptoEngine: CryptoEngine, hashAlgorithm: string
 
     //#region Make "iterationCount" rounds of hashing
     for (let j = 0; j < iterationCount; j++)
-      internalSequence = internalSequence.then(roundBuffer => cryptoEngine.digest(hashAlgorithm, new Uint8Array(roundBuffer)));
+      internalSequence = internalSequence.then(roundBuffer => cryptoEngine.digest({ name: hashAlgorithm }, new Uint8Array(roundBuffer)));
     //#endregion
 
     internalSequence = internalSequence.then(roundBuffer => {
@@ -174,10 +174,8 @@ async function makePKCS12B2Key(cryptoEngine: CryptoEngine, hashAlgorithm: string
       const B = new ArrayBuffer(v);
       const bView = new Uint8Array(B);
 
-      const roundBufferView = new Uint8Array(roundBuffer);
-      for (let j = 0; j < B.byteLength; j++) {
-        bView[j] = roundBufferView[j % roundBuffer.byteLength];
-      }
+      for (let j = 0; j < B.byteLength; j++)
+        bView[j] = (roundBuffer as any)[j % roundBuffer.byteLength]; // TODO roundBuffer is ArrayBuffer. It doesn't have indexed values
       //#endregion
 
       //#region Make new I value
@@ -273,8 +271,14 @@ export default class CryptoEngine {
    */
   constructor(parameters: CryptoEngineParameters = {}) {
     //#region Internal properties of the object
+    const crypto = typeof self !== "undefined" && self.crypto
+      ? self.crypto
+      : null;
+    const subtle = crypto
+      ? crypto.subtle
+      : null;
     this.crypto = pvutils.getParametersValue(parameters, CRYPTO, crypto) as unknown as CryptoEngine;
-    this.subtle = pvutils.getParametersValue(parameters, SUBTLE, crypto.subtle) as unknown as CryptoEngine;
+    this.subtle = pvutils.getParametersValue(parameters, SUBTLE, subtle) as unknown as CryptoEngine;
     this.name = pvutils.getParametersValue(parameters, "name", "");
     //#endregion
   }

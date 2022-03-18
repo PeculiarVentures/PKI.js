@@ -26,8 +26,23 @@ const DIGEST_ALGORITHMS = "digestAlgorithms";
 const ENCAP_CONTENT_INFO = "encapContentInfo";
 const CERTIFICATES = "certificates";
 const CRLS = "crls";
-const OCSPS = "ocsps";
 const SIGNER_INFOS = "signerInfos";
+const OCSPS = "ocsps";
+const SIGNED_DATA = "SignedData";
+const SIGNED_DATA_VERSION = `${SIGNED_DATA}.${VERSION}`;
+const SIGNED_DATA_DIGEST_ALGORITHMS = `${SIGNED_DATA}.${DIGEST_ALGORITHMS}`;
+const SIGNED_DATA_ENCAP_CONTENT_INFO = `${SIGNED_DATA}.${ENCAP_CONTENT_INFO}`;
+const SIGNED_DATA_CERTIFICATES = `${SIGNED_DATA}.${CERTIFICATES}`;
+const SIGNED_DATA_CRLS = `${SIGNED_DATA}.${CRLS}`;
+const SIGNED_DATA_SIGNER_INFOS = `${SIGNED_DATA}.${SIGNER_INFOS}`;
+const CLEAR_PROPS = [
+  SIGNED_DATA_VERSION,
+  SIGNED_DATA_DIGEST_ALGORITHMS,
+  SIGNED_DATA_ENCAP_CONTENT_INFO,
+  SIGNED_DATA_CERTIFICATES,
+  SIGNED_DATA_CRLS,
+  SIGNED_DATA_SIGNER_INFOS
+];
 
 export interface SignedDataParameters extends Schema.SchemaConstructor {
   version?: number;
@@ -233,25 +248,25 @@ export default class SignedData implements Schema.SchemaCompatible {
     }
 
     return (new asn1js.Sequence({
-      name: (names.blockName || "SignedData"),
+      name: (names.blockName || SIGNED_DATA),
       optional: names.optional,
       value: [
-        new asn1js.Integer({ name: (names.version || "SignedData.version") }),
+        new asn1js.Integer({ name: (names.version || SIGNED_DATA_VERSION) }),
         new asn1js.Set({
           value: [
             new asn1js.Repeated({
-              name: (names.digestAlgorithms || "SignedData.digestAlgorithms"),
+              name: (names.digestAlgorithms || SIGNED_DATA_DIGEST_ALGORITHMS),
               value: AlgorithmIdentifier.schema()
             })
           ]
         }),
         EncapsulatedContentInfo.schema(names.encapContentInfo || {
           names: {
-            blockName: "SignedData.encapContentInfo"
+            blockName: SIGNED_DATA_ENCAP_CONTENT_INFO
           }
         }),
         new asn1js.Constructed({
-          name: (names.certificates || "SignedData.certificates"),
+          name: (names.certificates || SIGNED_DATA_CERTIFICATES),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -267,14 +282,14 @@ export default class SignedData implements Schema.SchemaCompatible {
           },
           value: RevocationInfoChoices.schema(names.crls || {
             names: {
-              crls: "SignedData.crls"
+              crls: SIGNED_DATA_CRLS
             }
           }).valueBlock.value
         }), // IMPLICIT RevocationInfoChoices
         new asn1js.Set({
           value: [
             new asn1js.Repeated({
-              name: (names.signerInfos || "SignedData.signerInfos"),
+              name: (names.signerInfos || SIGNED_DATA_SIGNER_INFOS),
               value: SignerInfo.schema()
             })
           ]
@@ -289,14 +304,7 @@ export default class SignedData implements Schema.SchemaCompatible {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    pvutils.clearProps(schema, [
-      "SignedData.version",
-      "SignedData.digestAlgorithms",
-      "SignedData.encapContentInfo",
-      "SignedData.certificates",
-      "SignedData.crls",
-      "SignedData.signerInfos"
-    ]);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
 
     //#region Check the schema is valid
@@ -310,24 +318,24 @@ export default class SignedData implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Get internal properties from parsed schema
-    this.version = asn1.result["SignedData.version"].valueBlock.valueDec;
+    this.version = asn1.result[SIGNED_DATA_VERSION].valueBlock.valueDec;
 
-    if ("SignedData.digestAlgorithms" in asn1.result) // Could be empty SET of digest algorithms
-      this.digestAlgorithms = Array.from(asn1.result["SignedData.digestAlgorithms"], algorithm => new AlgorithmIdentifier({ schema: algorithm }));
+    if (SIGNED_DATA_DIGEST_ALGORITHMS in asn1.result) // Could be empty SET of digest algorithms
+      this.digestAlgorithms = Array.from(asn1.result[SIGNED_DATA_DIGEST_ALGORITHMS], algorithm => new AlgorithmIdentifier({ schema: algorithm }));
 
-    this.encapContentInfo = new EncapsulatedContentInfo({ schema: asn1.result["SignedData.encapContentInfo"] });
+    this.encapContentInfo = new EncapsulatedContentInfo({ schema: asn1.result[SIGNED_DATA_ENCAP_CONTENT_INFO] });
 
-    if ("SignedData.certificates" in asn1.result) {
+    if (SIGNED_DATA_CERTIFICATES in asn1.result) {
       const certificateSet = new CertificateSet({
         schema: new asn1js.Set({
-          value: asn1.result["SignedData.certificates"].valueBlock.value
+          value: asn1.result[SIGNED_DATA_CERTIFICATES].valueBlock.value
         })
       });
       this.certificates = certificateSet.certificates.slice(0); // Copy all just for making comfortable access
     }
 
-    if ("SignedData.crls" in asn1.result) {
-      this.crls = Array.from(asn1.result["SignedData.crls"], (crl: Schema.SchemaType) => {
+    if (SIGNED_DATA_CRLS in asn1.result) {
+      this.crls = Array.from(asn1.result[SIGNED_DATA_CRLS], (crl: Schema.SchemaType) => {
         if (crl.idBlock.tagClass === 1)
           return new CertificateRevocationList({ schema: crl });
 
@@ -340,8 +348,8 @@ export default class SignedData implements Schema.SchemaCompatible {
       });
     }
 
-    if ("SignedData.signerInfos" in asn1.result) // Could be empty SET SignerInfos
-      this.signerInfos = Array.from(asn1.result["SignedData.signerInfos"], signerInfoSchema => new SignerInfo({ schema: signerInfoSchema }));
+    if (SIGNED_DATA_SIGNER_INFOS in asn1.result) // Could be empty SET SignerInfos
+      this.signerInfos = Array.from(asn1.result[SIGNED_DATA_SIGNER_INFOS], signerInfoSchema => new SignerInfo({ schema: signerInfoSchema }));
     //#endregion
   }
 
@@ -704,20 +712,21 @@ export default class SignedData implements Schema.SchemaCompatible {
 
       //#region Create correct data block for verification
 
-      if (this.encapContentInfo.eContent) // Attached data
+      const eContent = this.encapContentInfo.eContent;
+      if (eContent) // Attached data
       {
-        if ((this.encapContentInfo.eContent.idBlock.tagClass === 1) &&
-          (this.encapContentInfo.eContent.idBlock.tagNumber === 4)) {
-          if (this.encapContentInfo.eContent.idBlock.isConstructed === false)
-            data = this.encapContentInfo.eContent.valueBlock.valueHex;
+        if ((eContent.idBlock.tagClass === 1) &&
+          (eContent.idBlock.tagNumber === 4)) {
+          if (eContent.idBlock.isConstructed === false)
+            data = eContent.valueBlock.valueHex;
           else {
-            for (const contentValue of this.encapContentInfo.eContent.valueBlock.value) {
+            for (const contentValue of eContent.valueBlock.value) {
               data = pvutils.utilConcatBuf(data, contentValue.valueBlock.valueHex);
             }
           }
         }
         else
-          data = this.encapContentInfo.eContent.valueBlock.valueBeforeDecode;
+          data = eContent.valueBlock.valueBeforeDecode;
       }
       else // Detached data
       {
@@ -894,19 +903,20 @@ export default class SignedData implements Schema.SchemaCompatible {
       }
     }
     else {
-      if (this.encapContentInfo.eContent) // Attached data
+      const eContent = this.encapContentInfo.eContent;
+      if (eContent) // Attached data
       {
-        if ((this.encapContentInfo.eContent.idBlock.tagClass === 1) &&
-          (this.encapContentInfo.eContent.idBlock.tagNumber === 4)) {
-          if (this.encapContentInfo.eContent.idBlock.isConstructed === false)
-            data = this.encapContentInfo.eContent.valueBlock.valueHex;
+        if ((eContent.idBlock.tagClass === 1) &&
+          (eContent.idBlock.tagNumber === 4)) {
+          if (eContent.idBlock.isConstructed === false)
+            data = eContent.valueBlock.valueHex;
           else {
-            for (const content of this.encapContentInfo.eContent.valueBlock.value)
+            for (const content of eContent.valueBlock.value)
               data = pvutils.utilConcatBuf(data, content.valueBlock.valueHex);
           }
         }
         else
-          data = this.encapContentInfo.eContent.valueBlock.valueBeforeDecode;
+          data = eContent.valueBlock.valueBeforeDecode;
       }
       else // Detached data
       {

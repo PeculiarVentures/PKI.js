@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier.js";
+import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
 const SALT = "salt";

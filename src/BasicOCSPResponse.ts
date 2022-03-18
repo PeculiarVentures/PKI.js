@@ -7,8 +7,6 @@ import Certificate, { CertificateSchema, checkCA } from "./Certificate";
 import CertID from "./CertID";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
 import CertificateChainValidationEngine from "./CertificateChainValidationEngine";
-import { id_BasicConstraints } from "./ObjectIdentifiers";
-import BasicConstraints from "./BasicConstraints";
 import * as Schema from "./Schema";
 
 const TBS_RESPONSE_DATA = "tbsResponseData";

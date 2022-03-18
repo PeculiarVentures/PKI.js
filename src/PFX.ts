@@ -221,7 +221,7 @@ export default class PFX implements Schema.SchemaCompatible {
    * Convert current object to asn1js object and set correct values
    * @returns asn1js object
    */
-  public toSchema(): Schema.SchemaType {
+  public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     const outputArray = [
       new asn1js.Integer({ value: this.version }),
@@ -259,7 +259,7 @@ export default class PFX implements Schema.SchemaCompatible {
    * Making ContentInfo from PARSED_VALUE object
    * @param parameters Parameters, specific to each "integrity mode"
    */
-  protected async makeInternalValues(parameters: MakeInternalValuesParams = {}) {
+  public async makeInternalValues(parameters: MakeInternalValuesParams = {}) {
     //#region Check mandatory parameter
     if ((parameters instanceof Object) === false)
       throw new Error("The \"parameters\" must has \"Object\" type");
@@ -389,7 +389,7 @@ export default class PFX implements Schema.SchemaCompatible {
 
           //#region Combine all signed extensions
           //#region Initial variables
-          const signedAttr = [];
+          const signedAttr: Attribute[] = [];
           //#endregion
 
           //#region contentType
@@ -454,7 +454,7 @@ export default class PFX implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  protected async parseInternalValues(parameters: {
+  public async parseInternalValues(parameters: {
     checkIntegrity?: boolean;
     password?: ArrayBuffer;
   }) {

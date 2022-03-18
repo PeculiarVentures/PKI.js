@@ -457,7 +457,7 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
 	//#endregion
 
 	//#region Prepare modifier TBS value
-	const tbs = certificate.encodeTBS();
+	const tbs = certificate.encodeTBS().toBER();
 	//#endregion
 
 	//#region Initialize "issuer_key_hash" value

@@ -231,7 +231,7 @@ export interface GeneralNameParameters extends Schema.SchemaConstructor {
 	/**
 	 * value type - from a tagged value (0 for "otherName", 1 for "rfc822Name" etc.)
 	 */
-	typo?: number;
+	type?: number;
 	/**
 	 * asn1js object having GeneralName value (type depends on TYPE value)
 	 */

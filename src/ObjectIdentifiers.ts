@@ -16,6 +16,7 @@ export const id_NameConstraints = "2.5.29.30";
 export const id_CRLDistributionPoints = "2.5.29.31";
 export const id_FreshestCRL = "2.5.29.46";
 export const id_CertificatePolicies = "2.5.29.32";
+export const id_AnyPolicy = "2.5.29.32.0";
 export const id_MicrosoftAppPolicies = "1.3.6.1.4.1.311.21.10"; // szOID_APPLICATION_CERT_POLICIES - Microsoft-specific OID
 export const id_PolicyMappings = "2.5.29.33";
 export const id_AuthorityKeyIdentifier = "2.5.29.35";

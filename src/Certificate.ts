@@ -434,7 +434,7 @@ export default class Certificate implements Schema.SchemaCompatible {
   /**
    * Create ASN.1 schema for existing values of TBS part for the certificate
    */
-  public encodeTBS(): ArrayBuffer {
+  public encodeTBS(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
 
@@ -503,7 +503,7 @@ export default class Certificate implements Schema.SchemaCompatible {
     //#region Create and return output sequence
     return (new asn1js.Sequence({
       value: outputArray
-    })).toBER();
+    }));
     //#endregion
   }
 
@@ -618,7 +618,7 @@ export default class Certificate implements Schema.SchemaCompatible {
 
 
     // Create TBS data for signing
-    this.tbs = this.encodeTBS();
+    this.tbs = this.encodeTBS().toBER();
 
     // Signing TBS data on provided private key
     const signature = await engine.subtle.signWithPrivateKey(this.tbs, privateKey, parameters as any);

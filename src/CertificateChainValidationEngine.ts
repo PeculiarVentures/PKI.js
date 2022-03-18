@@ -7,7 +7,7 @@ import CertificateRevocationList from "./CertificateRevocationList";
 import * as common from "./common";
 import * as Helpers from "./Helpers";
 import GeneralName from "./GeneralName";
-import { id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BasicConstraints, id_CRLDistributionPoints, id_FreshestCRL, id_KeyUsage, id_SubjectKeyIdentifier } from "./ObjectIdentifiers";
+import { id_AnyPolicy, id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BasicConstraints, id_CertificatePolicies, id_CRLDistributionPoints, id_FreshestCRL, id_InhibitAnyPolicy, id_KeyUsage, id_NameConstraints, id_PolicyConstraints, id_PolicyMappings, id_SubjectAltName, id_SubjectKeyIdentifier } from "./ObjectIdentifiers";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
 import GeneralSubtree from "./GeneralSubtree";
 
@@ -114,7 +114,7 @@ export default class CertificateChainValidationEngine {
 	public static defaultFindOrigin(certificate: Certificate, validationEngine: CertificateChainValidationEngine): string {
 		//#region Firstly encode TBS for certificate
 		if (certificate.tbs.byteLength === 0) {
-			certificate.tbs = certificate.encodeTBS();
+			certificate.tbs = certificate.encodeTBS().toBER();
 		}
 		//#endregion
 
@@ -122,7 +122,7 @@ export default class CertificateChainValidationEngine {
 		for (const localCert of validationEngine.certs) {
 			//#region Firstly encode TBS for certificate
 			if (localCert.tbs.byteLength === 0) {
-				localCert.tbs = localCert.encodeTBS();
+				localCert.tbs = localCert.encodeTBS().toBER();
 			}
 			//#endregion
 
@@ -135,7 +135,7 @@ export default class CertificateChainValidationEngine {
 		for (const trustedCert of validationEngine.trustedCerts) {
 			//#region Firstly encode TBS for certificate
 			if (trustedCert.tbs.byteLength === 0)
-				trustedCert.tbs = trustedCert.encodeTBS();
+				trustedCert.tbs = trustedCert.encodeTBS().toBER();
 			//#endregion
 
 			if (pvutils.isEqualBuffer(certificate.tbs, trustedCert.tbs))
@@ -297,13 +297,12 @@ export default class CertificateChainValidationEngine {
 	public async sort(passedWhenNotRevValues = false): Promise<Certificate[]> {
 		//#region Initial variables
 		const localCerts: Certificate[] = [];
-		// TODO Don't use _this
+		// TODO Don't use this
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
-		const _this = this;
 		//#endregion
 
 		//#region Building certificate path
-		async function buildPath(certificate: Certificate): Promise<Certificate[][]> {
+		const buildPath = async (certificate: Certificate): Promise<Certificate[][]> => {
 			const result: Certificate[][] = [];
 
 			//#region Aux function checking array for unique elements
@@ -330,7 +329,7 @@ export default class CertificateChainValidationEngine {
 
 			//#endregion
 
-			const findIssuerResult = await _this.findIssuer(certificate, _this);
+			const findIssuerResult = await this.findIssuer(certificate, this);
 			if (findIssuerResult.length === 0) {
 				throw new Error("No valid certificate paths found");
 			}
@@ -355,11 +354,11 @@ export default class CertificateChainValidationEngine {
 			}
 
 			return result;
-		}
+		};
 		//#endregion
 
 		//#region Find CRL for specific certificate
-		async function findCRL(certificate: Certificate): Promise<FindCrlResult> {
+		const findCRL = async (certificate: Certificate): Promise<FindCrlResult> => {
 			//#region Initial variables
 			const issuerCertificates: Certificate[] = [];
 			const crls: CertificateRevocationList[] = [];
@@ -377,7 +376,7 @@ export default class CertificateChainValidationEngine {
 			//#endregion
 
 			//#region Find all CRLs for certificate's issuer
-			crls.push(..._this.crls.filter(element => element.issuer.isEqual(certificate.issuer)));
+			crls.push(...this.crls.filter(element => element.issuer.isEqual(certificate.issuer)));
 			if (crls.length === 0) {
 				return {
 					status: 2,
@@ -393,7 +392,7 @@ export default class CertificateChainValidationEngine {
 				// The "nextUpdate" is older than CHECK_DATE.
 				// Thus we should do have another, updated CRL.
 				// Thus the CRL assumed to be invalid.
-				if (crl.nextUpdate && crl.nextUpdate.value < _this.checkDate) {
+				if (crl.nextUpdate && crl.nextUpdate.value < this.checkDate) {
 					continue;
 				}
 				//#endregion
@@ -429,11 +428,11 @@ export default class CertificateChainValidationEngine {
 				status: 3,
 				statusMessage: "No valid CRLs found"
 			};
-		}
+		};
 		//#endregion
 
 		//#region Find OCSP for specific certificate
-		async function findOCSP(certificate: Certificate, issuerCertificate: Certificate): Promise<number> {
+		const findOCSP = async (certificate: Certificate, issuerCertificate: Certificate): Promise<number> => {
 			//#region Get hash algorithm from certificate
 			const hashAlgorithm = common.getAlgorithmByOID(certificate.signatureAlgorithm.algorithmId) as any;
 			if (!hashAlgorithm.name) {
@@ -445,8 +444,8 @@ export default class CertificateChainValidationEngine {
 			//#endregion
 
 			//#region Search for OCSP response for the certificate
-			for (let i = 0; i < _this.ocsps.length; i++) {
-				const ocsp = _this.ocsps[i];
+			for (let i = 0; i < this.ocsps.length; i++) {
+				const ocsp = this.ocsps[i];
 				const result = await ocsp.getCertificateStatus(certificate, issuerCertificate);
 				if (result.isForCertificate) {
 					if (result.status === 0)
@@ -458,7 +457,7 @@ export default class CertificateChainValidationEngine {
 			//#endregion
 
 			return 2;
-		}
+		};
 		//#endregion
 
 		//#region Check for certificate to be CA
@@ -546,7 +545,7 @@ export default class CertificateChainValidationEngine {
 		//#endregion
 
 		//#region Basic check for certificate path
-		async function basicCheck(path: Certificate[], checkDate: Date): Promise<{ result: boolean; resultCode?: number; resultMessage?: string; }> {
+		const basicCheck = async (path: Certificate[], checkDate: Date): Promise<{ result: boolean; resultCode?: number; resultMessage?: string; }> => {
 			//#region Check that all dates are valid
 			for (let i = 0; i < path.length; i++) {
 				if ((path[i].notBefore.value > checkDate) ||
@@ -587,7 +586,7 @@ export default class CertificateChainValidationEngine {
 			//#endregion
 
 			//#region Check each certificate (except "trusted root") to be non-revoked
-			if ((_this.crls.length !== 0) || (_this.ocsps.length !== 0)) // If CRLs and OCSPs are empty then we consider all certificates to be valid
+			if ((this.crls.length !== 0) || (this.ocsps.length !== 0)) // If CRLs and OCSPs are empty then we consider all certificates to be valid
 			{
 				for (let i = 0; i < (path.length - 1); i++) {
 					//#region Initial variables
@@ -599,7 +598,7 @@ export default class CertificateChainValidationEngine {
 					//#endregion
 
 					//#region Check OCSPs first
-					if (_this.ocsps.length !== 0) {
+					if (this.ocsps.length !== 0) {
 						ocspResult = await findOCSP(path[i], path[i + 1]);
 
 						switch (ocspResult) {
@@ -619,7 +618,7 @@ export default class CertificateChainValidationEngine {
 					//#endregion
 
 					//#region Check CRLs
-					if (_this.crls.length !== 0) {
+					if (this.crls.length !== 0) {
 						crlResult = await findCRL(path[i]);
 
 						if (crlResult.status === 0 && crlResult.result) {
@@ -698,7 +697,12 @@ export default class CertificateChainValidationEngine {
 			//#endregion
 
 			//#region Check each certificate (except "end entity") in the path to be a CA certificate
-			for (const cert of path) {
+			for (const [i, cert] of path.entries()) {
+				if (!i) {
+					// Skip entity certificate
+					continue;
+				}
+
 				const result = await checkForCA(cert);
 				if (!result.result) {
 					return {
@@ -713,13 +717,13 @@ export default class CertificateChainValidationEngine {
 			return {
 				result: true
 			};
-		}
+		};
 		//#endregion
 
 		//#region Do main work
-		//#region Initialize "localCerts" by value of "_this.certs" + "_this.trustedCerts" arrays
-		localCerts.push(..._this.trustedCerts);
-		localCerts.push(..._this.certs);
+		//#region Initialize "localCerts" by value of "this.certs" + "this.trustedCerts" arrays
+		localCerts.push(...this.trustedCerts);
+		localCerts.push(...this.certs);
 		//#endregion
 
 		//#region Check all certificates for been unique
@@ -760,8 +764,8 @@ export default class CertificateChainValidationEngine {
 			for (let j = 0; j < (result[i]).length; j++) {
 				const certificate = (result[i])[j];
 
-				for (let k = 0; k < _this.trustedCerts.length; k++) {
-					if (pvutils.isEqualBuffer(certificate.tbs, _this.trustedCerts[k].tbs)) {
+				for (let k = 0; k < this.trustedCerts.length; k++) {
+					if (pvutils.isEqualBuffer(certificate.tbs, this.trustedCerts[k].tbs)) {
 						found = true;
 						break;
 					}
@@ -805,7 +809,7 @@ export default class CertificateChainValidationEngine {
 		//#endregion
 
 		//#region Perform basic checking for all certificates in the path
-		result = await basicCheck(certificatePath, _this.checkDate);
+		result = await basicCheck(certificatePath, this.checkDate);
 		if (result.result === false)
 			throw result;
 		//#endregion
@@ -1071,8 +1075,7 @@ export default class CertificateChainValidationEngine {
 			//#region Get input variables
 			const passedWhenNotRevValues = parameters.passedWhenNotRevValues || false;
 
-			const initialPolicySet = parameters.initialPolicySet || [];
-			initialPolicySet.push("2.5.29.32.0"); // "anyPolicy"
+			const initialPolicySet = parameters.initialPolicySet || [id_AnyPolicy];
 
 			const initialExplicitPolicy = parameters.initialExplicitPolicy || false;
 			const initialPolicyMappingInhibit = parameters.initialPolicyMappingInhibit || false;
@@ -1109,8 +1112,8 @@ export default class CertificateChainValidationEngine {
 
 			//#region Work with policies
 			//#region Support variables
-			const allPolicies = []; // Array of all policies (string values)
-			allPolicies.push("2.5.29.32.0"); // Put "anyPolicy" at first place
+			const allPolicies: string[] = []; // Array of all policies (string values)
+			allPolicies.push(id_AnyPolicy); // Put "anyPolicy" at first place
 
 			const policiesAndCerts = []; // In fact "array of array" where rows are for each specific policy, column for each certificate and value is "true/false"
 
@@ -1126,31 +1129,33 @@ export default class CertificateChainValidationEngine {
 			let explicitPolicyStart = (explicitPolicyIndicator) ? (this.certs.length - 1) : (-1);
 			//#endregion
 
-			//#region Gather all neccessary information from certificate chain
+			//#region Gather all necessary information from certificate chain
 			for (let i = (this.certs.length - 2); i >= 0; i--, pathDepth++) {
 				const cert = this.certs[i];
 				if (cert.extensions) {
 					//#region Get information about certificate extensions
 					for (let j = 0; j < cert.extensions.length; j++) {
+						const extension = cert.extensions[j];
 						//#region CertificatePolicies
-						if (cert.extensions[j].extnID === "2.5.29.32") {
-							certPolicies[i] = cert.extensions[j].parsedValue;
+						if (extension.extnID === id_CertificatePolicies) {
+							certPolicies[i] = extension.parsedValue;
 
 							//#region Remove entry from "anyPolicies" for the certificate
 							for (let s = 0; s < allPolicies.length; s++) {
-								if (allPolicies[s] === "2.5.29.32.0") {
+								if (allPolicies[s] === id_AnyPolicy) {
 									delete (policiesAndCerts[s])[i];
 									break;
 								}
 							}
 							//#endregion
 
-							for (let k = 0; k < cert.extensions[j].parsedValue.certificatePolicies.length; k++) {
+							for (let k = 0; k < extension.parsedValue.certificatePolicies.length; k++) {
 								let policyIndex = (-1);
+								const policyId = extension.parsedValue.certificatePolicies[k].policyIdentifier;
 
 								//#region Try to find extension in "allPolicies" array
 								for (let s = 0; s < allPolicies.length; s++) {
-									if (cert.extensions[j].parsedValue.certificatePolicies[k].policyIdentifier === allPolicies[s]) {
+									if (policyId === allPolicies[s]) {
 										policyIndex = s;
 										break;
 									}
@@ -1158,7 +1163,7 @@ export default class CertificateChainValidationEngine {
 								//#endregion
 
 								if (policyIndex === (-1)) {
-									allPolicies.push(cert.extensions[j].parsedValue.certificatePolicies[k].policyIdentifier);
+									allPolicies.push(policyId);
 
 									const certArray = new Array(this.certs.length - 1);
 									certArray[i] = true;
@@ -1172,7 +1177,7 @@ export default class CertificateChainValidationEngine {
 						//#endregion
 
 						//#region PolicyMappings
-						if (cert.extensions[j].extnID === "2.5.29.33") {
+						if (extension.extnID === id_PolicyMappings) {
 							if (policyMappingInhibitIndicator) {
 								return {
 									result: false,
@@ -1181,38 +1186,38 @@ export default class CertificateChainValidationEngine {
 								};
 							}
 
-							policyMappings[i] = cert.extensions[j].parsedValue;
+							policyMappings[i] = extension.parsedValue;
 						}
 						//#endregion
 
 						//#region PolicyConstraints
-						if (cert.extensions[j].extnID === "2.5.29.36") {
+						if (extension.extnID === id_PolicyConstraints) {
 							if (explicitPolicyIndicator === false) {
 								//#region requireExplicitPolicy
-								if (cert.extensions[j].parsedValue.requireExplicitPolicy === 0) {
+								if (extension.parsedValue.requireExplicitPolicy === 0) {
 									explicitPolicyIndicator = true;
 									explicitPolicyStart = i;
 								}
 								else {
 									if (pendingConstraints[0] === false) {
 										pendingConstraints[0] = true;
-										explicitPolicyPending = cert.extensions[j].parsedValue.requireExplicitPolicy;
+										explicitPolicyPending = extension.parsedValue.requireExplicitPolicy;
 									}
 									else
-										explicitPolicyPending = (explicitPolicyPending > cert.extensions[j].parsedValue.requireExplicitPolicy) ? cert.extensions[j].parsedValue.requireExplicitPolicy : explicitPolicyPending;
+										explicitPolicyPending = (explicitPolicyPending > extension.parsedValue.requireExplicitPolicy) ? extension.parsedValue.requireExplicitPolicy : explicitPolicyPending;
 								}
 								//#endregion
 
 								//#region inhibitPolicyMapping
-								if (cert.extensions[j].parsedValue.inhibitPolicyMapping === 0)
+								if (extension.parsedValue.inhibitPolicyMapping === 0)
 									policyMappingInhibitIndicator = true;
 								else {
 									if (pendingConstraints[1] === false) {
 										pendingConstraints[1] = true;
-										policyMappingInhibitPending = cert.extensions[j].parsedValue.inhibitPolicyMapping + 1;
+										policyMappingInhibitPending = extension.parsedValue.inhibitPolicyMapping + 1;
 									}
 									else
-										policyMappingInhibitPending = (policyMappingInhibitPending > (cert.extensions[j].parsedValue.inhibitPolicyMapping + 1)) ? (cert.extensions[j].parsedValue.inhibitPolicyMapping + 1) : policyMappingInhibitPending;
+										policyMappingInhibitPending = (policyMappingInhibitPending > (extension.parsedValue.inhibitPolicyMapping + 1)) ? (extension.parsedValue.inhibitPolicyMapping + 1) : policyMappingInhibitPending;
 								}
 								//#endregion
 							}
@@ -1220,17 +1225,17 @@ export default class CertificateChainValidationEngine {
 						//#endregion
 
 						//#region InhibitAnyPolicy
-						if (cert.extensions[j].extnID === "2.5.29.54") {
+						if (extension.extnID === id_InhibitAnyPolicy) {
 							if (inhibitAnyPolicyIndicator === false) {
-								if (cert.extensions[j].parsedValue.valueBlock.valueDec === 0)
+								if (extension.parsedValue.valueBlock.valueDec === 0)
 									inhibitAnyPolicyIndicator = true;
 								else {
 									if (pendingConstraints[2] === false) {
 										pendingConstraints[2] = true;
-										inhibitAnyPolicyPending = cert.extensions[j].parsedValue.valueBlock.valueDec;
+										inhibitAnyPolicyPending = extension.parsedValue.valueBlock.valueDec;
 									}
 									else
-										inhibitAnyPolicyPending = (inhibitAnyPolicyPending > cert.extensions[j].parsedValue.valueBlock.valueDec) ? cert.extensions[j].parsedValue.valueBlock.valueDec : inhibitAnyPolicyPending;
+										inhibitAnyPolicyPending = (inhibitAnyPolicyPending > extension.parsedValue.valueBlock.valueDec) ? extension.parsedValue.valueBlock.valueDec : inhibitAnyPolicyPending;
 								}
 							}
 						}
@@ -1244,7 +1249,7 @@ export default class CertificateChainValidationEngine {
 
 						//#region Find "anyPolicy" index
 						for (let searchAnyPolicy = 0; searchAnyPolicy < allPolicies.length; searchAnyPolicy++) {
-							if (allPolicies[searchAnyPolicy] === "2.5.29.32.0") {
+							if (allPolicies[searchAnyPolicy] === id_AnyPolicy) {
 								policyIndex = searchAnyPolicy;
 								break;
 							}
@@ -1299,7 +1304,7 @@ export default class CertificateChainValidationEngine {
 				if ((i < (this.certs.length - 2)) && (typeof policyMappings[i + 1] !== "undefined")) {
 					for (let k = 0; k < policyMappings[i + 1].mappings.length; k++) {
 						//#region Check that we do not have "anyPolicy" in current mapping
-						if ((policyMappings[i + 1].mappings[k].issuerDomainPolicy === "2.5.29.32.0") || (policyMappings[i + 1].mappings[k].subjectDomainPolicy === "2.5.29.32.0")) {
+						if ((policyMappings[i + 1].mappings[k].issuerDomainPolicy === id_AnyPolicy) || (policyMappings[i + 1].mappings[k].subjectDomainPolicy === id_AnyPolicy)) {
 							return {
 								result: false,
 								resultCode: 99,
@@ -1352,7 +1357,7 @@ export default class CertificateChainValidationEngine {
 
 			//#region Working with "explicitPolicyIndicator" and "anyPolicy"
 			for (let i = 0; i < allPolicies.length; i++) {
-				if (allPolicies[i] === "2.5.29.32.0") {
+				if (allPolicies[i] === id_AnyPolicy) {
 					for (let j = 0; j < explicitPolicyStart; j++)
 						delete (policiesAndCerts[i])[j];
 				}
@@ -1368,7 +1373,7 @@ export default class CertificateChainValidationEngine {
 				for (let j = 0; j < (this.certs.length - 1); j++) {
 					let anyPolicyFound = false;
 
-					if ((j < explicitPolicyStart) && (allPolicies[i] === "2.5.29.32.0") && (allPolicies.length > 1)) {
+					if ((j < explicitPolicyStart) && (allPolicies[i] === id_AnyPolicy) && (allPolicies.length > 1)) {
 						found = false;
 						break;
 					}
@@ -1377,7 +1382,7 @@ export default class CertificateChainValidationEngine {
 						if (j >= explicitPolicyStart) {
 							//#region Search for "anyPolicy" in the policy set
 							for (let k = 0; k < allPolicies.length; k++) {
-								if (allPolicies[k] === "2.5.29.32.0") {
+								if (allPolicies[k] === id_AnyPolicy) {
 									if ((policiesAndCerts[k])[j] === true)
 										anyPolicyFound = true;
 
@@ -1400,17 +1405,17 @@ export default class CertificateChainValidationEngine {
 			//#endregion
 
 			//#region Create "set of user-constrained policies"
-			let userConstrPolicies = [];
+			let userConstrPolicies: string[] = [];
 
-			if ((initialPolicySet.length === 1) && (initialPolicySet[0] === "2.5.29.32.0") && (explicitPolicyIndicator === false))
+			if ((initialPolicySet.length === 1) && (initialPolicySet[0] === id_AnyPolicy) && (explicitPolicyIndicator === false))
 				userConstrPolicies = initialPolicySet;
 			else {
-				if ((authConstrPolicies.length === 1) && (authConstrPolicies[0] === "2.5.29.32.0"))
+				if ((authConstrPolicies.length === 1) && (authConstrPolicies[0] === id_AnyPolicy))
 					userConstrPolicies = initialPolicySet;
 				else {
 					for (let i = 0; i < authConstrPolicies.length; i++) {
 						for (let j = 0; j < initialPolicySet.length; j++) {
-							if ((initialPolicySet[j] === authConstrPolicies[i]) || (initialPolicySet[j] === "2.5.29.32.0")) {
+							if ((initialPolicySet[j] === authConstrPolicies[i]) || (initialPolicySet[j] === id_AnyPolicy)) {
 								userConstrPolicies.push(authConstrPolicies[i]);
 								break;
 							}
@@ -1458,19 +1463,20 @@ export default class CertificateChainValidationEngine {
 
 				if (cert.extensions) {
 					for (let j = 0; j < cert.extensions.length; j++) {
+						const extension = cert.extensions[j];
 						//#region NameConstraints
-						if (cert.extensions[j].extnID === "2.5.29.30") {
-							if ("permittedSubtrees" in cert.extensions[j].parsedValue)
-								certPermittedSubtrees = certPermittedSubtrees.concat(cert.extensions[j].parsedValue.permittedSubtrees);
+						if (extension.extnID === id_NameConstraints) {
+							if ("permittedSubtrees" in extension.parsedValue)
+								certPermittedSubtrees = certPermittedSubtrees.concat(extension.parsedValue.permittedSubtrees);
 
-							if ("excludedSubtrees" in cert.extensions[j].parsedValue)
-								certExcludedSubtrees = certExcludedSubtrees.concat(cert.extensions[j].parsedValue.excludedSubtrees);
+							if ("excludedSubtrees" in extension.parsedValue)
+								certExcludedSubtrees = certExcludedSubtrees.concat(extension.parsedValue.excludedSubtrees);
 						}
 						//#endregion
 
 						//#region SubjectAltName
-						if (cert.extensions[j].extnID === "2.5.29.17")
-							subjectAltNames = subjectAltNames.concat(cert.extensions[j].parsedValue.altNames);
+						if (extension.extnID === id_SubjectAltName)
+							subjectAltNames = subjectAltNames.concat(extension.parsedValue.altNames);
 						//#endregion
 					}
 				}
@@ -1505,7 +1511,7 @@ export default class CertificateChainValidationEngine {
 				if (formFound === false) {
 					policyResult.result = false;
 					policyResult.resultCode = 21;
-					policyResult.resultMessage = "No neccessary name form found";
+					policyResult.resultMessage = "No necessary name form found";
 
 					throw policyResult;
 				}

@@ -17,7 +17,7 @@ export interface AuthenticatedSafeParameters extends Schema.SchemaConstructor {
   parsedValue?: Schema.SchemaType;
 }
 
-export type SafeContent = ContentInfo | EncryptedData | EnvelopedData;
+export type SafeContent = ContentInfo | EncryptedData | EnvelopedData | object;
 
 /**
  * Class from RFC7292
@@ -162,7 +162,7 @@ export default class AuthenticatedSafe implements Schema.SchemaCompatible {
     };
   }
 
-  protected async parseInternalValues(parameters: { safeContents: SafeContent[]; }): Promise<void> {
+  public async parseInternalValues(parameters: { safeContents: SafeContent[]; }): Promise<void> {
     //#region Check input data from "parameters"
     if ((parameters instanceof Object) === false) {
       throw new Error("The \"parameters\" must has \"Object\" type");
@@ -311,9 +311,7 @@ export default class AuthenticatedSafe implements Schema.SchemaCompatible {
     }
     //#endregion
   }
-
-  // TODO No usages
-  protected async makeInternalValues(parameters: {
+  public async makeInternalValues(parameters: {
     safeContents: any[];
   }): Promise<this> {
     //#region Check data in PARSED_VALUE
