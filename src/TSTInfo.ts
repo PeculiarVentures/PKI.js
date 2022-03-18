@@ -411,9 +411,7 @@ export default class TSTInfo implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Get a "crypto" extension
-    const crypto = common.getCrypto();
-    if (!crypto)
-      throw new Error("Unable to create WebCrypto object");
+    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Get initial parameters

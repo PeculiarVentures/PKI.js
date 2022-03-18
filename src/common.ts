@@ -136,15 +136,26 @@ export function getEngine(): CryptoEngine {
 //#region Declaration of common functions
 
 /**
- * Get crypto subtle from current "crypto engine" or "undefined"
+ * Gets crypto subtle from the current "crypto engine"
+ * @param safety
+ * @returns Reruns {@link CryptoEngine} or `undefined`
  */
-export function getCrypto(): CryptoEngine | undefined {
+export function getCrypto(safety?: false): CryptoEngine | undefined;
+/**
+ * Gets crypto subtle from the current "crypto engine"
+ * @param safety
+ * @returns Reruns {@link CryptoEngine} or throws en exception
+ * @throws Throws {@link Error} if `subtle` is empty
+ */
+export function getCrypto(safety: true): CryptoEngine;
+export function getCrypto(safety = false): CryptoEngine | undefined {
   const _engine = getEngine();
 
-  if (_engine.subtle !== null)
-    return _engine.subtle;
+  if (!_engine.subtle && safety) {
+    throw new Error("Unable to create WebCrypto object");
+  }
 
-  return undefined;
+  return _engine.subtle;
 }
 
 /**
@@ -361,9 +372,7 @@ export async function kdfWithCounter(hashFunction: string, Zbuffer: ArrayBuffer,
   //#endregion
 
   //#region Get a "crypto" extension
-  const crypto = getCrypto();
-  if (typeof crypto === "undefined")
-    throw new Error("Unable to create WebCrypto object");
+  const crypto = getCrypto(true);
   //#endregion
 
   //#region Create a combined ArrayBuffer for digesting

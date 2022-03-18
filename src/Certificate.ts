@@ -587,10 +587,7 @@ export default class Certificate implements Schema.SchemaCompatible {
    */
   public async getKeyHash(hashAlgorithm = "SHA-1"): Promise<ArrayBuffer> {
     //#region Get a "crypto" extension
-    const crypto = common.getCrypto();
-    if (!crypto) {
-      throw new Error("Unable to create WebCrypto object");
-    }
+    const crypto = common.getCrypto(true);
     //#endregion
 
     return crypto.digest({ name: hashAlgorithm }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));

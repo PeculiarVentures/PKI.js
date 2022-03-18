@@ -272,10 +272,7 @@ export default class PFX implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Get a "crypto" extension
-    const crypto = common.getCrypto();
-    if (!crypto) {
-      throw new Error("Unable to create WebCrypto object");
-    }
+    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Makes values for each particular integrity mode
@@ -464,12 +461,6 @@ export default class PFX implements Schema.SchemaCompatible {
 
     if (parameters.checkIntegrity === undefined)
       parameters.checkIntegrity = true;
-    //#endregion
-
-    //#region Get a "crypto" extension
-    const crypto = common.getCrypto();
-    if (!crypto)
-      throw new Error("Unable to create WebCrypto object");
     //#endregion
 
     //#region Create value for "this.parsedValue.authenticatedSafe" and check integrity

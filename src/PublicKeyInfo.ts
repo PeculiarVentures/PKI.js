@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { getCrypto } from "./common";
+import * as common from "./common";
 import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import ECPublicKey from "./ECPublicKey";
 import RSAPublicKey from "./RSAPublicKey";
@@ -269,10 +269,7 @@ export default class PublicKeyInfo implements Schema.SchemaCompatible {
         throw new Error("Need to provide publicKey input parameter");
       }
 
-      const crypto = getCrypto();
-      if (typeof crypto === "undefined") {
-        throw new Error("Unable to create WebCrypto object");
-      }
+      const crypto = common.getCrypto(true);
       const exportedKey = await crypto.exportKey("spki", publicKey);
       const asn1 = asn1js.fromBER(exportedKey);
       try {

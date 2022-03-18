@@ -240,10 +240,7 @@ export default class CertID implements Schema.SchemaCompatible {
     let issuerCertificate: Certificate;
 
     //#region Get a "crypto" extension
-    const crypto = common.getCrypto();
-    if (!crypto) {
-      throw new Error("Unable to create WebCrypto object");
-    }
+    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Check input parameters

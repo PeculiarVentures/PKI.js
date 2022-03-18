@@ -403,10 +403,7 @@ export default class BasicOCSPResponse implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Get a "crypto" extension
-    const crypto = commonJs.getCrypto();
-    if (!crypto) {
-      throw new Error("Unable to create WebCrypto object");
-    }
+    const crypto = commonJs.getCrypto(true);
     //#endregion
 
     //#region Find correct value for "responderID"
