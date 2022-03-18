@@ -1,7 +1,7 @@
 {
   "reporter": [
     "lcov",
-    "text-summary",
+    "text-summary"
   ],
   "include": [
     "src/**/*.ts"
