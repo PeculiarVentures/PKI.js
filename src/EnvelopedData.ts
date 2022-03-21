@@ -23,6 +23,7 @@ import OriginatorIdentifierOrKey from "./OriginatorIdentifierOrKey";
 import OriginatorPublicKey from "./OriginatorPublicKey";
 import * as Schema from "./Schema";
 import Certificate from "./Certificate";
+import { ArgumentError, ParameterError } from "./errors";
 
 const VERSION = "version";
 const ORIGINATOR_INFO = "originatorInfo";
@@ -468,43 +469,39 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
     iterationCount?: number;
     keyEncryptionAlgorithm?: AesKeyGenParams;
     keyEncryptionAlgorithmParams?: any;
-  } | null = null, variant: number) {
-    //#region Initial variables
-    const encryptionParameters = parameters || {};
-    //#endregion
-
+  } = {}, variant: number) {
     //#region Check initial parameters
-    if ((preDefinedData instanceof ArrayBuffer) === false)
-      throw new Error("Please pass \"preDefinedData\" in ArrayBuffer type");
-
-    if (preDefinedData.byteLength === 0)
+    ArgumentError.assert(preDefinedData, "preDefinedData", "ArrayBuffer");
+    if (!preDefinedData.byteLength) {
       throw new Error("Pre-defined data could have zero length");
+    }
     //#endregion
 
     //#region Initialize encryption parameters
-    if (("keyIdentifier" in encryptionParameters) === false) {
+    if (!parameters.keyIdentifier) {
       const keyIdentifierBuffer = new ArrayBuffer(16);
       const keyIdentifierView = new Uint8Array(keyIdentifierBuffer);
       common.getRandomValues(keyIdentifierView);
 
-      encryptionParameters.keyIdentifier = keyIdentifierBuffer;
+      parameters.keyIdentifier = keyIdentifierBuffer;
     }
 
-    if (("hmacHashAlgorithm" in encryptionParameters) === false)
-      encryptionParameters.hmacHashAlgorithm = "SHA-512";
+    if (!parameters.hmacHashAlgorithm)
+      parameters.hmacHashAlgorithm = "SHA-512";
 
-    if (("iterationCount" in encryptionParameters) === false)
-      encryptionParameters.iterationCount = 2048;
+    if (parameters.iterationCount === undefined) {
+      parameters.iterationCount = 2048;
+    }
 
-    if (!encryptionParameters.keyEncryptionAlgorithm) {
-      encryptionParameters.keyEncryptionAlgorithm = {
+    if (!parameters.keyEncryptionAlgorithm) {
+      parameters.keyEncryptionAlgorithm = {
         name: "AES-KW",
         length: 256
       };
     }
 
-    if (!("keyEncryptionAlgorithmParams" in encryptionParameters))
-      encryptionParameters.keyEncryptionAlgorithmParams = new asn1js.Null();
+    if (!parameters.keyEncryptionAlgorithmParams)
+      parameters.keyEncryptionAlgorithmParams = new asn1js.Null();
     //#endregion
 
     //#region Add new recipient based on passed variant
@@ -512,7 +509,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
       case 1: // KEKRecipientInfo
         {
           //#region keyEncryptionAlgorithm
-          const kekOID = common.getOIDByAlgorithm(encryptionParameters.keyEncryptionAlgorithm);
+          const kekOID = common.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm);
           if (kekOID === "")
             throw new Error("Incorrect value for \"keyEncryptionAlgorithm\"");
           //#endregion
@@ -521,14 +518,14 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
           const keyInfo = new KEKRecipientInfo({
             version: 4,
             kekid: new KEKIdentifier({
-              keyIdentifier: new asn1js.OctetString({ valueHex: encryptionParameters.keyIdentifier })
+              keyIdentifier: new asn1js.OctetString({ valueHex: parameters.keyIdentifier })
             }),
             keyEncryptionAlgorithm: new AlgorithmIdentifier({
               algorithmId: kekOID,
               /*
                For AES-KW params are NULL, but for other algorithm could another situation.
                */
-              algorithmParams: encryptionParameters.keyEncryptionAlgorithmParams
+              algorithmParams: parameters.keyEncryptionAlgorithmParams
             }),
             preDefinedKEK: preDefinedData
             // "encryptedKey" would be set in "ecrypt" function
@@ -563,17 +560,17 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
           const hmacOID = common.getOIDByAlgorithm({
             name: "HMAC",
             hash: {
-              name: encryptionParameters.hmacHashAlgorithm
+              name: parameters.hmacHashAlgorithm
             }
           } as Algorithm);
           if (hmacOID === "")
-            throw new Error(`Incorrect value for "hmacHashAlgorithm": ${encryptionParameters.hmacHashAlgorithm}`);
+            throw new Error(`Incorrect value for "hmacHashAlgorithm": ${parameters.hmacHashAlgorithm}`);
           //#endregion
 
           //#region PBKDF2-params
           const pbkdf2Params = new PBKDF2Params({
             salt: new asn1js.OctetString({ valueHex: saltBuffer }),
-            iterationCount: encryptionParameters.iterationCount,
+            iterationCount: parameters.iterationCount,
             prf: new AlgorithmIdentifier({
               algorithmId: hmacOID,
               algorithmParams: new asn1js.Null()
@@ -582,7 +579,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
           //#endregion
 
           //#region keyEncryptionAlgorithm
-          const kekOID = common.getOIDByAlgorithm(encryptionParameters.keyEncryptionAlgorithm);
+          const kekOID = common.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm);
           if (kekOID === "")
             throw new Error("Incorrect value for \"keyEncryptionAlgorithm\"");
           //#endregion
@@ -599,7 +596,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
               /*
                For AES-KW params are NULL, but for other algorithm could be another situation.
                */
-              algorithmParams: encryptionParameters.keyEncryptionAlgorithmParams
+              algorithmParams: parameters.keyEncryptionAlgorithmParams
             }),
             password: preDefinedData
             // "encryptedKey" would be set in "ecrypt" function

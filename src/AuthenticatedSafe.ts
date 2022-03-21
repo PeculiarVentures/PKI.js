@@ -6,6 +6,7 @@ import EnvelopedData from "./EnvelopedData";
 import EncryptedData from "./EncryptedData";
 import * as Schema from "./Schema";
 import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData } from "./ObjectIdentifiers";
+import { ArgumentError, ParameterError } from "./errors";
 
 const SAFE_CONTENTS = "safeContents";
 const PARSED_VALUE = "parsedValue";
@@ -164,20 +165,10 @@ export default class AuthenticatedSafe implements Schema.SchemaCompatible {
 
   public async parseInternalValues(parameters: { safeContents: SafeContent[]; }): Promise<void> {
     //#region Check input data from "parameters"
-    if ((parameters instanceof Object) === false) {
-      throw new Error("The \"parameters\" must has \"Object\" type");
-    }
-
-    if ((SAFE_CONTENTS in parameters) === false) {
-      throw new Error("Absent mandatory parameter \"safeContents\"");
-    }
-
-    if ((parameters.safeContents instanceof Array) === false) {
-      throw new Error("The \"parameters.safeContents\" must has \"Array\" type");
-    }
-
+    ParameterError.assert(parameters, SAFE_CONTENTS);
+    ArgumentError.assert(parameters.safeContents, SAFE_CONTENTS, "Array");
     if (parameters.safeContents.length !== this.safeContents.length) {
-      throw new Error("Length of \"parameters.safeContents\" must be equal to \"this.safeContents.length\"");
+      throw new ArgumentError("Length of \"parameters.safeContents\" must be equal to \"this.safeContents.length\"");
     }
     //#endregion
 
@@ -188,14 +179,13 @@ export default class AuthenticatedSafe implements Schema.SchemaCompatible {
 
     for (const [index, content] of this.safeContents.entries()) {
       const safeContent = parameters.safeContents[index];
+      const errorTarget = `parameters.safeContents[${index}]`;
       switch (content.contentType) {
         //#region data
         case id_ContentType_Data:
           {
             // Check that we do have OCTET STRING as "content"
-            if (!(content.content instanceof asn1js.OctetString)) {
-              throw new Error("Wrong type of \"this.safeContents[j].content\"");
-            }
+            ArgumentError.assert(content.content, "this.safeContents[j].content", asn1js.OctetString);
 
             //#region Check we have "constructive encoding" for AuthSafe content
             let authSafeContent = new ArrayBuffer(0);
@@ -233,18 +223,9 @@ export default class AuthenticatedSafe implements Schema.SchemaCompatible {
             //#endregion
 
             //#region Check mandatory parameters
-            if (!("recipientCertificate" in safeContent)) {
-              throw new Error("Absent mandatory parameter \"recipientCertificate\" in \"parameters.safeContents[j]\"");
-            }
+            ParameterError.assert(errorTarget, safeContent, "recipientCertificate", "recipientKey");
             const envelopedData = safeContent as any;
-
             const recipientCertificate = envelopedData.recipientCertificate;
-
-            if (!("recipientKey" in envelopedData)) {
-              throw new Error("Absent mandatory parameter \"recipientKey\" in \"parameters.safeContents[j]\"");
-            }
-
-            // noinspection JSUnresolvedVariable
             const recipientKey = envelopedData.recipientKey;
             //#endregion
 
@@ -276,9 +257,7 @@ export default class AuthenticatedSafe implements Schema.SchemaCompatible {
             //#endregion
 
             //#region Check mandatory parameters
-            if (!("password" in safeContent)) {
-              throw new Error("Absent mandatory parameter \"password\" in \"parameters.safeContents[j]\"");
-            }
+            ParameterError.assert(errorTarget, safeContent, "password");
 
             const password = (safeContent as any).password;
             //#endregion
@@ -315,28 +294,20 @@ export default class AuthenticatedSafe implements Schema.SchemaCompatible {
     safeContents: any[];
   }): Promise<this> {
     //#region Check data in PARSED_VALUE
-    if (!(this.parsedValue))
+    if (!(this.parsedValue)) {
       throw new Error("Please run \"parseValues\" first or add \"parsedValue\" manually");
+    }
+    ArgumentError.assert(this.parsedValue, "this.parsedValue", "object");
+    ArgumentError.assert(this.parsedValue.safeContents, "this.parsedValue.safeContents", "Array");
 
-    if ((this.parsedValue instanceof Object) === false)
-      throw new Error("The \"this.parsedValue\" must has \"Object\" type");
-
-    if (!(this.parsedValue.safeContents instanceof Array))
-      throw new Error("The \"this.parsedValue.safeContents\" must has \"Array\" type");
-    //#endregion
 
     //#region Check input data from "parameters"
-    if (!(parameters instanceof Object))
-      throw new Error("The \"parameters\" must has \"Object\" type");
-
-    if (!(parameters.safeContents))
-      throw new Error("Absent mandatory parameter \"safeContents\"");
-
-    if (!(parameters.safeContents instanceof Array))
-      throw new Error("The \"parameters.safeContents\" must has \"Array\" type");
-
-    if (parameters.safeContents.length !== this.parsedValue.safeContents.length)
-      throw new Error("Length of \"parameters.safeContents\" must be equal to \"this.parsedValue.safeContents\"");
+    ArgumentError.assert(parameters, "parameters", "object");
+    ParameterError.assert(parameters, "safeContents");
+    ArgumentError.assert(parameters.safeContents, "parameters.safeContents", "Array");
+    if (parameters.safeContents.length !== this.parsedValue.safeContents.length) {
+      throw new ArgumentError("Length of \"parameters.safeContents\" must be equal to \"this.parsedValue.safeContents\"");
+    }
     //#endregion
 
     //#region Create internal values from already parsed values
@@ -344,14 +315,8 @@ export default class AuthenticatedSafe implements Schema.SchemaCompatible {
 
     for (const [index, content] of this.parsedValue.safeContents.entries()) {
       //#region Check current "content" value
-      if (("privacyMode" in content) === false)
-        throw new Error("The \"privacyMode\" is a mandatory parameter for \"content\"");
-
-      if (("value" in content) === false)
-        throw new Error("The \"value\" is a mandatory parameter for \"content\"");
-
-      if ((content.value instanceof SafeContents) === false)
-        throw new Error("The \"content.value\" must has \"SafeContents\" type");
+      ParameterError.assert("content", content, "privacyMode", "value");
+      ArgumentError.assert(content.value, "content.value", SafeContents);
       //#endregion
 
       switch (content.privacyMode) {
@@ -396,39 +361,36 @@ export default class AuthenticatedSafe implements Schema.SchemaCompatible {
             //#region Initial variables
             const cmsEnveloped = new EnvelopedData();
             const contentToEncrypt = content.value.toSchema().toBER(false);
+            const safeContent = parameters.safeContents[index];
             //#endregion
 
             //#region Check mandatory parameters
-            if (("encryptingCertificate" in parameters.safeContents[index]) === false)
-              throw new Error("Absent mandatory parameter \"encryptingCertificate\" in \"parameters.safeContents[i]\"");
-
-            if (("encryptionAlgorithm" in parameters.safeContents[index]) === false)
-              throw new Error("Absent mandatory parameter \"encryptionAlgorithm\" in \"parameters.safeContents[i]\"");
+            ParameterError.assert(`parameters.safeContents[${index}]`, safeContent, "encryptingCertificate", "encryptionAlgorithm");
 
             switch (true) {
-              case (parameters.safeContents[index].encryptionAlgorithm.name.toLowerCase() === "aes-cbc"):
-              case (parameters.safeContents[index].encryptionAlgorithm.name.toLowerCase() === "aes-gcm"):
+              case (safeContent.encryptionAlgorithm.name.toLowerCase() === "aes-cbc"):
+              case (safeContent.encryptionAlgorithm.name.toLowerCase() === "aes-gcm"):
                 break;
               default:
-                throw new Error(`Incorrect parameter "encryptionAlgorithm" in "parameters.safeContents[i]": ${parameters.safeContents[index].encryptionAlgorithm}`);
+                throw new Error(`Incorrect parameter "encryptionAlgorithm" in "parameters.safeContents[i]": ${safeContent.encryptionAlgorithm}`);
             }
 
             switch (true) {
-              case (parameters.safeContents[index].encryptionAlgorithm.length === 128):
-              case (parameters.safeContents[index].encryptionAlgorithm.length === 192):
-              case (parameters.safeContents[index].encryptionAlgorithm.length === 256):
+              case (safeContent.encryptionAlgorithm.length === 128):
+              case (safeContent.encryptionAlgorithm.length === 192):
+              case (safeContent.encryptionAlgorithm.length === 256):
                 break;
               default:
-                throw new Error(`Incorrect parameter "encryptionAlgorithm.length" in "parameters.safeContents[i]": ${parameters.safeContents[index].encryptionAlgorithm.length}`);
+                throw new Error(`Incorrect parameter "encryptionAlgorithm.length" in "parameters.safeContents[i]": ${safeContent.encryptionAlgorithm.length}`);
             }
             //#endregion
 
             //#region Making correct "encryptionAlgorithm" variable
-            const encryptionAlgorithm = parameters.safeContents[index].encryptionAlgorithm;
+            const encryptionAlgorithm = safeContent.encryptionAlgorithm;
             //#endregion
 
             //#region Append recipient for enveloped data
-            cmsEnveloped.addRecipientByCertificate(parameters.safeContents[index].encryptingCertificate);
+            cmsEnveloped.addRecipientByCertificate(safeContent.encryptingCertificate);
             //#endregion
 
             //#region Making encryption

@@ -9,6 +9,7 @@ import EncryptedContentInfo from "./EncryptedContentInfo";
 import RSASSAPSSParams, { RSASSAPSSParamsParameters } from "./RSASSAPSSParams";
 import PBKDF2Params from "./PBKDF2Params";
 import PBES2Params from "./PBES2Params";
+import { ArgumentError, ParameterError } from "./errors";
 
 const CRYPTO = "crypto";
 const SUBTLE = "subtle";
@@ -297,14 +298,14 @@ export default class CryptoEngine {
         {
           const asn1 = asn1js.fromBER(pvtsutils.BufferSourceConverter.toArrayBuffer(keyData as BufferSource));
           if (asn1.offset === (-1)) {
-            throw new Error("Incorrect keyData");
+            throw new ArgumentError("Incorrect keyData");
           }
 
           const publicKeyInfo = new PublicKeyInfo();
           try {
             publicKeyInfo.fromSchema(asn1.result);
           } catch {
-            throw new Error("Incorrect keyData");
+            throw new ArgumentError("Incorrect keyData");
           }
 
           switch (alg.name.toUpperCase()) {
@@ -312,7 +313,7 @@ export default class CryptoEngine {
               {
                 //#region Get information about used hash function
                 if (!alg.hash) {
-                  throw new Error("Incorrect hash algorithm: Hash algorithm is missed");
+                  throw new ParameterError("hash", "algorithm.hash", "Incorrect hash algorithm: Hash algorithm is missed");
                 }
                 switch (alg.hash.name.toUpperCase()) {
                   case "SHA-1":
@@ -348,7 +349,7 @@ export default class CryptoEngine {
                 //#region Get information about used hash function
                 if (!jwk.alg) {
                   if (!alg.hash) {
-                    throw new Error("Incorrect hash algorithm: Hash algorithm is missed");
+                    throw new ParameterError("hash", "algorithm.hash", "Incorrect hash algorithm: Hash algorithm is missed");
                   }
                   switch (alg.hash.name.toUpperCase()) {
                     case "SHA-1":
@@ -411,7 +412,7 @@ export default class CryptoEngine {
                   jwk.alg = "RSA-OAEP";
                 else {
                   if (!alg.hash) {
-                    throw new Error("Incorrect hash algorithm: Hash algorithm is missed");
+                    throw new ParameterError("hash", "algorithm.hash", "Incorrect hash algorithm: Hash algorithm is missed");
                   }
                   switch (alg.hash.name.toUpperCase()) {
                     case "SHA-1":
@@ -1027,6 +1028,7 @@ export default class CryptoEngine {
    * Get OID for each specific algorithm
    * @param algorithm
    */
+  // TODO Use safety
   public getOIDByAlgorithm(algorithm: Algorithm): string {
     let result = "";
 
@@ -1689,26 +1691,9 @@ export default class CryptoEngine {
    */
   public async encryptEncryptedContentInfo(parameters: CryptoEngineEncryptParams): Promise<EncryptedContentInfo> {
     //#region Check for input parameters
-    if ((parameters instanceof Object) === false)
-      throw new Error("Parameters must have type \"Object\"");
-
-    if (("password" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"password\"");
-
-    if (("contentEncryptionAlgorithm" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"contentEncryptionAlgorithm\"");
-
-    if (("hmacHashAlgorithm" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"hmacHashAlgorithm\"");
-
-    if (("iterationCount" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"iterationCount\"");
-
-    if (("contentToEncrypt" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"contentToEncrypt\"");
-
-    if (("contentType" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"contentType\"");
+    ParameterError.assert(parameters,
+      "password", "contentEncryptionAlgorithm", "hmacHashAlgorithm",
+      "iterationCount", "contentToEncrypt", "contentToEncrypt", "contentType");
 
     const contentEncryptionOID = this.getOIDByAlgorithm(parameters.contentEncryptionAlgorithm);
     if (contentEncryptionOID === "")
@@ -1817,14 +1802,7 @@ export default class CryptoEngine {
    */
   public async decryptEncryptedContentInfo(parameters: CryptoEngineDecryptParams): Promise<ArrayBuffer> {
     //#region Check for input parameters
-    if ((parameters instanceof Object) === false)
-      throw new Error("Parameters must have type \"Object\"");
-
-    if (("password" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"password\"");
-
-    if (("encryptedContentInfo" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"encryptedContentInfo\"");
+    ParameterError.assert(parameters, "password", "encryptedContentInfo");
 
     if (parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId !== "1.2.840.113549.1.5.13") // pkcs5PBES2
       throw new Error(`Unknown "contentEncryptionAlgorithm": ${parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
@@ -1931,20 +1909,7 @@ export default class CryptoEngine {
     if ((parameters instanceof Object) === false)
       throw new Error("Parameters must have type \"Object\"");
 
-    if (("password" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"password\"");
-
-    if (("hashAlgorithm" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"hashAlgorithm\"");
-
-    if (("salt" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"iterationCount\"");
-
-    if (("iterationCount" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"salt\"");
-
-    if (("contentToStamp" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"contentToStamp\"");
+    ParameterError.assert(parameters, "password", "hashAlgorithm", "iterationCount", "salt", "contentToStamp");
     //#endregion
 
     //#region Choose correct length for HMAC key
@@ -2005,26 +1970,9 @@ export default class CryptoEngine {
     signatureToVerify: ArrayBuffer;
   }): Promise<boolean> {
     //#region Check for input parameters
-    if ((parameters instanceof Object) === false)
-      throw new Error("Parameters must have type \"Object\"");
-
-    if (("password" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"password\"");
-
-    if (("hashAlgorithm" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"hashAlgorithm\"");
-
-    if (("salt" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"iterationCount\"");
-
-    if (("iterationCount" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"salt\"");
-
-    if (("contentToVerify" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"contentToVerify\"");
-
-    if (("signatureToVerify" in parameters) === false)
-      throw new Error("Absent mandatory parameter \"signatureToVerify\"");
+    ParameterError.assert(parameters,
+      "password", "hashAlgorithm", "salt",
+      "iterationCount", "contentToVerify", "signatureToVerify");
     //#endregion
 
     //#region Choose correct length for HMAC key

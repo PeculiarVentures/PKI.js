@@ -8,6 +8,7 @@ import CertID from "./CertID";
 import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
 import CertificateChainValidationEngine from "./CertificateChainValidationEngine";
 import * as Schema from "./Schema";
+import { ParameterError } from "./errors";
 
 const TBS_RESPONSE_DATA = "tbsResponseData";
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";

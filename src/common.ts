@@ -2,6 +2,7 @@ import * as asn1js from "asn1js";
 import { utilConcatBuf } from "pvutils";
 import AlgorithmIdentifier from "./AlgorithmIdentifier";
 import CryptoEngine, { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams } from "./CryptoEngine";
+import { ArgumentError } from "./errors";
 
 
 //#region Crypto engine related function
@@ -72,7 +73,7 @@ export function getEngine(): CryptoEngine {
       _engine = (global as any)[process.pid].pkijs.engine;
     }
     catch (ex) {
-      throw new Error("Please call \"setEngine\" before call to \"getEngine\"");
+      throw new Error("Please call 'setEngine' before call to 'getEngine'");
     }
 
     return _engine;
@@ -347,20 +348,16 @@ export async function kdfWithCounter(hashFunction: string, Zbuffer: ArrayBuffer,
     case "SHA-512":
       break;
     default:
-      throw new Error(`Unknown hash function: ${hashFunction}`);
+      throw new ArgumentError(`Unknown hash function: ${hashFunction}`);
   }
 
-  if ((Zbuffer instanceof ArrayBuffer) === false)
-    throw new Error("Please set \"Zbuffer\" as \"ArrayBuffer\"");
-
+  ArgumentError.assert(Zbuffer, "Zbuffer", "ArrayBuffer");
   if (Zbuffer.byteLength === 0)
-    throw new Error("\"Zbuffer\" has zero length, error");
+    throw new ArgumentError("'Zbuffer' has zero length, error");
 
-  if ((SharedInfo instanceof ArrayBuffer) === false)
-    throw new Error("Please set \"SharedInfo\" as \"ArrayBuffer\"");
-
+  ArgumentError.assert(SharedInfo, "SharedInfo", "ArrayBuffer");
   if (Counter > 255)
-    throw new Error("Please set \"Counter\" variable to value less or equal to 255");
+    throw new ArgumentError("Please set 'Counter' argument to value less or equal to 255");
   //#endregion
 
   //#region Initial variables
@@ -424,17 +421,13 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
       hashLength = 512; // In bits
       break;
     default:
-      throw new Error(`Unknown hash function: ${hashFunction}`);
+      throw new ArgumentError(`Unknown hash function: ${hashFunction}`);
   }
 
-  if ((Zbuffer instanceof ArrayBuffer) === false)
-    throw new Error("Please set \"Zbuffer\" as \"ArrayBuffer\"");
-
+  ArgumentError.assert(Zbuffer, "Zbuffer", "ArrayBuffer");
   if (Zbuffer.byteLength === 0)
-    throw new Error("\"Zbuffer\" has zero length, error");
-
-  if ((SharedInfo instanceof ArrayBuffer) === false)
-    throw new Error("Please set \"SharedInfo\" as \"ArrayBuffer\"");
+    throw new ArgumentError("'Zbuffer' has zero length, error");
+  ArgumentError.assert(SharedInfo, "SharedInfo", "ArrayBuffer");
   //#endregion
 
   //#region Calculated maximum value of "Counter" variable

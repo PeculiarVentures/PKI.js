@@ -4,6 +4,7 @@ import * as common from "./common";
 import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import Certificate from "./Certificate";
 import * as Schema from "./Schema";
+import { ParameterError } from "./errors";
 
 const HASH_ALGORITHM = "hashAlgorithm";
 const ISSUER_NAME_HASH = "issuerNameHash";
@@ -237,31 +238,20 @@ export default class CertID implements Schema.SchemaCompatible {
    * @returns {Promise}
    */
   public async createForCertificate(certificate: Certificate, parameters: CertIDCreateParams): Promise<void> {
-    let issuerCertificate: Certificate;
-
-    //#region Get a "crypto" extension
-    const crypto = common.getCrypto(true);
-    //#endregion
-
     //#region Check input parameters
-    if ((HASH_ALGORITHM in parameters) === false)
-      throw new Error("Parameter \"hashAlgorithm\" is mandatory for \"OCSP_REQUEST.createForCertificate\"");
+    ParameterError.assert(parameters, HASH_ALGORITHM, "issuerCertificate");
 
+    const crypto = common.getCrypto(true);
     const hashOID = common.getOIDByAlgorithm({ name: parameters.hashAlgorithm });
     if (hashOID === "") {
-      throw new Error(`Incorrect HASH_ALGORITHM: ${this.hashAlgorithm}`);
+      throw new Error(`Incorrect 'hashAlgorithm': ${this.hashAlgorithm}`);
     }
 
     this.hashAlgorithm = new AlgorithmIdentifier({
       algorithmId: hashOID,
       algorithmParams: new asn1js.Null()
     });
-
-    if (parameters.issuerCertificate) {
-      issuerCertificate = parameters.issuerCertificate;
-    } else {
-      throw new Error("Parameter \"issuerCertificate\" is mandatory for \"OCSP_REQUEST.createForCertificate\"");
-    }
+    const issuerCertificate = parameters.issuerCertificate;
     //#endregion
 
     // Initialize SERIAL_NUMBER field

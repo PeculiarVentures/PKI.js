@@ -2,6 +2,7 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import ECNamedCurves from "./ECNamedCurves";
 import ECPublicKey, { ECPublicKeyParameters } from "./ECPublicKey";
+import { ParameterError } from "./errors";
 import * as Schema from "./Schema";
 
 const VERSION = "version";
@@ -282,33 +283,27 @@ export default class ECPrivateKey implements Schema.SchemaCompatible {
    * @param json
    */
   public fromJSON(json: any): void {
+    ParameterError.assert("json", json, "crv", "d");
+
     let coordinateLength = 0;
 
-    if (json.crv) {
-      const curve = ECNamedCurves.find(json.crv);
-      if (curve) {
-        this.namedCurve = curve.id;
-        coordinateLength = curve.size;
-      }
-    } else {
-      throw new Error("Absent mandatory parameter \"crv\"");
+    const curve = ECNamedCurves.find(json.crv);
+    if (curve) {
+      this.namedCurve = curve.id;
+      coordinateLength = curve.size;
     }
 
-    if (json.d) {
-      const convertBuffer = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.d, true));
+    const convertBuffer = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.d, true));
 
-      if (convertBuffer.byteLength < coordinateLength) {
-        const buffer = new ArrayBuffer(coordinateLength);
-        const view = new Uint8Array(buffer);
-        const convertBufferView = new Uint8Array(convertBuffer);
-        view.set(convertBufferView, 1);
+    if (convertBuffer.byteLength < coordinateLength) {
+      const buffer = new ArrayBuffer(coordinateLength);
+      const view = new Uint8Array(buffer);
+      const convertBufferView = new Uint8Array(convertBuffer);
+      view.set(convertBufferView, 1);
 
-        this.privateKey = new asn1js.OctetString({ valueHex: buffer });
-      } else {
-        this.privateKey = new asn1js.OctetString({ valueHex: convertBuffer.slice(0, coordinateLength) });
-      }
+      this.privateKey = new asn1js.OctetString({ valueHex: buffer });
     } else {
-      throw new Error("Absent mandatory parameter \"d\"");
+      this.privateKey = new asn1js.OctetString({ valueHex: convertBuffer.slice(0, coordinateLength) });
     }
 
     if (json.x && json.y) {

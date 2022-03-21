@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
+import { Convert } from "pvtsutils";
 import * as pvutils from "pvutils";
+import { ParameterError } from "./errors";
 import OtherPrimeInfo, { JsonOtherPrimeInfo, OtherPrimeInfoSchema } from "./OtherPrimeInfo";
 import * as Schema from "./Schema";
 
@@ -319,48 +321,18 @@ export default class RSAPrivateKey implements Schema.SchemaCompatible {
    * @param json
    */
   public fromJSON(json: any): void {
-    if ("n" in json)
-      this.modulus = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.n, true, true)) });
-    else
-      throw new Error("Absent mandatory parameter \"n\"");
-
-    if ("e" in json)
-      this.publicExponent = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.e, true, true)) });
-    else
-      throw new Error("Absent mandatory parameter \"e\"");
-
-    if ("d" in json)
-      this.privateExponent = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.d, true, true)) });
-    else
-      throw new Error("Absent mandatory parameter \"d\"");
-
-    if ("p" in json)
-      this.prime1 = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.p, true, true)) });
-    else
-      throw new Error("Absent mandatory parameter \"p\"");
-
-    if ("q" in json)
-      this.prime2 = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.q, true, true)) });
-    else
-      throw new Error("Absent mandatory parameter \"q\"");
-
-    if ("dp" in json)
-      this.exponent1 = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.dp, true, true)) });
-    else
-      throw new Error("Absent mandatory parameter \"dp\"");
-
-    if ("dq" in json)
-      this.exponent2 = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.dq, true, true)) });
-    else
-      throw new Error("Absent mandatory parameter \"dq\"");
-
-    if ("qi" in json)
-      this.coefficient = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.qi, true, true)) });
-    else
-      throw new Error("Absent mandatory parameter \"qi\"");
-
-    if ("oth" in json)
+    ParameterError.assert("json", json, "n", "e", "d", "p", "q", "dp", "dq", "qi");
+    this.modulus = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.n) });
+    this.publicExponent = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.e) });
+    this.privateExponent = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.d) });
+    this.prime1 = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.p) });
+    this.prime2 = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.q) });
+    this.exponent1 = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.dp) });
+    this.exponent2 = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.dq) });
+    this.coefficient = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.qi) });
+    if (json.oth) {
       this.otherPrimeInfos = Array.from(json.oth, (element: any) => new OtherPrimeInfo({ json: element }));
+    }
   }
 
 }

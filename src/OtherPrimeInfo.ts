@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { ParameterError } from "./errors";
 import * as Schema from "./Schema";
 
 const PRIME = "prime";
@@ -173,23 +174,10 @@ export default class OtherPrimeInfo implements Schema.SchemaCompatible {
    * @param json
    */
   public fromJSON(json: JsonOtherPrimeInfo): void {
-    if (json.r) {
-      this.prime = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.r, true)) });
-    } else {
-      throw new Error("Absent mandatory parameter \"r\"");
-    }
-
-    if (json.d) {
-      this.exponent = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.d, true)) });
-    } else {
-      throw new Error("Absent mandatory parameter \"d\"");
-    }
-
-    if (json.t) {
-      this.coefficient = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.t, true)) });
-    } else {
-      throw new Error("Absent mandatory parameter \"t\"");
-    }
+    ParameterError.assert("json", json, "r", "d", "r");
+    this.prime = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.r, true)) });
+    this.exponent = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.d, true)) });
+    this.coefficient = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.t, true)) });
   }
 
 }

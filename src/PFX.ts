@@ -14,6 +14,7 @@ import SignedAndUnsignedAttributes from "./SignedAndUnsignedAttributes";
 import AuthenticatedSafe from "./AuthenticatedSafe";
 import * as Schema from "./Schema";
 import Certificate from "./Certificate";
+import { ArgumentError, ParameterError } from "./errors";
 
 const VERSION = "version";
 const AUTH_SAFE = "authSafe";
@@ -261,42 +262,27 @@ export default class PFX implements Schema.SchemaCompatible {
    */
   public async makeInternalValues(parameters: MakeInternalValuesParams = {}) {
     //#region Check mandatory parameter
-    if ((parameters instanceof Object) === false)
-      throw new Error("The \"parameters\" must has \"Object\" type");
-
-    if (!this.parsedValue)
+    ArgumentError.assert(parameters, "parameters", "object");
+    if (!this.parsedValue) {
       throw new Error("Please call \"parseValues\" function first in order to make \"parsedValue\" data");
-
-    if (("integrityMode" in this.parsedValue) === false)
-      throw new Error("Absent mandatory parameter \"integrityMode\" inside \"parsedValue\"");
+    }
+    ParameterError.assertEmpty(this.parsedValue.integrityMode, "integrityMode", "parsedValue");
+    ParameterError.assertEmpty(this.parsedValue.authenticatedSafe, "authenticatedSafe", "parsedValue");
     //#endregion
 
-    //#region Get a "crypto" extension
     const crypto = common.getCrypto(true);
-    //#endregion
 
     //#region Makes values for each particular integrity mode
-    //#region Check that we do have necessary fields in PARSED_VALUE object
-    if (!this.parsedValue.authenticatedSafe)
-      throw new Error("Absent mandatory parameter \"authenticatedSafe\" in \"parsedValue\"");
-    //#endregion
-
     switch (this.parsedValue.integrityMode) {
       //#region HMAC-based integrity
       case 0:
         {
           //#region Check additional mandatory parameters
           if (!("iterations" in parameters))
-            throw new Error("Absent mandatory parameter \"iterations\"");
-
-          if (!parameters.pbkdf2HashAlgorithm)
-            throw new Error("Absent mandatory parameter \"pbkdf2HashAlgorithm\"");
-
-          if (!parameters.hmacHashAlgorithm)
-            throw new Error("Absent mandatory parameter \"hmacHashAlgorithm\"");
-
-          if (!parameters.password)
-            throw new Error("Absent mandatory parameter \"password\"");
+            throw new ParameterError("iterations");
+          ParameterError.assertEmpty(parameters.pbkdf2HashAlgorithm, "pbkdf2HashAlgorithm");
+          ParameterError.assertEmpty(parameters.hmacHashAlgorithm, "hmacHashAlgorithm");
+          ParameterError.assertEmpty(parameters.password, "password");
           //#endregion
 
           //#region Initial variables
@@ -350,14 +336,11 @@ export default class PFX implements Schema.SchemaCompatible {
       case 1:
         {
           //#region Check additional mandatory parameters
-          if (!("signingCertificate" in parameters))
-            throw new Error("Absent mandatory parameter \"signingCertificate\"");
-
-          if (!parameters.privateKey)
-            throw new Error("Absent mandatory parameter \"privateKey\"");
-
-          if (!parameters.hashAlgorithm)
-            throw new Error("Absent mandatory parameter \"hashAlgorithm\"");
+          if (!("signingCertificate" in parameters)) {
+            throw new ParameterError("signingCertificate");
+          }
+          ParameterError.assertEmpty(parameters.privateKey, "privateKey");
+          ParameterError.assertEmpty(parameters.hashAlgorithm, "hashAlgorithm");
           //#endregion
 
           //#region Making data to be signed
@@ -456,11 +439,11 @@ export default class PFX implements Schema.SchemaCompatible {
     password?: ArrayBuffer;
   }) {
     //#region Check input data from "parameters"
-    if ((parameters instanceof Object) === false)
-      throw new Error("The \"parameters\" must has \"Object\" type");
+    ArgumentError.assert(parameters, "parameters", "object");
 
-    if (parameters.checkIntegrity === undefined)
+    if (parameters.checkIntegrity === undefined) {
       parameters.checkIntegrity = true;
+    }
     //#endregion
 
     //#region Create value for "this.parsedValue.authenticatedSafe" and check integrity
@@ -471,9 +454,7 @@ export default class PFX implements Schema.SchemaCompatible {
       case ContentInfo.DATA:
         {
           //#region Check additional mandatory parameters
-          if (!parameters.password) {
-            throw new Error("Absent mandatory parameter \"password\"");
-          }
+          ParameterError.assertEmpty(parameters.password, "password");
           //#endregion
 
           //#region Integrity based on HMAC
@@ -481,9 +462,7 @@ export default class PFX implements Schema.SchemaCompatible {
           //#endregion
 
           //#region Check that we do have OCTETSTRING as "content"
-          if (!(this.authSafe.content instanceof asn1js.OctetString)) {
-            throw new Error("Wrong type of \"this.authSafe.content\"");
-          }
+          ArgumentError.assert(this.authSafe.content, "authSafe.content", asn1js.OctetString);
           //#endregion
 
           //#region Check we have "constructive encoding" for AuthSafe content
@@ -556,11 +535,8 @@ export default class PFX implements Schema.SchemaCompatible {
 
           //#region Check that we do have OCTET STRING as "content"
           const eContent = cmsSigned.encapContentInfo.eContent;
-          if (!eContent)
-            throw new Error("Absent of attached data in \"cmsSigned.encapContentInfo\"");
-
-          if ((eContent instanceof asn1js.OctetString) === false)
-            throw new Error("Wrong type of \"eContent\"");
+          ParameterError.assert(eContent, "eContent", "cmsSigned.encapContentInfo");
+          ArgumentError.assert(eContent, "eContent", asn1js.OctetString);
           //#endregion
 
           //#region Create correct data block for verification

@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import ECNamedCurves from "./ECNamedCurves";
+import { ArgumentError, ParameterError } from "./errors";
 import * as Schema from "./Schema";
 
 const X = "x";
@@ -109,9 +110,7 @@ export default class ECPublicKey implements Schema.SchemaCompatible {
    */
   fromSchema(schema: ArrayBuffer): any {
     //region Check the schema is valid
-    if ((schema instanceof ArrayBuffer) === false) {
-      throw new Error("Object's schema was not verified against input data for ECPublicKey");
-    }
+    ArgumentError.assert(schema, "schema", "ArrayBuffer");
 
     const view = new Uint8Array(schema);
     if (view[0] !== 0x04) {
@@ -168,10 +167,7 @@ export default class ECPublicKey implements Schema.SchemaCompatible {
    * @param json
    */
   public fromJSON(json: any): void {
-
-    if (!json.crv) {
-      throw new Error("Absent mandatory parameter \"crv\"");
-    }
+    ParameterError.assert("json", json, "crv", "x", "y");
 
     let coordinateLength = 0;
     const namedCurve = ECNamedCurves.find(json.crv);
@@ -180,36 +176,28 @@ export default class ECPublicKey implements Schema.SchemaCompatible {
       coordinateLength = namedCurve.size;
     }
 
-    if (X in json) {
-      // TODO Simplify Base64url encoding
-      const convertBuffer = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.x, true));
+    // TODO Simplify Base64url encoding
+    const xConvertBuffer = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.x, true));
 
-      if (convertBuffer.byteLength < coordinateLength) {
-        this.x = new ArrayBuffer(coordinateLength);
-        const view = new Uint8Array(this.x);
-        const convertBufferView = new Uint8Array(convertBuffer);
-        view.set(convertBufferView, 1);
-      } else {
-        this.x = convertBuffer.slice(0, coordinateLength);
-      }
+    if (xConvertBuffer.byteLength < coordinateLength) {
+      this.x = new ArrayBuffer(coordinateLength);
+      const view = new Uint8Array(this.x);
+      const convertBufferView = new Uint8Array(xConvertBuffer);
+      view.set(convertBufferView, 1);
     } else {
-      throw new Error("Absent mandatory parameter \"x\"");
+      this.x = xConvertBuffer.slice(0, coordinateLength);
     }
 
-    if (Y in json) {
-      // TODO Simplify Base64url encoding
-      const convertBuffer = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.y, true));
+    // // TODO Simplify Base64url encoding
+    const yConvertBuffer = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.y, true));
 
-      if (convertBuffer.byteLength < coordinateLength) {
-        this.y = new ArrayBuffer(coordinateLength);
-        const view = new Uint8Array(this.y);
-        const convertBufferView = new Uint8Array(convertBuffer);
-        view.set(convertBufferView, 1);
-      } else {
-        this.y = convertBuffer.slice(0, coordinateLength);
-      }
+    if (yConvertBuffer.byteLength < coordinateLength) {
+      this.y = new ArrayBuffer(coordinateLength);
+      const view = new Uint8Array(this.y);
+      const convertBufferView = new Uint8Array(yConvertBuffer);
+      view.set(convertBufferView, 1);
     } else {
-      throw new Error("Absent mandatory parameter \"y\"");
+      this.y = yConvertBuffer.slice(0, coordinateLength);
     }
   }
 

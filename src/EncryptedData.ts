@@ -5,6 +5,7 @@ import EncryptedContentInfo, { EncryptedContentInfoSchema } from "./EncryptedCon
 import Attribute from "./Attribute";
 import * as Schema from "./Schema";
 import { CryptoEngineEncryptParams } from "./CryptoEngine";
+import { ArgumentError, ParameterError } from "./errors";
 
 const VERSION = "version";
 const ENCRYPTED_CONTENT_INFO = "encryptedContentInfo";
@@ -224,15 +225,10 @@ export default class EncryptedData implements Schema.SchemaCompatible {
    */
   public async encrypt(parameters: CryptoEngineEncryptParams): Promise<void> {
     //#region Check for input parameters
-    if ((parameters instanceof Object) === false)
-      throw new Error("Parameters must have type \"Object\"");
+    ArgumentError.assert(parameters, "parameters", "object");
     //#endregion
 
-    //#region Get cryptographic engine
     const engine = common.getEngine();
-    if (typeof engine === "undefined")
-      throw new Error("Unable to initialize cryptographic engine");
-    //#endregion
 
     //#region Set "contentType" parameter
     const encryptParams: CryptoEngineEncryptParams = {
@@ -256,14 +252,11 @@ export default class EncryptedData implements Schema.SchemaCompatible {
     password: ArrayBuffer;
   }): Promise<ArrayBuffer> {
     //#region Check for input parameters
-    if ((parameters instanceof Object) === false)
-      throw new Error("Parameters must have type \"Object\"");
+    ArgumentError.assert(parameters, "parameters", "object");
     //#endregion
 
     //#region Get cryptographic engine
     const engine = common.getEngine();
-    if (typeof engine === "undefined")
-      throw new Error("Unable to initialize cryptographic engine");
     //#endregion
 
     //#region Set ENCRYPTED_CONTENT_INFO value

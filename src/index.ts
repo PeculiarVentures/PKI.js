@@ -215,3 +215,4 @@ import { QCStatement } from "./QCStatements";
 import QCStatements from "./QCStatements";
 export { QCStatement, QCStatements };
 export { default as ECNamedCurves } from "./ECNamedCurves";
+export * from "./errors";

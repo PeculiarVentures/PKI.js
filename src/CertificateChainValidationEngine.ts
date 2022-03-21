@@ -647,6 +647,7 @@ export default class CertificateChainValidationEngine {
 							}
 						} else {
 							if (passedWhenNotRevValues === false) {
+								// TODO use CertificateChainValidationError
 								throw {
 									result: false,
 									resultCode: 11,

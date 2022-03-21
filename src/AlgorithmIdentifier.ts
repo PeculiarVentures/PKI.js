@@ -2,6 +2,11 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as Schema from "./Schema";
 
+const ALGORITHM_ID = "algorithmId";
+const ALGORITHM_PARAMS = "algorithmParams";
+const ALGORITHM = "algorithm";
+const PARAMS = "params";
+
 export interface AlgorithmIdentifierParameters extends Schema.SchemaConstructor {
   /**
    * ObjectIdentifier for algorithm (string representation)
@@ -23,6 +28,10 @@ export type AlgorithmIdentifierSchema = Schema.SchemaParameters<{
   algorithmParams?: string;
 }>;
 
+const CLEAR_PROPS = [
+  ALGORITHM,
+  PARAMS
+];
 /**
  * Class from RFC5280
  */
@@ -43,10 +52,10 @@ export default class AlgorithmIdentifier implements Schema.SchemaCompatible {
    */
   constructor(parameters: AlgorithmIdentifierParameters = {}) {
     //#region Internal properties of the object
-    this.algorithmId = pvutils.getParametersValue(parameters, "algorithmId", AlgorithmIdentifier.defaultValues("algorithmId"));
+    this.algorithmId = pvutils.getParametersValue(parameters, ALGORITHM_ID, AlgorithmIdentifier.defaultValues(ALGORITHM_ID));
 
     if (parameters.algorithmParams) {
-      this.algorithmParams = pvutils.getParametersValue(parameters, "algorithmParams", AlgorithmIdentifier.defaultValues("algorithmParams"));
+      this.algorithmParams = pvutils.getParametersValue(parameters, ALGORITHM_PARAMS, AlgorithmIdentifier.defaultValues(ALGORITHM_PARAMS));
     }
     //#endregion
 
@@ -61,13 +70,13 @@ export default class AlgorithmIdentifier implements Schema.SchemaCompatible {
    * Return default values for all class members
    * @param memberName String name for a class member
    */
-  public static defaultValues(memberName: "algorithmId"): string;
-  public static defaultValues(memberName: "algorithmParams"): any;
+  public static defaultValues(memberName: typeof ALGORITHM_ID): string;
+  public static defaultValues(memberName: typeof ALGORITHM_PARAMS): any;
   public static defaultValues(memberName: string): any {
     switch (memberName) {
-      case "algorithmId":
+      case ALGORITHM_ID:
         return "";
-      case "algorithmParams":
+      case ALGORITHM_PARAMS:
         return new asn1js.Any();
       default:
         throw new Error(`Invalid member name for AlgorithmIdentifier class: ${memberName}`);
@@ -81,9 +90,9 @@ export default class AlgorithmIdentifier implements Schema.SchemaCompatible {
    */
   static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
-      case "algorithmId":
+      case ALGORITHM_ID:
         return (memberValue === "");
-      case "algorithmParams":
+      case ALGORITHM_PARAMS:
         return (memberValue instanceof asn1js.Any);
       default:
         throw new Error(`Invalid member name for AlgorithmIdentifier class: ${memberName}`);
@@ -122,10 +131,7 @@ export default class AlgorithmIdentifier implements Schema.SchemaCompatible {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    pvutils.clearProps(schema, [
-      "algorithm",
-      "params"
-    ]);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
 
     //#region Check the schema is valid
@@ -133,8 +139,8 @@ export default class AlgorithmIdentifier implements Schema.SchemaCompatible {
       schema,
       AlgorithmIdentifier.schema({
         names: {
-          algorithmIdentifier: "algorithm",
-          algorithmParams: "params"
+          algorithmIdentifier: ALGORITHM,
+          algorithmParams: PARAMS
         }
       })
     );
@@ -146,7 +152,7 @@ export default class AlgorithmIdentifier implements Schema.SchemaCompatible {
 
     //#region Get internal properties from parsed schema
     this.algorithmId = asn1.result.algorithm.valueBlock.toString();
-    if ("params" in asn1.result)
+    if (PARAMS in asn1.result)
       this.algorithmParams = asn1.result.params;
     //#endregion
   }
