@@ -408,6 +408,9 @@ export default class AuthenticatedSafe
 						
 						const currentParameters = parameters.safeContents[index];
 						currentParameters.contentToEncrypt = content.value.toSchema().toBER(false);
+
+						if ('saltLength' in parameters)
+							currentParameters.saltLength = parameters.saltLength;
 						//endregion
 						
 						//region Encrypt CMS EncryptedData using password
