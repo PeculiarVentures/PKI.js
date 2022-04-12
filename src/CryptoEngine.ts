@@ -648,58 +648,49 @@ export default class CryptoEngine {
   public exportKey(format: Exclude<KeyFormat, "jwk">, key: CryptoKey): Promise<ArrayBuffer>;
   public exportKey(format: string, key: CryptoKey): Promise<ArrayBuffer | JsonWebKey>;
   public async exportKey(format: KeyFormat, key: CryptoKey): Promise<ArrayBuffer | JsonWebKey> {
-    let sequence = this.subtle.exportKey("jwk", key);
+    let jwk = await this.subtle.exportKey("jwk", key);
 
     //#region Currently Safari returns ArrayBuffer as JWK thus we need an additional transformation
     if (this.name.toLowerCase() === "safari") {
-      sequence = sequence.then(result => {
-        // Some additional checks for Safari Technology Preview
-        if (result instanceof ArrayBuffer)
-          return JSON.parse(pvutils.arrayBufferToString(result));
-
-        return result;
-      });
+      // Some additional checks for Safari Technology Preview
+      if (jwk instanceof ArrayBuffer) {
+        jwk = JSON.parse(pvutils.arrayBufferToString(jwk));
+      }
     }
     //#endregion
 
     switch (format.toLowerCase()) {
       case "raw":
         return this.subtle.exportKey("raw", key);
-      case "spki":
-        sequence = sequence.then(result => {
-          const publicKeyInfo = new PublicKeyInfo();
+      case "spki": {
+        const publicKeyInfo = new PublicKeyInfo();
 
-          try {
-            publicKeyInfo.fromJSON(result);
-          }
-          catch (ex) {
-            throw new Error("Incorrect key data");
-          }
+        try {
+          publicKeyInfo.fromJSON(jwk);
+        }
+        catch (ex) {
+          throw new Error("Incorrect key data");
+        }
 
-          return publicKeyInfo.toSchema().toBER(false);
-        });
-        break;
-      case "pkcs8":
-        sequence = sequence.then(result => {
-          const privateKeyInfo = new PrivateKeyInfo();
+        return publicKeyInfo.toSchema().toBER(false);
+      }
+      case "pkcs8": {
+        const privateKeyInfo = new PrivateKeyInfo();
 
-          try {
-            privateKeyInfo.fromJSON(result);
-          }
-          catch (ex) {
-            throw new Error("Incorrect key data");
-          }
+        try {
+          privateKeyInfo.fromJSON(jwk);
+        }
+        catch (ex) {
+          throw new Error("Incorrect key data");
+        }
 
-          return privateKeyInfo.toSchema().toBER(false);
-        });
-        break;
+        return privateKeyInfo.toSchema().toBER(false);
+      }
       case "jwk":
-        break;
+        return jwk;
       default:
         throw new Error(`Incorrect format: ${format}`);
     }
-
-    return sequence;
   }
 
   /**

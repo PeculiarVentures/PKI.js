@@ -191,7 +191,7 @@ export class KeyTransRecipientInfo {
    * Convert current object to asn1js object and set correct values
    * @returns asn1js object
    */
-  public toSchema(): Schema.SchemaType {
+  public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
 

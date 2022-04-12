@@ -160,7 +160,7 @@ export default class RelativeDistinguishedNames {
 	 * Convert current object to asn1js object and set correct values
 	 * @returns asn1js object
 	 */
-	public toSchema(): Schema.SchemaType {
+	public toSchema(): asn1js.Sequence {
 		//#region Decode stored TBS value
 		if (this.valueBeforeDecode.byteLength === 0) // No stored encoded array, create "from scratch"
 		{

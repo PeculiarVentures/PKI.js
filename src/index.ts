@@ -43,8 +43,12 @@ import CertificationRequest from "./CertificationRequest";
 export { CertificationRequest };
 import ContentInfo from "./ContentInfo";
 export { ContentInfo };
-import CryptoEngine from "./CryptoEngine";
-export { CryptoEngine };
+export {
+  default as CryptoEngine,
+  CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, CryptoEngineDecryptParams,
+  CryptoEngineEncryptParams, CryptoEngineParameters, CryptoEnginePublicKeyParams,
+  CryptoEngineSignatureParams,
+} from "./CryptoEngine";
 import DigestInfo from "./DigestInfo";
 export { DigestInfo };
 import DistributionPoint from "./DistributionPoint";

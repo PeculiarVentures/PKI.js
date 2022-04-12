@@ -332,7 +332,7 @@ export default class GeneralName {
 	 * @param parameters Input parameters for the schema
 	 * @returns asn1js schema object
 	 */
-	static schema(parameters: GeneralNameSchema = {}): Schema.SchemaType {
+	static schema(parameters: GeneralNameSchema = {}): asn1js.Choice {
 		const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
 		return (new asn1js.Choice({
@@ -559,7 +559,7 @@ export default class GeneralName {
 	 * Convert current object to asn1js object and set correct values
 	 * @returns asn1js object
 	 */
-	public toSchema(): Schema.SchemaType {
+	public toSchema(): asn1js.Constructed | asn1js.IA5String | asn1js.ObjectIdentifier | asn1js.Choice {
 		//#region Construct and return new ASN.1 schema for this object
 		switch (this.type) {
 			case 0:

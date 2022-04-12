@@ -113,7 +113,7 @@ export default class OtherRevocationInfoFormat implements Schema.SchemaCompatibl
    * Convert current object to asn1js object and set correct values
    * @returns asn1js object
    */
-  public toSchema(): Schema.SchemaType {
+  public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: [

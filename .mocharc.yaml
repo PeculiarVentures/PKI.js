@@ -3,5 +3,5 @@ require:
 extension:
   - ts
 spec:
-  - "test/*.ts"
+  - "test/**/*.spec.ts"
 timeout: 10000

@@ -170,7 +170,7 @@ export default class SignedAndUnsignedAttributes implements Schema.SchemaCompati
    * Convert current object to asn1js object and set correct values
    * @returns asn1js object
    */
-  public toSchema(): Schema.SchemaType {
+  public toSchema(): asn1js.Sequence {
     if (SignedAndUnsignedAttributes.compareWithDefault(TYPE, this.type) || SignedAndUnsignedAttributes.compareWithDefault(ATTRIBUTES, this.attributes))
       throw new Error("Incorrectly initialized \"SignedAndUnsignedAttributes\" class");
 

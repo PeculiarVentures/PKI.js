@@ -168,7 +168,7 @@ export default class OriginatorInfo {
 	 * Convert current object to asn1js object and set correct values
 	 * @returns asn1js object
 	 */
-	public toSchema(): Schema.SchemaType {
+	public toSchema(): asn1js.Sequence {
 		const sequenceValue = [];
 
 		if (this.certs) {

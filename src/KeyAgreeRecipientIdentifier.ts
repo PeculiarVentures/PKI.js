@@ -161,7 +161,7 @@ export default class KeyAgreeRecipientIdentifier implements Schema.SchemaCompati
    * Convert current object to asn1js object and set correct values
    * @returns asn1js object
    */
-  public toSchema(): Schema.SchemaType {
+  public toSchema(): asn1js.BaseBlock<any> {
     //#region Construct and return new ASN.1 schema for this object
     switch (this.variant) {
       case 1:
@@ -175,7 +175,7 @@ export default class KeyAgreeRecipientIdentifier implements Schema.SchemaCompati
           value: this.value.toSchema().valueBlock.value
         });
       default:
-        return new asn1js.Any();
+        return new asn1js.Any() as any;
     }
     //#endregion
   }

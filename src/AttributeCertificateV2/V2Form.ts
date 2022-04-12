@@ -177,7 +177,7 @@ export class V2Form implements Schema.SchemaCompatible {
    * Convert current object to asn1js object and set correct values
    * @returns asn1js object
    */
-  public toSchema(): Schema.SchemaType {
+  public toSchema(): asn1js.Sequence {
     const result = new asn1js.Sequence();
 
     if (this.issuerName)

@@ -151,7 +151,7 @@ export class QCStatement implements Schema.SchemaCompatible {
    * Convert current object to asn1js object and set correct values
    * @returns asn1js object
    */
-  public toSchema(): Schema.SchemaType {
+  public toSchema(): asn1js.Sequence {
     const value = [
       new asn1js.ObjectIdentifier({ value: this.id })
     ];
@@ -304,7 +304,7 @@ export default class QCStatements implements Schema.SchemaCompatible {
    * Convert current object to asn1js object and set correct values
    * @returns asn1js object
    */
-  public toSchema(): Schema.SchemaType {
+  public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: Array.from(this.values, element => element.toSchema())

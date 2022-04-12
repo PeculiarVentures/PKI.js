@@ -141,17 +141,15 @@ export default class Time implements Schema.SchemaCompatible {
    * Convert current object to asn1js object and set correct values
    * @returns asn1js object
    */
-  public toSchema(): Schema.SchemaType {
+  public toSchema(): asn1js.UTCTime | asn1js.GeneralizedTime {
     //#region Construct and return new ASN.1 schema for this object
-    let result = {};
-
     if (this.type === 0) {
-      result = new asn1js.UTCTime({ valueDate: this.value });
+      return new asn1js.UTCTime({ valueDate: this.value });
     } else if (this.type === 1) {
-      result = new asn1js.GeneralizedTime({ valueDate: this.value });
+      return new asn1js.GeneralizedTime({ valueDate: this.value });
     }
 
-    return result;
+    return {} as any;
     //#endregion
   }
 
