@@ -223,7 +223,7 @@ async function parsePKCS12(buffer: ArrayBuffer, password: string) {
 	return pkcs12;
 }
 
-context.only("Node.js PKCS#12 Example", () => {
+context("Node.js PKCS#12 Example", () => {
 
 	before(() => {
 		const nodeEngine = new NodeEngine({});
