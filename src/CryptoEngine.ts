@@ -249,6 +249,23 @@ function prepareAlgorithm(data: globalThis.AlgorithmIdentifier | EcdsaParams): A
 
 export type CryptoEngineAlgorithmOperation = "sign" | "encrypt" | "generateKey" | "importKey" | "exportKey" | "verify";
 
+export interface StampDataWithPasswordParams {
+  password: ArrayBuffer;
+  hashAlgorithm: string;
+  salt: ArrayBuffer;
+  iterationCount: number;
+  contentToStamp: ArrayBuffer;
+}
+
+export interface VerifyDataStampedWithPasswordParams {
+  password: ArrayBuffer;
+  hashAlgorithm: string;
+  salt: ArrayBuffer;
+  iterationCount: number;
+  contentToVerify: ArrayBuffer;
+  signatureToVerify: ArrayBuffer;
+}
+
 /**
  * Default cryptographic engine for Web Cryptography API
  */
@@ -1889,13 +1906,7 @@ export default class CryptoEngine {
    * Stamping (signing) data using algorithm similar to HMAC
    * @param parameters
    */
-  public async stampDataWithPassword(parameters: {
-    password: ArrayBuffer;
-    hashAlgorithm: string;
-    salt: ArrayBuffer;
-    iterationCount: number;
-    contentToStamp: ArrayBuffer;
-  }): Promise<ArrayBuffer> {
+  public async stampDataWithPassword(parameters: StampDataWithPasswordParams): Promise<ArrayBuffer> {
     //#region Check for input parameters
     if ((parameters instanceof Object) === false)
       throw new Error("Parameters must have type \"Object\"");
@@ -1952,14 +1963,7 @@ export default class CryptoEngine {
     //#endregion
   }
 
-  public async verifyDataStampedWithPassword(parameters: {
-    password: ArrayBuffer;
-    hashAlgorithm: string;
-    salt: ArrayBuffer;
-    iterationCount: number;
-    contentToVerify: ArrayBuffer;
-    signatureToVerify: ArrayBuffer;
-  }): Promise<boolean> {
+  public async verifyDataStampedWithPassword(parameters: VerifyDataStampedWithPasswordParams): Promise<boolean> {
     //#region Check for input parameters
     ParameterError.assert(parameters,
       "password", "hashAlgorithm", "salt",

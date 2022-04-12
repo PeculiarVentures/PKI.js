@@ -47,7 +47,7 @@ export {
   default as CryptoEngine,
   CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, CryptoEngineDecryptParams,
   CryptoEngineEncryptParams, CryptoEngineParameters, CryptoEnginePublicKeyParams,
-  CryptoEngineSignatureParams,
+  CryptoEngineSignatureParams, StampDataWithPasswordParams, VerifyDataStampedWithPasswordParams,
 } from "./CryptoEngine";
 import DigestInfo from "./DigestInfo";
 export { DigestInfo };
@@ -219,4 +219,6 @@ import { QCStatement } from "./QCStatements";
 import QCStatements from "./QCStatements";
 export { QCStatement, QCStatements };
 export { default as ECNamedCurves } from "./ECNamedCurves";
+export { default as AttributeCertificateV1 } from "./AttributeCertificateV1";
+export { default as AttributeCertificateV2 } from "./AttributeCertificateV2";
 export * from "./errors";
