@@ -1017,10 +1017,12 @@ export default class CryptoEngine {
 
   /**
    * Get OID for each specific algorithm
-   * @param algorithm
+   * @param algorithm WebCrypto Algorithm
+   * @param safety if `true` throws exception on unknown algorithm
+   * @param target name of the target
+   * @throws Throws {@link Error} exception if unknown WebCrypto algorithm
    */
-  // TODO Use safety
-  public getOIDByAlgorithm(algorithm: Algorithm): string {
+  public getOIDByAlgorithm(algorithm: Algorithm, safety = false, target?: string): string {
     let result = "";
 
     switch (algorithm.name.toUpperCase()) {
@@ -1198,6 +1200,10 @@ export default class CryptoEngine {
       default:
     }
 
+    if (!result && safety) {
+      throw new Error(`Unsupported algorithm ${target ? `for ${target} ` : ""}: ${algorithm.name}`);
+    }
+
     return result;
   }
 
@@ -1206,6 +1212,7 @@ export default class CryptoEngine {
    * @param algorithmName Algorithm name to get common parameters for
    * @param operation Kind of operation: "sign", "encrypt", "generateKey", "importKey", "exportKey", "verify"
    */
+  // TODO Use safety
   public getAlgorithmParameters(algorithmName: string, operation: CryptoEngineAlgorithmOperation): CryptoEngineAlgorithmParams {
     let result: CryptoEngineAlgorithmParams = {
       algorithm: {},
@@ -1634,19 +1641,19 @@ export default class CryptoEngine {
 
     switch (signatureAlgorithm.algorithmId) {
       case "1.2.840.10045.4.1": // ecdsa-with-SHA1
-      case "1.2.840.113549.1.1.5":
+      case "1.2.840.113549.1.1.5": // rsa-encryption-with-SHA1
         result = "SHA-1";
         break;
       case "1.2.840.10045.4.3.2": // ecdsa-with-SHA256
-      case "1.2.840.113549.1.1.11":
+      case "1.2.840.113549.1.1.11": // rsa-encryption-with-SHA256
         result = "SHA-256";
         break;
       case "1.2.840.10045.4.3.3": // ecdsa-with-SHA384
-      case "1.2.840.113549.1.1.12":
+      case "1.2.840.113549.1.1.12": // rsa-encryption-with-SHA384
         result = "SHA-384";
         break;
       case "1.2.840.10045.4.3.4": // ecdsa-with-SHA512
-      case "1.2.840.113549.1.1.13":
+      case "1.2.840.113549.1.1.13": // rsa-encryption-with-SHA512
         result = "SHA-512";
         break;
       case "1.2.840.113549.1.1.10": // RSA-PSS
@@ -1686,24 +1693,17 @@ export default class CryptoEngine {
       "password", "contentEncryptionAlgorithm", "hmacHashAlgorithm",
       "iterationCount", "contentToEncrypt", "contentToEncrypt", "contentType");
 
-    const contentEncryptionOID = this.getOIDByAlgorithm(parameters.contentEncryptionAlgorithm);
-    if (contentEncryptionOID === "")
-      throw new Error("Wrong \"contentEncryptionAlgorithm\" value");
+    const contentEncryptionOID = this.getOIDByAlgorithm(parameters.contentEncryptionAlgorithm, true, "contentEncryptionAlgorithm");
 
     const pbkdf2OID = this.getOIDByAlgorithm({
       name: "PBKDF2"
-    });
-    if (pbkdf2OID === "")
-      throw new Error("Can not find OID for PBKDF2");
-
+    }, true, "PBKDF2");
     const hmacOID = this.getOIDByAlgorithm({
       name: "HMAC",
       hash: {
         name: parameters.hmacHashAlgorithm
       }
-    } as Algorithm);
-    if (hmacOID === "")
-      throw new Error(`Incorrect value for "hmacHashAlgorithm": ${parameters.hmacHashAlgorithm}`);
+    } as Algorithm, true, "hmacHashAlgorithm");
     //#endregion
 
     //#region Initial variables
@@ -2021,16 +2021,11 @@ export default class CryptoEngine {
    * @param hashAlgorithm Hash algorithm user would like to use
    */
   public async getSignatureParameters(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<CryptoEngineSignatureParams> {
-    //#region Check hashing algorithm
-    const oid = this.getOIDByAlgorithm({ name: hashAlgorithm });
-    if (oid === "") {
-      throw new Error(`Unsupported hash algorithm: ${hashAlgorithm}`);
-    }
-    //#endregion
+    // Check hashing algorithm
+    this.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
 
-    //#region Initial variables
+    // Initial variables
     const signatureAlgorithm = new AlgorithmIdentifier();
-    //#endregion
 
     //#region Get a "default parameters" for current algorithm
     const parameters = this.getAlgorithmParameters(privateKey.algorithm.name, "sign");
@@ -2045,7 +2040,7 @@ export default class CryptoEngine {
     switch (privateKey.algorithm.name.toUpperCase()) {
       case "RSASSA-PKCS1-V1_5":
       case "ECDSA":
-        signatureAlgorithm.algorithmId = this.getOIDByAlgorithm(algorithm);
+        signatureAlgorithm.algorithmId = this.getOIDByAlgorithm(algorithm, true);
         break;
       case "RSA-PSS":
         {
@@ -2068,9 +2063,7 @@ export default class CryptoEngine {
           const paramsObject: RSASSAPSSParamsParameters = {};
 
           if (hashAlgorithm.toUpperCase() !== "SHA-1") {
-            const hashAlgorithmOID = this.getOIDByAlgorithm({ name: hashAlgorithm });
-            if (hashAlgorithmOID === "")
-              throw new Error(`Unsupported hash algorithm: ${hashAlgorithm}`);
+            const hashAlgorithmOID = this.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
 
             paramsObject.hashAlgorithm = new AlgorithmIdentifier({
               algorithmId: hashAlgorithmOID,

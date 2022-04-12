@@ -242,10 +242,7 @@ export default class CertID implements Schema.SchemaCompatible {
     ParameterError.assert(parameters, HASH_ALGORITHM, "issuerCertificate");
 
     const crypto = common.getCrypto(true);
-    const hashOID = common.getOIDByAlgorithm({ name: parameters.hashAlgorithm });
-    if (hashOID === "") {
-      throw new Error(`Incorrect 'hashAlgorithm': ${this.hashAlgorithm}`);
-    }
+    const hashOID = common.getOIDByAlgorithm({ name: parameters.hashAlgorithm }, true, "hashAlgorithm");
 
     this.hashAlgorithm = new AlgorithmIdentifier({
       algorithmId: hashOID,

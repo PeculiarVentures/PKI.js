@@ -169,17 +169,19 @@ export function getRandomValues(view: Uint8Array) {
 
 /**
  * Get OID for each specific algorithm
- * @param algorithm
+ * @param algorithm WebCrypto Algorithm
+ * @param safety if `true` throws exception on unknown algorithm
+ * @param target name of the target
+ * @throws Throws {@link Error} exception if unknown WebCrypto algorithm
  */
-export function getOIDByAlgorithm(algorithm: Algorithm) {
-  return getEngine().subtle.getOIDByAlgorithm(algorithm);
+export function getOIDByAlgorithm(algorithm: Algorithm, safety?: boolean, target?: string) {
+  return getEngine().subtle.getOIDByAlgorithm(algorithm, safety, target);
 }
 
 /**
  * Get default algorithm parameters for each kind of operation
- * @param {string} algorithmName Algorithm name to get common parameters for
- * @param {string} operation Kind of operation: "sign", "encrypt", "generatekey", "importkey", "exportkey", "verify"
- * @returns {*}
+ * @param algorithmName Algorithm name to get common parameters for
+ * @param operation Kind of operation: "sign", "encrypt", "generatekey", "importkey", "exportkey", "verify"
  */
 export function getAlgorithmParameters(algorithmName: string, operation: CryptoEngineAlgorithmOperation): CryptoEngineAlgorithmParams {
   return getEngine().subtle.getAlgorithmParameters(algorithmName, operation);
@@ -187,8 +189,7 @@ export function getAlgorithmParameters(algorithmName: string, operation: CryptoE
 
 /**
  * Create CMS ECDSA signature from WebCrypto ECDSA signature
- * @param {ArrayBuffer} signatureBuffer WebCrypto result of "sign" function
- * @returns {ArrayBuffer}
+ * @param signatureBuffer WebCrypto result of "sign" function
  */
 export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuffer {
   //#region Initial check for correct length

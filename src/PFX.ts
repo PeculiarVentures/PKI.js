@@ -320,7 +320,7 @@ export default class PFX implements Schema.SchemaCompatible {
           this.macData = new MacData({
             mac: new DigestInfo({
               digestAlgorithm: new AlgorithmIdentifier({
-                algorithmId: common.getOIDByAlgorithm({ name: parameters.hmacHashAlgorithm })
+                algorithmId: common.getOIDByAlgorithm({ name: parameters.hmacHashAlgorithm }, true, "hmacHashAlgorithm"),
               }),
               digest: new asn1js.OctetString({ valueHex: result })
             }),

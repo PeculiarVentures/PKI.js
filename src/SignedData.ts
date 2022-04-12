@@ -857,9 +857,7 @@ export default class SignedData implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Simple check for supported algorithm
-    const hashAlgorithmOID = common.getOIDByAlgorithm({ name: hashAlgorithm });
-    if (hashAlgorithmOID === "")
-      throw new Error(`Unsupported hash algorithm: ${hashAlgorithm}`);
+    const hashAlgorithmOID = common.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
     //#endregion
 
     //#region Append information about hash algorithm

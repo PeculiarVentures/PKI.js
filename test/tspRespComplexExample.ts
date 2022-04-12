@@ -9,17 +9,17 @@ export interface CreateTSPResponseResult extends utils.CertificateWithPrivateKey
 }
 /**
  * Creates TSP response
- * @param hashAlg Hash algorithm
+ * @param hashAlgorithm Hash algorithm
  * @param signAlg Signing algorithm
  * @returns
  */
-export async function createTSPResp(hashAlg: string, signAlg: string): Promise<CreateTSPResponseResult> {
+export async function createTSPResp(hashAlgorithm: string, signAlg: string): Promise<CreateTSPResponseResult> {
   const crypto = pkijs.getCrypto(true);
 
-  const certWithKey = await utils.createSelfSignedCertificate(hashAlg, signAlg);
+  const certWithKey = await utils.createSelfSignedCertificate(hashAlgorithm, signAlg);
 
   //#region Hash "testData" value
-  const hashedMessage = await crypto.digest(hashAlg, testData);
+  const hashedMessage = await crypto.digest(hashAlgorithm, testData);
   //#endregion
   //#region Create specific TST info structure to sign
   const hashedBuffer = new ArrayBuffer(4);
@@ -33,7 +33,7 @@ export async function createTSPResp(hashAlg: string, signAlg: string): Promise<C
     version: 1,
     policy: "1.1.1",
     messageImprint: new pkijs.MessageImprint({
-      hashAlgorithm: new pkijs.AlgorithmIdentifier({ algorithmId: pkijs.getOIDByAlgorithm({ name: hashAlg }) }),
+      hashAlgorithm: new pkijs.AlgorithmIdentifier({ algorithmId: pkijs.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm") }),
       hashedMessage: new asn1js.OctetString({ valueHex: hashedMessage })
     }),
     serialNumber: new asn1js.Integer({ valueHex: hashedBuffer }),
@@ -69,7 +69,7 @@ export async function createTSPResp(hashAlg: string, signAlg: string): Promise<C
     certificates: [certWithKey.certificate]
   });
 
-  await cmsSignedSimpl.sign(certWithKey.privateKey, 0, hashAlg);
+  await cmsSignedSimpl.sign(certWithKey.privateKey, 0, hashAlgorithm);
 
   //#endregion
   //#region Create internal CMS Signed Data

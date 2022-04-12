@@ -365,20 +365,15 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
           let algorithmParams;
 
           if (encryptionParameters.useOAEP === true) {
-            //#region keyEncryptionAlgorithm
+            // keyEncryptionAlgorithm
             algorithmId = common.getOIDByAlgorithm({
               name: "RSA-OAEP"
-            });
-            if (algorithmId === "")
-              throw new Error("Can not find OID for RSA-OAEP");
-            //#endregion
+            }, true, "keyEncryptionAlgorithm");
 
             //#region RSAES-OAEP-params
             const hashOID = common.getOIDByAlgorithm({
               name: encryptionParameters.oaepHashAlgorithm
-            });
-            if (hashOID === "")
-              throw new Error(`Unknown OAEP hash algorithm: ${encryptionParameters.oaepHashAlgorithm}`);
+            }, true, "RSAES-OAEP-params");
 
             const hashAlgorithm = new AlgorithmIdentifier({
               algorithmId: hashOID,
@@ -508,11 +503,8 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
     switch (variant) {
       case 1: // KEKRecipientInfo
         {
-          //#region keyEncryptionAlgorithm
-          const kekOID = common.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm);
-          if (kekOID === "")
-            throw new Error("Incorrect value for \"keyEncryptionAlgorithm\"");
-          //#endregion
+          // keyEncryptionAlgorithm
+          const kekOID = common.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm, true, "keyEncryptionAlgorithm");
 
           //#region KEKRecipientInfo
           const keyInfo = new KEKRecipientInfo({
@@ -542,13 +534,8 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
         break;
       case 2: // PasswordRecipientinfo
         {
-          //#region keyDerivationAlgorithm
-          const pbkdf2OID = common.getOIDByAlgorithm({
-            name: "PBKDF2"
-          });
-          if (pbkdf2OID === "")
-            throw new Error("Can not find OID for PBKDF2");
-          //#endregion
+          // keyDerivationAlgorithm
+          const pbkdf2OID = common.getOIDByAlgorithm({ name: "PBKDF2" }, true, "keyDerivationAlgorithm");
 
           //#region Salt
           const saltBuffer = new ArrayBuffer(64);
@@ -562,9 +549,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
             hash: {
               name: parameters.hmacHashAlgorithm
             }
-          } as Algorithm);
-          if (hmacOID === "")
-            throw new Error(`Incorrect value for "hmacHashAlgorithm": ${parameters.hmacHashAlgorithm}`);
+          } as Algorithm, true, "hmacHashAlgorithm");
           //#endregion
 
           //#region PBKDF2-params
@@ -578,11 +563,8 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
           });
           //#endregion
 
-          //#region keyEncryptionAlgorithm
-          const kekOID = common.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm);
-          if (kekOID === "")
-            throw new Error("Incorrect value for \"keyEncryptionAlgorithm\"");
-          //#endregion
+          // keyEncryptionAlgorithm
+          const kekOID = common.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm, true, "keyEncryptionAlgorithm");
 
           //#region PasswordRecipientinfo
           const keyInfo = new PasswordRecipientinfo({
@@ -659,9 +641,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
     const aesKWoid = common.getOIDByAlgorithm({
       name: "AES-KW",
       length: encryptionParameters.kekEncryptionLength
-    } as Algorithm);
-    if (aesKWoid === "")
-      throw new Error(`Unknown length for key encryption algorithm: ${encryptionParameters.kekEncryptionLength}`);
+    } as Algorithm, true, "keyEncryptionAlgorithm");
 
     const aesKW = new AlgorithmIdentifier({
       algorithmId: aesKWoid,
@@ -672,9 +652,7 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
     const ecdhOID = common.getOIDByAlgorithm({
       name: "ECDH",
       kdf: encryptionParameters.kdfAlgorithm
-    } as Algorithm);
-    if (ecdhOID === "")
-      throw new Error(`Unknown KDF algorithm: ${encryptionParameters.kdfAlgorithm}`);
+    } as Algorithm, true, "KeyAgreeRecipientInfo");
 
     // In fact there is no need in so long UKM, but RFC2631
     // has requirement that "UserKeyMaterial" must be 512 bits long
@@ -719,11 +697,8 @@ export default class EnvelopedData implements Schema.SchemaCompatible {
     const contentView = new Uint8Array(contentToEncrypt);
     //#endregion
 
-    //#region Check for input parameters
-    const contentEncryptionOID = common.getOIDByAlgorithm(contentEncryptionAlgorithm);
-    if (contentEncryptionOID === "")
-      throw new Error("Wrong \"contentEncryptionAlgorithm\" value");
-    //#endregion
+    // Check for input parameters
+    const contentEncryptionOID = common.getOIDByAlgorithm(contentEncryptionAlgorithm, true, "contentEncryptionAlgorithm");
 
     //#region Get a "crypto" extension
     const crypto = common.getCrypto(true);
