@@ -1,11 +1,11 @@
 import * as asn1js from "asn1js";
-import { Convert } from "pvtsutils";
+import * as pvtsutils from "pvtsutils";
 import * as pkijs from "../src";
 
 export function toPEM(buffer: BufferSource, tag: string): string {
 	return [
 		`-----BEGIN ${tag}-----`,
-		formatPEM(Convert.ToBase64(buffer)),
+		formatPEM(pvtsutils.Convert.ToBase64(buffer)),
 		`-----END ${tag}-----`,
 		"",
 	].join("\n");
@@ -15,7 +15,7 @@ export function fromPEM(pem: string): ArrayBuffer {
 	const base64 = pem
 		.replace(/-{5}(BEGIN|END) .*-{5}/gm, "")
 		.replace(/\s/gm, "");
-	return Convert.FromBase64(base64);
+	return pvtsutils.Convert.FromBase64(base64);
 }
 
 /**
@@ -50,8 +50,8 @@ export function isNode() {
 }
 
 if (isNode()) {
-	import("crypto").then(nodeCrypto => {
-		const webcrypto = nodeCrypto.webcrypto as unknown as Crypto;
+	import("@peculiar/webcrypto").then(peculiarCrypto => {
+		const webcrypto = new peculiarCrypto.Crypto();
 		pkijs.setEngine("newEngine", webcrypto, new pkijs.CryptoEngine({ name: "", crypto: webcrypto, subtle: webcrypto.subtle }));
 	});
 }

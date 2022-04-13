@@ -1,14 +1,9 @@
-/* eslint-disable no-undef,no-unused-vars,no-unreachable */
+import * as assert from "assert";
 import * as asn1js from "asn1js";
-import { stringToArrayBuffer, fromBase64 } from "pvutils";
+import * as pvutils from "pvutils";
 import * as pkijs from "../src";
 import { CertificateChainValidationEngineVerifyParams } from "../src/CertificateChainValidationEngine";
-
-import * as nodeCrypto from "crypto";
-import * as assert from "assert";
-const webcrypto = nodeCrypto.webcrypto as unknown as Crypto;
-pkijs.setEngine("newEngine", webcrypto, new pkijs.CryptoEngine({ name: "", crypto: webcrypto, subtle: webcrypto.subtle }));
-
+import "./utils";
 
 //#region Testing constants
 
@@ -952,7 +947,7 @@ const PKITS: Record<string, Record<string, string>> = {
 //#region Aux functions
 
 function pkitsToArrayBuffer(pkitsValue: string) {
-  return stringToArrayBuffer(fromBase64(pkitsValue));
+  return pvutils.stringToArrayBuffer(pvutils.fromBase64(pkitsValue));
 }
 
 //#endregion

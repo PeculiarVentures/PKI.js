@@ -98,7 +98,7 @@ export default [
           }
         }),
       ],
-      external: ["crypto", /^https:\/\/unpkg\.com/, /pkijs\.es\.js$/],
+      external: ["crypto", "@peculiar/webcrypto", /^https:\/\/unpkg\.com/, /pkijs\.es\.js$/],
       output: [
         {
           file: output,
