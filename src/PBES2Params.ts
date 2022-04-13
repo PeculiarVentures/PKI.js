@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
@@ -29,8 +29,8 @@ export class PBES2Params implements Schema.SchemaCompatible {
    */
   constructor(parameters: PBES2ParamsParameters = {}) {
     //#region Internal properties of the object
-    this.keyDerivationFunc = getParametersValue(parameters, KEY_DERIVATION_FUNC, PBES2Params.defaultValues(KEY_DERIVATION_FUNC));
-    this.encryptionScheme = getParametersValue(parameters, ENCRYPTION_SCHEME, PBES2Params.defaultValues(ENCRYPTION_SCHEME));
+    this.keyDerivationFunc = pvutils.getParametersValue(parameters, KEY_DERIVATION_FUNC, PBES2Params.defaultValues(KEY_DERIVATION_FUNC));
+    this.encryptionScheme = pvutils.getParametersValue(parameters, ENCRYPTION_SCHEME, PBES2Params.defaultValues(ENCRYPTION_SCHEME));
     //#endregion
 
     //#region If input argument array contains "schema" for this object
@@ -74,7 +74,7 @@ export class PBES2Params implements Schema.SchemaCompatible {
     keyDerivationFunc?: AlgorithmIdentifierSchema;
     encryptionScheme?: AlgorithmIdentifierSchema;
   }> = {}): Schema.SchemaType {
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
       name: (names.blockName || ""),
@@ -91,7 +91,7 @@ export class PBES2Params implements Schema.SchemaCompatible {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, CLEAR_PROPS);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
 
     //#region Check the schema is valid

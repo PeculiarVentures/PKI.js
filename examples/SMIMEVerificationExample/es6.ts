@@ -5,7 +5,7 @@ import * as pvutils from "pvutils";
 import parse from "emailjs-mime-parser";
 import * as pkijs from "../../src";
 import * as common from "../common";
-import { Convert } from "pvtsutils";
+import * as pvtsutils from "pvtsutils";
 
 /**
  * Array of root certificates from "CA Bundle"
@@ -65,7 +65,7 @@ async function verifySMIME() {
 
 function handleMIMEFile(evt: Event) {
 	common.handleFileBrowse(evt, file => {
-		common.getElement("smime_message", "textarea").value = Convert.ToUtf8String(file);
+		common.getElement("smime_message", "textarea").value = pvtsutils.Convert.ToUtf8String(file);
 	});
 }
 

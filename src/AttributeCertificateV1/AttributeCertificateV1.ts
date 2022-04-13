@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
 import { AttributeCertificateInfoV1, AttributeCertificateInfoV1Schema } from "./AttributeCertificateInfoV1";
 import * as Schema from "../Schema";
@@ -34,9 +34,9 @@ export class AttributeCertificateV1 implements Schema.SchemaCompatible {
    */
   constructor(parameters: AttributeCertificateV1Parameters = {}) {
     //#region Internal properties of the object
-    this.acinfo = getParametersValue(parameters, ACINFO, AttributeCertificateV1.defaultValues(ACINFO));
-    this.signatureAlgorithm = getParametersValue(parameters, SIGNATURE_ALGORITHM, AttributeCertificateV1.defaultValues(SIGNATURE_ALGORITHM));
-    this.signatureValue = getParametersValue(parameters, SIGNATURE_VALUE, AttributeCertificateV1.defaultValues(SIGNATURE_VALUE));
+    this.acinfo = pvutils.getParametersValue(parameters, ACINFO, AttributeCertificateV1.defaultValues(ACINFO));
+    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, AttributeCertificateV1.defaultValues(SIGNATURE_ALGORITHM));
+    this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, AttributeCertificateV1.defaultValues(SIGNATURE_VALUE));
     //#endregion
 
     //#region If input argument array contains "schema" for this object
@@ -86,7 +86,7 @@ export class AttributeCertificateV1 implements Schema.SchemaCompatible {
     signatureAlgorithm?: AlgorithmIdentifierSchema;
     signatureValue?: string;
   }> = {}): Schema.SchemaType {
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
       name: (names.blockName || ""),
@@ -104,7 +104,7 @@ export class AttributeCertificateV1 implements Schema.SchemaCompatible {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, CLEAR_PROPS);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
 
     //#region Check the schema is valid

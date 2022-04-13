@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { KEKIdentifier, KEKIdentifierSchema } from "./KEKIdentifier";
 import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
@@ -41,11 +41,11 @@ export class KEKRecipientInfo implements Schema.SchemaCompatible {
    */
   constructor(parameters: KEKRecipientInfoParameters = {}) {
     //#region Internal properties of the object
-    this.version = getParametersValue(parameters, VERSION, KEKRecipientInfo.defaultValues(VERSION));
-    this.kekid = getParametersValue(parameters, KEK_ID, KEKRecipientInfo.defaultValues(KEK_ID));
-    this.keyEncryptionAlgorithm = getParametersValue(parameters, KEY_ENCRYPTION_ALGORITHM, KEKRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM));
-    this.encryptedKey = getParametersValue(parameters, ENCRYPTED_KEY, KEKRecipientInfo.defaultValues(ENCRYPTED_KEY));
-    this.preDefinedKEK = getParametersValue(parameters, PER_DEFINED_KEK, KEKRecipientInfo.defaultValues(PER_DEFINED_KEK));
+    this.version = pvutils.getParametersValue(parameters, VERSION, KEKRecipientInfo.defaultValues(VERSION));
+    this.kekid = pvutils.getParametersValue(parameters, KEK_ID, KEKRecipientInfo.defaultValues(KEK_ID));
+    this.keyEncryptionAlgorithm = pvutils.getParametersValue(parameters, KEY_ENCRYPTION_ALGORITHM, KEKRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM));
+    this.encryptedKey = pvutils.getParametersValue(parameters, ENCRYPTED_KEY, KEKRecipientInfo.defaultValues(ENCRYPTED_KEY));
+    this.preDefinedKEK = pvutils.getParametersValue(parameters, PER_DEFINED_KEK, KEKRecipientInfo.defaultValues(PER_DEFINED_KEK));
     //#endregion
 
     //#region If input argument array contains "schema" for this object
@@ -134,7 +134,7 @@ export class KEKRecipientInfo implements Schema.SchemaCompatible {
      * @property {string} [keyEncryptionAlgorithm]
      * @property {string} [encryptedKey]
      */
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
       name: (names.blockName || ""),
@@ -153,7 +153,7 @@ export class KEKRecipientInfo implements Schema.SchemaCompatible {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, CLEAR_PROPS);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
 
     //#region Check the schema is valid

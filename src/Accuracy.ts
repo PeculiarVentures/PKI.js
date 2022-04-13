@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import * as Schema from "./Schema";
 
 export const SECONDS = "seconds";
@@ -35,15 +35,15 @@ export class Accuracy {
   constructor(parameters: AccuracyParameters = {}) {
     //#region Internal properties of the object
     if (parameters.seconds !== undefined) {
-      this.seconds = getParametersValue(parameters, SECONDS, Accuracy.defaultValues(SECONDS));
+      this.seconds = pvutils.getParametersValue(parameters, SECONDS, Accuracy.defaultValues(SECONDS));
     }
 
     if (parameters.millis !== undefined) {
-      this.millis = getParametersValue(parameters, MILLIS, Accuracy.defaultValues(MILLIS));
+      this.millis = pvutils.getParametersValue(parameters, MILLIS, Accuracy.defaultValues(MILLIS));
     }
 
     if (parameters.micros !== undefined) {
-      this.micros = getParametersValue(parameters, MICROS, Accuracy.defaultValues(MICROS));
+      this.micros = pvutils.getParametersValue(parameters, MICROS, Accuracy.defaultValues(MICROS));
     }
     //#endregion
 
@@ -106,7 +106,7 @@ export class Accuracy {
    * @returns asn1js schema object
    */
   static schema(parameters: AccuracySchema = {}): any {
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
       name: (names.blockName || ""),
@@ -142,7 +142,7 @@ export class Accuracy {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, [
+    pvutils.clearProps(schema, [
       SECONDS,
       MILLIS,
       MICROS,

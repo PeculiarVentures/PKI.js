@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
@@ -38,8 +38,8 @@ export class EncryptedContentInfo implements Schema.SchemaCompatible {
    */
   constructor(parameters: EncryptedContentParameters = {}) {
     //#region Internal properties of the object
-    this.contentType = getParametersValue(parameters, CONTENT_TYPE, EncryptedContentInfo.defaultValues(CONTENT_TYPE));
-    this.contentEncryptionAlgorithm = getParametersValue(parameters, CONTENT_ENCRYPTION_ALGORITHM, EncryptedContentInfo.defaultValues(CONTENT_ENCRYPTION_ALGORITHM));
+    this.contentType = pvutils.getParametersValue(parameters, CONTENT_TYPE, EncryptedContentInfo.defaultValues(CONTENT_TYPE));
+    this.contentEncryptionAlgorithm = pvutils.getParametersValue(parameters, CONTENT_ENCRYPTION_ALGORITHM, EncryptedContentInfo.defaultValues(CONTENT_ENCRYPTION_ALGORITHM));
 
     if (parameters.encryptedContent) {
       // encryptedContent (!!!) could be contructive or primitive value (!!!)
@@ -141,7 +141,7 @@ export class EncryptedContentInfo implements Schema.SchemaCompatible {
    * @returns asn1js schema object
    */
   public static schema(parameters: EncryptedContentInfoSchema = {}): Schema.SchemaType {
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
       name: (names.blockName || ""),
@@ -183,7 +183,7 @@ export class EncryptedContentInfo implements Schema.SchemaCompatible {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, CLEAR_PROPS);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
 
     //#region Check the schema is valid

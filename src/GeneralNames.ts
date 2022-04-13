@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import * as Schema from "./Schema";
 import { GeneralName } from "./GeneralName";
 
@@ -25,7 +25,7 @@ export class GeneralNames implements Schema.SchemaCompatible {
 	 */
 	constructor(parameters: GeneralNamesParameters = {}) {
 		//#region Internal properties of the object
-		this.names = getParametersValue(parameters, "names", GeneralNames.defaultValues("names"));
+		this.names = pvutils.getParametersValue(parameters, "names", GeneralNames.defaultValues("names"));
 		//#endregion
 
 		//#region If input argument array contains "schema" for this object
@@ -62,7 +62,7 @@ export class GeneralNames implements Schema.SchemaCompatible {
 	 * @returns asn1js schema object
 	 */
 	public static schema(parameters: GeneralNamesSchema = {}, optional = false): Schema.SchemaType {
-		const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+		const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
 		return (new asn1js.Sequence({
 			optional,
@@ -82,7 +82,7 @@ export class GeneralNames implements Schema.SchemaCompatible {
 	 */
 	fromSchema(schema: Schema.SchemaType): void {
 		//#region Clear input data first
-		clearProps(schema, [
+		pvutils.clearProps(schema, [
 			"names",
 			"generalNames"
 		]);

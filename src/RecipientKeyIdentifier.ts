@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { OtherKeyAttribute, OtherKeyAttributeSchema } from "./OtherKeyAttribute";
 import * as Schema from "./Schema";
 
@@ -39,12 +39,12 @@ export class RecipientKeyIdentifier {
    */
   constructor(parameters: RecipientKeyIdentifierParameters = {}) {
     //#region Internal properties of the object
-    this.subjectKeyIdentifier = getParametersValue(parameters, SUBJECT_KEY_IDENTIFIER, RecipientKeyIdentifier.defaultValues(SUBJECT_KEY_IDENTIFIER));
+    this.subjectKeyIdentifier = pvutils.getParametersValue(parameters, SUBJECT_KEY_IDENTIFIER, RecipientKeyIdentifier.defaultValues(SUBJECT_KEY_IDENTIFIER));
     if (parameters.date) {
-      this.date = getParametersValue(parameters, DATE, RecipientKeyIdentifier.defaultValues(DATE));
+      this.date = pvutils.getParametersValue(parameters, DATE, RecipientKeyIdentifier.defaultValues(DATE));
     }
     if (parameters.other) {
-      this.other = getParametersValue(parameters, OTHER, RecipientKeyIdentifier.defaultValues(OTHER));
+      this.other = pvutils.getParametersValue(parameters, OTHER, RecipientKeyIdentifier.defaultValues(OTHER));
     }
     //#endregion
 
@@ -115,7 +115,7 @@ export class RecipientKeyIdentifier {
    * @returns asn1js schema object
    */
   public static schema(parameters: RecipientKeyIdentifierSchema = {}): Schema.SchemaType {
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
       name: (names.blockName || ""),
@@ -136,7 +136,7 @@ export class RecipientKeyIdentifier {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, CLEAR_PROPS);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
 
     //#region Check the schema is valid

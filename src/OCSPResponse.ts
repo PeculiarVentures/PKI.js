@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { ResponseBytes, ResponseBytesSchema } from "./ResponseBytes";
 import { BasicOCSPResponse } from "./BasicOCSPResponse";
 import * as Schema from "./Schema";
@@ -28,10 +28,10 @@ export class OCSPResponse implements Schema.SchemaCompatible {
    */
   constructor(parameters: OCSPResponseParameters = {}) {
     //#region Internal properties of the object
-    this.responseStatus = getParametersValue(parameters, RESPONSE_STATUS, OCSPResponse.defaultValues(RESPONSE_STATUS));
+    this.responseStatus = pvutils.getParametersValue(parameters, RESPONSE_STATUS, OCSPResponse.defaultValues(RESPONSE_STATUS));
 
     if (parameters.responseBytes) {
-      this.responseBytes = getParametersValue(parameters, RESPONSE_BYTES, OCSPResponse.defaultValues(RESPONSE_BYTES));
+      this.responseBytes = pvutils.getParametersValue(parameters, RESPONSE_BYTES, OCSPResponse.defaultValues(RESPONSE_BYTES));
     }
     //#endregion
 
@@ -103,7 +103,7 @@ export class OCSPResponse implements Schema.SchemaCompatible {
     responseStatus?: string;
     responseBytes?: ResponseBytesSchema;
   }> = {}): Schema.SchemaType {
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
       name: (names.blockName || "OCSPResponse"),
@@ -133,7 +133,7 @@ export class OCSPResponse implements Schema.SchemaCompatible {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, [
+    pvutils.clearProps(schema, [
       RESPONSE_STATUS,
       RESPONSE_BYTES
     ]);

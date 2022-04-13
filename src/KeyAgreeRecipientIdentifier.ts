@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { IssuerAndSerialNumber, IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
 import { RecipientKeyIdentifier, RecipientKeyIdentifierSchema } from "./RecipientKeyIdentifier";
 import * as Schema from "./Schema";
@@ -34,8 +34,8 @@ export class KeyAgreeRecipientIdentifier implements Schema.SchemaCompatible {
    */
   constructor(parameters: KeyAgreeRecipientIdentifierParameters = {}) {
     //#region Internal properties of the object
-    this.variant = getParametersValue(parameters, VARIANT, KeyAgreeRecipientIdentifier.defaultValues(VARIANT));
-    this.value = getParametersValue(parameters, VALUE, KeyAgreeRecipientIdentifier.defaultValues(VALUE));
+    this.variant = pvutils.getParametersValue(parameters, VARIANT, KeyAgreeRecipientIdentifier.defaultValues(VARIANT));
+    this.value = pvutils.getParametersValue(parameters, VALUE, KeyAgreeRecipientIdentifier.defaultValues(VALUE));
     //#endregion
 
     //#region If input argument array contains "schema" for this object
@@ -92,7 +92,7 @@ export class KeyAgreeRecipientIdentifier implements Schema.SchemaCompatible {
    * @returns asn1js schema object
    */
   public static schema(parameters: KeyAgreeRecipientIdentifierSchema = {}): Schema.SchemaType {
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Choice({
       value: [
@@ -123,7 +123,7 @@ export class KeyAgreeRecipientIdentifier implements Schema.SchemaCompatible {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, CLEAR_PROPS);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
 
     //#region Check the schema is valid

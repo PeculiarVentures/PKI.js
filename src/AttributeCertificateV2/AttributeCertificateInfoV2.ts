@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { GeneralNames } from "../GeneralNames";
 import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
 import { Attribute } from "../Attribute";
@@ -75,18 +75,18 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
    */
   constructor(parameters: AttributeCertificateInfoV2Parameters = {}) {
     //#region Internal properties of the object
-    this.version = getParametersValue(parameters, VERSION, AttributeCertificateInfoV2.defaultValues(VERSION));
-    this.holder = getParametersValue(parameters, HOLDER, AttributeCertificateInfoV2.defaultValues(HOLDER));
-    this.issuer = getParametersValue(parameters, ISSUER, AttributeCertificateInfoV2.defaultValues(ISSUER));
-    this.signature = getParametersValue(parameters, SIGNATURE, AttributeCertificateInfoV2.defaultValues(SIGNATURE));
-    this.serialNumber = getParametersValue(parameters, SERIAL_NUMBER, AttributeCertificateInfoV2.defaultValues(SERIAL_NUMBER));
-    this.attrCertValidityPeriod = getParametersValue(parameters, ATTR_CERT_VALIDITY_PERIOD, AttributeCertificateInfoV2.defaultValues(ATTR_CERT_VALIDITY_PERIOD));
-    this.attributes = getParametersValue(parameters, ATTRIBUTES, AttributeCertificateInfoV2.defaultValues(ATTRIBUTES));
+    this.version = pvutils.getParametersValue(parameters, VERSION, AttributeCertificateInfoV2.defaultValues(VERSION));
+    this.holder = pvutils.getParametersValue(parameters, HOLDER, AttributeCertificateInfoV2.defaultValues(HOLDER));
+    this.issuer = pvutils.getParametersValue(parameters, ISSUER, AttributeCertificateInfoV2.defaultValues(ISSUER));
+    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, AttributeCertificateInfoV2.defaultValues(SIGNATURE));
+    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, AttributeCertificateInfoV2.defaultValues(SERIAL_NUMBER));
+    this.attrCertValidityPeriod = pvutils.getParametersValue(parameters, ATTR_CERT_VALIDITY_PERIOD, AttributeCertificateInfoV2.defaultValues(ATTR_CERT_VALIDITY_PERIOD));
+    this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, AttributeCertificateInfoV2.defaultValues(ATTRIBUTES));
     if (parameters.issuerUniqueID) {
-      this.issuerUniqueID = getParametersValue(parameters, ISSUER_UNIQUE_ID, AttributeCertificateInfoV2.defaultValues(ISSUER_UNIQUE_ID));
+      this.issuerUniqueID = pvutils.getParametersValue(parameters, ISSUER_UNIQUE_ID, AttributeCertificateInfoV2.defaultValues(ISSUER_UNIQUE_ID));
     }
     if (parameters.extensions) {
-      this.extensions = getParametersValue(parameters, EXTENSIONS, AttributeCertificateInfoV2.defaultValues(EXTENSIONS));
+      this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, AttributeCertificateInfoV2.defaultValues(EXTENSIONS));
     }
     //#endregion
     //#region If input argument array contains "schema" for this object
@@ -155,7 +155,7 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
    * @returns asn1js schema object
    */
   public static schema(parameters: AttributeCertificateInfoV2Schema = {}): Schema.SchemaType {
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
       name: (names.blockName || ""),
@@ -205,7 +205,7 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, CLEAR_PROPS);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { Convert } from "pvtsutils";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { ParameterError } from "./errors";
 import { OtherPrimeInfo, JsonOtherPrimeInfo, OtherPrimeInfoSchema } from "./OtherPrimeInfo";
@@ -322,14 +322,14 @@ export class RSAPrivateKey implements Schema.SchemaCompatible {
    */
   public fromJSON(json: any): void {
     ParameterError.assert("json", json, "n", "e", "d", "p", "q", "dp", "dq", "qi");
-    this.modulus = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.n) });
-    this.publicExponent = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.e) });
-    this.privateExponent = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.d) });
-    this.prime1 = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.p) });
-    this.prime2 = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.q) });
-    this.exponent1 = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.dp) });
-    this.exponent2 = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.dq) });
-    this.coefficient = new asn1js.Integer({ valueHex: Convert.FromBase64Url(json.qi) });
+    this.modulus = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.n) });
+    this.publicExponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.e) });
+    this.privateExponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.d) });
+    this.prime1 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.p) });
+    this.prime2 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.q) });
+    this.exponent1 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.dp) });
+    this.exponent2 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.dq) });
+    this.coefficient = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.qi) });
     if (json.oth) {
       this.otherPrimeInfos = Array.from(json.oth, (element: any) => new OtherPrimeInfo({ json: element }));
     }

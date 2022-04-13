@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { GeneralName, GeneralNameSchema } from "./GeneralName";
 import { Request, RequestSchema } from "./Request";
 import { Extension } from "./Extension";
@@ -59,16 +59,16 @@ export class TBSRequest implements Schema.SchemaCompatible {
    */
   constructor(parameters: TBSRequestParameters = {}) {
     //#region Internal properties of the object
-    this.tbs = getParametersValue(parameters, TBS, TBSRequest.defaultValues(TBS));
+    this.tbs = pvutils.getParametersValue(parameters, TBS, TBSRequest.defaultValues(TBS));
     if (parameters.version !== undefined) {
-      this.version = getParametersValue(parameters, VERSION, TBSRequest.defaultValues(VERSION));
+      this.version = pvutils.getParametersValue(parameters, VERSION, TBSRequest.defaultValues(VERSION));
     }
     if (parameters.requestorName) {
-      this.requestorName = getParametersValue(parameters, REQUESTOR_NAME, TBSRequest.defaultValues(REQUESTOR_NAME));
+      this.requestorName = pvutils.getParametersValue(parameters, REQUESTOR_NAME, TBSRequest.defaultValues(REQUESTOR_NAME));
     }
-    this.requestList = getParametersValue(parameters, REQUEST_LIST, TBSRequest.defaultValues(REQUEST_LIST));
+    this.requestList = pvutils.getParametersValue(parameters, REQUEST_LIST, TBSRequest.defaultValues(REQUEST_LIST));
     if (parameters.requestExtensions) {
-      this.requestExtensions = getParametersValue(parameters, REQUEST_EXTENSIONS, TBSRequest.defaultValues(REQUEST_EXTENSIONS));
+      this.requestExtensions = pvutils.getParametersValue(parameters, REQUEST_EXTENSIONS, TBSRequest.defaultValues(REQUEST_EXTENSIONS));
     }
     //#endregion
 
@@ -141,7 +141,7 @@ export class TBSRequest implements Schema.SchemaCompatible {
    * @returns asn1js schema object
    */
   public static schema(parameters: TBSRequestSchema = {}): Schema.SchemaType {
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
       name: (names.blockName || TBS_REQUEST),
@@ -197,7 +197,7 @@ export class TBSRequest implements Schema.SchemaCompatible {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, CLEAR_PROPS);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
 
     //#region Check the schema is valid

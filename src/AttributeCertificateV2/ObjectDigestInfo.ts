@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
 import * as Schema from "../Schema";
 
@@ -37,12 +37,12 @@ export class ObjectDigestInfo implements Schema.SchemaCompatible {
    */
   constructor(parameters: ObjectDigestInfoParameters = {}) {
     //#region Internal properties of the object
-    this.digestedObjectType = getParametersValue(parameters, DIGESTED_OBJECT_TYPE, ObjectDigestInfo.defaultValues(DIGESTED_OBJECT_TYPE));
+    this.digestedObjectType = pvutils.getParametersValue(parameters, DIGESTED_OBJECT_TYPE, ObjectDigestInfo.defaultValues(DIGESTED_OBJECT_TYPE));
     if (parameters.otherObjectTypeID) {
-      this.otherObjectTypeID = getParametersValue(parameters, OTHER_OBJECT_TYPE_ID, ObjectDigestInfo.defaultValues(OTHER_OBJECT_TYPE_ID));
+      this.otherObjectTypeID = pvutils.getParametersValue(parameters, OTHER_OBJECT_TYPE_ID, ObjectDigestInfo.defaultValues(OTHER_OBJECT_TYPE_ID));
     }
-    this.digestAlgorithm = getParametersValue(parameters, DIGEST_ALGORITHM, ObjectDigestInfo.defaultValues(DIGEST_ALGORITHM));
-    this.objectDigest = getParametersValue(parameters, OBJECT_DIGEST, ObjectDigestInfo.defaultValues(OBJECT_DIGEST));
+    this.digestAlgorithm = pvutils.getParametersValue(parameters, DIGEST_ALGORITHM, ObjectDigestInfo.defaultValues(DIGEST_ALGORITHM));
+    this.objectDigest = pvutils.getParametersValue(parameters, OBJECT_DIGEST, ObjectDigestInfo.defaultValues(OBJECT_DIGEST));
     //#endregion
     //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
@@ -101,7 +101,7 @@ export class ObjectDigestInfo implements Schema.SchemaCompatible {
     digestAlgorithm?: AlgorithmIdentifierSchema;
     objectDigest?: string;
   }> = {}): Schema.SchemaType {
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
       name: (names.blockName || ""),
@@ -123,7 +123,7 @@ export class ObjectDigestInfo implements Schema.SchemaCompatible {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, CLEAR_PROPS);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,

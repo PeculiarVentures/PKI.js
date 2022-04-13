@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pkijs from "../src";
-import { BufferSourceConverter, Convert } from "pvtsutils";
+import * as pvtsutils from "pvtsutils";
 
 export function getElement(id: string, type: "span"): HTMLSpanElement;
 export function getElement(id: string, type: "select"): HTMLSelectElement;
@@ -60,7 +60,7 @@ function decodePEM(pem: string, tag = "[A-Z0-9 ]+"): ArrayBuffer[] {
     const base64 = matches[1]
       .replace(/\r/g, "")
       .replace(/\n/g, "");
-    res.push(Convert.FromBase64(base64));
+    res.push(pvtsutils.Convert.FromBase64(base64));
   }
 
   return res;
@@ -69,8 +69,8 @@ function decodePEM(pem: string, tag = "[A-Z0-9 ]+"): ArrayBuffer[] {
 export function parseCertificate(source: BufferSource): pkijs.Certificate[] {
   const buffers: ArrayBuffer[] = [];
 
-  const buffer = BufferSourceConverter.toArrayBuffer(source);
-  const pem = Convert.ToBinary(buffer);
+  const buffer = pvtsutils.BufferSourceConverter.toArrayBuffer(source);
+  const pem = pvtsutils.Convert.ToBinary(buffer);
   if (/----BEGIN CERTIFICATE-----/.test(pem)) {
     buffers.push(...decodePEM(pem, "CERTIFICATE"));
   } else {

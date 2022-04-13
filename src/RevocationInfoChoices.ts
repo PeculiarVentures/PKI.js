@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { CertificateRevocationList } from "./CertificateRevocationList";
 import { OtherRevocationInfoFormat } from "./OtherRevocationInfoFormat";
 import * as Schema from "./Schema";
@@ -34,8 +34,8 @@ export class RevocationInfoChoices implements Schema.SchemaCompatible {
 	 */
 	constructor(parameters: RevocationInfoChoicesParameters = {}) {
 		//#region Internal properties of the object
-		this.crls = getParametersValue(parameters, CRLS, RevocationInfoChoices.defaultValues(CRLS));
-		this.otherRevocationInfos = getParametersValue(parameters, OTHER_REVOCATION_INFOS, RevocationInfoChoices.defaultValues(OTHER_REVOCATION_INFOS));
+		this.crls = pvutils.getParametersValue(parameters, CRLS, RevocationInfoChoices.defaultValues(CRLS));
+		this.otherRevocationInfos = pvutils.getParametersValue(parameters, OTHER_REVOCATION_INFOS, RevocationInfoChoices.defaultValues(OTHER_REVOCATION_INFOS));
 		//#endregion
 
 		//#region If input argument array contains "schema" for this object
@@ -83,7 +83,7 @@ export class RevocationInfoChoices implements Schema.SchemaCompatible {
 		 * @property {string} [blockName]
 		 * @property {string} [crls]
 		 */
-		const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+		const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
 		return (new asn1js.Set({
 			name: (names.blockName || ""),
@@ -116,7 +116,7 @@ export class RevocationInfoChoices implements Schema.SchemaCompatible {
 	 */
 	public fromSchema(schema: Schema.SchemaType): void {
 		//#region Clear input data first
-		clearProps(schema, CLEAR_PROPS);
+		pvutils.clearProps(schema, CLEAR_PROPS);
 		//#endregion
 
 		//#region Check the schema is valid

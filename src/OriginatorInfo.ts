@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { CertificateSet } from "./CertificateSet";
 import { RevocationInfoChoices } from "./RevocationInfoChoices";
 import * as Schema from "./Schema";
@@ -30,10 +30,10 @@ export class OriginatorInfo {
 	constructor(parameters: OriginatorInfoParameters = {}) {
 		//#region Internal properties of the object
 		if (parameters.certs) {
-			this.certs = getParametersValue(parameters, CERTS, OriginatorInfo.defaultValues(CERTS));
+			this.certs = pvutils.getParametersValue(parameters, CERTS, OriginatorInfo.defaultValues(CERTS));
 		}
 		if (parameters.crls) {
-			this.crls = getParametersValue(parameters, CRLS, OriginatorInfo.defaultValues(CRLS));
+			this.crls = pvutils.getParametersValue(parameters, CRLS, OriginatorInfo.defaultValues(CRLS));
 		}
 		//#endregion
 
@@ -94,7 +94,7 @@ export class OriginatorInfo {
 		certs?: string;
 		crls?: string;
 	}> = {}): Schema.SchemaType {
-		const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+		const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
 		return (new asn1js.Sequence({
 			name: (names.blockName || ""),
@@ -127,7 +127,7 @@ export class OriginatorInfo {
 	 */
 	public fromSchema(schema: Schema.SchemaType): void {
 		//#region Clear input data first
-		clearProps(schema, CLEAR_PROPS);
+		pvutils.clearProps(schema, CLEAR_PROPS);
 		//#endregion
 
 		//#region Check the schema is valid

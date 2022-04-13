@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import * as Schema from "./Schema";
 
 const KEY_ATTR_ID = "keyAttrId";
@@ -30,10 +30,10 @@ export class OtherKeyAttribute implements Schema.SchemaCompatible {
 	 */
 	constructor(parameters: OtherKeyAttributeParameters = {}) {
 		//#region Internal properties of the object
-		this.keyAttrId = getParametersValue(parameters, KEY_ATTR_ID, OtherKeyAttribute.defaultValues(KEY_ATTR_ID));
+		this.keyAttrId = pvutils.getParametersValue(parameters, KEY_ATTR_ID, OtherKeyAttribute.defaultValues(KEY_ATTR_ID));
 
 		if (parameters.keyAttr) {
-			this.keyAttr = getParametersValue(parameters, KEY_ATTR, OtherKeyAttribute.defaultValues(KEY_ATTR));
+			this.keyAttr = pvutils.getParametersValue(parameters, KEY_ATTR, OtherKeyAttribute.defaultValues(KEY_ATTR));
 		}
 		//#endregion
 
@@ -91,7 +91,7 @@ export class OtherKeyAttribute implements Schema.SchemaCompatible {
 	 * @returns asn1js schema object
 	 */
 	public static schema(parameters: OtherKeyAttributeSchema = {}): Schema.SchemaType {
-		const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+		const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
 		return (new asn1js.Sequence({
 			optional: (names.optional || true),
@@ -112,7 +112,7 @@ export class OtherKeyAttribute implements Schema.SchemaCompatible {
 	 */
 	public fromSchema(schema: Schema.SchemaType): void {
 		//#region Clear input data first
-		clearProps(schema, CLEAR_PROPS);
+		pvutils.clearProps(schema, CLEAR_PROPS);
 		//#endregion
 
 		//#region Check the schema is valid

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { getParametersValue, clearProps } from "pvutils";
+import * as pvutils from "pvutils";
 import { GeneralName, GeneralNameSchema } from "./GeneralName";
 import * as Schema from "./Schema";
 
@@ -35,8 +35,8 @@ export class AccessDescription {
    */
   constructor(parameters: AccessDescriptionParameters = {}) {
     //#region Internal properties of the object
-    this.accessMethod = getParametersValue(parameters, ACCESS_METHOD, AccessDescription.defaultValues(ACCESS_METHOD));
-    this.accessLocation = getParametersValue(parameters, ACCESS_LOCATION, AccessDescription.defaultValues(ACCESS_LOCATION));
+    this.accessMethod = pvutils.getParametersValue(parameters, ACCESS_METHOD, AccessDescription.defaultValues(ACCESS_METHOD));
+    this.accessLocation = pvutils.getParametersValue(parameters, ACCESS_LOCATION, AccessDescription.defaultValues(ACCESS_LOCATION));
     //#endregion
 
     //#region If input argument array contains "schema" for this object
@@ -77,7 +77,7 @@ export class AccessDescription {
    * @returns asn1js schema object
    */
   static schema(parameters: Schema.SchemaParameters<{ accessMethod?: string; accessLocation?: GeneralNameSchema; }> = {}) {
-    const names = getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
       name: (names.blockName || ""),
@@ -94,7 +94,7 @@ export class AccessDescription {
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    clearProps(schema, CLEAR_PROPS);
+    pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
 
     //#region Check the schema is valid

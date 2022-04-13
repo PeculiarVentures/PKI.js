@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { utilConcatBuf } from "pvutils";
+import * as pvutils from "pvutils";
 import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import type { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
 import { ArgumentError } from "./errors";
@@ -216,7 +216,7 @@ export function createECDSASignatureFromCMS(cmsSignature: asn1js.Sequence) {
         rValueViewCorrected.set(rValueView, 1);
         rValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
 
-        return utilConcatBuf(rValueBufferCorrected, sValue.valueBlock.valueHex);
+        return pvutils.utilConcatBuf(rValueBufferCorrected, sValue.valueBlock.valueHex);
       }
     case (rValue.valueBlock.valueHex.byteLength > sValue.valueBlock.valueHex.byteLength):
       {
@@ -233,7 +233,7 @@ export function createECDSASignatureFromCMS(cmsSignature: asn1js.Sequence) {
         sValueViewCorrected.set(sValueView, 1);
         sValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
 
-        return utilConcatBuf(rValue.valueBlock.valueHex, sValueBufferCorrected);
+        return pvutils.utilConcatBuf(rValue.valueBlock.valueHex, sValueBufferCorrected);
       }
     default:
       {
@@ -257,14 +257,14 @@ export function createECDSASignatureFromCMS(cmsSignature: asn1js.Sequence) {
           sValueViewCorrected.set(sValueView, 1);
           sValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
 
-          return utilConcatBuf(rValueBufferCorrected, sValueBufferCorrected);
+          return pvutils.utilConcatBuf(rValueBufferCorrected, sValueBufferCorrected);
         }
         //#endregion
       }
   }
   //#endregion
 
-  return utilConcatBuf(rValue.valueBlock.valueHex, sValue.valueBlock.valueHex);
+  return pvutils.utilConcatBuf(rValue.valueBlock.valueHex, sValue.valueBlock.valueHex);
 }
 
 /**
@@ -332,9 +332,9 @@ export async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer,
   //#endregion
 
   //#region Create a combined ArrayBuffer for digesting
-  combinedBuffer = utilConcatBuf(combinedBuffer, zBuffer);
-  combinedBuffer = utilConcatBuf(combinedBuffer, counterBuffer);
-  combinedBuffer = utilConcatBuf(combinedBuffer, SharedInfo);
+  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, zBuffer);
+  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, counterBuffer);
+  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, SharedInfo);
   //#endregion
 
   //#region Return digest of combined ArrayBuffer and information about current counter
@@ -416,7 +416,7 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
 
     for (const result of incomingResult) {
       if (result.counter === currentCounter) {
-        combinedBuffer = utilConcatBuf(combinedBuffer, result.result);
+        combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, result.result);
         found = true;
         break;
       }
