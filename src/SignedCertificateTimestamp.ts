@@ -389,7 +389,7 @@ export class SignedCertificateTimestamp implements Schema.SchemaCompatible {
 		//#endregion
 
 		//#region Perform verification
-		return common.getEngine().subtle.verifyWithPublicKey(
+		return common.getCrypto(true).verifyWithPublicKey(
 			stream.buffer.slice(0, stream.length),
 			{ valueBlock: { valueHex: this.signature.toBER(false) } } as any,
 			publicKeyInfo,

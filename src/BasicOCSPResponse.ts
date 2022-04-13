@@ -358,11 +358,11 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Initial variables
-    const engine = common.getEngine();
+    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
-    const signatureParams = await engine.subtle.getSignatureParameters(privateKey, hashAlgorithm);
+    const signatureParams = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
 
     const algorithm = signatureParams.parameters.algorithm;
     if (!("name" in algorithm)) {
@@ -376,7 +376,7 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await engine.subtle.signWithPrivateKey(this.tbsResponseData.tbs, privateKey, { algorithm });
+    const signature = await crypto.signWithPrivateKey(this.tbsResponseData.tbs, privateKey, { algorithm });
     this.signature = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -391,17 +391,13 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
     let certIndex = -1;
     const trustedCerts: Certificate[] = params.trustedCerts || [];
 
-    const engine = common.getEngine();
+    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Check amount of certificates
     if (!this.certs) {
       throw new Error("No certificates attached to the BasicOCSPResponse");
     }
-    //#endregion
-
-    //#region Get a "crypto" extension
-    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Find correct value for "responderID"
@@ -452,7 +448,7 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
     }
 
 
-    return engine.subtle.verifyWithPublicKey(this.tbsResponseData.tbs, this.signature, this.certs[certIndex].subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(this.tbsResponseData.tbs, this.signature, this.certs[certIndex].subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

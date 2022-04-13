@@ -1,11 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { getEngine } from "./common";
+import * as common from "./common";
 import { PublicKeyInfo } from "./PublicKeyInfo";
 import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
 import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { Attribute, AttributeSchema } from "./Attribute";
 import * as Schema from "./Schema";
+import { CryptoEnginePublicKeyParams } from "./CryptoEngine/CryptoEngineInterface";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -339,10 +340,10 @@ export class CertificationRequest implements Schema.SchemaCompatible {
     }
     //#endregion
 
-    const engine = getEngine();
+    const crypto = common.getCrypto(true);
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
-    const signatureParams = await engine.subtle.getSignatureParameters(privateKey, hashAlgorithm);
+    const signatureParams = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
     const parameters = signatureParams.parameters;
     this.signatureAlgorithm = signatureParams.signatureAlgorithm;
     //#endregion
@@ -352,7 +353,7 @@ export class CertificationRequest implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await engine.subtle.signWithPrivateKey(this.tbs, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(this.tbs, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -362,14 +363,14 @@ export class CertificationRequest implements Schema.SchemaCompatible {
    * @returns
    */
   public async verify(): Promise<boolean> {
-    return getEngine().subtle.verifyWithPublicKey(this.tbs, this.signatureValue, this.subjectPublicKeyInfo, this.signatureAlgorithm);
+    return common.getCrypto(true).verifyWithPublicKey(this.tbs, this.signatureValue, this.subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
   /**
    * Importing public key for current certificate request
    */
-  public async getPublicKey(parameters = null): Promise<CryptoKey> {
-    return getEngine().getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
+  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams): Promise<CryptoKey> {
+    return common.getCrypto(true).getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
   }
 
 }

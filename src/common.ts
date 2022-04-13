@@ -1,19 +1,22 @@
 import * as asn1js from "asn1js";
 import { utilConcatBuf } from "pvutils";
 import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
-import { CryptoEngine, CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams } from "./CryptoEngine";
+import type { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
 import { ArgumentError } from "./errors";
 
-
 //#region Crypto engine related function
-
-let engine = {
+export interface GlobalCryptoEngine {
+  name: string;
+  crypto: Crypto | null;
+  subtle: ICryptoEngine | null;
+}
+export let engine: GlobalCryptoEngine = {
   name: "none",
   crypto: null,
   subtle: null
-} as unknown as CryptoEngine;
+};
 
-export function setEngine(name: string, crypto: CryptoEngine | Crypto | null = null, subtle: null | SubtleCrypto | CryptoEngine = null): void {
+export function setEngine(name: string, crypto: Crypto | null = null, subtle: null | ICryptoEngine = null): void {
   //#region We are in Node
   // noinspection JSUnresolvedVariable
   if ((typeof process !== "undefined") && ("pid" in process) && (typeof global !== "undefined") && (typeof window === "undefined")) {
@@ -35,6 +38,7 @@ export function setEngine(name: string, crypto: CryptoEngine | Crypto | null = n
       (global as any)[process.pid].pkijs = {};
     }
     else {
+      // TODO remove comments with 'noinspection'
       // noinspection JSUnresolvedVariable
       if (typeof (global as any)[process.pid].pkijs !== "object") {
         // noinspection JSUnresolvedVariable
@@ -57,13 +61,13 @@ export function setEngine(name: string, crypto: CryptoEngine | Crypto | null = n
         name: name,
         crypto: crypto,
         subtle: subtle
-      } as CryptoEngine;
+      };
     }
   }
   //#endregion
 }
 
-export function getEngine(): CryptoEngine {
+export function getEngine(): GlobalCryptoEngine {
   //#region We are in Node
   // noinspection JSUnresolvedVariable
   if ((typeof process !== "undefined") && ("pid" in process) && (typeof global !== "undefined") && (typeof window === "undefined")) {
@@ -80,58 +84,8 @@ export function getEngine(): CryptoEngine {
   }
   //#endregion
 
-  return engine as CryptoEngine;
+  return engine;
 }
-
-(function initCryptoEngine() {
-  if (typeof self !== "undefined") {
-    if ("crypto" in self) {
-      let engineName = "webcrypto";
-
-      /**
-       * Standard crypto object
-       * @type {Object}
-       * @property {Object} [webkitSubtle] Subtle object from Apple
-       */
-      const cryptoObject = self.crypto;
-      let subtleObject;
-
-      // Apple Safari support
-      if ("webkitSubtle" in self.crypto) {
-        try {
-          subtleObject = (self.crypto as any).webkitSubtle;
-        }
-        catch (ex) {
-          subtleObject = self.crypto.subtle;
-        }
-
-        engineName = "safari";
-      }
-
-      if ("subtle" in self.crypto)
-        subtleObject = self.crypto.subtle;
-
-
-      if (typeof subtleObject === "undefined") {
-        engine = {
-          name: engineName,
-          crypto: cryptoObject,
-          subtle: null
-        } as unknown as CryptoEngine;
-      }
-      else {
-        engine = {
-          name: engineName,
-          crypto: cryptoObject,
-          subtle: new CryptoEngine({ name: engineName, crypto: self.crypto as any, subtle: subtleObject })
-        } as unknown as CryptoEngine;
-      }
-    }
-  }
-
-  setEngine(engine.name, engine.crypto, engine.subtle);
-})();
-
 //#endregion
 
 //#region Declaration of common functions
@@ -139,17 +93,17 @@ export function getEngine(): CryptoEngine {
 /**
  * Gets crypto subtle from the current "crypto engine"
  * @param safety
- * @returns Reruns {@link CryptoEngine} or `undefined`
+ * @returns Reruns {@link ICryptoEngine} or `null`
  */
-export function getCrypto(safety?: boolean): CryptoEngine | undefined;
+export function getCrypto(safety?: boolean): ICryptoEngine | null;
 /**
  * Gets crypto subtle from the current "crypto engine"
  * @param safety
- * @returns Reruns {@link CryptoEngine} or throws en exception
+ * @returns Reruns {@link ICryptoEngine} or throws en exception
  * @throws Throws {@link Error} if `subtle` is empty
  */
-export function getCrypto(safety: true): CryptoEngine;
-export function getCrypto(safety = false): CryptoEngine | undefined {
+export function getCrypto(safety: true): ICryptoEngine;
+export function getCrypto(safety = false): ICryptoEngine | null {
   const _engine = getEngine();
 
   if (!_engine.subtle && safety) {
@@ -164,7 +118,7 @@ export function getCrypto(safety = false): CryptoEngine | undefined {
  * @param view
  */
 export function getRandomValues(view: Uint8Array) {
-  return getEngine().subtle.getRandomValues(view);
+  return getCrypto(true).getRandomValues(view);
 }
 
 /**
@@ -175,7 +129,7 @@ export function getRandomValues(view: Uint8Array) {
  * @throws Throws {@link Error} exception if unknown WebCrypto algorithm
  */
 export function getOIDByAlgorithm(algorithm: Algorithm, safety?: boolean, target?: string) {
-  return getEngine().subtle.getOIDByAlgorithm(algorithm, safety, target);
+  return getCrypto(true).getOIDByAlgorithm(algorithm, safety, target);
 }
 
 /**
@@ -185,7 +139,7 @@ export function getOIDByAlgorithm(algorithm: Algorithm, safety?: boolean, target
  */
 // TODO Add safety
 export function getAlgorithmParameters(algorithmName: string, operation: CryptoEngineAlgorithmOperation): CryptoEngineAlgorithmParams {
-  return getEngine().subtle.getAlgorithmParameters(algorithmName, operation);
+  return getCrypto(true).getAlgorithmParameters(algorithmName, operation);
 }
 
 /**
@@ -323,7 +277,7 @@ export function createECDSASignatureFromCMS(cmsSignature: asn1js.Sequence) {
 export function getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety?: boolean, target?: string): T | object;
 export function getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety: true, target?: string): T;
 export function getAlgorithmByOID(oid: string, safety = false, target?: string): any {
-  return getEngine().subtle.getAlgorithmByOID(oid, safety, target);
+  return getCrypto(true).getAlgorithmByOID(oid, safety, target);
 }
 
 /**
@@ -331,17 +285,17 @@ export function getAlgorithmByOID(oid: string, safety = false, target?: string):
  * @param signatureAlgorithm Signature algorithm
  */
 export function getHashAlgorithm(signatureAlgorithm: AlgorithmIdentifier): string {
-  return getEngine().subtle.getHashAlgorithm(signatureAlgorithm);
+  return getCrypto(true).getHashAlgorithm(signatureAlgorithm);
 }
 
 /**
  * ANS X9.63 Key Derivation Function having a "Counter" as a parameter
  * @param hashFunction Used hash function
- * @param Zbuffer ArrayBuffer containing ECDH shared secret to derive from
+ * @param zBuffer ArrayBuffer containing ECDH shared secret to derive from
  * @param Counter
  * @param SharedInfo Usually DER encoded "ECC_CMS_SharedInfo" structure
  */
-export async function kdfWithCounter(hashFunction: string, Zbuffer: ArrayBuffer, Counter: number, SharedInfo: ArrayBuffer): Promise<{ counter: number; result: ArrayBuffer; }> {
+export async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer, Counter: number, SharedInfo: ArrayBuffer): Promise<{ counter: number; result: ArrayBuffer; }> {
   //#region Check of input parameters
   switch (hashFunction.toUpperCase()) {
     case "SHA-1":
@@ -353,9 +307,9 @@ export async function kdfWithCounter(hashFunction: string, Zbuffer: ArrayBuffer,
       throw new ArgumentError(`Unknown hash function: ${hashFunction}`);
   }
 
-  ArgumentError.assert(Zbuffer, "Zbuffer", "ArrayBuffer");
-  if (Zbuffer.byteLength === 0)
-    throw new ArgumentError("'Zbuffer' has zero length, error");
+  ArgumentError.assert(zBuffer, "zBuffer", "ArrayBuffer");
+  if (zBuffer.byteLength === 0)
+    throw new ArgumentError("'zBuffer' has zero length, error");
 
   ArgumentError.assert(SharedInfo, "SharedInfo", "ArrayBuffer");
   if (Counter > 255)
@@ -378,7 +332,7 @@ export async function kdfWithCounter(hashFunction: string, Zbuffer: ArrayBuffer,
   //#endregion
 
   //#region Create a combined ArrayBuffer for digesting
-  combinedBuffer = utilConcatBuf(combinedBuffer, Zbuffer);
+  combinedBuffer = utilConcatBuf(combinedBuffer, zBuffer);
   combinedBuffer = utilConcatBuf(combinedBuffer, counterBuffer);
   combinedBuffer = utilConcatBuf(combinedBuffer, SharedInfo);
   //#endregion

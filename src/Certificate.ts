@@ -10,7 +10,7 @@ import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 import { id_BasicConstraints } from "./ObjectIdentifiers";
 import { BasicConstraints } from "./BasicConstraints";
-import { CryptoEnginePublicKeyParams } from "./CryptoEngine";
+import { CryptoEnginePublicKeyParams } from "./CryptoEngine/CryptoEngineInterface";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -577,8 +577,8 @@ export class Certificate implements Schema.SchemaCompatible {
    * Importing public key for current certificate
    * @param parameters
    */
-  public async getPublicKey(parameters: CryptoEnginePublicKeyParams | null = null): Promise<CryptoKey> {
-    return common.getEngine().subtle.getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
+  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams): Promise<CryptoKey> {
+    return common.getCrypto(true).getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
   }
 
   /**
@@ -586,11 +586,7 @@ export class Certificate implements Schema.SchemaCompatible {
    * @param hashAlgorithm Hashing algorithm name
    */
   public async getKeyHash(hashAlgorithm = "SHA-1"): Promise<ArrayBuffer> {
-    //#region Get a "crypto" extension
-    const crypto = common.getCrypto(true);
-    //#endregion
-
-    return crypto.digest({ name: hashAlgorithm }, new Uint8Array(this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
+    return common.getCrypto(true).digest({ name: hashAlgorithm }, this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
   }
 
   /**
@@ -605,10 +601,10 @@ export class Certificate implements Schema.SchemaCompatible {
     }
     //#endregion
 
-    const engine = common.getEngine();
+    const crypto = common.getCrypto(true);
 
     // Get a "default parameters" for current algorithm and set correct signature algorithm
-    const signatureParameters = await engine.subtle.getSignatureParameters(privateKey, hashAlgorithm);
+    const signatureParameters = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
     const parameters = signatureParameters.parameters;
     this.signature = signatureParameters.signatureAlgorithm;
     this.signatureAlgorithm = signatureParameters.signatureAlgorithm;
@@ -618,7 +614,8 @@ export class Certificate implements Schema.SchemaCompatible {
     this.tbs = this.encodeTBS().toBER();
 
     // Signing TBS data on provided private key
-    const signature = await engine.subtle.signWithPrivateKey(this.tbs, privateKey, parameters as any);
+    // TODO remove any
+    const signature = await crypto.signWithPrivateKey(this.tbs, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
   }
 
@@ -641,7 +638,7 @@ export class Certificate implements Schema.SchemaCompatible {
       throw new Error("Please provide issuer certificate as a parameter");
     }
 
-    return common.getEngine().subtle.verifyWithPublicKey(this.tbs, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
+    return common.getCrypto(true).verifyWithPublicKey(this.tbs, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

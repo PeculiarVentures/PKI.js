@@ -300,14 +300,9 @@ export class PFX implements Schema.SchemaCompatible {
           //#endregion
 
           //#region Call current crypto engine for making HMAC-based data stamp
-          const engine = common.getEngine();
+          const crypto = common.getCrypto(true);
 
-          if (!engine.subtle.stampDataWithPassword) {
-            throw new Error(`No support for "stampDataWithPassword" in current engine "${engine.name}"`);
-          }
-
-
-          const result = await engine.subtle.stampDataWithPassword({
+          const result = await crypto.stampDataWithPassword({
             password: parameters.password,
             hashAlgorithm: parameters.hmacHashAlgorithm,
             salt: saltBuffer,
@@ -501,8 +496,7 @@ export class PFX implements Schema.SchemaCompatible {
             //#endregion
 
             //#region Call current crypto engine for verifying HMAC-based data stamp
-            const engine = common.getEngine();
-            const result = await engine.subtle.verifyDataStampedWithPassword({
+            const result = await common.getCrypto(true).verifyDataStampedWithPassword({
               password: parameters.password,
               hashAlgorithm: hashAlgorithm.name,
               salt: this.macData.macSalt.valueBlock.valueHex,

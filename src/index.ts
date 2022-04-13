@@ -23,7 +23,9 @@ export * from "./CertificateSet";
 export * from "./CertificateTemplate";
 export * from "./CertificationRequest";
 export * from "./ContentInfo";
-export * from "./CryptoEngine";
+export * from "./CryptoEngine/AbstractCryptoEngine";
+export * from "./CryptoEngine/CryptoEngine";
+export * from "./CryptoEngine/CryptoEngineInterface";
 export * from "./DigestInfo";
 export * from "./DistributionPoint";
 export * from "./ECCCMSSharedInfo";
@@ -114,3 +116,7 @@ export * from "./TimeStampReq";
 export * from "./TimeStampResp";
 export * from "./common";
 export * from "./errors";
+
+import { initCryptoEngine } from "./CryptoEngine/CryptoEngineInit";
+
+initCryptoEngine();

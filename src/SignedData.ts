@@ -497,10 +497,6 @@ export class SignedData implements Schema.SchemaCompatible {
       let shaAlgorithm = "";
       let certificatePath: Certificate[] = [];
 
-      const engine = common.getEngine();
-      //#endregion
-
-      //#region Get a "crypto" extension
       const crypto = common.getCrypto(true);
       //#endregion
 
@@ -805,7 +801,7 @@ export class SignedData implements Schema.SchemaCompatible {
       }
       //#endregion
 
-      const verifyResult = await engine.subtle.verifyWithPublicKey(data, signerInfo.signature, signerCert.subjectPublicKeyInfo, signerCert.signatureAlgorithm, shaAlgorithm);
+      const verifyResult = await crypto.verifyWithPublicKey(data, signerInfo.signature, signerCert.subjectPublicKeyInfo, signerCert.signatureAlgorithm, shaAlgorithm);
 
       //#region Make a final result
 
@@ -853,7 +849,7 @@ export class SignedData implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Initial variables
-    const engine = common.getEngine();
+    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Simple check for supported algorithm
@@ -879,7 +875,7 @@ export class SignedData implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
-    const signatureParams = await engine.subtle.getSignatureParameters(privateKey, hashAlgorithm);
+    const signatureParams = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
     const parameters = signatureParams.parameters;
     signerInfo.signatureAlgorithm = signatureParams.signatureAlgorithm;
     //#endregion
@@ -922,7 +918,7 @@ export class SignedData implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await engine.subtle.signWithPrivateKey(data, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(data, privateKey, parameters as any);
     signerInfo.signature = new asn1js.OctetString({ valueHex: signature });
     //#endregion
   }

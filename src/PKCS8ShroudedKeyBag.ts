@@ -5,7 +5,7 @@ import { EncryptedData } from "./EncryptedData";
 import { EncryptedContentInfo } from "./EncryptedContentInfo";
 import { PrivateKeyInfo } from "./PrivateKeyInfo";
 import * as Schema from "./Schema";
-import { CryptoEngineEncryptParams } from "./CryptoEngine";
+import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
 
 const ENCRYPTION_ALGORITHM = "encryptionAlgorithm";
 const ENCRYPTED_DATA = "encryptedData";
@@ -242,7 +242,7 @@ export class PKCS8ShroudedKeyBag implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Encrypt internal data
-    const encryptParams = {
+    const encryptParams: CryptoEngineEncryptParams = {
       ...parameters,
       contentToEncrypt: this.parsedValue.toSchema().toBER(false),
     };

@@ -4,8 +4,8 @@ import * as common from "./common";
 import { EncryptedContentInfo, EncryptedContentInfoSchema } from "./EncryptedContentInfo";
 import { Attribute } from "./Attribute";
 import * as Schema from "./Schema";
-import { CryptoEngineEncryptParams } from "./CryptoEngine";
-import { ArgumentError, ParameterError } from "./errors";
+import { ArgumentError } from "./errors";
+import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
 
 const VERSION = "version";
 const ENCRYPTED_CONTENT_INFO = "encryptedContentInfo";
@@ -228,8 +228,6 @@ export class EncryptedData implements Schema.SchemaCompatible {
     ArgumentError.assert(parameters, "parameters", "object");
     //#endregion
 
-    const engine = common.getEngine();
-
     //#region Set "contentType" parameter
     const encryptParams: CryptoEngineEncryptParams = {
       ...parameters,
@@ -237,11 +235,7 @@ export class EncryptedData implements Schema.SchemaCompatible {
     };
     //#endregion
 
-    if (!("encryptEncryptedContentInfo" in engine.subtle)) {
-      throw new Error(`No support for "encryptEncryptedContentInfo" in current crypto engine ${engine.name}`);
-    }
-
-    this.encryptedContentInfo = await engine.subtle.encryptEncryptedContentInfo(encryptParams);
+    this.encryptedContentInfo = await common.getCrypto(true).encryptEncryptedContentInfo(encryptParams);
   }
 
   /**
@@ -255,10 +249,6 @@ export class EncryptedData implements Schema.SchemaCompatible {
     ArgumentError.assert(parameters, "parameters", "object");
     //#endregion
 
-    //#region Get cryptographic engine
-    const engine = common.getEngine();
-    //#endregion
-
     //#region Set ENCRYPTED_CONTENT_INFO value
     const decryptParams = {
       ...parameters,
@@ -266,11 +256,7 @@ export class EncryptedData implements Schema.SchemaCompatible {
     };
     //#endregion
 
-    if (!("decryptEncryptedContentInfo" in engine.subtle)) {
-      throw new Error(`No support for "decryptEncryptedContentInfo" in current crypto engine ${engine.name}`);
-    }
-
-    return engine.subtle.decryptEncryptedContentInfo(decryptParams);
+    return common.getCrypto(true).decryptEncryptedContentInfo(decryptParams);
   }
 
 }

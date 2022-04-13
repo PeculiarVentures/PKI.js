@@ -251,11 +251,11 @@ export class OCSPRequest {
     //#endregion
 
     //#region Initial variables
-    const engine = common.getEngine();
+    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
-    const signatureParams = await engine.subtle.getSignatureParameters(privateKey, hashAlgorithm);
+    const signatureParams = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
     const parameters = signatureParams.parameters;
     this.optionalSignature.signatureAlgorithm = signatureParams.signatureAlgorithm;
     //#endregion
@@ -265,7 +265,7 @@ export class OCSPRequest {
     //#endregion
 
     // Signing TBS data on provided private key
-    const signature = await engine.subtle.signWithPrivateKey(tbs, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(tbs, privateKey, parameters as any);
     this.optionalSignature.signature = new asn1js.BitString({ valueHex: signature });
   }
 

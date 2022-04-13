@@ -1,51 +1,17 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as pvtsutils from "pvtsutils";
-import * as common from "./common";
-import { PublicKeyInfo } from "./PublicKeyInfo";
-import { PrivateKeyInfo } from "./PrivateKeyInfo";
-import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
-import { EncryptedContentInfo } from "./EncryptedContentInfo";
-import { RSASSAPSSParams, RSASSAPSSParamsParameters } from "./RSASSAPSSParams";
-import { PBKDF2Params } from "./PBKDF2Params";
-import { PBES2Params } from "./PBES2Params";
-import { ArgumentError, ParameterError } from "./errors";
-
-const CRYPTO = "crypto";
-const SUBTLE = "subtle";
-
-export interface CryptoEngineParameters {
-  name?: string;
-  crypto?: CryptoEngine | Crypto;
-  subtle?: CryptoEngine | SubtleCrypto;
-}
-export interface CryptoEngineAlgorithmParams {
-  algorithm: Algorithm | object;
-  usages: KeyUsage[];
-}
-
-export interface CryptoEngineEncryptParams {
-  password: ArrayBuffer;
-  contentEncryptionAlgorithm: Algorithm;
-  hmacHashAlgorithm: string;
-  iterationCount: number;
-  contentToEncrypt: ArrayBuffer;
-  contentType: string;
-}
-
-export interface CryptoEngineDecryptParams {
-  password: ArrayBuffer;
-  encryptedContentInfo: EncryptedContentInfo;
-}
-
-export interface CryptoEngineSignatureParams {
-  signatureAlgorithm: AlgorithmIdentifier;
-  parameters: CryptoEngineAlgorithmParams;
-}
-
-export interface CryptoEnginePublicKeyParams {
-  algorithm: CryptoEngineAlgorithmParams;
-}
+import * as common from "../common";
+import { PublicKeyInfo } from "../PublicKeyInfo";
+import { PrivateKeyInfo } from "../PrivateKeyInfo";
+import { AlgorithmIdentifier } from "../AlgorithmIdentifier";
+import { EncryptedContentInfo } from "../EncryptedContentInfo";
+import { RSASSAPSSParams, RSASSAPSSParamsParameters } from "../RSASSAPSSParams";
+import { PBKDF2Params } from "../PBKDF2Params";
+import { PBES2Params } from "../PBES2Params";
+import { ArgumentError, ParameterError } from "../errors";
+import * as type from "./CryptoEngineInterface";
+import { AbstractCryptoEngine } from "./AbstractCryptoEngine";
 
 /**
  * Making MAC key using algorithm described in B.2 of PKCS#12 standard.
@@ -247,61 +213,12 @@ function prepareAlgorithm(data: globalThis.AlgorithmIdentifier | EcdsaParams): A
   return res;
 }
 
-export type CryptoEngineAlgorithmOperation = "sign" | "encrypt" | "generateKey" | "importKey" | "exportKey" | "verify";
-
-export interface StampDataWithPasswordParams {
-  password: ArrayBuffer;
-  hashAlgorithm: string;
-  salt: ArrayBuffer;
-  iterationCount: number;
-  contentToStamp: ArrayBuffer;
-}
-
-export interface VerifyDataStampedWithPasswordParams {
-  password: ArrayBuffer;
-  hashAlgorithm: string;
-  salt: ArrayBuffer;
-  iterationCount: number;
-  contentToVerify: ArrayBuffer;
-  signatureToVerify: ArrayBuffer;
-}
-
 /**
  * Default cryptographic engine for Web Cryptography API
  */
-export class CryptoEngine {
-  /**
-   * Usually here we are expecting "window.crypto" or an equivalent from custom "crypto engine"
-   */
-  public crypto: CryptoEngine;
-  /**
-   * Usually here we are expecting "window.crypto.subtle" or an equivalent from custom "crypto engine"
-   */
-  public subtle: CryptoEngine;
-  /**
-   * Name of the "crypto engine"
-   */
-  public name: string;
+export class CryptoEngine extends AbstractCryptoEngine {
 
-  /**
-   * Constructor for CryptoEngine class
-   * @param parameters
-   */
-  constructor(parameters: CryptoEngineParameters = {}) {
-    //#region Internal properties of the object
-    const crypto = typeof self !== "undefined" && self.crypto
-      ? self.crypto
-      : null;
-    const subtle = crypto
-      ? crypto.subtle
-      : null;
-    this.crypto = pvutils.getParametersValue(parameters, CRYPTO, crypto) as unknown as CryptoEngine;
-    this.subtle = pvutils.getParametersValue(parameters, SUBTLE, subtle) as unknown as CryptoEngine;
-    this.name = pvutils.getParametersValue(parameters, "name", "");
-    //#endregion
-  }
-
-  public async importKey(format: KeyFormat, keyData: BufferSource | JsonWebKey, algorithm: globalThis.AlgorithmIdentifier, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey> {
+  public override async importKey(format: KeyFormat, keyData: BufferSource | JsonWebKey, algorithm: globalThis.AlgorithmIdentifier, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey> {
     //#region Initial variables
     let jwk: JsonWebKey = {};
     //#endregion
@@ -661,10 +578,10 @@ export class CryptoEngine {
    * @param format
    * @param key
    */
-  public exportKey(format: "jwk", key: CryptoKey): Promise<JsonWebKey>;
-  public exportKey(format: Exclude<KeyFormat, "jwk">, key: CryptoKey): Promise<ArrayBuffer>;
-  public exportKey(format: string, key: CryptoKey): Promise<ArrayBuffer | JsonWebKey>;
-  public async exportKey(format: KeyFormat, key: CryptoKey): Promise<ArrayBuffer | JsonWebKey> {
+  public override exportKey(format: "jwk", key: CryptoKey): Promise<JsonWebKey>;
+  public override exportKey(format: Exclude<KeyFormat, "jwk">, key: CryptoKey): Promise<ArrayBuffer>;
+  public override exportKey(format: string, key: CryptoKey): Promise<ArrayBuffer | JsonWebKey>;
+  public override async exportKey(format: KeyFormat, key: CryptoKey): Promise<ArrayBuffer | JsonWebKey> {
     let jwk = await this.subtle.exportKey("jwk", key);
 
     //#region Currently Safari returns ArrayBuffer as JWK thus we need an additional transformation
@@ -726,66 +643,6 @@ export class CryptoEngine {
 
     const key = await this.importKey(inputFormat, keyData, algorithm, extractable, keyUsages);
     return this.exportKey(outputFormat, key);
-  }
-
-  public async encrypt(algorithm: globalThis.AlgorithmIdentifier | RsaOaepParams | AesCtrParams | AesCbcParams | AesGcmParams, key: CryptoKey, data: BufferSource): Promise<ArrayBuffer>;
-  public async encrypt(...args: any[]): Promise<ArrayBuffer> {
-    return (this.subtle.encrypt as any)(...args);
-  }
-
-  public decrypt(algorithm: globalThis.AlgorithmIdentifier | RsaOaepParams | AesCtrParams | AesCbcParams | AesGcmParams, key: CryptoKey, data: BufferSource): Promise<ArrayBuffer>;
-  public async decrypt(...args: any[]): Promise<ArrayBuffer> {
-    return (this.subtle.decrypt as any)(...args);
-  }
-
-  public sign(algorithm: globalThis.AlgorithmIdentifier | RsaPssParams | EcdsaParams, key: CryptoKey, data: BufferSource): Promise<ArrayBuffer>;
-  public sign(...args: any[]): Promise<ArrayBuffer> {
-    return (this.subtle.sign as any)(...args);
-  }
-
-  public verify(algorithm: globalThis.AlgorithmIdentifier | RsaPssParams | EcdsaParams, key: CryptoKey, signature: BufferSource, data: BufferSource): Promise<boolean>;
-  public async verify(...args: any[]): Promise<boolean> {
-    return (this.subtle.verify as any)(...args);
-  }
-
-  public digest(algorithm: globalThis.AlgorithmIdentifier, data: BufferSource): Promise<ArrayBuffer>;
-  public async digest(...args: any[]) {
-    return (this.subtle.digest as any)(...args);
-  }
-
-  public generateKey(algorithm: RsaHashedKeyGenParams | EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair>;
-  public generateKey(algorithm: AesKeyGenParams | HmacKeyGenParams | Pbkdf2Params, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey>;
-  public generateKey(algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair | CryptoKey>;
-  public async generateKey(...args: any[]): Promise<CryptoKey | CryptoKeyPair> {
-    return (this.subtle.generateKey as any)(...args);
-  }
-
-  public deriveKey(algorithm: globalThis.AlgorithmIdentifier | EcdhKeyDeriveParams | HkdfParams | Pbkdf2Params, baseKey: CryptoKey, derivedKeyType: AlgorithmIdentifier | AesDerivedKeyParams | HmacImportParams | HkdfParams | Pbkdf2Params, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey>;
-  public async deriveKey(...args: any[]): Promise<CryptoKey> {
-    return (this.subtle.deriveKey as any)(...args);
-  }
-
-  public deriveBits(algorithm: globalThis.AlgorithmIdentifier | EcdhKeyDeriveParams | HkdfParams | Pbkdf2Params, baseKey: CryptoKey, length: number): Promise<ArrayBuffer>;
-  public async deriveBits(...args: any[]): Promise<ArrayBuffer> {
-    return (this.subtle.deriveBits as any)(...args);
-  }
-
-  public wrapKey(format: KeyFormat, key: CryptoKey, wrappingKey: CryptoKey, wrapAlgorithm: AlgorithmIdentifier | RsaOaepParams | AesCtrParams | AesCbcParams | AesGcmParams): Promise<ArrayBuffer>;
-  public async wrapKey(...args: any[]): Promise<ArrayBuffer> {
-    return (this.subtle.wrapKey as any)(...args);
-  }
-
-  public unwrapKey(format: KeyFormat, wrappedKey: BufferSource, unwrappingKey: CryptoKey, unwrapAlgorithm: AlgorithmIdentifier | RsaOaepParams | AesCtrParams | AesCbcParams | AesGcmParams, unwrappedKeyAlgorithm: AlgorithmIdentifier | RsaHashedImportParams | EcKeyImportParams | HmacImportParams | AesKeyAlgorithm, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey>;
-  public async unwrapKey(...args: any[]): Promise<CryptoKey> {
-    return (this.subtle.unwrapKey as any)(...args);
-  }
-
-  public getRandomValues<T extends ArrayBufferView | null>(array: T): T {
-    if (!("getRandomValues" in this.crypto)) {
-      throw new Error("No support for getRandomValues");
-    }
-
-    return this.crypto.getRandomValues(array);
   }
 
   /**
@@ -1032,13 +889,6 @@ export class CryptoEngine {
     return {};
   }
 
-  /**
-   * Get OID for each specific algorithm
-   * @param algorithm WebCrypto Algorithm
-   * @param safety if `true` throws exception on unknown algorithm
-   * @param target name of the target
-   * @throws Throws {@link Error} exception if unknown WebCrypto algorithm
-   */
   public getOIDByAlgorithm(algorithm: Algorithm, safety = false, target?: string): string {
     let result = "";
 
@@ -1224,14 +1074,8 @@ export class CryptoEngine {
     return result;
   }
 
-  /**
-   * Get default algorithm parameters for each kind of operation
-   * @param algorithmName Algorithm name to get common parameters for
-   * @param operation Kind of operation: "sign", "encrypt", "generateKey", "importKey", "exportKey", "verify"
-   */
-  // TODO Use safety
-  public getAlgorithmParameters(algorithmName: string, operation: CryptoEngineAlgorithmOperation): CryptoEngineAlgorithmParams {
-    let result: CryptoEngineAlgorithmParams = {
+  public getAlgorithmParameters(algorithmName: string, operation: type.CryptoEngineAlgorithmOperation): type.CryptoEngineAlgorithmParams {
+    let result: type.CryptoEngineAlgorithmParams = {
       algorithm: {},
       usages: []
     };
@@ -1653,6 +1497,7 @@ export class CryptoEngine {
    * Getting hash algorithm by signature algorithm
    * @param signatureAlgorithm Signature algorithm
    */
+  // TODO use safety
   getHashAlgorithm(signatureAlgorithm: AlgorithmIdentifier): string {
     let result = "";
 
@@ -1700,11 +1545,7 @@ export class CryptoEngine {
     return result;
   }
 
-  /**
-   * Specialized function encrypting "EncryptedContentInfo" object using parameters
-   * @param parameters
-   */
-  public async encryptEncryptedContentInfo(parameters: CryptoEngineEncryptParams): Promise<EncryptedContentInfo> {
+  public async encryptEncryptedContentInfo(parameters: type.CryptoEngineEncryptParams): Promise<EncryptedContentInfo> {
     //#region Check for input parameters
     ParameterError.assert(parameters,
       "password", "contentEncryptionAlgorithm", "hmacHashAlgorithm",
@@ -1808,7 +1649,7 @@ export class CryptoEngine {
    * Decrypt data stored in "EncryptedContentInfo" object using parameters
    * @param parameters
    */
-  public async decryptEncryptedContentInfo(parameters: CryptoEngineDecryptParams): Promise<ArrayBuffer> {
+  public async decryptEncryptedContentInfo(parameters: type.CryptoEngineDecryptParams): Promise<ArrayBuffer> {
     //#region Check for input parameters
     ParameterError.assert(parameters, "password", "encryptedContentInfo");
 
@@ -1902,11 +1743,7 @@ export class CryptoEngine {
     //#endregion
   }
 
-  /**
-   * Stamping (signing) data using algorithm similar to HMAC
-   * @param parameters
-   */
-  public async stampDataWithPassword(parameters: StampDataWithPasswordParams): Promise<ArrayBuffer> {
+  public async stampDataWithPassword(parameters: type.CryptoEngineStampDataWithPasswordParams): Promise<ArrayBuffer> {
     //#region Check for input parameters
     if ((parameters instanceof Object) === false)
       throw new Error("Parameters must have type \"Object\"");
@@ -1963,7 +1800,7 @@ export class CryptoEngine {
     //#endregion
   }
 
-  public async verifyDataStampedWithPassword(parameters: VerifyDataStampedWithPasswordParams): Promise<boolean> {
+  public async verifyDataStampedWithPassword(parameters: type.CryptoEngineVerifyDataStampedWithPasswordParams): Promise<boolean> {
     //#region Check for input parameters
     ParameterError.assert(parameters,
       "password", "hashAlgorithm", "salt",
@@ -2019,12 +1856,7 @@ export class CryptoEngine {
     //#endregion
   }
 
-  /**
-   * Get signature parameters by analyzing private key algorithm
-   * @param privateKey The private key user would like to use
-   * @param hashAlgorithm Hash algorithm user would like to use
-   */
-  public async getSignatureParameters(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<CryptoEngineSignatureParams> {
+  public async getSignatureParameters(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<type.CryptoEngineSignatureParams> {
     // Check hashing algorithm
     this.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
 
@@ -2103,16 +1935,8 @@ export class CryptoEngine {
     };
   }
 
-  /**
-   * Sign data with pre-defined private key
-   * @param data Data to be signed
-   * @param privateKey Private key to use
-   * @param parameters Parameters for used algorithm
-   */
-  public async signWithPrivateKey(data: ArrayBuffer, privateKey: CryptoKey, parameters: {
-    algorithm: Algorithm;
-  }) {
-    const signature = await this.sign(parameters.algorithm as any,
+  public async signWithPrivateKey(data: ArrayBuffer, privateKey: CryptoKey, parameters: type.CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer> {
+    const signature = await this.sign(parameters.algorithm,
       privateKey,
       new Uint8Array(data));
 
@@ -2125,7 +1949,7 @@ export class CryptoEngine {
     return signature;
   }
 
-  public fillPublicKeyParameters(publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier): CryptoEnginePublicKeyParams {
+  public fillPublicKeyParameters(publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier): type.CryptoEnginePublicKeyParams {
     const parameters = {} as any;
 
     //#region Find signer's hashing algorithm
@@ -2172,7 +1996,7 @@ export class CryptoEngine {
     return parameters;
   }
 
-  public async getPublicKey(publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, parameters: CryptoEnginePublicKeyParams | null = null): Promise<CryptoKey> {
+  public async getPublicKey(publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, parameters?: type.CryptoEnginePublicKeyParams): Promise<CryptoKey> {
     if (!parameters) {
       parameters = this.fillPublicKeyParameters(publicKeyInfo, signatureAlgorithm);
     }
@@ -2189,19 +2013,19 @@ export class CryptoEngine {
     );
   }
 
-  public async verifyWithPublicKey(data: ArrayBuffer, signature: asn1js.BitString | asn1js.OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm: string | null = null): Promise<boolean> {
+  public async verifyWithPublicKey(data: ArrayBuffer, signature: asn1js.BitString | asn1js.OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean> {
     //#region Find signer's hashing algorithm
     let publicKey: CryptoKey;
-    if (shaAlgorithm === null) {
+    if (!shaAlgorithm) {
       shaAlgorithm = this.getHashAlgorithm(signatureAlgorithm);
-      if (shaAlgorithm === "")
+      if (!shaAlgorithm)
         throw new Error(`Unsupported signature algorithm: ${signatureAlgorithm.algorithmId}`);
 
       //#region Import public key
       publicKey = await this.getPublicKey(publicKeyInfo, signatureAlgorithm);
       //#endregion
     } else {
-      const parameters = {} as CryptoEnginePublicKeyParams;
+      const parameters = {} as type.CryptoEnginePublicKeyParams;
 
       //#region Get information about public key algorithm and default parameters for import
       let algorithmId;

@@ -63,10 +63,7 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
 		});
 
 		if ("signedAttrs" in cmsSignedSimp.signerInfos[0]) {
-			const crypto = pkijs.getCrypto();
-			if (typeof crypto === "undefined")
-				throw new Error("WebCrypto extension is not installed");
-
+			const crypto = pkijs.getCrypto(true);
 			let shaAlgorithm = "";
 
 			switch (cmsSignedSimp.signerInfos[0].digestAlgorithm.algorithmId) {

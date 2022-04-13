@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { getEngine } from "./common";
+import * as common from "./common";
 import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
 import { Time, TimeSchema } from "./Time";
@@ -471,11 +471,11 @@ export class CertificateRevocationList implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Initial variables
-    const engine = getEngine();
+    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
-    const signatureParameters = await engine.subtle.getSignatureParameters(privateKey, hashAlgorithm);
+    const signatureParameters = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
     const { parameters } = signatureParameters;
     this.signature = signatureParameters.signatureAlgorithm;
     this.signatureAlgorithm = signatureParameters.signatureAlgorithm;
@@ -486,7 +486,7 @@ export class CertificateRevocationList implements Schema.SchemaCompatible {
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await engine.subtle.signWithPrivateKey(this.tbs, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(this.tbs, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -499,7 +499,7 @@ export class CertificateRevocationList implements Schema.SchemaCompatible {
     //#region Global variables
     let subjectPublicKeyInfo: PublicKeyInfo | undefined;
 
-    const engine = getEngine();
+    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Get information about CRL issuer certificate
@@ -535,7 +535,7 @@ export class CertificateRevocationList implements Schema.SchemaCompatible {
     }
     //#endregion
 
-    return engine.subtle.verifyWithPublicKey(this.tbs, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(this.tbs, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

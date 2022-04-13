@@ -9,12 +9,13 @@ export interface NodeEngineEncryptParams extends pkijs.CryptoEngineEncryptParams
 
 export default class NodeEngine extends pkijs.CryptoEngine {
 
-  constructor(parameters: pkijs.CryptoEngineParameters) {
-    super(parameters);
+  constructor() {
+    super({
+      crypto: nodeSpecificCrypto as any,
+      subtle: {} as any,
+      name: "nodeCryptoEngine"
+    });
 
-    this.crypto = nodeSpecificCrypto as any;
-    this.subtle = this as any;
-    this.name = "nodeCryptoEngine";
   }
 
   public override getRandomValues<T extends ArrayBufferView | null>(array: T): T {
@@ -493,7 +494,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
         throw new Error(`Incorrect 'parameters.hashAlgorithm' parameter: ${hashAlgorithm}`);
     }
   }
-  public override async stampDataWithPassword(parameters: pkijs.StampDataWithPasswordParams): Promise<ArrayBuffer> {
+  public override async stampDataWithPassword(parameters: pkijs.CryptoEngineStampDataWithPasswordParams): Promise<ArrayBuffer> {
     pkijs.ParameterError.assert(parameters, "password", "hashAlgorithm", "salt", "iterationCount", "contentToStamp");
 
     const length = this.getHashAlgorithmLength(parameters.hashAlgorithm);
@@ -501,7 +502,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     return nodeSpecificCrypto.stampDataWithPassword(parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount, parameters.contentToStamp);
   }
 
-  public override async verifyDataStampedWithPassword(parameters: pkijs.VerifyDataStampedWithPasswordParams): Promise<boolean> {
+  public override async verifyDataStampedWithPassword(parameters: pkijs.CryptoEngineVerifyDataStampedWithPasswordParams): Promise<boolean> {
     pkijs.ParameterError.assert(parameters, "password", "hashAlgorithm", "salt", "iterationCount", "contentToVerify", "signatureToVerify");
 
     const length = this.getHashAlgorithmLength(parameters.hashAlgorithm);
