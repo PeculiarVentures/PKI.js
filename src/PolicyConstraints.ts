@@ -64,7 +64,7 @@ export class PolicyConstraints implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * PolicyConstraints ::= SEQUENCE {
    *    requireExplicitPolicy           [0] SkipCerts OPTIONAL,
    *    inhibitPolicyMapping            [1] SkipCerts OPTIONAL }

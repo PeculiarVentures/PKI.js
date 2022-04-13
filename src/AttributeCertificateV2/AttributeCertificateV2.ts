@@ -70,7 +70,7 @@ export class AttributeCertificateV2 implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * AttributeCertificate ::= SEQUENCE {
    *   acinfo               AttributeCertificateInfoV2,
    *   signatureAlgorithm   AlgorithmIdentifier,

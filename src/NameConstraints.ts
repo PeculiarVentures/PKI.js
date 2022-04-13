@@ -65,7 +65,7 @@ export class NameConstraints implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * NameConstraints ::= SEQUENCE {
    *    permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
    *    excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }

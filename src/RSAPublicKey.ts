@@ -74,7 +74,7 @@ export class RSAPublicKey implements Schema.SchemaCompatible {
 	 * Return value of pre-defined ASN.1 schema for current class
 	 *
 	 * ASN.1 schema:
-	 * ```asn1
+	 * ```
 	 * RSAPublicKey ::= Sequence {
 	 *    modulus           Integer,  -- n
 	 *    publicExponent    Integer   -- e

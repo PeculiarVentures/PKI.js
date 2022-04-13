@@ -38,7 +38,7 @@ export interface PFXParsedValue {
   integrityMode?: number;
 }
 
-type MakeInternalValuesParams =
+export type MakeInternalValuesParams =
   {
     // empty
   }
@@ -139,7 +139,7 @@ export class PFX implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * PFX ::= SEQUENCE {
    *    version		INTEGER {v3(3)}(v3,...),
    *    authSafe	ContentInfo,

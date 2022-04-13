@@ -67,7 +67,7 @@ export class AttributeTypeAndValue {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * AttributeTypeAndValue ::= Sequence {
    *    type     AttributeType,
    *    value    AttributeValue }

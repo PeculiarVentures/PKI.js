@@ -95,7 +95,7 @@ export class Accuracy {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * Accuracy ::= SEQUENCE {
    *    seconds        INTEGER              OPTIONAL,
    *    millis     [0] INTEGER  (1..999)    OPTIONAL,

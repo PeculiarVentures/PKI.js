@@ -85,7 +85,7 @@ export class OtherPrimeInfo implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * OtherPrimeInfo ::= Sequence {
    *    prime             Integer,  -- ri
    *    exponent          Integer,  -- di

@@ -109,7 +109,7 @@ export class KEKRecipientInfo implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * KEKRecipientInfo ::= SEQUENCE {
    *    version CMSVersion,  -- always set to 4
    *    kekid KEKIdentifier,

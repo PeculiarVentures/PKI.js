@@ -72,7 +72,7 @@ export class RecipientEncryptedKeys implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * RecipientEncryptedKeys ::= SEQUENCE OF RecipientEncryptedKey
    * ```
    *

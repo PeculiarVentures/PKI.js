@@ -60,7 +60,7 @@ export class OtherRevocationInfoFormat implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * OtherCertificateFormat ::= SEQUENCE {
    *    otherRevInfoFormat OBJECT IDENTIFIER,
    *    otherRevInfo ANY DEFINED BY otherCertFormat }

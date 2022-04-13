@@ -40,7 +40,7 @@ export interface BasicOCSPResponseParameters extends Schema.SchemaConstructor {
   certs?: Certificate[];
 }
 
-interface BasicOCSPResponseVerifyParams {
+export interface BasicOCSPResponseVerifyParams {
   trustedCerts?: Certificate[];
 }
 
@@ -132,7 +132,7 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * BasicOCSPResponse       ::= SEQUENCE {
    *    tbsResponseData      ResponseData,
    *    signatureAlgorithm   AlgorithmIdentifier,

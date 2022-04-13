@@ -91,7 +91,7 @@ export class OCSPRequest {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * OCSPRequest     ::=     SEQUENCE {
    *    tbsRequest                  TBSRequest,
    *    optionalSignature   [0]     EXPLICIT Signature OPTIONAL }

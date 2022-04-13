@@ -98,7 +98,7 @@ export class RSASSAPSSParams implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * RSASSA-PSS-params  ::=  Sequence  {
    *    hashAlgorithm      [0] HashAlgorithm DEFAULT sha1Identifier,
    *    maskGenAlgorithm   [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,

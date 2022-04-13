@@ -61,7 +61,7 @@ export class PolicyQualifierInfo {
 	 * Return value of pre-defined ASN.1 schema for current class
 	 *
 	 * ASN.1 schema:
-	 * ```asn1
+	 * ```
 	 * PolicyQualifierInfo ::= SEQUENCE {
 	 *    policyQualifierId  PolicyQualifierId,
 	 *    qualifier          ANY DEFINED BY policyQualifierId }

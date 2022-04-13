@@ -90,7 +90,7 @@ export class Signature implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * Signature       ::=     SEQUENCE {
    *    signatureAlgorithm      AlgorithmIdentifier,
    *    signature               BIT STRING,

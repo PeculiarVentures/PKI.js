@@ -1,8 +1,8 @@
 # PKIjs
 
-[![License](https://img.shields.io/badge/license-BSD-green.svg?style=flat)](https://github.com/PeculiarVentures/PKI.js/blob/master/LICENSE) 
+[![License](https://img.shields.io/badge/license-BSD-green.svg?style=flat)](https://github.com/PeculiarVentures/PKI.js/blob/master/LICENSE)
 [![CircleCI](https://circleci.com/gh/PeculiarVentures/PKI.js/tree/master.svg?style=svg)](https://circleci.com/gh/PeculiarVentures/PKI.js/tree/master)
- [![Known Vulnerabilities](https://snyk.io/test/github/PeculiarVentures/PKI.js/badge.svg)](https://snyk.io/test/github/PeculiarVentures/PKI.js) [![Coverage Status](https://coveralls.io/repos/github/PeculiarVentures/PKI.js/badge.svg)](https://coveralls.io/github/PeculiarVentures/PKI.js) 
+ [![Known Vulnerabilities](https://snyk.io/test/github/PeculiarVentures/PKI.js/badge.svg)](https://snyk.io/test/github/PeculiarVentures/PKI.js) [![Coverage Status](https://coveralls.io/repos/github/PeculiarVentures/PKI.js/badge.svg)](https://coveralls.io/github/PeculiarVentures/PKI.js)
 
 
 [![NPM](https://nodei.co/npm/pkijs.png?downloads=true&downloadRank=true)](https://nodei.co/npm/pkijs/)
@@ -119,15 +119,15 @@ PKI.js V2 (ES2015 version) is **incompatible** with PKI.js V1 code. In order to 
 ## Information about PKIjs internal structure
 
 First of all a few words about what the PKI itself is. The PKI is a set of many related RFCs (Request For Comment, [_**https://www.ietf.org/standards/rfcs/**_](https://www.ietf.org/standards/rfcs/)). All PKI data initially are in binary format, called ASN.1. Each ASN.1 PKI-related structure has its "ASN.1 schema" - textual representation in ASN.1 notation language. Inside PKI documentation you would find something like this (example from RFC5280):
-```asn1
+```
 Certificate  ::=  SEQUENCE  {
     tbsCertificate       TBSCertificate,
     signatureAlgorithm   AlgorithmIdentifier,
     signatureValue       BIT STRING  }
 ```
- 
+
 The PKIjs library is a set of "helpers", providing you easy access to necessary internal structures. Each PKIjs class is a direct "mirror" (in most cases) of ASN.1 structure, defined in related RFC. So, assume we have this ASN.1 structure representation (example from RFC5280):
-```asn1
+```
 AccessDescription  ::=  SEQUENCE {
        accessMethod          OBJECT IDENTIFIER,
        accessLocation        GeneralName  }
@@ -140,14 +140,14 @@ Each PKIjs class has these common functions:
 * `schema` - Static function. The function returns pre-defined ASN.1 schema for this particular class. Usually using in call to `asn1js.compareSchema` function;
 * `fromSchema` - Major function initializing internal PKIjs class data from input _**[ASN1js]**_ internal data;
 * `toSchema` - Major function producing _**[ASN1js]**_ internal data from PKIjs class data;
-* `toJSON` - Standard function producing JSON representation of each class. Usually using indirectly during call to `JSON.stringify(<PKIjs class>)`;  
+* `toJSON` - Standard function producing JSON representation of each class. Usually using indirectly during call to `JSON.stringify(<PKIjs class>)`;
 
 In some complicated case PKIjs class could have additional functions, specific only for this particular class. For example, `sign`, `verify` etc.
 
 So, here is step-by-step description on how PKIjs parses binary PKI structures:
 1) Binary data parsed via _**[ASN1js]**_ package (`asn1js.fromBER` function). Outcome from this step is _**[ASN1js]**_ internal classes;
 2) In order to produce a "helper" user need to provide data from step #1 to specific class of PKIjs to function `<class>.fromSchema` (for example `Certificate.fromSchema`). Usually code will looks like `const cert = new Certificate({ schema: asn1.result })` - this code internally would call `Certificate.fromSchema` function;
-3) Inside `fromSchema` function PKIjs class would parse _**[ASN1js]**_ internal structures and produce easy to access class properties. Also in `fromSchema` PKIjs compare input ASN.1 structure with how it should like (compare with pre-defined ASN.1 schema); 
+3) Inside `fromSchema` function PKIjs class would parse _**[ASN1js]**_ internal structures and produce easy to access class properties. Also in `fromSchema` PKIjs compare input ASN.1 structure with how it should like (compare with pre-defined ASN.1 schema);
 
 So, usually user would use this code snippet:
 ```javascript
@@ -286,9 +286,9 @@ _**WARNING**_: if you would try to build PKI.js code for Node version <= 4 then 
 ### How to use PKI.js ES6 files directly in browser
 
 Currently there is a possibility to use ES6 modules directly from Web pages, without any transpilations (Babel, Rollup etc.). In order to do this all used files must point to direct or relative names and should be achievable via browser. Almost all modern browsers would support the "native ES6 modules". You could check [_**this link to caniuse site**_](https://caniuse.com/#feat=es6-module) for current status.
- 
+
 You could check [_**full-featured example here**_](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser). And please carefully read [_**this README**_](https://github.com/PeculiarVentures/PKI.js/tree/master/examples/HowToUseES6DirectlyInBrowser/README.md) before run it.
- 
+
 You could use PKI.js code by this way, but before you need to perform some additional steps:
 - Replace all occurences of `import * as asn1js from "asn1js"` and `import { <something> } from "pvutils"` inside `pkijs/src` directory with correct paths to `asn1js` and `pvutils` files. Usually you would have something like `import * as asn1js from "../../asn1js/src/asn1.js"` and `import { <something> } from "./pvutils/src/utils.js"`. Correct paths depends on your project structure. Also you would need to replace path to `pvutils` inside used `asn1js/src/asn1.js` file. How to replace - usually it is done via `sed "s/<what_to_find>/<replacement>/g" *` inside target directory;
 - Make a correct main ES6 file (initial application). It could be not a separate ES6 file, but a script on your page, but anyway it must has exports inside `windows` namespace in order to communicate with Web page:
@@ -343,7 +343,7 @@ Live examples can be found at [_**pkijs.org**_](https://pkijs.org).
 
 ## Tests using Node environment
 
-_**WARNING:**_ 
+_**WARNING:**_
 
 **!!!** in order to test PKIjs in Node environment you would need to install additional package `node-webcrypto-ossl` **!!!**
 
@@ -379,35 +379,35 @@ Please report bugs either as pull requests or as issues in the issue tracker. PK
 
 ## License
 
-*Copyright (c) 2016-2018, [_**Peculiar Ventures**_](http://peculiarventures.com/)* 
+*Copyright (c) 2016-2018, [_**Peculiar Ventures**_](http://peculiarventures.com/)*
 *All rights reserved.*
 
 *Author 2014-2018 [_**Yury Strozhevsky**_](http://www.strozhevsky.com/).*
 
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, 
+1. Redistributions of source code must retain the above copyright notice,
    this list of conditions and the following disclaimer.
 
-2. Redistributions in binary form must reproduce the above copyright notice, 
-   this list of conditions and the following disclaimer in the documentation 
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
 
-3. Neither the name of the copyright holder nor the names of its contributors 
-   may be used to endorse or promote products derived from this software without 
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software without
    specific prior written permission.
 
-*THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
-OF SUCH DAMAGE.* 
+*THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+OF SUCH DAMAGE.*
 
 
 [ASN.1]: http://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One

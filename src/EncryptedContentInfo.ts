@@ -126,7 +126,7 @@ export class EncryptedContentInfo implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * EncryptedContentInfo ::= SEQUENCE {
    *    contentType ContentType,
    *    contentEncryptionAlgorithm ContentEncryptionAlgorithmIdentifier,

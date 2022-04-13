@@ -80,7 +80,7 @@ export class OCSPResponse implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * OCSPResponse ::= SEQUENCE {
    *    responseStatus         OCSPResponseStatus,
    *    responseBytes          [0] EXPLICIT ResponseBytes OPTIONAL }

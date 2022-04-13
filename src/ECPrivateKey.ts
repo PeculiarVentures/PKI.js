@@ -120,7 +120,7 @@ export class ECPrivateKey implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * ECPrivateKey ::= SEQUENCE {
    * version        INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
    * privateKey     OCTET STRING,

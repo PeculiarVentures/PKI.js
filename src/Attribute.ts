@@ -81,7 +81,7 @@ export class Attribute {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
    *    type   ATTRIBUTE.&id({IOSet}),
    *    values SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{@type})

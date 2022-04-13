@@ -81,7 +81,7 @@ export class OtherKeyAttribute implements Schema.SchemaCompatible {
 	 * Return value of pre-defined ASN.1 schema for current class
 	 *
 	 * ASN.1 schema:
-	 * ```asn1
+	 * ```
 	 * OtherKeyAttribute ::= SEQUENCE {
 	 *    keyAttrId OBJECT IDENTIFIER,
 	 *    keyAttr ANY DEFINED BY keyAttrId OPTIONAL }

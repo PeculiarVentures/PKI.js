@@ -79,7 +79,7 @@ export class RecipientIdentifier implements Schema.SchemaCompatible {
 	 * Return value of pre-defined ASN.1 schema for current class
 	 *
 	 * ASN.1 schema:
-	 * ```asn1
+	 * ```
 	 * RecipientIdentifier ::= CHOICE {
 	 *    issuerAndSerialNumber IssuerAndSerialNumber,
 	 *    subjectKeyIdentifier [0] SubjectKeyIdentifier }

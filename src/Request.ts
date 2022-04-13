@@ -86,7 +86,7 @@ export class Request implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * Request         ::=     SEQUENCE {
    *    reqCert                     CertID,
    *    singleRequestExtensions     [0] EXPLICIT Extensions OPTIONAL }

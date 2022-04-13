@@ -109,7 +109,7 @@ export class KeyTransRecipientInfo {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * KeyTransRecipientInfo ::= SEQUENCE {
    *    version CMSVersion,  -- always set to 0 or 2
    *    rid RecipientIdentifier,

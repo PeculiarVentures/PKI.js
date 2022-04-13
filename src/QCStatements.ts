@@ -18,7 +18,7 @@ export interface QCStatementParameters extends Schema.SchemaConstructor {
   type?: any;
 }
 
-type QCStatementSchema = Schema.SchemaParameters<{
+export type QCStatementSchema = Schema.SchemaParameters<{
   id?: string;
   type?: string;
 }>;
@@ -88,7 +88,7 @@ export class QCStatement implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
      *	 QCStatement ::= SEQUENCE {
    *       statementId   QC-STATEMENT.&id({SupportedStatements}),
    *       statementInfo QC-STATEMENT.&Type({SupportedStatements}{@statementId}) OPTIONAL
@@ -239,7 +239,7 @@ export class QCStatements implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * QCStatements ::= SEQUENCE OF QCStatement
    * ```
    *

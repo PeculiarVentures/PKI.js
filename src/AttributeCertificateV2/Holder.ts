@@ -82,7 +82,7 @@ export class Holder implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * Holder ::= SEQUENCE {
    *   baseCertificateID   [0] IssuerSerial OPTIONAL,
    *       -- the issuer and serial number of

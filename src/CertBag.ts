@@ -90,7 +90,7 @@ export class CertBag implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * CertBag ::= SEQUENCE {
    *    certId    BAG-TYPE.&id   ({CertTypes}),
    *    certValue [0] EXPLICIT BAG-TYPE.&Type ({CertTypes}{@certId})

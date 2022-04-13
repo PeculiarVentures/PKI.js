@@ -129,7 +129,7 @@ export class KeyAgreeRecipientInfo implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * KeyAgreeRecipientInfo ::= SEQUENCE {
    *    version CMSVersion,  -- always set to 3
    *    originator [0] EXPLICIT OriginatorIdentifierOrKey,

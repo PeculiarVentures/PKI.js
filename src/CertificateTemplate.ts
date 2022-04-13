@@ -68,7 +68,7 @@ export class CertificateTemplate {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * CertificateTemplateOID ::= SEQUENCE {
      *    templateID              OBJECT IDENTIFIER,
      *    templateMajorVersion    INTEGER (0..4294967295) OPTIONAL,

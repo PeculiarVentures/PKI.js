@@ -76,7 +76,7 @@ export class V2Form implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * V2Form ::= SEQUENCE {
    *   issuerName            GeneralNames  OPTIONAL,
    *   baseCertificateID     [0] IssuerSerial  OPTIONAL,

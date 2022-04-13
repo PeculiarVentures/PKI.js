@@ -105,7 +105,7 @@ export class KEKIdentifier implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * KEKIdentifier ::= SEQUENCE {
    *    keyIdentifier OCTET STRING,
    *    date GeneralizedTime OPTIONAL,

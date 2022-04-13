@@ -129,7 +129,7 @@ export class TBSRequest implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * TBSRequest      ::=     SEQUENCE {
    *    version             [0]     EXPLICIT Version DEFAULT v1,
    *    requestorName       [1]     EXPLICIT GeneralName OPTIONAL,

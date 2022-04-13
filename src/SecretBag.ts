@@ -76,7 +76,7 @@ export class SecretBag {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * SecretBag ::= SEQUENCE {
    *    secretTypeId BAG-TYPE.&id ({SecretTypes}),
    *    secretValue  [0] EXPLICIT BAG-TYPE.&Type ({SecretTypes}{@secretTypeId})

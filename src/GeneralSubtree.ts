@@ -72,7 +72,7 @@ export class GeneralSubtree implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * GeneralSubtree ::= SEQUENCE {
    *    base                    GeneralName,
    *    minimum         [0]     BaseDistance DEFAULT 0,

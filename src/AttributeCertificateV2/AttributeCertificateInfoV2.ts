@@ -137,7 +137,7 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * AttributeCertificateInfoV2 ::= SEQUENCE {
    *   version                 AttCertVersion, -- version is v2
    *   holder                  Holder,

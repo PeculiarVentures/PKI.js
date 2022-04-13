@@ -82,7 +82,7 @@ export class MessageImprint implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * MessageImprint ::= SEQUENCE  {
    *    hashAlgorithm                AlgorithmIdentifier,
    *    hashedMessage                OCTET STRING  }

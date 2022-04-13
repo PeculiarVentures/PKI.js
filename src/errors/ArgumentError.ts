@@ -1,5 +1,5 @@
 
-interface AnyConstructor {
+export interface AnyConstructor {
   new(args: any): any;
 }
 

@@ -61,7 +61,7 @@ export class PBES2Params implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * PBES2-params ::= SEQUENCE {
    *    keyDerivationFunc AlgorithmIdentifier {{PBES2-KDFs}},
    *    encryptionScheme AlgorithmIdentifier {{PBES2-Encs}} }

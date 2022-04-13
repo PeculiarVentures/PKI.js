@@ -103,7 +103,7 @@ export class AlgorithmIdentifier implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * AlgorithmIdentifier  ::=  Sequence  {
    *    algorithm               OBJECT IDENTIFIER,
    *    parameters              ANY DEFINED BY algorithm OPTIONAL  }

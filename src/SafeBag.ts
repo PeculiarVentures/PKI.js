@@ -89,7 +89,7 @@ export class SafeBag implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * SafeBag ::= SEQUENCE {
    *    bagId	      	BAG-TYPE.&id ({PKCS12BagSet}),
    *    bagValue      [0] EXPLICIT BAG-TYPE.&Type({PKCS12BagSet}{@bagId}),

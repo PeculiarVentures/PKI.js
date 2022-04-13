@@ -57,7 +57,7 @@ export class BasicConstraints implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * BasicConstraints ::= SEQUENCE {
    *    cA                      BOOLEAN DEFAULT FALSE,
    *    pathLenConstraint       INTEGER (0..MAX) OPTIONAL }

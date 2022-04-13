@@ -75,7 +75,7 @@ export class AuthorityKeyIdentifier implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * AuthorityKeyIdentifier OID ::= 2.5.29.35
    *
    * AuthorityKeyIdentifier ::= SEQUENCE {

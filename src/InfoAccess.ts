@@ -50,7 +50,7 @@ export class InfoAccess implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * AuthorityInfoAccessSyntax  ::=
    * SEQUENCE SIZE (1..MAX) OF AccessDescription
    * ```

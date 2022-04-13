@@ -53,7 +53,7 @@ export class CertificatePolicies implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * certificatePolicies ::= SEQUENCE SIZE (1..MAX) OF PolicyInformation
    * ```
    *

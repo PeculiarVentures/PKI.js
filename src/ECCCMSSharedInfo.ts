@@ -87,7 +87,7 @@ export class ECCCMSSharedInfo implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * ECC-CMS-SharedInfo  ::=  SEQUENCE {
    *    keyInfo      AlgorithmIdentifier,
    *    entityUInfo  [0] EXPLICIT OCTET STRING OPTIONAL,

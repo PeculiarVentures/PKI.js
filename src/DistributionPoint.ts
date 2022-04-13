@@ -80,7 +80,7 @@ export class DistributionPoint implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * DistributionPoint ::= SEQUENCE {
    *    distributionPoint       [0]     DistributionPointName OPTIONAL,
    *    reasons                 [1]     ReasonFlags OPTIONAL,

@@ -110,7 +110,7 @@ export class CertID implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```asn1
+   * ```
    * CertID          ::=     SEQUENCE {
    *    hashAlgorithm       AlgorithmIdentifier,
    *    issuerNameHash      OCTET STRING, -- Hash of issuer's DN

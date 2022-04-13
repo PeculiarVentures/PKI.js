@@ -108,7 +108,7 @@ export class PasswordRecipientinfo implements Schema.SchemaCompatible {
 	 * Return value of pre-defined ASN.1 schema for current class
 	 *
 	 * ASN.1 schema:
-	 * ```asn1
+	 * ```
 	 * PasswordRecipientInfo ::= SEQUENCE {
 	 *    version CMSVersion,   -- Always set to 0
 	 *    keyDerivationAlgorithm [0] KeyDerivationAlgorithmIdentifier OPTIONAL,
