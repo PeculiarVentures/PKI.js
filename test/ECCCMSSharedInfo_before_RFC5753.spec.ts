@@ -28,7 +28,7 @@ AQEIMA0GCWCGSAFlAwQCAQUAogMCASADggEBAFT2wAXEKwmK0YgFWhX/QdWUAG4mlvcxqF+Re+UyW0/k
 hfHKhgKP/z+CWdAKm1DD668rf7nQo4lQH3o8F3ksK3sTqTi5UXDB3S7xWnv1YFh73oQep3aDfKzpccLm
 kFMUFatMJZmd+3N9uav5IA8TIIkFCqDVB59X9OCGvNubRZA+5q41b7TovTA04WBpiUxCWtKWJtArcU1I
 hmu2w50768pQp9adVJCy7byQIzA1VE4g+85srzEiML2ICC1AVm25OzNs73nkDtdivZF81Wk1qheN0m57
-NgeGVBTBKS4YLMeiMowMXJKoFnFqwyv+0JL0ZeFCh0al2RF+FDk86b1rykY===
+NgeGVBTBKS4YLMeiMowMXJKoFnFqwyv+0JL0ZeFCh0al2RF+FDk86b1rykY=
 -----END CERTIFICATE-----
 `;
 const envelopedDataPem = `
@@ -41,7 +41,7 @@ MAA2ADQAMABjAGYANQAyADMAMgA4ADkAZQBiAGYAMgBiADkAOAA4ADIAYwA2AGIAYQAxADgAYQAxAGIA
 OQBkAGMAYwAwAGEAMABmADMAMABiADcAOAA2ADIAZABjADgAMgAxADEAZQA4ADAAZAAyAGIANAA1AGEA
 NQBmAGEANQBkAggJNfwJUKlVlwQYMK8dCPR+rZ+p8f9JoB2+ns5mGIV45F7MMIAGCSqGSIb3DQEHATAd
 BglghkgBZQMEAQIEEFlT3Jb453LG9SVYa7MaWiCggAQgXNT1MFuyL+mH3XORYWrmsk9a1qui+48NZZbJ
-qH9W/zoAAAAAoRgwFgYIBAB/ABEAAQAxCgIIMltJu53L4Og===
+qH9W/zoAAAAAoRgwFgYIBAB/ABEAAQAxCgIIMltJu53L4Og=
 -----END CMS-----
 `;
 
@@ -58,7 +58,7 @@ it("EnvelopedData with an ECCCMSSharedInfo containing algorithmParams should be 
 });
 
 function pemToDer(pemString: string) {
-	const derBase64 = pemString.replace(/(-----(BEGIN|END) [\w ]+-----|\n)/g, "");
+	const derBase64 = pemString.replace(/(-----(BEGIN|END) [\w ]+-----|\n)/g, "").replace(/[\r\n]/g, "");
 	return pvtsutils.Convert.FromBase64(derBase64);
 }
 
