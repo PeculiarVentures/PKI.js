@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import ContentInfo from "./ContentInfo";
-import SafeContents from "./SafeContents";
-import EnvelopedData from "./EnvelopedData";
-import EncryptedData from "./EncryptedData";
+import { ContentInfo } from "./ContentInfo";
+import { SafeContents } from "./SafeContents";
+import { EnvelopedData } from "./EnvelopedData";
+import { EncryptedData } from "./EncryptedData";
 import * as Schema from "./Schema";
 import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData } from "./ObjectIdentifiers";
 import { ArgumentError, ParameterError } from "./errors";
@@ -23,7 +23,7 @@ export type SafeContent = ContentInfo | EncryptedData | EnvelopedData | object;
 /**
  * Class from RFC7292
  */
-export default class AuthenticatedSafe implements Schema.SchemaCompatible {
+export class AuthenticatedSafe implements Schema.SchemaCompatible {
 
   public safeContents: ContentInfo[];
   public parsedValue: any;

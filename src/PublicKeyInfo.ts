@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import ECPublicKey from "./ECPublicKey";
-import RSAPublicKey from "./RSAPublicKey";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { ECPublicKey } from "./ECPublicKey";
+import { RSAPublicKey } from "./RSAPublicKey";
 import * as Schema from "./Schema";
 
 const ALGORITHM = "algorithm";
@@ -34,7 +34,7 @@ export type PublicKeyInfoSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5280
  */
-export default class PublicKeyInfo implements Schema.SchemaCompatible {
+export class PublicKeyInfo implements Schema.SchemaCompatible {
 
   /**
    * Algorithm identifier

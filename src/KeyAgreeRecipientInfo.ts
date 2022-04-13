@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import OriginatorIdentifierOrKey, { OriginatorIdentifierOrKeySchema } from "./OriginatorIdentifierOrKey";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import RecipientEncryptedKeys, { RecipientEncryptedKeysSchema } from "./RecipientEncryptedKeys";
-import Certificate from "./Certificate";
+import { OriginatorIdentifierOrKey, OriginatorIdentifierOrKeySchema } from "./OriginatorIdentifierOrKey";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { RecipientEncryptedKeys, RecipientEncryptedKeysSchema } from "./RecipientEncryptedKeys";
+import { Certificate } from "./Certificate";
 import * as Schema from "./Schema";
 
 const VERSION = "version";
@@ -34,7 +34,7 @@ export interface KeyAgreeRecipientInfoParameters extends Schema.SchemaConstructo
 /**
  * Class from RFC5652
  */
-export default class KeyAgreeRecipientInfo implements Schema.SchemaCompatible {
+export class KeyAgreeRecipientInfo implements Schema.SchemaCompatible {
   version: number;
   originator: OriginatorIdentifierOrKey;
   ukm?: asn1js.OctetString;

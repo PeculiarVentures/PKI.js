@@ -10,7 +10,7 @@ export interface PolicyQualifierInfoParameters extends Schema.SchemaConstructor 
 /**
  * Class from RFC5280
  */
-export default class PolicyQualifierInfo {
+export class PolicyQualifierInfo {
 
 	public policyQualifierId: string;
 	public qualifier: Schema.SchemaType;

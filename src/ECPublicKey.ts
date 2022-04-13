@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import ECNamedCurves from "./ECNamedCurves";
+import { ECNamedCurves } from "./ECNamedCurves";
 import { ArgumentError, ParameterError } from "./errors";
 import * as Schema from "./Schema";
 
@@ -24,7 +24,7 @@ export interface ECPublicKeyParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5480
  */
-export default class ECPublicKey implements Schema.SchemaCompatible {
+export class ECPublicKey implements Schema.SchemaCompatible {
 
   public namedCurve: string;
   public x: ArrayBuffer;

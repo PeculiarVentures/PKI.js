@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import OtherKeyAttribute, { OtherKeyAttributeSchema } from "./OtherKeyAttribute";
+import { OtherKeyAttribute, OtherKeyAttributeSchema } from "./OtherKeyAttribute";
 import * as Schema from "./Schema";
 
 const SUBJECT_KEY_IDENTIFIER = "subjectKeyIdentifier";
@@ -27,7 +27,7 @@ export type RecipientKeyIdentifierSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5652
  */
-export default class RecipientKeyIdentifier {
+export class RecipientKeyIdentifier {
 
   public subjectKeyIdentifier: asn1js.OctetString;
   public date?: asn1js.GeneralizedTime;

@@ -19,7 +19,7 @@ export type OtherKeyAttributeSchema = Schema.SchemaType;
 /**
  * Class from RFC5652
  */
-export default class OtherKeyAttribute implements Schema.SchemaCompatible {
+export class OtherKeyAttribute implements Schema.SchemaCompatible {
 
 	public keyAttrId: string;
 	public keyAttr?: any;

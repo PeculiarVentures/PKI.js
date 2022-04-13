@@ -18,7 +18,7 @@ export interface CertificateTemplateParameters extends Schema.SchemaConstructor 
  * Class from "[MS-WCCE]: Windows Client Certificate Enrollment Protocol"
  */
 @extensionValue(id_MicrosoftCertTemplateV2, "MicrosoftCertTemplateV2")
-export default class CertificateTemplate {
+export class CertificateTemplate {
 
   public templateID: string;
   public templateMajorVersion?: number;

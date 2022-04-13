@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import DigestInfo, { DigestInfoSchema } from "./DigestInfo";
+import { DigestInfo, DigestInfoSchema } from "./DigestInfo";
 import * as Schema from "./Schema";
 
 const MAC = "mac";
@@ -27,7 +27,7 @@ export type MacDataSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC7292
  */
-export default class MacData implements Schema.SchemaCompatible {
+export class MacData implements Schema.SchemaCompatible {
 
   public mac: DigestInfo;
   public macSalt: asn1js.OctetString;

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AccessDescription from "./AccessDescription";
+import { AccessDescription } from "./AccessDescription";
 import { extensionValue } from "./ExtensionValueFactory";
 import { id_AuthorityInfoAccess, id_SubjectInfoAccess } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
@@ -16,7 +16,7 @@ export interface InfoAccessParameters extends Schema.SchemaConstructor {
  */
 @extensionValue(id_AuthorityInfoAccess, "AuthorityInfoAccess")
 @extensionValue(id_SubjectInfoAccess, "SubjectInfoAccess")
-export default class InfoAccess implements Schema.SchemaCompatible {
+export class InfoAccess implements Schema.SchemaCompatible {
 
   public accessDescriptions: AccessDescription[];
 

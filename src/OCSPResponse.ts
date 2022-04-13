@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import ResponseBytes, { ResponseBytesSchema } from "./ResponseBytes";
-import BasicOCSPResponse from "./BasicOCSPResponse";
+import { ResponseBytes, ResponseBytesSchema } from "./ResponseBytes";
+import { BasicOCSPResponse } from "./BasicOCSPResponse";
 import * as Schema from "./Schema";
-import Certificate from "./Certificate";
+import { Certificate } from "./Certificate";
 import { id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
 
 const RESPONSE_STATUS = "responseStatus";
@@ -17,7 +17,7 @@ export interface OCSPResponseParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC6960
  */
-export default class OCSPResponse implements Schema.SchemaCompatible {
+export class OCSPResponse implements Schema.SchemaCompatible {
 
   public responseStatus: asn1js.Enumerated;
   public responseBytes?: ResponseBytes;

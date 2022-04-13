@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
 const VERSION = "version";
@@ -27,7 +27,7 @@ export interface PasswordRecipientinfoParameters extends Schema.SchemaConstructo
  * Class from RFC5652
  */
 // TODO rename to PasswordRecipientInfo
-export default class PasswordRecipientinfo implements Schema.SchemaCompatible {
+export class PasswordRecipientinfo implements Schema.SchemaCompatible {
 
 	public version: number;
 	public keyDerivationAlgorithm?: AlgorithmIdentifier;

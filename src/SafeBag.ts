@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import Attribute from "./Attribute";
-import PrivateKeyInfo from "./PrivateKeyInfo";
-import PKCS8ShroudedKeyBag from "./PKCS8ShroudedKeyBag";
-import CertBag from "./CertBag";
-import CRLBag from "./CRLBag";
-import SecretBag from "./SecretBag";
-import SafeContents from "./SafeContents";
+import { Attribute } from "./Attribute";
+import { PrivateKeyInfo } from "./PrivateKeyInfo";
+import { PKCS8ShroudedKeyBag } from "./PKCS8ShroudedKeyBag";
+import { CertBag } from "./CertBag";
+import { CRLBag } from "./CRLBag";
+import { SecretBag } from "./SecretBag";
+import { SafeContents } from "./SafeContents";
 import * as Schema from "./Schema";
 
 const BAG_ID = "bagId";
@@ -28,7 +28,7 @@ export interface SafeBagParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC7292
  */
-export default class SafeBag implements Schema.SchemaCompatible {
+export class SafeBag implements Schema.SchemaCompatible {
 
   public bagId: string;
   public bagValue: BagType;

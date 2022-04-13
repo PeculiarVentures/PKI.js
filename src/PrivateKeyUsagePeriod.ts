@@ -20,7 +20,7 @@ export interface PrivateKeyUsagePeriodParameters extends Schema.SchemaConstructo
  * Class from RFC5280
  */
 @extensionValue(id_PrivateKeyUsagePeriod, "PrivateKeyUsagePeriod")
-export default class PrivateKeyUsagePeriod implements Schema.SchemaCompatible {
+export class PrivateKeyUsagePeriod implements Schema.SchemaCompatible {
 
   public notBefore?: Date;
   public notAfter?: Date;

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
 import { AttributeCertificateInfoV1, AttributeCertificateInfoV1Schema } from "./AttributeCertificateInfoV1";
 import * as Schema from "../Schema";
 
@@ -22,7 +22,7 @@ export interface AttributeCertificateV1Parameters extends Schema.SchemaConstruct
 /**
  * Class from X.509:1997
  */
-export default class AttributeCertificateV1 implements Schema.SchemaCompatible {
+export class AttributeCertificateV1 implements Schema.SchemaCompatible {
 
   public acinfo: AttributeCertificateInfoV1;
   public signatureAlgorithm: AlgorithmIdentifier;

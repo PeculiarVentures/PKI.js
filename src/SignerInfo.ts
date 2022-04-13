@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import SignedAndUnsignedAttributes, { SignedAndUnsignedAttributesSchema } from "./SignedAndUnsignedAttributes";
-import IssuerAndSerialNumber, { IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { SignedAndUnsignedAttributes, SignedAndUnsignedAttributesSchema } from "./SignedAndUnsignedAttributes";
+import { IssuerAndSerialNumber, IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
 import * as Schema from "./Schema";
 
 const VERSION = "version";
@@ -43,7 +43,7 @@ export interface SignerInfoParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5652
  */
-export default class SignerInfo implements Schema.SchemaCompatible {
+export class SignerInfo implements Schema.SchemaCompatible {
 
   public version: number;
   public sid: Schema.SchemaType;

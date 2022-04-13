@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
 export const HASH_ALGORITHM = "hashAlgorithm";
@@ -23,7 +23,7 @@ export type MessageImprintSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC3161
  */
-export default class MessageImprint implements Schema.SchemaCompatible {
+export class MessageImprint implements Schema.SchemaCompatible {
 
   public hashAlgorithm: AlgorithmIdentifier;
   public hashedMessage: asn1js.OctetString;

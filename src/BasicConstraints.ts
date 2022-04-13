@@ -17,7 +17,7 @@ export interface BasicConstraintsParameters extends Schema.SchemaConstructor {
  * Class from RFC5280
  */
 @extensionValue(id_BasicConstraints, "BasicConstraints")
-export default class BasicConstraints implements Schema.SchemaCompatible {
+export class BasicConstraints implements Schema.SchemaCompatible {
 
   public cA: boolean;
   public pathLenConstraint?: number | asn1js.Integer;

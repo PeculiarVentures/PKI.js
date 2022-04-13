@@ -17,7 +17,7 @@ export interface OtherRevocationInfoFormatParameters extends Schema.SchemaConstr
 /**
  * Class from RFC5652
  */
-export default class OtherRevocationInfoFormat implements Schema.SchemaCompatible {
+export class OtherRevocationInfoFormat implements Schema.SchemaCompatible {
 
   public otherRevInfoFormat: string;
   public otherRevInfo: any;

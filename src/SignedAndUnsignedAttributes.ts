@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import Attribute from "./Attribute";
+import { Attribute } from "./Attribute";
 import * as Schema from "./Schema";
 
 const TYPE = "type";
@@ -24,7 +24,7 @@ export type SignedAndUnsignedAttributesSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5652
  */
-export default class SignedAndUnsignedAttributes implements Schema.SchemaCompatible {
+export class SignedAndUnsignedAttributes implements Schema.SchemaCompatible {
 
   public type: number;
   public attributes: Attribute[];

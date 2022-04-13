@@ -13,7 +13,7 @@ export interface ECNamedCurve {
   size: number;
 }
 
-export default class ECNamedCurves {
+export class ECNamedCurves {
 
   public static readonly namedCurves: Record<string, ECNamedCurve> = {};
 

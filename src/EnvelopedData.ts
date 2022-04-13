@@ -1,28 +1,28 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import OriginatorInfo from "./OriginatorInfo";
-import RecipientInfo from "./RecipientInfo";
-import EncryptedContentInfo, { EncryptedContentInfoSchema } from "./EncryptedContentInfo";
-import Attribute from "./Attribute";
-import AlgorithmIdentifier, { AlgorithmIdentifierParameters } from "./AlgorithmIdentifier";
-import RSAESOAEPParams from "./RSAESOAEPParams";
+import { OriginatorInfo } from "./OriginatorInfo";
+import { RecipientInfo } from "./RecipientInfo";
+import { EncryptedContentInfo, EncryptedContentInfoSchema } from "./EncryptedContentInfo";
+import { Attribute } from "./Attribute";
+import { AlgorithmIdentifier, AlgorithmIdentifierParameters } from "./AlgorithmIdentifier";
+import { RSAESOAEPParams } from "./RSAESOAEPParams";
 import { KeyTransRecipientInfo } from "./KeyTransRecipientInfo";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
-import RecipientKeyIdentifier from "./RecipientKeyIdentifier";
-import RecipientEncryptedKey from "./RecipientEncryptedKey";
-import KeyAgreeRecipientIdentifier from "./KeyAgreeRecipientIdentifier";
-import KeyAgreeRecipientInfo, { KeyAgreeRecipientInfoParameters } from "./KeyAgreeRecipientInfo";
-import RecipientEncryptedKeys from "./RecipientEncryptedKeys";
-import KEKRecipientInfo from "./KEKRecipientInfo";
-import KEKIdentifier from "./KEKIdentifier";
-import PBKDF2Params from "./PBKDF2Params";
-import PasswordRecipientinfo from "./PasswordRecipientinfo";
-import ECCCMSSharedInfo from "./ECCCMSSharedInfo";
-import OriginatorIdentifierOrKey from "./OriginatorIdentifierOrKey";
-import OriginatorPublicKey from "./OriginatorPublicKey";
+import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
+import { RecipientKeyIdentifier } from "./RecipientKeyIdentifier";
+import { RecipientEncryptedKey } from "./RecipientEncryptedKey";
+import { KeyAgreeRecipientIdentifier } from "./KeyAgreeRecipientIdentifier";
+import { KeyAgreeRecipientInfo, KeyAgreeRecipientInfoParameters } from "./KeyAgreeRecipientInfo";
+import { RecipientEncryptedKeys } from "./RecipientEncryptedKeys";
+import { KEKRecipientInfo } from "./KEKRecipientInfo";
+import { KEKIdentifier } from "./KEKIdentifier";
+import { PBKDF2Params } from "./PBKDF2Params";
+import { PasswordRecipientinfo } from "./PasswordRecipientinfo";
+import { ECCCMSSharedInfo } from "./ECCCMSSharedInfo";
+import { OriginatorIdentifierOrKey } from "./OriginatorIdentifierOrKey";
+import { OriginatorPublicKey } from "./OriginatorPublicKey";
 import * as Schema from "./Schema";
-import Certificate from "./Certificate";
+import { Certificate } from "./Certificate";
 import { ArgumentError, ParameterError } from "./errors";
 
 const VERSION = "version";
@@ -64,7 +64,7 @@ export interface EnvelopedDataEncryptionParams {
 /**
  * Class from RFC5652
  */
-export default class EnvelopedData implements Schema.SchemaCompatible {
+export class EnvelopedData implements Schema.SchemaCompatible {
 
   public version: number;
   public originatorInfo?: OriginatorInfo;

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
 const HASH_ALGORITHM = "hashAlgorithm";
@@ -21,7 +21,7 @@ export interface RSAESOAEPParamsParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC3447
  */
-export default class RSAESOAEPParams implements Schema.SchemaCompatible {
+export class RSAESOAEPParams implements Schema.SchemaCompatible {
 
   public hashAlgorithm: AlgorithmIdentifier;
   public maskGenAlgorithm: AlgorithmIdentifier;

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
+import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
 import * as Schema from "./Schema";
 
 export const TYPE = "type";
@@ -257,7 +257,7 @@ export interface GeneralNameSchema {
 /**
  * Class from RFC5280
  */
-export default class GeneralName {
+export class GeneralName {
 
 	public type: number;
 	public value: any;

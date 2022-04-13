@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import PolicyQualifierInfo from "./PolicyQualifierInfo";
+import { PolicyQualifierInfo } from "./PolicyQualifierInfo";
 import * as Schema from "./Schema";
 
 export interface PolicyInformationParameters extends Schema.SchemaConstructor {
@@ -11,7 +11,7 @@ export interface PolicyInformationParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5280
  */
-export default class PolicyInformation {
+export class PolicyInformation {
 
 	public policyIdentifier: string;
 	public policyQualifiers?: PolicyQualifierInfo[];

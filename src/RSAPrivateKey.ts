@@ -2,7 +2,7 @@ import * as asn1js from "asn1js";
 import { Convert } from "pvtsutils";
 import * as pvutils from "pvutils";
 import { ParameterError } from "./errors";
-import OtherPrimeInfo, { JsonOtherPrimeInfo, OtherPrimeInfoSchema } from "./OtherPrimeInfo";
+import { OtherPrimeInfo, JsonOtherPrimeInfo, OtherPrimeInfoSchema } from "./OtherPrimeInfo";
 import * as Schema from "./Schema";
 
 const VERSION = "version";
@@ -58,7 +58,7 @@ export interface JsonRSAPrivateKey {
 /**
  * Class from RFC3447
  */
-export default class RSAPrivateKey implements Schema.SchemaCompatible {
+export class RSAPrivateKey implements Schema.SchemaCompatible {
 
   public version: number;
   public modulus: asn1js.Integer;

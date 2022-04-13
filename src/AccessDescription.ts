@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import GeneralName, { GeneralNameSchema } from "./GeneralName";
+import { GeneralName, GeneralNameSchema } from "./GeneralName";
 import * as Schema from "./Schema";
 
 const ACCESS_METHOD = "accessMethod";
@@ -18,7 +18,7 @@ export interface AccessDescriptionParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5280
  */
-export default class AccessDescription {
+export class AccessDescription {
 
   /**
    * The type and format of the information are specified by the accessMethod field. This profile defines two accessMethod OIDs: id-ad-caIssuers and id-ad-ocsp

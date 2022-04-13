@@ -191,7 +191,7 @@ export interface QCStatementsParameters extends Schema.SchemaConstructor {
  * Class from RFC3739
  */
 @extensionValue(id_QCStatements, "QCStatements")
-export default class QCStatements implements Schema.SchemaCompatible {
+export class QCStatements implements Schema.SchemaCompatible {
 
   public values: QCStatement[];
 

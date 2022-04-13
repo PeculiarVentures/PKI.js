@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import Time from "./Time";
-import Extensions from "./Extensions";
+import { Time } from "./Time";
+import { Extensions } from "./Extensions";
 import * as Schema from "./Schema";
 
 const USER_CERTIFICATE = "userCertificate";
@@ -22,7 +22,7 @@ export interface RevokedCertificateParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5280
  */
-export default class RevokedCertificate implements Schema.SchemaCompatible {
+export class RevokedCertificate implements Schema.SchemaCompatible {
 
   public userCertificate: asn1js.Integer;
   public revocationDate: Time;

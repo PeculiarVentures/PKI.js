@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import ECNamedCurves from "./ECNamedCurves";
-import ECPublicKey, { ECPublicKeyParameters } from "./ECPublicKey";
+import { ECNamedCurves } from "./ECNamedCurves";
+import { ECPublicKey, ECPublicKeyParameters } from "./ECPublicKey";
 import { ParameterError } from "./errors";
 import * as Schema from "./Schema";
 
@@ -34,7 +34,7 @@ export interface JsonECPrivateKey {
 /**
  * Class from RFC5915
  */
-export default class ECPrivateKey implements Schema.SchemaCompatible {
+export class ECPrivateKey implements Schema.SchemaCompatible {
 
   public version: number;
   public privateKey: asn1js.OctetString;

@@ -1,15 +1,15 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AuthorityKeyIdentifier from "./AuthorityKeyIdentifier";
-import BasicOCSPResponse from "./BasicOCSPResponse";
-import Certificate from "./Certificate";
-import CertificateRevocationList from "./CertificateRevocationList";
+import { AuthorityKeyIdentifier } from "./AuthorityKeyIdentifier";
+import { BasicOCSPResponse } from "./BasicOCSPResponse";
+import { Certificate } from "./Certificate";
+import { CertificateRevocationList } from "./CertificateRevocationList";
 import * as common from "./common";
 import * as Helpers from "./Helpers";
-import GeneralName from "./GeneralName";
+import { GeneralName } from "./GeneralName";
 import { id_AnyPolicy, id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BasicConstraints, id_CertificatePolicies, id_CRLDistributionPoints, id_FreshestCRL, id_InhibitAnyPolicy, id_KeyUsage, id_NameConstraints, id_PolicyConstraints, id_PolicyMappings, id_SubjectAltName, id_SubjectKeyIdentifier } from "./ObjectIdentifiers";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
-import GeneralSubtree from "./GeneralSubtree";
+import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
+import { GeneralSubtree } from "./GeneralSubtree";
 
 const TRUSTED_CERTS = "trustedCerts";
 const CERTS = "certs";
@@ -64,7 +64,7 @@ export interface CertificateChainValidationEngineVerifyParams {
 	passedWhenNotRevValues?: boolean;
 }
 
-export default class CertificateChainValidationEngine {
+export class CertificateChainValidationEngine {
 
 	/**
 	 * Array of pre-defined trusted (by user) certificates

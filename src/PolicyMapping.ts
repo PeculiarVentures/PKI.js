@@ -17,7 +17,7 @@ export interface PolicyMappingParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5280
  */
-export default class PolicyMapping {
+export class PolicyMapping {
 
   public issuerDomainPolicy: string;
   public subjectDomainPolicy: string;

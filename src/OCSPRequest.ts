@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import TBSRequest, { TBSRequestSchema } from "./TBSRequest";
-import Signature, { SignatureSchema } from "./Signature";
-import Request from "./Request";
-import CertID, { CertIDCreateParams } from "./CertID";
+import { TBSRequest, TBSRequestSchema } from "./TBSRequest";
+import { Signature, SignatureSchema } from "./Signature";
+import { Request } from "./Request";
+import { CertID, CertIDCreateParams } from "./CertID";
 import * as Schema from "./Schema";
-import Certificate from "./Certificate";
+import { Certificate } from "./Certificate";
 
 const TBS_REQUEST = "tbsRequest";
 const OPTIONAL_SIGNATURE = "optionalSignature";
@@ -23,7 +23,7 @@ export interface OCSPRequestParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC6960
  */
-export default class OCSPRequest {
+export class OCSPRequest {
 
   public tbsRequest: TBSRequest;
   public optionalSignature?: Signature;

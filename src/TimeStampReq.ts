@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import MessageImprint, { MessageImprintSchema } from "./MessageImprint";
-import Extension from "./Extension";
+import { MessageImprint, MessageImprintSchema } from "./MessageImprint";
+import { Extension } from "./Extension";
 import * as Schema from "./Schema";
 
 const VERSION = "version";
@@ -38,7 +38,7 @@ export interface TimeStampReqParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC3161
  */
-export default class TimeStampReq implements Schema.SchemaCompatible {
+export class TimeStampReq implements Schema.SchemaCompatible {
 
   public version: number;
   public messageImprint: MessageImprint;

@@ -1,19 +1,19 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import ContentInfo, { ContentInfoSchema } from "./ContentInfo";
-import MacData, { MacDataSchema } from "./MacData";
-import DigestInfo from "./DigestInfo";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import SignedData from "./SignedData";
-import EncapsulatedContentInfo from "./EncapsulatedContentInfo";
-import Attribute from "./Attribute";
-import SignerInfo from "./SignerInfo";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
-import SignedAndUnsignedAttributes from "./SignedAndUnsignedAttributes";
-import AuthenticatedSafe from "./AuthenticatedSafe";
+import { ContentInfo, ContentInfoSchema } from "./ContentInfo";
+import { MacData, MacDataSchema } from "./MacData";
+import { DigestInfo } from "./DigestInfo";
+import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import { SignedData } from "./SignedData";
+import { EncapsulatedContentInfo } from "./EncapsulatedContentInfo";
+import { Attribute } from "./Attribute";
+import { SignerInfo } from "./SignerInfo";
+import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
+import { SignedAndUnsignedAttributes } from "./SignedAndUnsignedAttributes";
+import { AuthenticatedSafe } from "./AuthenticatedSafe";
 import * as Schema from "./Schema";
-import Certificate from "./Certificate";
+import { Certificate } from "./Certificate";
 import { ArgumentError, ParameterError } from "./errors";
 
 const VERSION = "version";
@@ -59,7 +59,7 @@ type MakeInternalValuesParams =
 /**
  * Class from RFC7292
  */
-export default class PFX implements Schema.SchemaCompatible {
+export class PFX implements Schema.SchemaCompatible {
 
   public version: number;
   public authSafe: ContentInfo;

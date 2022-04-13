@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import GeneralNames from "../GeneralNames";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
-import Attribute from "../Attribute";
-import Extensions, { ExtensionsSchema } from "../Extensions";
+import { GeneralNames } from "../GeneralNames";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import { Attribute } from "../Attribute";
+import { Extensions, ExtensionsSchema } from "../Extensions";
 import { AttCertValidityPeriod, AttCertValidityPeriodSchema } from "../AttributeCertificateV1";
 import { V2Form } from "./V2Form";
 import { Holder, HolderSchema } from "./Holder";

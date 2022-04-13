@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import Certificate from "./Certificate";
-import AttributeCertificateV1 from "./AttributeCertificateV1";
-import AttributeCertificateV2 from "./AttributeCertificateV2";
-import OtherCertificateFormat from "./OtherCertificateFormat";
+import { Certificate } from "./Certificate";
+import { AttributeCertificateV1 } from "./AttributeCertificateV1";
+import { AttributeCertificateV2 } from "./AttributeCertificateV2";
+import { OtherCertificateFormat } from "./OtherCertificateFormat";
 import * as Schema from "./Schema";
 
 const CERTIFICATES = "certificates";
@@ -20,7 +20,7 @@ export interface CertificateSetParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5652
  */
-export default class CertificateSet implements Schema.SchemaCompatible {
+export class CertificateSet implements Schema.SchemaCompatible {
 
   public certificates: CertificateSetItem[];
 

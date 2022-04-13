@@ -34,7 +34,7 @@ export type OtherPrimeInfoSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC3447
  */
-export default class OtherPrimeInfo implements Schema.SchemaCompatible {
+export class OtherPrimeInfo implements Schema.SchemaCompatible {
 
   public prime: asn1js.Integer;
   public exponent: asn1js.Integer;

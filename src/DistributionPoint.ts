@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import GeneralName from "./GeneralName";
+import { GeneralName } from "./GeneralName";
 import { DistributionPointName } from "./IssuingDistributionPoint";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
+import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
 import * as Schema from "./Schema";
 
 const DISTRIBUTION_POINT = "distributionPoint";
@@ -27,7 +27,7 @@ export interface DistributionPointParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5280
  */
-export default class DistributionPoint implements Schema.SchemaCompatible {
+export class DistributionPoint implements Schema.SchemaCompatible {
 
   public distributionPoint?: DistributionPointName;
   public reasons?: asn1js.BitString;

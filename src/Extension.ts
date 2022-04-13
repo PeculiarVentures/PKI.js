@@ -29,7 +29,7 @@ export type ExtensionSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5280
  */
-export default class Extension implements Schema.SchemaCompatible {
+export class Extension implements Schema.SchemaCompatible {
 
   public extnID: string;
   public critical: boolean;

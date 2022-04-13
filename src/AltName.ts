@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { extensionValue } from "./ExtensionValueFactory";
-import GeneralName from "./GeneralName";
+import { GeneralName } from "./GeneralName";
 import { id_SubjectAltName, id_IssuerAltName } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
@@ -22,7 +22,7 @@ export interface AltNameParameters extends Schema.SchemaConstructor {
  */
 @extensionValue(id_SubjectAltName, "SubjectAltName")
 @extensionValue(id_IssuerAltName, "IssuerAltName")
-export default class AltName implements Schema.SchemaCompatible {
+export class AltName implements Schema.SchemaCompatible {
 
   /**
    * Array of alternative names in GeneralName type

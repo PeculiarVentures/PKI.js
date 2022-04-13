@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import SafeBag from "./SafeBag";
+import { SafeBag } from "./SafeBag";
 import * as Schema from "./Schema";
 
 const SAFE_BUGS = "safeBags";
@@ -12,7 +12,7 @@ export interface SafeContentsParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC7292
  */
-export default class SafeContents {
+export class SafeContents {
 
   public safeBags: SafeBag[];
 

@@ -1,11 +1,11 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import PKIStatusInfo, { PKIStatusInfoSchema } from "./PKIStatusInfo";
-import ContentInfo, { ContentInfoSchema } from "./ContentInfo";
-import SignedData from "./SignedData";
+import { PKIStatusInfo, PKIStatusInfoSchema } from "./PKIStatusInfo";
+import { ContentInfo, ContentInfoSchema } from "./ContentInfo";
+import { SignedData } from "./SignedData";
 import * as Schema from "./Schema";
 import { id_ContentType_SignedData } from "./ObjectIdentifiers";
-import Certificate from "./Certificate";
+import { Certificate } from "./Certificate";
 
 const STATUS = "status";
 const TIME_STAMP_TOKEN = "timeStampToken";
@@ -31,7 +31,7 @@ export interface TimeStampRespParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC3161
  */
-export default class TimeStampResp implements Schema.SchemaCompatible {
+export class TimeStampResp implements Schema.SchemaCompatible {
 
   public status: PKIStatusInfo;
   public timeStampToken?: ContentInfo;

@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import Certificate from "./Certificate";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { Certificate } from "./Certificate";
 import * as Schema from "./Schema";
 
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";
@@ -23,7 +23,7 @@ export type SignatureSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC6960
  */
-export default class Signature implements Schema.SchemaCompatible {
+export class Signature implements Schema.SchemaCompatible {
 
   public signatureAlgorithm: AlgorithmIdentifier;
   public signature: asn1js.BitString;

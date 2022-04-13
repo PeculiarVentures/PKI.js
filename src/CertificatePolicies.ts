@@ -2,7 +2,7 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { extensionValue } from "./ExtensionValueFactory";
 import { id_CertificatePolicies, id_MicrosoftAppPolicies } from "./ObjectIdentifiers";
-import PolicyInformation from "./PolicyInformation";
+import { PolicyInformation } from "./PolicyInformation";
 import * as Schema from "./Schema";
 
 const CERTIFICATE_POLICIES = "certificatePolicies";
@@ -19,7 +19,7 @@ export interface CertificatePoliciesParameters extends Schema.SchemaConstructor 
  */
 @extensionValue(id_CertificatePolicies, "CertificatePolicies")
 @extensionValue(id_MicrosoftAppPolicies, "CertificatePoliciesMicrosoft")
-export default class CertificatePolicies implements Schema.SchemaCompatible {
+export class CertificatePolicies implements Schema.SchemaCompatible {
 
   public certificatePolicies: PolicyInformation[];
 

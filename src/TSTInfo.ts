@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import MessageImprint, { HASHED_MESSAGE, HASH_ALGORITHM, MessageImprintSchema } from "./MessageImprint";
-import Accuracy, { AccuracySchema, MICROS, MILLIS, SECONDS } from "./Accuracy";
-import GeneralName, { GeneralNameSchema, TYPE, VALUE } from "./GeneralName";
-import Extension, { ExtensionSchema } from "./Extension";
+import { MessageImprint, HASHED_MESSAGE, HASH_ALGORITHM, MessageImprintSchema } from "./MessageImprint";
+import { Accuracy, AccuracySchema, MICROS, MILLIS, SECONDS } from "./Accuracy";
+import { GeneralName, GeneralNameSchema, TYPE, VALUE } from "./GeneralName";
+import { Extension, ExtensionSchema } from "./Extension";
 import * as Schema from "./Schema";
 
 const VERSION = "version";
@@ -63,7 +63,7 @@ export interface TSTInfoVerifyParams {
 /**
  * Class from RFC3161
  */
-export default class TSTInfo implements Schema.SchemaCompatible {
+export class TSTInfo implements Schema.SchemaCompatible {
 
   public version: number;
   public policy: string;

@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import ResponseData, { ResponseDataSchema } from "./ResponseData";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import Certificate, { CertificateSchema, checkCA } from "./Certificate";
-import CertID from "./CertID";
-import RelativeDistinguishedNames from "./RelativeDistinguishedNames";
-import CertificateChainValidationEngine from "./CertificateChainValidationEngine";
+import { ResponseData, ResponseDataSchema } from "./ResponseData";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { Certificate, CertificateSchema, checkCA } from "./Certificate";
+import { CertID } from "./CertID";
+import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
+import { CertificateChainValidationEngine } from "./CertificateChainValidationEngine";
 import * as Schema from "./Schema";
 import { ParameterError } from "./errors";
 
@@ -48,7 +48,7 @@ interface BasicOCSPResponseVerifyParams {
 /**
  * Class from RFC6960
  */
-export default class BasicOCSPResponse implements Schema.SchemaCompatible {
+export class BasicOCSPResponse implements Schema.SchemaCompatible {
 
   public tbsResponseData: ResponseData;
   public signatureAlgorithm: AlgorithmIdentifier;

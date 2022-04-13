@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { KeyTransRecipientInfo } from "./KeyTransRecipientInfo";
-import KeyAgreeRecipientInfo from "./KeyAgreeRecipientInfo";
-import KEKRecipientInfo from "./KEKRecipientInfo";
-import PasswordRecipientinfo from "./PasswordRecipientinfo";
-import OtherRecipientInfo from "./OtherRecipientInfo";
+import { KeyAgreeRecipientInfo } from "./KeyAgreeRecipientInfo";
+import { KEKRecipientInfo } from "./KEKRecipientInfo";
+import { PasswordRecipientinfo } from "./PasswordRecipientinfo";
+import { OtherRecipientInfo } from "./OtherRecipientInfo";
 import * as Schema from "./Schema";
 
 const VARIANT = "variant";
@@ -23,7 +23,7 @@ export interface RecipientInfoParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5652
  */
-export default class RecipientInfo implements Schema.SchemaCompatible {
+export class RecipientInfo implements Schema.SchemaCompatible {
 
   public variant: number;
   public value?: RecipientInfoValue;

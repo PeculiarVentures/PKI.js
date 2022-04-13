@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
-import OriginatorPublicKey from "./OriginatorPublicKey";
+import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
+import { OriginatorPublicKey } from "./OriginatorPublicKey";
 import * as Schema from "./Schema";
 
 const VARIANT = "variant";
@@ -20,7 +20,7 @@ export type OriginatorIdentifierOrKeySchema = Schema.SchemaParameters;
 /**
  * Class from RFC5652
  */
-export default class OriginatorIdentifierOrKey {
+export class OriginatorIdentifierOrKey {
 
   public variant: number;
   public value?: any;

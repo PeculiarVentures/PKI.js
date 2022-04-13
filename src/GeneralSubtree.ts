@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import GeneralName, { GeneralNameSchema } from "./GeneralName";
+import { GeneralName, GeneralNameSchema } from "./GeneralName";
 import * as Schema from "./Schema";
 
 const BASE = "base";
@@ -21,7 +21,7 @@ export interface GeneralSubtreeParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5280
  */
-export default class GeneralSubtree implements Schema.SchemaCompatible {
+export class GeneralSubtree implements Schema.SchemaCompatible {
 
   public base: GeneralName;
   public minimum: number | asn1js.Integer;

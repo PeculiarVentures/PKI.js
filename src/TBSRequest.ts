@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import GeneralName, { GeneralNameSchema } from "./GeneralName";
-import Request, { RequestSchema } from "./Request";
-import Extension from "./Extension";
-import Extensions, { ExtensionsSchema } from "./Extensions";
+import { GeneralName, GeneralNameSchema } from "./GeneralName";
+import { Request, RequestSchema } from "./Request";
+import { Extension } from "./Extension";
+import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 
 const TBS = "tbs";
@@ -45,7 +45,7 @@ export type TBSRequestSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC6960
  */
-export default class TBSRequest implements Schema.SchemaCompatible {
+export class TBSRequest implements Schema.SchemaCompatible {
 
   public tbs: ArrayBuffer;
   public version?: number;

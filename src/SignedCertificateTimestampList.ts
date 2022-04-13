@@ -16,7 +16,7 @@ export interface SignedCertificateTimestampListParameters extends Schema.SchemaC
  * Class from RFC6962
  */
 @extensionValue(id_SignedCertificateTimestampList, "SignedCertificateTimestampList")
-export default class SignedCertificateTimestampList implements Schema.SchemaCompatible {
+export class SignedCertificateTimestampList implements Schema.SchemaCompatible {
 
   public timestamps: SignedCertificateTimestamp[];
 

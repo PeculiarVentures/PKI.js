@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import GeneralNames from "../GeneralNames";
+import { GeneralNames } from "../GeneralNames";
 import { IssuerSerial } from "../AttributeCertificateV1";
 import { ObjectDigestInfo } from "./ObjectDigestInfo";
 import * as Schema from "../Schema";

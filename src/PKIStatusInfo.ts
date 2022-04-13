@@ -26,7 +26,7 @@ export type PKIStatusInfoSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC3161
  */
-export default class PKIStatusInfo implements Schema.SchemaCompatible {
+export class PKIStatusInfo implements Schema.SchemaCompatible {
 
 	public status: number;
 	public statusStrings?: asn1js.Utf8String[];

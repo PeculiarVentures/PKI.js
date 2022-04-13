@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import CertificateRevocationList from "./CertificateRevocationList";
-import OtherRevocationInfoFormat from "./OtherRevocationInfoFormat";
+import { CertificateRevocationList } from "./CertificateRevocationList";
+import { OtherRevocationInfoFormat } from "./OtherRevocationInfoFormat";
 import * as Schema from "./Schema";
 
 const CRLS = "crls";
@@ -22,7 +22,7 @@ export type RevocationInfoChoicesSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5652
  */
-export default class RevocationInfoChoices implements Schema.SchemaCompatible {
+export class RevocationInfoChoices implements Schema.SchemaCompatible {
 
 	public crls: CertificateRevocationList[];
 	public otherRevocationInfos: OtherRevocationInfoFormat[];

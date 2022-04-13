@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
 import * as Schema from "./Schema";
-import GeneralName from "./GeneralName";
+import { GeneralName } from "./GeneralName";
 import { extensionValue } from "./ExtensionValueFactory";
 import { id_CertificateIssuer } from "./ObjectIdentifiers";
 
@@ -16,7 +16,7 @@ export type GeneralNamesSchema = Schema.SchemaParameters<{
  * Class from RFC5280
  */
 @extensionValue(id_CertificateIssuer, "CertificateIssuer")
-export default class GeneralNames implements Schema.SchemaCompatible {
+export class GeneralNames implements Schema.SchemaCompatible {
 
 	/**
 	 * Array of "general names"

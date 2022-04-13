@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import RecipientEncryptedKey from "./RecipientEncryptedKey";
+import { RecipientEncryptedKey } from "./RecipientEncryptedKey";
 import * as Schema from "./Schema";
 
 const ENCRYPTED_KEYS = "encryptedKeys";
@@ -20,7 +20,7 @@ export type RecipientEncryptedKeysSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5652
  */
-export default class RecipientEncryptedKeys implements Schema.SchemaCompatible {
+export class RecipientEncryptedKeys implements Schema.SchemaCompatible {
 
   public encryptedKeys: RecipientEncryptedKey[];
 

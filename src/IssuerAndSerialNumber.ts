@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import RelativeDistinguishedNames, { RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
 import * as Schema from "./Schema";
 
 const ISSUER = "issuer";
@@ -24,7 +24,7 @@ export type IssuerAndSerialNumberSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5652
  */
-export default class IssuerAndSerialNumber implements Schema.SchemaCompatible {
+export class IssuerAndSerialNumber implements Schema.SchemaCompatible {
 
   public issuer: RelativeDistinguishedNames;
   public serialNumber: asn1js.Integer;

@@ -20,7 +20,7 @@ export type ContentInfoSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5652
  */
-export default class ContentInfo {
+export class ContentInfo {
 
   public static readonly DATA = id_ContentType_Data;
   public static readonly SIGNED_DATA = id_ContentType_SignedData;

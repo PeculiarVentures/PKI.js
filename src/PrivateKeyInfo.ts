@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import Attribute from "./Attribute";
-import ECPrivateKey from "./ECPrivateKey";
-import RSAPrivateKey from "./RSAPrivateKey";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { Attribute } from "./Attribute";
+import { ECPrivateKey } from "./ECPrivateKey";
+import { RSAPrivateKey } from "./RSAPrivateKey";
 import * as Schema from "./Schema";
 
 const VERSION = "version";
@@ -30,7 +30,7 @@ export interface PrivateKeyInfoParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5208
  */
-export default class PrivateKeyInfo implements Schema.SchemaCompatible {
+export class PrivateKeyInfo implements Schema.SchemaCompatible {
 
   public version: number;
   public privateKeyAlgorithm: AlgorithmIdentifier;

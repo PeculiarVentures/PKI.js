@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
 const CONTENT_TYPE = "contentType";
@@ -27,7 +27,7 @@ export type EncryptedContentInfoSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5652
  */
-export default class EncryptedContentInfo implements Schema.SchemaCompatible {
+export class EncryptedContentInfo implements Schema.SchemaCompatible {
   contentType: string;
   contentEncryptionAlgorithm: AlgorithmIdentifier;
   encryptedContent?: asn1js.OctetString;

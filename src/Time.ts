@@ -33,7 +33,7 @@ export type TimeSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5280
  */
-export default class Time implements Schema.SchemaCompatible {
+export class Time implements Schema.SchemaCompatible {
 
   /**
    * 0 - UTCTime; 1 - GeneralizedTime; 2 - empty value

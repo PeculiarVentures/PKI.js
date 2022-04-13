@@ -1,14 +1,14 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { getEngine } from "./common";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import RelativeDistinguishedNames, { RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
-import Time, { TimeSchema } from "./Time";
-import RevokedCertificate from "./RevokedCertificate";
-import Extensions, { ExtensionsSchema } from "./Extensions";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import { Time, TimeSchema } from "./Time";
+import { RevokedCertificate } from "./RevokedCertificate";
+import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
-import Certificate from "./Certificate";
-import PublicKeyInfo from "./PublicKeyInfo";
+import { Certificate } from "./Certificate";
+import { PublicKeyInfo } from "./PublicKeyInfo";
 import { id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BaseCRLNumber, id_CertificateIssuer, id_CRLNumber, id_CRLReason, id_FreshestCRL, id_InvalidityDate, id_IssuerAltName, id_IssuingDistributionPoint } from "./ObjectIdentifiers";
 
 const TBS = "tbs";
@@ -157,7 +157,7 @@ const WELL_KNOWN_EXTENSIONS = [
 /**
  * Class from RFC5280
  */
-export default class CertificateRevocationList implements Schema.SchemaCompatible {
+export class CertificateRevocationList implements Schema.SchemaCompatible {
 
   public tbs: ArrayBuffer;
   public version: number;

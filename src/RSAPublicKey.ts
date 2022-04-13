@@ -21,7 +21,7 @@ const CLEAR_PROPS = [MODULUS, PUBLIC_EXPONENT];
 /**
  * Class from RFC3447
  */
-export default class RSAPublicKey implements Schema.SchemaCompatible {
+export class RSAPublicKey implements Schema.SchemaCompatible {
 
 	/**
 	 * Modulus part of RSA public key

@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { extensionValue } from "./ExtensionValueFactory";
-import GeneralSubtree from "./GeneralSubtree";
+import { GeneralSubtree } from "./GeneralSubtree";
 import { id_NameConstraints } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
@@ -21,7 +21,7 @@ export interface NameConstraintsParameters extends Schema.SchemaConstructor {
  * Class from RFC5280
  */
 @extensionValue(id_NameConstraints, "NameConstraints")
-export default class NameConstraints implements Schema.SchemaCompatible {
+export class NameConstraints implements Schema.SchemaCompatible {
 
   public permittedSubtrees?: GeneralSubtree[];
   public excludedSubtrees?: GeneralSubtree[];

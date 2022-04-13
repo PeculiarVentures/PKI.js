@@ -17,7 +17,7 @@ export interface OtherCertificateFormatParameters extends Schema.SchemaType {
 /**
  * Class from RFC5652
  */
-export default class OtherCertificateFormat {
+export class OtherCertificateFormat {
 
 	public otherCertFormat: string;
 	public otherCert: any;

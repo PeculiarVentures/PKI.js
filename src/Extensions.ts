@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import Extension, { ExtensionSchema } from "./Extension";
+import { Extension, ExtensionSchema } from "./Extension";
 import * as Schema from "./Schema";
 
 const EXTENSIONS = "extensions";
@@ -20,7 +20,7 @@ export type ExtensionsSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5280
  */
-export default class Extensions implements Schema.SchemaCompatible {
+export class Extensions implements Schema.SchemaCompatible {
 
   public extensions: Extension[];
 

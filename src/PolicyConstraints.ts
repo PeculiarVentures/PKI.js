@@ -20,7 +20,7 @@ export interface PolicyConstraintsParameters extends Schema.SchemaConstructor {
  * Class from RFC5280
  */
 @extensionValue(id_PolicyConstraints, "PolicyConstraints")
-export default class PolicyConstraints implements Schema.SchemaCompatible {
+export class PolicyConstraints implements Schema.SchemaCompatible {
 
   public requireExplicitPolicy?: number;
   public inhibitPolicyMapping?: number;

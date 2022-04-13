@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import Certificate from "./Certificate";
-import AttributeCertificateV2 from "./AttributeCertificateV2";
+import { Certificate } from "./Certificate";
+import { AttributeCertificateV2 } from "./AttributeCertificateV2";
 import * as Schema from "./Schema";
 import { id_CertBag_AttributeCertificate, id_CertBag_SDSICertificate, id_CertBag_X509Certificate } from "./ObjectIdentifiers";
 
@@ -22,7 +22,7 @@ export interface CertBagParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC7292
  */
-export default class CertBag implements Schema.SchemaCompatible {
+export class CertBag implements Schema.SchemaCompatible {
 
   public certId: string;
   public certValue: any;

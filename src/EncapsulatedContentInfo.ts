@@ -22,7 +22,7 @@ export type EncapsulatedContentInfoSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5652
  */
-export default class EncapsulatedContentInfo implements Schema.SchemaCompatible {
+export class EncapsulatedContentInfo implements Schema.SchemaCompatible {
 
   public eContentType: string;
   public eContent?: asn1js.OctetString;

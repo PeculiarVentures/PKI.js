@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import EncryptedContentInfo, { EncryptedContentInfoSchema } from "./EncryptedContentInfo";
-import Attribute from "./Attribute";
+import { EncryptedContentInfo, EncryptedContentInfoSchema } from "./EncryptedContentInfo";
+import { Attribute } from "./Attribute";
 import * as Schema from "./Schema";
 import { CryptoEngineEncryptParams } from "./CryptoEngine";
 import { ArgumentError, ParameterError } from "./errors";
@@ -25,7 +25,7 @@ export interface EncryptedDataParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5652
  */
-export default class EncryptedData implements Schema.SchemaCompatible {
+export class EncryptedData implements Schema.SchemaCompatible {
 
   public version: number;
   public encryptedContentInfo: EncryptedContentInfo;

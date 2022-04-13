@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import CertID, { CertIDSchema } from "./CertID";
-import Extension from "./Extension";
-import Extensions, { ExtensionsSchema } from "./Extensions";
+import { CertID, CertIDSchema } from "./CertID";
+import { Extension } from "./Extension";
+import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 
 const CERT_ID = "certID";
@@ -37,7 +37,7 @@ export type SingleResponseSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC6960
  */
-export default class SingleResponse implements Schema.SchemaCompatible {
+export class SingleResponse implements Schema.SchemaCompatible {
   certID: CertID;
   certStatus: any;
   thisUpdate: Date;

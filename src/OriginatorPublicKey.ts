@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
 const ALGORITHM = "algorithm";
@@ -18,7 +18,7 @@ export interface OriginatorPublicKeyParameters extends Schema.SchemaConstructor 
 /**
  * Class from RFC5652
  */
-export default class OriginatorPublicKey implements Schema.SchemaCompatible {
+export class OriginatorPublicKey implements Schema.SchemaCompatible {
 
   public algorithm: AlgorithmIdentifier;
   public publicKey: asn1js.BitString;

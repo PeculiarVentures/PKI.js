@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
 import * as Schema from "../Schema";
 
 const DIGESTED_OBJECT_TYPE = "digestedObjectType";

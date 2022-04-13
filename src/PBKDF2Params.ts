@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
 const SALT = "salt";
@@ -24,7 +24,7 @@ export interface PBKDF2ParamsParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC2898
  */
-export default class PBKDF2Params implements Schema.SchemaCompatible {
+export class PBKDF2Params implements Schema.SchemaCompatible {
 
   public salt: any;
   public iterationCount: number;

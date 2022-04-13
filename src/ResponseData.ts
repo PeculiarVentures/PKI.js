@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import RelativeDistinguishedNames, { RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
-import SingleResponse, { SingleResponseSchema } from "./SingleResponse";
-import Extension from "./Extension";
-import Extensions, { ExtensionsSchema } from "./Extensions";
+import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import { SingleResponse, SingleResponseSchema } from "./SingleResponse";
+import { Extension } from "./Extension";
+import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 
 const TBS = "tbs";
@@ -48,7 +48,7 @@ export type ResponseDataSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC6960
  */
-export default class ResponseData implements Schema.SchemaCompatible {
+export class ResponseData implements Schema.SchemaCompatible {
 
   public version?: number;
   public tbs: ArrayBuffer;

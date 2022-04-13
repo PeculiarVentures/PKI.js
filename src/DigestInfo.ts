@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
 const DIGEST_ALGORITHM = "digestAlgorithm";
@@ -23,7 +23,7 @@ export type DigestInfoSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC3447
  */
-export default class DigestInfo implements Schema.SchemaCompatible {
+export class DigestInfo implements Schema.SchemaCompatible {
 
 	public digestAlgorithm: AlgorithmIdentifier;
 	public digest: asn1js.OctetString;

@@ -15,7 +15,7 @@ export type AttributeSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC2986
  */
-export default class Attribute {
+export class Attribute {
 
   public type: string;
   public values: any[];

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
 const KEY_DERIVATION_FUNC = "keyDerivationFunc";
@@ -18,7 +18,7 @@ export interface PBES2ParamsParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC2898
  */
-export default class PBES2Params implements Schema.SchemaCompatible {
+export class PBES2Params implements Schema.SchemaCompatible {
 
   public keyDerivationFunc: AlgorithmIdentifier;
   public encryptionScheme: AlgorithmIdentifier;

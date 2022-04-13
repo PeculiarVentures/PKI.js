@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import EncryptedData from "./EncryptedData";
-import EncryptedContentInfo from "./EncryptedContentInfo";
-import PrivateKeyInfo from "./PrivateKeyInfo";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { EncryptedData } from "./EncryptedData";
+import { EncryptedContentInfo } from "./EncryptedContentInfo";
+import { PrivateKeyInfo } from "./PrivateKeyInfo";
 import * as Schema from "./Schema";
 import { CryptoEngineEncryptParams } from "./CryptoEngine";
 
@@ -24,7 +24,7 @@ export interface PKCS8ShroudedKeyBagParameters extends Schema.SchemaConstructor 
 /**
  * Class from RFC7292
  */
-export default class PKCS8ShroudedKeyBag implements Schema.SchemaCompatible {
+export class PKCS8ShroudedKeyBag implements Schema.SchemaCompatible {
 
   public encryptionAlgorithm: AlgorithmIdentifier;
   public encryptedData: asn1js.OctetString;

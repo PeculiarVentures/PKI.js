@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { extensionValue } from "./ExtensionValueFactory";
-import GeneralName from "./GeneralName";
+import { GeneralName } from "./GeneralName";
 import { id_AuthorityKeyIdentifier } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
@@ -24,7 +24,7 @@ export interface AuthorityKeyIdentifierParameters extends Schema.SchemaConstruct
  * Class from RFC5280
  */
 @extensionValue(id_AuthorityKeyIdentifier, "AuthorityKeyIdentifier")
-export default class AuthorityKeyIdentifier implements Schema.SchemaCompatible {
+export class AuthorityKeyIdentifier implements Schema.SchemaCompatible {
 
   public keyIdentifier?: asn1js.OctetString;
   public authorityCertIssuer?: GeneralName[];

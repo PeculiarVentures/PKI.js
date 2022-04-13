@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
 const KEY_INFO = "keyInfo";
@@ -21,7 +21,7 @@ export interface ECCCMSSharedInfoParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC6318
  */
-export default class ECCCMSSharedInfo implements Schema.SchemaCompatible {
+export class ECCCMSSharedInfo implements Schema.SchemaCompatible {
 
   public keyInfo: AlgorithmIdentifier;
   public entityUInfo?: asn1js.OctetString;

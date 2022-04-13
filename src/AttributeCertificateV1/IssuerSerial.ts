@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import GeneralNames, { GeneralNamesSchema } from "../GeneralNames";
+import { GeneralNames, GeneralNamesSchema } from "../GeneralNames";
 import * as Schema from "../Schema";
 
 const ISSUER = "issuer";

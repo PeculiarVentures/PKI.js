@@ -22,7 +22,7 @@ export type ResponseBytesSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC6960
  */
-export default class ResponseBytes implements Schema.SchemaCompatible {
+export class ResponseBytes implements Schema.SchemaCompatible {
 
 	public responseType: string;
 	public response: asn1js.OctetString;

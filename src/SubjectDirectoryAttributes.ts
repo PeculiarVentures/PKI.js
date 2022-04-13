@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import Attribute from "./Attribute";
+import { Attribute } from "./Attribute";
 import { extensionValue } from "./ExtensionValueFactory";
 import { id_SubjectDirectoryAttributes } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
@@ -18,7 +18,7 @@ export interface SubjectDirectoryAttributesParameters extends Schema.SchemaConst
  * Class from RFC5280
  */
 @extensionValue(id_SubjectDirectoryAttributes, "SubjectDirectoryAttributes")
-export default class SubjectDirectoryAttributes implements Schema.SchemaCompatible {
+export class SubjectDirectoryAttributes implements Schema.SchemaCompatible {
 
   public attributes: Attribute[];
 

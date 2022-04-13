@@ -2,13 +2,13 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as pvtsutils from "pvtsutils";
 import * as common from "./common";
-import PublicKeyInfo from "./PublicKeyInfo";
-import PrivateKeyInfo from "./PrivateKeyInfo";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import EncryptedContentInfo from "./EncryptedContentInfo";
-import RSASSAPSSParams, { RSASSAPSSParamsParameters } from "./RSASSAPSSParams";
-import PBKDF2Params from "./PBKDF2Params";
-import PBES2Params from "./PBES2Params";
+import { PublicKeyInfo } from "./PublicKeyInfo";
+import { PrivateKeyInfo } from "./PrivateKeyInfo";
+import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import { EncryptedContentInfo } from "./EncryptedContentInfo";
+import { RSASSAPSSParams, RSASSAPSSParamsParameters } from "./RSASSAPSSParams";
+import { PBKDF2Params } from "./PBKDF2Params";
+import { PBES2Params } from "./PBES2Params";
 import { ArgumentError, ParameterError } from "./errors";
 
 const CRYPTO = "crypto";
@@ -269,7 +269,7 @@ export interface VerifyDataStampedWithPasswordParams {
 /**
  * Default cryptographic engine for Web Cryptography API
  */
-export default class CryptoEngine {
+export class CryptoEngine {
   /**
    * Usually here we are expecting "window.crypto" or an equivalent from custom "crypto engine"
    */

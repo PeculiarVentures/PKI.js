@@ -17,7 +17,7 @@ export interface ExtKeyUsageParameters extends Schema.SchemaConstructor {
  * Class from RFC5280
  */
 @extensionValue(id_ExtKeyUsage, "ExtKeyUsage")
-export default class ExtKeyUsage implements Schema.SchemaCompatible {
+export class ExtKeyUsage implements Schema.SchemaCompatible {
 
   public keyPurposes: string[];
 

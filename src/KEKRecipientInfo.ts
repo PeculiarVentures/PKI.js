@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import KEKIdentifier, { KEKIdentifierSchema } from "./KEKIdentifier";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { KEKIdentifier, KEKIdentifierSchema } from "./KEKIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 
 const VERSION = "version";
@@ -27,7 +27,7 @@ export interface KEKRecipientInfoParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5652
  */
-export default class KEKRecipientInfo implements Schema.SchemaCompatible {
+export class KEKRecipientInfo implements Schema.SchemaCompatible {
 
   public version: number;
   public kekid: KEKIdentifier;

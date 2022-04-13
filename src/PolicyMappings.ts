@@ -2,7 +2,7 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { extensionValue } from "./ExtensionValueFactory";
 import { id_PolicyMappings } from "./ObjectIdentifiers";
-import PolicyMapping from "./PolicyMapping";
+import { PolicyMapping } from "./PolicyMapping";
 import * as Schema from "./Schema";
 
 const MAPPINGS = "mappings";
@@ -18,7 +18,7 @@ export interface PolicyMappingsParameters extends Schema.SchemaConstructor {
  * Class from RFC5280
  */
 @extensionValue(id_PolicyMappings, "PolicyMappings")
-export default class PolicyMappings {
+export class PolicyMappings {
 
   public mappings: PolicyMapping[];
 

@@ -1,15 +1,15 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import RelativeDistinguishedNames, { RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
-import Time, { TimeSchema } from "./Time";
-import PublicKeyInfo, { PublicKeyInfoSchema } from "./PublicKeyInfo";
-import Extension from "./Extension";
-import Extensions, { ExtensionsSchema } from "./Extensions";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import { Time, TimeSchema } from "./Time";
+import { PublicKeyInfo, PublicKeyInfoSchema } from "./PublicKeyInfo";
+import { Extension } from "./Extension";
+import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 import { id_BasicConstraints } from "./ObjectIdentifiers";
-import BasicConstraints from "./BasicConstraints";
+import { BasicConstraints } from "./BasicConstraints";
 import { CryptoEnginePublicKeyParams } from "./CryptoEngine";
 
 const TBS = "tbs";
@@ -198,7 +198,7 @@ export type CertificateSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5280
  */
-export default class Certificate implements Schema.SchemaCompatible {
+export class Certificate implements Schema.SchemaCompatible {
 
   /**
    * ToBeSigned (TBS) part of the certificate

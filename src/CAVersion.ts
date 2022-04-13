@@ -16,7 +16,7 @@ export interface CAVersionParameters extends Schema.SchemaConstructor {
  * Class from https://docs.microsoft.com/en-us/windows/desktop/seccrypto/certification-authority-renewal
  */
 @extensionValue(id_MicrosoftCaVersion, "MicrosoftCaVersion")
-export default class CAVersion implements Schema.SchemaCompatible {
+export class CAVersion implements Schema.SchemaCompatible {
 
   public certificateIndex: number;
   public keyIndex: number;

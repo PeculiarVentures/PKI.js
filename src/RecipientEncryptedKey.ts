@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import KeyAgreeRecipientIdentifier, { KeyAgreeRecipientIdentifierSchema } from "./KeyAgreeRecipientIdentifier";
+import { KeyAgreeRecipientIdentifier, KeyAgreeRecipientIdentifierSchema } from "./KeyAgreeRecipientIdentifier";
 import * as Schema from "./Schema";
 
 const RID = "rid";
@@ -18,7 +18,7 @@ export interface RecipientEncryptedKeyParameters extends Schema.SchemaConstructo
 /**
  * Class from RFC5652
  */
-export default class RecipientEncryptedKey implements Schema.SchemaCompatible {
+export class RecipientEncryptedKey implements Schema.SchemaCompatible {
 
   public rid: KeyAgreeRecipientIdentifier;
   public encryptedKey: asn1js.OctetString;

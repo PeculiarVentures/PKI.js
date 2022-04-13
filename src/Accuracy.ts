@@ -21,7 +21,7 @@ export type AccuracySchema = Schema.SchemaParameters<{
 /**
  * Class from RFC3161. Accuracy represents the time deviation around the UTC time contained in GeneralizedTime.
  */
-export default class Accuracy {
+export class Accuracy {
 
 
   public seconds?: number;

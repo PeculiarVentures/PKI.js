@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import Certificate from "./Certificate";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { Certificate } from "./Certificate";
 import * as Schema from "./Schema";
 import { ParameterError } from "./errors";
 
@@ -40,7 +40,7 @@ export interface CertIDCreateParams {
 /**
  * Class from RFC6960
  */
-export default class CertID implements Schema.SchemaCompatible {
+export class CertID implements Schema.SchemaCompatible {
 
   public hashAlgorithm: AlgorithmIdentifier;
   public issuerNameHash: asn1js.OctetString;

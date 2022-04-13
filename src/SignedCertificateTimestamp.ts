@@ -2,10 +2,10 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as bs from "bytestreamjs";
 import * as common from "./common";
-import PublicKeyInfo from "./PublicKeyInfo";
+import { PublicKeyInfo } from "./PublicKeyInfo";
 import * as Schema from "./Schema";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import Certificate from "./Certificate";
+import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import { Certificate } from "./Certificate";
 
 const VERSION = "version";
 const LOG_ID = "logID";

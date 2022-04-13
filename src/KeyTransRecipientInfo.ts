@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AlgorithmIdentifier, { AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import Certificate from "./Certificate";
-import RecipientIdentifier, { RecipientIdentifierSchema } from "./RecipientIdentifier";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
+import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { Certificate } from "./Certificate";
+import { RecipientIdentifier, RecipientIdentifierSchema } from "./RecipientIdentifier";
+import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
 import * as Schema from "./Schema";
 
 const VERSION = "version";

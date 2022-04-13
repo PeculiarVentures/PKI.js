@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import CertID, { CertIDSchema } from "./CertID";
-import Extension, { ExtensionSchema } from "./Extension";
+import { CertID, CertIDSchema } from "./CertID";
+import { Extension, ExtensionSchema } from "./Extension";
 import * as Schema from "./Schema";
 
 const REQ_CERT = "reqCert";
@@ -25,7 +25,7 @@ export type RequestSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC6960
  */
-export default class Request implements Schema.SchemaCompatible {
+export class Request implements Schema.SchemaCompatible {
 
   public reqCert: CertID;
   public singleRequestExtensions?: Extension[];

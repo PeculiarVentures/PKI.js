@@ -17,7 +17,7 @@ export interface OtherRecipientInfoParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5652
  */
-export default class OtherRecipientInfo implements Schema.SchemaCompatible {
+export class OtherRecipientInfo implements Schema.SchemaCompatible {
 
   public oriType: string;
   public oriValue: any;

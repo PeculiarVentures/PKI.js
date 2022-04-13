@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import OtherKeyAttribute, { OtherKeyAttributeSchema } from "./OtherKeyAttribute";
+import { OtherKeyAttribute, OtherKeyAttributeSchema } from "./OtherKeyAttribute";
 import * as Schema from "./Schema";
 
 const KEY_IDENTIFIER = "keyIdentifier";
@@ -27,7 +27,7 @@ export type KEKIdentifierSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5652
  */
-export default class KEKIdentifier implements Schema.SchemaCompatible {
+export class KEKIdentifier implements Schema.SchemaCompatible {
 
   public keyIdentifier: asn1js.OctetString;
   public date?: asn1js.GeneralizedTime;

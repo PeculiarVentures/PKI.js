@@ -17,7 +17,7 @@ export interface SecretBagParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC7292
  */
-export default class SecretBag {
+export class SecretBag {
 
   public secretTypeId: string;
   public secretValue: Schema.SchemaCompatible;

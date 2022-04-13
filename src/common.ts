@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { utilConcatBuf } from "pvutils";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import CryptoEngine, { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams } from "./CryptoEngine";
+import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import { CryptoEngine, CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams } from "./CryptoEngine";
 import { ArgumentError } from "./errors";
 
 
@@ -181,8 +181,9 @@ export function getOIDByAlgorithm(algorithm: Algorithm, safety?: boolean, target
 /**
  * Get default algorithm parameters for each kind of operation
  * @param algorithmName Algorithm name to get common parameters for
- * @param operation Kind of operation: "sign", "encrypt", "generatekey", "importkey", "exportkey", "verify"
+ * @param operation Kind of operation: "sign", "encrypt", "generateKey", "importKey", "exportKey", "verify"
  */
+// TODO Add safety
 export function getAlgorithmParameters(algorithmName: string, operation: CryptoEngineAlgorithmOperation): CryptoEngineAlgorithmParams {
   return getEngine().subtle.getAlgorithmParameters(algorithmName, operation);
 }

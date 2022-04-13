@@ -1,21 +1,21 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import EncapsulatedContentInfo, { EncapsulatedContentInfoSchema } from "./EncapsulatedContentInfo";
-import Certificate, { checkCA } from "./Certificate";
-import CertificateRevocationList from "./CertificateRevocationList";
-import OtherRevocationInfoFormat from "./OtherRevocationInfoFormat";
-import SignerInfo from "./SignerInfo";
-import CertificateSet, { CertificateSetItem } from "./CertificateSet";
-import RevocationInfoChoices, { RevocationInfoChoicesSchema } from "./RevocationInfoChoices";
-import IssuerAndSerialNumber from "./IssuerAndSerialNumber";
-import TSTInfo from "./TSTInfo";
-import CertificateChainValidationEngine, { CertificateChainValidationEngineParameters, FindIssuerCallback, FindOriginCallback } from "./CertificateChainValidationEngine";
-import BasicOCSPResponse from "./BasicOCSPResponse";
-import OtherCertificateFormat from "./OtherCertificateFormat";
-import AttributeCertificateV1 from "./AttributeCertificateV1";
-import AttributeCertificateV2 from "./AttributeCertificateV2";
+import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import { EncapsulatedContentInfo, EncapsulatedContentInfoSchema } from "./EncapsulatedContentInfo";
+import { Certificate, checkCA } from "./Certificate";
+import { CertificateRevocationList } from "./CertificateRevocationList";
+import { OtherRevocationInfoFormat } from "./OtherRevocationInfoFormat";
+import { SignerInfo } from "./SignerInfo";
+import { CertificateSet, CertificateSetItem } from "./CertificateSet";
+import { RevocationInfoChoices, RevocationInfoChoicesSchema } from "./RevocationInfoChoices";
+import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
+import { TSTInfo } from "./TSTInfo";
+import { CertificateChainValidationEngine, CertificateChainValidationEngineParameters, FindIssuerCallback, FindOriginCallback } from "./CertificateChainValidationEngine";
+import { BasicOCSPResponse } from "./BasicOCSPResponse";
+import { OtherCertificateFormat } from "./OtherCertificateFormat";
+import { AttributeCertificateV1 } from "./AttributeCertificateV1";
+import { AttributeCertificateV2 } from "./AttributeCertificateV2";
 import * as Schema from "./Schema";
 import { id_ContentType_Data, id_eContentType_TSTInfo, id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
 
@@ -121,7 +121,7 @@ export class SignedDataVerifyError extends Error {
 /**
  * Class from RFC5652
  */
-export default class SignedData implements Schema.SchemaCompatible {
+export class SignedData implements Schema.SchemaCompatible {
 
   public static ID_DATA: typeof id_ContentType_Data = id_ContentType_Data;
 

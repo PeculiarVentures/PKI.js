@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import CertificateRevocationList from "./CertificateRevocationList";
+import { CertificateRevocationList } from "./CertificateRevocationList";
 import { id_CRLBag_X509CRL } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
@@ -21,7 +21,7 @@ export interface CRLBagParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC7292
  */
-export default class CRLBag implements Schema.SchemaCompatible {
+export class CRLBag implements Schema.SchemaCompatible {
 
   public crlId: string;
   public crlValue: any;

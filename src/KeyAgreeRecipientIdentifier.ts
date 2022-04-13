@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import IssuerAndSerialNumber, { IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
-import RecipientKeyIdentifier, { RecipientKeyIdentifierSchema } from "./RecipientKeyIdentifier";
+import { IssuerAndSerialNumber, IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
+import { RecipientKeyIdentifier, RecipientKeyIdentifierSchema } from "./RecipientKeyIdentifier";
 import * as Schema from "./Schema";
 
 const VARIANT = "variant";
@@ -23,7 +23,7 @@ export type KeyAgreeRecipientIdentifierSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5652
  */
-export default class KeyAgreeRecipientIdentifier implements Schema.SchemaCompatible {
+export class KeyAgreeRecipientIdentifier implements Schema.SchemaCompatible {
 
   public variant: number;
   public value: any;

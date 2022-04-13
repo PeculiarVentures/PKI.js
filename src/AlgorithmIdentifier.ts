@@ -35,7 +35,7 @@ const CLEAR_PROPS = [
 /**
  * Class from RFC5280
  */
-export default class AlgorithmIdentifier implements Schema.SchemaCompatible {
+export class AlgorithmIdentifier implements Schema.SchemaCompatible {
 
   /**
    * ObjectIdentifier for algorithm (string representation)

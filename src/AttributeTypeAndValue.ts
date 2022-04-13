@@ -24,7 +24,7 @@ export type AttributeValueType = asn1js.Utf8String
 /**
  * Class from RFC5280
  */
-export default class AttributeTypeAndValue {
+export class AttributeTypeAndValue {
 
   public type: string;
   public value: AttributeValueType;

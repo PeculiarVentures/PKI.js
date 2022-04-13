@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import AttributeTypeAndValue from "./AttributeTypeAndValue";
+import { AttributeTypeAndValue } from "./AttributeTypeAndValue";
 import * as Schema from "./Schema";
 
 export interface RelativeDistinguishedNamesParameters extends Schema.SchemaConstructor {
@@ -23,7 +23,7 @@ export type RelativeDistinguishedNamesSchema = Schema.SchemaParameters<{
 /**
  * Class from RFC5280
  */
-export default class RelativeDistinguishedNames {
+export class RelativeDistinguishedNames {
 
 	/**
 	 * Array of "type and value" objects

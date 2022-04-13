@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { getEngine } from "./common";
-import PublicKeyInfo from "./PublicKeyInfo";
-import RelativeDistinguishedNames, { RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
-import AlgorithmIdentifier from "./AlgorithmIdentifier";
-import Attribute, { AttributeSchema } from "./Attribute";
+import { PublicKeyInfo } from "./PublicKeyInfo";
+import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import { Attribute, AttributeSchema } from "./Attribute";
 import * as Schema from "./Schema";
 
 const TBS = "tbs";
@@ -81,7 +81,7 @@ export interface CertificationRequestParameters extends Schema.SchemaConstructor
 /**
  * Class from RFC2986
  */
-export default class CertificationRequest implements Schema.SchemaCompatible {
+export class CertificationRequest implements Schema.SchemaCompatible {
 
   public tbs: ArrayBuffer;
   public version: number;

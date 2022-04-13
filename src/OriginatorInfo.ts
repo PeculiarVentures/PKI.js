@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { getParametersValue, clearProps } from "pvutils";
-import CertificateSet from "./CertificateSet";
-import RevocationInfoChoices from "./RevocationInfoChoices";
+import { CertificateSet } from "./CertificateSet";
+import { RevocationInfoChoices } from "./RevocationInfoChoices";
 import * as Schema from "./Schema";
 
 const CERTS = "certs";
@@ -18,7 +18,7 @@ export interface OriginatorInfoParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5652
  */
-export default class OriginatorInfo {
+export class OriginatorInfo {
 
 	public certs?: CertificateSet;
 	public crls?: RevocationInfoChoices;
