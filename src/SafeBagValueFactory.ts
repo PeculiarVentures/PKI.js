@@ -6,7 +6,8 @@ export interface BagTypeConstructor<T extends BagType> {
 
 export class SafeBagValueFactory {
   private static items?: Record<string, BagTypeConstructor<BagType>>;
-  public static register<T extends BagType = BagType>(id: string, type: BagTypeConstructor<T>): void {
+
+  private static getItems(): Record<string, BagTypeConstructor<BagType>> {
     if (!this.items) {
       this.items = {};
 
@@ -17,11 +18,15 @@ export class SafeBagValueFactory {
       SafeBagValueFactory.register("1.2.840.113549.1.12.10.1.5", SecretBag);
       SafeBagValueFactory.register("1.2.840.113549.1.12.10.1.6", SafeContents);
     }
-    this.items[id] = type;
+
+    return this.items;
+  }
+  public static register<T extends BagType = BagType>(id: string, type: BagTypeConstructor<T>): void {
+    this.getItems()[id] = type;
   }
 
   public static find(id: string): BagTypeConstructor<BagType> | null {
-    return this.items?.[id] || null;
+    return this.getItems()[id] || null;
   }
 
 }
