@@ -73,7 +73,6 @@
     "PKCS"
   ],
   "module": "build/index.es.js",
-  "unpkg": "build/index.unpkg.js",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "name": "pkijs",
