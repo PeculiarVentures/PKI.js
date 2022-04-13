@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import * as utils from "./utils";
 import * as pkijs from "../src";
 

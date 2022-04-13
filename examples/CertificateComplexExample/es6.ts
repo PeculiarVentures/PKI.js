@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import * as pkijs from "../../src";
 import * as utils from "../../test/utils";
 import * as example from "../../test/certificateComplexExample";
@@ -185,143 +184,12 @@ async function createCertificate() {
 	}
 }
 
-async function verifyCertificateInternal() {
-	//#region Major activities
-	//#region Initial check
-	if (certificateBuffer.byteLength === 0)
-		return { result: false };
-	//#endregion
-
-	//#region Decode existing CERT
-	const asn1 = asn1js.fromBER(certificateBuffer);
-	const certificate = new pkijs.Certificate({ schema: asn1.result });
-	//#endregion
-
-	//#region Create certificate's array (end-user certificate + intermediate certificates)
-	const certificates = [];
-	certificates.push(...intermediateCertificates);
-	certificates.push(certificate);
-	//#endregion
-
-	//#region Make a copy of trusted certificates array
-	const trustedCerts = [];
-	trustedCerts.push(...trustedCertificates);
-	//#endregion
-
-	//#region Create new X.509 certificate chain object
-	const certChainVerificationEngine = new pkijs.CertificateChainValidationEngine({
-		trustedCerts,
-		certs: certificates,
-		crls,
-	});
-	//#endregion
-
-	//#region Verify CERT
-	return certChainVerificationEngine.verify();
-	//#endregion
-	//#endregion
-}
-
 async function verifyCertificate() {
 	try {
 		const chainStatus = await example.verifyCertificate(certificateBuffer, intermediateCertificates, trustedCertificates, crls);
 		alert(`Verification result: ${chainStatus.result}`);
 	} catch (e) {
 		common.processError(e, "Error on Certificate verifying");
-	}
-}
-
-function parseCAbundle(buffer: ArrayBuffer) {
-	//#region Initial variables
-	const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
-	const startChars = "-----BEGIN CERTIFICATE-----";
-	const endChars = "-----END CERTIFICATE-----";
-	const endLineChars = "\r\n";
-
-	const view = new Uint8Array(buffer);
-
-	let waitForStart = false;
-	let middleStage = true;
-	let waitForEnd = false;
-	let waitForEndLine = false;
-	let started = false;
-
-	let certBodyEncoded = "";
-	//#endregion
-
-	for (let i = 0; i < view.length; i++) {
-		if (started === true) {
-			if (base64Chars.indexOf(String.fromCharCode(view[i])) !== (-1))
-				certBodyEncoded += String.fromCharCode(view[i]);
-			else {
-				if (String.fromCharCode(view[i]) === "-") {
-					//#region Decoded trustedCertificates
-					const asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(window.atob(certBodyEncoded)));
-					try {
-						trustedCertificates.push(new pkijs.Certificate({ schema: asn1.result }));
-					}
-					catch (ex) {
-						alert("Wrong certificate format");
-						return;
-					}
-					//#endregion
-
-					//#region Set all "flag variables"
-					certBodyEncoded = "";
-
-					started = false;
-					waitForEnd = true;
-					//#endregion
-				}
-			}
-		}
-		else {
-			if (waitForEndLine === true) {
-				if (endLineChars.indexOf(String.fromCharCode(view[i])) === (-1)) {
-					waitForEndLine = false;
-
-					if (waitForEnd === true) {
-						waitForEnd = false;
-						middleStage = true;
-					}
-					else {
-						if (waitForStart === true) {
-							waitForStart = false;
-							started = true;
-
-							certBodyEncoded += String.fromCharCode(view[i]);
-						}
-						else
-							middleStage = true;
-					}
-				}
-			}
-			else {
-				if (middleStage === true) {
-					if (String.fromCharCode(view[i]) === "-") {
-						if ((i === 0) ||
-							((String.fromCharCode(view[i - 1]) === "\r") ||
-								(String.fromCharCode(view[i - 1]) === "\n"))) {
-							middleStage = false;
-							waitForStart = true;
-						}
-					}
-				}
-				else {
-					if (waitForStart === true) {
-						if (startChars.indexOf(String.fromCharCode(view[i])) === (-1))
-							waitForEndLine = true;
-					}
-					else {
-						if (waitForEnd === true) {
-							if (endChars.indexOf(String.fromCharCode(view[i])) === (-1))
-								waitForEndLine = true;
-						}
-					}
-				}
-			}
-		}
 	}
 }
 

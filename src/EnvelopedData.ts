@@ -23,7 +23,7 @@ import { OriginatorIdentifierOrKey } from "./OriginatorIdentifierOrKey";
 import { OriginatorPublicKey } from "./OriginatorPublicKey";
 import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
-import { ArgumentError, ParameterError } from "./errors";
+import { ArgumentError } from "./errors";
 
 const VERSION = "version";
 const ORIGINATOR_INFO = "originatorInfo";
@@ -792,10 +792,7 @@ export class EnvelopedData implements Schema.SchemaCompatible {
       //#endregion
       //#region Export public key of ephemeral ECDH key pair
 
-      const ecdhPublicKey = ecdhKeys.publicKey!;
-      const ecdhPrivateKey = ecdhKeys.privateKey!;
-
-      const exportedECDHPublicKey = await crypto.exportKey("spki", ecdhPublicKey);
+      const exportedECDHPublicKey = await crypto.exportKey("spki", ecdhKeys.publicKey);
       //#endregion
 
       //#region Create shared secret
@@ -803,7 +800,7 @@ export class EnvelopedData implements Schema.SchemaCompatible {
         name: "ECDH",
         public: recipientPublicKey
       },
-        ecdhPrivateKey,
+        ecdhKeys.privateKey,
         recipientCurveLength);
       //#endregion
 
@@ -869,7 +866,7 @@ export class EnvelopedData implements Schema.SchemaCompatible {
       recipientInfo.recipientEncryptedKeys.encryptedKeys[0].encryptedKey = new asn1js.OctetString({ valueHex: wrappedKey });
       //#endregion
 
-      return { ecdhPrivateKey };
+      return { ecdhPrivateKey: ecdhKeys.privateKey };
       //#endregion
     };
 

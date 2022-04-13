@@ -53,6 +53,8 @@
   "scripts": {
     "build": "rollup -c",
     "build:examples": "rollup -c examples/rollup.config.js",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint --fix . --ext .ts",
     "build:docs": "esdoc",
     "test": "mocha",
     "prepublishOnly": "npm run build"

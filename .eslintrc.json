@@ -9,6 +9,7 @@
     "plugin:@typescript-eslint/recommended"
   ],
   "ignorePatterns": [
+    "build/**/*.ts",
     "**/*.js"
   ],
   "rules": {

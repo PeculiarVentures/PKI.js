@@ -1,8 +1,5 @@
 import * as assert from "assert";
-import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import * as utils from "./utils";
-import * as pkijs from "../src";
 import * as example from "./howToEncryptCMSviaKey";
 
 context("How To Encrypt CMS via Key Identifier", () => {

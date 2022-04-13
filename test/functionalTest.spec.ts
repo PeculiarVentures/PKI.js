@@ -2,7 +2,6 @@ import * as assert from "assert";
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pkijs from "../src";
-import * as utils from "./utils";
 
 context("PKIjs functional testing", () => {
   //region Initial variables

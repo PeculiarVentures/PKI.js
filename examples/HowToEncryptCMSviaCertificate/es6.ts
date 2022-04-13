@@ -1,5 +1,4 @@
 import * as pvtsutils from "pvtsutils";
-import * as pvutils from "pvutils";
 import * as example from "../../test/howToEncryptCMSviaCertificate";
 import * as utils from "../../test/utils";
 import * as common from "../common";

@@ -6,6 +6,7 @@ import { KEKRecipientInfo } from "./KEKRecipientInfo";
 import { PasswordRecipientinfo } from "./PasswordRecipientinfo";
 import { OtherRecipientInfo } from "./OtherRecipientInfo";
 import * as Schema from "./Schema";
+import { ParameterError } from "./errors";
 
 const VARIANT = "variant";
 const VALUE = "value";
@@ -208,7 +209,8 @@ export class RecipientInfo implements Schema.SchemaCompatible {
    */
   public toSchema(): asn1js.BaseBlock<any> {
     //#region Construct and return new ASN.1 schema for this object
-    const _schema = this.value!.toSchema();
+    ParameterError.assertEmpty(this.value, "value", "RecipientInfo");
+    const _schema = this.value.toSchema();
 
     switch (this.variant) {
       case 1:

@@ -271,7 +271,7 @@ export class PrivateKeyInfo implements Schema.SchemaCompatible {
     }
 
     // TODO Unclear behavior
-    const publicKeyJWK = this.parsedKey!.toJSON();
+    const publicKeyJWK = this.parsedKey.toJSON();
     Object.assign(jwk, publicKeyJWK);
 
 

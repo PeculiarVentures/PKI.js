@@ -10,7 +10,6 @@ import MimeNode from "emailjs-mime-builder";
 import parse from "emailjs-mime-parser";
 
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT
-const trustedCertificates = []; // Array of root certificates from "CA Bundle"
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-v1_5";

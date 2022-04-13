@@ -1,7 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pkijs from "../src";
 import { BufferSourceConverter, Convert } from "pvtsutils";
-import * as utils from "../test/utils";
 
 export function getElement(id: string, type: "span"): HTMLSpanElement;
 export function getElement(id: string, type: "select"): HTMLSelectElement;
@@ -80,7 +79,7 @@ export function parseCertificate(source: BufferSource): pkijs.Certificate[] {
 
   const res: pkijs.Certificate[] = [];
   for (const item of buffers) {
-    const asn1 = asn1js.fromBER(buffer);
+    const asn1 = asn1js.fromBER(item);
     if (asn1.offset === (-1)) {
       throw new Error("Bad encoded ASN.1");
     }

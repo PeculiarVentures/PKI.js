@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
-import * as pvutils from "pvutils";
 import * as example from "../../test/opensslPrivateKeyEncryption";
 import * as utils from "../../test/utils";
 import * as pkijs from "../../src";
