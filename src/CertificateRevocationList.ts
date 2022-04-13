@@ -432,7 +432,7 @@ export class CertificateRevocationList implements Schema.SchemaCompatible {
     return object;
   }
 
-  public isCertificateRevoked(certificate: Certificate) {
+  public isCertificateRevoked(certificate: Certificate): boolean {
     //#region Check that issuer of the input certificate is the same with issuer of this CRL
     if (!this.issuer.isEqual(certificate.issuer)) {
       return false;

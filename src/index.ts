@@ -98,6 +98,7 @@ export * from "./ResponseData";
 export * from "./RevocationInfoChoices";
 export * from "./RevokedCertificate";
 export * from "./SafeBag";
+export * from "./SafeBagValueFactory";
 export * from "./SafeContents";
 export * from "./Schema";
 export * from "./SecretBag";

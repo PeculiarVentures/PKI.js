@@ -1,12 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { Attribute } from "./Attribute";
-import { PrivateKeyInfo } from "./PrivateKeyInfo";
-import { PKCS8ShroudedKeyBag } from "./PKCS8ShroudedKeyBag";
-import { CertBag } from "./CertBag";
-import { CRLBag } from "./CRLBag";
-import { SecretBag } from "./SecretBag";
-import { SafeContents } from "./SafeContents";
 import * as Schema from "./Schema";
 
 const BAG_ID = "bagId";
@@ -17,8 +11,6 @@ const CLEAR_PROPS = [
   BAG_VALUE,
   BAG_ATTRIBUTES
 ];
-
-export type BagType = PrivateKeyInfo | PKCS8ShroudedKeyBag | CertBag | CRLBag | SecretBag | SafeContents;
 
 export interface SafeBagParameters extends Schema.SchemaConstructor {
   bagId?: string;
@@ -168,29 +160,11 @@ export class SafeBag implements Schema.SchemaCompatible {
     //#region Get internal properties from parsed schema
     this.bagId = asn1.result.bagId.valueBlock.toString();
 
-    // TODO Move to SafeBagValueFactory
-    switch (this.bagId) {
-      case "1.2.840.113549.1.12.10.1.1": // keyBag
-        this.bagValue = new PrivateKeyInfo({ schema: asn1.result.bagValue });
-        break;
-      case "1.2.840.113549.1.12.10.1.2": // pkcs8ShroudedKeyBag
-        this.bagValue = new PKCS8ShroudedKeyBag({ schema: asn1.result.bagValue });
-        break;
-      case "1.2.840.113549.1.12.10.1.3": // certBag
-        this.bagValue = new CertBag({ schema: asn1.result.bagValue });
-        break;
-      case "1.2.840.113549.1.12.10.1.4": // crlBag
-        this.bagValue = new CRLBag({ schema: asn1.result.bagValue });
-        break;
-      case "1.2.840.113549.1.12.10.1.5": // secretBag
-        this.bagValue = new SecretBag({ schema: asn1.result.bagValue });
-        break;
-      case "1.2.840.113549.1.12.10.1.6": // safeContentsBag
-        this.bagValue = new SafeContents({ schema: asn1.result.bagValue });
-        break;
-      default:
-        throw new Error(`Invalid BAG_ID for SafeBag: ${this.bagId}`);
+    const bagType = SafeBagValueFactory.find(this.bagId);
+    if (!bagType) {
+      throw new Error(`Invalid BAG_ID for SafeBag: ${this.bagId}`);
     }
+    this.bagValue = new bagType({ schema: asn1.result.bagValue });
 
     if (BAG_ATTRIBUTES in asn1.result) {
       this.bagAttributes = Array.from(asn1.result.bagAttributes, element => new Attribute({ schema: element }));
@@ -246,3 +220,4 @@ export class SafeBag implements Schema.SchemaCompatible {
 
 }
 
+import { type BagType, SafeBagValueFactory } from "./SafeBagValueFactory";

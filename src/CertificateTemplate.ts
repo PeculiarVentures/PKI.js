@@ -1,7 +1,5 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { extensionValue } from "./ExtensionValueFactory";
-import { id_MicrosoftCertTemplateV2 } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
 const TEMPLATE_ID = "templateID";
@@ -17,7 +15,6 @@ export interface CertificateTemplateParameters extends Schema.SchemaConstructor 
 /**
  * Class from "[MS-WCCE]: Windows Client Certificate Enrollment Protocol"
  */
-@extensionValue(id_MicrosoftCertTemplateV2, "MicrosoftCertTemplateV2")
 export class CertificateTemplate {
 
   public templateID: string;

@@ -3,8 +3,6 @@ import * as pvutils from "pvutils";
 import * as bs from "bytestreamjs";
 import { SignedCertificateTimestamp } from "./SignedCertificateTimestamp";
 import * as Schema from "./Schema";
-import { extensionValue } from "./ExtensionValueFactory";
-import { id_SignedCertificateTimestampList } from "./ObjectIdentifiers";
 
 const TIMESTAMPS = "timestamps";
 
@@ -15,7 +13,6 @@ export interface SignedCertificateTimestampListParameters extends Schema.SchemaC
 /**
  * Class from RFC6962
  */
-@extensionValue(id_SignedCertificateTimestampList, "SignedCertificateTimestampList")
 export class SignedCertificateTimestampList implements Schema.SchemaCompatible {
 
   public timestamps: SignedCertificateTimestamp[];

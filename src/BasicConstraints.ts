@@ -1,7 +1,5 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { extensionValue } from "./ExtensionValueFactory";
-import { id_BasicConstraints } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
 const PATH_LENGTH_CONSTRAINT = "pathLenConstraint";
@@ -16,7 +14,6 @@ export interface BasicConstraintsParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5280
  */
-@extensionValue(id_BasicConstraints, "BasicConstraints")
 export class BasicConstraints implements Schema.SchemaCompatible {
 
   public cA: boolean;

@@ -1,7 +1,5 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { extensionValue } from "./ExtensionValueFactory";
-import { id_MicrosoftCaVersion } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
 const CERTIFICATE_INDEX = "certificateIndex";
@@ -15,7 +13,6 @@ export interface CAVersionParameters extends Schema.SchemaConstructor {
 /**
  * Class from https://docs.microsoft.com/en-us/windows/desktop/seccrypto/certification-authority-renewal
  */
-@extensionValue(id_MicrosoftCaVersion, "MicrosoftCaVersion")
 export class CAVersion implements Schema.SchemaCompatible {
 
   public certificateIndex: number;

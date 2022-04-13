@@ -1,8 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { extensionValue } from "./ExtensionValueFactory";
 import { GeneralName } from "./GeneralName";
-import { id_IssuingDistributionPoint } from "./ObjectIdentifiers";
 import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
 import * as Schema from "./Schema";
 
@@ -37,7 +35,6 @@ export interface IssuingDistributionPointParameters extends Schema.SchemaConstru
 /**
  * Class from RFC5280
  */
-@extensionValue(id_IssuingDistributionPoint, "IssuingDistributionPoint")
 export class IssuingDistributionPoint {
 
   public distributionPoint?: DistributionPointName;

@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { SafeBag } from "./SafeBag";
 import * as Schema from "./Schema";
 
 const SAFE_BUGS = "safeBags";
@@ -146,3 +145,5 @@ export class SafeContents {
   }
 
 }
+
+import { SafeBag } from "./SafeBag";

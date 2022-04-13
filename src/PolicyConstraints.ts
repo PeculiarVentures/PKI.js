@@ -1,7 +1,5 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { extensionValue } from "./ExtensionValueFactory";
-import { id_PolicyConstraints } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
 const REQUIRE_EXPLICIT_POLICY = "requireExplicitPolicy";
@@ -19,7 +17,6 @@ export interface PolicyConstraintsParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5280
  */
-@extensionValue(id_PolicyConstraints, "PolicyConstraints")
 export class PolicyConstraints implements Schema.SchemaCompatible {
 
   public requireExplicitPolicy?: number;

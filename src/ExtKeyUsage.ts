@@ -1,7 +1,5 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { extensionValue } from "./ExtensionValueFactory";
-import { id_ExtKeyUsage } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
 const KEY_PURPOSES = "keyPurposes";
@@ -16,7 +14,6 @@ export interface ExtKeyUsageParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5280
  */
-@extensionValue(id_ExtKeyUsage, "ExtKeyUsage")
 export class ExtKeyUsage implements Schema.SchemaCompatible {
 
   public keyPurposes: string[];

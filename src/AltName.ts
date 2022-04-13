@@ -1,8 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { extensionValue } from "./ExtensionValueFactory";
 import { GeneralName } from "./GeneralName";
-import { id_SubjectAltName, id_IssuerAltName } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
 const ALT_NAMES = "altNames";
@@ -20,8 +18,6 @@ export interface AltNameParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC5280
  */
-@extensionValue(id_SubjectAltName, "SubjectAltName")
-@extensionValue(id_IssuerAltName, "IssuerAltName")
 export class AltName implements Schema.SchemaCompatible {
 
   /**

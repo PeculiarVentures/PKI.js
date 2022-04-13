@@ -1,7 +1,5 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { extensionValue } from "./ExtensionValueFactory";
-import { id_PrivateKeyUsagePeriod } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
 const NOT_BEFORE = "notBefore";
@@ -19,7 +17,6 @@ export interface PrivateKeyUsagePeriodParameters extends Schema.SchemaConstructo
 /**
  * Class from RFC5280
  */
-@extensionValue(id_PrivateKeyUsagePeriod, "PrivateKeyUsagePeriod")
 export class PrivateKeyUsagePeriod implements Schema.SchemaCompatible {
 
   public notBefore?: Date;

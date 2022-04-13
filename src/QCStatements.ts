@@ -1,7 +1,5 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { extensionValue } from "./ExtensionValueFactory";
-import { id_QCStatements } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
 const ID = "id";
@@ -190,7 +188,6 @@ export interface QCStatementsParameters extends Schema.SchemaConstructor {
 /**
  * Class from RFC3739
  */
-@extensionValue(id_QCStatements, "QCStatements")
 export class QCStatements implements Schema.SchemaCompatible {
 
   public values: QCStatement[];

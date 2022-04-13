@@ -1,8 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { DistributionPoint } from "./DistributionPoint";
-import { extensionValue } from "./ExtensionValueFactory";
-import { id_CRLDistributionPoints, id_FreshestCRL } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
 const DISTRIBUTION_POINTS = "distributionPoints";
@@ -17,8 +15,6 @@ export interface CRLDistributionPointsParameters extends Schema.SchemaConstructo
 /**
  * Class from RFC5280
  */
-@extensionValue(id_CRLDistributionPoints, "CRLDistributionPoints")
-@extensionValue(id_FreshestCRL, "FreshestCRL")
 export class CRLDistributionPoints implements Schema.SchemaCompatible {
 
   public distributionPoints: DistributionPoint[];
