@@ -23,6 +23,9 @@ export interface SchemaConstructor {
   schema?: SchemaType;
 }
 
+/**
+ * Parameters for schema generation
+ */
 export interface SchemaParameters<N extends Record<string, any> = { /**/ }> {
   names?: SchemaNames & N;
 }

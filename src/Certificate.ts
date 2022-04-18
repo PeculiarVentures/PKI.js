@@ -147,7 +147,7 @@ function tbsCertificate(parameters: TBSCertificateSchema = {}): Schema.SchemaTyp
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 1 // [1]
         }
-      }), // IMPLICIT bistring value
+      }), // IMPLICIT BIT_STRING value
       new asn1js.Primitive({
         name: (names.tbsCertificateSubjectUniqueID || TBS_CERTIFICATE_SUBJECT_UNIQUE_ID),
         optional: true,
@@ -155,7 +155,7 @@ function tbsCertificate(parameters: TBSCertificateSchema = {}): Schema.SchemaTyp
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 2 // [2]
         }
-      }), // IMPLICIT bistring value
+      }), // IMPLICIT BIT_STRING value
       new asn1js.Constructed({
         optional: true,
         idBlock: {
@@ -172,23 +172,73 @@ function tbsCertificate(parameters: TBSCertificateSchema = {}): Schema.SchemaTyp
   }));
 }
 
-export interface CertificateParameters extends Schema.SchemaConstructor {
-  tbs?: ArrayBuffer;
-  version?: number;
-  serialNumber?: asn1js.Integer;
-  signature?: AlgorithmIdentifier;
-  issuer?: RelativeDistinguishedNames;
-  notBefore?: Time;
-  notAfter?: Time;
-  subject?: RelativeDistinguishedNames;
-  subjectPublicKeyInfo?: PublicKeyInfo;
+export interface ICertificate {
+  /**
+   * ToBeSigned (TBS) part of the certificate
+   */
+  tbs: ArrayBuffer;
+  /**
+   * Version number
+   */
+  version: number;
+  /**
+   * Serial number of the certificate
+   */
+  serialNumber: asn1js.Integer;
+  /**
+   * This field contains the algorithm identifier for the algorithm used by the CA to sign the certificate
+   */
+  signature: AlgorithmIdentifier;
+  /**
+   * The issuer field identifies the entity that has signed and issued the certificate
+   */
+  issuer: RelativeDistinguishedNames;
+  /**
+   * The date on which the certificate validity period begins
+   */
+  notBefore: Time;
+  /**
+   * The date on which the certificate validity period ends
+   */
+  notAfter: Time;
+  /**
+   * The subject field identifies the entity associated with the public key stored in the subject public key field
+   */
+  subject: RelativeDistinguishedNames;
+  /**
+   * This field is used to carry the public key and identify the algorithm with which the key is used
+   */
+  subjectPublicKeyInfo: PublicKeyInfo;
+  /**
+   * The subject and issuer unique identifiers are present in the certificate to handle the possibility of reuse of subject and/or issuer names over time
+   */
   issuerUniqueID?: ArrayBuffer;
+  /**
+   * The subject and issuer unique identifiers are present in the certificate to handle the possibility of reuse of subject and/or issuer names over time
+   */
   subjectUniqueID?: ArrayBuffer;
+  /**
+   * If present, this field is a SEQUENCE of one or more certificate extensions
+   */
   extensions?: Extension[];
-  signatureAlgorithm?: AlgorithmIdentifier;
-  signatureValue?: asn1js.BitString;
+  /**
+   * The signatureAlgorithm field contains the identifier for the cryptographic algorithm used by the CA to sign this certificate
+   */
+  signatureAlgorithm: AlgorithmIdentifier;
+  /**
+   * The signatureValue field contains a digital signature computed upon the ASN.1 DER encoded tbsCertificate
+   */
+  signatureValue: asn1js.BitString;
 }
 
+/**
+ * Constructor parameters for the {@link Certificate} class
+ */
+export type CertificateParameters = Schema.SchemaConstructor & Partial<ICertificate>;
+
+/**
+ * Parameters for {@link Certificate} schema generation
+ */
 export type CertificateSchema = Schema.SchemaParameters<{
   tbsCertificate?: TBSCertificateSchema;
   signatureAlgorithm?: AlgorithmIdentifierSchema;
@@ -196,70 +246,103 @@ export type CertificateSchema = Schema.SchemaParameters<{
 }>;
 
 /**
- * Class from RFC5280
+ * Represents an X.509 certificate described in [RFC5280 Section 4](https://datatracker.ietf.org/doc/html/rfc5280#section-4).
+ *
+ * @example The following example demonstrates how to parse X.509 Certificate
+ * ```js
+ * const asn1 = asn1js.fromBER(raw);
+ * if (asn1.offset === -1) {
+ *   throw new Error("Incorrect encoded ASN.1 data");
+ * }
+ *
+ * const cert = new pkijs.Certificate({ schema: asn1.result });
+ * ```
+ *
+ * @example The following example demonstrates how to create self-signed certificate
+ * ```js
+ * const crypto = pkijs.getCrypto(true);
+ *
+ * // Create certificate
+ * const certificate = new pkijs.Certificate();
+ * certificate.version = 2;
+ * certificate.serialNumber = new asn1js.Integer({ value: 1 });
+ * certificate.issuer.typesAndValues.push(new pkijs.AttributeTypeAndValue({
+ *   type: "2.5.4.3", // Common name
+ *   value: new asn1js.BmpString({ value: "Test" })
+ * }));
+ * certificate.subject.typesAndValues.push(new pkijs.AttributeTypeAndValue({
+ *   type: "2.5.4.3", // Common name
+ *   value: new asn1js.BmpString({ value: "Test" })
+ * }));
+ *
+ * certificate.notBefore.value = new Date();
+ * const notAfter = new Date();
+ * notAfter.setUTCFullYear(notAfter.getUTCFullYear() + 1);
+ * certificate.notAfter.value = notAfter;
+ *
+ * certificate.extensions = []; // Extensions are not a part of certificate by default, it's an optional array
+ *
+ * // "BasicConstraints" extension
+ * const basicConstr = new pkijs.BasicConstraints({
+ *   cA: true,
+ *   pathLenConstraint: 3
+ * });
+ * certificate.extensions.push(new pkijs.Extension({
+ *   extnID: "2.5.29.19",
+ *   critical: false,
+ *   extnValue: basicConstr.toSchema().toBER(false),
+ *   parsedValue: basicConstr // Parsed value for well-known extensions
+ * }));
+ *
+ * // "KeyUsage" extension
+ * const bitArray = new ArrayBuffer(1);
+ * const bitView = new Uint8Array(bitArray);
+ * bitView[0] |= 0x02; // Key usage "cRLSign" flag
+ * bitView[0] |= 0x04; // Key usage "keyCertSign" flag
+ * const keyUsage = new asn1js.BitString({ valueHex: bitArray });
+ * certificate.extensions.push(new pkijs.Extension({
+ *   extnID: "2.5.29.15",
+ *   critical: false,
+ *   extnValue: keyUsage.toBER(false),
+ *   parsedValue: keyUsage // Parsed value for well-known extensions
+ * }));
+ *
+ * const algorithm = pkijs.getAlgorithmParameters("RSASSA-PKCS1-v1_5", "generateKey");
+ * if ("hash" in algorithm.algorithm) {
+ *   algorithm.algorithm.hash.name = "SHA-256";
+ * }
+ *
+ * const keys = await crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
+ *
+ * // Exporting public key into "subjectPublicKeyInfo" value of certificate
+ * await certificate.subjectPublicKeyInfo.importKey(keys.publicKey);
+ *
+ * // Signing final certificate
+ * await certificate.sign(keys.privateKey, "SHA-256");
+ *
+ * const raw = certificate.toSchema().toBER();
+ * ```
  */
-export class Certificate implements Schema.SchemaCompatible {
+export class Certificate implements Schema.SchemaCompatible, ICertificate {
 
-  /**
-   * ToBeSigned (TBS) part of the certificate
-   */
   public tbs: ArrayBuffer;
-  /**
-   * Version number
-   */
   public version: number;
-  /**
-   * Serial number of the certificate
-   */
   public serialNumber: asn1js.Integer;
-  /**
-   * This field contains the algorithm identifier for the algorithm used by the CA to sign the certificate
-   */
   public signature: AlgorithmIdentifier;
-  /**
-   * The issuer field identifies the entity that has signed and issued the certificate
-   */
   public issuer: RelativeDistinguishedNames;
-  /**
-   * The date on which the certificate validity period begins
-   */
   public notBefore: Time;
-  /**
-   * The date on which the certificate validity period ends
-   */
   public notAfter: Time;
-  /**
-   * The subject field identifies the entity associated with the public key stored in the subject public key field
-   */
   public subject: RelativeDistinguishedNames;
-  /**
-   * This field is used to carry the public key and identify the algorithm with which the key is used
-   */
   public subjectPublicKeyInfo: PublicKeyInfo;
-  /**
-   * The subject and issuer unique identifiers are present in the certificate to handle the possibility of reuse of subject and/or issuer names over time
-   */
   public issuerUniqueID?: ArrayBuffer;
-  /**
-   * The subject and issuer unique identifiers are present in the certificate to handle the possibility of reuse of subject and/or issuer names over time
-   */
   public subjectUniqueID?: ArrayBuffer;
-  /**
-   * If present, this field is a SEQUENCE of one or more certificate extensions
-   */
   public extensions?: Extension[];
-  /**
-   * The signatureAlgorithm field contains the identifier for the cryptographic algorithm used by the CA to sign this certificate
-   */
   public signatureAlgorithm: AlgorithmIdentifier;
-  /**
-   * The signatureValue field contains a digital signature computed upon the ASN.1 DER encoded tbsCertificate
-   */
   public signatureValue: asn1js.BitString;
 
   /**
    * Constructor for Certificate class
-   * @param parameters
+   * @param parameters Init parameters
    */
   constructor(parameters: CertificateParameters = {}) {
     //#region Internal properties of the object
@@ -295,6 +378,7 @@ export class Certificate implements Schema.SchemaCompatible {
   /**
    * Return default values for all class members
    * @param memberName String name for a class member
+   * @returns Predefined default value
    */
   public static defaultValues(memberName: typeof TBS): ArrayBuffer;
   public static defaultValues(memberName: typeof VERSION): number;
@@ -349,11 +433,56 @@ export class Certificate implements Schema.SchemaCompatible {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * Certificate  ::=  SEQUENCE  {
    *    tbsCertificate       TBSCertificate,
    *    signatureAlgorithm   AlgorithmIdentifier,
    *    signatureValue       BIT STRING  }
+   *
+   * TBSCertificate  ::=  SEQUENCE  {
+   *     version         [0]  EXPLICIT Version DEFAULT v1,
+   *     serialNumber         CertificateSerialNumber,
+   *     signature            AlgorithmIdentifier,
+   *     issuer               Name,
+   *     validity             Validity,
+   *     subject              Name,
+   *     subjectPublicKeyInfo SubjectPublicKeyInfo,
+   *     issuerUniqueID  [1]  IMPLICIT UniqueIdentifier OPTIONAL,
+   *                           -- If present, version MUST be v2 or v3
+   *     subjectUniqueID [2]  IMPLICIT UniqueIdentifier OPTIONAL,
+   *                           -- If present, version MUST be v2 or v3
+   *     extensions      [3]  EXPLICIT Extensions OPTIONAL
+   *                           -- If present, version MUST be v3
+   *     }
+   *
+   * Version  ::=  INTEGER  {  v1(0), v2(1), v3(2)  }
+   *
+   * CertificateSerialNumber  ::=  INTEGER
+   *
+   * Validity ::= SEQUENCE {
+   *     notBefore      Time,
+   *     notAfter       Time }
+   *
+   * Time ::= CHOICE {
+   *     utcTime        UTCTime,
+   *     generalTime    GeneralizedTime }
+   *
+   * UniqueIdentifier  ::=  BIT STRING
+   *
+   * SubjectPublicKeyInfo  ::=  SEQUENCE  {
+   *     algorithm            AlgorithmIdentifier,
+   *     subjectPublicKey     BIT STRING  }
+   *
+   * Extensions  ::=  SEQUENCE SIZE (1..MAX) OF Extension
+   *
+   * Extension  ::=  SEQUENCE  {
+   *     extnID      OBJECT IDENTIFIER,
+   *     critical    BOOLEAN DEFAULT FALSE,
+   *     extnValue   OCTET STRING
+   *                 -- contains the DER encoding of an ASN.1 value
+   *                 -- corresponding to the extension type identified
+   *                 -- by extnID
+   *     }
    * ```
    *
    * @param parameters Input parameters for the schema
@@ -378,7 +507,7 @@ export class Certificate implements Schema.SchemaCompatible {
 
   /**
    * Convert parsed asn1js object into current class
-   * @param schema
+   * @param schema ASN.1 schema
    */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
@@ -432,7 +561,8 @@ export class Certificate implements Schema.SchemaCompatible {
   }
 
   /**
-   * Create ASN.1 schema for existing values of TBS part for the certificate
+   * Creates ASN.1 schema for existing values of TBS part for the certificate
+   * @returns ASN.1 SEQUENCE
    */
   public encodeTBS(): asn1js.Sequence {
     //#region Create array for output sequence
@@ -508,8 +638,8 @@ export class Certificate implements Schema.SchemaCompatible {
   }
 
   /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
+   * Converts the current object to ASN.1 object and sets correct values
+   * @returns ASN.1 SEQUENCE
    */
   public toSchema(encodeFlag = false): asn1js.Sequence {
     let tbsSchema = {};
@@ -538,7 +668,7 @@ export class Certificate implements Schema.SchemaCompatible {
   }
 
   /**
-   * Conversion for the class to JSON object
+   * Converts the object into the JSON object
    */
   public toJSON(): any {
     const object: any = {
@@ -575,7 +705,8 @@ export class Certificate implements Schema.SchemaCompatible {
 
   /**
    * Importing public key for current certificate
-   * @param parameters
+   * @param parameters Public key export parameters
+   * @returns WebCrypto public key
    */
   public async getPublicKey(parameters?: CryptoEnginePublicKeyParams): Promise<CryptoKey> {
     return common.getCrypto(true).getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
@@ -584,6 +715,7 @@ export class Certificate implements Schema.SchemaCompatible {
   /**
    * Get hash value for subject public key (default SHA-1)
    * @param hashAlgorithm Hashing algorithm name
+   * @returns Computed hash value from `Certificate.tbsCertificate.subjectPublicKeyInfo.subjectPublicKey`
    */
   public async getKeyHash(hashAlgorithm = "SHA-1"): Promise<ArrayBuffer> {
     return common.getCrypto(true).digest({ name: hashAlgorithm }, this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
@@ -594,7 +726,7 @@ export class Certificate implements Schema.SchemaCompatible {
    * @param privateKey Private key for SUBJECT_PUBLIC_KEY_INFO structure
    * @param hashAlgorithm Hashing algorithm
    */
-  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1") {
+  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<void> {
     //#region Initial checking
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
@@ -646,10 +778,11 @@ export class Certificate implements Schema.SchemaCompatible {
 /**
  * Check CA flag for the certificate
  * @param cert Certificate to find CA flag for
+ * @returns Returns {@link Certificate} if `cert` is CA certificate otherwise return `null`
  */
 export function checkCA(cert: Certificate, signerCert: Certificate | null = null): Certificate | null {
   //#region Do not include signer's certificate
-  if (signerCert && (cert.issuer.isEqual(signerCert.issuer) === true) && (cert.serialNumber.isEqual(signerCert.serialNumber) === true)) {
+  if (signerCert && cert.issuer.isEqual(signerCert.issuer) && cert.serialNumber.isEqual(signerCert.serialNumber)) {
     return null;
   }
   //#endregion
