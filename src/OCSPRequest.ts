@@ -7,6 +7,7 @@ import { Request } from "./Request";
 import { CertID, CertIDCreateParams } from "./CertID";
 import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
+import { ParameterError } from "./errors";
 
 const TBS_REQUEST = "tbsRequest";
 const OPTIONAL_SIGNATURE = "optionalSignature";
@@ -21,7 +22,34 @@ export interface OCSPRequestParameters extends Schema.SchemaConstructor {
 }
 
 /**
- * Class from RFC6960
+ * Represents an OCSP request described in [RFC6960 Section 4.1](https://datatracker.ietf.org/doc/html/rfc6960#section-4.1)
+ *
+ * @example The following example demonstrates how to create OCSP request
+ * ```js
+ * // Create OCSP request
+ * const ocspReq = new pkijs.OCSPRequest();
+ *
+ * ocspReq.tbsRequest.requestorName = new pkijs.GeneralName({
+ *   type: 4,
+ *   value: cert.subject,
+ * });
+ *
+ * await ocspReq.createForCertificate(cert, {
+ *   hashAlgorithm: "SHA-256",
+ *   issuerCertificate: issuerCert,
+ * });
+ *
+ * const nonce = pkijs.getRandomValues(new Uint8Array(10));
+ * ocspReq.tbsRequest.requestExtensions = [
+ *   new pkijs.Extension({
+ *     extnID: "1.3.6.1.5.5.7.48.1.2", // nonce
+ *     extnValue: new asn1js.OctetString({ valueHex: nonce.buffer }).toBER(),
+ *   })
+ * ];
+ *
+ * // Encode OCSP request
+ * const ocspReqRaw = ocspReq.toSchema(true).toBER();
+ * ```
  */
 export class OCSPRequest {
 
@@ -68,6 +96,7 @@ export class OCSPRequest {
    * Compare values with default values for all class members
    * @param memberName String name for a class member
    * @param memberValue Value to compare with default value
+   * @returns Returns `true` if `memberValue` is equal to default value for selected class member
    */
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
@@ -91,7 +120,7 @@ export class OCSPRequest {
    * Return value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * OCSPRequest     ::=     SEQUENCE {
    *    tbsRequest                  TBSRequest,
    *    optionalSignature   [0]     EXPLICIT Signature OPTIONAL }
@@ -191,7 +220,7 @@ export class OCSPRequest {
 
   /**
    * Conversion for the class to JSON object
-   * @returns
+   * @returns JSON oject
    */
   public toJSON(): any {
     const _object: any = {
@@ -220,13 +249,9 @@ export class OCSPRequest {
     //#endregion
 
     //#region Make final request data
-    this.tbsRequest = new TBSRequest({
-      requestList: [
-        new Request({
-          reqCert: certID
-        })
-      ]
-    });
+    this.tbsRequest.requestList.push(new Request({
+      reqCert: certID,
+    }));
     //#endregion
   }
 
@@ -237,11 +262,7 @@ export class OCSPRequest {
    */
   public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1") {
     //#region Initial checking
-    //#region Check private key
-    if (!privateKey) {
-      throw new Error("Need to provide a private key for signing");
-    }
-    //#endregion
+    ParameterError.assertEmpty(privateKey, "privateKey", "OCSPRequest.sign method");
 
     //#region Check that OPTIONAL_SIGNATURE exists in the current request
     if (!this.optionalSignature) {
