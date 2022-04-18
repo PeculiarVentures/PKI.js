@@ -10,6 +10,7 @@ import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
 import { PublicKeyInfo } from "./PublicKeyInfo";
 import { id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BaseCRLNumber, id_CertificateIssuer, id_CRLNumber, id_CRLReason, id_FreshestCRL, id_InvalidityDate, id_IssuerAltName, id_IssuingDistributionPoint } from "./ObjectIdentifiers";
+import { AsnError } from "./errors";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -380,7 +381,9 @@ export class CertificateRevocationList implements Schema.SchemaCompatible {
         return CertificateRevocationList.schema();
       }
 
-      tbsSchema = asn1js.fromBER(this.tbs).result;
+      const asn1 = asn1js.fromBER(this.tbs);
+      AsnError.assert(asn1, "TBS Certificate Revocation List");
+      tbsSchema = asn1.result;
     }
     //#endregion
     //#region Create TBS schema via assembling from TBS parts

@@ -168,6 +168,7 @@ export async function verifyCertificate(certificateBuffer: ArrayBuffer, intermed
 
   //#region Decode existing CERT
   const asn1 = asn1js.fromBER(certificateBuffer);
+  pkijs.AsnError.assert(asn1, "Certificate");
   const certificate = new pkijs.Certificate({ schema: asn1.result });
   //#endregion
 

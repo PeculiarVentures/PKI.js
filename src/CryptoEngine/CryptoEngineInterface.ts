@@ -4,8 +4,18 @@ import type { EncryptedContentInfo } from "../EncryptedContentInfo";
 import type { PublicKeyInfo } from "../PublicKeyInfo";
 
 export type CryptoEngineAlgorithmOperation = "sign" | "encrypt" | "generateKey" | "importKey" | "exportKey" | "verify";
+
+/**
+ * Algorithm parameters
+ */
 export interface CryptoEngineAlgorithmParams {
+  /**
+   * Algorithm
+   */
   algorithm: Algorithm | object;
+  /**
+   * Key usages
+   */
   usages: KeyUsage[];
 }
 
@@ -18,7 +28,13 @@ export interface CryptoEngineSignWithPrivateKeyParams {
   algorithm: Algorithm;
 }
 
+/**
+ * Public key parameters
+ */
 export interface CryptoEnginePublicKeyParams {
+  /**
+   * Algorithm
+   */
   algorithm: CryptoEngineAlgorithmParams;
 }
 

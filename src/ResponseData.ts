@@ -5,6 +5,7 @@ import { SingleResponse, SingleResponseSchema } from "./SingleResponse";
 import { Extension } from "./Extension";
 import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
+import { AsnError } from "./errors";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -264,7 +265,9 @@ export class ResponseData implements Schema.SchemaCompatible {
         return ResponseData.schema();
       }
 
-      tbsSchema = asn1js.fromBER(this.tbs).result;
+      const asn1 = asn1js.fromBER(this.tbs);
+      AsnError.assert(asn1, "TBS Response Data");
+      tbsSchema = asn1.result;
     }
     //#endregion
     //#region Create TBS schema via assembling from TBS parts

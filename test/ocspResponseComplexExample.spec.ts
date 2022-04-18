@@ -17,6 +17,7 @@ context("OCSP Response Complex Example", () => {
         const ocspResp = await example.createOCSPResp(hashAlg, sigAlg);
         const ocspRespRaw = ocspResp.ocspResp.toSchema().toBER();
         const asn1 = asn1js.fromBER(ocspRespRaw);
+        pkijs.AsnError.assert(asn1, "OCSPResponse");
         new pkijs.OCSPResponse({ schema: asn1.result });
 
         const result = await example.verifyOCSPResp(ocspRespRaw, [ocspResp.certificate]);

@@ -34,6 +34,7 @@ context("PKCS#10 Complex Example", () => {
       it(testName, async () => {
         const pkcs10Buffer = await example.createPKCS10Internal(hashAlg, signAlg);
         const asn1 = asn1js.fromBER(pkcs10Buffer);
+        pkijs.AsnError.assert(asn1, "CertificationRequest");
         const pkcs10 = new pkijs.CertificationRequest({ schema: asn1.result });
 
         assert.equal(pkcs10.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);

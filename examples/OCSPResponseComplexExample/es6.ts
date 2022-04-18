@@ -60,6 +60,7 @@ function parseOCSPResp(source: ArrayBuffer) {
 
 	//#region Decode existing OCSP response
 	const asn1 = asn1js.fromBER(source);
+	pkijs.AsnError.assert(asn1, "OCSP response");
 	const ocspRespSimpl = new pkijs.OCSPResponse({ schema: asn1.result });
 	//#endregion
 
@@ -99,6 +100,7 @@ function parseOCSPResp(source: ArrayBuffer) {
 	//#region Check that we do have "responseBytes"
 	if (ocspRespSimpl.responseBytes) {
 		const asn1Basic = asn1js.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHex);
+		pkijs.AsnError.assert(asn1, "Basic OCSP response");
 		ocspBasicResp = new pkijs.BasicOCSPResponse({ schema: asn1Basic.result });
 	}
 	else

@@ -25,7 +25,7 @@ async function verifySMIME() {
 		if ((lastNode.contentType.value === "application/x-pkcs7-signature") || (lastNode.contentType.value === "application/pkcs7-signature")) {
 			// Parse into pkijs types
 			const asn1 = asn1js.fromBER(lastNode.content.buffer);
-			if (asn1.offset === (-1)) {
+			if (asn1.offset === -1) {
 				alert("Incorrect message format!");
 				return;
 			}

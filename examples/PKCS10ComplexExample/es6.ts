@@ -22,6 +22,7 @@ function parsePKCS10() {
 
   //#region Decode existing PKCS#10
   const asn1 = asn1js.fromBER(utils.fromPEM(common.getElement("pem-text-block", "textarea").value));
+  pkijs.AsnError.assert(asn1, "PKCS#10 Certificate Request");
   const pkcs10 = new pkijs.CertificationRequest({ schema: asn1.result });
   //#endregion
 
@@ -60,6 +61,7 @@ function parsePKCS10() {
 
   if (pkcs10.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1)) {
     const asn1PublicKey = asn1js.fromBER(pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
+    pkijs.AsnError.assert(asn1, "pkcs10.subjectPublicKeyInfo.subjectPublicKey");
     const rsaPublicKeySimple = new pkijs.RSAPublicKey({ schema: asn1PublicKey.result });
     const modulusView = new Uint8Array(rsaPublicKeySimple.modulus.valueBlock.valueHex);
     let modulusBitLength = 0;

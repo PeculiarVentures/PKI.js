@@ -93,6 +93,7 @@ export async function createPKCS10Internal(hashAlg: string, signAlg: string) {
 export async function verifyPKCS10Internal(pkcs10Buffer: ArrayBuffer) {
   //#region Decode existing PKCS#10
   const asn1 = asn1js.fromBER(pkcs10Buffer);
+  pkijs.AsnError.assert(asn1, "CertificationRequest");
   const pkcs10 = new pkijs.CertificationRequest({ schema: asn1.result });
   //#endregion
 

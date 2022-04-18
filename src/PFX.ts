@@ -14,7 +14,7 @@ import { SignedAndUnsignedAttributes } from "./SignedAndUnsignedAttributes";
 import { AuthenticatedSafe } from "./AuthenticatedSafe";
 import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
-import { ArgumentError, ParameterError } from "./errors";
+import { ArgumentError, AsnError, ParameterError } from "./errors";
 
 const VERSION = "version";
 const AUTH_SAFE = "authSafe";
@@ -474,9 +474,7 @@ export class PFX implements Schema.SchemaCompatible {
 
           //#region Parse internal ASN.1 data
           const asn1 = asn1js.fromBER(authSafeContent);
-          if (asn1.offset === (-1)) {
-            throw new Error("Error during parsing of ASN.1 data inside \"this.authSafe.content\"");
-          }
+          AsnError.assert(asn1, "PFX.authSafe.content");
           //#endregion
 
           //#region Set "authenticatedSafe" value
@@ -546,9 +544,7 @@ export class PFX implements Schema.SchemaCompatible {
 
           //#region Parse internal ASN.1 data
           const asn1 = asn1js.fromBER(data);
-          if (asn1.offset === (-1)) {
-            throw new Error("Error during parsing of ASN.1 data inside \"this.authSafe.content\"");
-          }
+          AsnError.assert(asn1, "PDX.authSafe.content");
           //#endregion
 
           //#region Set "authenticatedSafe" value

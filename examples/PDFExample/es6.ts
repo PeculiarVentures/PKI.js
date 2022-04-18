@@ -42,6 +42,7 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
 			contentView[i] = contents.charCodeAt(i);
 
 		const asn1 = asn1js.fromBER(contentBuffer);
+		pkijs.AsnError.assert(asn1, "CMS SignedData");
 
 		const cmsContentSimp = new pkijs.ContentInfo({ schema: asn1.result });
 		const cmsSignedSimp = new pkijs.SignedData({ schema: cmsContentSimp.content });

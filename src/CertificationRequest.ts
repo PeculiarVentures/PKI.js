@@ -7,6 +7,7 @@ import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { Attribute, AttributeSchema } from "./Attribute";
 import * as Schema from "./Schema";
 import { CryptoEnginePublicKeyParams } from "./CryptoEngine/CryptoEngineInterface";
+import { AsnError } from "./errors";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -291,7 +292,10 @@ export class CertificationRequest implements Schema.SchemaCompatible {
         return CertificationRequest.schema();
       }
 
-      tbsSchema = asn1js.fromBER(this.tbs).result;
+      const asn1 = asn1js.fromBER(this.tbs);
+      AsnError.assert(asn1, "PKCS#10 Certificate Request");
+
+      tbsSchema = asn1.result;
     } else {
       tbsSchema = this.encodeTBS();
     }

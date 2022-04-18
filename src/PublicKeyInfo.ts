@@ -168,7 +168,7 @@ export class PublicKeyInfo implements Schema.SchemaCompatible {
       case "1.2.840.113549.1.1.1": // RSA
         {
           const publicKeyASN1 = asn1js.fromBER(this.subjectPublicKey.valueBlock.valueHex);
-          if (publicKeyASN1.offset !== (-1)) {
+          if (publicKeyASN1.offset !== -1) {
             try {
               this.parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
             }

@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { CertificateRevocationList } from "./CertificateRevocationList";
+import { AsnError } from "./errors";
 import { id_CRLBag_X509CRL } from "./ObjectIdentifiers";
 import * as Schema from "./Schema";
 
@@ -153,6 +154,7 @@ export class CRLBag implements Schema.SchemaCompatible {
       case id_CRLBag_X509CRL: // x509CRL
         {
           const asn1Inner = asn1js.fromBER(this.certValue.valueBlock.valueHex);
+          AsnError.assert(asn1Inner, "Certificate Revocation List");
           this.parsedValue = new CertificateRevocationList({ schema: asn1Inner.result });
         }
         break;

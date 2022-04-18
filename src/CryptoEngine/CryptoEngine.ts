@@ -9,7 +9,7 @@ import { EncryptedContentInfo } from "../EncryptedContentInfo";
 import { RSASSAPSSParams, RSASSAPSSParamsParameters } from "../RSASSAPSSParams";
 import { PBKDF2Params } from "../PBKDF2Params";
 import { PBES2Params } from "../PBES2Params";
-import { ArgumentError, ParameterError } from "../errors";
+import { ArgumentError, AsnError, ParameterError } from "../errors";
 import * as type from "./CryptoEngineInterface";
 import { AbstractCryptoEngine } from "./AbstractCryptoEngine";
 
@@ -231,9 +231,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
       case "spki":
         {
           const asn1 = asn1js.fromBER(pvtsutils.BufferSourceConverter.toArrayBuffer(keyData as BufferSource));
-          if (asn1.offset === (-1)) {
-            throw new ArgumentError("Incorrect keyData");
-          }
+          AsnError.assert(asn1, "keyData");
 
           const publicKeyInfo = new PublicKeyInfo();
           try {
@@ -394,8 +392,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
           //#region Parse "PrivateKeyInfo" object
           const asn1 = asn1js.fromBER(pvtsutils.BufferSourceConverter.toArrayBuffer(keyData as BufferSource));
-          if (asn1.offset === (-1))
-            throw new Error("Incorrect keyData");
+          AsnError.assert(asn1, "keyData");
 
           try {
             privateKeyInfo.fromSchema(asn1.result);
@@ -2083,6 +2080,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     if (publicKey.algorithm.name === "ECDSA") {
       const asn1 = asn1js.fromBER(signatureValue);
+      AsnError.assert(asn1, "Signature value");
       // noinspection JSCheckFunctionSignatures
       signatureValue = common.createECDSASignatureFromCMS(asn1.result);
     }

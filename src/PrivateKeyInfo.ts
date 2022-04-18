@@ -183,7 +183,7 @@ export class PrivateKeyInfo implements Schema.SchemaCompatible {
       case "1.2.840.113549.1.1.1": // RSA
         {
           const privateKeyASN1 = asn1js.fromBER(this.privateKey.valueBlock.valueHex);
-          if (privateKeyASN1.offset !== (-1))
+          if (privateKeyASN1.offset !== -1)
             this.parsedKey = new RSAPrivateKey({ schema: privateKeyASN1.result });
         }
         break;
@@ -191,7 +191,7 @@ export class PrivateKeyInfo implements Schema.SchemaCompatible {
         if ("algorithmParams" in this.privateKeyAlgorithm) {
           if (this.privateKeyAlgorithm.algorithmParams instanceof asn1js.ObjectIdentifier) {
             const privateKeyASN1 = asn1js.fromBER(this.privateKey.valueBlock.valueHex);
-            if (privateKeyASN1.offset !== (-1)) {
+            if (privateKeyASN1.offset !== -1) {
               this.parsedKey = new ECPrivateKey({
                 namedCurve: this.privateKeyAlgorithm.algorithmParams.valueBlock.toString(),
                 schema: privateKeyASN1.result

@@ -34,6 +34,7 @@ context("Certificate Complex Example", () => {
         const cert = await example.createCertificate(hashAlg, signAlg);
 
         const asn1 = asn1js.fromBER(cert.certificateBuffer);
+        pkijs.AsnError.assert(asn1, "Certificate");
         const certificate = new pkijs.Certificate({ schema: asn1.result });
         assert.equal(certificate.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);
 

@@ -45,6 +45,7 @@ async function smimeEncrypt() {
 	// Decode input certificate
 	certificateBuffer = utils.fromPEM(common.getElement("new_signed_data").innerHTML);
 	const asn1 = asn1js.fromBER(certificateBuffer);
+	pkijs.AsnError.assert(asn1, "Certificate");
 	const certSimpl = new pkijs.Certificate({ schema: asn1.result });
 
 	const cmsEnveloped = new pkijs.EnvelopedData();
@@ -88,6 +89,7 @@ async function smimeDecrypt() {
 	certificateBuffer = utils.fromPEM(common.getElement("new_signed_data", "textarea").value);
 
 	let asn1 = asn1js.fromBER(certificateBuffer);
+	pkijs.AsnError.assert(asn1, "Certificate");
 	const certSimpl = new pkijs.Certificate({ schema: asn1.result });
 
 	// Decode input private key
@@ -96,17 +98,17 @@ async function smimeDecrypt() {
 	// Parse S/MIME message to get CMS enveloped content
 	const parser = parse(common.getElement("encrypted_content", "textarea").value);
 
-	//Make all CMS data
+	// Make all CMS data
 	asn1 = asn1js.fromBER(parser.content.buffer);
-	if (asn1.offset === (-1)) {
+	if (asn1.offset === -1) {
 		alert("Unable to parse your data. Please check you have \"Content-Type: charset=binary\" in your S/MIME message");
 		return;
 	}
 
 	const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
 	const cmsEnvelopedSimp = new pkijs.EnvelopedData({ schema: cmsContentSimpl.content });
-	//#endregion
 
+	JSON.parse;
 	let result: ArrayBuffer;
 	try {
 		result = await cmsEnvelopedSimp.decrypt(0,

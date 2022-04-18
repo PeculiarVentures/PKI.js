@@ -5,6 +5,7 @@ import { BasicOCSPResponse } from "./BasicOCSPResponse";
 import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
 import { id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
+import { AsnError } from "./errors";
 
 const RESPONSE_STATUS = "responseStatus";
 const RESPONSE_BYTES = "responseBytes";
@@ -283,6 +284,7 @@ export class OCSPResponse implements Schema.SchemaCompatible {
 
     try {
       const asn1Basic = asn1js.fromBER(this.responseBytes.response.valueBlock.valueHex);
+      AsnError.assert(asn1Basic, "Basic OCSP response");
       basicResponse = new BasicOCSPResponse({ schema: asn1Basic.result });
     }
     catch (ex) {
@@ -302,6 +304,7 @@ export class OCSPResponse implements Schema.SchemaCompatible {
     //#region Check that ResponseData has type BasicOCSPResponse and sign it
     if (this.responseBytes && this.responseBytes.responseType === id_PKIX_OCSP_Basic) {
       const asn1 = asn1js.fromBER(this.responseBytes.response.valueBlock.valueHex);
+      AsnError.assert(asn1, "Basic OCSP response");
       const basicResponse = new BasicOCSPResponse({ schema: asn1.result });
 
       return basicResponse.sign(privateKey, hashAlgorithm);
@@ -324,6 +327,7 @@ export class OCSPResponse implements Schema.SchemaCompatible {
     //#region Check that ResponceData has type BasicOCSPResponse and verify it
     if (this.responseBytes && this.responseBytes.responseType === id_PKIX_OCSP_Basic) {
       const asn1 = asn1js.fromBER(this.responseBytes.response.valueBlock.valueHex);
+      AsnError.assert(asn1, "Basic OCSP response");
       const basicResponse = new BasicOCSPResponse({ schema: asn1.result });
 
       if (issuerCertificate !== null) {

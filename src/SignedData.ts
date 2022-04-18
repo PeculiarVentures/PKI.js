@@ -18,6 +18,7 @@ import { AttributeCertificateV1 } from "./AttributeCertificateV1";
 import { AttributeCertificateV2 } from "./AttributeCertificateV2";
 import * as Schema from "./Schema";
 import { id_ContentType_Data, id_eContentType_TSTInfo, id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
+import { AsnError } from "./errors";
 
 export type SignedDataCRL = CertificateRevocationList | OtherRevocationInfoFormat;
 
@@ -580,6 +581,7 @@ export class SignedData implements Schema.SchemaCompatible {
 
         //#region Initialize TST_INFO value
         const asn1 = asn1js.fromBER(this.encapContentInfo.eContent.valueBlock.valueHex);
+        AsnError.assert(asn1, "TSTInfo");
         let tstInfo: TSTInfo;
 
         try {

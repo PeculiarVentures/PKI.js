@@ -6,7 +6,7 @@ import { EnvelopedData } from "./EnvelopedData";
 import { EncryptedData } from "./EncryptedData";
 import * as Schema from "./Schema";
 import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData } from "./ObjectIdentifiers";
-import { ArgumentError, ParameterError } from "./errors";
+import { ArgumentError, AsnError, ParameterError } from "./errors";
 
 const SAFE_CONTENTS = "safeContents";
 const PARSED_VALUE = "parsedValue";
@@ -201,9 +201,7 @@ export class AuthenticatedSafe implements Schema.SchemaCompatible {
 
             //#region Parse internal ASN.1 data
             const asn1 = asn1js.fromBER(authSafeContent);
-            if (asn1.offset === (-1)) {
-              throw new Error("Error during parsing of ASN.1 data inside \"content.content\"");
-            }
+            AsnError.assert(asn1, "content.content");
             //#endregion
 
             //#region Finally initialize initial values of SAFE_CONTENTS type
@@ -235,11 +233,8 @@ export class AuthenticatedSafe implements Schema.SchemaCompatible {
               recipientPrivateKey: recipientKey
             });
 
-
             const asn1 = asn1js.fromBER(decrypted);
-            if (asn1.offset === (-1)) {
-              throw new Error("Error during parsing of decrypted data");
-            }
+            AsnError.assert(asn1, "decrypted");
 
             this.parsedValue.safeContents.push({
               privacyMode: 2, // Public-key privacy mode
@@ -270,9 +265,7 @@ export class AuthenticatedSafe implements Schema.SchemaCompatible {
 
             //#region Initialize internal data
             const asn1 = asn1js.fromBER(decrypted);
-            if (asn1.offset === (-1)) {
-              throw new Error("Error during parsing of decrypted data");
-            }
+            AsnError.assert(asn1, "decrypted");
 
             this.parsedValue.safeContents.push({
               privacyMode: 1, // Password-based privacy mode

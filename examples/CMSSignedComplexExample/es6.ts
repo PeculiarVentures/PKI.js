@@ -57,6 +57,7 @@ function parseCMSSigned() {
 
 	//#region Decode existing CMS Signed Data
 	const asn1 = asn1js.fromBER(cmsSignedBuffer);
+	pkijs.AsnError.assert(asn1, "CMS SignedData");
 	const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
 	const cmsSignedSimpl = new pkijs.SignedData({ schema: cmsContentSimpl.content });
 	//#endregion

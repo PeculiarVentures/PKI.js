@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
 import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
 import * as Schema from "./Schema";
 
@@ -523,7 +524,10 @@ export class GeneralName {
 
 					const valueBER = value.toBER(false);
 
-					this.value = asn1js.fromBER(valueBER).result.valueBlock.value;
+					const asnValue = asn1js.fromBER(valueBER);
+					AsnError.assert(asnValue, "GeneralName value");
+
+					this.value = asnValue.result.valueBlock.value;
 				}
 				break;
 			case 3: // x400Address
@@ -547,7 +551,9 @@ export class GeneralName {
 
 					const valueBER = value.toBER(false);
 
-					this.value = asn1js.fromBER(valueBER).result.valueBlock.toString(); // Getting a string representation of the ObjectIdentifier
+					const asnValue = asn1js.fromBER(valueBER);
+					AsnError.assert(asnValue, "GeneralName registeredID");
+					this.value = asnValue.result.valueBlock.toString(); // Getting a string representation of the ObjectIdentifier
 				}
 				break;
 			default:

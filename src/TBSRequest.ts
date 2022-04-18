@@ -5,6 +5,7 @@ import { Request, RequestSchema } from "./Request";
 import { Extension } from "./Extension";
 import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
+import { AsnError } from "./errors";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -238,7 +239,10 @@ export class TBSRequest implements Schema.SchemaCompatible {
       if (this.tbs.byteLength === 0) // No stored TBS part
         return TBSRequest.schema();
 
-      tbsSchema = asn1js.fromBER(this.tbs).result;
+      const asn1 = asn1js.fromBER(this.tbs);
+      AsnError.assert(asn1, "TBS Request");
+
+      tbsSchema = asn1.result;
     }
     //#endregion
     //#region Create TBS schema via assembling from TBS parts

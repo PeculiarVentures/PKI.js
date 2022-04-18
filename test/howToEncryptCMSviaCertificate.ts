@@ -9,6 +9,7 @@ export interface EnvelopedWithCertificateParams extends Algorithm {
 export async function envelopedEncrypt(certificateBuffer: ArrayBuffer, encAlg: EnvelopedWithCertificateParams, valueBuffer: ArrayBuffer) {
   //#region Decode input certificate
   const asn1 = asn1js.fromBER(certificateBuffer);
+  pkijs.AsnError.assert(asn1, "Certificate");
   const certSimpl = new pkijs.Certificate({ schema: asn1.result });
   //#endregion
 
@@ -34,11 +35,13 @@ export async function envelopedEncrypt(certificateBuffer: ArrayBuffer, encAlg: E
 export async function envelopedDecrypt(certificateBuffer: ArrayBuffer, privateKeyBuffer: ArrayBuffer, cmsEnvelopedBuffer: ArrayBuffer) {
   //#region Decode input certificate
   let asn1 = asn1js.fromBER(certificateBuffer);
+  pkijs.AsnError.assert(asn1, "Certificate");
   const certSimpl = new pkijs.Certificate({ schema: asn1.result });
   //#endregion
 
   //#region Decode CMS Enveloped content
   asn1 = asn1js.fromBER(cmsEnvelopedBuffer);
+  pkijs.AsnError.assert(asn1, "CMS Enveloped data");
   const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
   const cmsEnvelopedSimp = new pkijs.EnvelopedData({ schema: cmsContentSimpl.content });
   //#endregion

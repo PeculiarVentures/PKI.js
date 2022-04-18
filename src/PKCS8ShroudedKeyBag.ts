@@ -6,6 +6,7 @@ import { EncryptedContentInfo } from "./EncryptedContentInfo";
 import { PrivateKeyInfo } from "./PrivateKeyInfo";
 import * as Schema from "./Schema";
 import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
+import { AsnError } from "./errors";
 
 const ENCRYPTION_ALGORITHM = "encryptionAlgorithm";
 const ENCRYPTED_DATA = "encryptedData";
@@ -222,9 +223,7 @@ export class PKCS8ShroudedKeyBag implements Schema.SchemaCompatible {
     //#region Initialize PARSED_VALUE with decrypted PKCS#8 private key
 
     const asn1 = asn1js.fromBER(decryptedData);
-    if (asn1.offset === (-1)) {
-      throw new Error("Error during parsing ASN.1 data");
-    }
+    AsnError.assert(asn1, "decryptedData");
 
     this.parsedValue = new PrivateKeyInfo({ schema: asn1.result });
     //#endregion

@@ -81,6 +81,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
 
   //#region Decode existing TSP response
   const asn1 = asn1js.fromBER(tspResponse);
+  pkijs.AsnError.assert(asn1, "TimeStamp response");
   const tspRespSimpl = new pkijs.TimeStampResp({ schema: asn1.result });
   //#endregion
 
@@ -126,6 +127,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
     throw new Error("'signedSimpl.encapContentInfo.eContent' is empty");
   }
   const asn1TST = asn1js.fromBER(signedSimpl.encapContentInfo.eContent.valueBlock.valueHex);
+  pkijs.AsnError.assert(asn1, "TimeStamp info");
   const tstInfoSimpl = new pkijs.TSTInfo({ schema: asn1TST.result });
   //#endregion
 

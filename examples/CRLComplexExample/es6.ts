@@ -47,6 +47,7 @@ function parseCRL(crlBuffer: ArrayBuffer) {
 		issuerTable.deleteRow(issuerTable.rows.length - 1);
 
 	//#region Decode existing CRL
+	pkijs.AsnError.assert(asn1, "CRL");
 	const asn1 = asn1js.fromBER(crlBuffer);
 	const crlSimpl = new pkijs.CertificateRevocationList({
 		schema: asn1.result
@@ -179,6 +180,7 @@ function handleIssuerCert(evt: Event) {
 	common.handleFileBrowse(evt, file => {
 		try {
 			const asn1 = asn1js.fromBER(file);
+			pkijs.AsnError.assert(asn1, "Certificate");
 			const cert = new pkijs.Certificate({
 				schema: asn1.result,
 			});

@@ -94,6 +94,7 @@ export async function envelopedDecrypt(encryptionVariant: number, preDefinedData
 
   //#region Decode CMS Enveloped content
   const asn1 = asn1js.fromBER(cmsEnvelopedBuffer);
+  pkijs.AsnError.assert(asn1, "CMS Enveloped data");
   const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
   const cmsEnvelopedSimp = new pkijs.EnvelopedData({ schema: cmsContentSimpl.content });
   //#endregion

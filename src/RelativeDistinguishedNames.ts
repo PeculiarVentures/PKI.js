@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AttributeTypeAndValue } from "./AttributeTypeAndValue";
+import { AsnError } from "./errors";
 import * as Schema from "./Schema";
 
 export interface RelativeDistinguishedNamesParameters extends Schema.SchemaConstructor {
@@ -172,6 +173,7 @@ export class RelativeDistinguishedNames {
 		}
 
 		const asn1 = asn1js.fromBER(this.valueBeforeDecode);
+		AsnError.assert(asn1, "RelativeDistinguishedNames");
 		//#endregion
 
 		//#region Construct and return new ASN.1 schema for this object

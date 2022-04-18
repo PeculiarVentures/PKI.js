@@ -6,6 +6,7 @@ import { PublicKeyInfo } from "./PublicKeyInfo";
 import * as Schema from "./Schema";
 import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { Certificate } from "./Certificate";
+import { AsnError } from "./errors";
 
 const VERSION = "version";
 const LOG_ID = "logID";
@@ -204,10 +205,7 @@ export class SignedCertificateTimestamp implements Schema.SchemaCompatible {
 			const signatureData = new Uint8Array(stream.getBlock(signatureLength)).buffer.slice(0);
 
 			const asn1 = asn1js.fromBER(signatureData);
-			if (asn1.offset === (-1)) {
-				throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
-			}
-
+			AsnError.assert(asn1, "SignedCertificateTimestamp");
 			this.signature = asn1.result;
 			//#endregion
 
@@ -356,9 +354,7 @@ export class SignedCertificateTimestamp implements Schema.SchemaCompatible {
 		}
 
 		const asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(publicKeyBase64)));
-		if (asn1.offset === (-1)) {
-			throw new Error(`Incorrect key value for CT Log with logId: ${logId}`);
-		}
+		AsnError.assert(asn1, `CT Log with logId: ${logId}`);
 
 		const publicKeyInfo = new PublicKeyInfo({ schema: asn1.result });
 		//#endregion

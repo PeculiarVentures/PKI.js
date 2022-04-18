@@ -25,6 +25,7 @@ context("CMS Signed Complex Example", () => {
             //#region Simple test for decoding data
             assert.doesNotThrow(() => {
               const asn1 = asn1js.fromBER(cms.cmsSignedData);
+              pkijs.AsnError.assert(asn1, "CMS SignedData");
               const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
               new pkijs.SignedData({ schema: cmsContentSimpl.content });
             });
@@ -45,6 +46,7 @@ context("CMS Signed Complex Example", () => {
     const cmsSignedBuffer = pvtsutils.Convert.FromBase64(testData);
     assert.doesNotThrow(() => {
       const asn1 = asn1js.fromBER(cmsSignedBuffer);
+      pkijs.AsnError.assert(asn1, "CMS SignedData");
       const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
       new pkijs.SignedData({ schema: cmsContentSimpl.content });
     });

@@ -53,7 +53,7 @@ export class ExtensionValueFactory {
 
   public static fromBER(id: string, raw: ArrayBuffer): ExtensionParsedValue | null {
     const asn1 = asn1js.fromBER(raw);
-    if (asn1.offset === (-1)) {
+    if (asn1.offset === -1) {
       return null;
     }
 
@@ -102,4 +102,5 @@ import { PrivateKeyUsagePeriod } from "./PrivateKeyUsagePeriod";
 import { QCStatements } from "./QCStatements";
 import { SignedCertificateTimestampList } from "./SignedCertificateTimestampList";
 import { SubjectDirectoryAttributes } from "./SubjectDirectoryAttributes";
+import { AsnError } from "./errors";
 

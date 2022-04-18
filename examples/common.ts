@@ -80,9 +80,7 @@ export function parseCertificate(source: BufferSource): pkijs.Certificate[] {
   const res: pkijs.Certificate[] = [];
   for (const item of buffers) {
     const asn1 = asn1js.fromBER(item);
-    if (asn1.offset === (-1)) {
-      throw new Error("Bad encoded ASN.1");
-    }
+    pkijs.AsnError.assert(asn1, "Certificate");
 
     res.push(new pkijs.Certificate({ schema: asn1.result }));
   }

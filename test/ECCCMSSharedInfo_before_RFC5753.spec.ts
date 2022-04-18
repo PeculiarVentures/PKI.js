@@ -65,8 +65,7 @@ function pemToDer(pemString: string) {
 function pemToAsn1(pemString: string) {
 	const der = pemToDer(pemString);
 	const asn1 = asn1js.fromBER(der);
-	if (asn1.offset === -1) {
-		throw new Error("Value is not DER-encoded");
-	}
+	pkijs.AsnError.assert(asn1, "DER-encoded data");
+
 	return asn1.result;
 }

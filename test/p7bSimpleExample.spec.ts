@@ -17,6 +17,7 @@ context("P7B Simple Example", () => {
       it(testName, async () => {
         const cmsSignedBuffer = await example.createP7B(hashAlg, signAlg);
         const asn1 = asn1js.fromBER(cmsSignedBuffer);
+        pkijs.AsnError.assert(asn1, "ContentInfo");
         const contentInfo = new pkijs.ContentInfo({ schema: asn1.result });
 
         assert.equal(contentInfo.contentType, "1.2.840.113549.1.7.2", "Content Type ID must be '1.2.840.113549.1.7.2'");

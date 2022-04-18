@@ -48,6 +48,7 @@ function parseOCSPReq(source: ArrayBuffer) {
 	//#endregion
 	//#region Decode existing OCSP request
 	const asn1 = asn1js.fromBER(source);
+	pkijs.AsnError.assert(asn1, "OCSP request");
 	const ocspReqSimpl = new pkijs.OCSPRequest({ schema: asn1.result });
 	//#endregion
 	//#region Put information about OCSP request requestor

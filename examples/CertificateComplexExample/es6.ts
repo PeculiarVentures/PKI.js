@@ -39,6 +39,7 @@ function parseCertificate() {
 
 	//#region Decode existing X.509 certificate
 	const asn1 = asn1js.fromBER(certificateBuffer);
+	pkijs.AsnError.assert(asn1, "Certificate");
 	const certificate = new pkijs.Certificate({ schema: asn1.result });
 	//#endregion
 
@@ -105,6 +106,7 @@ function parseCertificate() {
 
 	if (certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1)) {
 		const asn1PublicKey = asn1js.fromBER(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
+		pkijs.AsnError.assert(asn1, "certificate.subjectPublicKeyInfo.subjectPublicKey");
 		const rsaPublicKey = new pkijs.RSAPublicKey({ schema: asn1PublicKey.result });
 
 		const modulusView = new Uint8Array(rsaPublicKey.modulus.valueBlock.valueHex);
@@ -230,6 +232,7 @@ function handleInterCertsFile(evt: Event) {
 function handleCRLsFile(evt: Event) {
 	common.handleFileBrowse(evt, file => {
 		const asn1 = asn1js.fromBER(file);
+		pkijs.AsnError.assert(asn1, "CertificateRevocationList");
 		const crl = new pkijs.CertificateRevocationList({ schema: asn1.result });
 
 		crls.push(crl);

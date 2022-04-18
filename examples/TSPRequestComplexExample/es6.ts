@@ -46,6 +46,7 @@ function parseTSPReq() {
 
 	//#region Decode existing TSP request
 	const asn1 = asn1js.fromBER(tspReqBuffer);
+	pkijs.AsnError.assert(asn1, "TimeStamp request");
 	const tspReqSimpl = new pkijs.TimeStampReq({ schema: asn1.result });
 	//#endregion
 

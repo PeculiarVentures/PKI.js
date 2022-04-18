@@ -80,8 +80,7 @@ async function parseOpenSSLPrivateKey() {
 	const decryptedKey = await example.parseOpenSSLPrivateKey(aesKeyLength, ivBuffer, passwordBuffer, privateKeyData);
 
 	const asn1 = asn1js.fromBER(decryptedKey);
-	if (asn1.offset === (-1))
-		throw new Error("Incorrect encrypted key");
+	pkijs.AsnError.assert(asn1, "decryptedKey");
 
 	// Just in order to check all was decoded correctly
 	new pkijs.RSAPrivateKey({ schema: asn1.result });
@@ -114,8 +113,9 @@ async function generateOpenSSLPrivateKey() {
 	};
 	const { privateKey } = await crypto.subtle.generateKey(alg, true, ["sign", "verify"]);
 	const pkcs8 = await crypto.subtle.exportKey("pkcs8", privateKey);
-	const asn = asn1js.fromBER(pkcs8);
-	const pki = new pkijs.PrivateKeyInfo({ schema: asn.result });
+	const asn1 = asn1js.fromBER(pkcs8);
+	pkijs.AsnError.assert(asn1, "PrivateKeyInfo");
+	const pki = new pkijs.PrivateKeyInfo({ schema: asn1.result });
 	common.getElement("pkijs_data", "textarea").innerHTML = utils.toPEM(pki.privateKey.valueBlock.valueHex, "RSA PRIVATE KEY");
 }
 

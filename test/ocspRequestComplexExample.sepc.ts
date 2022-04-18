@@ -7,6 +7,7 @@ context("OCSP Request Complex Example", () => {
   it("Create And Parse OCSP Request", async () => {
     const ocspReqRaw = await example.createOCSPReq();
     const asn1 = asn1js.fromBER(ocspReqRaw);
+    pkijs.AsnError.assert(asn1, "OCSPRequest");
     new pkijs.OCSPRequest({ schema: asn1.result });
   });
 });

@@ -182,6 +182,7 @@ async function parsePKCS12(buffer: ArrayBuffer, password: string) {
 
 	//#region Parse internal PKCS#12 values
 	const asn1 = asn1js.fromBER(buffer);
+	pkijs.AsnError.assert(asn1, "PFX");
 	const pkcs12 = new pkijs.PFX({ schema: asn1.result });
 	//#endregion
 
@@ -264,9 +265,11 @@ context("Node.js PKCS#12 Example", () => {
 
 		before(() => {
 			let asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(x509CertificateBASE64)));
+			pkijs.AsnError.assert(asn1, "Certificate");
 			certSimpl = new pkijs.Certificate({ schema: asn1.result });
 
 			asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(x509PrivateKeyBASE64)));
+			pkijs.AsnError.assert(asn1, "PrivateKeyInfo");
 			pkcs8Simpl = new pkijs.PrivateKeyInfo({ schema: asn1.result });
 		});
 
@@ -297,8 +300,10 @@ context("Node.js PKCS#12 Example", () => {
 		before(() => {
 			let asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(attributeCertificateBASE64)));
 			attrCertSimpl = new pkijs.AttributeCertificateV2({ schema: asn1.result });
+			pkijs.AsnError.assert(asn1, "AttributeCertificateV2");
 
 			asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(attributePrivateKeyBASE64)));
+			pkijs.AsnError.assert(asn1, "PrivateKeyInfo");
 			pkcs8Simpl = new pkijs.PrivateKeyInfo({ schema: asn1.result });
 		});
 

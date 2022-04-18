@@ -23,7 +23,7 @@ import { OriginatorIdentifierOrKey } from "./OriginatorIdentifierOrKey";
 import { OriginatorPublicKey } from "./OriginatorPublicKey";
 import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
-import { ArgumentError } from "./errors";
+import { ArgumentError, AsnError } from "./errors";
 
 const VERSION = "version";
 const ORIGINATOR_INFO = "originatorInfo";
@@ -851,6 +851,7 @@ export class EnvelopedData implements Schema.SchemaCompatible {
       //#region Append all necessary data to current CMS_RECIPIENT_INFO object
       //#region OriginatorIdentifierOrKey
       const asn1 = asn1js.fromBER(exportedECDHPublicKey);
+      AsnError.assert(asn1, "OriginatorIdentifierOrKey");
 
       const originator = new OriginatorIdentifierOrKey();
       originator.variant = 3;

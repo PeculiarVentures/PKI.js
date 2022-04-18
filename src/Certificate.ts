@@ -11,6 +11,7 @@ import * as Schema from "./Schema";
 import { id_BasicConstraints } from "./ObjectIdentifiers";
 import { BasicConstraints } from "./BasicConstraints";
 import { CryptoEnginePublicKeyParams } from "./CryptoEngine/CryptoEngineInterface";
+import { AsnError } from "./errors";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -650,7 +651,10 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
         return Certificate.schema().value[0];
       }
 
-      tbsSchema = asn1js.fromBER(this.tbs).result;
+      const asn1 = asn1js.fromBER(this.tbs);
+      AsnError.assert(asn1, "TBS Certificate");
+
+      tbsSchema = asn1.result;
     } else {
       // Create TBS schema via assembling from TBS parts
       tbsSchema = this.encodeTBS();

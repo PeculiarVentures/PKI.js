@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
 import * as Schema from "./Schema";
 
 const REQUIRE_EXPLICIT_POLICY = "requireExplicitPolicy";
@@ -137,6 +138,7 @@ export class PolicyConstraints implements Schema.SchemaCompatible {
 
       const ber1 = field1.toBER(false);
       const int1 = asn1js.fromBER(ber1);
+      AsnError.assert(int1, "Integer");
 
       this.requireExplicitPolicy = int1.result.valueBlock.valueDec;
     }
@@ -149,6 +151,7 @@ export class PolicyConstraints implements Schema.SchemaCompatible {
 
       const ber2 = field2.toBER(false);
       const int2 = asn1js.fromBER(ber2);
+      AsnError.assert(int2, "Integer");
 
       this.inhibitPolicyMapping = int2.result.valueBlock.valueDec;
     }

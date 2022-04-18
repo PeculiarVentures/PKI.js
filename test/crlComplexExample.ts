@@ -95,6 +95,7 @@ export async function verifyCRL(crlBuffer: ArrayBuffer, issuer: pkijs.Certificat
 
   //#region Decode existing CRL
   const asn1 = asn1js.fromBER(crlBuffer);
+  pkijs.AsnError.assert(asn1, "CRL");
   const crlSimpl = new pkijs.CertificateRevocationList({
     schema: asn1.result
   });
@@ -109,6 +110,7 @@ export async function verifyCRL(crlBuffer: ArrayBuffer, issuer: pkijs.Certificat
     };
   } else {
     const asn = asn1js.fromBER(issuer);
+    pkijs.AsnError.assert(asn1, "PublicKeyInfo");
     const publicKeyInfo = new pkijs.PublicKeyInfo({ schema: asn.result });
     verifyParams = {
       publicKeyInfo: publicKeyInfo,

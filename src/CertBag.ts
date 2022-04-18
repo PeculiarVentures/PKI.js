@@ -4,6 +4,7 @@ import { Certificate } from "./Certificate";
 import { AttributeCertificateV2 } from "./AttributeCertificateV2";
 import * as Schema from "./Schema";
 import { id_CertBag_AttributeCertificate, id_CertBag_SDSICertificate, id_CertBag_X509Certificate } from "./ObjectIdentifiers";
+import { AsnError } from "./errors";
 
 const CERT_ID = "certId";
 const CERT_VALUE = "certValue";
@@ -154,6 +155,7 @@ export class CertBag implements Schema.SchemaCompatible {
       case id_CertBag_X509Certificate: // x509Certificate
         {
           const asn1Inner = asn1js.fromBER(this.certValue.valueBlock.valueHex);
+          AsnError.assert(asn1Inner, "Certificate value");
 
           try {
             this.parsedValue = new Certificate({ schema: asn1Inner.result });
@@ -167,6 +169,7 @@ export class CertBag implements Schema.SchemaCompatible {
       case id_CertBag_AttributeCertificate: // attributeCertificate - (!!!) THIS OID IS SUBJECT FOR CHANGE IN FUTURE (!!!)
         {
           const asn1Inner = asn1js.fromBER(this.certValue.valueBlock.valueHex);
+          AsnError.assert(asn1Inner, "Attribute Certificate v2");
           this.parsedValue = new AttributeCertificateV2({ schema: asn1Inner.result });
         }
         break;
