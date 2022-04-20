@@ -103,9 +103,7 @@ function parseCertificate() {
   let publicKeySize = "< unknown >";
 
   if (certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1)) {
-    const asn1PublicKey = asn1js.fromBER(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
-    pkijs.AsnError.assert(asn1, "certificate.subjectPublicKeyInfo.subjectPublicKey");
-    const rsaPublicKey = new pkijs.RSAPublicKey({ schema: asn1PublicKey.result });
+    const rsaPublicKey = pkijs.RSAPublicKey.fromBER(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
 
     const modulusView = new Uint8Array(rsaPublicKey.modulus.valueBlock.valueHex);
     let modulusBitLength = 0;

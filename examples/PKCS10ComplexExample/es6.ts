@@ -59,9 +59,7 @@ function parsePKCS10() {
   let publicKeySize = "< unknown >";
 
   if (pkcs10.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1)) {
-    const asn1PublicKey = asn1js.fromBER(pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
-    pkijs.AsnError.assert(asn1, "pkcs10.subjectPublicKeyInfo.subjectPublicKey");
-    const rsaPublicKeySimple = new pkijs.RSAPublicKey({ schema: asn1PublicKey.result });
+    const rsaPublicKeySimple = pkijs.RSAPublicKey.fromBER(pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
     const modulusView = new Uint8Array(rsaPublicKeySimple.modulus.valueBlock.valueHex);
     let modulusBitLength = 0;
 

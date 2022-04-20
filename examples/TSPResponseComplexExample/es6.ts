@@ -124,9 +124,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
   if (!signedSimpl.encapContentInfo.eContent) {
     throw new Error("'signedSimpl.encapContentInfo.eContent' is empty");
   }
-  const asn1TST = asn1js.fromBER(signedSimpl.encapContentInfo.eContent.valueBlock.valueHex);
-  pkijs.AsnError.assert(asn1, "TimeStamp info");
-  const tstInfoSimpl = new pkijs.TSTInfo({ schema: asn1TST.result });
+  const tstInfoSimpl = pkijs.TSTInfo.fromBER(signedSimpl.encapContentInfo.eContent.valueBlock.valueHex);
   //#endregion
 
   //#region Put information about policy

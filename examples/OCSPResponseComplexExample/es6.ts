@@ -97,9 +97,7 @@ function parseOCSPResp(source: ArrayBuffer) {
 
   //#region Check that we do have "responseBytes"
   if (ocspRespSimpl.responseBytes) {
-    const asn1Basic = asn1js.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHex);
-    pkijs.AsnError.assert(asn1, "Basic OCSP response");
-    ocspBasicResp = new pkijs.BasicOCSPResponse({ schema: asn1Basic.result });
+    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHex);
   }
   else
     return; // Nothing else to display - only status information exists
