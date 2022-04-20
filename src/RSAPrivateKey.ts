@@ -1,7 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
-import { JsonRSAPrivateKey } from "../build";
 import { AsnError, ParameterError } from "./errors";
 import { OtherPrimeInfo, OtherPrimeInfoJson, OtherPrimeInfoSchema } from "./OtherPrimeInfo";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -43,7 +42,7 @@ export interface IRSAPrivateKey {
   otherPrimeInfos?: OtherPrimeInfo[];
 }
 
-export type RSAPrivateKeyParameters = PkiObjectParameters & Partial<IRSAPrivateKey> & { json?: JsonRSAPrivateKey; };
+export type RSAPrivateKeyParameters = PkiObjectParameters & Partial<IRSAPrivateKey> & { json?: RSAPrivateKeyJson; };
 
 export interface RSAPrivateKeyJson {
   n: string;
