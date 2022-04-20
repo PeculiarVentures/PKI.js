@@ -135,6 +135,61 @@ export class SignedDataVerifyError extends Error {
 
 /**
  * Represents the SignedData structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ *
+ * @example The following example demonstrates how to create and sign CMS Signed Data
+ * ```js
+ * // Create a new CMS Signed Data
+ * const cmsSigned = new pkijs.SignedData({
+ *   encapContentInfo: new pkijs.EncapsulatedContentInfo({
+ *     eContentType: pkijs.ContentInfo.DATA,, // "data" content type
+ *     eContent: new asn1js.OctetString({ valueHex: buffer })
+ *   }),
+ *   signerInfos: [
+ *     new pkijs.SignerInfo({
+ *       sid: new pkijs.IssuerAndSerialNumber({
+ *         issuer: cert.issuer,
+ *         serialNumber: cert.serialNumber
+ *       })
+ *     })
+ *   ],
+ *   // Signer certificate for chain validation
+ *   certificates: [cert]
+ * });
+ *
+ * await cmsSigned.sign(keys.privateKey, 0, "SHA-256");
+ *
+ * // Add Signed Data to Content Info
+ * const cms = new pkijs.ContentInfo({
+ *   contentType: pkijs.ContentInfo.SIGNED_DATA,,
+ *   content: cmsSigned.toSchema(true),
+ * });
+ *
+ * // Encode CMS to ASN.1
+ * const cmsRaw = cms.toSchema().toBER();
+ * ```
+ *
+ * @example The following example demonstrates how to verify CMS Signed Data
+ * ```js
+ * // Parse CMS and detect it's Signed Data
+ * const cms = pkijs.ContentInfo.fromBER(cmsRaw);
+ * if (cms.contentType !== pkijs.ContentInfo.SIGNED_DATA) {
+ *   throw new Error("CMS is not Signed Data");
+ * }
+ *
+ * // Read Signed Data
+ * const signedData = new pkijs.SignedData({ schema: cms.content });
+ *
+ * // Verify Signed Data signature
+ * const ok = await signedData.verify({
+ *   signer: 0,
+ *   checkChain: true,
+ *   trustedCerts: [trustedCert],
+ * });
+ *
+ * if (!ok) {
+ *   throw new Error("CMS signature is invalid")
+ * }
+ * ```
  */
 export class SignedData extends PkiObject implements ISignedData {
 
@@ -469,7 +524,7 @@ export class SignedData extends PkiObject implements ISignedData {
     return res;
   }
 
-  public verify(params: SignedDataVerifyParams & { extendedMode?: false; }): Promise<boolean>;
+  public verify(params?: SignedDataVerifyParams & { extendedMode?: false; }): Promise<boolean>;
   public verify(params: SignedDataVerifyParams & { extendedMode: true; }): Promise<SignedDataVerifyResult>;
   public async verify({
     signer = (-1),
