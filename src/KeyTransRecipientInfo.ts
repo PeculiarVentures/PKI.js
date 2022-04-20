@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { Certificate, CertificateJson } from "./Certificate";
+import { Certificate } from "./Certificate";
 import { RecipientIdentifier, RecipientIdentifierSchema } from "./RecipientIdentifier";
 import { IssuerAndSerialNumber, IssuerAndSerialNumberJson } from "./IssuerAndSerialNumber";
 import * as Schema from "./Schema";

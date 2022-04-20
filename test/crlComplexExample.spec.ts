@@ -1,5 +1,4 @@
 import * as assert from "assert";
-import * as asn1js from "asn1js";
 import * as pkijs from "../src";
 import * as example from "./crlComplexExample";
 
@@ -32,9 +31,7 @@ context("CRL Complex Example", () => {
 
       it(testName, async () => {
         const crlWithKey = await example.createCRL(hashAlg, signAlg);
-        const asn1 = asn1js.fromBER(crlWithKey.crlBuffer);
-        pkijs.AsnError.assert(asn1, "CRL");
-        const crl = new pkijs.CertificateRevocationList({ schema: asn1.result });
+        const crl = pkijs.CertificateRevocationList.fromBER(crlWithKey.crlBuffer);
 
         assert.equal(crl.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);
 

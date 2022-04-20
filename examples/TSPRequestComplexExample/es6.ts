@@ -1,4 +1,3 @@
-import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as pkijs from "../../src";
 import * as example from "../../test/tspReqComplexExample";
@@ -45,9 +44,7 @@ function parseTSPReq() {
   //#endregion
 
   //#region Decode existing TSP request
-  const asn1 = asn1js.fromBER(tspReqBuffer);
-  pkijs.AsnError.assert(asn1, "TimeStamp request");
-  const tspReqSimpl = new pkijs.TimeStampReq({ schema: asn1.result });
+  const tspReqSimpl = pkijs.TimeStampReq.fromBER(tspReqBuffer);
   //#endregion
 
   //#region Put information about message imprint

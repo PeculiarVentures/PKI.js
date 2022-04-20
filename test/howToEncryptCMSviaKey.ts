@@ -1,4 +1,3 @@
-import * as asn1js from "asn1js";
 import * as pkijs from "../src";
 
 function getKeyAgreeAlgorithmParams(operation: pkijs.CryptoEngineAlgorithmOperation, curveName: string) {
@@ -68,9 +67,7 @@ export async function envelopedEncrypt(keys: CreateKeyPairResult, alg: EcKeyAlgo
  */
 export async function envelopedDecrypt(pkcs8: ArrayBuffer, cmsEnvelopedBuffer: ArrayBuffer) {
   //#region Decode CMS Enveloped content
-  const asn1 = asn1js.fromBER(cmsEnvelopedBuffer);
-  pkijs.AsnError.assert(asn1, "CMS Enveloped data");
-  const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
+  const cmsContentSimpl = pkijs.ContentInfo.fromBER(cmsEnvelopedBuffer);
   const cmsEnvelopedSimp = new pkijs.EnvelopedData({ schema: cmsContentSimpl.content });
   //#endregion
 

@@ -1,5 +1,4 @@
 import * as assert from "assert";
-import * as asn1js from "asn1js";
 import * as pkijs from "../src";
 import * as example from "./certificateComplexExample";
 
@@ -33,9 +32,7 @@ context("Certificate Complex Example", () => {
       it(testName, async () => {
         const cert = await example.createCertificate(hashAlg, signAlg);
 
-        const asn1 = asn1js.fromBER(cert.certificateBuffer);
-        pkijs.AsnError.assert(asn1, "Certificate");
-        const certificate = new pkijs.Certificate({ schema: asn1.result });
+        const certificate = pkijs.Certificate.fromBER(cert.certificateBuffer);
         assert.equal(certificate.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);
 
         const result = await example.verifyCertificate(cert.certificateBuffer, [], [cert.certificate], []);

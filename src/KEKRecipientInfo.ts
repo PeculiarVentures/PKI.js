@@ -4,7 +4,6 @@ import { KEKIdentifier, KEKIdentifierJson, KEKIdentifierSchema } from "./KEKIden
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { Convert } from "pvtsutils";
 import { AsnError } from "./errors";
 
 const VERSION = "version";

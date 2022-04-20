@@ -70,14 +70,10 @@ export async function verifyOCSPResp(ocspResponseBuffer: ArrayBuffer, trustedCer
   let ocspBasicResp: pkijs.BasicOCSPResponse;
 
   //#region Decode existing OCSP response
-  const asn1 = asn1js.fromBER(ocspResponseBuffer);
-  pkijs.AsnError.assert(asn1, "OCSPResponse");
-  const ocspRespSimpl = new pkijs.OCSPResponse({ schema: asn1.result });
+  const ocspRespSimpl = pkijs.OCSPResponse.fromBER(ocspResponseBuffer);
 
   if (ocspRespSimpl.responseBytes) {
-    const asn1Basic = asn1js.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHex);
-    pkijs.AsnError.assert(asn1, "BasicOCSPResponse");
-    ocspBasicResp = new pkijs.BasicOCSPResponse({ schema: asn1Basic.result });
+    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHex);
   } else {
     throw new Error("No \"ResponseBytes\" in the OCSP Response - nothing to verify");
   }

@@ -1,6 +1,5 @@
 /// <reference path="types.d.ts" />
 
-import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as utils from "../../test/utils";
 import * as pkijs from "../../src";
@@ -44,9 +43,7 @@ async function createCertificate() {
 async function smimeEncrypt() {
   // Decode input certificate
   certificateBuffer = utils.fromPEM(common.getElement("new_signed_data").innerHTML);
-  const asn1 = asn1js.fromBER(certificateBuffer);
-  pkijs.AsnError.assert(asn1, "Certificate");
-  const certSimpl = new pkijs.Certificate({ schema: asn1.result });
+  const certSimpl = pkijs.Certificate.fromBER(certificateBuffer);
 
   const cmsEnveloped = new pkijs.EnvelopedData();
 
@@ -88,9 +85,7 @@ async function smimeDecrypt() {
   // Decode input certificate
   certificateBuffer = utils.fromPEM(common.getElement("new_signed_data", "textarea").value);
 
-  let asn1 = asn1js.fromBER(certificateBuffer);
-  pkijs.AsnError.assert(asn1, "Certificate");
-  const certSimpl = new pkijs.Certificate({ schema: asn1.result });
+  const certSimpl = pkijs.Certificate.fromBER(certificateBuffer);
 
   // Decode input private key
   const privateKeyBuffer = utils.fromPEM(common.getElement("pkcs8_key", "textarea").value);
@@ -99,13 +94,7 @@ async function smimeDecrypt() {
   const parser = parse(common.getElement("encrypted_content", "textarea").value);
 
   // Make all CMS data
-  asn1 = asn1js.fromBER(parser.content.buffer);
-  if (asn1.offset === -1) {
-    alert("Unable to parse your data. Please check you have \"Content-Type: charset=binary\" in your S/MIME message");
-    return;
-  }
-
-  const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
+  const cmsContentSimpl = pkijs.ContentInfo.fromBER(parser.content.buffer);
   const cmsEnvelopedSimp = new pkijs.EnvelopedData({ schema: cmsContentSimpl.content });
 
   JSON.parse;

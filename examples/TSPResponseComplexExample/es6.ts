@@ -80,9 +80,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
   //#endregion
 
   //#region Decode existing TSP response
-  const asn1 = asn1js.fromBER(tspResponse);
-  pkijs.AsnError.assert(asn1, "TimeStamp response");
-  const tspRespSimpl = new pkijs.TimeStampResp({ schema: asn1.result });
+  const tspRespSimpl = pkijs.TimeStampResp.fromBER(tspResponse);
   //#endregion
 
   //#region Put information about TSP response status

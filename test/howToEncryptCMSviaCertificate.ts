@@ -1,4 +1,3 @@
-import * as asn1js from "asn1js";
 import * as pkijs from "../src";
 
 export interface EnvelopedWithCertificateParams extends Algorithm {
@@ -8,7 +7,7 @@ export interface EnvelopedWithCertificateParams extends Algorithm {
 
 export async function envelopedEncrypt(certificateBuffer: ArrayBuffer, encAlg: EnvelopedWithCertificateParams, valueBuffer: ArrayBuffer) {
   // Decode input certificate
-  const certSimpl = pkijs.Certificate.fromRaw(certificateBuffer);
+  const certSimpl = pkijs.Certificate.fromBER(certificateBuffer);
 
   const cmsEnveloped = new pkijs.EnvelopedData({
     originatorInfo: new pkijs.OriginatorInfo({
@@ -31,15 +30,11 @@ export async function envelopedEncrypt(certificateBuffer: ArrayBuffer, encAlg: E
 
 export async function envelopedDecrypt(certificateBuffer: ArrayBuffer, privateKeyBuffer: ArrayBuffer, cmsEnvelopedBuffer: ArrayBuffer) {
   //#region Decode input certificate
-  let asn1 = asn1js.fromBER(certificateBuffer);
-  pkijs.AsnError.assert(asn1, "Certificate");
-  const certSimpl = new pkijs.Certificate({ schema: asn1.result });
+  const certSimpl = pkijs.Certificate.fromBER(certificateBuffer);
   //#endregion
 
   //#region Decode CMS Enveloped content
-  asn1 = asn1js.fromBER(cmsEnvelopedBuffer);
-  pkijs.AsnError.assert(asn1, "CMS Enveloped data");
-  const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
+  const cmsContentSimpl = pkijs.ContentInfo.fromBER(cmsEnvelopedBuffer);
   const cmsEnvelopedSimp = new pkijs.EnvelopedData({ schema: cmsContentSimpl.content });
   //#endregion
 

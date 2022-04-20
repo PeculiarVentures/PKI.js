@@ -1,5 +1,4 @@
 import * as assert from "assert";
-import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pkijs from "../src";
 import * as example from "./cmsSignedComplexExample";
@@ -24,9 +23,7 @@ context("CMS Signed Complex Example", () => {
             const cms = await example.createCMSSigned(hashAlg, signAlg, dataBuffer, detachedSignature, addExt);
             //#region Simple test for decoding data
             assert.doesNotThrow(() => {
-              const asn1 = asn1js.fromBER(cms.cmsSignedData);
-              pkijs.AsnError.assert(asn1, "CMS SignedData");
-              const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
+              const cmsContentSimpl = pkijs.ContentInfo.fromBER(cms.cmsSignedData);
               new pkijs.SignedData({ schema: cmsContentSimpl.content });
             });
             //#endregion
@@ -45,9 +42,7 @@ context("CMS Signed Complex Example", () => {
     //#region Simple test for decoding data
     const cmsSignedBuffer = pvtsutils.Convert.FromBase64(testData);
     assert.doesNotThrow(() => {
-      const asn1 = asn1js.fromBER(cmsSignedBuffer);
-      pkijs.AsnError.assert(asn1, "CMS SignedData");
-      const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
+      const cmsContentSimpl = pkijs.ContentInfo.fromBER(cmsSignedBuffer);
       new pkijs.SignedData({ schema: cmsContentSimpl.content });
     });
     //#endregion

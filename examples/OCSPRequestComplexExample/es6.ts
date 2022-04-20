@@ -1,4 +1,3 @@
-import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as example from "../../test/ocspRequestComplexExample";
 import * as utils from "../../test/utils";
@@ -47,9 +46,7 @@ function parseOCSPReq(source: ArrayBuffer) {
     requestorTable.deleteRow(requestorTable.rows.length - 1);
   //#endregion
   //#region Decode existing OCSP request
-  const asn1 = asn1js.fromBER(source);
-  pkijs.AsnError.assert(asn1, "OCSP request");
-  const ocspReqSimpl = new pkijs.OCSPRequest({ schema: asn1.result });
+  const ocspReqSimpl = pkijs.OCSPRequest.fromBER(source);
   //#endregion
   //#region Put information about OCSP request requestor
   if (ocspReqSimpl.tbsRequest.requestorName) {

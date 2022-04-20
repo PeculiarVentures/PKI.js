@@ -3,7 +3,7 @@ import * as pvutils from "pvutils";
 import { OriginatorIdentifierOrKey, OriginatorIdentifierOrKeyJson, OriginatorIdentifierOrKeySchema } from "./OriginatorIdentifierOrKey";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { RecipientEncryptedKeys, RecipientEncryptedKeysJson, RecipientEncryptedKeysSchema } from "./RecipientEncryptedKeys";
-import { Certificate, CertificateJson } from "./Certificate";
+import { Certificate } from "./Certificate";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";

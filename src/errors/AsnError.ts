@@ -1,5 +1,3 @@
-import * as asn1js from "asn1js";
-
 export interface AsnFromBerResult {
   offset: number;
   result: any;

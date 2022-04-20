@@ -956,10 +956,7 @@ function pkitsToArrayBuffer(pkitsValue: string) {
 
 context("PKITS's certificates parsing test", () => {
   function parsingCheck(buffer: ArrayBuffer) {
-    const asn1 = asn1js.fromBER(buffer);
-    pkijs.AsnError.assert(asn1, "Certificate");
-    // noinspection JSUnusedLocalSymbols
-    new pkijs.Certificate({ schema: asn1.result });
+    pkijs.Certificate.fromBER(buffer);
   }
 
   const keys = Object.keys(PKITS.certs);
@@ -985,9 +982,7 @@ context("PKITS's certificates parsing test", () => {
 
 context("PKITS's CRL parsing test", () => {
   function parsingCheck(buffer: ArrayBuffer) {
-    const asn1 = asn1js.fromBER(buffer);
-    pkijs.AsnError.assert(asn1, "CertificateRevicationList");
-    new pkijs.CertificateRevocationList({ schema: asn1.result });
+    pkijs.CertificateRevocationList.fromBER(buffer);
   }
 
   const keys = Object.keys(PKITS.crls);
@@ -1013,9 +1008,7 @@ context("PKITS's CRL parsing test", () => {
 
 context("PKITS's certificate pairs parsing test", () => {
   function parsingCheck(buffer: ArrayBuffer) {
-    const asn1 = asn1js.fromBER(buffer);
-    pkijs.AsnError.assert(asn1, "Certificate");
-    new pkijs.Certificate({ schema: asn1.result });
+    pkijs.Certificate.fromBER(buffer);
   }
 
   const keys = Object.keys(PKITS.certpairs);
@@ -1078,9 +1071,8 @@ function simpleVerification(params: {
     //#region Initialize certificates
     function initializeTrustedCertificates() {
       for (let i = 0; i < params.trustedCertificates.length; i++) {
-        const asn1 = asn1js.fromBER(pkitsToArrayBuffer(PKITS.certs[params.trustedCertificates[i]]));
-        pkijs.AsnError.assert(asn1, "Certificate");
-        trustedCerts.push(new pkijs.Certificate({ schema: asn1.result }));
+        const certRaw = pkitsToArrayBuffer(PKITS.certs[params.trustedCertificates[i]]);
+        trustedCerts.push(pkijs.Certificate.fromBER(certRaw));
       }
     }
 
@@ -1091,9 +1083,8 @@ function simpleVerification(params: {
     //#region Initialize intermediate and end entity certificates
     function initializeIntermediateCertificates() {
       for (let i = 0; i < params.certificates.length; i++) {
-        const asn1 = asn1js.fromBER(pkitsToArrayBuffer(PKITS.certs[params.certificates[i]]));
-        pkijs.AsnError.assert(asn1, "Certificate");
-        certs.push(new pkijs.Certificate({ schema: asn1.result }));
+        const certRaw = pkitsToArrayBuffer(PKITS.certs[params.certificates[i]]);
+        certs.push(pkijs.Certificate.fromBER(certRaw));
       }
     }
 
@@ -1104,9 +1095,8 @@ function simpleVerification(params: {
     //#region Initialize CRLs
     function initializeCRLs() {
       for (let i = 0; i < params.crls.length; i++) {
-        const asn1 = asn1js.fromBER(pkitsToArrayBuffer(PKITS.crls[params.crls[i]]));
-        pkijs.AsnError.assert(asn1, "Certificate");
-        crls.push(new pkijs.CertificateRevocationList({ schema: asn1.result }));
+        const crlRaw = pkitsToArrayBuffer(PKITS.crls[params.crls[i]]);
+        crls.push(pkijs.CertificateRevocationList.fromBER(crlRaw));
       }
     }
 

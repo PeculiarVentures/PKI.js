@@ -1,4 +1,3 @@
-import * as asn1js from "asn1js";
 import * as pkijs from "../src";
 import * as pvtsutils from "pvtsutils";
 
@@ -79,10 +78,7 @@ export function parseCertificate(source: BufferSource): pkijs.Certificate[] {
 
   const res: pkijs.Certificate[] = [];
   for (const item of buffers) {
-    const asn1 = asn1js.fromBER(item);
-    pkijs.AsnError.assert(asn1, "Certificate");
-
-    res.push(new pkijs.Certificate({ schema: asn1.result }));
+    res.push(pkijs.Certificate.fromBER(item));
   }
 
   return res;

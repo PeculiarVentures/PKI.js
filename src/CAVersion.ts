@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { IAccessDescription } from "./AccessDescription";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 

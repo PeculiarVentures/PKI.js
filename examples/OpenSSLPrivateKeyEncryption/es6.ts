@@ -1,4 +1,3 @@
-import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as example from "../../test/opensslPrivateKeyEncryption";
 import * as utils from "../../test/utils";
@@ -78,11 +77,8 @@ async function parseOpenSSLPrivateKey() {
 
   const decryptedKey = await example.parseOpenSSLPrivateKey(aesKeyLength, ivBuffer, passwordBuffer, privateKeyData);
 
-  const asn1 = asn1js.fromBER(decryptedKey);
-  pkijs.AsnError.assert(asn1, "decryptedKey");
-
   // Just in order to check all was decoded correctly
-  new pkijs.RSAPrivateKey({ schema: asn1.result });
+  pkijs.RSAPrivateKey.fromBER(decryptedKey);
 
   common.getElement("pkijs_data", "textarea").value = utils.toPEM(decryptedKey, "RSA PRIVATE KEY");
 }
@@ -112,9 +108,7 @@ async function generateOpenSSLPrivateKey() {
   };
   const { privateKey } = await crypto.subtle.generateKey(alg, true, ["sign", "verify"]);
   const pkcs8 = await crypto.subtle.exportKey("pkcs8", privateKey);
-  const asn1 = asn1js.fromBER(pkcs8);
-  pkijs.AsnError.assert(asn1, "PrivateKeyInfo");
-  const pki = new pkijs.PrivateKeyInfo({ schema: asn1.result });
+  const pki = pkijs.PrivateKeyInfo.fromBER(pkcs8);
   common.getElement("pkijs_data", "textarea").innerHTML = utils.toPEM(pki.privateKey.valueBlock.valueHex, "RSA PRIVATE KEY");
 }
 

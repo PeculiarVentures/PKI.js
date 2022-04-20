@@ -8,13 +8,11 @@ export const privateKeyBASE64 = "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoI
 
 export async function passwordBasedIntegrity(password: string, hash = "SHA-256"): Promise<ArrayBuffer> {
   //#region Create simplified structires for certificate and private key
-  let asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64)));
-  pkijs.AsnError.assert(asn1, "Certificate");
-  const certSimpl = new pkijs.Certificate({ schema: asn1.result });
+  const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64));
+  const certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-  asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64)));
-  pkijs.AsnError.assert(asn1, "PrivateKeyInfo");
-  const pkcs8Simpl = new pkijs.PrivateKeyInfo({ schema: asn1.result });
+  const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64));
+  const pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
   //#endregion
   //#region Put initial values for PKCS#12 structures
   const pkcs12 = new pkijs.PFX({
@@ -73,13 +71,11 @@ export async function passwordBasedIntegrity(password: string, hash = "SHA-256")
 
 export async function certificateBasedIntegrity(): Promise<ArrayBuffer> {
   //#region Create simplified structires for certificate and private key
-  let asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64)));
-  pkijs.AsnError.assert(asn1, "Certificate");
-  const certSimpl = new pkijs.Certificate({ schema: asn1.result });
+  const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64));
+  const certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-  asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64)));
-  pkijs.AsnError.assert(asn1, "PrivateKeyInfo");
-  const pkcs8Simpl = new pkijs.PrivateKeyInfo({ schema: asn1.result });
+  const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64));
+  const pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
   //#endregion
 
   //#region Get a "crypto" extension
@@ -164,13 +160,11 @@ export async function passwordPrivacy(password: string) {
   //#endregion
 
   //#region Create simplified structires for certificate and private key
-  let asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64)));
-  pkijs.AsnError.assert(asn1, "Certificate");
-  const certSimpl = new pkijs.Certificate({ schema: asn1.result });
+  const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64));
+  const certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-  asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64)));
-  pkijs.AsnError.assert(asn1, "PrivateKeyInfo");
-  const pkcs8Simpl = new pkijs.PrivateKeyInfo({ schema: asn1.result });
+  const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64));
+  const pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
   //#endregion
 
   //#region Put initial values for PKCS#12 structures
@@ -239,13 +233,11 @@ export async function passwordPrivacy(password: string) {
 
 export async function certificatePrivacy(password: string) {
   //#region Create simplified structires for certificate and private key
-  let asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64)));
-  pkijs.AsnError.assert(asn1, "Certificate");
-  const certSimpl = new pkijs.Certificate({ schema: asn1.result });
+  const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64));
+  const certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-  asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64)));
-  pkijs.AsnError.assert(asn1, "PrivateKeyInfo");
-  const pkcs8Simpl = new pkijs.PrivateKeyInfo({ schema: asn1.result });
+  const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64));
+  const pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
   //#endregion
 
   //#region Put initial values for PKCS#12 structures
@@ -338,13 +330,11 @@ export async function openSSLLike(password: string) {
   //#endregion
 
   //#region Create simplified structires for certificate and private key
-  let asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64)));
-  pkijs.AsnError.assert(asn1, "Certificate");
-  const certSimpl = new pkijs.Certificate({ schema: asn1.result });
+  const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64));
+  const certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-  asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64)));
-  pkijs.AsnError.assert(asn1, "PrivateKeyInfo");
-  const pkcs8Simpl = new pkijs.PrivateKeyInfo({ schema: asn1.result });
+  const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64));
+  const pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
 
   //#region Add "keyUsage" attribute
   pkcs8Simpl.attributes = [
@@ -486,9 +476,7 @@ export async function parsePKCS12(buffer: ArrayBuffer, password: string) {
   const passwordConverted = pvutils.stringToArrayBuffer(password);
 
   // Parse internal PKCS#12 values
-  const asn1 = asn1js.fromBER(buffer);
-  pkijs.AsnError.assert(asn1, "PFX");
-  const pkcs12 = new pkijs.PFX({ schema: asn1.result });
+  const pkcs12 = pkijs.PFX.fromBER(buffer);
 
   // Parse "AuthenticatedSafe" value of PKCS#12 data
   await pkcs12.parseInternalValues({

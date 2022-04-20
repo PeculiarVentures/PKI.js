@@ -1,5 +1,4 @@
 import * as assert from "assert";
-import * as asn1js from "asn1js";
 import * as pkijs from "../src";
 import * as example from "./ocspResponseComplexExample";
 
@@ -16,9 +15,7 @@ context("OCSP Response Complex Example", () => {
       it(testName, async () => {
         const ocspResp = await example.createOCSPResp(hashAlg, sigAlg);
         const ocspRespRaw = ocspResp.ocspResp.toSchema().toBER();
-        const asn1 = asn1js.fromBER(ocspRespRaw);
-        pkijs.AsnError.assert(asn1, "OCSPResponse");
-        new pkijs.OCSPResponse({ schema: asn1.result });
+        pkijs.OCSPResponse.fromBER(ocspRespRaw);
 
         const result = await example.verifyOCSPResp(ocspRespRaw, [ocspResp.certificate]);
         assert.equal(result, true, "OCSP Response must be verified successfully");

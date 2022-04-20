@@ -21,9 +21,8 @@ function parsePKCS10() {
   common.getElement("pkcs10-attributes").style.display = "none";
 
   //#region Decode existing PKCS#10
-  const asn1 = asn1js.fromBER(utils.fromPEM(common.getElement("pem-text-block", "textarea").value));
-  pkijs.AsnError.assert(asn1, "PKCS#10 Certificate Request");
-  const pkcs10 = new pkijs.CertificationRequest({ schema: asn1.result });
+  const pkcs10Raw = utils.fromPEM(common.getElement("pem-text-block", "textarea").value);
+  const pkcs10 = pkijs.CertificationRequest.fromBER(pkcs10Raw);
   //#endregion
 
   //#region Parse and display information about "subject"

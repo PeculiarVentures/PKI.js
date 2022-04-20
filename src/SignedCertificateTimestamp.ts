@@ -349,10 +349,8 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
       throw new Error(`Public key not found for CT with logId: ${logId}`);
     }
 
-    const asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(publicKeyBase64)));
-    AsnError.assert(asn1, `CT Log with logId: ${logId}`);
-
-    const publicKeyInfo = new PublicKeyInfo({ schema: asn1.result });
+    const pki = pvutils.stringToArrayBuffer(pvutils.fromBase64(publicKeyBase64));
+    const publicKeyInfo = PublicKeyInfo.fromBER(pki);
     //#endregion
 
     //#region Initialize signed data block

@@ -1,5 +1,3 @@
-/* eslint-disable no-console,no-undef,no-unreachable */
-import * as asn1js from "asn1js";
 import * as pkijs from "../../src";
 import * as common from "../common";
 
@@ -41,10 +39,7 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
     for (let i = 0; i < contentLength; i++)
       contentView[i] = contents.charCodeAt(i);
 
-    const asn1 = asn1js.fromBER(contentBuffer);
-    pkijs.AsnError.assert(asn1, "CMS SignedData");
-
-    const cmsContentSimp = new pkijs.ContentInfo({ schema: asn1.result });
+    const cmsContentSimp = pkijs.ContentInfo.fromBER(contentBuffer);
     const cmsSignedSimp = new pkijs.SignedData({ schema: cmsContentSimp.content });
 
     const signedDataBuffer = new ArrayBuffer(byteRange[1] + byteRange[3]);

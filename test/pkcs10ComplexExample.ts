@@ -59,7 +59,8 @@ export async function createPKCS10Internal(hashAlg: string, signAlg: string) {
   //#region Exporting public key into "subjectPublicKeyInfo" value of PKCS#10
   await pkcs10.subjectPublicKeyInfo.importKey(publicKey);
   //#endregion
-  //#region SubjectKeyIdentifier
+
+  // SubjectKeyIdentifier
   const subjectKeyIdentifier = await crypto.digest({ name: "SHA-1" }, pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
   pkcs10.attributes.push(new pkijs.Attribute({
     type: "1.2.840.113549.1.9.14",
@@ -83,21 +84,17 @@ export async function createPKCS10Internal(hashAlg: string, signAlg: string) {
       ]
     })).toSchema()]
   }));
-  //#endregion
-  //#region Signing final PKCS#10 request
+
+  // Signing final PKCS#10 request
   await pkcs10.sign(privateKey, hashAlg);
-  //#endregion
+
   return pkcs10.toSchema().toBER(false);
 }
 
 export async function verifyPKCS10Internal(pkcs10Buffer: ArrayBuffer) {
-  //#region Decode existing PKCS#10
-  const asn1 = asn1js.fromBER(pkcs10Buffer);
-  pkijs.AsnError.assert(asn1, "CertificationRequest");
-  const pkcs10 = new pkijs.CertificationRequest({ schema: asn1.result });
-  //#endregion
+  // Decode existing PKCS#10
+  const pkcs10 = pkijs.CertificationRequest.fromBER(pkcs10Buffer);
 
-  //#region Verify PKCS#10
+  // PKCS#10
   return pkcs10.verify();
-  //#endregion
 }

@@ -1,4 +1,3 @@
-import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as pkijs from "../../src";
 import * as utils from "../../test/utils";
@@ -56,9 +55,7 @@ function parseCMSSigned() {
   //#endregion
 
   //#region Decode existing CMS Signed Data
-  const asn1 = asn1js.fromBER(cmsSignedBuffer);
-  pkijs.AsnError.assert(asn1, "CMS SignedData");
-  const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
+  const cmsContentSimpl = pkijs.ContentInfo.fromBER(cmsSignedBuffer);
   const cmsSignedSimpl = new pkijs.SignedData({ schema: cmsContentSimpl.content });
   //#endregion
 

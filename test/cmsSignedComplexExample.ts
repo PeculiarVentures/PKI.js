@@ -124,9 +124,7 @@ export async function verifyCMSSigned(cmsSignedBuffer: ArrayBuffer, trustedCerti
   //#endregion
 
   //#region Decode existing CMS_Signed
-  const asn1 = asn1js.fromBER(cmsSignedBuffer);
-  pkijs.AsnError.assert(asn1, "CMS SignedData");
-  const cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
+  const cmsContentSimpl = pkijs.ContentInfo.fromBER(cmsSignedBuffer);
   const cmsSignedSimpl = new pkijs.SignedData({ schema: cmsContentSimpl.content });
   //#endregion
 

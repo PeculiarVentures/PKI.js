@@ -34,7 +34,7 @@ export abstract class PkiObject {
    * @param raw ASN.1 encoded raw data
    * @returns Initialized and filled current class object
    */
-  public static fromRaw<T extends PkiObject>(this: PkiObjectConstructor<T>, raw: BufferSource): T {
+  public static fromBER<T extends PkiObject>(this: PkiObjectConstructor<T>, raw: BufferSource): T {
     const asn1 = asn1js.fromBER(pvtsutils.BufferSourceConverter.toArrayBuffer(raw));
     AsnError.assert(asn1, this.name);
 

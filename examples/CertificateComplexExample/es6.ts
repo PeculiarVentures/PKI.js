@@ -38,9 +38,7 @@ function parseCertificate() {
   //#endregion
 
   //#region Decode existing X.509 certificate
-  const asn1 = asn1js.fromBER(certificateBuffer);
-  pkijs.AsnError.assert(asn1, "Certificate");
-  const certificate = new pkijs.Certificate({ schema: asn1.result });
+  const certificate = pkijs.Certificate.fromBER(certificateBuffer);
   //#endregion
 
   //#region Put information about X.509 certificate issuer
@@ -231,9 +229,7 @@ function handleInterCertsFile(evt: Event) {
 
 function handleCRLsFile(evt: Event) {
   common.handleFileBrowse(evt, file => {
-    const asn1 = asn1js.fromBER(file);
-    pkijs.AsnError.assert(asn1, "CertificateRevocationList");
-    const crl = new pkijs.CertificateRevocationList({ schema: asn1.result });
+    const crl = pkijs.CertificateRevocationList.fromBER(file);
 
     crls.push(crl);
   });

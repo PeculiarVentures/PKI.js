@@ -102,5 +102,5 @@ import { PrivateKeyUsagePeriod } from "./PrivateKeyUsagePeriod";
 import { QCStatements } from "./QCStatements";
 import { SignedCertificateTimestampList } from "./SignedCertificateTimestampList";
 import { SubjectDirectoryAttributes } from "./SubjectDirectoryAttributes";
-import { AsnError } from "./errors";
+
 

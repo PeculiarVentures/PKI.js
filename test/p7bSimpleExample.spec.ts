@@ -1,5 +1,4 @@
 import * as assert from "assert";
-import * as asn1js from "asn1js";
 import "./utils";
 import * as pkijs from "../src";
 import * as example from "./p7bSimpleExample";
@@ -16,9 +15,7 @@ context("P7B Simple Example", () => {
 
       it(testName, async () => {
         const cmsSignedBuffer = await example.createP7B(hashAlg, signAlg);
-        const asn1 = asn1js.fromBER(cmsSignedBuffer);
-        pkijs.AsnError.assert(asn1, "ContentInfo");
-        const contentInfo = new pkijs.ContentInfo({ schema: asn1.result });
+        const contentInfo = pkijs.ContentInfo.fromBER(cmsSignedBuffer);
 
         assert.equal(contentInfo.contentType, "1.2.840.113549.1.7.2", "Content Type ID must be '1.2.840.113549.1.7.2'");
 

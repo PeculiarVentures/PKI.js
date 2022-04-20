@@ -464,13 +464,8 @@ export class PFX extends PkiObject implements IPFX {
           }
           //#endregion
 
-          //#region Parse internal ASN.1 data
-          const asn1 = asn1js.fromBER(authSafeContent);
-          AsnError.assert(asn1, "PFX.authSafe.content");
-          //#endregion
-
           //#region Set "authenticatedSafe" value
-          this.parsedValue.authenticatedSafe = new AuthenticatedSafe({ schema: asn1.result });
+          this.parsedValue.authenticatedSafe = AuthenticatedSafe.fromBER(authSafeContent);
           //#endregion
 
           //#region Check integrity
@@ -534,17 +529,11 @@ export class PFX extends PkiObject implements IPFX {
           }
           //#endregion
 
-          //#region Parse internal ASN.1 data
-          const asn1 = asn1js.fromBER(data);
-          AsnError.assert(asn1, "PDX.authSafe.content");
-          //#endregion
-
           //#region Set "authenticatedSafe" value
-          this.parsedValue.authenticatedSafe = new AuthenticatedSafe({ schema: asn1.result });
+          this.parsedValue.authenticatedSafe = AuthenticatedSafe.fromBER(data);
           //#endregion
 
           //#region Check integrity
-
           const ok = await cmsSigned.verify({ signer: 0, checkChain: false });
           if (!ok) {
             throw new Error("Integrity for the PKCS#12 data is broken!");

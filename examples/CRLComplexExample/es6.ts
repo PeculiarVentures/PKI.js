@@ -47,7 +47,7 @@ function parseCRL(crlBuffer: ArrayBuffer) {
     issuerTable.deleteRow(issuerTable.rows.length - 1);
 
   //#region Decode existing CRL
-  const crlSimpl = pkijs.CertificateRevocationList.fromRaw(crlBuffer);
+  const crlSimpl = pkijs.CertificateRevocationList.fromBER(crlBuffer);
   //#endregion
 
   //#region Put information about CRL issuer

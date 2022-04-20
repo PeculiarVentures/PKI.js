@@ -165,9 +165,7 @@ export async function verifyCertificate(certificateBuffer: ArrayBuffer, intermed
   //#endregion
 
   //#region Decode existing CERT
-  const asn1 = asn1js.fromBER(certificateBuffer);
-  pkijs.AsnError.assert(asn1, "Certificate");
-  const certificate = new pkijs.Certificate({ schema: asn1.result });
+  const certificate = pkijs.Certificate.fromBER(certificateBuffer);
   //#endregion
 
   //#region Create certificate's array (end-user certificate + intermediate certificates)

@@ -843,12 +843,9 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#endregion
       //#region Append all necessary data to current CMS_RECIPIENT_INFO object
       //#region OriginatorIdentifierOrKey
-      const asn1 = asn1js.fromBER(exportedECDHPublicKey);
-      AsnError.assert(asn1, "OriginatorIdentifierOrKey");
-
       const originator = new OriginatorIdentifierOrKey();
       originator.variant = 3;
-      originator.value = new OriginatorPublicKey({ schema: asn1.result });
+      originator.value = OriginatorPublicKey.fromBER(exportedECDHPublicKey);
 
       recipientInfo.originator = originator;
       //#endregion

@@ -154,7 +154,7 @@ export class CRLBag extends PkiObject implements ICRLBag {
     switch (this.crlId) {
       case id_CRLBag_X509CRL: // x509CRL
         {
-          this.parsedValue = CertificateRevocationList.fromRaw(this.certValue.valueBlock.valueHex);
+          this.parsedValue = CertificateRevocationList.fromBER(this.certValue.valueBlock.valueHex);
         }
         break;
       default:

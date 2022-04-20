@@ -181,9 +181,7 @@ async function parsePKCS12(buffer: ArrayBuffer, password: string) {
   const passwordConverted = pvtsutils.Convert.FromUtf8String(password);
 
   //#region Parse internal PKCS#12 values
-  const asn1 = asn1js.fromBER(buffer);
-  pkijs.AsnError.assert(asn1, "PFX");
-  const pkcs12 = new pkijs.PFX({ schema: asn1.result });
+  const pkcs12 = pkijs.PFX.fromBER(buffer);
   //#endregion
 
   // Parse "AuthenticatedSafe" value of PKCS#12 data
@@ -264,13 +262,11 @@ context("Node.js PKCS#12 Example", () => {
     let certSimpl: pkijs.Certificate;
 
     before(() => {
-      let asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(x509CertificateBASE64)));
-      pkijs.AsnError.assert(asn1, "Certificate");
-      certSimpl = new pkijs.Certificate({ schema: asn1.result });
+      const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(x509CertificateBASE64));
+      certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-      asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(x509PrivateKeyBASE64)));
-      pkijs.AsnError.assert(asn1, "PrivateKeyInfo");
-      pkcs8Simpl = new pkijs.PrivateKeyInfo({ schema: asn1.result });
+      const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(x509PrivateKeyBASE64));
+      pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
     });
 
     it("RC2-40-CBC algorithm", async () => {
@@ -298,13 +294,11 @@ context("Node.js PKCS#12 Example", () => {
     let attrCertSimpl: pkijs.AttributeCertificateV2;
 
     before(() => {
-      let asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(attributeCertificateBASE64)));
-      attrCertSimpl = new pkijs.AttributeCertificateV2({ schema: asn1.result });
-      pkijs.AsnError.assert(asn1, "AttributeCertificateV2");
+      const attrCertRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(attributeCertificateBASE64));
+      attrCertSimpl = pkijs.AttributeCertificateV2.fromBER(attrCertRaw);
 
-      asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(attributePrivateKeyBASE64)));
-      pkijs.AsnError.assert(asn1, "PrivateKeyInfo");
-      pkcs8Simpl = new pkijs.PrivateKeyInfo({ schema: asn1.result });
+      const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(attributePrivateKeyBASE64));
+      pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
     });
 
     ["DES-EDE3-CBC", "AES-256-CBC"].forEach(encAlg => {

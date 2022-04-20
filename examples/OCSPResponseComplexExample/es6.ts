@@ -59,9 +59,7 @@ function parseOCSPResp(source: ArrayBuffer) {
   //#endregion
 
   //#region Decode existing OCSP response
-  const asn1 = asn1js.fromBER(source);
-  pkijs.AsnError.assert(asn1, "OCSP response");
-  const ocspRespSimpl = new pkijs.OCSPResponse({ schema: asn1.result });
+  const ocspRespSimpl = pkijs.OCSPResponse.fromBER(source);
   //#endregion
 
   //#region Put information about overall response status

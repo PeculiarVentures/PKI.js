@@ -212,10 +212,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
 
     //#region Initialize PARSED_VALUE with decrypted PKCS#8 private key
 
-    const asn1 = asn1js.fromBER(decryptedData);
-    AsnError.assert(asn1, "decryptedData");
-
-    this.parsedValue = new PrivateKeyInfo({ schema: asn1.result });
+    this.parsedValue = PrivateKeyInfo.fromBER(decryptedData);
     //#endregion
   }
 

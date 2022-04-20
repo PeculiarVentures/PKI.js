@@ -576,12 +576,10 @@ export class SignedData extends PkiObject implements ISignedData {
         //#endregion
 
         //#region Initialize TST_INFO value
-        const asn1 = asn1js.fromBER(this.encapContentInfo.eContent.valueBlock.valueHex);
-        AsnError.assert(asn1, "TSTInfo");
         let tstInfo: TSTInfo;
 
         try {
-          tstInfo = new TSTInfo({ schema: asn1.result });
+          tstInfo = TSTInfo.fromBER(this.encapContentInfo.eContent.valueBlock.valueHex);
         }
         catch (ex) {
           throw new SignedDataVerifyError({

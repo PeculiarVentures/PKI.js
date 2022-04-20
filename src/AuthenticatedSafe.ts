@@ -186,15 +186,10 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             }
             //#endregion
 
-            //#region Parse internal ASN.1 data
-            const asn1 = asn1js.fromBER(authSafeContent);
-            AsnError.assert(asn1, "content.content");
-            //#endregion
-
             //#region Finally initialize initial values of SAFE_CONTENTS type
             this.parsedValue.safeContents.push({
               privacyMode: 0, // No privacy, clear data
-              value: new SafeContents({ schema: asn1.result })
+              value: SafeContents.fromBER(authSafeContent)
             });
             //#endregion
           }
@@ -220,12 +215,9 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
               recipientPrivateKey: recipientKey
             });
 
-            const asn1 = asn1js.fromBER(decrypted);
-            AsnError.assert(asn1, "decrypted");
-
             this.parsedValue.safeContents.push({
               privacyMode: 2, // Public-key privacy mode
-              value: new SafeContents({ schema: asn1.result })
+              value: SafeContents.fromBER(decrypted),
             });
             //#endregion
           }
@@ -251,12 +243,9 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             //#endregion
 
             //#region Initialize internal data
-            const asn1 = asn1js.fromBER(decrypted);
-            AsnError.assert(asn1, "decrypted");
-
             this.parsedValue.safeContents.push({
               privacyMode: 1, // Password-based privacy mode
-              value: new SafeContents({ schema: asn1.result })
+              value: SafeContents.fromBER(decrypted),
             });
             //#endregion
           }

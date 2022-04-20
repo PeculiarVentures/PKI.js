@@ -1,6 +1,5 @@
 /// <reference path="types.d.ts" />
 
-import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import parse from "emailjs-mime-parser";
 import * as pkijs from "../../src";
@@ -24,17 +23,11 @@ async function verifySMIME() {
     const lastNode = parser.childNodes[1];
     if ((lastNode.contentType.value === "application/x-pkcs7-signature") || (lastNode.contentType.value === "application/pkcs7-signature")) {
       // Parse into pkijs types
-      const asn1 = asn1js.fromBER(lastNode.content.buffer);
-      if (asn1.offset === -1) {
-        alert("Incorrect message format!");
-        return;
-      }
-
       let cmsContentSimpl;
       let cmsSignedSimpl;
 
       try {
-        cmsContentSimpl = new pkijs.ContentInfo({ schema: asn1.result });
+        cmsContentSimpl = pkijs.ContentInfo.fromBER(lastNode.content.buffer);
         cmsSignedSimpl = new pkijs.SignedData({ schema: cmsContentSimpl.content });
       }
       catch (ex) {
