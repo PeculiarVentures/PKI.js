@@ -108,7 +108,6 @@ function parsePKCS10() {
       let subjval = "";
 
       for (let j = 0; j < pkcs10.attributes[i].values.length; j++) {
-        // noinspection OverlyComplexBooleanExpressionJS
         if ((pkcs10.attributes[i].values[j] instanceof asn1js.Utf8String) ||
           (pkcs10.attributes[i].values[j] instanceof asn1js.BmpString) ||
           (pkcs10.attributes[i].values[j] instanceof asn1js.UniversalString) ||

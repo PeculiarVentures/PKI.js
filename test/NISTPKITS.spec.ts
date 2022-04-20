@@ -962,10 +962,8 @@ context("PKITS's certificates parsing test", () => {
   const keys = Object.keys(PKITS.certs);
 
   for (let i = 0; i < keys.length; i++) {
-    // noinspection AnonymousFunctionJS
     const runningFunction = (buffer: ArrayBuffer, func: (buffer: ArrayBuffer) => void) => {
       return () => {
-        // noinspection JSCheckFunctionSignatures
         assert.doesNotThrow(() => {
           func(buffer);
         }, Error, "Correct convertion to CERT");
@@ -988,10 +986,8 @@ context("PKITS's CRL parsing test", () => {
   const keys = Object.keys(PKITS.crls);
 
   for (let i = 0; i < keys.length; i++) {
-    // noinspection AnonymousFunctionJS
     const runningFunction = (buffer: ArrayBuffer, func: (buffer: ArrayBuffer) => void) => {
       return () => {
-        // noinspection JSCheckFunctionSignatures
         assert.doesNotThrow(() => {
           func(buffer);
         }, Error, "Correct convertion to CRL");
@@ -1014,7 +1010,6 @@ context("PKITS's certificate pairs parsing test", () => {
   const keys = Object.keys(PKITS.certpairs);
 
   for (let i = 0; i < keys.length; i++) {
-    // noinspection AnonymousFunctionJS
     const runningFunction = (buffer: ArrayBuffer, func: (buffer: ArrayBuffer) => void) => {
       return () => {
         const asn1 = asn1js.fromBER(buffer);
@@ -1037,7 +1032,6 @@ context("PKITS's certificate pairs parsing test", () => {
           //#endregion
 
           if (name !== null) {
-            // noinspection JSCheckFunctionSignatures
             assert.doesNotThrow(() => {
               func(value.valueBlock.value[0].valueBeforeDecode);
             }, Error, `Correct convertion to CERT for ${name}`);
@@ -1076,7 +1070,6 @@ function simpleVerification(params: {
       }
     }
 
-    // noinspection JSCheckFunctionSignatures
     assert.doesNotThrow(initializeTrustedCertificates, Error, "Successfully initialize trusted root certificates");
     //#endregion
 
@@ -1088,7 +1081,6 @@ function simpleVerification(params: {
       }
     }
 
-    // noinspection JSCheckFunctionSignatures
     assert.doesNotThrow(initializeIntermediateCertificates, Error, "Successfully initialize intermediate and end entity certificates");
     //#endregion
 
@@ -1100,7 +1092,6 @@ function simpleVerification(params: {
       }
     }
 
-    // noinspection JSCheckFunctionSignatures
     assert.doesNotThrow(initializeCRLs, Error, "Successfully initialize CRLs");
     //#endregion
 
@@ -1173,7 +1164,6 @@ context("NIST PKITS tests", () => {
     }));
 
     // Currently (2015, September) WebCrypto can not handle DSA signatures
-    // noinspection ES6ModulesDependencies
     it.skip("4.1.4 Valid DSA Signatures Test4", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"

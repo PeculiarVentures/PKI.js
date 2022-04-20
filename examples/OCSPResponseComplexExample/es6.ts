@@ -159,10 +159,8 @@ function parseOCSPResp(source: ArrayBuffer) {
 
       const row = respIDTable.insertRow(respIDTable.rows.length);
       const cell0 = row.insertCell(0);
-      // noinspection InnerHTMLJS
       cell0.innerHTML = typeval;
       const cell1 = row.insertCell(1);
-      // noinspection InnerHTMLJS
       cell1.innerHTML = subjval;
     }
 
@@ -206,7 +204,6 @@ function parseOCSPResp(source: ArrayBuffer) {
 
       const row = extensionTable.insertRow(extensionTable.rows.length);
       const cell0 = row.insertCell(0);
-      // noinspection InnerHTMLJS
       cell0.innerHTML = typeval;
     }
 

@@ -117,7 +117,6 @@ function parseCRL(crlBuffer: ArrayBuffer) {
   else
     signatureAlgorithm = `${signatureAlgorithm} (${crlSimpl.signature.algorithmId})`;
 
-  // noinspection InnerHTMLJS
   common.getElement("crl-sign-algo").innerHTML = signatureAlgorithm;
   //#endregion
 
@@ -126,10 +125,8 @@ function parseCRL(crlBuffer: ArrayBuffer) {
     for (let i = 0; i < crlSimpl.revokedCertificates.length; i++) {
       const row = revokedTable.insertRow(revokedTable.rows.length);
       const cell0 = row.insertCell(0);
-      // noinspection InnerHTMLJS
       cell0.innerHTML = pvutils.bufferToHexCodes(crlSimpl.revokedCertificates[i].userCertificate.valueBlock.valueHex);
       const cell1 = row.insertCell(1);
-      // noinspection InnerHTMLJS
       cell1.innerHTML = crlSimpl.revokedCertificates[i].revocationDate.value.toString();
     }
 
@@ -141,7 +138,6 @@ function parseCRL(crlBuffer: ArrayBuffer) {
     for (let i = 0; i < crlSimpl.crlExtensions.extensions.length; i++) {
       const row = extensionTable.insertRow(extensionTable.rows.length);
       const cell0 = row.insertCell(0);
-      // noinspection InnerHTMLJS
       cell0.innerHTML = crlSimpl.crlExtensions.extensions[i].extnID;
     }
 

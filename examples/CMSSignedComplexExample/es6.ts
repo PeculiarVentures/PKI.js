@@ -88,7 +88,6 @@ function parseCMSSigned() {
   if (typeof eContentType === "undefined")
     eContentType = cmsSignedSimpl.encapContentInfo.eContentType;
 
-  // noinspection InnerHTMLJS
   common.getElement("cms-encap-type").innerHTML = eContentType;
   //#endregion
 
@@ -126,10 +125,8 @@ function parseCMSSigned() {
 
       const row = certificatesTable.insertRow(certificatesTable.rows.length);
       const cell0 = row.insertCell(0);
-      // noinspection InnerHTMLJS
       cell0.innerHTML = pvutils.bufferToHexCodes(cert.serialNumber.valueBlock.valueHex);
       const cell1 = row.insertCell(1);
-      // noinspection InnerHTMLJS
       cell1.innerHTML = ul;
     }
 
@@ -157,7 +154,7 @@ function parseCMSSigned() {
 
       const row = crlsTable.insertRow(certificatesTable.rows.length);
       const cell = row.insertCell(0);
-      // noinspection InnerHTMLJS
+      //  InnerHTMLJS
       cell.innerHTML = ul;
     }
 
@@ -166,7 +163,6 @@ function parseCMSSigned() {
   //#endregion
 
   //#region Put information about number of signers
-  // noinspection InnerHTMLJS
   common.getElement("cms-signs").innerHTML = cmsSignedSimpl.signerInfos.length.toString();
   //#endregion
 

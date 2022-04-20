@@ -18,35 +18,25 @@ export let engine: GlobalCryptoEngine = {
 
 export function setEngine(name: string, crypto: Crypto | null = null, subtle: null | ICryptoEngine = null): void {
   //#region We are in Node
-  // noinspection JSUnresolvedVariable
   if ((typeof process !== "undefined") && ("pid" in process) && (typeof global !== "undefined") && (typeof window === "undefined")) {
     if (typeof (global as any)[process.pid] === "undefined") {
-      // noinspection JSUnresolvedVariable
       (global as any)[process.pid] = {};
     }
     else {
-      // noinspection JSUnresolvedVariable
       if (typeof (global as any)[process.pid] !== "object") {
-        // noinspection JSUnresolvedVariable
         throw new Error(`Name global.${process.pid} already exists and it is not an object`);
       }
     }
 
-    // noinspection JSUnresolvedVariable
     if (typeof (global as any)[process.pid].pkijs === "undefined") {
-      // noinspection JSUnresolvedVariable
       (global as any)[process.pid].pkijs = {};
     }
     else {
-      // TODO remove comments with 'noinspection'
-      // noinspection JSUnresolvedVariable
       if (typeof (global as any)[process.pid].pkijs !== "object") {
-        // noinspection JSUnresolvedVariable
         throw new Error(`Name global.${process.pid}.pkijs already exists and it is not an object`);
       }
     }
 
-    // noinspection JSUnresolvedVariable
     (global as any)[process.pid].pkijs.engine = {
       name: name,
       crypto: crypto,
@@ -69,7 +59,6 @@ export function setEngine(name: string, crypto: Crypto | null = null, subtle: nu
 
 export function getEngine(): GlobalCryptoEngine {
   //#region We are in Node
-  // noinspection JSUnresolvedVariable
   if ((typeof process !== "undefined") && ("pid" in process) && (typeof global !== "undefined") && (typeof window === "undefined")) {
     let _engine;
 

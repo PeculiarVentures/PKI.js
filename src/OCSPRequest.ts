@@ -110,7 +110,6 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case TBS_REQUEST:
-        // noinspection OverlyComplexBooleanExpressionJS
         return ((TBSRequest.compareWithDefault("tbs", memberValue.tbs)) &&
           (TBSRequest.compareWithDefault("version", memberValue.version)) &&
           (TBSRequest.compareWithDefault("requestorName", memberValue.requestorName)) &&

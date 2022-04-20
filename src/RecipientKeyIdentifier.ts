@@ -96,7 +96,6 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
       case SUBJECT_KEY_IDENTIFIER:
         return (memberValue.isEqual(RecipientKeyIdentifier.defaultValues(SUBJECT_KEY_IDENTIFIER)));
       case DATE:
-        // noinspection OverlyComplexBooleanExpressionJS
         return ((memberValue.year === 0) &&
           (memberValue.month === 0) &&
           (memberValue.day === 0) &&

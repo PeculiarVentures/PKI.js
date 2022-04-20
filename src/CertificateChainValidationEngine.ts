@@ -514,7 +514,6 @@ export class CertificateChainValidationEngine {
           };
         }
 
-        // noinspection OverlyComplexBooleanExpressionJS
         if ((isCA === true) && (keyUsagePresent === true) && ((needToCheckCRL) && (cRLSign === false))) {
           return {
             result: false,

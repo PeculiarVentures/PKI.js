@@ -115,7 +115,6 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case CERT_ID:
-        // noinspection OverlyComplexBooleanExpressionJS
         return ((CertID.compareWithDefault("hashAlgorithm", memberValue.hashAlgorithm)) &&
           (CertID.compareWithDefault("issuerNameHash", memberValue.issuerNameHash)) &&
           (CertID.compareWithDefault("issuerKeyHash", memberValue.issuerKeyHash)) &&

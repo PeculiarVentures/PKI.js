@@ -96,7 +96,6 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
       case KEY_IDENTIFIER:
         return (memberValue.isEqual(KEKIdentifier.defaultValues(KEY_IDENTIFIER)));
       case DATE:
-        // noinspection OverlyComplexBooleanExpressionJS
         return ((memberValue.year === 0) &&
           (memberValue.month === 0) &&
           (memberValue.day === 0) &&

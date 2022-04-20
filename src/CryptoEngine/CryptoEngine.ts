@@ -1840,7 +1840,6 @@ export class CryptoEngine extends AbstractCryptoEngine {
     //#endregion
 
     //#region Import HMAC key
-    // noinspection JSCheckFunctionSignatures
     const hmacKey = await this.importKey("raw",
       new Uint8Array(pkcsKey),
       hmacAlgorithm,
@@ -2081,7 +2080,6 @@ export class CryptoEngine extends AbstractCryptoEngine {
     if (publicKey.algorithm.name === "ECDSA") {
       const asn1 = asn1js.fromBER(signatureValue);
       AsnError.assert(asn1, "Signature value");
-      // noinspection JSCheckFunctionSignatures
       signatureValue = common.createECDSASignatureFromCMS(asn1.result);
     }
     //#endregion

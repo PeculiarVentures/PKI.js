@@ -71,7 +71,6 @@ async function parsePKCS12(buffer: ArrayBuffer) {
   result.push(utils.toPEM(pkcs8Buffer, "PRIVATE KEY"));
   //#endregion
 
-  // noinspection InnerHTMLJS
   common.getElement("parsing_result").innerHTML = result.join("\n");
 }
 

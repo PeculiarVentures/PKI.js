@@ -144,7 +144,6 @@ function parseCertificate() {
   else
     signatureAlgorithm = `${signatureAlgorithm} (${certificate.signatureAlgorithm.algorithmId})`;
 
-  // noinspection InnerHTMLJS
   common.getElement("cert-sign-algo").innerHTML = signatureAlgorithm;
   //#endregion
 
@@ -198,10 +197,8 @@ function handleFileBrowse(evt: any) {
 
   const currentFiles = evt.target.files;
 
-  // noinspection AnonymousFunctionJS
   tempReader.onload =
     (event: any) => {
-      // noinspection JSUnresolvedVariable
       certificateBuffer = event.target.result;
       parseCertificate();
     };
