@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const ALGORITHM = "algorithm";
@@ -10,51 +12,59 @@ const CLEAR_PROPS = [
   PUBLIC_KEY
 ];
 
-export interface OriginatorPublicKeyParameters extends Schema.SchemaConstructor {
-  algorithm?: AlgorithmIdentifier;
-  publicKey?: asn1js.BitString;
+export interface IOriginatorPublicKey {
+  algorithm: AlgorithmIdentifier;
+  publicKey: asn1js.BitString;
 }
 
-/**
- * Class from RFC5652
- */
-export class OriginatorPublicKey implements Schema.SchemaCompatible {
+export interface OriginatorPublicKeyJson {
+  algorithm: AlgorithmIdentifierJson;
+  publicKey: Schema.AsnBitStringJson;
+}
 
-  public algorithm: AlgorithmIdentifier;
-  public publicKey: asn1js.BitString;
+export type OriginatorPublicKeyParameters = PkiObjectParameters & Partial<IOriginatorPublicKey>;
+
+/**
+ * Represents the OriginatorPublicKey structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ */
+export class OriginatorPublicKey extends PkiObject implements IOriginatorPublicKey {
+
+  public static override CLASS_NAME = "OriginatorPublicKey";
+
+  public algorithm!: AlgorithmIdentifier;
+  public publicKey!: asn1js.BitString;
 
   /**
-   * Constructor for OriginatorPublicKey class
-   * @param parameters
+   * Initializes a new instance of the {@link OriginatorPublicKey} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: OriginatorPublicKeyParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.algorithm = pvutils.getParametersValue(parameters, ALGORITHM, OriginatorPublicKey.defaultValues(ALGORITHM));
     this.publicKey = pvutils.getParametersValue(parameters, PUBLIC_KEY, OriginatorPublicKey.defaultValues(PUBLIC_KEY));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof PUBLIC_KEY): asn1js.BitString;
-  public static defaultValues(memberName: string): any;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof PUBLIC_KEY): asn1js.BitString;
+  public static override defaultValues(memberName: string): any;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ALGORITHM:
         return new AlgorithmIdentifier();
       case PUBLIC_KEY:
         return new asn1js.BitString();
       default:
-        throw new Error(`Invalid member name for OriginatorPublicKey class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -69,24 +79,24 @@ export class OriginatorPublicKey implements Schema.SchemaCompatible {
       case PUBLIC_KEY:
         return (memberValue.isEqual(OriginatorPublicKey.defaultValues(memberName)));
       default:
-        throw new Error(`Invalid member name for OriginatorPublicKey class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * OriginatorPublicKey ::= SEQUENCE {
    *    algorithm AlgorithmIdentifier,
    *    publicKey BIT STRING }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  static schema(parameters: Schema.SchemaParameters<{
+  static override schema(parameters: Schema.SchemaParameters<{
     algorithm?: AlgorithmIdentifierSchema;
     publicKey?: string;
   }> = {}): Schema.SchemaType {
@@ -101,16 +111,11 @@ export class OriginatorPublicKey implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       OriginatorPublicKey.schema({
@@ -124,22 +129,13 @@ export class OriginatorPublicKey implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for OriginatorPublicKey");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.algorithm = new AlgorithmIdentifier({ schema: asn1.result.algorithm });
     this.publicKey = asn1.result.publicKey;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
@@ -151,14 +147,10 @@ export class OriginatorPublicKey implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): OriginatorPublicKeyJson {
     return {
       algorithm: this.algorithm.toJSON(),
-      publicKey: this.publicKey.toJSON()
+      publicKey: this.publicKey.toJSON() as Schema.AsnBitStringJson,
     };
   }
 

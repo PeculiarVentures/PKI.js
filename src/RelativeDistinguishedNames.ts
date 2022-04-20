@@ -1,217 +1,202 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AttributeTypeAndValue } from "./AttributeTypeAndValue";
+import { AttributeTypeAndValue, AttributeTypeAndValueJson } from "./AttributeTypeAndValue";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
-export interface RelativeDistinguishedNamesParameters extends Schema.SchemaConstructor {
-	/**
-	 * Array of "type and value" objects
-	 */
-	typesAndValues?: AttributeTypeAndValue[];
-	/**
-	 * Value of the RDN before decoding from schema
-	 */
-	valueBeforeDecode?: ArrayBuffer;
+export const TYPE_AND_VALUES = "typesAndValues";
+export const VALUE_BEFORE_DECODE = "valueBeforeDecode";
+export const RDN = "RDN";
+
+export interface IRelativeDistinguishedNames {
+  /**
+   * Array of "type and value" objects
+   */
+  typesAndValues: AttributeTypeAndValue[];
+  /**
+   * Value of the RDN before decoding from schema
+   */
+  valueBeforeDecode: ArrayBuffer;
 }
 
+export type RelativeDistinguishedNamesParameters = PkiObjectParameters & Partial<IRelativeDistinguishedNames>;
+
 export type RelativeDistinguishedNamesSchema = Schema.SchemaParameters<{
-	repeatedSequence?: string;
-	repeatedSet?: string;
-	typeAndValue?: Schema.SchemaType;
+  repeatedSequence?: string;
+  repeatedSet?: string;
+  typeAndValue?: Schema.SchemaType;
 }>;
 
+export interface RelativeDistinguishedNamesJson {
+  typesAndValues: AttributeTypeAndValueJson[];
+}
+
 /**
- * Class from RFC5280
+ * Represents the RelativeDistinguishedNames structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
-export class RelativeDistinguishedNames {
+export class RelativeDistinguishedNames extends PkiObject implements IRelativeDistinguishedNames {
 
-	/**
-	 * Array of "type and value" objects
-	 */
-	public typesAndValues: AttributeTypeAndValue[];
-	/**
-	 * Value of the RDN before decoding from schema
-	 */
-	public valueBeforeDecode: ArrayBuffer;
+  public static override CLASS_NAME = "RelativeDistinguishedNames";
 
-	/**
-	 * Constructor for RelativeDistinguishedNames class
-	 * @param parameters
-	 */
-	constructor(parameters: RelativeDistinguishedNamesParameters = {}) {
-		//#region Internal properties of the object
-		this.typesAndValues = pvutils.getParametersValue(parameters, "typesAndValues", RelativeDistinguishedNames.defaultValues("typesAndValues"));
-		this.valueBeforeDecode = pvutils.getParametersValue(parameters, "valueBeforeDecode", RelativeDistinguishedNames.defaultValues("valueBeforeDecode"));
-		//#endregion
+  public typesAndValues!: AttributeTypeAndValue[];
+  public valueBeforeDecode!: ArrayBuffer;
 
-		//#region If input argument array contains "schema" for this object
-		if (parameters.schema) {
-			this.fromSchema(parameters.schema);
-		}
-		//#endregion
-	}
+  /**
+   * Initializes a new instance of the {@link RelativeDistinguishedNames} class
+   * @param parameters Initialization parameters
+   */
+  constructor(parameters: RelativeDistinguishedNamesParameters = {}) {
+    super();
 
-	/**
-	 * Return default values for all class members
-	 * @param memberName String name for a class member
-	 */
-	public static defaultValues(memberName: "typesAndValues"): AttributeTypeAndValue[];
-	public static defaultValues(memberName: "valueBeforeDecode"): ArrayBuffer;
-	public static defaultValues(memberName: string): any {
-		switch (memberName) {
-			case "typesAndValues":
-				return [];
-			case "valueBeforeDecode":
-				return new ArrayBuffer(0);
-			default:
-				throw new Error(`Invalid member name for RelativeDistinguishedNames class: ${memberName}`);
-		}
-	}
+    this.typesAndValues = pvutils.getParametersValue(parameters, TYPE_AND_VALUES, RelativeDistinguishedNames.defaultValues(TYPE_AND_VALUES));
+    this.valueBeforeDecode = pvutils.getParametersValue(parameters, VALUE_BEFORE_DECODE, RelativeDistinguishedNames.defaultValues(VALUE_BEFORE_DECODE));
 
-	/**
-	 * Compare values with default values for all class members
-	 * @param memberName String name for a class member
-	 * @param memberValue Value to compare with default value
-	 */
-	public static compareWithDefault(memberName: string, memberValue: any): boolean {
-		switch (memberName) {
-			case "typesAndValues":
-				return (memberValue.length === 0);
-			case "valueBeforeDecode":
-				return (memberValue.byteLength === 0);
-			default:
-				throw new Error(`Invalid member name for RelativeDistinguishedNames class: ${memberName}`);
-		}
-	}
+    if (parameters.schema) {
+      this.fromSchema(parameters.schema);
+    }
+  }
 
-	/**
-	 * Return value of pre-defined ASN.1 schema for current class
-	 *
-	 * ASN.1 schema:
-	 * ```
-	 * RDNSequence ::= Sequence OF RelativeDistinguishedName
-	 *
-	 * RelativeDistinguishedName ::=
-	 * SET SIZE (1..MAX) OF AttributeTypeAndValue
-	 * ```
-	 *
-	 * @param parameters Input parameters for the schema
-	 * @returns asn1js schema object
-	 */
-	static schema(parameters: RelativeDistinguishedNamesSchema = {}): Schema.SchemaType {
-		const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  /**
+   * Returns default values for all class members
+   * @param memberName String name for a class member
+   * @returns Default value
+   */
+  public static override defaultValues(memberName: typeof TYPE_AND_VALUES): AttributeTypeAndValue[];
+  public static override defaultValues(memberName: typeof VALUE_BEFORE_DECODE): ArrayBuffer;
+  public static override defaultValues(memberName: string): any {
+    switch (memberName) {
+      case TYPE_AND_VALUES:
+        return [];
+      case VALUE_BEFORE_DECODE:
+        return new ArrayBuffer(0);
+      default:
+        return super.defaultValues(memberName);
+    }
+  }
 
-		return (new asn1js.Sequence({
-			name: (names.blockName || ""),
-			value: [
-				new asn1js.Repeated({
-					name: (names.repeatedSequence || ""),
-					value: new asn1js.Set({
-						value: [
-							new asn1js.Repeated({
-								name: (names.repeatedSet || ""),
-								value: AttributeTypeAndValue.schema(names.typeAndValue || {})
-							})
-						]
-					} as any)
-				} as any)
-			]
-		} as any));
-	}
+  /**
+   * Compares values with default values for all class members
+   * @param memberName String name for a class member
+   * @param memberValue Value to compare with default value
+   */
+  public static compareWithDefault(memberName: string, memberValue: any): boolean {
+    switch (memberName) {
+      case TYPE_AND_VALUES:
+        return (memberValue.length === 0);
+      case VALUE_BEFORE_DECODE:
+        return (memberValue.byteLength === 0);
+      default:
+        return super.defaultValues(memberName);
+    }
+  }
 
-	/**
-	 * Convert parsed asn1js object into current class
-	 * @param schema
-	 */
-	public fromSchema(schema: Schema.SchemaType): void {
-		//#region Clear input data first
-		pvutils.clearProps(schema, [
-			"RDN",
-			"typesAndValues"
-		]);
-		//#endregion
+  /**
+   * Returns value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn
+   * RDNSequence ::= Sequence OF RelativeDistinguishedName
+   *
+   * RelativeDistinguishedName ::=
+   * SET SIZE (1..MAX) OF AttributeTypeAndValue
+   * ```
+   *
+   * @param parameters Input parameters for the schema
+   * @returns ASN.1 schema object
+   */
+  static override schema(parameters: RelativeDistinguishedNamesSchema = {}): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
-		//#region Check the schema is valid
-		const asn1 = asn1js.compareSchema(schema,
-			schema,
-			RelativeDistinguishedNames.schema({
-				names: {
-					blockName: "RDN",
-					repeatedSet: "typesAndValues"
-				}
-			})
-		);
+    return (new asn1js.Sequence({
+      name: (names.blockName || ""),
+      value: [
+        new asn1js.Repeated({
+          name: (names.repeatedSequence || ""),
+          value: new asn1js.Set({
+            value: [
+              new asn1js.Repeated({
+                name: (names.repeatedSet || ""),
+                value: AttributeTypeAndValue.schema(names.typeAndValue || {})
+              })
+            ]
+          } as any)
+        } as any)
+      ]
+    } as any));
+  }
 
-		if (!asn1.verified) {
-			throw new Error("Object's schema was not verified against input data for RelativeDistinguishedNames");
-		}
-		//#endregion
+  public fromSchema(schema: Schema.SchemaType): void {
+    // Clear input data first
+    pvutils.clearProps(schema, [
+      RDN,
+      TYPE_AND_VALUES
+    ]);
 
-		//#region Get internal properties from parsed schema
-		if ("typesAndValues" in asn1.result) {// Could be a case when there is no "types and values"
-			this.typesAndValues = Array.from(asn1.result.typesAndValues, element => new AttributeTypeAndValue({ schema: element }));
-		}
+    // Check the schema is valid
+    const asn1 = asn1js.compareSchema(schema,
+      schema,
+      RelativeDistinguishedNames.schema({
+        names: {
+          blockName: RDN,
+          repeatedSet: TYPE_AND_VALUES
+        }
+      })
+    );
+    AsnError.assertSchema(asn1, this.className);
 
-		this.valueBeforeDecode = asn1.result.RDN.valueBeforeDecode;
-		//#endregion
-	}
+    // Get internal properties from parsed schema
+    if (TYPE_AND_VALUES in asn1.result) {// Could be a case when there is no "types and values"
+      this.typesAndValues = Array.from(asn1.result.typesAndValues, element => new AttributeTypeAndValue({ schema: element }));
+    }
 
-	/**
-	 * Convert current object to asn1js object and set correct values
-	 * @returns asn1js object
-	 */
-	public toSchema(): asn1js.Sequence {
-		//#region Decode stored TBS value
-		if (this.valueBeforeDecode.byteLength === 0) // No stored encoded array, create "from scratch"
-		{
-			return (new asn1js.Sequence({
-				value: [new asn1js.Set({
-					value: Array.from(this.typesAndValues, element => element.toSchema())
-				} as any)]
-			} as any));
-		}
+    this.valueBeforeDecode = asn1.result.RDN.valueBeforeDecode;
+  }
 
-		const asn1 = asn1js.fromBER(this.valueBeforeDecode);
-		AsnError.assert(asn1, "RelativeDistinguishedNames");
-		//#endregion
+  public toSchema(): asn1js.Sequence {
+    if (this.valueBeforeDecode.byteLength === 0) // No stored encoded array, create "from scratch"
+    {
+      return (new asn1js.Sequence({
+        value: [new asn1js.Set({
+          value: Array.from(this.typesAndValues, o => o.toSchema())
+        } as any)]
+      } as any));
+    }
 
-		//#region Construct and return new ASN.1 schema for this object
-		return asn1.result;
-		//#endregion
-	}
+    const asn1 = asn1js.fromBER(this.valueBeforeDecode);
+    AsnError.assert(asn1, "RelativeDistinguishedNames");
 
-	/**
-	 * Conversion for the class to JSON object
-	 */
-	public toJSON(): any {
-		return {
-			typesAndValues: Array.from(this.typesAndValues, element => element.toJSON())
-		};
-	}
+    return asn1.result;
+  }
 
-	/**
-	 * Compare two RDN values, or RDN with ArrayBuffer value
-	 * @param compareTo The value compare to current
-	 */
-	isEqual(compareTo: unknown): boolean {
-		if (compareTo instanceof RelativeDistinguishedNames) {
-			if (this.typesAndValues.length !== compareTo.typesAndValues.length)
-				return false;
+  public toJSON(): RelativeDistinguishedNamesJson {
+    return {
+      typesAndValues: Array.from(this.typesAndValues, o => o.toJSON())
+    };
+  }
 
-			for (const [index, typeAndValue] of this.typesAndValues.entries()) {
-				if (typeAndValue.isEqual(compareTo.typesAndValues[index]) === false)
-					return false;
-			}
+  /**
+   * Compares two RDN values, or RDN with ArrayBuffer value
+   * @param compareTo The value compare to current
+   */
+  public isEqual(compareTo: unknown): boolean {
+    if (compareTo instanceof RelativeDistinguishedNames) {
+      if (this.typesAndValues.length !== compareTo.typesAndValues.length)
+        return false;
 
-			return true;
-		}
+      for (const [index, typeAndValue] of this.typesAndValues.entries()) {
+        if (typeAndValue.isEqual(compareTo.typesAndValues[index]) === false)
+          return false;
+      }
 
-		if (compareTo instanceof ArrayBuffer) {
-			return pvutils.isEqualBuffer(this.valueBeforeDecode, compareTo);
-		}
+      return true;
+    }
 
-		return false;
-	}
+    if (compareTo instanceof ArrayBuffer) {
+      return pvutils.isEqualBuffer(this.valueBeforeDecode, compareTo);
+    }
+
+    return false;
+  }
 
 }

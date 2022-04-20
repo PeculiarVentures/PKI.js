@@ -1,12 +1,19 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
 import { stringPrep } from "./Helpers";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
-export interface AttributeTypeAndValueParameters extends Schema.SchemaConstructor {
-  type?: string;
-  value?: object;
+const TYPE = "type";
+const VALUE = "value";
+
+export interface IAttributeTypeAndValue {
+  type: string;
+  value: AttributeValueType;
 }
+
+export type AttributeTypeAndValueParameters = PkiObjectParameters & Partial<IAttributeTypeAndValue>;
 
 export type AttributeValueType = asn1js.Utf8String
   | asn1js.BmpString
@@ -21,53 +28,59 @@ export type AttributeValueType = asn1js.Utf8String
   | asn1js.GeneralString
   | asn1js.CharacterString;
 
-/**
- * Class from RFC5280
- */
-export class AttributeTypeAndValue {
+export interface AttributeTypeAndValueJson {
+  type: string;
+  value: any;
+}
 
-  public type: string;
-  public value: AttributeValueType;
+/**
+ * Represents the AttributeTypeAndValue structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
+ */
+export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAndValue {
+
+  public static override CLASS_NAME = "AttributeTypeAndValue";
+
+  public type!: string;
+  public value!: AttributeValueType;
 
   /**
-   * Constructor for AttributeTypeAndValue class
-   * @param parameters
+   * Initializes a new instance of the {@link AttributeTypeAndValue} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: AttributeTypeAndValueParameters = {}) {
-    //#region Internal properties of the object
-    this.type = pvutils.getParametersValue(parameters, "type", AttributeTypeAndValue.defaultValues("type"));
-    this.value = pvutils.getParametersValue(parameters, "value", AttributeTypeAndValue.defaultValues("value"));
-    //#endregion
+    super();
 
-    //#region If input argument array contains "schema" for this object
+    this.type = pvutils.getParametersValue(parameters, TYPE, AttributeTypeAndValue.defaultValues(TYPE));
+    this.value = pvutils.getParametersValue(parameters, VALUE, AttributeTypeAndValue.defaultValues(VALUE));
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: "type"): string;
-  public static defaultValues(memberName: "value"): AttributeValueType;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof TYPE): string;
+  public static override defaultValues(memberName: typeof VALUE): AttributeValueType;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
-      case "type":
+      case TYPE:
         return "";
-      case "value":
+      case VALUE:
         return {};
       default:
-        throw new Error(`Invalid member name for AttributeTypeAndValue class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * AttributeTypeAndValue ::= Sequence {
    *    type     AttributeType,
    *    value    AttributeValue }
@@ -78,9 +91,9 @@ export class AttributeTypeAndValue {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  static schema(parameters: Schema.SchemaParameters<{ type?: "type", value?: "typeValue"; }> = {}): Schema.SchemaType {
+  static override schema(parameters: Schema.SchemaParameters<{ type?: string, value?: string; }> = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -92,18 +105,10 @@ export class AttributeTypeAndValue {
     }));
   }
 
-  public static blockName(): string {
-    return "AttributeTypeAndValue";
-  }
-
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType) {
     //#region Clear input data first
     pvutils.clearProps(schema, [
-      "type",
+      TYPE,
       "typeValue"
     ]);
     //#endregion
@@ -113,28 +118,21 @@ export class AttributeTypeAndValue {
       schema,
       AttributeTypeAndValue.schema({
         names: {
-          type: "type",
+          type: TYPE,
           value: "typeValue"
         }
       })
     );
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for AttributeTypeAndValue");
-    }
+    AsnError.assertSchema(asn1, this.className);
     //#endregion
 
     //#region Get internal properties from parsed schema
     this.type = asn1.result.type.valueBlock.toString();
-    // noinspection JSUnresolvedVariable
     this.value = asn1.result.typeValue;
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
@@ -146,13 +144,10 @@ export class AttributeTypeAndValue {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): AttributeTypeAndValueJson {
+    const _object = {
       type: this.type
-    };
+    } as AttributeTypeAndValueJson;
 
     if (Object.keys(this.value).length !== 0) {
       _object.value = (this.value).toJSON();
@@ -164,7 +159,7 @@ export class AttributeTypeAndValue {
   }
 
   /**
-   * Compare two AttributeTypeAndValue values, or AttributeTypeAndValue with ArrayBuffer value
+   * Compares two AttributeTypeAndValue values, or AttributeTypeAndValue with ArrayBuffer value
    * @param compareTo The value compare to current
    */
   public isEqual(compareTo: AttributeTypeAndValue | ArrayBuffer): boolean {
@@ -230,4 +225,3 @@ export class AttributeTypeAndValue {
   }
 
 }
-

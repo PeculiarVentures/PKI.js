@@ -85,7 +85,6 @@ export async function createCertificate(hashAlg: string, signAlg: string) {
     parsedValue: extKeyUsage // Parsed value for well-known extensions
   }));
 
-
   //#region Microsoft-specific extensions
   const certType = new asn1js.Utf8String({ value: "certType" });
 
@@ -95,7 +94,6 @@ export async function createCertificate(hashAlg: string, signAlg: string) {
     extnValue: certType.toBER(false),
     parsedValue: certType // Parsed value for well-known extensions
   }));
-
 
   const prevHash = new asn1js.OctetString({ valueHex: (new Uint8Array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])).buffer });
 

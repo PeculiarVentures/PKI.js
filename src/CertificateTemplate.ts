@@ -1,58 +1,70 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const TEMPLATE_ID = "templateID";
 const TEMPLATE_MAJOR_VERSION = "templateMajorVersion";
 const TEMPLATE_MINOR_VERSION = "templateMinorVersion";
+const CLEAR_PROPS = [
+  TEMPLATE_ID,
+  TEMPLATE_MAJOR_VERSION,
+  TEMPLATE_MINOR_VERSION
+];
 
-export interface CertificateTemplateParameters extends Schema.SchemaConstructor {
-  templateID?: string;
+export interface ICertificateTemplate {
+  templateID: string;
   templateMajorVersion?: number;
   templateMinorVersion?: number;
 }
 
+export interface CertificateTemplateJson {
+  templateID: string;
+  templateMajorVersion?: number;
+  templateMinorVersion?: number;
+}
+
+export type CertificateTemplateParameters = PkiObjectParameters & Partial<ICertificateTemplate>;
+
 /**
  * Class from "[MS-WCCE]: Windows Client Certificate Enrollment Protocol"
  */
-export class CertificateTemplate {
+export class CertificateTemplate extends PkiObject implements ICertificateTemplate {
 
-  public templateID: string;
+  public templateID!: string;
   public templateMajorVersion?: number;
   public templateMinorVersion?: number;
 
   /**
-   * Constructor for CertificateTemplate class
-   * @param parameters
+   * Initializes a new instance of the {@link CertificateTemplate} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: CertificateTemplateParameters = {}) {
-    //#region Internal properties of the object
-    this.templateID = pvutils.getParametersValue(parameters, TEMPLATE_ID, CertificateTemplate.defaultValues(TEMPLATE_ID));
+    super();
 
+    this.templateID = pvutils.getParametersValue(parameters, TEMPLATE_ID, CertificateTemplate.defaultValues(TEMPLATE_ID));
     if (TEMPLATE_MAJOR_VERSION in parameters) {
       this.templateMajorVersion = pvutils.getParametersValue(parameters, TEMPLATE_MAJOR_VERSION, CertificateTemplate.defaultValues(TEMPLATE_MAJOR_VERSION));
     }
-
     if (TEMPLATE_MINOR_VERSION in parameters) {
       this.templateMinorVersion = pvutils.getParametersValue(parameters, TEMPLATE_MINOR_VERSION, CertificateTemplate.defaultValues(TEMPLATE_MINOR_VERSION));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof TEMPLATE_MINOR_VERSION): number;
-  public static defaultValues(memberName: typeof TEMPLATE_MAJOR_VERSION): number;
-  public static defaultValues(memberName: typeof TEMPLATE_ID): string;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof TEMPLATE_MINOR_VERSION): number;
+  public static override defaultValues(memberName: typeof TEMPLATE_MAJOR_VERSION): number;
+  public static override defaultValues(memberName: typeof TEMPLATE_ID): string;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TEMPLATE_ID:
         return "";
@@ -60,12 +72,12 @@ export class CertificateTemplate {
       case TEMPLATE_MINOR_VERSION:
         return 0;
       default:
-        throw new Error(`Invalid member name for CertificateTemplate class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
    * ```asn
@@ -77,9 +89,9 @@ export class CertificateTemplate {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  static schema(parameters: Schema.SchemaParameters<{
+  static override schema(parameters: Schema.SchemaParameters<{
     templateID?: string,
     templateMajorVersion?: string,
     templateMinorVersion?: string,
@@ -102,20 +114,11 @@ export class CertificateTemplate {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
-    pvutils.clearProps(schema, [
-      TEMPLATE_ID,
-      TEMPLATE_MAJOR_VERSION,
-      TEMPLATE_MINOR_VERSION
-    ]);
-    //#endregion
+    // Clear input data first
+    pvutils.clearProps(schema, CLEAR_PROPS);
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       CertificateTemplate.schema({
@@ -126,67 +129,47 @@ export class CertificateTemplate {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for CertificateTemplate");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.templateID = asn1.result.templateID.valueBlock.toString();
-
     if (TEMPLATE_MAJOR_VERSION in asn1.result) {
       this.templateMajorVersion = asn1.result.templateMajorVersion.valueBlock.valueDec;
     }
-
     if (TEMPLATE_MINOR_VERSION in asn1.result) {
       this.templateMinorVersion = asn1.result.templateMinorVersion.valueBlock.valueDec;
     }
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Create array for output sequence
+    // Create array for output sequence
     const outputArray = [];
-
     outputArray.push(new asn1js.ObjectIdentifier({ value: this.templateID }));
-
     if (TEMPLATE_MAJOR_VERSION in this) {
       outputArray.push(new asn1js.Integer({ value: this.templateMajorVersion }));
     }
-
     if (TEMPLATE_MINOR_VERSION in this) {
       outputArray.push(new asn1js.Integer({ value: this.templateMinorVersion }));
     }
-    //#endregion
 
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: outputArray
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const object: any = {
-      extnID: this.templateID
+  public toJSON(): CertificateTemplateJson {
+    const res: CertificateTemplateJson = {
+      templateID: this.templateID
     };
 
     if (TEMPLATE_MAJOR_VERSION in this)
-      object.templateMajorVersion = this.templateMajorVersion;
+      res.templateMajorVersion = this.templateMajorVersion;
 
     if (TEMPLATE_MINOR_VERSION in this)
-      object.templateMinorVersion = this.templateMinorVersion;
+      res.templateMinorVersion = this.templateMinorVersion;
 
-    return object;
+    return res;
   }
 
 }

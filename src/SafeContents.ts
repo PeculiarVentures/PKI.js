@@ -1,47 +1,56 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as Schema from "./Schema";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { AsnError } from "./errors";
 
 const SAFE_BUGS = "safeBags";
 
-export interface SafeContentsParameters extends Schema.SchemaConstructor {
-  safeBags?: SafeBag[];
+export interface ISafeContents {
+  safeBags: SafeBag[];
+}
+
+export type SafeContentsParameters = PkiObjectParameters & Partial<ISafeContents>;
+
+export interface SafeContentsJson {
+  safeBags: SafeBagJson[];
 }
 
 /**
- * Class from RFC7292
+ * Represents the SafeContents structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
-export class SafeContents {
+export class SafeContents extends PkiObject implements ISafeContents {
 
-  public safeBags: SafeBag[];
+  public static override CLASS_NAME = "SafeContents";
+
+  public safeBags!: SafeBag[];
 
   /**
-   * Constructor for SafeContents class
-   * @param parameters
+   * Initializes a new instance of the {@link SafeContents} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: SafeContentsParameters = {}) {
-    //#region Internal properties of the object
-    this.safeBags = pvutils.getParametersValue(parameters, SAFE_BUGS, SafeContents.defaultValues(SAFE_BUGS));
-    //#endregion
+    super();
 
-    //#region If input argument array contains "schema" for this object
+    this.safeBags = pvutils.getParametersValue(parameters, SAFE_BUGS, SafeContents.defaultValues(SAFE_BUGS));
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof SAFE_BUGS): SafeBag[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof SAFE_BUGS): SafeBag[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case SAFE_BUGS:
         return [];
       default:
-        throw new Error(`Invalid member name for SafeContents class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -55,29 +64,24 @@ export class SafeContents {
       case SAFE_BUGS:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for SafeContents class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * SafeContents ::= SEQUENCE OF SafeBag
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     safeBags?: string;
   }> = {}): Schema.SchemaType {
-    /**
-     * @type {Object}
-     * @property {string} [blockName]
-     * @property {string} [safeBags]
-     */
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -91,18 +95,13 @@ export class SafeContents {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, [
       SAFE_BUGS
     ]);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       SafeContents.schema({
@@ -111,39 +110,26 @@ export class SafeContents {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for SafeContents");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.safeBags = Array.from(asn1.result.safeBags, element => new SafeBag({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
-      value: Array.from(this.safeBags, element => element.toSchema())
+      value: Array.from(this.safeBags, o => o.toSchema())
     }));
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): SafeContentsJson {
     return {
-      safeBags: Array.from(this.safeBags, element => element.toJSON())
+      safeBags: Array.from(this.safeBags, o => o.toJSON())
     };
   }
 
 }
 
-import { SafeBag } from "./SafeBag";
+import { SafeBag, SafeBagJson } from "./SafeBag";

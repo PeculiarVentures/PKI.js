@@ -6,7 +6,7 @@ import { PublicKeyInfo } from "../PublicKeyInfo";
 import { PrivateKeyInfo } from "../PrivateKeyInfo";
 import { AlgorithmIdentifier } from "../AlgorithmIdentifier";
 import { EncryptedContentInfo } from "../EncryptedContentInfo";
-import { RSASSAPSSParams, RSASSAPSSParamsParameters } from "../RSASSAPSSParams";
+import { IRSASSAPSSParams, RSASSAPSSParams } from "../RSASSAPSSParams";
 import { PBKDF2Params } from "../PBKDF2Params";
 import { PBES2Params } from "../PBES2Params";
 import { ArgumentError, AsnError, ParameterError } from "../errors";
@@ -1893,7 +1893,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
           //#endregion
 
           //#region Fill "RSASSA_PSS_params" object
-          const paramsObject: RSASSAPSSParamsParameters = {};
+          const paramsObject: Partial<IRSASSAPSSParams> = {};
 
           if (hashAlgorithm.toUpperCase() !== "SHA-1") {
             const hashAlgorithmOID = this.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");

@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { ContentInfo, ContentInfoSchema } from "./ContentInfo";
-import { MacData, MacDataSchema } from "./MacData";
+import { ContentInfo, ContentInfoJson, ContentInfoSchema } from "./ContentInfo";
+import { MacData, MacDataJson, MacDataSchema } from "./MacData";
 import { DigestInfo } from "./DigestInfo";
 import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { SignedData } from "./SignedData";
@@ -15,6 +15,7 @@ import { AuthenticatedSafe } from "./AuthenticatedSafe";
 import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const VERSION = "version";
 const AUTH_SAFE = "authSafe";
@@ -26,12 +27,20 @@ const CLERA_PROPS = [
   MAC_DATA
 ];
 
-export interface PFXParameters extends Schema.SchemaConstructor {
-  version?: number;
-  authSafe?: ContentInfo;
+export interface IPFX {
+  version: number;
+  authSafe: ContentInfo;
   macData?: MacData;
   parsedValue?: PFXParsedValue;
 }
+
+export interface PFXJson {
+  version: number;
+  authSafe: ContentInfoJson;
+  macData?: MacDataJson;
+}
+
+export type PFXParameters = PkiObjectParameters & Partial<IPFX>;
 
 export interface PFXParsedValue {
   authenticatedSafe?: AuthenticatedSafe;
@@ -57,47 +66,48 @@ export type MakeInternalValuesParams =
   };
 
 /**
- * Class from RFC7292
+ * Represents the PFX structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
-export class PFX implements Schema.SchemaCompatible {
+export class PFX extends PkiObject implements IPFX {
 
-  public version: number;
-  public authSafe: ContentInfo;
+  public static override CLASS_NAME = "PFX";
+
+  public version!: number;
+  public authSafe!: ContentInfo;
   public macData?: MacData;
   public parsedValue?: PFXParsedValue;
 
   /**
-   * Constructor for PFX class
-   * @param parameters
+   * Initializes a new instance of the {@link PFX} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: PFXParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, PFX.defaultValues(VERSION));
     this.authSafe = pvutils.getParametersValue(parameters, AUTH_SAFE, PFX.defaultValues(AUTH_SAFE));
-    if (parameters.macData) {
+    if (MAC_DATA in parameters) {
       this.macData = pvutils.getParametersValue(parameters, MAC_DATA, PFX.defaultValues(MAC_DATA));
     }
-    if (parameters.parsedValue) {
+    if (PARSED_VALUE in parameters) {
       this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, PFX.defaultValues(PARSED_VALUE));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof AUTH_SAFE): ContentInfo;
-  public static defaultValues(memberName: typeof MAC_DATA): MacData;
-  public static defaultValues(memberName: typeof PARSED_VALUE): PFXParsedValue;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof AUTH_SAFE): ContentInfo;
+  public static override defaultValues(memberName: typeof MAC_DATA): MacData;
+  public static override defaultValues(memberName: typeof PARSED_VALUE): PFXParsedValue;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 3;
@@ -108,7 +118,7 @@ export class PFX implements Schema.SchemaCompatible {
       case PARSED_VALUE:
         return {};
       default:
-        throw new Error(`Invalid member name for PFX class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -131,26 +141,26 @@ export class PFX implements Schema.SchemaCompatible {
       case PARSED_VALUE:
         return ((memberValue instanceof Object) && (Object.keys(memberValue).length === 0));
       default:
-        throw new Error(`Invalid member name for PFX class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * PFX ::= SEQUENCE {
-   *    version		INTEGER {v3(3)}(v3,...),
-   *    authSafe	ContentInfo,
-   *    macData    	MacData OPTIONAL
+   *    version     INTEGER {v3(3)}(v3,...),
+   *    authSafe    ContentInfo,
+   *    macData     MacData OPTIONAL
    * }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
     authSafe?: ContentInfoSchema;
     macData?: MacDataSchema;
@@ -176,16 +186,11 @@ export class PFX implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLERA_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       PFX.schema({
@@ -204,24 +209,15 @@ export class PFX implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for PFX");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.version = asn1.result.version.valueBlock.valueDec;
     this.authSafe = new ContentInfo({ schema: asn1.result.authSafe });
-
     if (MAC_DATA in asn1.result)
       this.macData = new MacData({ schema: asn1.result.macData });
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     const outputArray = [
@@ -239,12 +235,8 @@ export class PFX implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const output: any = {
+  public toJSON(): PFXJson {
+    const output: PFXJson = {
       version: this.version,
       authSafe: this.authSafe.toJSON()
     };

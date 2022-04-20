@@ -1,10 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { Certificate } from "./Certificate";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { Certificate, CertificateJson } from "./Certificate";
 import { RecipientIdentifier, RecipientIdentifierSchema } from "./RecipientIdentifier";
-import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
+import { IssuerAndSerialNumber, IssuerAndSerialNumberJson } from "./IssuerAndSerialNumber";
 import * as Schema from "./Schema";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { AsnError } from "./errors";
 
 const VERSION = "version";
 const RID = "rid";
@@ -18,56 +20,68 @@ const CLEAR_PROPS = [
   ENCRYPTED_KEY,
 ];
 
-export type RecipientIdentifierType = IssuerAndSerialNumber | asn1js.OctetString;
-
-export interface KeyTransRecipientInfoParameters extends Schema.SchemaConstructor {
-  version?: number;
-  rid?: RecipientIdentifierType;
-  keyEncryptionAlgorithm?: AlgorithmIdentifier;
-  encryptedKey?: asn1js.OctetString;
-  recipientCertificate?: Certificate;
-}
-
-/**
- * Class from RFC5652
- */
-export class KeyTransRecipientInfo {
+export interface IKeyTransRecipientInfo {
   version: number;
   rid: RecipientIdentifierType;
   keyEncryptionAlgorithm: AlgorithmIdentifier;
   encryptedKey: asn1js.OctetString;
   recipientCertificate: Certificate;
+}
+
+export interface KeyTransRecipientInfoJson {
+  version: number;
+  rid: RecipientIdentifierMixedJson;
+  keyEncryptionAlgorithm: AlgorithmIdentifierJson;
+  encryptedKey: Schema.AsnOctetStringJson;
+}
+
+export type RecipientIdentifierType = IssuerAndSerialNumber | asn1js.OctetString;
+export type RecipientIdentifierMixedJson = IssuerAndSerialNumberJson | Schema.AsnOctetStringJson;
+
+export type KeyTransRecipientInfoParameters = PkiObjectParameters & Partial<IKeyTransRecipientInfo>;
+
+/**
+ * Represents the KeyTransRecipientInfo structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ */
+export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipientInfo {
+
+  public static override CLASS_NAME = "KeyTransRecipientInfo";
+
+  public version!: number;
+  public rid!: RecipientIdentifierType;
+  public keyEncryptionAlgorithm!: AlgorithmIdentifier;
+  public encryptedKey!: asn1js.OctetString;
+  public recipientCertificate!: Certificate;
 
   /**
-   * Constructor for KeyTransRecipientInfo class
-   * @param parameters
+   * Initializes a new instance of the {@link KeyTransRecipientInfo} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: KeyTransRecipientInfoParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, KeyTransRecipientInfo.defaultValues(VERSION));
     this.rid = pvutils.getParametersValue(parameters, RID, KeyTransRecipientInfo.defaultValues(RID));
     this.keyEncryptionAlgorithm = pvutils.getParametersValue(parameters, KEY_ENCRYPTION_ALGORITHM, KeyTransRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM));
     this.encryptedKey = pvutils.getParametersValue(parameters, ENCRYPTED_KEY, KeyTransRecipientInfo.defaultValues(ENCRYPTED_KEY));
     this.recipientCertificate = pvutils.getParametersValue(parameters, RECIPIENT_CERTIFICATE, KeyTransRecipientInfo.defaultValues(RECIPIENT_CERTIFICATE));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof RID): RecipientIdentifierType;
-  public static defaultValues(memberName: typeof KEY_ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof ENCRYPTED_KEY): asn1js.OctetString;
-  public static defaultValues(memberName: typeof RECIPIENT_CERTIFICATE): Certificate;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof RID): RecipientIdentifierType;
+  public static override defaultValues(memberName: typeof KEY_ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof ENCRYPTED_KEY): asn1js.OctetString;
+  public static override defaultValues(memberName: typeof RECIPIENT_CERTIFICATE): Certificate;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return (-1);
@@ -80,7 +94,7 @@ export class KeyTransRecipientInfo {
       case RECIPIENT_CERTIFICATE:
         return new Certificate();
       default:
-        throw new Error(`Invalid member name for KeyTransRecipientInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -101,15 +115,15 @@ export class KeyTransRecipientInfo {
       case RECIPIENT_CERTIFICATE:
         return false; // For now we do not need to compare any values with the RECIPIENT_CERTIFICATE
       default:
-        throw new Error(`Invalid member name for KeyTransRecipientInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * KeyTransRecipientInfo ::= SEQUENCE {
    *    version CMSVersion,  -- always set to 0 or 2
    *    rid RecipientIdentifier,
@@ -118,9 +132,9 @@ export class KeyTransRecipientInfo {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
     rid?: RecipientIdentifierSchema;
     keyEncryptionAlgorithm?: AlgorithmIdentifierSchema;
@@ -139,16 +153,11 @@ export class KeyTransRecipientInfo {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       KeyTransRecipientInfo.schema({
@@ -168,29 +177,19 @@ export class KeyTransRecipientInfo {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for KeyTransRecipientInfo");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.version = asn1.result.version.valueBlock.valueDec;
-
     if (asn1.result.rid.idBlock.tagClass === 3) {
       this.rid = new asn1js.OctetString({ valueHex: asn1.result.rid.valueBlock.valueHex }); // SubjectKeyIdentifier
     } else {
       this.rid = new IssuerAndSerialNumber({ schema: asn1.result.rid });
     }
-
     this.keyEncryptionAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.keyEncryptionAlgorithm });
     this.encryptedKey = asn1.result.encryptedKey;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -225,16 +224,12 @@ export class KeyTransRecipientInfo {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): KeyTransRecipientInfoJson {
     return {
       version: this.version,
-      rid: this.rid.toJSON(),
+      rid: this.rid.toJSON() as Schema.AsnOctetStringJson,
       keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
-      encryptedKey: this.encryptedKey.toJSON()
+      encryptedKey: this.encryptedKey.toJSON() as Schema.AsnOctetStringJson,
     };
   }
 

@@ -1,87 +1,104 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
-export interface AttributeParameters extends Schema.SchemaConstructor {
-  type?: string;
-  values?: any[];
+const TYPE = "type";
+const VALUES = "values";
+const CLEAR_PROPS = [
+  TYPE,
+  VALUES
+];
+
+export interface IAttribute {
+  /**
+   * Specifies type of attribute value
+   */
+  type: string;
+  /**
+   * List of attribute values
+   */
+  values: any[];
 }
+
+export type AttributeParameters = PkiObjectParameters & Partial<IAttribute>;
+
 export type AttributeSchema = Schema.SchemaParameters<{
   setName?: string;
   type?: string;
   values?: string;
 }>;
 
-/**
- * Class from RFC2986
- */
-export class Attribute {
+export interface AttributeJson {
+  type: string;
+  values: any[];
+}
 
-  public type: string;
-  public values: any[];
+/**
+ * Represents the Attribute structure described in [RFC2986](https://datatracker.ietf.org/doc/html/rfc2986)
+ */
+export class Attribute extends PkiObject implements IAttribute {
+
+  public static override CLASS_NAME = "Attribute";
+
+  public type!: string;
+  public values!: any[];
 
   /**
-   * Constructor for Attribute class
-   * @param parameters
+   * Initializes a new instance of the {@link Attribute} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: AttributeParameters = {}) {
-    //#region Internal properties of the object
-    /**
-     * @type {string}
-     * @desc ObjectIdentifier for attribute (string representation)
-     */
-    this.type = pvutils.getParametersValue(parameters, "type", Attribute.defaultValues("type"));
-    /**
-     * @type {Array}
-     * @desc Any attribute values
-     */
-    this.values = pvutils.getParametersValue(parameters, "values", Attribute.defaultValues("values"));
-    //#endregion
+    super();
 
-    //#region If input argument array contains "schema" for this object
-    if (parameters.schema)
+    this.type = pvutils.getParametersValue(parameters, TYPE, Attribute.defaultValues(TYPE));
+    this.values = pvutils.getParametersValue(parameters, VALUES, Attribute.defaultValues(VALUES));
+
+    if (parameters.schema) {
       this.fromSchema(parameters.schema);
-    //#endregion
-  }
-
-  /**
-   * Return default values for all class members
-   * @param memberName String name for a class member
-   */
-  public static defaultValues(memberName: "type"): string;
-  public static defaultValues(memberName: "values"): any[];
-  public static defaultValues(memberName: string): any {
-    switch (memberName) {
-      case "type":
-        return "";
-      case "values":
-        return [];
-      default:
-        throw new Error(`Invalid member name for Attribute class: ${memberName}`);
     }
   }
 
   /**
-   * Compare values with default values for all class members
+   * Returns default values for all class members
+   * @param memberName String name for a class member
+   * @returns Default value
+   */
+  public static override defaultValues(memberName: typeof TYPE): string;
+  public static override defaultValues(memberName: typeof VALUES): any[];
+  public static override defaultValues(memberName: string): any {
+    switch (memberName) {
+      case TYPE:
+        return "";
+      case VALUES:
+        return [];
+      default:
+        return super.defaultValues(memberName);
+    }
+  }
+
+  /**
+   * Compares values with default values for all class members
    * @param memberName String name for a class member
    * @param memberValue Value to compare with default value
    */
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
-      case "type":
+      case TYPE:
         return (memberValue === "");
-      case "values":
+      case VALUES:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for Attribute class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
    *    type   ATTRIBUTE.&id({IOSet}),
    *    values SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{@type})
@@ -89,9 +106,9 @@ export class Attribute {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: AttributeSchema = {}) {
+  public static override schema(parameters: AttributeSchema = {}) {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -111,44 +128,27 @@ export class Attribute {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
-    pvutils.clearProps(schema, [
-      "type",
-      "values"
-    ]);
-    //#endregion
+    // Clear input data first
+    pvutils.clearProps(schema, CLEAR_PROPS);
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       Attribute.schema({
         names: {
-          type: "type",
-          values: "values"
+          type: TYPE,
+          values: VALUES
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for Attribute");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.type = asn1.result.type.valueBlock.toString();
     this.values = asn1.result.values;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
@@ -162,13 +162,10 @@ export class Attribute {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
+  public toJSON(): AttributeJson {
     return {
       type: this.type,
-      values: Array.from(this.values, element => element.toJSON())
+      values: Array.from(this.values, o => o.toJSON())
     };
   }
 

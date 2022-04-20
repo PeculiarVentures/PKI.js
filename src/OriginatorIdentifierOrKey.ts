@@ -1,7 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
 import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
 import { OriginatorPublicKey } from "./OriginatorPublicKey";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const VARIANT = "variant";
@@ -10,54 +12,62 @@ const CLEAR_PROPS = [
   "blockName",
 ];
 
-export interface OriginatorIdentifierOrKeyParameters extends Schema.SchemaConstructor {
-  variant?: number;
+export interface IOriginatorIdentifierOrKey {
+  variant: number;
   value?: any;
 }
+
+export interface OriginatorIdentifierOrKeyJson {
+  variant: number;
+  value?: any;
+}
+
+export type OriginatorIdentifierOrKeyParameters = PkiObjectParameters & Partial<IOriginatorIdentifierOrKey>;
 
 export type OriginatorIdentifierOrKeySchema = Schema.SchemaParameters;
 
 /**
- * Class from RFC5652
+ * Represents the OriginatorIdentifierOrKey structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
-export class OriginatorIdentifierOrKey {
+export class OriginatorIdentifierOrKey extends PkiObject implements IOriginatorIdentifierOrKey {
 
-  public variant: number;
+  public static override CLASS_NAME = "OriginatorIdentifierOrKey";
+
+  public variant!: number;
   public value?: any;
 
   /**
-   * Constructor for OriginatorIdentifierOrKey class
-   * @param parameters
+   * Initializes a new instance of the {@link OriginatorIdentifierOrKey} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: OriginatorIdentifierOrKeyParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.variant = pvutils.getParametersValue(parameters, VARIANT, OriginatorIdentifierOrKey.defaultValues(VARIANT));
-    if (parameters.value) {
+    if (VALUE in parameters) {
       this.value = pvutils.getParametersValue(parameters, VALUE, OriginatorIdentifierOrKey.defaultValues(VALUE));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VARIANT): number;
-  public static defaultValues(memberName: typeof VALUE): any;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VARIANT): number;
+  public static override defaultValues(memberName: typeof VALUE): any;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VARIANT:
         return (-1);
       case VALUE:
         return {};
       default:
-        throw new Error(`Invalid member name for OriginatorIdentifierOrKey class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -73,15 +83,15 @@ export class OriginatorIdentifierOrKey {
       case VALUE:
         return (Object.keys(memberValue).length === 0);
       default:
-        throw new Error(`Invalid member name for OriginatorIdentifierOrKey class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * OriginatorIdentifierOrKey ::= CHOICE {
    *    issuerAndSerialNumber IssuerAndSerialNumber,
    *    subjectKeyIdentifier [0] SubjectKeyIdentifier,
@@ -89,9 +99,9 @@ export class OriginatorIdentifierOrKey {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: OriginatorIdentifierOrKeySchema = {}): Schema.SchemaType {
+  public static override schema(parameters: OriginatorIdentifierOrKeySchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Choice({
@@ -120,16 +130,11 @@ export class OriginatorIdentifierOrKey {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       OriginatorIdentifierOrKey.schema({
@@ -138,10 +143,7 @@ export class OriginatorIdentifierOrKey {
         }
       })
     );
-
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for OriginatorIdentifierOrKey");
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     if (asn1.result.blockName.idBlock.tagClass === 1) {
@@ -170,10 +172,6 @@ export class OriginatorIdentifierOrKey {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.BaseBlock<any> {
     //#region Construct and return new ASN.1 schema for this object
     switch (this.variant) {
@@ -199,20 +197,16 @@ export class OriginatorIdentifierOrKey {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): OriginatorIdentifierOrKeyJson {
+    const res: OriginatorIdentifierOrKeyJson = {
       variant: this.variant
     };
 
     if ((this.variant === 1) || (this.variant === 2) || (this.variant === 3)) {
-      _object.value = this.value.toJSON();
+      res.value = this.value.toJSON();
     }
 
-    return _object;
+    return res;
   }
 
 }

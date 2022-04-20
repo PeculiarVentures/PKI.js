@@ -1,64 +1,73 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AccessDescription } from "./AccessDescription";
+import { AccessDescription, AccessDescriptionJson } from "./AccessDescription";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const ACCESS_DESCRIPTIONS = "accessDescriptions";
 
-export interface InfoAccessParameters extends Schema.SchemaConstructor {
-  accessDescriptions?: AccessDescription[];
+export interface IInfoAccess {
+  accessDescriptions: AccessDescription[];
 }
 
-/**
- * Class from RFC5280
- */
-export class InfoAccess implements Schema.SchemaCompatible {
+export interface InfoAccessJson {
+  accessDescriptions: AccessDescriptionJson[];
+}
 
-  public accessDescriptions: AccessDescription[];
+export type InfoAccessParameters = PkiObjectParameters & Partial<IInfoAccess>;
+
+/**
+ * Represents the InfoAccess structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
+ */
+export class InfoAccess extends PkiObject implements IInfoAccess {
+
+  public static override CLASS_NAME = "InfoAccess";
+
+  public accessDescriptions!: AccessDescription[];
 
   /**
-   * Constructor for InfoAccess class
-   * @param parameters
+   * Initializes a new instance of the {@link InfoAccess} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: InfoAccessParameters = {}) {
-    //#region Internal properties of the object
-    this.accessDescriptions = pvutils.getParametersValue(parameters, ACCESS_DESCRIPTIONS, InfoAccess.defaultValues(ACCESS_DESCRIPTIONS));
-    //#endregion
+    super();
 
-    //#region If input argument array contains "schema" for this object
+    this.accessDescriptions = pvutils.getParametersValue(parameters, ACCESS_DESCRIPTIONS, InfoAccess.defaultValues(ACCESS_DESCRIPTIONS));
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof ACCESS_DESCRIPTIONS): AccessDescription[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof ACCESS_DESCRIPTIONS): AccessDescription[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ACCESS_DESCRIPTIONS:
         return [];
       default:
-        throw new Error(`Invalid member name for InfoAccess class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * AuthorityInfoAccessSyntax  ::=
    * SEQUENCE SIZE (1..MAX) OF AccessDescription
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     accessDescriptions?: string;
   }> = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
@@ -74,18 +83,13 @@ export class InfoAccess implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, [
       ACCESS_DESCRIPTIONS
     ]);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       InfoAccess.schema({
@@ -94,36 +98,22 @@ export class InfoAccess implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for InfoAccess");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.accessDescriptions = Array.from(asn1.result.accessDescriptions, element => new AccessDescription({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
-      value: Array.from(this.accessDescriptions, element => element.toSchema())
+      value: Array.from(this.accessDescriptions, o => o.toSchema())
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): InfoAccessJson {
     return {
-      accessDescriptions: Array.from(this.accessDescriptions, element => element.toJSON())
+      accessDescriptions: Array.from(this.accessDescriptions, o => o.toJSON())
     };
   }
 

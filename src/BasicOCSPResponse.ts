@@ -1,13 +1,15 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { ResponseData, ResponseDataSchema } from "./ResponseData";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { Certificate, CertificateSchema, checkCA } from "./Certificate";
+import { ResponseData, ResponseDataJson, ResponseDataSchema } from "./ResponseData";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { Certificate, CertificateJson, CertificateSchema, checkCA } from "./Certificate";
 import { CertID } from "./CertID";
 import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
 import { CertificateChainValidationEngine } from "./CertificateChainValidationEngine";
 import * as Schema from "./Schema";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { AsnError } from "./errors";
 
 const TBS_RESPONSE_DATA = "tbsResponseData";
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";
@@ -25,6 +27,13 @@ const CLEAR_PROPS = [
   BASIC_OCSP_RESPONSE_CERTS
 ];
 
+export interface IBasicOCSPResponse {
+  tbsResponseData: ResponseData;
+  signatureAlgorithm: AlgorithmIdentifier;
+  signature: asn1js.BitString;
+  certs?: Certificate[];
+}
+
 export interface CertificateStatus {
   isForCertificate: boolean;
   /**
@@ -33,57 +42,60 @@ export interface CertificateStatus {
   status: number;
 }
 
-export interface BasicOCSPResponseParameters extends Schema.SchemaConstructor {
-  tbsResponseData?: ResponseData;
-  signatureAlgorithm?: AlgorithmIdentifier;
-  signature?: asn1js.BitString;
-  certs?: Certificate[];
-}
+export type BasicOCSPResponseParameters = PkiObjectParameters & Partial<IBasicOCSPResponse>;
 
 export interface BasicOCSPResponseVerifyParams {
   trustedCerts?: Certificate[];
 }
 
-/**
- * Class from RFC6960
- */
-export class BasicOCSPResponse implements Schema.SchemaCompatible {
+export interface BasicOCSPResponseJson {
+  tbsResponseData: ResponseDataJson;
+  signatureAlgorithm: AlgorithmIdentifierJson;
+  signature: Schema.AsnBitStringJson;
+  certs?: CertificateJson[];
+}
 
-  public tbsResponseData: ResponseData;
-  public signatureAlgorithm: AlgorithmIdentifier;
-  public signature: asn1js.BitString;
+/**
+ * Represents the BasicOCSPResponse structure described in [RFC6960](https://datatracker.ietf.org/doc/html/rfc6960)
+ */
+export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
+
+  public static override CLASS_NAME = "BasicOCSPResponse";
+
+  public tbsResponseData!: ResponseData;
+  public signatureAlgorithm!: AlgorithmIdentifier;
+  public signature!: asn1js.BitString;
   public certs?: Certificate[];
 
   /**
-   * Constructor for BasicOCSPResponse class
-   * @param parameters
+   * Initializes a new instance of the {@link BasicOCSPResponse} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: BasicOCSPResponseParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.tbsResponseData = pvutils.getParametersValue(parameters, TBS_RESPONSE_DATA, BasicOCSPResponse.defaultValues(TBS_RESPONSE_DATA));
     this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, BasicOCSPResponse.defaultValues(SIGNATURE_ALGORITHM));
     this.signature = pvutils.getParametersValue(parameters, SIGNATURE, BasicOCSPResponse.defaultValues(SIGNATURE));
-    if (parameters.certs) {
+    if (CERTS in parameters) {
       this.certs = pvutils.getParametersValue(parameters, CERTS, BasicOCSPResponse.defaultValues(CERTS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof TBS_RESPONSE_DATA): ResponseData;
-  public static defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof SIGNATURE): asn1js.BitString;
-  public static defaultValues(memberName: typeof CERTS): Certificate[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof TBS_RESPONSE_DATA): ResponseData;
+  public static override defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof SIGNATURE): asn1js.BitString;
+  public static override defaultValues(memberName: typeof CERTS): Certificate[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS_RESPONSE_DATA:
         return new ResponseData();
@@ -94,7 +106,7 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
       case CERTS:
         return [];
       default:
-        throw new Error(`Invalid member name for BasicOCSPResponse class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -124,15 +136,15 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
       case CERTS:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for BasicOCSPResponse class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * BasicOCSPResponse       ::= SEQUENCE {
    *    tbsResponseData      ResponseData,
    *    signatureAlgorithm   AlgorithmIdentifier,
@@ -141,9 +153,9 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     tbsResponseData?: ResponseDataSchema;
     signatureAlgorithm?: AlgorithmIdentifierSchema;
     signature?: string;
@@ -184,39 +196,29 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
     //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       BasicOCSPResponse.schema()
     );
-
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for BasicOCSPResponse");
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     this.tbsResponseData = new ResponseData({ schema: asn1.result[BASIC_OCSP_RESPONSE_TBS_RESPONSE_DATA] });
     this.signatureAlgorithm = new AlgorithmIdentifier({ schema: asn1.result[BASIC_OCSP_RESPONSE_SIGNATURE_ALGORITHM] });
     this.signature = asn1.result[BASIC_OCSP_RESPONSE_SIGNATURE];
 
-    if (BASIC_OCSP_RESPONSE_CERTS in asn1.result)
+    if (BASIC_OCSP_RESPONSE_CERTS in asn1.result) {
       this.certs = Array.from(asn1.result[BASIC_OCSP_RESPONSE_CERTS], element => new Certificate({ schema: element }));
+    }
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -234,7 +236,7 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
         },
         value: [
           new asn1js.Sequence({
-            value: Array.from(this.certs, element => element.toSchema())
+            value: Array.from(this.certs, o => o.toSchema())
           })
         ]
       }));
@@ -249,21 +251,18 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): BasicOCSPResponseJson {
+    const res: BasicOCSPResponseJson = {
       tbsResponseData: this.tbsResponseData.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signature: this.signature.toJSON()
+      signature: this.signature.toJSON() as Schema.AsnBitStringJson,
     };
 
-    if (this.certs)
-      _object.certs = Array.from(this.certs, element => element.toJSON());
+    if (this.certs) {
+      res.certs = Array.from(this.certs, o => o.toJSON());
+    }
 
-    return _object;
+    return res;
   }
 
   /**
@@ -445,7 +444,6 @@ export class BasicOCSPResponse implements Schema.SchemaCompatible {
     if (!verificationResult.result) {
       throw new Error("Validation of signer's certificate failed");
     }
-
 
     return crypto.verifyWithPublicKey(this.tbsResponseData.tbs, this.signature, this.certs[certIndex].subjectPublicKeyInfo, this.signatureAlgorithm);
   }

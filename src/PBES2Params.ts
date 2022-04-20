@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const KEY_DERIVATION_FUNC = "keyDerivationFunc";
@@ -10,67 +12,75 @@ const CLEAR_PROPS = [
   ENCRYPTION_SCHEME
 ];
 
-export interface PBES2ParamsParameters extends Schema.SchemaConstructor {
-  keyDerivationFunc?: AlgorithmIdentifier;
-  encryptionScheme?: AlgorithmIdentifier;
+export interface IPBES2Params {
+  keyDerivationFunc: AlgorithmIdentifier;
+  encryptionScheme: AlgorithmIdentifier;
 }
 
-/**
- * Class from RFC2898
- */
-export class PBES2Params implements Schema.SchemaCompatible {
+export interface PBES2ParamsJson {
+  keyDerivationFunc: AlgorithmIdentifierJson;
+  encryptionScheme: AlgorithmIdentifierJson;
+}
 
-  public keyDerivationFunc: AlgorithmIdentifier;
-  public encryptionScheme: AlgorithmIdentifier;
+export type PBES2ParamsParameters = PkiObjectParameters & Partial<IPBES2Params>;
+
+/**
+ * Represents the PBES2Params structure described in [RFC2898](https://www.ietf.org/rfc/rfc2898.txt)
+ */
+export class PBES2Params extends PkiObject implements IPBES2Params {
+
+  public static override CLASS_NAME = "PBES2Params";
+
+  public keyDerivationFunc!: AlgorithmIdentifier;
+  public encryptionScheme!: AlgorithmIdentifier;
 
   /**
-   * Constructor for PBES2Params class
-   * @param parameters
+   * Initializes a new instance of the {@link PBES2Params} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: PBES2ParamsParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.keyDerivationFunc = pvutils.getParametersValue(parameters, KEY_DERIVATION_FUNC, PBES2Params.defaultValues(KEY_DERIVATION_FUNC));
     this.encryptionScheme = pvutils.getParametersValue(parameters, ENCRYPTION_SCHEME, PBES2Params.defaultValues(ENCRYPTION_SCHEME));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof KEY_DERIVATION_FUNC): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof ENCRYPTION_SCHEME): AlgorithmIdentifier;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof KEY_DERIVATION_FUNC): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof ENCRYPTION_SCHEME): AlgorithmIdentifier;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case KEY_DERIVATION_FUNC:
         return new AlgorithmIdentifier();
       case ENCRYPTION_SCHEME:
         return new AlgorithmIdentifier();
       default:
-        throw new Error(`Invalid member name for PBES2Params class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * PBES2-params ::= SEQUENCE {
    *    keyDerivationFunc AlgorithmIdentifier {{PBES2-KDFs}},
    *    encryptionScheme AlgorithmIdentifier {{PBES2-Encs}} }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     keyDerivationFunc?: AlgorithmIdentifierSchema;
     encryptionScheme?: AlgorithmIdentifierSchema;
   }> = {}): Schema.SchemaType {
@@ -85,16 +95,11 @@ export class PBES2Params implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       PBES2Params.schema({
@@ -112,37 +117,24 @@ export class PBES2Params implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for PBES2Params");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.keyDerivationFunc = new AlgorithmIdentifier({ schema: asn1.result.keyDerivationFunc });
     this.encryptionScheme = new AlgorithmIdentifier({ schema: asn1.result.encryptionScheme });
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: [
         this.keyDerivationFunc.toSchema(),
         this.encryptionScheme.toSchema()
       ]
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
+  public toJSON(): PBES2ParamsJson {
     return {
       keyDerivationFunc: this.keyDerivationFunc.toJSON(),
       encryptionScheme: this.encryptionScheme.toJSON()

@@ -1,8 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
-import { ParameterError } from "./errors";
-import { OtherPrimeInfo, JsonOtherPrimeInfo, OtherPrimeInfoSchema } from "./OtherPrimeInfo";
+import { JsonRSAPrivateKey } from "../build";
+import { AsnError, ParameterError } from "./errors";
+import { OtherPrimeInfo, OtherPrimeInfoJson, OtherPrimeInfoSchema } from "./OtherPrimeInfo";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const VERSION = "version";
@@ -28,22 +30,22 @@ const CLEAR_PROPS = [
   OTHER_PRIME_INFOS
 ];
 
-export interface RSAPrivateKeyParameters extends Schema.SchemaConstructor {
-  version?: number;
-  modulus?: asn1js.Integer;
-  publicExponent?: asn1js.Integer;
-  privateExponent?: asn1js.Integer;
-  prime1?: asn1js.Integer;
-  prime2?: asn1js.Integer;
-  exponent1?: asn1js.Integer;
-  exponent2?: asn1js.Integer;
-  coefficient?: asn1js.Integer;
-  otherPrimeInfosName?: asn1js.Integer;
-  otherPrimeInfo?: asn1js.Integer;
-  json?: JsonRSAPrivateKey;
+export interface IRSAPrivateKey {
+  version: number;
+  modulus: asn1js.Integer;
+  publicExponent: asn1js.Integer;
+  privateExponent: asn1js.Integer;
+  prime1: asn1js.Integer;
+  prime2: asn1js.Integer;
+  exponent1: asn1js.Integer;
+  exponent2: asn1js.Integer;
+  coefficient: asn1js.Integer;
+  otherPrimeInfos?: OtherPrimeInfo[];
 }
 
-export interface JsonRSAPrivateKey {
+export type RSAPrivateKeyParameters = PkiObjectParameters & Partial<IRSAPrivateKey> & { json?: JsonRSAPrivateKey; };
+
+export interface RSAPrivateKeyJson {
   n: string;
   e: string;
   d: string;
@@ -52,31 +54,34 @@ export interface JsonRSAPrivateKey {
   dp: string;
   dq: string;
   qi: string;
-  oth?: JsonOtherPrimeInfo[];
+  oth?: OtherPrimeInfoJson[];
 }
 
 /**
- * Class from RFC3447
+ * Represents the PrivateKeyInfo structure described in [RFC3447](https://datatracker.ietf.org/doc/html/rfc3447)
  */
-export class RSAPrivateKey implements Schema.SchemaCompatible {
+export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
 
-  public version: number;
-  public modulus: asn1js.Integer;
-  public publicExponent: asn1js.Integer;
-  public privateExponent: asn1js.Integer;
-  public prime1: asn1js.Integer;
-  public prime2: asn1js.Integer;
-  public exponent1: asn1js.Integer;
-  public exponent2: asn1js.Integer;
-  public coefficient: asn1js.Integer;
+  public static override CLASS_NAME = "RSAPrivateKey";
+
+  public version!: number;
+  public modulus!: asn1js.Integer;
+  public publicExponent!: asn1js.Integer;
+  public privateExponent!: asn1js.Integer;
+  public prime1!: asn1js.Integer;
+  public prime2!: asn1js.Integer;
+  public exponent1!: asn1js.Integer;
+  public exponent2!: asn1js.Integer;
+  public coefficient!: asn1js.Integer;
   public otherPrimeInfos?: OtherPrimeInfo[];
 
   /**
-   * Constructor for RSAPrivateKey class
-   * @param parameters
+   * Initializes a new instance of the {@link RSAPrivateKey} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: RSAPrivateKeyParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, RSAPrivateKey.defaultValues(VERSION));
     this.modulus = pvutils.getParametersValue(parameters, MODULUS, RSAPrivateKey.defaultValues(MODULUS));
     this.publicExponent = pvutils.getParametersValue(parameters, PUBLIC_EXPONENT, RSAPrivateKey.defaultValues(PUBLIC_EXPONENT));
@@ -86,39 +91,35 @@ export class RSAPrivateKey implements Schema.SchemaCompatible {
     this.exponent1 = pvutils.getParametersValue(parameters, EXPONENT1, RSAPrivateKey.defaultValues(EXPONENT1));
     this.exponent2 = pvutils.getParametersValue(parameters, EXPONENT2, RSAPrivateKey.defaultValues(EXPONENT2));
     this.coefficient = pvutils.getParametersValue(parameters, COEFFICIENT, RSAPrivateKey.defaultValues(COEFFICIENT));
-
-    if (parameters.otherPrimeInfo) {
+    if (OTHER_PRIME_INFOS in parameters) {
       this.otherPrimeInfos = pvutils.getParametersValue(parameters, OTHER_PRIME_INFOS, RSAPrivateKey.defaultValues(OTHER_PRIME_INFOS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
-    if (parameters.schema) {
-      this.fromSchema(parameters.schema);
-    }
-    //#endregion
-    //#region If input argument array contains "json" for this object
     if (parameters.json) {
       this.fromJSON(parameters.json);
     }
-    //#endregion
+
+    if (parameters.schema) {
+      this.fromSchema(parameters.schema);
+    }
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof MODULUS): asn1js.Integer;
-  public static defaultValues(memberName: typeof PUBLIC_EXPONENT): asn1js.Integer;
-  public static defaultValues(memberName: typeof PRIVATE_EXPONENT): asn1js.Integer;
-  public static defaultValues(memberName: typeof PRIME1): asn1js.Integer;
-  public static defaultValues(memberName: typeof PRIME2): asn1js.Integer;
-  public static defaultValues(memberName: typeof EXPONENT1): asn1js.Integer;
-  public static defaultValues(memberName: typeof EXPONENT2): asn1js.Integer;
-  public static defaultValues(memberName: typeof COEFFICIENT): asn1js.Integer;
-  public static defaultValues(memberName: typeof OTHER_PRIME_INFOS): OtherPrimeInfo[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof MODULUS): asn1js.Integer;
+  public static override defaultValues(memberName: typeof PUBLIC_EXPONENT): asn1js.Integer;
+  public static override defaultValues(memberName: typeof PRIVATE_EXPONENT): asn1js.Integer;
+  public static override defaultValues(memberName: typeof PRIME1): asn1js.Integer;
+  public static override defaultValues(memberName: typeof PRIME2): asn1js.Integer;
+  public static override defaultValues(memberName: typeof EXPONENT1): asn1js.Integer;
+  public static override defaultValues(memberName: typeof EXPONENT2): asn1js.Integer;
+  public static override defaultValues(memberName: typeof COEFFICIENT): asn1js.Integer;
+  public static override defaultValues(memberName: typeof OTHER_PRIME_INFOS): OtherPrimeInfo[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 0;
@@ -141,15 +142,15 @@ export class RSAPrivateKey implements Schema.SchemaCompatible {
       case OTHER_PRIME_INFOS:
         return [];
       default:
-        throw new Error(`Invalid member name for RSAPrivateKey class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * RSAPrivateKey ::= Sequence {
    *    version           Version,
    *    modulus           Integer,  -- n
@@ -167,9 +168,9 @@ export class RSAPrivateKey implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
     modulus?: string;
     publicExponent?: string;
@@ -209,16 +210,11 @@ export class RSAPrivateKey implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       RSAPrivateKey.schema({
@@ -240,10 +236,7 @@ export class RSAPrivateKey implements Schema.SchemaCompatible {
         }
       })
     );
-
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for RSAPrivateKey");
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     this.version = asn1.result.version.valueBlock.valueDec;
@@ -261,10 +254,6 @@ export class RSAPrivateKey implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -281,7 +270,7 @@ export class RSAPrivateKey implements Schema.SchemaCompatible {
 
     if (this.otherPrimeInfos) {
       outputArray.push(new asn1js.Sequence({
-        value: Array.from(this.otherPrimeInfos, element => element.toSchema())
+        value: Array.from(this.otherPrimeInfos, o => o.toSchema())
       }));
     }
     //#endregion
@@ -293,12 +282,8 @@ export class RSAPrivateKey implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): JsonRSAPrivateKey {
-    const jwk: JsonRSAPrivateKey = {
+  public toJSON(): RSAPrivateKeyJson {
+    const jwk: RSAPrivateKeyJson = {
       n: pvutils.toBase64(pvutils.arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
       e: pvutils.toBase64(pvutils.arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true),
       d: pvutils.toBase64(pvutils.arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true, true),
@@ -308,20 +293,20 @@ export class RSAPrivateKey implements Schema.SchemaCompatible {
       dq: pvutils.toBase64(pvutils.arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true, true),
       qi: pvutils.toBase64(pvutils.arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true, true)
     };
-
     if (this.otherPrimeInfos) {
-      jwk.oth = Array.from(this.otherPrimeInfos, element => element.toJSON());
+      jwk.oth = Array.from(this.otherPrimeInfos, o => o.toJSON());
     }
 
     return jwk;
   }
 
   /**
-   * Convert JSON value into current object
-   * @param json
+   * Converts JSON value into current object
+   * @param json JSON object
    */
   public fromJSON(json: any): void {
     ParameterError.assert("json", json, "n", "e", "d", "p", "q", "dp", "dq", "qi");
+
     this.modulus = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.n) });
     this.publicExponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.e) });
     this.privateExponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.d) });

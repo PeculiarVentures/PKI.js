@@ -1,3 +1,4 @@
+export * from "./PkiObject";
 export * from "./AccessDescription";
 export * from "./Accuracy";
 export * from "./AlgorithmIdentifier";

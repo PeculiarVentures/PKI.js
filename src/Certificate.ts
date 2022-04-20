@@ -1,17 +1,18 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
-import { Time, TimeSchema } from "./Time";
-import { PublicKeyInfo, PublicKeyInfoSchema } from "./PublicKeyInfo";
-import { Extension } from "./Extension";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { RelativeDistinguishedNames, RelativeDistinguishedNamesJson, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import { Time, TimeJson, TimeSchema } from "./Time";
+import { PublicKeyInfo, PublicKeyInfoJson, PublicKeyInfoSchema } from "./PublicKeyInfo";
+import { Extension, ExtensionJson } from "./Extension";
 import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 import { id_BasicConstraints } from "./ObjectIdentifiers";
 import { BasicConstraints } from "./BasicConstraints";
 import { CryptoEnginePublicKeyParams } from "./CryptoEngine/CryptoEngineInterface";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -235,7 +236,7 @@ export interface ICertificate {
 /**
  * Constructor parameters for the {@link Certificate} class
  */
-export type CertificateParameters = Schema.SchemaConstructor & Partial<ICertificate>;
+export type CertificateParameters = PkiObjectParameters & Partial<ICertificate>;
 
 /**
  * Parameters for {@link Certificate} schema generation
@@ -245,6 +246,23 @@ export type CertificateSchema = Schema.SchemaParameters<{
   signatureAlgorithm?: AlgorithmIdentifierSchema;
   signatureValue?: string;
 }>;
+
+export interface CertificateJson {
+  tbs: string;
+  version: number;
+  serialNumber: Schema.AsnIntegerJson;
+  signature: AlgorithmIdentifierJson;
+  issuer: RelativeDistinguishedNamesJson;
+  notBefore: TimeJson;
+  notAfter: TimeJson;
+  subject: RelativeDistinguishedNamesJson;
+  subjectPublicKeyInfo: PublicKeyInfoJson | JsonWebKey;
+  issuerUniqueID?: string;
+  subjectUniqueID?: string;
+  extensions?: ExtensionJson[];
+  signatureAlgorithm: AlgorithmIdentifierJson;
+  signatureValue: Schema.AsnBitStringJson;
+}
 
 /**
  * Represents an X.509 certificate described in [RFC5280 Section 4](https://datatracker.ietf.org/doc/html/rfc5280#section-4).
@@ -324,29 +342,32 @@ export type CertificateSchema = Schema.SchemaParameters<{
  * const raw = certificate.toSchema().toBER();
  * ```
  */
-export class Certificate implements Schema.SchemaCompatible, ICertificate {
+export class Certificate extends PkiObject implements ICertificate {
 
-  public tbs: ArrayBuffer;
-  public version: number;
-  public serialNumber: asn1js.Integer;
-  public signature: AlgorithmIdentifier;
-  public issuer: RelativeDistinguishedNames;
-  public notBefore: Time;
-  public notAfter: Time;
-  public subject: RelativeDistinguishedNames;
-  public subjectPublicKeyInfo: PublicKeyInfo;
+  public static override CLASS_NAME = "Certificate";
+
+  public tbs!: ArrayBuffer;
+  public version!: number;
+  public serialNumber!: asn1js.Integer;
+  public signature!: AlgorithmIdentifier;
+  public issuer!: RelativeDistinguishedNames;
+  public notBefore!: Time;
+  public notAfter!: Time;
+  public subject!: RelativeDistinguishedNames;
+  public subjectPublicKeyInfo!: PublicKeyInfo;
   public issuerUniqueID?: ArrayBuffer;
   public subjectUniqueID?: ArrayBuffer;
   public extensions?: Extension[];
-  public signatureAlgorithm: AlgorithmIdentifier;
-  public signatureValue: asn1js.BitString;
+  public signatureAlgorithm!: AlgorithmIdentifier;
+  public signatureValue!: asn1js.BitString;
 
   /**
-   * Constructor for Certificate class
-   * @param parameters Init parameters
+   * Initializes a new instance of the {@link Certificate} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: CertificateParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.tbs = pvutils.getParametersValue(parameters, TBS, Certificate.defaultValues(TBS));
     this.version = pvutils.getParametersValue(parameters, VERSION, Certificate.defaultValues(VERSION));
     this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, Certificate.defaultValues(SERIAL_NUMBER));
@@ -356,24 +377,21 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
     this.notAfter = pvutils.getParametersValue(parameters, NOT_AFTER, Certificate.defaultValues(NOT_AFTER));
     this.subject = pvutils.getParametersValue(parameters, SUBJECT, Certificate.defaultValues(SUBJECT));
     this.subjectPublicKeyInfo = pvutils.getParametersValue(parameters, SUBJECT_PUBLIC_KEY_INFO, Certificate.defaultValues(SUBJECT_PUBLIC_KEY_INFO));
-    if (parameters.issuerUniqueID) {
+    if (ISSUER_UNIQUE_ID in parameters) {
       this.issuerUniqueID = pvutils.getParametersValue(parameters, ISSUER_UNIQUE_ID, Certificate.defaultValues(ISSUER_UNIQUE_ID));
     }
-    if (parameters.subjectUniqueID) {
+    if (SUBJECT_UNIQUE_ID in parameters) {
       this.subjectUniqueID = pvutils.getParametersValue(parameters, SUBJECT_UNIQUE_ID, Certificate.defaultValues(SUBJECT_UNIQUE_ID));
     }
-    if (parameters.extensions) {
+    if (EXTENSIONS in parameters) {
       this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, Certificate.defaultValues(EXTENSIONS));
     }
     this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, Certificate.defaultValues(SIGNATURE_ALGORITHM));
     this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, Certificate.defaultValues(SIGNATURE_VALUE));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
@@ -381,21 +399,21 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
    * @param memberName String name for a class member
    * @returns Predefined default value
    */
-  public static defaultValues(memberName: typeof TBS): ArrayBuffer;
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof SERIAL_NUMBER): asn1js.Integer;
-  public static defaultValues(memberName: typeof SIGNATURE): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof ISSUER): RelativeDistinguishedNames;
-  public static defaultValues(memberName: typeof NOT_BEFORE): Time;
-  public static defaultValues(memberName: typeof NOT_AFTER): Time;
-  public static defaultValues(memberName: typeof SUBJECT): RelativeDistinguishedNames;
-  public static defaultValues(memberName: typeof SUBJECT_PUBLIC_KEY_INFO): PublicKeyInfo;
-  public static defaultValues(memberName: typeof ISSUER_UNIQUE_ID): ArrayBuffer;
-  public static defaultValues(memberName: typeof SUBJECT_UNIQUE_ID): ArrayBuffer;
-  public static defaultValues(memberName: typeof EXTENSIONS): Extension[];
-  public static defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof SIGNATURE_VALUE): asn1js.BitString;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof TBS): ArrayBuffer;
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof SERIAL_NUMBER): asn1js.Integer;
+  public static override defaultValues(memberName: typeof SIGNATURE): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof ISSUER): RelativeDistinguishedNames;
+  public static override defaultValues(memberName: typeof NOT_BEFORE): Time;
+  public static override defaultValues(memberName: typeof NOT_AFTER): Time;
+  public static override defaultValues(memberName: typeof SUBJECT): RelativeDistinguishedNames;
+  public static override defaultValues(memberName: typeof SUBJECT_PUBLIC_KEY_INFO): PublicKeyInfo;
+  public static override defaultValues(memberName: typeof ISSUER_UNIQUE_ID): ArrayBuffer;
+  public static override defaultValues(memberName: typeof SUBJECT_UNIQUE_ID): ArrayBuffer;
+  public static override defaultValues(memberName: typeof EXTENSIONS): Extension[];
+  public static override defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof SIGNATURE_VALUE): asn1js.BitString;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS:
         return new ArrayBuffer(0);
@@ -426,12 +444,12 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
       case SIGNATURE_VALUE:
         return new asn1js.BitString();
       default:
-        throw new Error(`Invalid member name for Certificate class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
    * ```asn
@@ -487,9 +505,9 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: CertificateSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: CertificateSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -506,14 +524,9 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema ASN.1 schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
@@ -532,9 +545,7 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
         }
       })
     );
-
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for Certificate");
+    AsnError.assertSchema(asn1, this.className);
     //#endregion
 
     //#region Get internal properties from parsed schema
@@ -625,7 +636,7 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
           tagNumber: 3 // [3]
         },
         value: [new asn1js.Sequence({
-          value: Array.from(this.extensions, element => element.toSchema())
+          value: Array.from(this.extensions, o => o.toSchema())
         })]
       }));
     }
@@ -638,10 +649,6 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
     //#endregion
   }
 
-  /**
-   * Converts the current object to ASN.1 object and sets correct values
-   * @returns ASN.1 SEQUENCE
-   */
   public toSchema(encodeFlag = false): asn1js.Sequence {
     let tbsSchema = {};
 
@@ -660,7 +667,7 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
       tbsSchema = this.encodeTBS();
     }
 
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: [
         tbsSchema,
@@ -668,16 +675,13 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
         this.signatureValue
       ]
     }));
-    //#endregion
   }
 
-  /**
-   * Converts the object into the JSON object
-   */
-  public toJSON(): any {
-    const object: any = {
+  public toJSON(): CertificateJson {
+    const res: CertificateJson = {
       tbs: pvutils.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
-      serialNumber: this.serialNumber.toJSON(),
+      version: this.version,
+      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
       signature: this.signature.toJSON(),
       issuer: this.issuer.toJSON(),
       notBefore: this.notBefore.toJSON(),
@@ -685,26 +689,26 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
       subject: this.subject.toJSON(),
       subjectPublicKeyInfo: this.subjectPublicKeyInfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON()
+      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson,
     };
 
     if ((VERSION in this) && (this.version !== Certificate.defaultValues(VERSION))) {
-      object.version = this.version;
+      res.version = this.version;
     }
 
     if (this.issuerUniqueID) {
-      object.issuerUniqueID = pvutils.bufferToHexCodes(this.issuerUniqueID, 0, this.issuerUniqueID.byteLength);
+      res.issuerUniqueID = pvutils.bufferToHexCodes(this.issuerUniqueID, 0, this.issuerUniqueID.byteLength);
     }
 
     if (this.subjectUniqueID) {
-      object.subjectUniqueID = pvutils.bufferToHexCodes(this.subjectUniqueID, 0, this.subjectUniqueID.byteLength);
+      res.subjectUniqueID = pvutils.bufferToHexCodes(this.subjectUniqueID, 0, this.subjectUniqueID.byteLength);
     }
 
     if (this.extensions) {
-      object.extensions = Array.from(this.extensions, element => element.toJSON());
+      res.extensions = Array.from(this.extensions, o => o.toJSON());
     }
 
-    return object;
+    return res;
   }
 
   /**
@@ -744,7 +748,6 @@ export class Certificate implements Schema.SchemaCompatible, ICertificate {
     const parameters = signatureParameters.parameters;
     this.signature = signatureParameters.signatureAlgorithm;
     this.signatureAlgorithm = signatureParameters.signatureAlgorithm;
-
 
     // Create TBS data for signing
     this.tbs = this.encodeTBS().toBER();

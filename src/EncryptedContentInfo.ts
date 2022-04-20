@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const CONTENT_TYPE = "contentType";
@@ -12,11 +14,19 @@ const CLEAR_PROPS = [
   ENCRYPTED_CONTENT,
 ];
 
-export interface EncryptedContentParameters extends Schema.SchemaConstructor {
-  contentType?: string;
-  contentEncryptionAlgorithm?: AlgorithmIdentifier;
+export interface IEncryptedContentInfo {
+  contentType: string;
+  contentEncryptionAlgorithm: AlgorithmIdentifier;
   encryptedContent?: asn1js.OctetString;
 }
+
+export interface EncryptedContentInfoJson {
+  contentType: string;
+  contentEncryptionAlgorithm: AlgorithmIdentifierJson;
+  encryptedContent?: Schema.AsnOctetStringJson;
+}
+
+export type EncryptedContentParameters = PkiObjectParameters & Partial<IEncryptedContentInfo>;
 
 export type EncryptedContentInfoSchema = Schema.SchemaParameters<{
   contentType?: string;
@@ -25,29 +35,33 @@ export type EncryptedContentInfoSchema = Schema.SchemaParameters<{
 }>;
 
 /**
- * Class from RFC5652
+ * Represents the EncryptedContentInfo structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
-export class EncryptedContentInfo implements Schema.SchemaCompatible {
-  contentType: string;
-  contentEncryptionAlgorithm: AlgorithmIdentifier;
-  encryptedContent?: asn1js.OctetString;
+export class EncryptedContentInfo extends PkiObject implements IEncryptedContentInfo {
+
+  public static override CLASS_NAME = "EncryptedContentInfo";
+
+  public contentType!: string;
+  public contentEncryptionAlgorithm!: AlgorithmIdentifier;
+  public encryptedContent?: asn1js.OctetString;
 
   /**
-   * Constructor for EncryptedContentInfo class
-   * @param parameters
+   * Initializes a new instance of the {@link EncryptedContent} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: EncryptedContentParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.contentType = pvutils.getParametersValue(parameters, CONTENT_TYPE, EncryptedContentInfo.defaultValues(CONTENT_TYPE));
     this.contentEncryptionAlgorithm = pvutils.getParametersValue(parameters, CONTENT_ENCRYPTION_ALGORITHM, EncryptedContentInfo.defaultValues(CONTENT_ENCRYPTION_ALGORITHM));
 
-    if (parameters.encryptedContent) {
-      // encryptedContent (!!!) could be contructive or primitive value (!!!)
+    if (ENCRYPTED_CONTENT in parameters && parameters.encryptedContent) {
+      // encryptedContent (!!!) could be constructive or primitive value (!!!)
       this.encryptedContent = parameters.encryptedContent;
 
       if ((this.encryptedContent.idBlock.tagClass === 1) &&
         (this.encryptedContent.idBlock.tagNumber === 4)) {
-        //#region Divide OCTETSTRING value down to small pieces
+        //#region Divide OCTET STRING value down to small pieces
         if (this.encryptedContent.idBlock.isConstructed === false) {
           const constrString = new asn1js.OctetString({
             idBlock: { isConstructed: true },
@@ -76,22 +90,21 @@ export class EncryptedContentInfo implements Schema.SchemaCompatible {
         //#endregion
       }
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
-    if (parameters.schema)
+    if (parameters.schema) {
       this.fromSchema(parameters.schema);
-    //#endregion
+    }
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof CONTENT_TYPE): string;
-  public static defaultValues(memberName: typeof CONTENT_ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof ENCRYPTED_CONTENT): asn1js.OctetString;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof CONTENT_TYPE): string;
+  public static override defaultValues(memberName: typeof CONTENT_ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof ENCRYPTED_CONTENT): asn1js.OctetString;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CONTENT_TYPE:
         return "";
@@ -100,7 +113,7 @@ export class EncryptedContentInfo implements Schema.SchemaCompatible {
       case ENCRYPTED_CONTENT:
         return new asn1js.OctetString();
       default:
-        throw new Error(`Invalid member name for EncryptedContentInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -118,15 +131,15 @@ export class EncryptedContentInfo implements Schema.SchemaCompatible {
       case ENCRYPTED_CONTENT:
         return (memberValue.isEqual(EncryptedContentInfo.defaultValues(ENCRYPTED_CONTENT)));
       default:
-        throw new Error(`Invalid member name for EncryptedContentInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * EncryptedContentInfo ::= SEQUENCE {
    *    contentType ContentType,
    *    contentEncryptionAlgorithm ContentEncryptionAlgorithmIdentifier,
@@ -138,9 +151,9 @@ export class EncryptedContentInfo implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: EncryptedContentInfoSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: EncryptedContentInfoSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -177,16 +190,11 @@ export class EncryptedContentInfo implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       EncryptedContentInfo.schema({
@@ -201,28 +209,19 @@ export class EncryptedContentInfo implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for EncryptedContentInfo");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.contentType = asn1.result.contentType.valueBlock.toString();
     this.contentEncryptionAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.contentEncryptionAlgorithm });
-
     if (ENCRYPTED_CONTENT in asn1.result) {
       this.encryptedContent = asn1.result.encryptedContent as asn1js.OctetString;
 
       this.encryptedContent.idBlock.tagClass = 1; // UNIVERSAL
-      this.encryptedContent.idBlock.tagNumber = 4; // OCTETSTRING (!!!) The value still has instance of "in_window.org.pkijs.asn1.ASN1_CONSTRUCTED / ASN1_PRIMITIVE"
+      this.encryptedContent.idBlock.tagNumber = 4; // OCTET STRING (!!!) The value still has instance of "in_window.org.pkijs.asn1.ASN1_CONSTRUCTED / ASN1_PRIMITIVE"
     }
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const sequenceLengthBlock = {
@@ -256,21 +255,17 @@ export class EncryptedContentInfo implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): EncryptedContentInfoJson {
+    const res: EncryptedContentInfoJson = {
       contentType: this.contentType,
       contentEncryptionAlgorithm: this.contentEncryptionAlgorithm.toJSON()
     };
 
     if (this.encryptedContent) {
-      _object.encryptedContent = this.encryptedContent.toJSON();
+      res.encryptedContent = this.encryptedContent.toJSON() as Schema.AsnOctetStringJson;
     }
 
-    return _object;
+    return res;
   }
 
 }

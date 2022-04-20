@@ -1,13 +1,14 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { PublicKeyInfo } from "./PublicKeyInfo";
-import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
-import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
-import { Attribute, AttributeSchema } from "./Attribute";
+import { PublicKeyInfo, PublicKeyInfoJson } from "./PublicKeyInfo";
+import { RelativeDistinguishedNames, RelativeDistinguishedNamesJson, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson } from "./AlgorithmIdentifier";
+import { Attribute, AttributeJson, AttributeSchema } from "./Attribute";
 import * as Schema from "./Schema";
 import { CryptoEnginePublicKeyParams } from "./CryptoEngine/CryptoEngineInterface";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -16,6 +17,40 @@ const SPKI = "subjectPublicKeyInfo";
 const ATTRIBUTES = "attributes";
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";
 const SIGNATURE_VALUE = "signatureValue";
+const CSR_INFO = "CertificationRequestInfo";
+const CSR_INFO_VERSION = `${CSR_INFO}.version`;
+const CSR_INFO_SUBJECT = `${CSR_INFO}.subject`;
+const CSR_INFO_SPKI = `${CSR_INFO}.subjectPublicKeyInfo`;
+const CSR_INFO_ATTRS = `${CSR_INFO}.attributes`;
+const CLEAR_PROPS = [
+  CSR_INFO,
+  CSR_INFO_VERSION,
+  CSR_INFO_SUBJECT,
+  CSR_INFO_SPKI,
+  CSR_INFO_ATTRS,
+  SIGNATURE_ALGORITHM,
+  SIGNATURE_VALUE
+];
+
+export interface ICertificationRequest {
+  tbs: ArrayBuffer;
+  version: number;
+  subject: RelativeDistinguishedNames;
+  subjectPublicKeyInfo: PublicKeyInfo;
+  attributes?: Attribute[];
+  signatureAlgorithm: AlgorithmIdentifier;
+  signatureValue: asn1js.BitString;
+}
+
+export interface CertificationRequestJson {
+  tbs: string;
+  version: number;
+  subject: RelativeDistinguishedNamesJson;
+  subjectPublicKeyInfo: PublicKeyInfoJson | JsonWebKey;
+  attributes?: AttributeJson[];
+  signatureAlgorithm: AlgorithmIdentifierJson;
+  signatureValue: Schema.AsnBitStringJson;
+}
 
 export interface CertificationRequestInfoParameters {
   names?: {
@@ -39,17 +74,17 @@ function CertificationRequestInfo(parameters: CertificationRequestInfoParameters
   const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
   return (new asn1js.Sequence({
-    name: (names.CertificationRequestInfo || "CertificationRequestInfo"),
+    name: (names.CertificationRequestInfo || CSR_INFO),
     value: [
-      new asn1js.Integer({ name: (names.CertificationRequestInfoVersion || "CertificationRequestInfo.version") }),
+      new asn1js.Integer({ name: (names.CertificationRequestInfoVersion || CSR_INFO_VERSION) }),
       RelativeDistinguishedNames.schema(names.subject || {
         names: {
-          blockName: "CertificationRequestInfo.subject"
+          blockName: CSR_INFO_SUBJECT
         }
       }),
       PublicKeyInfo.schema({
         names: {
-          blockName: "CertificationRequestInfo.subjectPublicKeyInfo"
+          blockName: CSR_INFO_SPKI
         }
       }),
       new asn1js.Constructed({
@@ -61,7 +96,7 @@ function CertificationRequestInfo(parameters: CertificationRequestInfoParameters
         value: [
           new asn1js.Repeated({
             optional: true, // Because OpenSSL makes wrong ATTRIBUTES field
-            name: (names.CertificationRequestInfoAttributes || "CertificationRequestInfo.attributes"),
+            name: (names.CertificationRequestInfoAttributes || CSR_INFO_ATTRS),
             value: Attribute.schema(names.attributes || {})
           })
         ]
@@ -70,88 +105,58 @@ function CertificationRequestInfo(parameters: CertificationRequestInfoParameters
   }));
 }
 
-export interface CertificationRequestParameters extends Schema.SchemaConstructor {
-  tbs?: ArrayBuffer;
-  version?: number;
-  subject?: RelativeDistinguishedNames;
-  subjectPublicKeyInfo?: PublicKeyInfo;
-  attributes?: Attribute[];
-  signatureAlgorithm?: AlgorithmIdentifier;
-  signatureValue?: asn1js.BitString;
-}
+export type CertificationRequestParameters = PkiObjectParameters & Partial<ICertificationRequest>;
 
 /**
- * Class from RFC2986
+ * Represents the CertificationRequest structure described in [RFC2986](https://datatracker.ietf.org/doc/html/rfc2986)
  */
-export class CertificationRequest implements Schema.SchemaCompatible {
+export class CertificationRequest extends PkiObject implements ICertificationRequest {
 
-  public tbs: ArrayBuffer;
-  public version: number;
-  public subject: RelativeDistinguishedNames;
-  public subjectPublicKeyInfo: PublicKeyInfo;
+  public static override CLASS_NAME = "CertificationRequest";
+
+  public tbs!: ArrayBuffer;
+  public version!: number;
+  public subject!: RelativeDistinguishedNames;
+  public subjectPublicKeyInfo!: PublicKeyInfo;
   public attributes?: Attribute[];
-  public signatureAlgorithm: AlgorithmIdentifier;
-  public signatureValue: asn1js.BitString;
+  public signatureAlgorithm!: AlgorithmIdentifier;
+  public signatureValue!: asn1js.BitString;
 
   /**
-   * Constructor for Attribute class
-   * @param parameters
-   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
+   * Initializes a new instance of the {@link CertificationRequest} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: CertificationRequestParameters = {}) {
-    //#region Internal properties of the object
-    this.tbs = pvutils.getParametersValue(parameters, TBS, CertificationRequest.defaultValues(TBS));
-    /**
-     * @type {number}
-     * @desc version
-     */
-    this.version = pvutils.getParametersValue(parameters, VERSION, CertificationRequest.defaultValues(VERSION));
-    /**
-     * @type {RelativeDistinguishedNames}
-     * @desc subject
-     */
-    this.subject = pvutils.getParametersValue(parameters, SUBJECT, CertificationRequest.defaultValues(SUBJECT));
-    /**
-     * @type {PublicKeyInfo}
-     * @desc subjectPublicKeyInfo
-     */
-    this.subjectPublicKeyInfo = pvutils.getParametersValue(parameters, SPKI, CertificationRequest.defaultValues(SPKI));
+    super();
 
-    if (parameters.attributes) {
+    this.tbs = pvutils.getParametersValue(parameters, TBS, CertificationRequest.defaultValues(TBS));
+    this.version = pvutils.getParametersValue(parameters, VERSION, CertificationRequest.defaultValues(VERSION));
+    this.subject = pvutils.getParametersValue(parameters, SUBJECT, CertificationRequest.defaultValues(SUBJECT));
+    this.subjectPublicKeyInfo = pvutils.getParametersValue(parameters, SPKI, CertificationRequest.defaultValues(SPKI));
+    if (ATTRIBUTES in parameters) {
       this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, CertificationRequest.defaultValues(ATTRIBUTES));
     }
-
-    /**
-     * @type {AlgorithmIdentifier}
-     * @desc signatureAlgorithm
-     */
     this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, CertificationRequest.defaultValues(SIGNATURE_ALGORITHM));
-    /**
-     * @type {BitString}
-     * @desc signatureAlgorithm
-     */
     this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, CertificationRequest.defaultValues(SIGNATURE_VALUE));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof TBS): ArrayBuffer;
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof SUBJECT): RelativeDistinguishedNames;
-  public static defaultValues(memberName: typeof SPKI): PublicKeyInfo;
-  public static defaultValues(memberName: typeof ATTRIBUTES): Attribute[];
-  public static defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof SIGNATURE_VALUE): asn1js.BitString;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof TBS): ArrayBuffer;
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof SUBJECT): RelativeDistinguishedNames;
+  public static override defaultValues(memberName: typeof SPKI): PublicKeyInfo;
+  public static override defaultValues(memberName: typeof ATTRIBUTES): Attribute[];
+  public static override defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof SIGNATURE_VALUE): asn1js.BitString;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS:
         return new ArrayBuffer(0);
@@ -168,15 +173,15 @@ export class CertificationRequest implements Schema.SchemaCompatible {
       case SIGNATURE_VALUE:
         return new asn1js.BitString();
       default:
-        throw new Error(`Invalid member name for CertificationRequest class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * CertificationRequest ::= SEQUENCE {
    *    certificationRequestInfo CertificationRequestInfo,
    *    signatureAlgorithm       AlgorithmIdentifier{{ SignatureAlgorithms }},
@@ -185,9 +190,9 @@ export class CertificationRequest implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  static schema(parameters: Schema.SchemaParameters<{
+  static override schema(parameters: Schema.SchemaParameters<{
     certificationRequestInfo?: CertificationRequestInfoParameters;
     signatureAlgorithm?: string;
     signatureValue?: string;
@@ -209,47 +214,27 @@ export class CertificationRequest implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
-    pvutils.clearProps(schema, [
-      "CertificationRequestInfo",
-      "CertificationRequestInfo.version",
-      "CertificationRequestInfo.subject",
-      "CertificationRequestInfo.subjectPublicKeyInfo",
-      "CertificationRequestInfo.attributes",
-      SIGNATURE_ALGORITHM,
-      SIGNATURE_VALUE
-    ]);
-    //#endregion
+    // Clear input data first
+    pvutils.clearProps(schema, CLEAR_PROPS);
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       CertificationRequest.schema()
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for CertificationRequest");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.tbs = asn1.result.CertificationRequestInfo.valueBeforeDecode;
-
-    this.version = asn1.result["CertificationRequestInfo.version"].valueBlock.valueDec;
-    this.subject = new RelativeDistinguishedNames({ schema: asn1.result["CertificationRequestInfo.subject"] });
-    this.subjectPublicKeyInfo = new PublicKeyInfo({ schema: asn1.result["CertificationRequestInfo.subjectPublicKeyInfo"] });
-    if ("CertificationRequestInfo.attributes" in asn1.result) {
-      this.attributes = Array.from(asn1.result["CertificationRequestInfo.attributes"], element => new Attribute({ schema: element }));
+    this.version = asn1.result[CSR_INFO_VERSION].valueBlock.valueDec;
+    this.subject = new RelativeDistinguishedNames({ schema: asn1.result[CSR_INFO_SUBJECT] });
+    this.subjectPublicKeyInfo = new PublicKeyInfo({ schema: asn1.result[CSR_INFO_SPKI] });
+    if (CSR_INFO_ATTRS in asn1.result) {
+      this.attributes = Array.from(asn1.result[CSR_INFO_ATTRS], element => new Attribute({ schema: element }));
     }
-
     this.signatureAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.signatureAlgorithm });
     this.signatureValue = asn1.result.signatureValue;
-    //#endregion
   }
 
   /**
@@ -270,7 +255,7 @@ export class CertificationRequest implements Schema.SchemaCompatible {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        value: Array.from(this.attributes || [], element => element.toSchema())
+        value: Array.from(this.attributes || [], o => o.toSchema())
       }));
     }
     //#endregion
@@ -280,10 +265,6 @@ export class CertificationRequest implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(encodeFlag = false): Schema.SchemaType {
     let tbsSchema;
 
@@ -311,22 +292,18 @@ export class CertificationRequest implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const object: any = {
+  public toJSON(): CertificationRequestJson {
+    const object: CertificationRequestJson = {
       tbs: pvutils.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
       version: this.version,
       subject: this.subject.toJSON(),
       subjectPublicKeyInfo: this.subjectPublicKeyInfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON()
+      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson,
     };
 
     if (ATTRIBUTES in this) {
-      object.attributes = Array.from(this.attributes || [], element => element.toJSON());
+      object.attributes = Array.from(this.attributes || [], o => o.toJSON());
     }
 
     return object;
@@ -364,7 +341,7 @@ export class CertificationRequest implements Schema.SchemaCompatible {
 
   /**
    * Verify existing certification request signature
-   * @returns
+   * @returns Returns `true` if signature value is valid, otherwise `false`
    */
   public async verify(): Promise<boolean> {
     return common.getCrypto(true).verifyWithPublicKey(this.tbs, this.signatureValue, this.subjectPublicKeyInfo, this.signatureAlgorithm);
@@ -372,6 +349,8 @@ export class CertificationRequest implements Schema.SchemaCompatible {
 
   /**
    * Importing public key for current certificate request
+   * @param parameters
+   * @returns WebCrypt public key
    */
   public async getPublicKey(parameters?: CryptoEnginePublicKeyParams): Promise<CryptoKey> {
     return common.getCrypto(true).getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);

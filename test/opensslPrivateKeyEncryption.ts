@@ -38,7 +38,6 @@ function md5(data: BufferSource, offset: number): ArrayBuffer {
   const length = data.byteLength;
   const view = pvtsutils.BufferSourceConverter.toUint8Array(data);
 
-
   const paddedLength = (length + 72) & ~63; // data + 9 extra bytes
   const padded = new Uint8Array(paddedLength);
 

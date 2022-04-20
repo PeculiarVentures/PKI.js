@@ -1,13 +1,15 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { GeneralNames } from "../GeneralNames";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
-import { Attribute } from "../Attribute";
-import { Extensions, ExtensionsSchema } from "../Extensions";
-import { AttCertValidityPeriod, AttCertValidityPeriodSchema } from "../AttributeCertificateV1";
-import { V2Form } from "./V2Form";
-import { Holder, HolderSchema } from "./Holder";
+import { GeneralNames, GeneralNamesJson } from "../GeneralNames";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import { Attribute, AttributeJson } from "../Attribute";
+import { Extensions, ExtensionsJson, ExtensionsSchema } from "../Extensions";
+import { AttCertValidityPeriod, AttCertValidityPeriodJson, AttCertValidityPeriodSchema } from "../AttributeCertificateV1";
+import { V2Form, V2FormJson } from "./V2Form";
+import { Holder, HolderJson, HolderSchema } from "./Holder";
 import * as Schema from "../Schema";
+import { PkiObject, PkiObjectParameters } from "../PkiObject";
+import { AsnError } from "../errors";
 
 const VERSION = "version";
 const HOLDER = "holder";
@@ -30,17 +32,19 @@ const CLEAR_PROPS = [
   EXTENSIONS
 ];
 
-export interface AttributeCertificateInfoV2Parameters extends Schema.SchemaConstructor {
-  version?: number;
-  holder?: Holder;
-  issuer?: GeneralNames | V2Form;
-  signature?: AlgorithmIdentifier;
-  serialNumber?: asn1js.Integer;
-  attrCertValidityPeriod?: AttCertValidityPeriod;
-  attributes?: Attribute[];
+export interface IAttributeCertificateInfoV2 {
+  version: number;
+  holder: Holder;
+  issuer: GeneralNames | V2Form;
+  signature: AlgorithmIdentifier;
+  serialNumber: asn1js.Integer;
+  attrCertValidityPeriod: AttCertValidityPeriod;
+  attributes: Attribute[];
   issuerUniqueID?: asn1js.BitString;
   extensions?: Extensions;
 }
+
+export type AttributeCertificateInfoV2Parameters = PkiObjectParameters & Partial<AttributeCertificateInfoV2>;
 
 export type AttributeCertificateInfoV2Schema = Schema.SchemaParameters<{
   version?: string;
@@ -54,27 +58,42 @@ export type AttributeCertificateInfoV2Schema = Schema.SchemaParameters<{
   extensions?: ExtensionsSchema;
 }>;
 
-/**
- * Class from RFC5755
- */
-export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
+export interface AttributeCertificateInfoV2Json {
+  version: number;
+  holder: HolderJson;
+  issuer: GeneralNamesJson | V2FormJson;
+  signature: AlgorithmIdentifierJson;
+  serialNumber: Schema.AsnIntegerJson;
+  attrCertValidityPeriod: AttCertValidityPeriodJson;
+  attributes: AttributeJson[];
+  issuerUniqueID?: Schema.AsnBitStringJson;
+  extensions?: ExtensionsJson;
+}
 
-  public version: number;
-  public holder: Holder;
-  public issuer: GeneralNames | V2Form;
-  public signature: AlgorithmIdentifier;
-  public serialNumber: asn1js.Integer;
-  public attrCertValidityPeriod: AttCertValidityPeriod;
-  public attributes: Attribute[];
+/**
+ * Represents the AttributeCertificateInfoV2 structure described in [RFC5755](https://datatracker.ietf.org/doc/html/rfc5755)
+ */
+export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeCertificateInfoV2 {
+
+  public static override CLASS_NAME = "AttributeCertificateInfoV2";
+
+  public version!: number;
+  public holder!: Holder;
+  public issuer!: GeneralNames | V2Form;
+  public signature!: AlgorithmIdentifier;
+  public serialNumber!: asn1js.Integer;
+  public attrCertValidityPeriod!: AttCertValidityPeriod;
+  public attributes!: Attribute[];
   public issuerUniqueID?: asn1js.BitString;
   public extensions?: Extensions;
 
   /**
-   * Constructor for AttributeCertificateInfoV2 class
-   * @param parameters
+   * Initializes a new instance of the {@link AttributeCertificateInfoV2} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: AttributeCertificateInfoV2Parameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, AttributeCertificateInfoV2.defaultValues(VERSION));
     this.holder = pvutils.getParametersValue(parameters, HOLDER, AttributeCertificateInfoV2.defaultValues(HOLDER));
     this.issuer = pvutils.getParametersValue(parameters, ISSUER, AttributeCertificateInfoV2.defaultValues(ISSUER));
@@ -82,33 +101,33 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
     this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, AttributeCertificateInfoV2.defaultValues(SERIAL_NUMBER));
     this.attrCertValidityPeriod = pvutils.getParametersValue(parameters, ATTR_CERT_VALIDITY_PERIOD, AttributeCertificateInfoV2.defaultValues(ATTR_CERT_VALIDITY_PERIOD));
     this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, AttributeCertificateInfoV2.defaultValues(ATTRIBUTES));
-    if (parameters.issuerUniqueID) {
+    if (ISSUER_UNIQUE_ID in parameters) {
       this.issuerUniqueID = pvutils.getParametersValue(parameters, ISSUER_UNIQUE_ID, AttributeCertificateInfoV2.defaultValues(ISSUER_UNIQUE_ID));
     }
-    if (parameters.extensions) {
+    if (EXTENSIONS in parameters) {
       this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, AttributeCertificateInfoV2.defaultValues(EXTENSIONS));
     }
-    //#endregion
-    //#region If input argument array contains "schema" for this object
-    if (parameters.schema)
+
+    if (parameters.schema) {
       this.fromSchema(parameters.schema);
-    //#endregion
+    }
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof HOLDER): Holder;
-  public static defaultValues(memberName: typeof ISSUER): GeneralNames | V2Form;
-  public static defaultValues(memberName: typeof SIGNATURE): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof SERIAL_NUMBER): asn1js.Integer;
-  public static defaultValues(memberName: typeof ATTR_CERT_VALIDITY_PERIOD): AttCertValidityPeriod;
-  public static defaultValues(memberName: typeof ATTRIBUTES): Attribute[];
-  public static defaultValues(memberName: typeof ISSUER_UNIQUE_ID): asn1js.BitString;
-  public static defaultValues(memberName: typeof EXTENSIONS): Extensions;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof HOLDER): Holder;
+  public static override defaultValues(memberName: typeof ISSUER): GeneralNames | V2Form;
+  public static override defaultValues(memberName: typeof SIGNATURE): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof SERIAL_NUMBER): asn1js.Integer;
+  public static override defaultValues(memberName: typeof ATTR_CERT_VALIDITY_PERIOD): AttCertValidityPeriod;
+  public static override defaultValues(memberName: typeof ATTRIBUTES): Attribute[];
+  public static override defaultValues(memberName: typeof ISSUER_UNIQUE_ID): asn1js.BitString;
+  public static override defaultValues(memberName: typeof EXTENSIONS): Extensions;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 1;
@@ -129,15 +148,15 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
       case EXTENSIONS:
         return new Extensions();
       default:
-        throw new Error(`Invalid member name for AttributeCertificateInfoV2 class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * AttributeCertificateInfoV2 ::= SEQUENCE {
    *   version                 AttCertVersion, -- version is v2
    *   holder                  Holder,
@@ -152,9 +171,9 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: AttributeCertificateInfoV2Schema = {}): Schema.SchemaType {
+  public static override schema(parameters: AttributeCertificateInfoV2Schema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -199,15 +218,11 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
-    //#region Check the schema is valid
+
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       AttributeCertificateInfoV2.schema({
@@ -240,10 +255,8 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for AttributeCertificateInfoV2");
-    //#endregion
     //#region Get internal properties from parsed schema
     this.version = asn1.result.version.valueBlock.valueDec;
     this.holder = new Holder({ schema: asn1.result.holder });
@@ -258,7 +271,7 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
         break;
       case 1: // GeneralNames (should not be used)
       default:
-        throw new Error("Incorect value for 'issuer' in AttributeCertificateInfoV2");
+        throw new Error("Incorrect value for 'issuer' in AttributeCertificateInfoV2");
     }
 
     this.signature = new AlgorithmIdentifier({ schema: asn1.result.signature });
@@ -266,18 +279,16 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
     this.attrCertValidityPeriod = new AttCertValidityPeriod({ schema: asn1.result.attrCertValidityPeriod });
     this.attributes = Array.from(asn1.result.attributes.valueBlock.value, element => new Attribute({ schema: element }));
 
-    if (ISSUER_UNIQUE_ID in asn1.result)
+    if (ISSUER_UNIQUE_ID in asn1.result) {
       this.issuerUniqueID = asn1.result.issuerUniqueID;
+    }
 
-    if (EXTENSIONS in asn1.result)
+    if (EXTENSIONS in asn1.result) {
       this.extensions = new Extensions({ schema: asn1.result.extensions });
+    }
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     const result = new asn1js.Sequence({
       value: [
@@ -294,7 +305,7 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
         this.serialNumber,
         this.attrCertValidityPeriod.toSchema(),
         new asn1js.Sequence({
-          value: Array.from(this.attributes, element => element.toSchema())
+          value: Array.from(this.attributes, o => o.toSchema())
         })
       ]
     });
@@ -309,23 +320,19 @@ export class AttributeCertificateInfoV2 implements Schema.SchemaCompatible {
     return result;
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const result: any = {
+  public toJSON(): AttributeCertificateInfoV2Json {
+    const result: AttributeCertificateInfoV2Json = {
       version: this.version,
       holder: this.holder.toJSON(),
       issuer: this.issuer.toJSON(),
       signature: this.signature.toJSON(),
-      serialNumber: this.serialNumber.toJSON(),
+      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
       attrCertValidityPeriod: this.attrCertValidityPeriod.toJSON(),
-      attributes: Array.from(this.attributes, element => element.toJSON())
+      attributes: Array.from(this.attributes, o => o.toJSON())
     };
 
     if (this.issuerUniqueID) {
-      result.issuerUniqueID = this.issuerUniqueID.toJSON();
+      result.issuerUniqueID = this.issuerUniqueID.toJSON() as Schema.AsnBitStringJson;
     }
     if (this.extensions) {
       result.extensions = this.extensions.toJSON();

@@ -7,11 +7,8 @@ export interface EnvelopedWithCertificateParams extends Algorithm {
 }
 
 export async function envelopedEncrypt(certificateBuffer: ArrayBuffer, encAlg: EnvelopedWithCertificateParams, valueBuffer: ArrayBuffer) {
-  //#region Decode input certificate
-  const asn1 = asn1js.fromBER(certificateBuffer);
-  pkijs.AsnError.assert(asn1, "Certificate");
-  const certSimpl = new pkijs.Certificate({ schema: asn1.result });
-  //#endregion
+  // Decode input certificate
+  const certSimpl = pkijs.Certificate.fromRaw(certificateBuffer);
 
   const cmsEnveloped = new pkijs.EnvelopedData({
     originatorInfo: new pkijs.OriginatorInfo({

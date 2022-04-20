@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { Attribute } from "./Attribute";
+import { Attribute, AttributeJson } from "./Attribute";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const ATTRIBUTES = "attributes";
@@ -8,59 +10,66 @@ const CLEAR_PROPS = [
   ATTRIBUTES
 ];
 
-export interface SubjectDirectoryAttributesParameters extends Schema.SchemaConstructor {
-  attributes?: Attribute[];
+export interface ISubjectDirectoryAttributes {
+  attributes: Attribute[];
 }
 
-/**
- * Class from RFC5280
- */
-export class SubjectDirectoryAttributes implements Schema.SchemaCompatible {
+export interface SubjectDirectoryAttributesJson {
+  attributes: AttributeJson[];
+}
 
-  public attributes: Attribute[];
+export type SubjectDirectoryAttributesParameters = PkiObjectParameters & Partial<ISubjectDirectoryAttributes>;
+
+/**
+ * Represents the SubjectDirectoryAttributes structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
+ */
+export class SubjectDirectoryAttributes extends PkiObject implements ISubjectDirectoryAttributes {
+
+  public static override CLASS_NAME = "SubjectDirectoryAttributes";
+
+  public attributes!: Attribute[];
 
   /**
-   * Constructor for SubjectDirectoryAttributes class
-   * @param parameters
+   * Initializes a new instance of the {@link SubjectDirectoryAttributes} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: SubjectDirectoryAttributesParameters = {}) {
-    //#region Internal properties of the object
-    this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, SubjectDirectoryAttributes.defaultValues(ATTRIBUTES));
-    //#endregion
+    super();
 
-    //#region If input argument array contains "schema" for this object
+    this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, SubjectDirectoryAttributes.defaultValues(ATTRIBUTES));
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof ATTRIBUTES): Attribute[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof ATTRIBUTES): Attribute[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ATTRIBUTES:
         return [];
       default:
-        throw new Error(`Invalid member name for SubjectDirectoryAttributes class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * SubjectDirectoryAttributes ::= SEQUENCE SIZE (1..MAX) OF Attribute
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     attributes?: string;
   }> = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
@@ -76,16 +85,11 @@ export class SubjectDirectoryAttributes implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       SubjectDirectoryAttributes.schema({
@@ -94,36 +98,22 @@ export class SubjectDirectoryAttributes implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for SubjectDirectoryAttributes");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.attributes = Array.from(asn1.result.attributes, element => new Attribute({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
-      value: Array.from(this.attributes, element => element.toSchema())
+      value: Array.from(this.attributes, o => o.toSchema())
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): SubjectDirectoryAttributesJson {
     return {
-      attributes: Array.from(this.attributes, element => element.toJSON())
+      attributes: Array.from(this.attributes, o => o.toJSON())
     };
   }
 

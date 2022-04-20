@@ -1,8 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
-import { AttributeCertificateInfoV1, AttributeCertificateInfoV1Schema } from "./AttributeCertificateInfoV1";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import { AttributeCertificateInfoV1, AttributeCertificateInfoV1Json, AttributeCertificateInfoV1Schema } from "./AttributeCertificateInfoV1";
 import * as Schema from "../Schema";
+import { PkiObject, PkiObjectParameters } from "../PkiObject";
+import { AsnError } from "../errors";
 
 const ACINFO = "acinfo";
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";
@@ -13,47 +15,65 @@ const CLEAR_PROPS = [
   SIGNATURE_ALGORITHM
 ];
 
-export interface AttributeCertificateV1Parameters extends Schema.SchemaConstructor {
-  acinfo?: AttributeCertificateInfoV1;
-  signatureAlgorithm?: AlgorithmIdentifier;
-  signatureValue?: asn1js.BitString;
+export interface IAttributeCertificateV1 {
+  /**
+   * Attribute certificate information
+   */
+  acinfo: AttributeCertificateInfoV1;
+  /**
+   * Signature algorithm
+   */
+  signatureAlgorithm: AlgorithmIdentifier;
+  /**
+   * Signature value
+   */
+  signatureValue: asn1js.BitString;
 }
+
+export interface AttributeCertificateV1Json {
+  acinfo: AttributeCertificateInfoV1Json;
+  signatureAlgorithm: AlgorithmIdentifierJson;
+  signatureValue: Schema.AsnBitStringJson;
+}
+
+export type AttributeCertificateV1Parameters = PkiObjectParameters & Partial<IAttributeCertificateV1>;
 
 /**
  * Class from X.509:1997
  */
-export class AttributeCertificateV1 implements Schema.SchemaCompatible {
+export class AttributeCertificateV1 extends PkiObject implements IAttributeCertificateV1 {
 
-  public acinfo: AttributeCertificateInfoV1;
-  public signatureAlgorithm: AlgorithmIdentifier;
-  public signatureValue: asn1js.BitString;
+  public static override CLASS_NAME = "AttributeCertificateV1";
+
+  public acinfo!: AttributeCertificateInfoV1;
+  public signatureAlgorithm!: AlgorithmIdentifier;
+  public signatureValue!: asn1js.BitString;
 
   /**
-   * Constructor for AttributeCertificateV1 class
-   * @param parameters
+   * Initializes a new instance of the {@link AttributeCertificateV1} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: AttributeCertificateV1Parameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.acinfo = pvutils.getParametersValue(parameters, ACINFO, AttributeCertificateV1.defaultValues(ACINFO));
     this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, AttributeCertificateV1.defaultValues(SIGNATURE_ALGORITHM));
     this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, AttributeCertificateV1.defaultValues(SIGNATURE_VALUE));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof ACINFO): AttributeCertificateInfoV1;
-  public static defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof SIGNATURE_VALUE): asn1js.BitString;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof ACINFO): AttributeCertificateInfoV1;
+  public static override defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof SIGNATURE_VALUE): asn1js.BitString;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ACINFO:
         return new AttributeCertificateInfoV1();
@@ -62,15 +82,15 @@ export class AttributeCertificateV1 implements Schema.SchemaCompatible {
       case SIGNATURE_VALUE:
         return new asn1js.BitString();
       default:
-        throw new Error(`Invalid member name for AttributeCertificateV1 class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * AttributeCertificate ::= SEQUENCE {
    *   acinfo               AttributeCertificateInfoV1,
    *   signatureAlgorithm   AlgorithmIdentifier,
@@ -79,9 +99,9 @@ export class AttributeCertificateV1 implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     acinfo?: AttributeCertificateInfoV1Schema;
     signatureAlgorithm?: AlgorithmIdentifierSchema;
     signatureValue?: string;
@@ -98,14 +118,9 @@ export class AttributeCertificateV1 implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
@@ -126,9 +141,7 @@ export class AttributeCertificateV1 implements Schema.SchemaCompatible {
         }
       })
     );
-
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for AttributeCertificateV1");
+    AsnError.assertSchema(asn1, this.className);
     //#endregion
 
     //#region Get internal properties from parsed schema
@@ -138,10 +151,6 @@ export class AttributeCertificateV1 implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     return (new asn1js.Sequence({
       value: [
@@ -152,15 +161,11 @@ export class AttributeCertificateV1 implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): AttributeCertificateV1Json {
     return {
       acinfo: this.acinfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON()
+      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson,
     };
   }
 

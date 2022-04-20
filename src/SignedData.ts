@@ -1,26 +1,28 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
-import { EncapsulatedContentInfo, EncapsulatedContentInfoSchema } from "./EncapsulatedContentInfo";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson } from "./AlgorithmIdentifier";
+import { EncapsulatedContentInfo, EncapsulatedContentInfoJson, EncapsulatedContentInfoSchema } from "./EncapsulatedContentInfo";
 import { Certificate, checkCA } from "./Certificate";
-import { CertificateRevocationList } from "./CertificateRevocationList";
-import { OtherRevocationInfoFormat } from "./OtherRevocationInfoFormat";
-import { SignerInfo } from "./SignerInfo";
-import { CertificateSet, CertificateSetItem } from "./CertificateSet";
+import { CertificateRevocationList, CertificateRevocationListJson } from "./CertificateRevocationList";
+import { OtherRevocationInfoFormat, OtherRevocationInfoFormatJson } from "./OtherRevocationInfoFormat";
+import { SignerInfo, SignerInfoJson } from "./SignerInfo";
+import { CertificateSet, CertificateSetItem, CertificateSetItemJson } from "./CertificateSet";
 import { RevocationInfoChoices, RevocationInfoChoicesSchema } from "./RevocationInfoChoices";
 import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
 import { TSTInfo } from "./TSTInfo";
 import { CertificateChainValidationEngine, CertificateChainValidationEngineParameters, FindIssuerCallback, FindOriginCallback } from "./CertificateChainValidationEngine";
-import { BasicOCSPResponse } from "./BasicOCSPResponse";
+import { BasicOCSPResponse, BasicOCSPResponseJson } from "./BasicOCSPResponse";
 import { OtherCertificateFormat } from "./OtherCertificateFormat";
 import { AttributeCertificateV1 } from "./AttributeCertificateV1";
 import { AttributeCertificateV2 } from "./AttributeCertificateV2";
 import * as Schema from "./Schema";
 import { id_ContentType_Data, id_eContentType_TSTInfo, id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 export type SignedDataCRL = CertificateRevocationList | OtherRevocationInfoFormat;
+export type SignedDataCRLJson = CertificateRevocationListJson | OtherRevocationInfoFormatJson;
 
 const VERSION = "version";
 const DIGEST_ALGORITHMS = "digestAlgorithms";
@@ -45,15 +47,27 @@ const CLEAR_PROPS = [
   SIGNED_DATA_SIGNER_INFOS
 ];
 
-export interface SignedDataParameters extends Schema.SchemaConstructor {
-  version?: number;
-  digestAlgorithms?: AlgorithmIdentifier[];
-  encapContentInfo?: EncapsulatedContentInfo;
+export interface ISignedData {
+  version: number;
+  digestAlgorithms: AlgorithmIdentifier[];
+  encapContentInfo: EncapsulatedContentInfo;
   certificates?: CertificateSetItem[];
   crls?: SignedDataCRL[];
   ocsps?: BasicOCSPResponse[];
-  signerInfos?: SignerInfo[];
+  signerInfos: SignerInfo[];
 }
+
+export interface SignedDataJson {
+  version: number;
+  digestAlgorithms: AlgorithmIdentifierJson[];
+  encapContentInfo: EncapsulatedContentInfoJson;
+  certificates?: CertificateSetItemJson[];
+  crls?: SignedDataCRLJson[];
+  ocsps?: BasicOCSPResponseJson[];
+  signerInfos: SignerInfoJson[];
+}
+
+export type SignedDataParameters = PkiObjectParameters & Partial<ISignedData>;
 
 export interface SignedDataVerifyParams {
   signer?: number;
@@ -120,60 +134,61 @@ export class SignedDataVerifyError extends Error {
 }
 
 /**
- * Class from RFC5652
+ * Represents the SignedData structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
-export class SignedData implements Schema.SchemaCompatible {
+export class SignedData extends PkiObject implements ISignedData {
+
+  public static override CLASS_NAME = "SignedData";
 
   public static ID_DATA: typeof id_ContentType_Data = id_ContentType_Data;
 
-  public version: number;
-  public digestAlgorithms: AlgorithmIdentifier[];
-  public encapContentInfo: EncapsulatedContentInfo;
+  public version!: number;
+  public digestAlgorithms!: AlgorithmIdentifier[];
+  public encapContentInfo!: EncapsulatedContentInfo;
   public certificates?: CertificateSetItem[];
   public crls?: SignedDataCRL[];
   public ocsps?: BasicOCSPResponse[];
-  public signerInfos: SignerInfo[];
+  public signerInfos!: SignerInfo[];
 
   /**
-   * Constructor for SignedData class
-   * @param parameters
+   * Initializes a new instance of the {@link SignedData} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: SignedDataParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, SignedData.defaultValues(VERSION));
     this.digestAlgorithms = pvutils.getParametersValue(parameters, DIGEST_ALGORITHMS, SignedData.defaultValues(DIGEST_ALGORITHMS));
     this.encapContentInfo = pvutils.getParametersValue(parameters, ENCAP_CONTENT_INFO, SignedData.defaultValues(ENCAP_CONTENT_INFO));
-    if (parameters.certificates) {
+    if (CERTIFICATES in parameters) {
       this.certificates = pvutils.getParametersValue(parameters, CERTIFICATES, SignedData.defaultValues(CERTIFICATES));
     }
-    if (parameters.crls) {
+    if (CRLS in parameters) {
       this.crls = pvutils.getParametersValue(parameters, CRLS, SignedData.defaultValues(CRLS));
     }
-    if (parameters.ocsps) {
+    if (OCSPS in parameters) {
       this.ocsps = pvutils.getParametersValue(parameters, OCSPS, SignedData.defaultValues(OCSPS));
     }
     this.signerInfos = pvutils.getParametersValue(parameters, SIGNER_INFOS, SignedData.defaultValues(SIGNER_INFOS));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof DIGEST_ALGORITHMS): AlgorithmIdentifier[];
-  public static defaultValues(memberName: typeof ENCAP_CONTENT_INFO): EncapsulatedContentInfo;
-  public static defaultValues(memberName: typeof CERTIFICATES): CertificateSetItem[];
-  public static defaultValues(memberName: typeof CRLS): SignedDataCRL[];
-  public static defaultValues(memberName: typeof OCSPS): BasicOCSPResponse[];
-  public static defaultValues(memberName: typeof SIGNER_INFOS): SignerInfo[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof DIGEST_ALGORITHMS): AlgorithmIdentifier[];
+  public static override defaultValues(memberName: typeof ENCAP_CONTENT_INFO): EncapsulatedContentInfo;
+  public static override defaultValues(memberName: typeof CERTIFICATES): CertificateSetItem[];
+  public static override defaultValues(memberName: typeof CRLS): SignedDataCRL[];
+  public static override defaultValues(memberName: typeof OCSPS): BasicOCSPResponse[];
+  public static override defaultValues(memberName: typeof SIGNER_INFOS): SignerInfo[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 0;
@@ -190,7 +205,7 @@ export class SignedData implements Schema.SchemaCompatible {
       case SIGNER_INFOS:
         return [];
       default:
-        throw new Error(`Invalid member name for SignedData class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -213,15 +228,15 @@ export class SignedData implements Schema.SchemaCompatible {
       case SIGNER_INFOS:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for SignedData class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * SignedData ::= SEQUENCE {
    *    version CMSVersion,
    *    digestAlgorithms DigestAlgorithmIdentifiers,
@@ -232,9 +247,9 @@ export class SignedData implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
     digestAlgorithms?: string;
     encapContentInfo?: EncapsulatedContentInfoSchema;
@@ -299,23 +314,16 @@ export class SignedData implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       SignedData.schema()
     );
-
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for SignedData");
+    AsnError.assertSchema(asn1, this.className);
     //#endregion
 
     //#region Get internal properties from parsed schema
@@ -354,30 +362,26 @@ export class SignedData implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(encodeFlag = false): Schema.SchemaType {
     //#region Create array for output sequence
     const outputArray = [];
 
     // IF ((certificates is present) AND
-    // 	(any certificates with a type of other are present)) OR
-    // 	((crls is present) AND
-    // 	(any crls with a type of other are present))
+    //  (any certificates with a type of other are present)) OR
+    //  ((crls is present) AND
+    //  (any crls with a type of other are present))
     // THEN version MUST be 5
     // ELSE
-    // 	IF (certificates is present) AND
-    // 			(any version 2 attribute certificates are present)
-    // 	THEN version MUST be 4
-    // 	ELSE
-    // 			IF ((certificates is present) AND
-    // 				(any version 1 attribute certificates are present)) OR
-    // 				(any SignerInfo structures are version 3) OR
-    // 				(encapContentInfo eContentType is other than id-data)
-    // 			THEN version MUST be 3
-    // 			ELSE version MUST be 1
+    //  IF (certificates is present) AND
+    //    (any version 2 attribute certificates are present)
+    //  THEN version MUST be 4
+    //  ELSE
+    //    IF ((certificates is present) AND
+    //      (any version 1 attribute certificates are present)) OR
+    //      (any SignerInfo structures are version 3) OR
+    //      (encapContentInfo eContentType is other than id-data)
+    //    THEN version MUST be 3
+    //    ELSE version MUST be 1
     if ((this.certificates && this.certificates.length && this.certificates.some(o => o instanceof OtherCertificateFormat))
       || (this.crls && this.crls.length && this.crls.some(o => o instanceof OtherRevocationInfoFormat))) {
       this.version = 5;
@@ -449,36 +453,28 @@ export class SignedData implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): SignedDataJson {
+    const res: SignedDataJson = {
       version: this.version,
       digestAlgorithms: Array.from(this.digestAlgorithms, algorithm => algorithm.toJSON()),
-      encapContentInfo: this.encapContentInfo.toJSON()
+      encapContentInfo: this.encapContentInfo.toJSON(),
+      signerInfos: Array.from(this.signerInfos, signerInfo => signerInfo.toJSON()),
     };
 
     if (this.certificates) {
-      _object.certificates = Array.from(this.certificates, certificate => certificate.toJSON());
+      res.certificates = Array.from(this.certificates, certificate => certificate.toJSON());
     }
 
     if (this.crls) {
-      _object.crls = Array.from(this.crls, crl => crl.toJSON());
+      res.crls = Array.from(this.crls, crl => crl.toJSON());
     }
 
-    _object.signerInfos = Array.from(this.signerInfos, signerInfo => signerInfo.toJSON());
 
-    return _object;
+    return res;
   }
 
   public verify(params: SignedDataVerifyParams & { extendedMode?: false; }): Promise<boolean>;
   public verify(params: SignedDataVerifyParams & { extendedMode: true; }): Promise<SignedDataVerifyResult>;
-  /**
-   * Verify current SignedData value
-   * @param param0
-   */
   public async verify({
     signer = (-1),
     data = (new ArrayBuffer(0)),

@@ -1,8 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { Time } from "./Time";
-import { Extensions } from "./Extensions";
+import { Time, TimeJson } from "./Time";
+import { Extensions, ExtensionsJson } from "./Extensions";
 import * as Schema from "./Schema";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { AsnError } from "./errors";
 
 const USER_CERTIFICATE = "userCertificate";
 const REVOCATION_DATE = "revocationDate";
@@ -13,49 +15,58 @@ const CLEAR_PROPS = [
   CRL_ENTRY_EXTENSIONS
 ];
 
-export interface RevokedCertificateParameters extends Schema.SchemaConstructor {
-  userCertificate?: asn1js.Integer;
-  revocationDate?: Time;
+export interface IRevokedCertificate {
+  userCertificate: asn1js.Integer;
+  revocationDate: Time;
   crlEntryExtensions?: Extensions;
 }
 
-/**
- * Class from RFC5280
- */
-export class RevokedCertificate implements Schema.SchemaCompatible {
+export type RevokedCertificateParameters = PkiObjectParameters & Partial<IRevokedCertificate>;
 
-  public userCertificate: asn1js.Integer;
-  public revocationDate: Time;
+export interface RevokedCertificateJson {
+  userCertificate: Schema.AsnIntegerJson;
+  revocationDate: TimeJson;
+  crlEntryExtensions?: ExtensionsJson;
+}
+
+/**
+ * Represents the RevokedCertificate structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
+ */
+export class RevokedCertificate extends PkiObject implements IRevokedCertificate {
+
+  public static override CLASS_NAME = "RevokedCertificate";
+
+  public userCertificate!: asn1js.Integer;
+  public revocationDate!: Time;
   public crlEntryExtensions?: Extensions;
 
   /**
-   * Constructor for RevokedCertificate class
-   * @param parameters
+   * Initializes a new instance of the {@link RevokedCertificate} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: RevokedCertificateParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.userCertificate = pvutils.getParametersValue(parameters, USER_CERTIFICATE, RevokedCertificate.defaultValues(USER_CERTIFICATE));
     this.revocationDate = pvutils.getParametersValue(parameters, REVOCATION_DATE, RevokedCertificate.defaultValues(REVOCATION_DATE));
-    if (parameters.crlEntryExtensions) {
+    if (CRL_ENTRY_EXTENSIONS in parameters) {
       this.crlEntryExtensions = pvutils.getParametersValue(parameters, CRL_ENTRY_EXTENSIONS, RevokedCertificate.defaultValues(CRL_ENTRY_EXTENSIONS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof USER_CERTIFICATE): asn1js.Integer;
-  public static defaultValues(memberName: typeof REVOCATION_DATE): Time;
-  public static defaultValues(memberName: typeof CRL_ENTRY_EXTENSIONS): Extensions;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof USER_CERTIFICATE): asn1js.Integer;
+  public static override defaultValues(memberName: typeof REVOCATION_DATE): Time;
+  public static override defaultValues(memberName: typeof CRL_ENTRY_EXTENSIONS): Extensions;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case USER_CERTIFICATE:
         return new asn1js.Integer();
@@ -64,15 +75,15 @@ export class RevokedCertificate implements Schema.SchemaCompatible {
       case CRL_ENTRY_EXTENSIONS:
         return new Extensions();
       default:
-        throw new Error(`Invalid member name for RevokedCertificate class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * revokedCertificates     SEQUENCE OF SEQUENCE  {
      *        userCertificate         CertificateSerialNumber,
      *        revocationDate          Time,
@@ -82,9 +93,9 @@ export class RevokedCertificate implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     userCertificate?: string;
     revocationDate?: string;
     crlEntryExtensions?: string;
@@ -110,49 +121,34 @@ export class RevokedCertificate implements Schema.SchemaCompatible {
     });
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       RevokedCertificate.schema()
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for RevokedCertificate");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.userCertificate = asn1.result.userCertificate;
     this.revocationDate = new Time({ schema: asn1.result.revocationDate });
-
-    if (CRL_ENTRY_EXTENSIONS in asn1.result)
+    if (CRL_ENTRY_EXTENSIONS in asn1.result) {
       this.crlEntryExtensions = new Extensions({ schema: asn1.result.crlEntryExtensions });
-    //#endregion
+    }
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Create array for output sequence
+    // Create array for output sequence
     const outputArray: any[] = [
       this.userCertificate,
       this.revocationDate.toSchema()
     ];
-
     if (this.crlEntryExtensions) {
       outputArray.push(this.crlEntryExtensions.toSchema());
     }
-    //#endregion
 
     // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
@@ -160,20 +156,17 @@ export class RevokedCertificate implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
-    const object: any = {
-      userCertificate: this.userCertificate.toJSON(),
-      revocationDate: this.revocationDate.toJSON
+  public toJSON(): RevokedCertificateJson {
+    const res: RevokedCertificateJson = {
+      userCertificate: this.userCertificate.toJSON() as Schema.AsnIntegerJson,
+      revocationDate: this.revocationDate.toJSON(),
     };
 
     if (this.crlEntryExtensions) {
-      object.crlEntryExtensions = this.crlEntryExtensions.toJSON();
+      res.crlEntryExtensions = this.crlEntryExtensions.toJSON();
     }
 
-    return object;
+    return res;
   }
 
 }

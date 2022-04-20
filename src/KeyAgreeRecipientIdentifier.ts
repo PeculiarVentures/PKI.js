@@ -1,7 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { IssuerAndSerialNumber, IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
-import { RecipientKeyIdentifier, RecipientKeyIdentifierSchema } from "./RecipientKeyIdentifier";
+import { AsnError } from "./errors";
+import { IssuerAndSerialNumber, IssuerAndSerialNumberJson, IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { RecipientKeyIdentifier, RecipientKeyIdentifierJson, RecipientKeyIdentifierSchema } from "./RecipientKeyIdentifier";
 import * as Schema from "./Schema";
 
 const VARIANT = "variant";
@@ -10,10 +12,17 @@ const CLEAR_PROPS = [
   "blockName",
 ];
 
-export interface KeyAgreeRecipientIdentifierParameters extends Schema.SchemaConstructor {
-  variant?: number;
-  value?: any;
+export interface IKeyAgreeRecipientIdentifier {
+  variant: number;
+  value: any;
 }
+
+export interface KeyAgreeRecipientIdentifierJson {
+  variant: number;
+  value?: IssuerAndSerialNumberJson | RecipientKeyIdentifierJson;
+}
+
+export type KeyAgreeRecipientIdentifierParameters = PkiObjectParameters & Partial<IKeyAgreeRecipientIdentifier>;
 
 export type KeyAgreeRecipientIdentifierSchema = Schema.SchemaParameters<{
   issuerAndSerialNumber?: IssuerAndSerialNumberSchema;
@@ -21,44 +30,45 @@ export type KeyAgreeRecipientIdentifierSchema = Schema.SchemaParameters<{
 }>;
 
 /**
- * Class from RFC5652
+ * Represents the KeyAgreeRecipientIdentifier structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
-export class KeyAgreeRecipientIdentifier implements Schema.SchemaCompatible {
+export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeRecipientIdentifier {
 
-  public variant: number;
+  public static override CLASS_NAME = "KeyAgreeRecipientIdentifier";
+
+  public variant!: number;
   public value: any;
 
   /**
-   * Constructor for KeyAgreeRecipientIdentifier class
-   * @param parameters
+   * Initializes a new instance of the {@link KeyAgreeRecipientIdentifier} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: KeyAgreeRecipientIdentifierParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.variant = pvutils.getParametersValue(parameters, VARIANT, KeyAgreeRecipientIdentifier.defaultValues(VARIANT));
     this.value = pvutils.getParametersValue(parameters, VALUE, KeyAgreeRecipientIdentifier.defaultValues(VALUE));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VARIANT): number;
-  public static defaultValues(memberName: typeof VALUE): any;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VARIANT): number;
+  public static override defaultValues(memberName: typeof VALUE): any;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VARIANT:
         return (-1);
       case VALUE:
         return {};
       default:
-        throw new Error(`Invalid member name for KeyAgreeRecipientIdentifier class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -74,24 +84,24 @@ export class KeyAgreeRecipientIdentifier implements Schema.SchemaCompatible {
       case VALUE:
         return (Object.keys(memberValue).length === 0);
       default:
-        throw new Error(`Invalid member name for KeyAgreeRecipientIdentifier class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * KeyAgreeRecipientIdentifier ::= CHOICE {
    *    issuerAndSerialNumber IssuerAndSerialNumber,
    *    rKeyId [0] IMPLICIT RecipientKeyIdentifier }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: KeyAgreeRecipientIdentifierSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: KeyAgreeRecipientIdentifierSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Choice({
@@ -117,16 +127,11 @@ export class KeyAgreeRecipientIdentifier implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       KeyAgreeRecipientIdentifier.schema({
@@ -135,13 +140,9 @@ export class KeyAgreeRecipientIdentifier implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for KeyAgreeRecipientIdentifier");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     if (asn1.result.blockName.idBlock.tagClass === 1) {
       this.variant = 1;
       this.value = new IssuerAndSerialNumber({ schema: asn1.result.blockName });
@@ -154,13 +155,8 @@ export class KeyAgreeRecipientIdentifier implements Schema.SchemaCompatible {
         })
       });
     }
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.BaseBlock<any> {
     //#region Construct and return new ASN.1 schema for this object
     switch (this.variant) {
@@ -180,20 +176,16 @@ export class KeyAgreeRecipientIdentifier implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
-      variant: this.variant
+  public toJSON(): KeyAgreeRecipientIdentifierJson {
+    const res: KeyAgreeRecipientIdentifierJson = {
+      variant: this.variant,
     };
 
     if ((this.variant === 1) || (this.variant === 2)) {
-      _object.value = this.value.toJSON();
+      res.value = this.value.toJSON();
     }
 
-    return _object;
+    return res;
   }
 
 }

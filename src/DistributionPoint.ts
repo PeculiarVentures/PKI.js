@@ -1,7 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { GeneralName } from "./GeneralName";
-import { DistributionPointName } from "./IssuingDistributionPoint";
+import { AsnError } from "./errors";
+import { GeneralName, GeneralNameJson } from "./GeneralName";
+import { DistributionPointName, DistributionPointNameJson } from "./IssuingDistributionPoint";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
 import * as Schema from "./Schema";
 
@@ -18,52 +20,62 @@ const CLEAR_PROPS = [
   CRL_ISSUER_NAMES,
 ];
 
-export interface DistributionPointParameters extends Schema.SchemaConstructor {
+export interface IDistributionPoint {
   distributionPoint?: DistributionPointName;
   reasons?: asn1js.BitString;
   cRLIssuer?: GeneralName[];
 }
 
+export interface DistributionPointJson {
+  distributionPoint?: DistributionPointNameJson;
+  reasons?: Schema.AsnBitStringJson;
+  cRLIssuer?: GeneralNameJson[];
+}
+
+export type DistributionPointParameters = PkiObjectParameters & Partial<IDistributionPoint>;
+
 /**
- * Class from RFC5280
+ * Represents the DistributionPoint structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
-export class DistributionPoint implements Schema.SchemaCompatible {
+export class DistributionPoint extends PkiObject implements IDistributionPoint {
+
+  public static override CLASS_NAME = "DistributionPoint";
 
   public distributionPoint?: DistributionPointName;
   public reasons?: asn1js.BitString;
   public cRLIssuer?: GeneralName[];
 
   /**
-   * Constructor for DistributionPoint class
-   * @param parameters
+   * Initializes a new instance of the {@link DistributionPoint} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: DistributionPointParameters = {}) {
-    //#region Internal properties of the object
-    if (parameters.distributionPoint) {
+    super();
+
+    if (DISTRIBUTION_POINT in parameters) {
       this.distributionPoint = pvutils.getParametersValue(parameters, DISTRIBUTION_POINT, DistributionPoint.defaultValues(DISTRIBUTION_POINT));
     }
-    if (parameters.reasons) {
+    if (REASONS in parameters) {
       this.reasons = pvutils.getParametersValue(parameters, REASONS, DistributionPoint.defaultValues(REASONS));
     }
-    if (parameters.cRLIssuer) {
+    if (CRL_ISSUER in parameters) {
       this.cRLIssuer = pvutils.getParametersValue(parameters, CRL_ISSUER, DistributionPoint.defaultValues(CRL_ISSUER));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
-    if (parameters.schema)
+    if (parameters.schema) {
       this.fromSchema(parameters.schema);
-    //#endregion
+    }
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof DISTRIBUTION_POINT): DistributionPointName;
-  public static defaultValues(memberName: typeof REASONS): asn1js.BitString;
-  public static defaultValues(memberName: typeof CRL_ISSUER): GeneralName[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof DISTRIBUTION_POINT): DistributionPointName;
+  public static override defaultValues(memberName: typeof REASONS): asn1js.BitString;
+  public static override defaultValues(memberName: typeof CRL_ISSUER): GeneralName[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case DISTRIBUTION_POINT:
         return [];
@@ -72,15 +84,15 @@ export class DistributionPoint implements Schema.SchemaCompatible {
       case CRL_ISSUER:
         return [];
       default:
-        throw new Error(`Invalid member name for DistributionPoint class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * DistributionPoint ::= SEQUENCE {
    *    distributionPoint       [0]     DistributionPointName OPTIONAL,
    *    reasons                 [1]     ReasonFlags OPTIONAL,
@@ -103,9 +115,9 @@ export class DistributionPoint implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     distributionPoint?: string;
     distributionPointNames?: string;
     reasons?: string;
@@ -188,16 +200,11 @@ export class DistributionPoint implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       DistributionPoint.schema({
@@ -210,10 +217,7 @@ export class DistributionPoint implements Schema.SchemaCompatible {
         }
       })
     );
-
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for DistributionPoint");
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     if (DISTRIBUTION_POINT in asn1.result) {
@@ -240,10 +244,6 @@ export class DistributionPoint implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -257,7 +257,7 @@ export class DistributionPoint implements Schema.SchemaCompatible {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          value: Array.from(this.distributionPoint, element => element.toSchema())
+          value: Array.from(this.distributionPoint, o => o.toSchema())
         });
       } else if (this.distributionPoint) {
         internalValue = new asn1js.Constructed({
@@ -294,7 +294,7 @@ export class DistributionPoint implements Schema.SchemaCompatible {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 2 // [2]
         },
-        value: Array.from(this.cRLIssuer, element => element.toSchema())
+        value: Array.from(this.cRLIssuer, o => o.toSchema())
       }));
     }
     //#endregion
@@ -306,27 +306,23 @@ export class DistributionPoint implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const object: any = {};
+  public toJSON(): DistributionPointJson {
+    const object: DistributionPointJson = {};
 
     if (this.distributionPoint) {
       if (this.distributionPoint instanceof Array) {
-        object.distributionPoint = Array.from(this.distributionPoint, element => element.toJSON());
+        object.distributionPoint = Array.from(this.distributionPoint, o => o.toJSON());
       } else {
         object.distributionPoint = this.distributionPoint.toJSON();
       }
     }
 
     if (this.reasons) {
-      object.reasons = this.reasons.toJSON();
+      object.reasons = this.reasons.toJSON() as Schema.AsnBitStringJson;
     }
 
     if (this.cRLIssuer) {
-      object.cRLIssuer = Array.from(this.cRLIssuer, element => element.toJSON());
+      object.cRLIssuer = Array.from(this.cRLIssuer, o => o.toJSON());
     }
 
     return object;

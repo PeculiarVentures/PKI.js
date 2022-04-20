@@ -13,21 +13,21 @@ context("PKIjs functional testing", () => {
 
   it("GeneralName", () => {
     // results["GeneralName0"] = new pkijs.GeneralName({
-    // 	schema: (new pkijs.GeneralName({
-    // 		type: 0,
-    // 		value: new asn1js.Sequence({
-    // 			value: [
-    // 				new asn1js.ObjectIdentifier({ value: fakeOID }),
-    // 				new asn1js.Constructed({
-    // 					idBlock: {
-    // 						tagClass: 3, // CONTEXT-SPECIFIC
-    // 						tagNumber: 0 // [0]
-    // 					},
-    // 					value: [new asn1js.Null()]
-    // 				})
-    // 			]
-    // 		})
-    // 	})).toSchema()
+    //   schema: (new pkijs.GeneralName({
+    //     type: 0,
+    //     value: new asn1js.Sequence({
+    //       value: [
+    //         new asn1js.ObjectIdentifier({ value: fakeOID }),
+    //         new asn1js.Constructed({
+    //           idBlock: {
+    //             tagClass: 3, // CONTEXT-SPECIFIC
+    //             tagNumber: 0 // [0]
+    //           },
+    //           value: [new asn1js.Null()]
+    //         })
+    //       ]
+    //     })
+    //   })).toSchema()
     // });
 
     results["GeneralName1"] = new pkijs.GeneralName({
@@ -37,21 +37,19 @@ context("PKIjs functional testing", () => {
       })).toSchema()
     });
 
-
-
     //
     // results["GeneralName2"] = new pkijs.GeneralName({
-    // 	schema: (new pkijs.GeneralName({
-    // 		type: 2,
-    // 		value: fakeString
-    // 	})).toSchema()
+    //   schema: (new pkijs.GeneralName({
+    //     type: 2,
+    //     value: fakeString
+    //   })).toSchema()
     // });
 
     // results["GeneralName3"] = new pkijs.GeneralName({
-    // 	schema: (new pkijs.GeneralName({
-    // 		type: 3,
-    // 		value: fakeString
-    // 	})).toSchema()
+    //   schema: (new pkijs.GeneralName({
+    //     type: 3,
+    //     value: fakeString
+    //   })).toSchema()
     // });
   });
 
@@ -145,7 +143,7 @@ context("PKIjs functional testing", () => {
     results["AttributeTypeAndValue"] = new pkijs.AttributeTypeAndValue({
       schema: (new pkijs.AttributeTypeAndValue({
         type: fakeOID,
-        value: new asn1js.Null()
+        value: new asn1js.Null() as any,
       })).toSchema()
     });
   });

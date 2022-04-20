@@ -3,6 +3,7 @@ import * as pvutils from "pvutils";
 import { CertificateRevocationList } from "./CertificateRevocationList";
 import { AsnError } from "./errors";
 import { id_CRLBag_X509CRL } from "./ObjectIdentifiers";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const CRL_ID = "crlId";
@@ -13,50 +14,58 @@ const CLEAR_PROPS = [
   CRL_VALUE,
 ];
 
-export interface CRLBagParameters extends Schema.SchemaConstructor {
-  crlId?: string;
-  crlValue?: any;
+export interface ICRLBag {
+  crlId: string;
+  crlValue: any;
   parsedValue?: any;
+  certValue?: any;
 }
 
-/**
- * Class from RFC7292
- */
-export class CRLBag implements Schema.SchemaCompatible {
+export interface CRLBagJson {
+  crlId: string;
+  crlValue: any;
+}
 
-  public crlId: string;
+export type CRLBagParameters = PkiObjectParameters & Partial<ICRLBag>;
+
+/**
+ * Represents the CRLBag structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
+ */
+export class CRLBag extends PkiObject implements ICRLBag {
+
+  public static override CLASS_NAME = "CRLBag";
+
+  public crlId!: string;
   public crlValue: any;
   public parsedValue?: any;
   public certValue?: any;
 
   /**
-   * Constructor for CRLBag class
-   * @param parameters
+   * Initializes a new instance of the {@link CRLBag} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: CRLBagParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.crlId = pvutils.getParametersValue(parameters, CRL_ID, CRLBag.defaultValues(CRL_ID));
     this.crlValue = pvutils.getParametersValue(parameters, CRL_VALUE, CRLBag.defaultValues(CRL_VALUE));
-    if (parameters.parsedValue) {
+    if (PARSED_VALUE in parameters) {
       this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, CRLBag.defaultValues(PARSED_VALUE));
     }
-    //#endregion
-
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof CRL_ID): string;
-  public static defaultValues(memberName: typeof CRL_VALUE): any;
-  public static defaultValues(memberName: typeof PARSED_VALUE): any;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof CRL_ID): string;
+  public static override defaultValues(memberName: typeof CRL_VALUE): any;
+  public static override defaultValues(memberName: typeof PARSED_VALUE): any;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CRL_ID:
         return "";
@@ -65,7 +74,7 @@ export class CRLBag implements Schema.SchemaCompatible {
       case PARSED_VALUE:
         return {};
       default:
-        throw new Error(`Invalid member name for CRLBag class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -83,25 +92,25 @@ export class CRLBag implements Schema.SchemaCompatible {
       case PARSED_VALUE:
         return ((memberValue instanceof Object) && (Object.keys(memberValue).length === 0));
       default:
-        throw new Error(`Invalid member name for CRLBag class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * CRLBag ::= SEQUENCE {
-   *    crlId     	BAG-TYPE.&id ({CRLTypes}),
-   *    crlValue 	[0] EXPLICIT BAG-TYPE.&Type ({CRLTypes}{@crlId})
+   *    crlId      BAG-TYPE.&id ({CRLTypes}),
+   *    crlValue   [0] EXPLICIT BAG-TYPE.&Type ({CRLTypes}{@crlId})
    *}
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     id?: string;
     value?: string;
   }> = {}): Schema.SchemaType {
@@ -122,16 +131,11 @@ export class CRLBag implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       CRLBag.schema({
@@ -141,35 +145,25 @@ export class CRLBag implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for CRLBag");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.crlId = asn1.result.crlId.valueBlock.toString();
     this.crlValue = asn1.result.crlValue;
 
     switch (this.crlId) {
       case id_CRLBag_X509CRL: // x509CRL
         {
-          const asn1Inner = asn1js.fromBER(this.certValue.valueBlock.valueHex);
-          AsnError.assert(asn1Inner, "Certificate Revocation List");
-          this.parsedValue = new CertificateRevocationList({ schema: asn1Inner.result });
+          this.parsedValue = CertificateRevocationList.fromRaw(this.certValue.valueBlock.valueHex);
         }
         break;
       default:
         throw new Error(`Incorrect CRL_ID value in CRLBag: ${this.crlId}`);
     }
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     if (this.parsedValue) {
       this.crlId = id_CRLBag_X509CRL;
       this.crlValue = new asn1js.OctetString({ valueHex: this.parsedValue.toSchema().toBER(false) });
@@ -187,14 +181,9 @@ export class CRLBag implements Schema.SchemaCompatible {
         })
       ]
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): CRLBagJson {
     return {
       crlId: this.crlId,
       crlValue: this.crlValue.toJSON()
@@ -202,4 +191,3 @@ export class CRLBag implements Schema.SchemaCompatible {
   }
 
 }
-

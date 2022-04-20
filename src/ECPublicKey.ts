@@ -2,64 +2,66 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { ECNamedCurves } from "./ECNamedCurves";
 import { ArgumentError, ParameterError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const X = "x";
 const Y = "y";
 const NAMED_CURVE = "namedCurve";
 
-export interface JsonECPublicKey {
+export interface IECPublicKey {
+  namedCurve: string;
+  x: ArrayBuffer;
+  y: ArrayBuffer;
+}
+
+export interface ECPublicKeyJson {
   crv: string;
   x: string;
   y: string;
 }
 
-export interface ECPublicKeyParameters extends Schema.SchemaConstructor {
-  namedCurve?: string;
-  x?: ArrayBuffer;
-  y?: ArrayBuffer;
-  json?: JsonECPublicKey;
-}
+export type ECPublicKeyParameters = PkiObjectParameters & Partial<IECPublicKey> & { json?: ECPublicKeyJson; };
 
 /**
- * Class from RFC5480
+ * Represents the PrivateKeyInfo structure described in [RFC5480](https://datatracker.ietf.org/doc/html/rfc5480)
  */
-export class ECPublicKey implements Schema.SchemaCompatible {
+export class ECPublicKey extends PkiObject implements IECPublicKey {
 
-  public namedCurve: string;
-  public x: ArrayBuffer;
-  public y: ArrayBuffer;
+  public static override CLASS_NAME = "ECPublicKey";
+
+  public namedCurve!: string;
+  public x!: ArrayBuffer;
+  public y!: ArrayBuffer;
 
   /**
-   * Constructor for ECCPublicKey class
-   * @param parameters
+   * Initializes a new instance of the {@link ECPublicKey} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: ECPublicKeyParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.x = pvutils.getParametersValue(parameters, X, ECPublicKey.defaultValues(X));
     this.y = pvutils.getParametersValue(parameters, Y, ECPublicKey.defaultValues(Y));
     this.namedCurve = pvutils.getParametersValue(parameters, NAMED_CURVE, ECPublicKey.defaultValues(NAMED_CURVE));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
+    if ("json" in parameters) {
+      this.fromJSON(parameters.json);
+    }
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
-    //#region If input argument array contains "json" for this object
-    if (parameters.json) {
-      this.fromJSON(parameters.json);
-    }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof NAMED_CURVE): string;
-  public static defaultValues(memberName: typeof X | typeof Y): ArrayBuffer;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof NAMED_CURVE): string;
+  public static override defaultValues(memberName: typeof X | typeof Y): ArrayBuffer;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case X:
       case Y:
@@ -67,15 +69,11 @@ export class ECPublicKey implements Schema.SchemaCompatible {
       case NAMED_CURVE:
         return "";
       default:
-        throw new Error(`Invalid member name for ECCPublicKey class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
-  /**
-   * Compare values with default values for all class members
-   * @param memberName String name for a class member
-   * @param memberValue Value to compare with default value
-   */
+
   /**
    * Compare values with default values for all class members
    * @param memberName String name for a class member
@@ -91,34 +89,30 @@ export class ECPublicKey implements Schema.SchemaCompatible {
         return typeof memberValue === "string" &&
           memberValue === ECPublicKey.defaultValues(memberName);
       default:
-        throw new Error(`Invalid member name for ECCPublicKey class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(): Schema.SchemaType {
+  public static override schema(): Schema.SchemaType {
     return new asn1js.RawData();
   }
 
-  /**
-   * Convert ArrayBuffer into current class
-   * @param schema Special case: schema is an ArrayBuffer
-   */
-  fromSchema(schema: ArrayBuffer): any {
-    //region Check the schema is valid
+  public fromSchema(schema: ArrayBuffer): any {
+    //#region Check the schema is valid
     ArgumentError.assert(schema, "schema", "ArrayBuffer");
 
     const view = new Uint8Array(schema);
     if (view[0] !== 0x04) {
       throw new Error("Object's schema was not verified against input data for ECPublicKey");
     }
-    //endregion
+    //#endregion
 
-    //region Get internal properties from parsed schema
+    //#region Get internal properties from parsed schema
     const namedCurve = ECNamedCurves.find(this.namedCurve);
     if (!namedCurve) {
       throw new Error(`Incorrect curve OID: ${this.namedCurve}`);
@@ -129,15 +123,12 @@ export class ECPublicKey implements Schema.SchemaCompatible {
       throw new Error("Object's schema was not verified against input data for ECPublicKey");
     }
 
+    this.namedCurve = namedCurve.name;
     this.x = schema.slice(1, coordinateLength + 1);
     this.y = schema.slice(1 + coordinateLength, coordinateLength * 2 + 1);
-    //endregion
+    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.RawData {
     return new asn1js.RawData({
       data: pvutils.utilConcatBuf(
@@ -148,11 +139,7 @@ export class ECPublicKey implements Schema.SchemaCompatible {
     });
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): JsonECPublicKey {
+  public toJSON(): ECPublicKeyJson {
     const namedCurve = ECNamedCurves.find(this.namedCurve);
 
     return {
@@ -163,8 +150,8 @@ export class ECPublicKey implements Schema.SchemaCompatible {
   }
 
   /**
-   * Convert JSON value into current object
-   * @param json
+   * Converts JSON value into current object
+   * @param json JSON object
    */
   public fromJSON(json: any): void {
     ParameterError.assert("json", json, "crv", "x", "y");
@@ -188,7 +175,7 @@ export class ECPublicKey implements Schema.SchemaCompatible {
       this.x = xConvertBuffer.slice(0, coordinateLength);
     }
 
-    // // TODO Simplify Base64url encoding
+    // TODO Simplify Base64url encoding
     const yConvertBuffer = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.y, true));
 
     if (yConvertBuffer.byteLength < coordinateLength) {

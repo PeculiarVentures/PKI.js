@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { DistributionPoint } from "./DistributionPoint";
+import { DistributionPoint, DistributionPointJson } from "./DistributionPoint";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const DISTRIBUTION_POINTS = "distributionPoints";
@@ -8,59 +10,66 @@ const CLEAR_PROPS = [
   DISTRIBUTION_POINTS
 ];
 
-export interface CRLDistributionPointsParameters extends Schema.SchemaConstructor {
-  distributionPoints?: DistributionPoint[];
+export interface ICRLDistributionPoints {
+  distributionPoints: DistributionPoint[];
 }
 
-/**
- * Class from RFC5280
- */
-export class CRLDistributionPoints implements Schema.SchemaCompatible {
+export interface CRLDistributionPointsJson {
+  distributionPoints: DistributionPointJson[];
+}
 
-  public distributionPoints: DistributionPoint[];
+export type CRLDistributionPointsParameters = PkiObjectParameters & Partial<ICRLDistributionPoints>;
+
+/**
+ * Represents the CRLDistributionPoints structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
+ */
+export class CRLDistributionPoints extends PkiObject implements ICRLDistributionPoints {
+
+  public static override CLASS_NAME = "CRLDistributionPoints";
+
+  public distributionPoints!: DistributionPoint[];
 
   /**
-   * Constructor for CRLDistributionPoints class
-   * @param parameters
+   * Initializes a new instance of the {@link CRLDistributionPoints} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: CRLDistributionPointsParameters = {}) {
-    //#region Internal properties of the object
-    this.distributionPoints = pvutils.getParametersValue(parameters, DISTRIBUTION_POINTS, CRLDistributionPoints.defaultValues(DISTRIBUTION_POINTS));
-    //#endregion
+    super();
 
-    //#region If input argument array contains "schema" for this object
+    this.distributionPoints = pvutils.getParametersValue(parameters, DISTRIBUTION_POINTS, CRLDistributionPoints.defaultValues(DISTRIBUTION_POINTS));
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: string): DistributionPoint[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: string): DistributionPoint[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case DISTRIBUTION_POINTS:
         return [];
       default:
-        throw new Error(`Invalid member name for CRLDistributionPoints class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * CRLDistributionPoints ::= SEQUENCE SIZE (1..MAX) OF DistributionPoint
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     distributionPoints?: string;
   }> = {}): Schema.SchemaType {
     /**
@@ -81,16 +90,11 @@ export class CRLDistributionPoints implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       CRLDistributionPoints.schema({
@@ -99,38 +103,23 @@ export class CRLDistributionPoints implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for CRLDistributionPoints");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.distributionPoints = Array.from(asn1.result.distributionPoints, element => new DistributionPoint({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
-      value: Array.from(this.distributionPoints, element => element.toSchema())
+      value: Array.from(this.distributionPoints, o => o.toSchema())
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): CRLDistributionPointsJson {
     return {
-      distributionPoints: Array.from(this.distributionPoints, element => element.toJSON())
+      distributionPoints: Array.from(this.distributionPoints, o => o.toJSON())
     };
   }
 
 }
-

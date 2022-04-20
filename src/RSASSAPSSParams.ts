@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const HASH_ALGORITHM = "hashAlgorithm";
@@ -14,63 +16,73 @@ const CLEAR_PROPS = [
   TRAILER_FIELD
 ];
 
-export interface RSASSAPSSParamsParameters extends Schema.SchemaConstructor {
-  hashAlgorithm?: AlgorithmIdentifier;
-  maskGenAlgorithm?: AlgorithmIdentifier;
+export interface IRSASSAPSSParams {
+  /**
+   * Algorithms of hashing (DEFAULT sha1)
+   */
+  hashAlgorithm: AlgorithmIdentifier;
+  /**
+   * Salt length (DEFAULT 20)
+   */
+  maskGenAlgorithm: AlgorithmIdentifier;
+  /**
+   * Salt length (DEFAULT 20)
+   */
+  saltLength: number;
+  /**
+   * (DEFAULT 1)
+   */
+  trailerField: number;
+}
+
+export interface RSASSAPSSParamsJson {
+  hashAlgorithm?: AlgorithmIdentifierJson;
+  maskGenAlgorithm?: AlgorithmIdentifierJson;
   saltLength?: number;
   trailerField?: number;
 }
 
+export type RSASSAPSSParamsParameters = PkiObjectParameters & Partial<IRSASSAPSSParams>;
+
 /**
- * Class from RFC4055
+ * Represents the RSASSAPSSParams structure described in [RFC4055](https://datatracker.ietf.org/doc/html/rfc4055)
  */
-export class RSASSAPSSParams implements Schema.SchemaCompatible {
+export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
+
+  public static override CLASS_NAME = "RSASSAPSSParams";
+
+  public hashAlgorithm!: AlgorithmIdentifier;
+  public maskGenAlgorithm!: AlgorithmIdentifier;
+  public saltLength!: number;
+  public trailerField!: number;
 
   /**
-   * Algorithms of hashing (DEFAULT sha1)
-   */
-  public hashAlgorithm: AlgorithmIdentifier;
-  /**
-   * Salt length (DEFAULT 20)
-   */
-  public maskGenAlgorithm: AlgorithmIdentifier;
-  /**
-   * Salt length (DEFAULT 20)
-   */
-  public saltLength: number;
-  /**
-   * (DEFAULT 1)
-   */
-  public trailerField: number;
-
-  /**
-   * Constructor for RSASSAPSSParams class
-   * @param parameters
+   * Initializes a new instance of the {@link RSASSAPSSParams} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: RSASSAPSSParamsParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.hashAlgorithm = pvutils.getParametersValue(parameters, HASH_ALGORITHM, RSASSAPSSParams.defaultValues(HASH_ALGORITHM));
     this.maskGenAlgorithm = pvutils.getParametersValue(parameters, MASK_GEN_ALGORITHM, RSASSAPSSParams.defaultValues(MASK_GEN_ALGORITHM));
     this.saltLength = pvutils.getParametersValue(parameters, SALT_LENGTH, RSASSAPSSParams.defaultValues(SALT_LENGTH));
     this.trailerField = pvutils.getParametersValue(parameters, TRAILER_FIELD, RSASSAPSSParams.defaultValues(TRAILER_FIELD));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof HASH_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof MASK_GEN_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof SALT_LENGTH): number;
-  public static defaultValues(memberName: typeof TRAILER_FIELD): number;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof HASH_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof MASK_GEN_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof SALT_LENGTH): number;
+  public static override defaultValues(memberName: typeof TRAILER_FIELD): number;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case HASH_ALGORITHM:
         return new AlgorithmIdentifier({
@@ -90,15 +102,15 @@ export class RSASSAPSSParams implements Schema.SchemaCompatible {
       case TRAILER_FIELD:
         return 1;
       default:
-        throw new Error(`Invalid member name for RSASSAPSSParams class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * RSASSA-PSS-params  ::=  Sequence  {
    *    hashAlgorithm      [0] HashAlgorithm DEFAULT sha1Identifier,
    *    maskGenAlgorithm   [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
@@ -107,9 +119,9 @@ export class RSASSAPSSParams implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     hashAlgorithm?: AlgorithmIdentifierSchema;
     maskGenAlgorithm?: AlgorithmIdentifierSchema;
     saltLength?: string;
@@ -156,16 +168,11 @@ export class RSASSAPSSParams implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       RSASSAPSSParams.schema({
@@ -185,12 +192,9 @@ export class RSASSAPSSParams implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for RSASSAPSSParams");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     if (HASH_ALGORITHM in asn1.result)
       this.hashAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.hashAlgorithm });
 
@@ -202,13 +206,8 @@ export class RSASSAPSSParams implements Schema.SchemaCompatible {
 
     if (TRAILER_FIELD in asn1.result)
       this.trailerField = asn1.result.trailerField.valueBlock.valueDec;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -261,30 +260,26 @@ export class RSASSAPSSParams implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const object: any = {};
+  public toJSON(): RSASSAPSSParamsJson {
+    const res: RSASSAPSSParamsJson = {};
 
     if (!this.hashAlgorithm.isEqual(RSASSAPSSParams.defaultValues(HASH_ALGORITHM))) {
-      object.hashAlgorithm = this.hashAlgorithm.toJSON();
+      res.hashAlgorithm = this.hashAlgorithm.toJSON();
     }
 
     if (!this.maskGenAlgorithm.isEqual(RSASSAPSSParams.defaultValues(MASK_GEN_ALGORITHM))) {
-      object.maskGenAlgorithm = this.maskGenAlgorithm.toJSON();
+      res.maskGenAlgorithm = this.maskGenAlgorithm.toJSON();
     }
 
     if (this.saltLength !== RSASSAPSSParams.defaultValues(SALT_LENGTH)) {
-      object.saltLength = this.saltLength;
+      res.saltLength = this.saltLength;
     }
 
     if (this.trailerField !== RSASSAPSSParams.defaultValues(TRAILER_FIELD)) {
-      object.trailerField = this.trailerField;
+      res.trailerField = this.trailerField;
     }
 
-    return object;
+    return res;
   }
 
 }

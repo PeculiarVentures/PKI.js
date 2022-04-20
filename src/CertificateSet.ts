@@ -1,64 +1,75 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { Certificate } from "./Certificate";
-import { AttributeCertificateV1 } from "./AttributeCertificateV1";
-import { AttributeCertificateV2 } from "./AttributeCertificateV2";
-import { OtherCertificateFormat } from "./OtherCertificateFormat";
+import { Certificate, CertificateJson } from "./Certificate";
+import { AttributeCertificateV1, AttributeCertificateV1Json } from "./AttributeCertificateV1";
+import { AttributeCertificateV2, AttributeCertificateV2Json } from "./AttributeCertificateV2";
+import { OtherCertificateFormat, OtherCertificateFormatJson } from "./OtherCertificateFormat";
 import * as Schema from "./Schema";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { AsnError } from "./errors";
 
 const CERTIFICATES = "certificates";
 const CLEAR_PROPS = [
   CERTIFICATES,
 ];
 
-export type CertificateSetItem = Certificate | AttributeCertificateV1 | AttributeCertificateV2 | OtherCertificateFormat | Schema.SchemaType;
-
-export interface CertificateSetParameters extends Schema.SchemaConstructor {
-  certificates?: Certificate[];
+export interface ICertificateSet {
+  certificates: CertificateSetItem[];
 }
 
-/**
- * Class from RFC5652
- */
-export class CertificateSet implements Schema.SchemaCompatible {
+export interface CertificateSetJson {
+  certificates: CertificateSetItemJson[];
+}
 
-  public certificates: CertificateSetItem[];
+export type CertificateSetItemJson = CertificateJson | AttributeCertificateV1Json | AttributeCertificateV2Json | OtherCertificateFormatJson | Schema.AsnBlockJson;
+
+export type CertificateSetItem = Certificate | AttributeCertificateV1 | AttributeCertificateV2 | OtherCertificateFormat | Schema.SchemaType;
+
+export type CertificateSetParameters = PkiObjectParameters & Partial<ICertificateSet>;
+
+/**
+ * Represents the CertificateSet structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ */
+export class CertificateSet extends PkiObject implements ICertificateSet {
+
+  public static override CLASS_NAME = "CertificateSet";
+
+  public certificates!: CertificateSetItem[];
 
   /**
-   * Constructor for CertificateSet class
-   * @param parameters
+   * Initializes a new instance of the {@link CertificateSet} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: CertificateSetParameters = {}) {
-    //#region Internal properties of the object
-    this.certificates = pvutils.getParametersValue(parameters, CERTIFICATES, CertificateSet.defaultValues(CERTIFICATES));
-    //#endregion
+    super();
 
-    //#region If input argument array contains "schema" for this object
+    this.certificates = pvutils.getParametersValue(parameters, CERTIFICATES, CertificateSet.defaultValues(CERTIFICATES));
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof CERTIFICATES): CertificateSetItem[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof CERTIFICATES): CertificateSetItem[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CERTIFICATES:
         return [];
       default:
-        throw new Error(`Invalid member name for Attribute class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * CertificateSet ::= SET OF CertificateChoices
    *
    * CertificateChoices ::= CHOICE {
@@ -70,9 +81,9 @@ export class CertificateSet implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     certificates?: string;
   }> = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
@@ -126,24 +137,16 @@ export class CertificateSet implements Schema.SchemaCompatible {
     );
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       CertificateSet.schema()
     );
-
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for CertificateSet");
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     this.certificates = Array.from(asn1.result.certificates || [], (element: any) => {
@@ -180,12 +183,8 @@ export class CertificateSet implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Set {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Set({
       value: Array.from(this.certificates, element => {
         switch (true) {
@@ -221,17 +220,12 @@ export class CertificateSet implements Schema.SchemaCompatible {
         return element;
       })
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
+  public toJSON(): CertificateSetJson {
     return {
-      certificates: Array.from(this.certificates, element => element.toJSON())
+      certificates: Array.from(this.certificates, o => o.toJSON())
     };
   }
 
 }
-

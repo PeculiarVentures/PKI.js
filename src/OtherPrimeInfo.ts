@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { ParameterError } from "./errors";
+import { AsnError, ParameterError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const PRIME = "prime";
@@ -12,14 +13,15 @@ const CLEAR_PROPS = [
   COEFFICIENT,
 ];
 
-export interface OtherPrimeInfoParameters extends Schema.SchemaConstructor {
-  prime?: asn1js.Integer;
-  exponent?: asn1js.Integer;
-  coefficient?: asn1js.Integer;
-  json?: JsonOtherPrimeInfo;
+export interface IOtherPrimeInfo {
+  prime: asn1js.Integer;
+  exponent: asn1js.Integer;
+  coefficient: asn1js.Integer;
 }
 
-export interface JsonOtherPrimeInfo {
+export type OtherPrimeInfoParameters = PkiObjectParameters & Partial<IOtherPrimeInfo> & { json?: OtherPrimeInfoJson; };
+
+export interface OtherPrimeInfoJson {
   r: string;
   d: string;
   t: string;
@@ -32,43 +34,43 @@ export type OtherPrimeInfoSchema = Schema.SchemaParameters<{
 }>;
 
 /**
- * Class from RFC3447
+ * Represents the OtherPrimeInfo structure described in [RFC3447](https://datatracker.ietf.org/doc/html/rfc3447)
  */
-export class OtherPrimeInfo implements Schema.SchemaCompatible {
+export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
 
-  public prime: asn1js.Integer;
-  public exponent: asn1js.Integer;
-  public coefficient: asn1js.Integer;
+  public static override CLASS_NAME = "OtherPrimeInfo";
+
+  public prime!: asn1js.Integer;
+  public exponent!: asn1js.Integer;
+  public coefficient!: asn1js.Integer;
 
   /**
-   * Constructor for OtherPrimeInfo class
-   * @param parameters
+   * Initializes a new instance of the {@link OtherPrimeInfo} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: OtherPrimeInfoParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.prime = pvutils.getParametersValue(parameters, PRIME, OtherPrimeInfo.defaultValues(PRIME));
     this.exponent = pvutils.getParametersValue(parameters, EXPONENT, OtherPrimeInfo.defaultValues(EXPONENT));
     this.coefficient = pvutils.getParametersValue(parameters, COEFFICIENT, OtherPrimeInfo.defaultValues(COEFFICIENT));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
-    if (parameters.schema) {
-      this.fromSchema(parameters.schema);
-    }
-    //#endregion
-    //#region If input argument array contains "json" for this object
     if (parameters.json) {
       this.fromJSON(parameters.json);
     }
-    //#endregion
+
+    if (parameters.schema) {
+      this.fromSchema(parameters.schema);
+    }
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof PRIME | typeof EXPONENT | typeof COEFFICIENT): asn1js.Integer;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof PRIME | typeof EXPONENT | typeof COEFFICIENT): asn1js.Integer;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case PRIME:
         return new asn1js.Integer();
@@ -77,15 +79,15 @@ export class OtherPrimeInfo implements Schema.SchemaCompatible {
       case COEFFICIENT:
         return new asn1js.Integer();
       default:
-        throw new Error(`Invalid member name for OtherPrimeInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * OtherPrimeInfo ::= Sequence {
    *    prime             Integer,  -- ri
    *    exponent          Integer,  -- di
@@ -94,9 +96,9 @@ export class OtherPrimeInfo implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: OtherPrimeInfoSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: OtherPrimeInfoSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -109,16 +111,11 @@ export class OtherPrimeInfo implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       OtherPrimeInfo.schema({
@@ -129,10 +126,7 @@ export class OtherPrimeInfo implements Schema.SchemaCompatible {
         }
       })
     );
-
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for OtherPrimeInfo");
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     this.prime = asn1.result.prime.convertFromDER();
@@ -141,12 +135,7 @@ export class OtherPrimeInfo implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: [
         this.prime.convertToDER(),
@@ -154,14 +143,9 @@ export class OtherPrimeInfo implements Schema.SchemaCompatible {
         this.coefficient.convertToDER()
       ]
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): JsonOtherPrimeInfo {
+  public toJSON(): OtherPrimeInfoJson {
     return {
       r: pvutils.toBase64(pvutils.arrayBufferToString(this.prime.valueBlock.valueHex), true, true),
       d: pvutils.toBase64(pvutils.arrayBufferToString(this.exponent.valueBlock.valueHex), true, true),
@@ -170,15 +154,15 @@ export class OtherPrimeInfo implements Schema.SchemaCompatible {
   }
 
   /**
-   * Convert JSON value into current object
-   * @param json
+   * Converts JSON value into current object
+   * @param json JSON object
    */
-  public fromJSON(json: JsonOtherPrimeInfo): void {
+  public fromJSON(json: OtherPrimeInfoJson): void {
     ParameterError.assert("json", json, "r", "d", "r");
+
     this.prime = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.r, true)) });
     this.exponent = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.d, true)) });
     this.coefficient = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.t, true)) });
   }
 
 }
-

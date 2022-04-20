@@ -1,10 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { OriginatorIdentifierOrKey, OriginatorIdentifierOrKeySchema } from "./OriginatorIdentifierOrKey";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { RecipientEncryptedKeys, RecipientEncryptedKeysSchema } from "./RecipientEncryptedKeys";
-import { Certificate } from "./Certificate";
+import { OriginatorIdentifierOrKey, OriginatorIdentifierOrKeyJson, OriginatorIdentifierOrKeySchema } from "./OriginatorIdentifierOrKey";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { RecipientEncryptedKeys, RecipientEncryptedKeysJson, RecipientEncryptedKeysSchema } from "./RecipientEncryptedKeys";
+import { Certificate, CertificateJson } from "./Certificate";
 import * as Schema from "./Schema";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { AsnError } from "./errors";
 
 const VERSION = "version";
 const ORIGINATOR = "originator";
@@ -21,20 +23,7 @@ const CLEAR_PROPS = [
   RECIPIENT_ENCRYPTED_KEY,
 ];
 
-export interface KeyAgreeRecipientInfoParameters extends Schema.SchemaConstructor {
-  version?: number;
-  originator?: OriginatorIdentifierOrKey;
-  ukm?: KeyAgreeRecipientInfo;
-  keyEncryptionAlgorithm?: AlgorithmIdentifier;
-  recipientEncryptedKeys?: RecipientEncryptedKeys;
-  recipientCertificate?: Certificate;
-  recipientPublicKey?: CryptoKey;
-}
-
-/**
- * Class from RFC5652
- */
-export class KeyAgreeRecipientInfo implements Schema.SchemaCompatible {
+export interface IKeyAgreeRecipientInfo {
   version: number;
   originator: OriginatorIdentifierOrKey;
   ukm?: asn1js.OctetString;
@@ -42,43 +31,68 @@ export class KeyAgreeRecipientInfo implements Schema.SchemaCompatible {
   recipientEncryptedKeys: RecipientEncryptedKeys;
   recipientCertificate: Certificate;
   recipientPublicKey: CryptoKey | null;
+}
+
+export interface KeyAgreeRecipientInfoJson {
+  version: number;
+  originator: OriginatorIdentifierOrKeyJson;
+  ukm?: Schema.AsnOctetStringJson;
+  keyEncryptionAlgorithm: AlgorithmIdentifierJson;
+  recipientEncryptedKeys: RecipientEncryptedKeysJson;
+}
+
+export type KeyAgreeRecipientInfoParameters = PkiObjectParameters & Partial<IKeyAgreeRecipientInfo>;
+
+/**
+ * Represents the KeyAgreeRecipientInfo structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ */
+export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipientInfo {
+
+  public static override CLASS_NAME = "KeyAgreeRecipientInfo";
+
+  public version!: number;
+  public originator!: OriginatorIdentifierOrKey;
+  public ukm?: asn1js.OctetString;
+  public keyEncryptionAlgorithm!: AlgorithmIdentifier;
+  public recipientEncryptedKeys!: RecipientEncryptedKeys;
+  public recipientCertificate!: Certificate;
+  public recipientPublicKey!: CryptoKey | null;
 
   /**
-   * Constructor for KeyAgreeRecipientInfo class
-   * @param parameters
+   * Initializes a new instance of the {@link KeyAgreeRecipientInfo} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: KeyAgreeRecipientInfoParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, KeyAgreeRecipientInfo.defaultValues(VERSION));
     this.originator = pvutils.getParametersValue(parameters, ORIGINATOR, KeyAgreeRecipientInfo.defaultValues(ORIGINATOR));
-    if (parameters.ukm) {
+    if (UKM in parameters) {
       this.ukm = pvutils.getParametersValue(parameters, UKM, KeyAgreeRecipientInfo.defaultValues(UKM));
     }
     this.keyEncryptionAlgorithm = pvutils.getParametersValue(parameters, KEY_ENCRYPTION_ALGORITHM, KeyAgreeRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM));
     this.recipientEncryptedKeys = pvutils.getParametersValue(parameters, RECIPIENT_ENCRYPTED_KEY, KeyAgreeRecipientInfo.defaultValues(RECIPIENT_ENCRYPTED_KEY));
     this.recipientCertificate = pvutils.getParametersValue(parameters, RECIPIENT_CERTIFICATE, KeyAgreeRecipientInfo.defaultValues(RECIPIENT_CERTIFICATE));
     this.recipientPublicKey = pvutils.getParametersValue(parameters, RECIPIENT_PUBLIC_KEY, KeyAgreeRecipientInfo.defaultValues(RECIPIENT_PUBLIC_KEY));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof ORIGINATOR): OriginatorIdentifierOrKey;
-  public static defaultValues(memberName: typeof UKM): asn1js.OctetString;
-  public static defaultValues(memberName: typeof KEY_ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof RECIPIENT_ENCRYPTED_KEY): RecipientEncryptedKeys;
-  public static defaultValues(memberName: typeof RECIPIENT_CERTIFICATE): Certificate;
-  public static defaultValues(memberName: typeof RECIPIENT_PUBLIC_KEY): null;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof ORIGINATOR): OriginatorIdentifierOrKey;
+  public static override defaultValues(memberName: typeof UKM): asn1js.OctetString;
+  public static override defaultValues(memberName: typeof KEY_ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof RECIPIENT_ENCRYPTED_KEY): RecipientEncryptedKeys;
+  public static override defaultValues(memberName: typeof RECIPIENT_CERTIFICATE): Certificate;
+  public static override defaultValues(memberName: typeof RECIPIENT_PUBLIC_KEY): null;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 0;
@@ -95,7 +109,7 @@ export class KeyAgreeRecipientInfo implements Schema.SchemaCompatible {
       case RECIPIENT_PUBLIC_KEY:
         return null;
       default:
-        throw new Error(`Invalid member name for KeyAgreeRecipientInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -121,15 +135,15 @@ export class KeyAgreeRecipientInfo implements Schema.SchemaCompatible {
       case RECIPIENT_PUBLIC_KEY:
         return false;
       default:
-        throw new Error(`Invalid member name for KeyAgreeRecipientInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * KeyAgreeRecipientInfo ::= SEQUENCE {
    *    version CMSVersion,  -- always set to 3
    *    originator [0] EXPLICIT OriginatorIdentifierOrKey,
@@ -139,9 +153,9 @@ export class KeyAgreeRecipientInfo implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
     originator?: OriginatorIdentifierOrKeySchema;
     ukm?: string;
@@ -177,16 +191,11 @@ export class KeyAgreeRecipientInfo implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       KeyAgreeRecipientInfo.schema({
@@ -211,27 +220,17 @@ export class KeyAgreeRecipientInfo implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for KeyAgreeRecipientInfo");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.version = asn1.result.version.valueBlock.valueDec;
     this.originator = new OriginatorIdentifierOrKey({ schema: asn1.result.originator });
-
     if (UKM in asn1.result)
       this.ukm = asn1.result.ukm;
-
     this.keyEncryptionAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.keyEncryptionAlgorithm });
     this.recipientEncryptedKeys = new RecipientEncryptedKeys({ schema: asn1.result.recipientEncryptedKeys });
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for final sequence
     const outputArray = [];
@@ -271,20 +270,19 @@ export class KeyAgreeRecipientInfo implements Schema.SchemaCompatible {
    * Conversion for the class to JSON object
    * @returns
    */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): KeyAgreeRecipientInfoJson {
+    const res: KeyAgreeRecipientInfoJson = {
       version: this.version,
-      originator: this.originator.toJSON()
+      originator: this.originator.toJSON(),
+      keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
+      recipientEncryptedKeys: this.recipientEncryptedKeys.toJSON(),
     };
 
     if (this.ukm) {
-      _object.ukm = this.ukm.toJSON();
+      res.ukm = this.ukm.toJSON() as Schema.AsnOctetStringJson;
     }
 
-    _object.keyEncryptionAlgorithm = this.keyEncryptionAlgorithm.toJSON();
-    _object.recipientEncryptedKeys = this.recipientEncryptedKeys.toJSON();
-
-    return _object;
+    return res;
   }
 
 }

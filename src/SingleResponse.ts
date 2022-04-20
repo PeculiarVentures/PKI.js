@@ -1,8 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { CertID, CertIDSchema } from "./CertID";
-import { Extension } from "./Extension";
+import { CertID, CertIDJson, CertIDSchema } from "./CertID";
+import { AsnError } from "./errors";
+import { Extension, ExtensionJson } from "./Extension";
 import { Extensions, ExtensionsSchema } from "./Extensions";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const CERT_ID = "certID";
@@ -18,13 +20,15 @@ const CLEAR_PROPS = [
   SINGLE_EXTENSIONS,
 ];
 
-export interface SingleResponseParameters extends Schema.SchemaConstructor {
-  certID?: CertID;
-  certStatus?: any;
-  thisUpdate?: Date;
+export interface ISingleResponse {
+  certID: CertID;
+  certStatus: any;
+  thisUpdate: Date;
   nextUpdate?: Date;
   singleExtensions?: Extension[];
 }
+
+export type SingleResponseParameters = PkiObjectParameters & Partial<ISingleResponse>;
 
 export type SingleResponseSchema = Schema.SchemaParameters<{
   certID?: CertIDSchema;
@@ -34,50 +38,60 @@ export type SingleResponseSchema = Schema.SchemaParameters<{
   singleExtensions?: ExtensionsSchema;
 }>;
 
-/**
- * Class from RFC6960
- */
-export class SingleResponse implements Schema.SchemaCompatible {
-  certID: CertID;
+export interface SingleResponseJson {
+  certID: CertIDJson;
   certStatus: any;
   thisUpdate: Date;
+  nextUpdate?: Date;
+  singleExtensions?: ExtensionJson[];
+}
+
+/**
+ * Represents an SingleResponse described in [RFC6960](https://datatracker.ietf.org/doc/html/rfc6960)
+ */
+export class SingleResponse extends PkiObject implements ISingleResponse {
+
+  public static override CLASS_NAME = "SingleResponse";
+
+  certID!: CertID;
+  certStatus: any;
+  thisUpdate!: Date;
   nextUpdate?: Date;
   singleExtensions?: Extension[];
 
   /**
-   * Constructor for SingleResponse class
-   * @param parameters
+   * Initializes a new instance of the {@link SingleResponse} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: SingleResponseParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.certID = pvutils.getParametersValue(parameters, CERT_ID, SingleResponse.defaultValues(CERT_ID));
     this.certStatus = pvutils.getParametersValue(parameters, CERT_STATUS, SingleResponse.defaultValues(CERT_STATUS));
     this.thisUpdate = pvutils.getParametersValue(parameters, THIS_UPDATE, SingleResponse.defaultValues(THIS_UPDATE));
-    if (parameters.nextUpdate) {
+    if (NEXT_UPDATE in parameters) {
       this.nextUpdate = pvutils.getParametersValue(parameters, NEXT_UPDATE, SingleResponse.defaultValues(NEXT_UPDATE));
     }
-    if (parameters.singleExtensions) {
+    if (SINGLE_EXTENSIONS in parameters) {
       this.singleExtensions = pvutils.getParametersValue(parameters, SINGLE_EXTENSIONS, SingleResponse.defaultValues(SINGLE_EXTENSIONS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof CERT_ID): CertID;
-  public static defaultValues(memberName: typeof CERT_STATUS): any;
-  public static defaultValues(memberName: typeof THIS_UPDATE): Date;
-  public static defaultValues(memberName: typeof NEXT_UPDATE): Date;
-  public static defaultValues(memberName: typeof SINGLE_EXTENSIONS): Extension[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof CERT_ID): CertID;
+  public static override defaultValues(memberName: typeof CERT_STATUS): any;
+  public static override defaultValues(memberName: typeof THIS_UPDATE): Date;
+  public static override defaultValues(memberName: typeof NEXT_UPDATE): Date;
+  public static override defaultValues(memberName: typeof SINGLE_EXTENSIONS): Extension[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CERT_ID:
         return new CertID();
@@ -89,7 +103,7 @@ export class SingleResponse implements Schema.SchemaCompatible {
       case SINGLE_EXTENSIONS:
         return [];
       default:
-        throw new Error(`Invalid member name for SingleResponse class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -112,15 +126,15 @@ export class SingleResponse implements Schema.SchemaCompatible {
       case NEXT_UPDATE:
         return (memberValue === SingleResponse.defaultValues(memberName as typeof NEXT_UPDATE));
       default:
-        throw new Error(`Invalid member name for SingleResponse class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * SingleResponse ::= SEQUENCE {
    *    certID                       CertID,
    *    certStatus                   CertStatus,
@@ -141,9 +155,9 @@ export class SingleResponse implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: SingleResponseSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: SingleResponseSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -209,16 +223,11 @@ export class SingleResponse implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       SingleResponse.schema({
@@ -240,29 +249,20 @@ export class SingleResponse implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for SingleResponse");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.certID = new CertID({ schema: asn1.result.certID });
     this.certStatus = asn1.result.certStatus;
     this.thisUpdate = asn1.result.thisUpdate.toDate();
     if (NEXT_UPDATE in asn1.result)
       this.nextUpdate = asn1.result.nextUpdate.toDate();
-
     if (SINGLE_EXTENSIONS in asn1.result)
       this.singleExtensions = Array.from(asn1.result.singleExtensions.valueBlock.value, element => new Extension({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Create value array for output sequence
+    // Create value array for output sequence
     const outputArray = [];
 
     outputArray.push(this.certID.toSchema());
@@ -280,38 +280,31 @@ export class SingleResponse implements Schema.SchemaCompatible {
 
     if (this.singleExtensions) {
       outputArray.push(new asn1js.Sequence({
-        value: Array.from(this.singleExtensions, element => element.toSchema())
+        value: Array.from(this.singleExtensions, o => o.toSchema())
       }));
     }
-    //#endregion
 
-    //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: outputArray
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): SingleResponseJson {
+    const res: SingleResponseJson = {
       certID: this.certID.toJSON(),
       certStatus: this.certStatus.toJSON(),
       thisUpdate: this.thisUpdate
     };
 
     if (this.nextUpdate) {
-      _object.nextUpdate = this.nextUpdate;
+      res.nextUpdate = this.nextUpdate;
     }
 
     if (this.singleExtensions) {
-      _object.singleExtensions = Array.from(this.singleExtensions, element => element.toJSON());
+      res.singleExtensions = Array.from(this.singleExtensions, o => o.toJSON());
     }
 
-    return _object;
+    return res;
   }
 
 }

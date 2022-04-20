@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { GeneralName, GeneralNameSchema } from "./GeneralName";
+import { AsnError } from "./errors";
+import { GeneralName, GeneralNameJson, GeneralNameSchema } from "./GeneralName";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const BASE = "base";
@@ -12,50 +14,58 @@ const CLEAR_PROPS = [
   MAXIMUM
 ];
 
-export interface GeneralSubtreeParameters extends Schema.SchemaConstructor {
-  base?: GeneralName;
-  minimum?: number | asn1js.Integer;
+export interface IGeneralSubtree {
+  base: GeneralName;
+  minimum: number | asn1js.Integer;
   maximum?: number | asn1js.Integer;
 }
 
-/**
- * Class from RFC5280
- */
-export class GeneralSubtree implements Schema.SchemaCompatible {
+export interface GeneralSubtreeJson {
+  base: GeneralNameJson;
+  minimum?: number | Schema.AsnIntegerJson;
+  maximum?: number | Schema.AsnIntegerJson;
+}
 
-  public base: GeneralName;
-  public minimum: number | asn1js.Integer;
+export type GeneralSubtreeParameters = PkiObjectParameters & Partial<IGeneralSubtree>;
+
+/**
+ * Represents the GeneralSubtree structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
+ */
+export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
+
+  public static override CLASS_NAME = "GeneralSubtree";
+
+  public base!: GeneralName;
+  public minimum!: number | asn1js.Integer;
   public maximum?: number | asn1js.Integer;
 
   /**
-   * Constructor for GeneralSubtree class
-   * @param parameters
+   * Initializes a new instance of the {@link GeneralSubtree} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: GeneralSubtreeParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.base = pvutils.getParametersValue(parameters, BASE, GeneralSubtree.defaultValues(BASE));
     this.minimum = pvutils.getParametersValue(parameters, MINIMUM, GeneralSubtree.defaultValues(MINIMUM));
-
     if (MAXIMUM in parameters) {
       this.maximum = pvutils.getParametersValue(parameters, MAXIMUM, GeneralSubtree.defaultValues(MAXIMUM));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof BASE): GeneralName;
-  public static defaultValues(memberName: typeof MINIMUM): number;
-  public static defaultValues(memberName: typeof MAXIMUM): number;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof BASE): GeneralName;
+  public static override defaultValues(memberName: typeof MINIMUM): number;
+  public static override defaultValues(memberName: typeof MAXIMUM): number;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case BASE:
         return new GeneralName();
@@ -64,15 +74,15 @@ export class GeneralSubtree implements Schema.SchemaCompatible {
       case MAXIMUM:
         return 0;
       default:
-        throw new Error(`Invalid member name for GeneralSubtree class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * GeneralSubtree ::= SEQUENCE {
    *    base                    GeneralName,
    *    minimum         [0]     BaseDistance DEFAULT 0,
@@ -82,9 +92,9 @@ export class GeneralSubtree implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     base?: GeneralNameSchema;
     minimum?: string;
     maximum?: string;
@@ -115,16 +125,11 @@ export class GeneralSubtree implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       GeneralSubtree.schema({
@@ -139,12 +144,9 @@ export class GeneralSubtree implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for GeneralSubtree");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.base = new GeneralName({ schema: asn1.result.base });
 
     if (MINIMUM in asn1.result) {
@@ -160,13 +162,8 @@ export class GeneralSubtree implements Schema.SchemaCompatible {
       else
         this.maximum = asn1.result.maximum.valueBlock.valueDec;
     }
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -219,32 +216,28 @@ export class GeneralSubtree implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const object: any = {
+  public toJSON(): GeneralSubtreeJson {
+    const res: GeneralSubtreeJson = {
       base: this.base.toJSON()
     };
 
     if (this.minimum !== 0) {
       if (typeof this.minimum === "number") {
-        object.minimum = this.minimum;
+        res.minimum = this.minimum;
       } else {
-        object.minimum = this.minimum.toJSON();
+        res.minimum = this.minimum.toJSON() as Schema.AsnIntegerJson;
       }
     }
 
     if (this.maximum !== undefined) {
       if (typeof this.maximum === "number") {
-        object.maximum = this.maximum;
+        res.maximum = this.maximum;
       } else {
-        object.maximum = this.maximum.toJSON();
+        res.maximum = this.maximum.toJSON() as Schema.AsnIntegerJson;
       }
     }
 
-    return object;
+    return res;
   }
 
 }

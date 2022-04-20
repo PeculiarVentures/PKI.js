@@ -1,11 +1,13 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { MessageImprint, HASHED_MESSAGE, HASH_ALGORITHM, MessageImprintSchema } from "./MessageImprint";
-import { Accuracy, AccuracySchema, MICROS, MILLIS, SECONDS } from "./Accuracy";
-import { GeneralName, GeneralNameSchema, TYPE, VALUE } from "./GeneralName";
-import { Extension, ExtensionSchema } from "./Extension";
+import { MessageImprint, HASHED_MESSAGE, HASH_ALGORITHM, MessageImprintSchema, MessageImprintJson } from "./MessageImprint";
+import { Accuracy, AccuracyJson, AccuracySchema, MICROS, MILLIS, SECONDS } from "./Accuracy";
+import { GeneralName, GeneralNameJson, GeneralNameSchema, TYPE, VALUE } from "./GeneralName";
+import { Extension, ExtensionJson, ExtensionSchema } from "./Extension";
 import * as Schema from "./Schema";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { AsnError } from "./errors";
 
 const VERSION = "version";
 const POLICY = "policy";
@@ -41,18 +43,33 @@ const CLEAR_PROPS = [
   TST_INFO_EXTENSIONS
 ];
 
-export interface TSTInfoParameters extends Schema.SchemaConstructor {
-  version?: number;
-  policy?: string;
-  messageImprint?: MessageImprint;
-  serialNumber?: asn1js.Integer;
-  genTime?: Date;
+export interface ITSTInfo {
+  version: number;
+  policy: string;
+  messageImprint: MessageImprint;
+  serialNumber: asn1js.Integer;
+  genTime: Date;
   accuracy?: Accuracy;
   ordering?: boolean;
   nonce?: asn1js.Integer;
   tsa?: GeneralName;
   extensions?: Extension[];
 }
+
+export interface TSTInfoJson {
+  version: number;
+  policy: string;
+  messageImprint: MessageImprintJson;
+  serialNumber: Schema.AsnIntegerJson;
+  genTime: Date;
+  accuracy?: AccuracyJson;
+  ordering?: boolean;
+  nonce?: Schema.AsnIntegerJson;
+  tsa?: GeneralNameJson;
+  extensions?: ExtensionJson[];
+}
+
+export type TSTInfoParameters = PkiObjectParameters & Partial<ITSTInfo>;
 
 export interface TSTInfoVerifyParams {
   data: ArrayBuffer;
@@ -61,15 +78,17 @@ export interface TSTInfoVerifyParams {
 }
 
 /**
- * Class from RFC3161
+ * Represents the TSTInfo structure described in [RFC3161](https://www.ietf.org/rfc/rfc3161.txt)
  */
-export class TSTInfo implements Schema.SchemaCompatible {
+export class TSTInfo extends PkiObject implements ITSTInfo {
 
-  public version: number;
-  public policy: string;
-  public messageImprint: MessageImprint;
-  public serialNumber: asn1js.Integer;
-  public genTime: Date;
+  public static override CLASS_NAME = "TSTInfo";
+
+  public version!: number;
+  public policy!: string;
+  public messageImprint!: MessageImprint;
+  public serialNumber!: asn1js.Integer;
+  public genTime!: Date;
   public accuracy?: Accuracy;
   public ordering?: boolean;
   public nonce?: asn1js.Integer;
@@ -77,19 +96,19 @@ export class TSTInfo implements Schema.SchemaCompatible {
   public extensions?: Extension[];
 
   /**
-   * Constructor for TSTInfo class
-   * @param parameters
-   * @param {Object} [parameters.schema] asn1js parsed value to initialize the class from
+   * Initializes a new instance of the {@link TSTInfo} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: TSTInfoParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, TSTInfo.defaultValues(VERSION));
     this.policy = pvutils.getParametersValue(parameters, POLICY, TSTInfo.defaultValues(POLICY));
     this.messageImprint = pvutils.getParametersValue(parameters, MESSAGE_IMPRINT, TSTInfo.defaultValues(MESSAGE_IMPRINT));
     this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, TSTInfo.defaultValues(SERIAL_NUMBER));
     this.genTime = pvutils.getParametersValue(parameters, GEN_TIME, TSTInfo.defaultValues(GEN_TIME));
 
-    if (parameters.accuracy) {
+    if (ACCURACY in parameters) {
       this.accuracy = pvutils.getParametersValue(parameters, ACCURACY, TSTInfo.defaultValues(ACCURACY));
     }
 
@@ -97,41 +116,39 @@ export class TSTInfo implements Schema.SchemaCompatible {
       this.ordering = pvutils.getParametersValue(parameters, ORDERING, TSTInfo.defaultValues(ORDERING));
     }
 
-    if (parameters.nonce) {
+    if (NONCE in parameters) {
       this.nonce = pvutils.getParametersValue(parameters, NONCE, TSTInfo.defaultValues(NONCE));
     }
 
-    if (parameters.tsa) {
+    if (TSA in parameters) {
       this.tsa = pvutils.getParametersValue(parameters, TSA, TSTInfo.defaultValues(TSA));
     }
 
-    if (parameters.extensions) {
+    if (EXTENSIONS in parameters) {
       this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, TSTInfo.defaultValues(EXTENSIONS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof POLICY): string;
-  public static defaultValues(memberName: typeof MESSAGE_IMPRINT): MessageImprint;
-  public static defaultValues(memberName: typeof SERIAL_NUMBER): asn1js.Integer;
-  public static defaultValues(memberName: typeof GEN_TIME): Date;
-  public static defaultValues(memberName: typeof ACCURACY): Accuracy;
-  public static defaultValues(memberName: typeof ORDERING): boolean;
-  public static defaultValues(memberName: typeof NONCE): asn1js.Integer;
-  public static defaultValues(memberName: typeof TSA): GeneralName;
-  public static defaultValues(memberName: typeof EXTENSIONS): Extension[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof POLICY): string;
+  public static override defaultValues(memberName: typeof MESSAGE_IMPRINT): MessageImprint;
+  public static override defaultValues(memberName: typeof SERIAL_NUMBER): asn1js.Integer;
+  public static override defaultValues(memberName: typeof GEN_TIME): Date;
+  public static override defaultValues(memberName: typeof ACCURACY): Accuracy;
+  public static override defaultValues(memberName: typeof ORDERING): boolean;
+  public static override defaultValues(memberName: typeof NONCE): asn1js.Integer;
+  public static override defaultValues(memberName: typeof TSA): GeneralName;
+  public static override defaultValues(memberName: typeof EXTENSIONS): Extension[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 0;
@@ -154,7 +171,7 @@ export class TSTInfo implements Schema.SchemaCompatible {
       case EXTENSIONS:
         return [];
       default:
-        throw new Error(`Invalid member name for TSTInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -186,15 +203,15 @@ export class TSTInfo implements Schema.SchemaCompatible {
       case EXTENSIONS:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for TSTInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * TSTInfo ::= SEQUENCE  {
    *   version                      INTEGER  { v1(1) },
    *   policy                       TSAPolicyId,
@@ -209,9 +226,9 @@ export class TSTInfo implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
     policy?: string;
     messageImprint?: MessageImprintSchema;
@@ -280,26 +297,18 @@ export class TSTInfo implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       TSTInfo.schema()
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for TSTInfo");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.version = asn1.result[TST_INFO_VERSION].valueBlock.valueDec;
     this.policy = asn1.result[TST_INFO_POLICY].valueBlock.toString();
     this.messageImprint = new MessageImprint({ schema: asn1.result[TST_INFO_MESSAGE_IMPRINT] });
@@ -315,13 +324,8 @@ export class TSTInfo implements Schema.SchemaCompatible {
       this.tsa = new GeneralName({ schema: asn1.result[TST_INFO_TSA] });
     if (TST_INFO_EXTENSIONS in asn1.result)
       this.extensions = Array.from(asn1.result[TST_INFO_EXTENSIONS], element => new Extension({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -356,7 +360,7 @@ export class TSTInfo implements Schema.SchemaCompatible {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 1 // [1]
         },
-        value: Array.from(this.extensions, element => element.toSchema())
+        value: Array.from(this.extensions, o => o.toSchema())
       }));
     }
     //#endregion
@@ -369,35 +373,31 @@ export class TSTInfo implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): TSTInfoJson {
+    const res: TSTInfoJson = {
       version: this.version,
       policy: this.policy,
       messageImprint: this.messageImprint.toJSON(),
-      serialNumber: this.serialNumber.toJSON(),
+      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
       genTime: this.genTime
     };
 
     if (this.accuracy)
-      _object.accuracy = this.accuracy.toJSON();
+      res.accuracy = this.accuracy.toJSON();
 
     if (this.ordering !== undefined)
-      _object.ordering = this.ordering;
+      res.ordering = this.ordering;
 
     if (this.nonce)
-      _object.nonce = this.nonce.toJSON();
+      res.nonce = this.nonce.toJSON() as Schema.AsnIntegerJson;
 
     if (this.tsa)
-      _object.tsa = this.tsa.toJSON();
+      res.tsa = this.tsa.toJSON();
 
     if (this.extensions)
-      _object.extensions = Array.from(this.extensions, element => element.toJSON());
+      res.extensions = Array.from(this.extensions, o => o.toJSON());
 
-    return _object;
+    return res;
   }
 
   /**

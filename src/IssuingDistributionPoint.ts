@@ -1,7 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { GeneralName } from "./GeneralName";
-import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
+import { AsnError } from "./errors";
+import { GeneralName, GeneralNameJson } from "./GeneralName";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { RelativeDistinguishedNames, RelativeDistinguishedNamesJson } from "./RelativeDistinguishedNames";
 import * as Schema from "./Schema";
 
 const DISTRIBUTION_POINT = "distributionPoint";
@@ -21,10 +23,17 @@ const CLEAR_PROPS = [
   ONLY_CONTAINS_ATTRIBUTE_CERTS,
 ];
 
-export type DistributionPointName = GeneralName[] | RelativeDistinguishedNames;
-
-export interface IssuingDistributionPointParameters extends Schema.SchemaConstructor {
+export interface IIssuingDistributionPoint {
   distributionPoint?: DistributionPointName;
+  onlyContainsUserCerts: boolean;
+  onlyContainsCACerts: boolean;
+  onlySomeReasons?: number;
+  indirectCRL: boolean;
+  onlyContainsAttributeCerts: boolean;
+}
+
+export interface IssuingDistributionPointJson {
+  distributionPoint?: DistributionPointNameJson;
   onlyContainsUserCerts?: boolean;
   onlyContainsCACerts?: boolean;
   onlySomeReasons?: number;
@@ -32,24 +41,33 @@ export interface IssuingDistributionPointParameters extends Schema.SchemaConstru
   onlyContainsAttributeCerts?: boolean;
 }
 
+export type DistributionPointName = GeneralName[] | RelativeDistinguishedNames;
+export type DistributionPointNameJson = GeneralNameJson[] | RelativeDistinguishedNamesJson;
+
+export type IssuingDistributionPointParameters = PkiObjectParameters & Partial<IIssuingDistributionPoint>;
+
 /**
- * Class from RFC5280
+ * Represents the IssuingDistributionPoint structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
-export class IssuingDistributionPoint {
+export class IssuingDistributionPoint extends PkiObject implements IIssuingDistributionPoint {
+
+  public static override CLASS_NAME = "IssuingDistributionPoint";
 
   public distributionPoint?: DistributionPointName;
-  public onlyContainsUserCerts: boolean;
-  public onlyContainsCACerts: boolean;
+  public onlyContainsUserCerts!: boolean;
+  public onlyContainsCACerts!: boolean;
   public onlySomeReasons?: number;
-  public indirectCRL: boolean;
-  public onlyContainsAttributeCerts: boolean;
+  public indirectCRL!: boolean;
+  public onlyContainsAttributeCerts!: boolean;
+
   /**
-   * Constructor for IssuingDistributionPoint class
-   * @param parameters
+   * Initializes a new instance of the {@link IssuingDistributionPoint} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: IssuingDistributionPointParameters = {}) {
-    //#region Internal properties of the object
-    if (parameters.distributionPoint) {
+    super();
+
+    if (DISTRIBUTION_POINT in parameters) {
       this.distributionPoint = pvutils.getParametersValue(parameters, DISTRIBUTION_POINT, IssuingDistributionPoint.defaultValues(DISTRIBUTION_POINT));
     }
 
@@ -60,26 +78,24 @@ export class IssuingDistributionPoint {
     }
     this.indirectCRL = pvutils.getParametersValue(parameters, INDIRECT_CRL, IssuingDistributionPoint.defaultValues(INDIRECT_CRL));
     this.onlyContainsAttributeCerts = pvutils.getParametersValue(parameters, ONLY_CONTAINS_ATTRIBUTE_CERTS, IssuingDistributionPoint.defaultValues(ONLY_CONTAINS_ATTRIBUTE_CERTS));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof DISTRIBUTION_POINT): DistributionPointName;
-  public static defaultValues(memberName: typeof ONLY_CONTAINS_USER_CERTS): boolean;
-  public static defaultValues(memberName: typeof ONLY_CONTAINS_CA_CERTS): boolean;
-  public static defaultValues(memberName: typeof ONLY_SOME_REASON): number;
-  public static defaultValues(memberName: typeof INDIRECT_CRL): boolean;
-  public static defaultValues(memberName: typeof ONLY_CONTAINS_ATTRIBUTE_CERTS): boolean;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof DISTRIBUTION_POINT): DistributionPointName;
+  public static override defaultValues(memberName: typeof ONLY_CONTAINS_USER_CERTS): boolean;
+  public static override defaultValues(memberName: typeof ONLY_CONTAINS_CA_CERTS): boolean;
+  public static override defaultValues(memberName: typeof ONLY_SOME_REASON): number;
+  public static override defaultValues(memberName: typeof INDIRECT_CRL): boolean;
+  public static override defaultValues(memberName: typeof ONLY_CONTAINS_ATTRIBUTE_CERTS): boolean;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case DISTRIBUTION_POINT:
         return [];
@@ -94,15 +110,15 @@ export class IssuingDistributionPoint {
       case ONLY_CONTAINS_ATTRIBUTE_CERTS:
         return false;
       default:
-        throw new Error(`Invalid member name for IssuingDistributionPoint class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * IssuingDistributionPoint ::= SEQUENCE {
    *    distributionPoint          [0] DistributionPointName OPTIONAL,
    *    onlyContainsUserCerts      [1] BOOLEAN DEFAULT FALSE,
@@ -124,9 +140,9 @@ export class IssuingDistributionPoint {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     distributionPoint?: string;
     distributionPointNames?: string;
     onlyContainsUserCerts?: string;
@@ -218,16 +234,11 @@ export class IssuingDistributionPoint {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       IssuingDistributionPoint.schema({
@@ -242,13 +253,9 @@ export class IssuingDistributionPoint {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for IssuingDistributionPoint");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     if (DISTRIBUTION_POINT in asn1.result) {
       switch (true) {
         case (asn1.result.distributionPoint.idBlock.tagNumber === 0): // GENERAL_NAMES variant
@@ -292,13 +299,8 @@ export class IssuingDistributionPoint {
       const view = new Uint8Array(asn1.result.onlyContainsAttributeCerts.valueBlock.valueHex);
       this.onlyContainsAttributeCerts = (view[0] !== 0x00);
     }
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -312,7 +314,7 @@ export class IssuingDistributionPoint {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          value: Array.from(this.distributionPoint, element => element.toSchema())
+          value: Array.from(this.distributionPoint, o => o.toSchema())
         });
       } else if (this.distributionPoint) {
         value = this.distributionPoint.toSchema();
@@ -393,41 +395,38 @@ export class IssuingDistributionPoint {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
-    const object: any = {};
+  public toJSON(): IssuingDistributionPointJson {
+    const obj: IssuingDistributionPointJson = {};
 
     if (this.distributionPoint) {
       if (this.distributionPoint instanceof Array) {
-        object.distributionPoint = Array.from(this.distributionPoint, element => element.toJSON());
+        obj.distributionPoint = Array.from(this.distributionPoint, o => o.toJSON());
       } else {
-        object.distributionPoint = this.distributionPoint.toJSON();
+        obj.distributionPoint = this.distributionPoint.toJSON();
       }
     }
 
     if (this.onlyContainsUserCerts !== IssuingDistributionPoint.defaultValues(ONLY_CONTAINS_USER_CERTS)) {
-      object.onlyContainsUserCerts = this.onlyContainsUserCerts;
+      obj.onlyContainsUserCerts = this.onlyContainsUserCerts;
     }
 
     if (this.onlyContainsCACerts !== IssuingDistributionPoint.defaultValues(ONLY_CONTAINS_CA_CERTS)) {
-      object.onlyContainsCACerts = this.onlyContainsCACerts;
+      obj.onlyContainsCACerts = this.onlyContainsCACerts;
     }
 
     if (ONLY_SOME_REASON in this) {
-      object.onlySomeReasons = this.onlySomeReasons;
+      obj.onlySomeReasons = this.onlySomeReasons;
     }
 
     if (this.indirectCRL !== IssuingDistributionPoint.defaultValues(INDIRECT_CRL)) {
-      object.indirectCRL = this.indirectCRL;
+      obj.indirectCRL = this.indirectCRL;
     }
 
     if (this.onlyContainsAttributeCerts !== IssuingDistributionPoint.defaultValues(ONLY_CONTAINS_ATTRIBUTE_CERTS)) {
-      object.onlyContainsAttributeCerts = this.onlyContainsAttributeCerts;
+      obj.onlyContainsAttributeCerts = this.onlyContainsAttributeCerts;
     }
 
-    return object;
+    return obj;
   }
 
 }

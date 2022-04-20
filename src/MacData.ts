@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { DigestInfo, DigestInfoSchema } from "./DigestInfo";
+import { DigestInfo, DigestInfoJson, DigestInfoSchema } from "./DigestInfo";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const MAC = "mac";
@@ -12,11 +14,19 @@ const CLEAR_PROPS = [
   ITERATIONS
 ];
 
-export interface MacDataParameters extends Schema.SchemaConstructor {
-  mac?: DigestInfo;
-  macSalt?: asn1js.OctetString;
+export interface IMacData {
+  mac: DigestInfo;
+  macSalt: asn1js.OctetString;
   iterations?: number;
 }
+
+export interface MacDataJson {
+  mac: DigestInfoJson;
+  macSalt: Schema.AsnOctetStringJson;
+  iterations?: number;
+}
+
+export type MacDataParameters = PkiObjectParameters & Partial<IMacData>;
 
 export type MacDataSchema = Schema.SchemaParameters<{
   mac?: DigestInfoSchema;
@@ -25,42 +35,43 @@ export type MacDataSchema = Schema.SchemaParameters<{
 }>;
 
 /**
- * Class from RFC7292
+ * Represents the MacData structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
-export class MacData implements Schema.SchemaCompatible {
+export class MacData extends PkiObject implements IMacData {
 
-  public mac: DigestInfo;
-  public macSalt: asn1js.OctetString;
+  public static override CLASS_NAME = "MacData";
+
+  public mac!: DigestInfo;
+  public macSalt!: asn1js.OctetString;
   public iterations?: number;
 
   /**
-   * Constructor for MacData class
-   * @param parameters
+   * Initializes a new instance of the {@link MacData} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: MacDataParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.mac = pvutils.getParametersValue(parameters, MAC, MacData.defaultValues(MAC));
     this.macSalt = pvutils.getParametersValue(parameters, MAC_SALT, MacData.defaultValues(MAC_SALT));
-    if (parameters.iterations !== undefined) {
+    if (ITERATIONS in parameters) {
       this.iterations = pvutils.getParametersValue(parameters, ITERATIONS, MacData.defaultValues(ITERATIONS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof MAC): DigestInfo;
-  public static defaultValues(memberName: typeof MAC_SALT): asn1js.OctetString;
-  public static defaultValues(memberName: typeof ITERATIONS): number;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof MAC): DigestInfo;
+  public static override defaultValues(memberName: typeof MAC_SALT): asn1js.OctetString;
+  public static override defaultValues(memberName: typeof ITERATIONS): number;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case MAC:
         return new DigestInfo();
@@ -69,7 +80,7 @@ export class MacData implements Schema.SchemaCompatible {
       case ITERATIONS:
         return 1;
       default:
-        throw new Error(`Invalid member name for MacData class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -88,28 +99,28 @@ export class MacData implements Schema.SchemaCompatible {
       case ITERATIONS:
         return (memberValue === MacData.defaultValues(memberName));
       default:
-        throw new Error(`Invalid member name for MacData class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * MacData ::= SEQUENCE {
-   *    mac 		DigestInfo,
+   *    mac           DigestInfo,
    *    macSalt       OCTET STRING,
-   *    iterations	INTEGER DEFAULT 1
+   *    iterations    INTEGER DEFAULT 1
    *    -- Note: The default is for historical reasons and its use is
    *    -- deprecated. A higher value, like 1024 is recommended.
    *    }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: MacDataSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: MacDataSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -130,16 +141,11 @@ export class MacData implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       MacData.schema({
@@ -154,24 +160,15 @@ export class MacData implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for MacData");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.mac = new DigestInfo({ schema: asn1.result.mac });
     this.macSalt = asn1.result.macSalt;
-
     if (ITERATIONS in asn1.result)
       this.iterations = asn1.result.iterations.valueBlock.valueDec;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     const outputArray: any[] = [
@@ -189,20 +186,17 @@ export class MacData implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const output: any = {
+  public toJSON(): MacDataJson {
+    const res: MacDataJson = {
       mac: this.mac.toJSON(),
-      macSalt: this.macSalt.toJSON()
+      macSalt: this.macSalt.toJSON() as Schema.AsnOctetStringJson,
     };
 
-    if (this.iterations !== undefined)
-      output.iterations = this.iterations;
+    if (this.iterations !== undefined) {
+      res.iterations = this.iterations;
+    }
 
-    return output;
+    return res;
   }
 
 }

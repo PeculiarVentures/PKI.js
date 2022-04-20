@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { PolicyMapping } from "./PolicyMapping";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PolicyMapping, PolicyMappingJson } from "./PolicyMapping";
 import * as Schema from "./Schema";
 
 const MAPPINGS = "mappings";
@@ -8,59 +10,66 @@ const CLEAR_PROPS = [
   MAPPINGS,
 ];
 
-export interface PolicyMappingsParameters extends Schema.SchemaConstructor {
-  mappings?: PolicyMapping[];
+export interface IPolicyMappings {
+  mappings: PolicyMapping[];
 }
 
-/**
- * Class from RFC5280
- */
-export class PolicyMappings {
+export interface PolicyMappingsJson {
+  mappings: PolicyMappingJson[];
+}
 
-  public mappings: PolicyMapping[];
+export type PolicyMappingsParameters = PkiObjectParameters & Partial<IPolicyMappings>;
+
+/**
+ * Represents the PolicyMappings structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
+ */
+export class PolicyMappings extends PkiObject implements IPolicyMappings {
+
+  public static override CLASS_NAME = "PolicyMappings";
+
+  public mappings!: PolicyMapping[];
 
   /**
-   * Constructor for PolicyMappings class
-   * @param parameters
+   * Initializes a new instance of the {@link PolicyMappings} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: PolicyMappingsParameters = {}) {
-    //#region Internal properties of the object
-    this.mappings = pvutils.getParametersValue(parameters, MAPPINGS, PolicyMappings.defaultValues(MAPPINGS));
-    //#endregion
+    super();
 
-    //#region If input argument array contains "schema" for this object
+    this.mappings = pvutils.getParametersValue(parameters, MAPPINGS, PolicyMappings.defaultValues(MAPPINGS));
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: string): PolicyMapping[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: string): PolicyMapping[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case MAPPINGS:
         return [];
       default:
-        throw new Error(`Invalid member name for PolicyMappings class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * PolicyMappings ::= SEQUENCE SIZE (1..MAX) OF PolicyMapping
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     mappings?: string;
   }> = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
@@ -76,16 +85,11 @@ export class PolicyMappings {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       PolicyMappings.schema({
@@ -94,34 +98,22 @@ export class PolicyMappings {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for PolicyMappings");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.mappings = Array.from(asn1.result.mappings, element => new PolicyMapping({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
-      value: Array.from(this.mappings, element => element.toSchema())
+      value: Array.from(this.mappings, o => o.toSchema())
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
+  public toJSON(): PolicyMappingsJson {
     return {
-      mappings: Array.from(this.mappings, element => element.toJSON())
+      mappings: Array.from(this.mappings, o => o.toJSON())
     };
   }
 

@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const ISSUER_DOMAIN_POLICY = "issuerDomainPolicy";
@@ -9,67 +11,75 @@ const CLEAR_PROPS = [
   SUBJECT_DOMAIN_POLICY
 ];
 
-export interface PolicyMappingParameters extends Schema.SchemaConstructor {
-  issuerDomainPolicy?: string;
-  subjectDomainPolicy?: string;
+export interface IPolicyMapping {
+  issuerDomainPolicy: string;
+  subjectDomainPolicy: string;
 }
 
-/**
- * Class from RFC5280
- */
-export class PolicyMapping {
+export interface PolicyMappingJson {
+  issuerDomainPolicy: string;
+  subjectDomainPolicy: string;
+}
 
-  public issuerDomainPolicy: string;
-  public subjectDomainPolicy: string;
+export type PolicyMappingParameters = PkiObjectParameters & Partial<IPolicyMapping>;
+
+/**
+ * Represents the PolicyMapping structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
+ */
+export class PolicyMapping extends PkiObject implements IPolicyMapping {
+
+  public static override CLASS_NAME = "PolicyMapping";
+
+  public issuerDomainPolicy!: string;
+  public subjectDomainPolicy!: string;
 
   /**
-   * Constructor for PolicyMapping class
-   * @param parameters
+   * Initializes a new instance of the {@link PolicyMapping} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: PolicyMappingParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.issuerDomainPolicy = pvutils.getParametersValue(parameters, ISSUER_DOMAIN_POLICY, PolicyMapping.defaultValues(ISSUER_DOMAIN_POLICY));
     this.subjectDomainPolicy = pvutils.getParametersValue(parameters, SUBJECT_DOMAIN_POLICY, PolicyMapping.defaultValues(SUBJECT_DOMAIN_POLICY));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof ISSUER_DOMAIN_POLICY): string;
-  public static defaultValues(memberName: typeof SUBJECT_DOMAIN_POLICY): string;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof ISSUER_DOMAIN_POLICY): string;
+  public static override defaultValues(memberName: typeof SUBJECT_DOMAIN_POLICY): string;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ISSUER_DOMAIN_POLICY:
         return "";
       case SUBJECT_DOMAIN_POLICY:
         return "";
       default:
-        throw new Error(`Invalid member name for PolicyMapping class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * PolicyMapping ::= SEQUENCE {
    *    issuerDomainPolicy      CertPolicyId,
    *    subjectDomainPolicy     CertPolicyId }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     issuerDomainPolicy?: string;
     subjectDomainPolicy?: string;
   }> = {}): Schema.SchemaType {
@@ -84,16 +94,11 @@ export class PolicyMapping {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       PolicyMapping.schema({
@@ -103,38 +108,24 @@ export class PolicyMapping {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for PolicyMapping");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.issuerDomainPolicy = asn1.result.issuerDomainPolicy.valueBlock.toString();
     this.subjectDomainPolicy = asn1.result.subjectDomainPolicy.valueBlock.toString();
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: [
         new asn1js.ObjectIdentifier({ value: this.issuerDomainPolicy }),
         new asn1js.ObjectIdentifier({ value: this.subjectDomainPolicy })
       ]
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): PolicyMappingJson {
     return {
       issuerDomainPolicy: this.issuerDomainPolicy,
       subjectDomainPolicy: this.subjectDomainPolicy

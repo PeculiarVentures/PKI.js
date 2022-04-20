@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { KeyAgreeRecipientIdentifier, KeyAgreeRecipientIdentifierSchema } from "./KeyAgreeRecipientIdentifier";
+import { AsnError } from "./errors";
+import { KeyAgreeRecipientIdentifier, KeyAgreeRecipientIdentifierJson, KeyAgreeRecipientIdentifierSchema } from "./KeyAgreeRecipientIdentifier";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const RID = "rid";
@@ -10,50 +12,58 @@ const CLEAR_PROPS = [
   ENCRYPTED_KEY,
 ];
 
-export interface RecipientEncryptedKeyParameters extends Schema.SchemaConstructor {
-  rid?: KeyAgreeRecipientIdentifier;
-  encryptedKey?: asn1js.OctetString;
+export interface IRecipientEncryptedKey {
+  rid: KeyAgreeRecipientIdentifier;
+  encryptedKey: asn1js.OctetString;
 }
 
-/**
- * Class from RFC5652
- */
-export class RecipientEncryptedKey implements Schema.SchemaCompatible {
+export interface RecipientEncryptedKeyJson {
+  rid: KeyAgreeRecipientIdentifierJson;
+  encryptedKey: Schema.AsnOctetStringJson;
+}
 
-  public rid: KeyAgreeRecipientIdentifier;
-  public encryptedKey: asn1js.OctetString;
+export type RecipientEncryptedKeyParameters = PkiObjectParameters & Partial<IRecipientEncryptedKey>;
+
+/**
+ * Represents the RecipientEncryptedKey structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ */
+export class RecipientEncryptedKey extends PkiObject implements IRecipientEncryptedKey {
+
+  public static override CLASS_NAME = "RecipientEncryptedKey";
+
+  public rid!: KeyAgreeRecipientIdentifier;
+  public encryptedKey!: asn1js.OctetString;
 
   /**
-   * Constructor for RecipientEncryptedKey class
-   * @param parameters
+   * Initializes a new instance of the {@link RecipientEncryptedKey} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: RecipientEncryptedKeyParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.rid = pvutils.getParametersValue(parameters, RID, RecipientEncryptedKey.defaultValues(RID));
     this.encryptedKey = pvutils.getParametersValue(parameters, ENCRYPTED_KEY, RecipientEncryptedKey.defaultValues(ENCRYPTED_KEY));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof RID): KeyAgreeRecipientIdentifier;
-  public static defaultValues(memberName: typeof ENCRYPTED_KEY): asn1js.OctetString;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof RID): KeyAgreeRecipientIdentifier;
+  public static override defaultValues(memberName: typeof ENCRYPTED_KEY): asn1js.OctetString;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case RID:
         return new KeyAgreeRecipientIdentifier();
       case ENCRYPTED_KEY:
         return new asn1js.OctetString();
       default:
-        throw new Error(`Invalid member name for RecipientEncryptedKey class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -69,15 +79,15 @@ export class RecipientEncryptedKey implements Schema.SchemaCompatible {
       case ENCRYPTED_KEY:
         return (memberValue.isEqual(RecipientEncryptedKey.defaultValues(ENCRYPTED_KEY)));
       default:
-        throw new Error(`Invalid member name for RecipientEncryptedKey class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * RecipientEncryptedKey ::= SEQUENCE {
    *    rid KeyAgreeRecipientIdentifier,
    *    encryptedKey EncryptedKey }
@@ -86,9 +96,9 @@ export class RecipientEncryptedKey implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     rid?: KeyAgreeRecipientIdentifierSchema;
     encryptedKey?: string;
   }> = {}): Schema.SchemaType {
@@ -103,16 +113,11 @@ export class RecipientEncryptedKey implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       RecipientEncryptedKey.schema({
@@ -126,24 +131,15 @@ export class RecipientEncryptedKey implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for RecipientEncryptedKey");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.rid = new KeyAgreeRecipientIdentifier({ schema: asn1.result.rid });
     this.encryptedKey = asn1.result.encryptedKey;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: [
         this.rid.toSchema(),
@@ -153,14 +149,10 @@ export class RecipientEncryptedKey implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): RecipientEncryptedKeyJson {
     return {
       rid: this.rid.toJSON(),
-      encryptedKey: this.encryptedKey.toJSON()
+      encryptedKey: this.encryptedKey.toJSON() as Schema.AsnOctetStringJson,
     };
   }
 

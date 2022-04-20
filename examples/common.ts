@@ -88,7 +88,6 @@ export function parseCertificate(source: BufferSource): pkijs.Certificate[] {
   return res;
 }
 
-
 export function processError(e: unknown, message: string) {
   console.error(e);
   alert(`${message}.See developer console for more details`);

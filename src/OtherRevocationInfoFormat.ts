@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const OTHER_REV_INFO_FORMAT = "otherRevInfoFormat";
@@ -9,67 +11,75 @@ const CLEAR_PROPS = [
   OTHER_REV_INFO
 ];
 
-export interface OtherRevocationInfoFormatParameters extends Schema.SchemaConstructor {
-  otherRevInfoFormat?: string;
+export interface IOtherRevocationInfoFormat {
+  otherRevInfoFormat: string;
+  otherRevInfo: any;
+}
+
+export interface OtherRevocationInfoFormatJson {
+  otherRevInfoFormat: string;
   otherRevInfo?: any;
 }
 
-/**
- * Class from RFC5652
- */
-export class OtherRevocationInfoFormat implements Schema.SchemaCompatible {
+export type OtherRevocationInfoFormatParameters = PkiObjectParameters & Partial<IOtherRevocationInfoFormat>;
 
-  public otherRevInfoFormat: string;
+/**
+ * Represents the OtherRevocationInfoFormat structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ */
+export class OtherRevocationInfoFormat extends PkiObject implements IOtherRevocationInfoFormat {
+
+  public static override CLASS_NAME = "OtherRevocationInfoFormat";
+
+  public otherRevInfoFormat!: string;
   public otherRevInfo: any;
 
   /**
-   * Constructor for OtherRevocationInfoFormat class
-   * @param parameters
+   * Initializes a new instance of the {@link OtherRevocationInfoFormat} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: OtherRevocationInfoFormatParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.otherRevInfoFormat = pvutils.getParametersValue(parameters, OTHER_REV_INFO_FORMAT, OtherRevocationInfoFormat.defaultValues(OTHER_REV_INFO_FORMAT));
     this.otherRevInfo = pvutils.getParametersValue(parameters, OTHER_REV_INFO, OtherRevocationInfoFormat.defaultValues(OTHER_REV_INFO));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  static defaultValues(memberName: typeof OTHER_REV_INFO_FORMAT): string;
-  static defaultValues(memberName: typeof OTHER_REV_INFO): any;
-  static defaultValues(memberName: string): any {
+  static override defaultValues(memberName: typeof OTHER_REV_INFO_FORMAT): string;
+  static override defaultValues(memberName: typeof OTHER_REV_INFO): any;
+  static override defaultValues(memberName: string): any {
     switch (memberName) {
       case OTHER_REV_INFO_FORMAT:
         return "";
       case OTHER_REV_INFO:
         return new asn1js.Any();
       default:
-        throw new Error(`Invalid member name for OtherRevocationInfoFormat class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * OtherCertificateFormat ::= SEQUENCE {
    *    otherRevInfoFormat OBJECT IDENTIFIER,
    *    otherRevInfo ANY DEFINED BY otherCertFormat }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     otherRevInfoFormat?: string;
     otherRevInfo?: string;
   }> = {}): Schema.SchemaType {
@@ -84,59 +94,42 @@ export class OtherRevocationInfoFormat implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       OtherRevocationInfoFormat.schema()
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for OtherRevocationInfoFormat");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.otherRevInfoFormat = asn1.result.otherRevInfoFormat.valueBlock.toString();
     this.otherRevInfo = asn1.result.otherRevInfo;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: [
         new asn1js.ObjectIdentifier({ value: this.otherRevInfoFormat }),
         this.otherRevInfo
       ]
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
-    const object: any = {
+  public toJSON(): OtherRevocationInfoFormatJson {
+    const res: OtherRevocationInfoFormatJson = {
       otherRevInfoFormat: this.otherRevInfoFormat
     };
 
     if (!(this.otherRevInfo instanceof asn1js.Any)) {
-      object.otherRevInfo = this.otherRevInfo.toJSON();
+      res.otherRevInfo = this.otherRevInfo.toJSON();
     }
 
-    return object;
+    return res;
   }
 
 }

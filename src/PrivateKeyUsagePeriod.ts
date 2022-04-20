@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const NOT_BEFORE = "notBefore";
@@ -9,63 +11,71 @@ const CLEAR_PROPS = [
   NOT_AFTER
 ];
 
-export interface PrivateKeyUsagePeriodParameters extends Schema.SchemaConstructor {
+export interface IPrivateKeyUsagePeriod {
   notBefore?: Date;
   notAfter?: Date;
 }
 
+export interface PrivateKeyUsagePeriodJson {
+  notBefore?: Date;
+  notAfter?: Date;
+}
+
+export type PrivateKeyUsagePeriodParameters = PkiObjectParameters & Partial<IPrivateKeyUsagePeriod>;
+
 /**
- * Class from RFC5280
+ * Represents the PrivateKeyUsagePeriod structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
-export class PrivateKeyUsagePeriod implements Schema.SchemaCompatible {
+export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsagePeriod {
+
+  public static override CLASS_NAME = "PrivateKeyUsagePeriod";
 
   public notBefore?: Date;
   public notAfter?: Date;
 
   /**
-   * Constructor for PrivateKeyUsagePeriod class
-   * @param parameters
+   * Initializes a new instance of the {@link PrivateKeyUsagePeriod} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: PrivateKeyUsagePeriodParameters = {}) {
-    //#region Internal properties of the object
-    if (parameters.notBefore) {
+    super();
+
+    if (NOT_BEFORE in parameters) {
       this.notBefore = pvutils.getParametersValue(parameters, NOT_BEFORE, PrivateKeyUsagePeriod.defaultValues(NOT_BEFORE));
     }
 
-    if (parameters.notAfter) {
+    if (NOT_AFTER in parameters) {
       this.notAfter = pvutils.getParametersValue(parameters, NOT_AFTER, PrivateKeyUsagePeriod.defaultValues(NOT_AFTER));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof NOT_BEFORE): Date;
-  public static defaultValues(memberName: typeof NOT_AFTER): Date;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof NOT_BEFORE): Date;
+  public static override defaultValues(memberName: typeof NOT_AFTER): Date;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case NOT_BEFORE:
         return new Date();
       case NOT_AFTER:
         return new Date();
       default:
-        throw new Error(`Invalid member name for PrivateKeyUsagePeriod class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * PrivateKeyUsagePeriod OID ::= 2.5.29.16
    *
    * PrivateKeyUsagePeriod ::= SEQUENCE {
@@ -75,9 +85,9 @@ export class PrivateKeyUsagePeriod implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     notBefore?: string;
     notAfter?: string;
   }> = {}): Schema.SchemaType {
@@ -106,16 +116,11 @@ export class PrivateKeyUsagePeriod implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       PrivateKeyUsagePeriod.schema({
@@ -125,30 +130,21 @@ export class PrivateKeyUsagePeriod implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for PrivateKeyUsagePeriod");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     if (NOT_BEFORE in asn1.result) {
       const localNotBefore = new asn1js.GeneralizedTime();
       localNotBefore.fromBuffer(asn1.result.notBefore.valueBlock.valueHex);
       this.notBefore = localNotBefore.toDate();
     }
-
     if (NOT_AFTER in asn1.result) {
       const localNotAfter = new asn1js.GeneralizedTime({ valueHex: asn1.result.notAfter.valueBlock.valueHex });
       localNotAfter.fromBuffer(asn1.result.notAfter.valueBlock.valueHex);
       this.notAfter = localNotAfter.toDate();
     }
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -181,22 +177,18 @@ export class PrivateKeyUsagePeriod implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const object: any = {};
+  public toJSON(): PrivateKeyUsagePeriodJson {
+    const res: PrivateKeyUsagePeriodJson = {};
 
     if (this.notBefore) {
-      object.notBefore = this.notBefore;
+      res.notBefore = this.notBefore;
     }
 
     if (this.notAfter) {
-      object.notAfter = this.notAfter;
+      res.notAfter = this.notAfter;
     }
 
-    return object;
+    return res;
   }
 
 }

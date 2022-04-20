@@ -1,18 +1,28 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { Certificate } from "./Certificate";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { Certificate, CertificateJson } from "./Certificate";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";
 const SIGNATURE = "signature";
 const CERTS = "certs";
 
-export interface SignatureParameters extends Schema.SchemaConstructor {
-  signatureAlgorithm?: AlgorithmIdentifier;
-  signature?: asn1js.BitString;
+export interface ISignature {
+  signatureAlgorithm: AlgorithmIdentifier;
+  signature: asn1js.BitString;
   certs?: Certificate[];
 }
+
+export interface SignatureJson {
+  signatureAlgorithm: AlgorithmIdentifierJson;
+  signature: Schema.AsnBitStringJson;
+  certs?: CertificateJson[];
+}
+
+export type SignatureParameters = PkiObjectParameters & Partial<ISignature>;
 
 export type SignatureSchema = Schema.SchemaParameters<{
   signatureAlgorithm?: AlgorithmIdentifierSchema;
@@ -21,41 +31,42 @@ export type SignatureSchema = Schema.SchemaParameters<{
 }>;
 
 /**
- * Class from RFC6960
+ * Represents the Signature structure described in [RFC6960](https://datatracker.ietf.org/doc/html/rfc6960)
  */
-export class Signature implements Schema.SchemaCompatible {
+export class Signature extends PkiObject implements ISignature {
 
-  public signatureAlgorithm: AlgorithmIdentifier;
-  public signature: asn1js.BitString;
+  public static override CLASS_NAME = "Signature";
+
+  public signatureAlgorithm!: AlgorithmIdentifier;
+  public signature!: asn1js.BitString;
   public certs?: Certificate[];
 
   /**
-   * Constructor for Signature class
-   * @param parameters
+   * Initializes a new instance of the {@link Signature} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: SignatureParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, Signature.defaultValues(SIGNATURE_ALGORITHM));
     this.signature = pvutils.getParametersValue(parameters, SIGNATURE, Signature.defaultValues(SIGNATURE));
-    if (parameters.certs)
+    if (CERTS in parameters) {
       this.certs = pvutils.getParametersValue(parameters, CERTS, Signature.defaultValues(CERTS));
-    //#endregion
-
-    //#region If input argument array contains "schema" for this object
+    }
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof SIGNATURE): asn1js.BitString;
-  public static defaultValues(memberName: typeof CERTS): Certificate[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof SIGNATURE): asn1js.BitString;
+  public static override defaultValues(memberName: typeof CERTS): Certificate[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case SIGNATURE_ALGORITHM:
         return new AlgorithmIdentifier();
@@ -64,7 +75,7 @@ export class Signature implements Schema.SchemaCompatible {
       case CERTS:
         return [];
       default:
-        throw new Error(`Invalid member name for Signature class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -82,15 +93,15 @@ export class Signature implements Schema.SchemaCompatible {
       case CERTS:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for Signature class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * Signature       ::=     SEQUENCE {
    *    signatureAlgorithm      AlgorithmIdentifier,
    *    signature               BIT STRING,
@@ -98,9 +109,9 @@ export class Signature implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: SignatureSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: SignatureSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -129,20 +140,15 @@ export class Signature implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, [
       SIGNATURE_ALGORITHM,
       SIGNATURE,
       CERTS
     ]);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       Signature.schema({
@@ -157,24 +163,15 @@ export class Signature implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for Signature");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.signatureAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.signatureAlgorithm });
     this.signature = asn1.result.signature;
-
     if (CERTS in asn1.result)
       this.certs = Array.from(asn1.result.certs, element => new Certificate({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array of output sequence
     const outputArray = [];
@@ -191,7 +188,7 @@ export class Signature implements Schema.SchemaCompatible {
         },
         value: [
           new asn1js.Sequence({
-            value: Array.from(this.certs, element => element.toSchema())
+            value: Array.from(this.certs, o => o.toSchema())
           })
         ]
       }));
@@ -205,21 +202,17 @@ export class Signature implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): SignatureJson {
+    const res: SignatureJson = {
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signature: this.signature.toJSON()
+      signature: this.signature.toJSON() as Schema.AsnBitStringJson,
     };
 
     if (this.certs) {
-      _object.certs = Array.from(this.certs, element => element.toJSON());
+      res.certs = Array.from(this.certs, o => o.toJSON());
     }
 
-    return _object;
+    return res;
   }
 
 }

@@ -1,11 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
-import { SingleResponse, SingleResponseSchema } from "./SingleResponse";
-import { Extension } from "./Extension";
+import { SingleResponse, SingleResponseJson, SingleResponseSchema } from "./SingleResponse";
+import { Extension, ExtensionJson } from "./Extension";
 import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -28,13 +29,16 @@ const CLEAR_PROPS = [
   RESPONSE_DATA_RESPONSE_EXTENSIONS
 ];
 
-export interface ResponseDataParameters extends Schema.SchemaConstructor {
-  tbs?: ArrayBuffer;
-  responderID?: any;
-  producedAt?: Date;
-  responses?: SingleResponse[];
+export interface IResponseData {
+  version?: number;
+  tbs: ArrayBuffer;
+  responderID: any;
+  producedAt: Date;
+  responses: SingleResponse[];
   responseExtensions?: Extension[];
 }
+
+export type ResponseDataParameters = PkiObjectParameters & Partial<IResponseData>;
 
 export type ResponseDataSchema = Schema.SchemaParameters<{
   version?: string;
@@ -46,24 +50,36 @@ export type ResponseDataSchema = Schema.SchemaParameters<{
   extensions?: ExtensionsSchema;
 }>;
 
+export interface ResponseDataJson {
+  version?: number;
+  tbs: string;
+  responderID: any;
+  producedAt: Date;
+  responses: SingleResponseJson[];
+  responseExtensions?: ExtensionJson[];
+}
+
 /**
- * Class from RFC6960
+ * Represents an ResponseData described in [RFC6960](https://datatracker.ietf.org/doc/html/rfc6960)
  */
-export class ResponseData implements Schema.SchemaCompatible {
+export class ResponseData extends PkiObject implements IResponseData {
+
+  public static override CLASS_NAME = "ResponseData";
 
   public version?: number;
-  public tbs: ArrayBuffer;
+  public tbs!: ArrayBuffer;
   public responderID: any;
-  public producedAt: Date;
-  public responses: SingleResponse[];
+  public producedAt!: Date;
+  public responses!: SingleResponse[];
   public responseExtensions?: Extension[];
 
   /**
-   * Constructor for ResponseData class
-   * @param parameters
+   * Initializes a new instance of the {@link ResponseData} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: ResponseDataParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.tbs = pvutils.getParametersValue(parameters, TBS, ResponseData.defaultValues(TBS));
     if (VERSION in parameters) {
       this.version = pvutils.getParametersValue(parameters, VERSION, ResponseData.defaultValues(VERSION));
@@ -71,29 +87,27 @@ export class ResponseData implements Schema.SchemaCompatible {
     this.responderID = pvutils.getParametersValue(parameters, RESPONDER_ID, ResponseData.defaultValues(RESPONDER_ID));
     this.producedAt = pvutils.getParametersValue(parameters, PRODUCED_AT, ResponseData.defaultValues(PRODUCED_AT));
     this.responses = pvutils.getParametersValue(parameters, RESPONSES, ResponseData.defaultValues(RESPONSES));
-    if (parameters.responseExtensions) {
+    if (RESPONSE_EXTENSIONS in parameters) {
       this.responseExtensions = pvutils.getParametersValue(parameters, RESPONSE_EXTENSIONS, ResponseData.defaultValues(RESPONSE_EXTENSIONS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof TBS): ArrayBuffer;
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof RESPONDER_ID): any;
-  public static defaultValues(memberName: typeof PRODUCED_AT): Date;
-  public static defaultValues(memberName: typeof RESPONSES): SingleResponse[];
-  public static defaultValues(memberName: typeof RESPONSE_EXTENSIONS): Extension[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof TBS): ArrayBuffer;
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof RESPONDER_ID): any;
+  public static override defaultValues(memberName: typeof PRODUCED_AT): Date;
+  public static override defaultValues(memberName: typeof RESPONSES): SingleResponse[];
+  public static override defaultValues(memberName: typeof RESPONSE_EXTENSIONS): Extension[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 0;
@@ -107,7 +121,7 @@ export class ResponseData implements Schema.SchemaCompatible {
       case RESPONSE_EXTENSIONS:
         return [];
       default:
-        throw new Error(`Invalid member name for ResponseData class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -129,15 +143,15 @@ export class ResponseData implements Schema.SchemaCompatible {
       case RESPONSE_EXTENSIONS:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for ResponseData class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * ResponseData ::= SEQUENCE {
    *    version              [0] EXPLICIT Version DEFAULT v1,
    *    responderID              ResponderID,
@@ -147,9 +161,9 @@ export class ResponseData implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: ResponseDataSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: ResponseDataSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -212,14 +226,9 @@ export class ResponseData implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
@@ -227,9 +236,7 @@ export class ResponseData implements Schema.SchemaCompatible {
       ResponseData.schema()
     );
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for ResponseData");
-    }
+    AsnError.assertSchema(asn1, this.className);
     //#endregion
 
     //#region Get internal properties from parsed schema
@@ -241,7 +248,7 @@ export class ResponseData implements Schema.SchemaCompatible {
     if (asn1.result[RESPONSE_DATA_RESPONDER_ID].idBlock.tagNumber === 1)
       this.responderID = new RelativeDistinguishedNames({ schema: asn1.result[RESPONSE_DATA_RESPONDER_ID].valueBlock.value[0] });
     else
-      this.responderID = asn1.result[RESPONSE_DATA_RESPONDER_ID].valueBlock.value[0]; // OCTETSTRING
+      this.responderID = asn1.result[RESPONSE_DATA_RESPONDER_ID].valueBlock.value[0]; // OCTET_STRING
 
     this.producedAt = asn1.result[RESPONSE_DATA_PRODUCED_AT].toDate();
     this.responses = Array.from(asn1.result[RESPONSE_DATA_RESPONSES], element => new SingleResponse({ schema: element }));
@@ -251,12 +258,7 @@ export class ResponseData implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @param encodeFlag If param equal to false then create TBS schema via decoding stored value. In other case create TBS schema via assembling from TBS parts.
-   * @returns asn1js object
-   */
-  toSchema(encodeFlag = false) {
+  public toSchema(encodeFlag = false): Schema.SchemaType {
     //#region Decode stored TBS value
     let tbsSchema;
 
@@ -305,7 +307,7 @@ export class ResponseData implements Schema.SchemaCompatible {
       outputArray.push(new asn1js.GeneralizedTime({ valueDate: this.producedAt }));
 
       outputArray.push(new asn1js.Sequence({
-        value: Array.from(this.responses, element => element.toSchema())
+        value: Array.from(this.responses, o => o.toSchema())
       }));
 
       if (this.responseExtensions) {
@@ -315,7 +317,7 @@ export class ResponseData implements Schema.SchemaCompatible {
             tagNumber: 1 // [1]
           },
           value: [new asn1js.Sequence({
-            value: Array.from(this.responseExtensions, element => element.toSchema())
+            value: Array.from(this.responseExtensions, o => o.toSchema())
           })]
         }));
       }
@@ -331,34 +333,30 @@ export class ResponseData implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {};
+  public toJSON(): ResponseDataJson {
+    const res = {} as ResponseDataJson;
 
     if (VERSION in this) {
-      _object.version = this.version;
+      res.version = this.version;
     }
 
     if (this.responderID) {
-      _object.responderID = this.responderID;
+      res.responderID = this.responderID;
     }
 
     if (this.producedAt) {
-      _object.producedAt = this.producedAt;
+      res.producedAt = this.producedAt;
     }
 
     if (this.responses) {
-      _object.responses = Array.from(this.responses, element => element.toJSON());
+      res.responses = Array.from(this.responses, o => o.toJSON());
     }
 
     if (this.responseExtensions) {
-      _object.responseExtensions = Array.from(this.responseExtensions, element => element.toJSON());
+      res.responseExtensions = Array.from(this.responseExtensions, o => o.toJSON());
     }
 
-    return _object;
+    return res;
   }
 
 }

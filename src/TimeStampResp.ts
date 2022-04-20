@@ -1,11 +1,13 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { PKIStatusInfo, PKIStatusInfoSchema } from "./PKIStatusInfo";
-import { ContentInfo, ContentInfoSchema } from "./ContentInfo";
+import { PKIStatusInfo, PKIStatusInfoJson, PKIStatusInfoSchema } from "./PKIStatusInfo";
+import { ContentInfo, ContentInfoJson, ContentInfoSchema } from "./ContentInfo";
 import { SignedData } from "./SignedData";
 import * as Schema from "./Schema";
 import { id_ContentType_SignedData } from "./ObjectIdentifiers";
 import { Certificate } from "./Certificate";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { AsnError } from "./errors";
 
 const STATUS = "status";
 const TIME_STAMP_TOKEN = "timeStampToken";
@@ -17,58 +19,66 @@ const CLEAR_PROPS = [
   TIME_STAMP_RESP_TOKEN
 ];
 
+export interface ITimeStampResp {
+  status: PKIStatusInfo;
+  timeStampToken?: ContentInfo;
+}
+
+export interface TimeStampRespJson {
+  status: PKIStatusInfoJson;
+  timeStampToken?: ContentInfoJson;
+}
+
 export interface TimeStampRespVerifyParams {
   signer?: number;
   trustedCerts?: Certificate[];
   data?: ArrayBuffer;
 }
 
-export interface TimeStampRespParameters extends Schema.SchemaConstructor {
-  status?: PKIStatusInfo;
-  timeStampToken?: ContentInfo;
-}
+export type TimeStampRespParameters = PkiObjectParameters & Partial<ITimeStampResp>;
 
 /**
- * Class from RFC3161
+ * Represents the TimeStampResp structure described in [RFC3161](https://www.ietf.org/rfc/rfc3161.txt)
  */
-export class TimeStampResp implements Schema.SchemaCompatible {
+export class TimeStampResp extends PkiObject implements ITimeStampResp {
 
-  public status: PKIStatusInfo;
+  public static override CLASS_NAME = "TimeStampResp";
+
+  public status!: PKIStatusInfo;
   public timeStampToken?: ContentInfo;
 
   /**
-   * Constructor for TimeStampResp class
-   * @param parameters
+   * Initializes a new instance of the {@link TimeStampResp} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: TimeStampRespParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.status = pvutils.getParametersValue(parameters, STATUS, TimeStampResp.defaultValues(STATUS));
-    if (parameters.timeStampToken) {
+    if (TIME_STAMP_TOKEN in parameters) {
       this.timeStampToken = pvutils.getParametersValue(parameters, TIME_STAMP_TOKEN, TimeStampResp.defaultValues(TIME_STAMP_TOKEN));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof STATUS): PKIStatusInfo;
-  public static defaultValues(memberName: typeof TIME_STAMP_TOKEN): ContentInfo;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof STATUS): PKIStatusInfo;
+  public static override defaultValues(memberName: typeof TIME_STAMP_TOKEN): ContentInfo;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case STATUS:
         return new PKIStatusInfo();
       case TIME_STAMP_TOKEN:
         return new ContentInfo();
       default:
-        throw new Error(`Invalid member name for TimeStampResp class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -87,24 +97,24 @@ export class TimeStampResp implements Schema.SchemaCompatible {
         return ((memberValue.contentType === "") &&
           (memberValue.content instanceof asn1js.Any));
       default:
-        throw new Error(`Invalid member name for TimeStampResp class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * TimeStampResp ::= SEQUENCE  {
    *    status                  PKIStatusInfo,
    *    timeStampToken          TimeStampToken     OPTIONAL  }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     status?: PKIStatusInfoSchema,
     timeStampToken?: ContentInfoSchema,
   }> = {}): Schema.SchemaType {
@@ -128,37 +138,23 @@ export class TimeStampResp implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       TimeStampResp.schema()
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for TimeStampResp");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.status = new PKIStatusInfo({ schema: asn1.result[TIME_STAMP_RESP_STATUS] });
     if (TIME_STAMP_RESP_TOKEN in asn1.result)
       this.timeStampToken = new ContentInfo({ schema: asn1.result[TIME_STAMP_RESP_TOKEN] });
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -176,20 +172,16 @@ export class TimeStampResp implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
-      status: this.status
+  public toJSON(): TimeStampRespJson {
+    const res: TimeStampRespJson = {
+      status: this.status.toJSON()
     };
 
     if (this.timeStampToken) {
-      _object.timeStampToken = this.timeStampToken.toJSON();
+      res.timeStampToken = this.timeStampToken.toJSON();
     }
 
-    return _object;
+    return res;
   }
 
   /**
@@ -218,7 +210,6 @@ export class TimeStampResp implements Schema.SchemaCompatible {
 
     return signed.verify(verificationParameters);
   }
-
 
   private assertContentType(): asserts this is { timeStampToken: ContentInfo; } {
     if (!this.timeStampToken) {

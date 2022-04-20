@@ -5,6 +5,7 @@ import { AttributeCertificateV2 } from "./AttributeCertificateV2";
 import * as Schema from "./Schema";
 import { id_CertBag_AttributeCertificate, id_CertBag_SDSICertificate, id_CertBag_X509Certificate } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const CERT_ID = "certId";
 const CERT_VALUE = "certValue";
@@ -14,49 +15,57 @@ const CLEAR_PROPS = [
   CERT_VALUE
 ];
 
-export interface CertBagParameters extends Schema.SchemaConstructor {
-  certId?: string;
-  certValue?: any;
-  parsedValue?: any;
+export interface ICertBag {
+  certId: string;
+  certValue: any;
+  parsedValue: any;
+}
+
+export type CertBagParameters = PkiObjectParameters & Partial<ICertBag>;
+
+export interface CertBagJson {
+  certId: string;
+  certValue: any;
 }
 
 /**
- * Class from RFC7292
+ * Represents the CertBag structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
-export class CertBag implements Schema.SchemaCompatible {
+export class CertBag extends PkiObject implements ICertBag {
 
-  public certId: string;
+  public static override CLASS_NAME = "CertBag";
+
+  public certId!: string;
   public certValue: any;
   public parsedValue: any;
 
   /**
-   * Constructor for CertBag class
-   * @param parameters
+   * Initializes a new instance of the {@link CertBag} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: CertBagParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.certId = pvutils.getParametersValue(parameters, CERT_ID, CertBag.defaultValues(CERT_ID));
     this.certValue = pvutils.getParametersValue(parameters, CERT_VALUE, CertBag.defaultValues(CERT_VALUE));
     if (PARSED_VALUE in parameters) {
       this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, CertBag.defaultValues(PARSED_VALUE));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof CERT_ID): string;
-  public static defaultValues(memberName: typeof CERT_VALUE): any;
-  public static defaultValues(memberName: typeof PARSED_VALUE): any;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof CERT_ID): string;
+  public static override defaultValues(memberName: typeof CERT_VALUE): any;
+  public static override defaultValues(memberName: typeof PARSED_VALUE): any;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CERT_ID:
         return "";
@@ -65,7 +74,7 @@ export class CertBag implements Schema.SchemaCompatible {
       case PARSED_VALUE:
         return {};
       default:
-        throw new Error(`Invalid member name for CertBag class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -83,15 +92,15 @@ export class CertBag implements Schema.SchemaCompatible {
       case PARSED_VALUE:
         return ((memberValue instanceof Object) && (Object.keys(memberValue).length === 0));
       default:
-        throw new Error(`Invalid member name for CertBag class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * CertBag ::= SEQUENCE {
    *    certId    BAG-TYPE.&id   ({CertTypes}),
    *    certValue [0] EXPLICIT BAG-TYPE.&Type ({CertTypes}{@certId})
@@ -99,9 +108,9 @@ export class CertBag implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     id?: string;
     value?: string;
   }> = {}): Schema.SchemaType {
@@ -122,16 +131,11 @@ export class CertBag implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       CertBag.schema({
@@ -141,36 +145,28 @@ export class CertBag implements Schema.SchemaCompatible {
         }
       })
     );
-
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for CertBag");
-    }
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     this.certId = asn1.result.certId.valueBlock.toString();
     this.certValue = asn1.result.certValue;
 
+    const certValueHex = this.certValue.valueBlock.valueHex;
     switch (this.certId) {
       case id_CertBag_X509Certificate: // x509Certificate
         {
-          const asn1Inner = asn1js.fromBER(this.certValue.valueBlock.valueHex);
-          AsnError.assert(asn1Inner, "Certificate value");
-
           try {
-            this.parsedValue = new Certificate({ schema: asn1Inner.result });
+            this.parsedValue = Certificate.fromRaw(certValueHex);
           }
           catch (ex) // In some realizations the same OID used for attribute certificates
           {
-            this.parsedValue = new AttributeCertificateV2({ schema: asn1Inner.result });
+            AttributeCertificateV2.fromRaw(certValueHex);
           }
         }
         break;
       case id_CertBag_AttributeCertificate: // attributeCertificate - (!!!) THIS OID IS SUBJECT FOR CHANGE IN FUTURE (!!!)
         {
-          const asn1Inner = asn1js.fromBER(this.certValue.valueBlock.valueHex);
-          AsnError.assert(asn1Inner, "Attribute Certificate v2");
-          this.parsedValue = new AttributeCertificateV2({ schema: asn1Inner.result });
+          this.parsedValue = AttributeCertificateV2.fromRaw(certValueHex);
         }
         break;
       case id_CertBag_SDSICertificate: // sdsiCertificate
@@ -180,10 +176,6 @@ export class CertBag implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     if (PARSED_VALUE in this) {
@@ -211,11 +203,7 @@ export class CertBag implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): CertBagJson {
     return {
       certId: this.certId,
       certValue: this.certValue.toJSON()

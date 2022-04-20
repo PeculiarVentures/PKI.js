@@ -1,11 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { GeneralName, GeneralNameSchema } from "./GeneralName";
-import { Request, RequestSchema } from "./Request";
-import { Extension } from "./Extension";
+import { GeneralName, GeneralNameJson, GeneralNameSchema } from "./GeneralName";
+import { Request, RequestJson, RequestSchema } from "./Request";
+import { Extension, ExtensionJson } from "./Extension";
 import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -25,13 +26,23 @@ const CLEAR_PROPS = [
   TBS_REQUEST_REQUEST_EXTENSIONS
 ];
 
-export interface TBSRequestParameters extends Schema.SchemaConstructor {
-  tbs?: ArrayBuffer;
+export interface ITBSRequest {
+  tbs: ArrayBuffer;
   version?: number;
   requestorName?: GeneralName;
-  requestList?: Request[];
+  requestList: Request[];
   requestExtensions?: Extension[];
 }
+
+export interface TBSRequestJson {
+  tbs: string;
+  version?: number;
+  requestorName?: GeneralNameJson;
+  requestList: RequestJson[];
+  requestExtensions?: ExtensionJson[];
+}
+
+export type TBSRequestParameters = PkiObjectParameters & Partial<ITBSRequest>;
 
 export type TBSRequestSchema = Schema.SchemaParameters<{
   TBSRequestVersion?: string;
@@ -44,52 +55,53 @@ export type TBSRequestSchema = Schema.SchemaParameters<{
 }>;
 
 /**
- * Class from RFC6960
+ * Represents the TBSRequest structure described in [RFC6960](https://datatracker.ietf.org/doc/html/rfc6960)
  */
-export class TBSRequest implements Schema.SchemaCompatible {
+export class TBSRequest extends PkiObject implements ITBSRequest {
 
-  public tbs: ArrayBuffer;
+  public static override CLASS_NAME = "TBSRequest";
+
+  public tbs!: ArrayBuffer;
   public version?: number;
   public requestorName?: GeneralName;
-  public requestList: Request[];
+  public requestList!: Request[];
   public requestExtensions?: Extension[];
 
   /**
-   * Constructor for TBSRequest class
-   * @param parameters
+   * Initializes a new instance of the {@link TBSRequest} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: TBSRequestParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.tbs = pvutils.getParametersValue(parameters, TBS, TBSRequest.defaultValues(TBS));
-    if (parameters.version !== undefined) {
+    if (VERSION in parameters) {
       this.version = pvutils.getParametersValue(parameters, VERSION, TBSRequest.defaultValues(VERSION));
     }
-    if (parameters.requestorName) {
+    if (REQUESTOR_NAME in parameters) {
       this.requestorName = pvutils.getParametersValue(parameters, REQUESTOR_NAME, TBSRequest.defaultValues(REQUESTOR_NAME));
     }
     this.requestList = pvutils.getParametersValue(parameters, REQUEST_LIST, TBSRequest.defaultValues(REQUEST_LIST));
-    if (parameters.requestExtensions) {
+    if (REQUEST_EXTENSIONS in parameters) {
       this.requestExtensions = pvutils.getParametersValue(parameters, REQUEST_EXTENSIONS, TBSRequest.defaultValues(REQUEST_EXTENSIONS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof TBS): ArrayBuffer;
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof REQUESTOR_NAME): GeneralName;
-  public static defaultValues(memberName: typeof REQUEST_LIST): Request[];
-  public static defaultValues(memberName: typeof REQUEST_EXTENSIONS): Extension[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof TBS): ArrayBuffer;
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof REQUESTOR_NAME): GeneralName;
+  public static override defaultValues(memberName: typeof REQUEST_LIST): Request[];
+  public static override defaultValues(memberName: typeof REQUEST_EXTENSIONS): Extension[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS:
         return new ArrayBuffer(0);
@@ -101,7 +113,7 @@ export class TBSRequest implements Schema.SchemaCompatible {
       case REQUEST_EXTENSIONS:
         return [];
       default:
-        throw new Error(`Invalid member name for TBSRequest class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -122,15 +134,15 @@ export class TBSRequest implements Schema.SchemaCompatible {
       case REQUEST_EXTENSIONS:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for TBSRequest class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * TBSRequest      ::=     SEQUENCE {
    *    version             [0]     EXPLICIT Version DEFAULT v1,
    *    requestorName       [1]     EXPLICIT GeneralName OPTIONAL,
@@ -139,9 +151,9 @@ export class TBSRequest implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: TBSRequestSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: TBSRequestSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -192,26 +204,18 @@ export class TBSRequest implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       TBSRequest.schema()
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for TBSRequest");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.tbs = asn1.result.TBSRequest.valueBeforeDecode;
 
     if (TBS_REQUEST_VERSION in asn1.result)
@@ -223,15 +227,14 @@ export class TBSRequest implements Schema.SchemaCompatible {
 
     if (TBS_REQUEST_REQUEST_EXTENSIONS in asn1.result)
       this.requestExtensions = Array.from(asn1.result[TBS_REQUEST_REQUEST_EXTENSIONS].valueBlock.value, element => new Extension({ schema: element }));
-    //#endregion
   }
 
   /**
    * Convert current object to asn1js object and set correct values
-   * @param {boolean} encodeFlag If param equal to false then create TBS schema via decoding stored value. In othe case create TBS schema via assembling from TBS parts.
+   * @param encodeFlag If param equal to false then create TBS schema via decoding stored value. In othe case create TBS schema via assembling from TBS parts.
    * @returns asn1js object
    */
-  toSchema(encodeFlag = false) {
+  public toSchema(encodeFlag = false): asn1js.Sequence {
     //#region Decode stored TBS value
     let tbsSchema;
 
@@ -270,7 +273,7 @@ export class TBSRequest implements Schema.SchemaCompatible {
       }
 
       outputArray.push(new asn1js.Sequence({
-        value: Array.from(this.requestList, element => element.toSchema())
+        value: Array.from(this.requestList, o => o.toSchema())
       }));
 
       if (this.requestExtensions) {
@@ -281,7 +284,7 @@ export class TBSRequest implements Schema.SchemaCompatible {
           },
           value: [
             new asn1js.Sequence({
-              value: Array.from(this.requestExtensions, element => element.toSchema())
+              value: Array.from(this.requestExtensions, o => o.toSchema())
             })
           ]
         }));
@@ -298,27 +301,23 @@ export class TBSRequest implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {};
+  public toJSON(): TBSRequestJson {
+    const res: any = {};
 
     if (this.version != undefined)
-      _object.version = this.version;
+      res.version = this.version;
 
     if (this.requestorName) {
-      _object.requestorName = this.requestorName.toJSON();
+      res.requestorName = this.requestorName.toJSON();
     }
 
-    _object.requestList = Array.from(this.requestList, element => element.toJSON());
+    res.requestList = Array.from(this.requestList, o => o.toJSON());
 
     if (this.requestExtensions) {
-      _object.requestExtensions = Array.from(this.requestExtensions, element => element.toJSON());
+      res.requestExtensions = Array.from(this.requestExtensions, o => o.toJSON());
     }
 
-    return _object;
+    return res;
   }
 
 }

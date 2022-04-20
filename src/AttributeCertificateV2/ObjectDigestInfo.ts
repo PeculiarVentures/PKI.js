@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import { AsnError } from "../errors";
+import { PkiObject, PkiObjectParameters } from "../PkiObject";
 import * as Schema from "../Schema";
 
 const DIGESTED_OBJECT_TYPE = "digestedObjectType";
@@ -14,52 +16,63 @@ const CLEAR_PROPS = [
   OBJECT_DIGEST,
 ];
 
-export interface ObjectDigestInfoParameters extends Schema.SchemaConstructor {
-  digestedObjectType?: asn1js.Enumerated;
+export interface IObjectDigestInfo {
+  digestedObjectType: asn1js.Enumerated;
   otherObjectTypeID?: asn1js.ObjectIdentifier;
-  digestAlgorithm?: AlgorithmIdentifier;
-  objectDigest?: asn1js.BitString;
+  digestAlgorithm: AlgorithmIdentifier;
+  objectDigest: asn1js.BitString;
+}
+
+export type ObjectDigestInfoParameters = PkiObjectParameters & Partial<IObjectDigestInfo>;
+
+export interface ObjectDigestInfoJson {
+  digestedObjectType: Schema.AsnEnumeratedJson;
+  otherObjectTypeID?: Schema.AsnObjectIdentifierJson;
+  digestAlgorithm: AlgorithmIdentifierJson;
+  objectDigest: Schema.AsnBitStringJson;
 }
 
 /**
- * Class from RFC5755
+ * Represents the ObjectDigestInfo structure described in [RFC5755](https://datatracker.ietf.org/doc/html/rfc5755)
  */
-export class ObjectDigestInfo implements Schema.SchemaCompatible {
+export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
 
-  public digestedObjectType: asn1js.Enumerated;
+  public static override CLASS_NAME = "ObjectDigestInfo";
+
+  public digestedObjectType!: asn1js.Enumerated;
   public otherObjectTypeID?: asn1js.ObjectIdentifier;
-  public digestAlgorithm: AlgorithmIdentifier;
-  public objectDigest: asn1js.BitString;
+  public digestAlgorithm!: AlgorithmIdentifier;
+  public objectDigest!: asn1js.BitString;
 
   /**
-   * Constructor for ObjectDigestInfo class
-   * @param parameters
+   * Initializes a new instance of the {@link ObjectDigestInfo} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: ObjectDigestInfoParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.digestedObjectType = pvutils.getParametersValue(parameters, DIGESTED_OBJECT_TYPE, ObjectDigestInfo.defaultValues(DIGESTED_OBJECT_TYPE));
-    if (parameters.otherObjectTypeID) {
+    if (OTHER_OBJECT_TYPE_ID in parameters) {
       this.otherObjectTypeID = pvutils.getParametersValue(parameters, OTHER_OBJECT_TYPE_ID, ObjectDigestInfo.defaultValues(OTHER_OBJECT_TYPE_ID));
     }
     this.digestAlgorithm = pvutils.getParametersValue(parameters, DIGEST_ALGORITHM, ObjectDigestInfo.defaultValues(DIGEST_ALGORITHM));
     this.objectDigest = pvutils.getParametersValue(parameters, OBJECT_DIGEST, ObjectDigestInfo.defaultValues(OBJECT_DIGEST));
-    //#endregion
-    //#region If input argument array contains "schema" for this object
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof DIGESTED_OBJECT_TYPE): asn1js.Enumerated;
-  public static defaultValues(memberName: typeof OTHER_OBJECT_TYPE_ID): asn1js.ObjectIdentifier;
-  public static defaultValues(memberName: typeof DIGEST_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof OBJECT_DIGEST): asn1js.BitString;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof DIGESTED_OBJECT_TYPE): asn1js.Enumerated;
+  public static override defaultValues(memberName: typeof OTHER_OBJECT_TYPE_ID): asn1js.ObjectIdentifier;
+  public static override defaultValues(memberName: typeof DIGEST_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof OBJECT_DIGEST): asn1js.BitString;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case DIGESTED_OBJECT_TYPE:
         return new asn1js.Enumerated();
@@ -70,15 +83,15 @@ export class ObjectDigestInfo implements Schema.SchemaCompatible {
       case OBJECT_DIGEST:
         return new asn1js.BitString();
       default:
-        throw new Error(`Invalid member name for ObjectDigestInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * ObjectDigestInfo ::= SEQUENCE {
    *   digestedObjectType  ENUMERATED {
    *     publicKey            (0),
@@ -93,9 +106,9 @@ export class ObjectDigestInfo implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     digestedObjectType?: string;
     otherObjectTypeID?: string;
     digestAlgorithm?: AlgorithmIdentifierSchema;
@@ -117,15 +130,11 @@ export class ObjectDigestInfo implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
-    //#region Check the schema is valid
+
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       ObjectDigestInfo.schema({
@@ -141,26 +150,20 @@ export class ObjectDigestInfo implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for ObjectDigestInfo");
-    }
-    //#endregion
     //#region Get internal properties from parsed schema
     this.digestedObjectType = asn1.result.digestedObjectType;
 
-    if (OTHER_OBJECT_TYPE_ID in asn1.result)
+    if (OTHER_OBJECT_TYPE_ID in asn1.result) {
       this.otherObjectTypeID = asn1.result.otherObjectTypeID;
+    }
 
     this.digestAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.digestAlgorithm });
     this.objectDigest = asn1.result.objectDigest;
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     const result = new asn1js.Sequence({
       value: [this.digestedObjectType]
@@ -176,21 +179,16 @@ export class ObjectDigestInfo implements Schema.SchemaCompatible {
     return result;
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const result: any = {
-      digestedObjectType: this.digestedObjectType.toJSON()
+  public toJSON(): ObjectDigestInfoJson {
+    const result: ObjectDigestInfoJson = {
+      digestedObjectType: this.digestedObjectType.toJSON() as Schema.AsnEnumeratedJson,
+      digestAlgorithm: this.digestAlgorithm.toJSON(),
+      objectDigest: this.objectDigest.toJSON() as Schema.AsnBitStringJson,
     };
 
     if (this.otherObjectTypeID) {
-      result.otherObjectTypeID = this.otherObjectTypeID.toJSON();
+      result.otherObjectTypeID = this.otherObjectTypeID.toJSON() as Schema.AsnObjectIdentifierJson;
     }
-
-    result.digestAlgorithm = this.digestAlgorithm.toJSON();
-    result.objectDigest = this.objectDigest.toJSON();
 
     return result;
   }

@@ -69,7 +69,6 @@ export interface CryptoEngineVerifyDataStampedWithPasswordParams {
   signatureToVerify: ArrayBuffer;
 }
 
-
 export interface ICryptoEngine extends SubtleCrypto {
   name: string;
   crypto: Crypto;

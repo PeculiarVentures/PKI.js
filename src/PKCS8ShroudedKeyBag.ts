@@ -1,12 +1,13 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EncryptedData } from "./EncryptedData";
 import { EncryptedContentInfo } from "./EncryptedContentInfo";
 import { PrivateKeyInfo } from "./PrivateKeyInfo";
 import * as Schema from "./Schema";
 import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const ENCRYPTION_ALGORITHM = "encryptionAlgorithm";
 const ENCRYPTED_DATA = "encryptedData";
@@ -16,49 +17,57 @@ const CLEAR_PROPS = [
   ENCRYPTED_DATA,
 ];
 
-export interface PKCS8ShroudedKeyBagParameters extends Schema.SchemaConstructor {
-  encryptionAlgorithm?: AlgorithmIdentifier;
-  encryptedData?: asn1js.OctetString;
+export interface IPKCS8ShroudedKeyBag {
+  encryptionAlgorithm: AlgorithmIdentifier;
+  encryptedData: asn1js.OctetString;
   parsedValue?: PrivateKeyInfo;
 }
 
-/**
- * Class from RFC7292
- */
-export class PKCS8ShroudedKeyBag implements Schema.SchemaCompatible {
+export type PKCS8ShroudedKeyBagParameters = PkiObjectParameters & Partial<IPKCS8ShroudedKeyBag>;
 
-  public encryptionAlgorithm: AlgorithmIdentifier;
-  public encryptedData: asn1js.OctetString;
+export interface PKCS8ShroudedKeyBagJson {
+  encryptionAlgorithm: AlgorithmIdentifierJson;
+  encryptedData: Schema.AsnOctetStringJson;
+}
+
+/**
+ * Represents the PKCS8ShroudedKeyBag structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
+ */
+export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyBag {
+
+  public static override CLASS_NAME = "PKCS8ShroudedKeyBag";
+
+  public encryptionAlgorithm!: AlgorithmIdentifier;
+  public encryptedData!: asn1js.OctetString;
   public parsedValue?: PrivateKeyInfo;
 
   /**
-   * Constructor for PKCS8ShroudedKeyBag class
-   * @param parameters
+   * Initializes a new instance of the {@link PKCS8ShroudedKeyBag} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: PKCS8ShroudedKeyBagParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.encryptionAlgorithm = pvutils.getParametersValue(parameters, ENCRYPTION_ALGORITHM, PKCS8ShroudedKeyBag.defaultValues(ENCRYPTION_ALGORITHM));
     this.encryptedData = pvutils.getParametersValue(parameters, ENCRYPTED_DATA, PKCS8ShroudedKeyBag.defaultValues(ENCRYPTED_DATA));
-    if (parameters.parsedValue) {
+    if (PARSED_VALUE in parameters) {
       this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, PKCS8ShroudedKeyBag.defaultValues(PARSED_VALUE));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof ENCRYPTED_DATA): asn1js.OctetString;
-  public static defaultValues(memberName: typeof PARSED_VALUE): PrivateKeyInfo;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof ENCRYPTED_DATA): asn1js.OctetString;
+  public static override defaultValues(memberName: typeof PARSED_VALUE): PrivateKeyInfo;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ENCRYPTION_ALGORITHM:
         return (new AlgorithmIdentifier());
@@ -67,7 +76,7 @@ export class PKCS8ShroudedKeyBag implements Schema.SchemaCompatible {
       case PARSED_VALUE:
         return {};
       default:
-        throw new Error(`Invalid member name for PKCS8ShroudedKeyBag class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -86,15 +95,15 @@ export class PKCS8ShroudedKeyBag implements Schema.SchemaCompatible {
       case PARSED_VALUE:
         return ((memberValue instanceof Object) && (Object.keys(memberValue).length === 0));
       default:
-        throw new Error(`Invalid member name for PKCS8ShroudedKeyBag class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * PKCS8ShroudedKeyBag ::= EncryptedPrivateKeyInfo
    *
    * EncryptedPrivateKeyInfo ::= SEQUENCE {
@@ -106,9 +115,9 @@ export class PKCS8ShroudedKeyBag implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     encryptionAlgorithm?: AlgorithmIdentifierSchema;
     encryptedData?: string;
   }> = {}): Schema.SchemaType {
@@ -143,16 +152,11 @@ export class PKCS8ShroudedKeyBag implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       PKCS8ShroudedKeyBag.schema({
@@ -166,40 +170,26 @@ export class PKCS8ShroudedKeyBag implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for PKCS8ShroudedKeyBag");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.encryptionAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.encryptionAlgorithm });
     this.encryptedData = asn1.result.encryptedData;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: [
         this.encryptionAlgorithm.toSchema(),
         this.encryptedData
       ]
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): PKCS8ShroudedKeyBagJson {
     return {
       encryptionAlgorithm: this.encryptionAlgorithm.toJSON(),
-      encryptedData: this.encryptedData.toJSON()
+      encryptedData: this.encryptedData.toJSON() as Schema.AsnOctetStringJson,
     };
   }
 

@@ -1,11 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { EncryptedContentInfo, EncryptedContentInfoSchema } from "./EncryptedContentInfo";
-import { Attribute } from "./Attribute";
+import { EncryptedContentInfo, EncryptedContentInfoJson, EncryptedContentInfoSchema } from "./EncryptedContentInfo";
+import { Attribute, AttributeJson } from "./Attribute";
 import * as Schema from "./Schema";
-import { ArgumentError } from "./errors";
+import { ArgumentError, AsnError } from "./errors";
 import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const VERSION = "version";
 const ENCRYPTED_CONTENT_INFO = "encryptedContentInfo";
@@ -16,49 +17,58 @@ const CLEAR_PROPS = [
   UNPROTECTED_ATTRS,
 ];
 
-export interface EncryptedDataParameters extends Schema.SchemaConstructor {
-  version?: number;
-  encryptedContentInfo?: EncryptedContentInfo;
+export interface IEncryptedData {
+  version: number;
+  encryptedContentInfo: EncryptedContentInfo;
   unprotectedAttrs?: Attribute[];
 }
 
-/**
- * Class from RFC5652
- */
-export class EncryptedData implements Schema.SchemaCompatible {
+export interface EncryptedDataJson {
+  version: number;
+  encryptedContentInfo: EncryptedContentInfoJson;
+  unprotectedAttrs?: AttributeJson[];
+}
 
-  public version: number;
-  public encryptedContentInfo: EncryptedContentInfo;
+export type EncryptedDataParameters = PkiObjectParameters & Partial<IEncryptedData>;
+
+/**
+ * Represents the EncryptedData structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ */
+export class EncryptedData extends PkiObject implements IEncryptedData {
+
+  public static override CLASS_NAME = "EncryptedData";
+
+  public version!: number;
+  public encryptedContentInfo!: EncryptedContentInfo;
   public unprotectedAttrs?: Attribute[];
 
   /**
-   * Constructor for EncryptedData class
-   * @param parameters
+   * Initializes a new instance of the {@link EncryptedData} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: EncryptedDataParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, EncryptedData.defaultValues(VERSION));
     this.encryptedContentInfo = pvutils.getParametersValue(parameters, ENCRYPTED_CONTENT_INFO, EncryptedData.defaultValues(ENCRYPTED_CONTENT_INFO));
-    if (parameters.unprotectedAttrs) {
+    if (UNPROTECTED_ATTRS in parameters) {
       this.unprotectedAttrs = pvutils.getParametersValue(parameters, UNPROTECTED_ATTRS, EncryptedData.defaultValues(UNPROTECTED_ATTRS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof ENCRYPTED_CONTENT_INFO): EncryptedContentInfo;
-  public static defaultValues(memberName: typeof UNPROTECTED_ATTRS): Attribute[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof ENCRYPTED_CONTENT_INFO): EncryptedContentInfo;
+  public static override defaultValues(memberName: typeof UNPROTECTED_ATTRS): Attribute[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 0;
@@ -67,7 +77,7 @@ export class EncryptedData implements Schema.SchemaCompatible {
       case UNPROTECTED_ATTRS:
         return [];
       default:
-        throw new Error(`Invalid member name for EncryptedData class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -88,15 +98,15 @@ export class EncryptedData implements Schema.SchemaCompatible {
       case UNPROTECTED_ATTRS:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for EncryptedData class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * EncryptedData ::= SEQUENCE {
    *    version CMSVersion,
    *    encryptedContentInfo EncryptedContentInfo,
@@ -104,9 +114,9 @@ export class EncryptedData implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
     encryptedContentInfo?: EncryptedContentInfoSchema;
     unprotectedAttrs?: string;
@@ -135,16 +145,11 @@ export class EncryptedData implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       EncryptedData.schema({
@@ -159,24 +164,15 @@ export class EncryptedData implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for EncryptedData");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.version = asn1.result.version.valueBlock.valueDec;
     this.encryptedContentInfo = new EncryptedContentInfo({ schema: asn1.result.encryptedContentInfo });
-
     if (UNPROTECTED_ATTRS in asn1.result)
       this.unprotectedAttrs = Array.from(asn1.result.unprotectedAttrs, element => new Attribute({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -191,7 +187,7 @@ export class EncryptedData implements Schema.SchemaCompatible {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 1 // [1]
         },
-        value: Array.from(this.unprotectedAttrs, element => element.toSchema())
+        value: Array.from(this.unprotectedAttrs, o => o.toSchema())
       }));
     }
     //#endregion
@@ -203,20 +199,16 @@ export class EncryptedData implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): EncryptedDataJson {
+    const res: EncryptedDataJson = {
       version: this.version,
       encryptedContentInfo: this.encryptedContentInfo.toJSON()
     };
 
     if (this.unprotectedAttrs)
-      _object.unprotectedAttrs = Array.from(this.unprotectedAttrs, element => element.toJSON());
+      res.unprotectedAttrs = Array.from(this.unprotectedAttrs, o => o.toJSON());
 
-    return _object;
+    return res;
   }
 
   /**
@@ -241,6 +233,7 @@ export class EncryptedData implements Schema.SchemaCompatible {
   /**
    * Create a new CMS Encrypted Data content
    * @param parameters Parameters necessary for encryption
+   * @returns Returns decrypted raw data
    */
   async decrypt(parameters: {
     password: ArrayBuffer;

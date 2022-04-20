@@ -1,19 +1,27 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { ResponseBytes, ResponseBytesSchema } from "./ResponseBytes";
+import { ResponseBytes, ResponseBytesJson, ResponseBytesSchema } from "./ResponseBytes";
 import { BasicOCSPResponse } from "./BasicOCSPResponse";
 import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
 import { id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const RESPONSE_STATUS = "responseStatus";
 const RESPONSE_BYTES = "responseBytes";
 
-export interface OCSPResponseParameters extends Schema.SchemaConstructor {
-  responseStatus?: asn1js.Enumerated;
+export interface IOCSPResponse {
+  responseStatus: asn1js.Enumerated;
   responseBytes?: ResponseBytes;
 }
+
+export interface OCSPResponseJson {
+  responseStatus: Schema.AsnEnumeratedJson;
+  responseBytes?: ResponseBytesJson;
+}
+
+export type OCSPResponseParameters = PkiObjectParameters & Partial<IOCSPResponse>;
 
 /**
  * Represents an OCSP response described in [RFC6960 Section 4.2](https://datatracker.ietf.org/doc/html/rfc6960#section-4.2)
@@ -78,45 +86,45 @@ export interface OCSPResponseParameters extends Schema.SchemaConstructor {
  * const ocspRespRaw = ocspResp.toSchema().toBER();
  * ```
  */
-export class OCSPResponse implements Schema.SchemaCompatible {
+export class OCSPResponse extends PkiObject implements IOCSPResponse {
 
-  public responseStatus: asn1js.Enumerated;
+  public static override CLASS_NAME = "OCSPResponse";
+
+  public responseStatus!: asn1js.Enumerated;
   public responseBytes?: ResponseBytes;
 
   /**
-   * Constructor for OCSPResponse class
-   * @param parameters
+   * Initializes a new instance of the {@link OCSPResponse} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: OCSPResponseParameters = {}) {
-    //#region Internal properties of the object
-    this.responseStatus = pvutils.getParametersValue(parameters, RESPONSE_STATUS, OCSPResponse.defaultValues(RESPONSE_STATUS));
+    super();
 
-    if (parameters.responseBytes) {
+    this.responseStatus = pvutils.getParametersValue(parameters, RESPONSE_STATUS, OCSPResponse.defaultValues(RESPONSE_STATUS));
+    if (RESPONSE_BYTES in parameters) {
       this.responseBytes = pvutils.getParametersValue(parameters, RESPONSE_BYTES, OCSPResponse.defaultValues(RESPONSE_BYTES));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof RESPONSE_STATUS): asn1js.Enumerated;
-  public static defaultValues(memberName: typeof RESPONSE_BYTES): ResponseBytes;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof RESPONSE_STATUS): asn1js.Enumerated;
+  public static override defaultValues(memberName: typeof RESPONSE_BYTES): ResponseBytes;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case RESPONSE_STATUS:
         return new asn1js.Enumerated();
       case RESPONSE_BYTES:
         return new ResponseBytes();
       default:
-        throw new Error(`Invalid member name for OCSPResponse class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -133,15 +141,15 @@ export class OCSPResponse implements Schema.SchemaCompatible {
         return ((ResponseBytes.compareWithDefault("responseType", memberValue.responseType)) &&
           (ResponseBytes.compareWithDefault("response", memberValue.response)));
       default:
-        throw new Error(`Invalid member name for OCSPResponse class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * OCSPResponse ::= SEQUENCE {
    *    responseStatus         OCSPResponseStatus,
    *    responseBytes          [0] EXPLICIT ResponseBytes OPTIONAL }
@@ -158,9 +166,9 @@ export class OCSPResponse implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     responseStatus?: string;
     responseBytes?: ResponseBytesSchema;
   }> = {}): Schema.SchemaType {
@@ -188,39 +196,26 @@ export class OCSPResponse implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, [
       RESPONSE_STATUS,
       RESPONSE_BYTES
     ]);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       OCSPResponse.schema()
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for OCSPResponse");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.responseStatus = asn1.result.responseStatus;
     if (RESPONSE_BYTES in asn1.result)
       this.responseBytes = new ResponseBytes({ schema: asn1.result.responseBytes });
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -244,20 +239,16 @@ export class OCSPResponse implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
-      responseStatus: this.responseStatus.toJSON()
+  public toJSON(): OCSPResponseJson {
+    const res: OCSPResponseJson = {
+      responseStatus: this.responseStatus.toJSON() as Schema.AsnEnumeratedJson
     };
 
     if (this.responseBytes) {
-      _object.responseBytes = this.responseBytes.toJSON();
+      res.responseBytes = this.responseBytes.toJSON();
     }
 
-    return _object;
+    return res;
   }
 
   /**

@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const TYPE = "type";
@@ -14,75 +16,77 @@ export enum TimeType {
   empty,
 }
 
-export interface TimeParameters extends Schema.SchemaConstructor {
+export interface ITime {
   /**
    * 0 - UTCTime; 1 - GeneralizedTime; 2 - empty value
    */
-  type?: TimeType;
+  type: TimeType;
   /**
    * Value of the TIME class
    */
-  value?: Date;
+  value: Date;
 }
+
+export type TimeParameters = PkiObjectParameters & Partial<ITime>;
 
 export type TimeSchema = Schema.SchemaParameters<{
   utcTimeName?: string;
   generalTimeName?: string;
 }>;
 
+export interface TimeJson {
+  type: TimeType;
+  value: Date;
+}
+
 /**
- * Class from RFC5280
+ * Represents the Time structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
-export class Time implements Schema.SchemaCompatible {
+export class Time extends PkiObject implements ITime {
+
+  public static override CLASS_NAME = "Time";
+
+  public type!: TimeType;
+  public value!: Date;
 
   /**
-   * 0 - UTCTime; 1 - GeneralizedTime; 2 - empty value
-   */
-  public type: TimeType;
-  /**
-   * Value of the TIME class
-   */
-  public value: Date;
-
-  /**
-   * Constructor for Time class
-   * @param parameters
+   * Initializes a new instance of the {@link Time} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: TimeParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.type = pvutils.getParametersValue(parameters, TYPE, Time.defaultValues(TYPE));
     this.value = pvutils.getParametersValue(parameters, VALUE, Time.defaultValues(VALUE));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof TYPE): TimeType;
-  public static defaultValues(memberName: typeof VALUE): Date;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof TYPE): TimeType;
+  public static override defaultValues(memberName: typeof VALUE): Date;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TYPE:
         return 0;
       case VALUE:
         return new Date(0, 0, 0);
       default:
-        throw new Error(`Invalid member name for Time class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * Time ::= CHOICE {
      *   utcTime        UTCTime,
      *   generalTime    GeneralizedTime }
@@ -90,9 +94,9 @@ export class Time implements Schema.SchemaCompatible {
    *
    * @param parameters Input parameters for the schema
    * @param optional Flag that current schema should be optional
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  static schema(parameters: TimeSchema = {}, optional = false): Schema.SchemaType {
+  static override schema(parameters: TimeSchema = {}, optional = false): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Choice({
@@ -104,28 +108,20 @@ export class Time implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, Time.schema({
       names: {
         utcTimeName: UTC_TIME_NAME,
         generalTimeName: GENERAL_TIME_NAME
       }
     }));
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for Time");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     if (UTC_TIME_NAME in asn1.result) {
       this.type = 0;
       this.value = asn1.result.utcTimeName.toDate();
@@ -134,15 +130,9 @@ export class Time implements Schema.SchemaCompatible {
       this.type = 1;
       this.value = asn1.result.generalTimeName.toDate();
     }
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.UTCTime | asn1js.GeneralizedTime {
-    //#region Construct and return new ASN.1 schema for this object
     if (this.type === 0) {
       return new asn1js.UTCTime({ valueDate: this.value });
     } else if (this.type === 1) {
@@ -150,13 +140,9 @@ export class Time implements Schema.SchemaCompatible {
     }
 
     return {} as any;
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
+  public toJSON(): TimeJson {
     return {
       type: this.type,
       value: this.value

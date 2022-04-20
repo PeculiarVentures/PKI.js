@@ -1,8 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { Attribute } from "./Attribute";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { Attribute, AttributeJson } from "./Attribute";
 import { ECPrivateKey } from "./ECPrivateKey";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { RSAPrivateKey } from "./RSAPrivateKey";
 import * as Schema from "./Schema";
 
@@ -18,59 +20,68 @@ const CLEAR_PROPS = [
   ATTRIBUTES
 ];
 
-export interface PrivateKeyInfoParameters extends Schema.SchemaConstructor {
-  version?: number;
-  privateKeyAlgorithm?: AlgorithmIdentifier;
-  privateKey?: asn1js.OctetString;
+export interface IPrivateKeyInfo {
+  version: number;
+  privateKeyAlgorithm: AlgorithmIdentifier;
+  privateKey: asn1js.OctetString;
   attributes?: Attribute[];
   parsedKey?: RSAPrivateKey | ECPrivateKey;
-  json?: JsonWebKey;
+}
+
+export type PrivateKeyInfoParameters = PkiObjectParameters & Partial<IPrivateKeyInfo> & { json?: JsonWebKey; };
+
+export interface PrivateKeyInfoJson {
+  version: number;
+  privateKeyAlgorithm: AlgorithmIdentifierJson;
+  privateKey: Schema.AsnOctetStringJson;
+  attributes?: AttributeJson[];
 }
 
 /**
- * Class from RFC5208
+ * Represents the PrivateKeyInfo structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5208)
  */
-export class PrivateKeyInfo implements Schema.SchemaCompatible {
+export class PrivateKeyInfo extends PkiObject implements IPrivateKeyInfo {
 
-  public version: number;
-  public privateKeyAlgorithm: AlgorithmIdentifier;
-  public privateKey: asn1js.OctetString;
+  public static override CLASS_NAME = "PrivateKeyInfo";
+
+  public version!: number;
+  public privateKeyAlgorithm!: AlgorithmIdentifier;
+  public privateKey!: asn1js.OctetString;
   public attributes?: Attribute[];
   public parsedKey?: RSAPrivateKey | ECPrivateKey;
 
   /**
-   * Constructor for PrivateKeyInfo class
-   * @param parameters
+   * Initializes a new instance of the {@link PrivateKeyInfo} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: PrivateKeyInfoParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, PrivateKeyInfo.defaultValues(VERSION));
     this.privateKeyAlgorithm = pvutils.getParametersValue(parameters, PRIVATE_KEY_ALGORITHM, PrivateKeyInfo.defaultValues(PRIVATE_KEY_ALGORITHM));
     this.privateKey = pvutils.getParametersValue(parameters, PRIVATE_KEY, PrivateKeyInfo.defaultValues(PRIVATE_KEY));
-
-    if (parameters.attributes) {
+    if (ATTRIBUTES in parameters) {
       this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, PrivateKeyInfo.defaultValues(ATTRIBUTES));
     }
-    if (parameters.parsedKey) {
+    if (PARSED_KEY in parameters) {
       this.parsedKey = pvutils.getParametersValue(parameters, PARSED_KEY, PrivateKeyInfo.defaultValues(PARSED_KEY));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
-    if (parameters.schema)
-      this.fromSchema(parameters.schema);
-    //#endregion
-    //#region If input argument array contains "json" for this object
-    if (parameters.json)
+    if (parameters.json) {
       this.fromJSON(parameters.json);
-    //#endregion
+    }
+
+    if (parameters.schema) {
+      this.fromSchema(parameters.schema);
+    }
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 0;
@@ -83,15 +94,15 @@ export class PrivateKeyInfo implements Schema.SchemaCompatible {
       case PARSED_KEY:
         return {};
       default:
-        throw new Error(`Invalid member name for PrivateKeyInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * PrivateKeyInfo ::= SEQUENCE {
    *    version Version,
    *    privateKeyAlgorithm AlgorithmIdentifier {{PrivateKeyAlgorithms}},
@@ -106,9 +117,9 @@ export class PrivateKeyInfo implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
     privateKeyAlgorithm?: AlgorithmIdentifierSchema;
     privateKey?: string;
@@ -139,16 +150,11 @@ export class PrivateKeyInfo implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       PrivateKeyInfo.schema({
@@ -164,11 +170,7 @@ export class PrivateKeyInfo implements Schema.SchemaCompatible {
         }
       })
     );
-
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for PrivateKeyInfo");
-    }
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     this.version = asn1.result.version.valueBlock.valueDec;
@@ -205,10 +207,6 @@ export class PrivateKeyInfo implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray: any = [
@@ -224,7 +222,7 @@ export class PrivateKeyInfo implements Schema.SchemaCompatible {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        value: Array.from(this.attributes, element => element.toSchema())
+        value: Array.from(this.attributes, o => o.toSchema())
       }));
     }
     //#endregion
@@ -236,21 +234,17 @@ export class PrivateKeyInfo implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): JsonWebKey {
+  public toJSON(): PrivateKeyInfoJson | JsonWebKey {
     //#region Return common value in case we do not have enough info fo making JWK
     if (!this.parsedKey) {
-      const object: any = {
+      const object: PrivateKeyInfoJson = {
         version: this.version,
         privateKeyAlgorithm: this.privateKeyAlgorithm.toJSON(),
-        privateKey: this.privateKey.toJSON()
+        privateKey: this.privateKey.toJSON() as Schema.AsnOctetStringJson,
       };
 
       if (this.attributes) {
-        object.attributes = Array.from(this.attributes, element => element.toJSON());
+        object.attributes = Array.from(this.attributes, o => o.toJSON());
       }
 
       return object;
@@ -274,14 +268,13 @@ export class PrivateKeyInfo implements Schema.SchemaCompatible {
     const publicKeyJWK = this.parsedKey.toJSON();
     Object.assign(jwk, publicKeyJWK);
 
-
     return jwk;
     //#endregion
   }
 
   /**
-   * Convert JSON value into current object
-   * @param json
+   * Converts JSON value into current object
+   * @param json JSON object
    */
   public fromJSON(json: any): void {
     if ("kty" in json) {

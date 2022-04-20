@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const ID = "id";
@@ -13,10 +15,17 @@ const QC_STATEMENTS_CLEAR_PROPS = [
   VALUES
 ];
 
-export interface QCStatementParameters extends Schema.SchemaConstructor {
-  id?: string;
+export interface IQCStatement {
+  id: string;
   type?: any;
 }
+
+export interface QCStatementJson {
+  id: string;
+  type?: any;
+}
+
+export type QCStatementParameters = PkiObjectParameters & Partial<IQCStatement>;
 
 export type QCStatementSchema = Schema.SchemaParameters<{
   id?: string;
@@ -24,47 +33,47 @@ export type QCStatementSchema = Schema.SchemaParameters<{
 }>;
 
 /**
- * Class from RFC3739
+ * Represents the QCStatement structure described in [RFC3739](https://datatracker.ietf.org/doc/html/rfc3739)
  */
-export class QCStatement implements Schema.SchemaCompatible {
+export class QCStatement extends PkiObject implements IQCStatement {
 
-  public id: string;
+  public static override CLASS_NAME = "QCStatement";
+
+  public id!: string;
   public type?: any;
 
   /**
-   * Constructor for QCStatement class
-   * @param parameters
+   * Initializes a new instance of the {@link QCStatement} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: QCStatementParameters = {}) {
-    //#region Internal properties of the object
-    this.id = pvutils.getParametersValue(parameters, ID, QCStatement.defaultValues(ID));
+    super();
 
-    if (parameters.type) {
+    this.id = pvutils.getParametersValue(parameters, ID, QCStatement.defaultValues(ID));
+    if (TYPE in parameters) {
       this.type = pvutils.getParametersValue(parameters, TYPE, QCStatement.defaultValues(TYPE));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof ID): string;
-  public static defaultValues(memberName: typeof TYPE): any;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof ID): string;
+  public static override defaultValues(memberName: typeof TYPE): any;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ID:
         return "";
       case TYPE:
         return new asn1js.Null();
       default:
-        throw new Error(`Invalid member name for QCStatement class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -80,25 +89,25 @@ export class QCStatement implements Schema.SchemaCompatible {
       case TYPE:
         return (memberValue instanceof asn1js.Null);
       default:
-        throw new Error(`Invalid member name for QCStatement class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
-     *	 QCStatement ::= SEQUENCE {
+   * ```asn
+   * QCStatement ::= SEQUENCE {
    *       statementId   QC-STATEMENT.&id({SupportedStatements}),
    *       statementInfo QC-STATEMENT.&Type({SupportedStatements}{@statementId}) OPTIONAL
    *   }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: QCStatementSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: QCStatementSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -113,16 +122,11 @@ export class QCStatement implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, QC_STATEMENT_CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       QCStatement.schema({
@@ -132,23 +136,14 @@ export class QCStatement implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for QCStatement");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.id = asn1.result.id.valueBlock.toString();
-
     if (TYPE in asn1.result)
       this.type = asn1.result.type;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     const value = [
       new asn1js.ObjectIdentifier({ value: this.id })
@@ -157,17 +152,13 @@ export class QCStatement implements Schema.SchemaCompatible {
     if (TYPE in this)
       value.push(this.type);
 
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
-      value
+      value,
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
+  public toJSON(): QCStatementJson {
     const object: any = {
       id: this.id
     };
@@ -181,43 +172,51 @@ export class QCStatement implements Schema.SchemaCompatible {
 
 }
 
-export interface QCStatementsParameters extends Schema.SchemaConstructor {
-  values?: QCStatement[];
+export interface IQCStatements {
+  values: QCStatement[];
 }
 
-/**
- * Class from RFC3739
- */
-export class QCStatements implements Schema.SchemaCompatible {
+export interface QCStatementsJson {
+  values: QCStatementJson[];
+}
 
-  public values: QCStatement[];
+export type QCStatementsParameters = PkiObjectParameters & Partial<IQCStatements>;
+
+/**
+ * Represents the QCStatements structure described in [RFC3739](https://datatracker.ietf.org/doc/html/rfc3739)
+ */
+export class QCStatements extends PkiObject implements IQCStatements {
+
+  public static override CLASS_NAME = "QCStatements";
+
+  public values!: QCStatement[];
 
   /**
-   * Constructor for QCStatements class
-   * @param parameters
+   * Initializes a new instance of the {@link QCStatement} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: QCStatementParameters = {}) {
-    //#region Internal properties of the object
-    this.values = pvutils.getParametersValue(parameters, VALUES, QCStatements.defaultValues(VALUES));
-    //#endregion
+    super();
 
-    //#region If input argument array contains "schema" for this object
-    if (parameters.schema)
+    this.values = pvutils.getParametersValue(parameters, VALUES, QCStatements.defaultValues(VALUES));
+
+    if (parameters.schema) {
       this.fromSchema(parameters.schema);
-    //#endregion
+    }
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VALUES): QCStatement[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VALUES): QCStatement[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VALUES:
         return [];
       default:
-        throw new Error(`Invalid member name for QCStatements class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -231,22 +230,22 @@ export class QCStatements implements Schema.SchemaCompatible {
       case VALUES:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for QCStatements class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * QCStatements ::= SEQUENCE OF QCStatement
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     values?: string;
     value?: QCStatementSchema;
   }> = {}): Schema.SchemaType {
@@ -268,16 +267,11 @@ export class QCStatements implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, QC_STATEMENTS_CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       QCStatements.schema({
@@ -286,38 +280,23 @@ export class QCStatements implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for QCStatements");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.values = Array.from(asn1.result.values, element => new QCStatement({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
-      value: Array.from(this.values, element => element.toSchema())
+      value: Array.from(this.values, o => o.toSchema())
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): QCStatementsJson {
     return {
-      extensions: Array.from(this.values, element => element.toJSON())
+      values: Array.from(this.values, o => o.toJSON())
     };
   }
 
 }
-

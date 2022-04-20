@@ -2,7 +2,6 @@ import * as assert from "assert";
 import * as pvutils from "pvutils";
 import * as example from "./opensslPrivateKeyEncryption";
 
-
 context("OpenSSL Encrypted Private Key", () => {
   //#region Initial variables
   const passwordBuffer = pvutils.stringToArrayBuffer("password");

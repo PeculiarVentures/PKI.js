@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const REQUIRE_EXPLICIT_POLICY = "requireExplicitPolicy";
@@ -10,62 +11,70 @@ const CLEAR_PROPS = [
   INHIBIT_POLICY_MAPPING,
 ];
 
-export interface PolicyConstraintsParameters extends Schema.SchemaConstructor {
+export interface IPolicyConstraints {
   requireExplicitPolicy?: number;
   inhibitPolicyMapping?: number;
 }
 
+export interface PolicyConstraintsJson {
+  requireExplicitPolicy?: number;
+  inhibitPolicyMapping?: number;
+}
+
+export type PolicyConstraintsParameters = PkiObjectParameters & Partial<IPolicyConstraints>;
+
 /**
- * Class from RFC5280
+ * Represents the PolicyConstraints structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
-export class PolicyConstraints implements Schema.SchemaCompatible {
+export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
+
+  public static override CLASS_NAME = "PolicyConstraints";
 
   public requireExplicitPolicy?: number;
   public inhibitPolicyMapping?: number;
 
   /**
-   * Constructor for PolicyConstraints class
-   * @param parameters
+   * Initializes a new instance of the {@link PolicyConstraints} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: PolicyConstraintsParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     if (REQUIRE_EXPLICIT_POLICY in parameters) {
       this.requireExplicitPolicy = pvutils.getParametersValue(parameters, REQUIRE_EXPLICIT_POLICY, PolicyConstraints.defaultValues(REQUIRE_EXPLICIT_POLICY));
     }
     if (INHIBIT_POLICY_MAPPING in parameters) {
       this.inhibitPolicyMapping = pvutils.getParametersValue(parameters, INHIBIT_POLICY_MAPPING, PolicyConstraints.defaultValues(INHIBIT_POLICY_MAPPING));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof REQUIRE_EXPLICIT_POLICY): number;
-  public static defaultValues(memberName: typeof INHIBIT_POLICY_MAPPING): number;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof REQUIRE_EXPLICIT_POLICY): number;
+  public static override defaultValues(memberName: typeof INHIBIT_POLICY_MAPPING): number;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case REQUIRE_EXPLICIT_POLICY:
         return 0;
       case INHIBIT_POLICY_MAPPING:
         return 0;
       default:
-        throw new Error(`Invalid member name for PolicyConstraints class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * PolicyConstraints ::= SEQUENCE {
    *    requireExplicitPolicy           [0] SkipCerts OPTIONAL,
    *    inhibitPolicyMapping            [1] SkipCerts OPTIONAL }
@@ -74,9 +83,9 @@ export class PolicyConstraints implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     requireExplicitPolicy?: string;
     inhibitPolicyMapping?: string;
   }> = {}): Schema.SchemaType {
@@ -105,16 +114,11 @@ export class PolicyConstraints implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       PolicyConstraints.schema({
@@ -124,10 +128,7 @@ export class PolicyConstraints implements Schema.SchemaCompatible {
         }
       })
     );
-
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for PolicyConstraints");
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     if (REQUIRE_EXPLICIT_POLICY in asn1.result) {
@@ -158,10 +159,6 @@ export class PolicyConstraints implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create correct values for output sequence
     const outputArray = [];
@@ -192,22 +189,18 @@ export class PolicyConstraints implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const object: any = {};
+  public toJSON(): PolicyConstraintsJson {
+    const res: PolicyConstraintsJson = {};
 
     if (REQUIRE_EXPLICIT_POLICY in this) {
-      object.requireExplicitPolicy = this.requireExplicitPolicy;
+      res.requireExplicitPolicy = this.requireExplicitPolicy;
     }
 
     if (INHIBIT_POLICY_MAPPING in this) {
-      object.inhibitPolicyMapping = this.inhibitPolicyMapping;
+      res.inhibitPolicyMapping = this.inhibitPolicyMapping;
     }
 
-    return object;
+    return res;
   }
 
 }

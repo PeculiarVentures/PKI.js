@@ -123,7 +123,6 @@ export async function verifyCMSSigned(cmsSignedBuffer: ArrayBuffer, trustedCerti
     throw new Error("Nothing to verify!");
   //#endregion
 
-
   //#region Decode existing CMS_Signed
   const asn1 = asn1js.fromBER(cmsSignedBuffer);
   pkijs.AsnError.assert(asn1, "CMS SignedData");

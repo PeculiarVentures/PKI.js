@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const SALT = "salt";
@@ -14,56 +16,65 @@ const CLEAR_PROPS = [
   PRF
 ];
 
-export interface PBKDF2ParamsParameters extends Schema.SchemaConstructor {
-  salt?: any;
-  iterationCount?: number;
+export interface IPBKDF2Params {
+  salt: any;
+  iterationCount: number;
   keyLength?: number;
   prf?: AlgorithmIdentifier;
 }
 
+export interface PBKDF2ParamsJson {
+  salt: any;
+  iterationCount: number;
+  keyLength?: number;
+  prf?: AlgorithmIdentifierJson;
+}
+
+export type PBKDF2ParamsParameters = PkiObjectParameters & Partial<IPBKDF2Params>;
+
 /**
- * Class from RFC2898
+ * Represents the PBKDF2Params structure described in [RFC2898](https://www.ietf.org/rfc/rfc2898.txt)
  */
-export class PBKDF2Params implements Schema.SchemaCompatible {
+export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
+
+  public static override CLASS_NAME = "PBKDF2Params";
 
   public salt: any;
-  public iterationCount: number;
+  public iterationCount!: number;
   public keyLength?: number;
   public prf?: AlgorithmIdentifier;
 
   /**
-   * Constructor for PBKDF2Params class
-   * @param parameters
+   * Initializes a new instance of the {@link PBKDF2Params} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: PBKDF2ParamsParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.salt = pvutils.getParametersValue(parameters, SALT, PBKDF2Params.defaultValues(SALT));
     this.iterationCount = pvutils.getParametersValue(parameters, ITERATION_COUNT, PBKDF2Params.defaultValues(ITERATION_COUNT));
-
     if (KEY_LENGTH in parameters) {
       this.keyLength = pvutils.getParametersValue(parameters, KEY_LENGTH, PBKDF2Params.defaultValues(KEY_LENGTH));
     }
-
-    if (parameters.prf) {
+    if (PRF in parameters) {
       this.prf = pvutils.getParametersValue(parameters, PRF, PBKDF2Params.defaultValues(PRF));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
-    if (parameters.schema)
+    if (parameters.schema) {
       this.fromSchema(parameters.schema);
-    //#endregion
+    }
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof SALT): any;
-  public static defaultValues(memberName: typeof ITERATION_COUNT): number;
-  public static defaultValues(memberName: typeof KEY_LENGTH): number;
-  public static defaultValues(memberName: typeof PRF): AlgorithmIdentifier;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof SALT): any;
+  public static override defaultValues(memberName: typeof ITERATION_COUNT): number;
+  public static override defaultValues(memberName: typeof KEY_LENGTH): number;
+  public static override defaultValues(memberName: typeof PRF): AlgorithmIdentifier;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case SALT:
         return {};
@@ -77,15 +88,15 @@ export class PBKDF2Params implements Schema.SchemaCompatible {
           algorithmParams: new asn1js.Null()
         });
       default:
-        throw new Error(`Invalid member name for PBKDF2Params class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * PBKDF2-params ::= SEQUENCE {
    *    salt CHOICE {
    *        specified OCTET STRING,
@@ -97,9 +108,9 @@ export class PBKDF2Params implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     saltPrimitive?: string;
     saltConstructed?: AlgorithmIdentifierSchema;
     iterationCount?: string;
@@ -131,16 +142,11 @@ export class PBKDF2Params implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       PBKDF2Params.schema({
@@ -162,28 +168,17 @@ export class PBKDF2Params implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for PBKDF2Params");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.salt = asn1.result.salt;
     this.iterationCount = asn1.result.iterationCount.valueBlock.valueDec;
-
     if (KEY_LENGTH in asn1.result)
       this.keyLength = asn1.result.keyLength.valueBlock.valueDec;
-
     if (PRF in asn1.result)
       this.prf = new AlgorithmIdentifier({ schema: asn1.result.prf });
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -209,27 +204,23 @@ export class PBKDF2Params implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): PBKDF2ParamsJson {
+    const res: PBKDF2ParamsJson = {
       salt: this.salt.toJSON(),
       iterationCount: this.iterationCount
     };
 
     if (KEY_LENGTH in this) {
       if (PBKDF2Params.defaultValues(KEY_LENGTH) !== this.keyLength)
-        _object.keyLength = this.keyLength;
+        res.keyLength = this.keyLength;
     }
 
     if (this.prf) {
       if (PBKDF2Params.defaultValues(PRF).isEqual(this.prf) === false)
-        _object.prf = this.prf.toJSON();
+        res.prf = this.prf.toJSON();
     }
 
-    return _object;
+    return res;
   }
 
 }

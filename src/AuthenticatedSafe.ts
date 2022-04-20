@@ -1,67 +1,73 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { ContentInfo } from "./ContentInfo";
+import { ContentInfo, ContentInfoJson } from "./ContentInfo";
 import { SafeContents } from "./SafeContents";
 import { EnvelopedData } from "./EnvelopedData";
 import { EncryptedData } from "./EncryptedData";
 import * as Schema from "./Schema";
 import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData } from "./ObjectIdentifiers";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const SAFE_CONTENTS = "safeContents";
 const PARSED_VALUE = "parsedValue";
 const CONTENT_INFOS = "contentInfos";
 
+export interface IAuthenticatedSafe {
+  safeContents: ContentInfo[];
+  parsedValue: any;
+}
 
-export interface AuthenticatedSafeParameters extends Schema.SchemaConstructor {
-  safeContents?: ContentInfo[];
-  parsedValue?: Schema.SchemaType;
+export type AuthenticatedSafeParameters = PkiObjectParameters & Partial<IAuthenticatedSafe>;
+
+export interface AuthenticatedSafeJson {
+  safeContents: ContentInfoJson[];
 }
 
 export type SafeContent = ContentInfo | EncryptedData | EnvelopedData | object;
 
 /**
- * Class from RFC7292
+ * Represents the AuthenticatedSafe structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
-export class AuthenticatedSafe implements Schema.SchemaCompatible {
+export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
 
-  public safeContents: ContentInfo[];
+  public static override CLASS_NAME = "AuthenticatedSafe";
+
+  public safeContents!: ContentInfo[];
   public parsedValue: any;
 
   /**
-   * Constructor for AuthenticatedSafe class
-   * @param parameters
+   * Initializes a new instance of the {@link AuthenticatedSafe} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: AuthenticatedSafeParameters = {}) {
-    //#region Internal properties of the object
-    this.safeContents = pvutils.getParametersValue(parameters, SAFE_CONTENTS, AuthenticatedSafe.defaultValues(SAFE_CONTENTS));
+    super();
 
+    this.safeContents = pvutils.getParametersValue(parameters, SAFE_CONTENTS, AuthenticatedSafe.defaultValues(SAFE_CONTENTS));
     if (PARSED_VALUE in parameters) {
       this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, AuthenticatedSafe.defaultValues(PARSED_VALUE));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof SAFE_CONTENTS): ContentInfo[];
-  public static defaultValues(memberName: typeof PARSED_VALUE): any;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof SAFE_CONTENTS): ContentInfo[];
+  public static override defaultValues(memberName: typeof PARSED_VALUE): any;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case SAFE_CONTENTS:
         return [];
       case PARSED_VALUE:
         return {};
       default:
-        throw new Error(`Invalid member name for AuthenticatedSafe class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -77,15 +83,15 @@ export class AuthenticatedSafe implements Schema.SchemaCompatible {
       case PARSED_VALUE:
         return ((memberValue instanceof Object) && (Object.keys(memberValue).length === 0));
       default:
-        throw new Error(`Invalid member name for AuthenticatedSafe class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * AuthenticatedSafe ::= SEQUENCE OF ContentInfo
    * -- Data if unencrypted
    * -- EncryptedData if password-encrypted
@@ -93,9 +99,9 @@ export class AuthenticatedSafe implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     contentInfos?: string;
   }> = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
@@ -111,18 +117,13 @@ export class AuthenticatedSafe implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, [
       CONTENT_INFOS
     ]);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       AuthenticatedSafe.schema({
@@ -131,35 +132,21 @@ export class AuthenticatedSafe implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for AuthenticatedSafe");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.safeContents = Array.from(asn1.result.contentInfos, element => new ContentInfo({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
-      value: Array.from(this.safeContents, element => element.toSchema())
+      value: Array.from(this.safeContents, o => o.toSchema())
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): AuthenticatedSafeJson {
     return {
-      safeContents: Array.from(this.safeContents, element => element.toJSON())
+      safeContents: Array.from(this.safeContents, o => o.toJSON())
     };
   }
 
@@ -293,7 +280,6 @@ export class AuthenticatedSafe implements Schema.SchemaCompatible {
     ArgumentError.assert(this.parsedValue, "this.parsedValue", "object");
     ArgumentError.assert(this.parsedValue.safeContents, "this.parsedValue.safeContents", "Array");
 
-
     //#region Check input data from "parameters"
     ArgumentError.assert(parameters, "parameters", "object");
     ParameterError.assert(parameters, "safeContents");
@@ -388,7 +374,6 @@ export class AuthenticatedSafe implements Schema.SchemaCompatible {
 
             //#region Making encryption
             await cmsEnveloped.encrypt(encryptionAlgorithm, contentToEncrypt);
-
 
             this.safeContents.push(new ContentInfo({
               contentType: "1.2.840.113549.1.7.3",

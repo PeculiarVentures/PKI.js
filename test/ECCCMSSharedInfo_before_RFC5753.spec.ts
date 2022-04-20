@@ -46,26 +46,26 @@ qH9W/zoAAAAAoRgwFgYIBAB/ABEAAQAxCgIIMltJu53L4Og=
 `;
 
 it("EnvelopedData with an ECCCMSSharedInfo containing algorithmParams should be decrypted", async () => {
-	const recipientPrivateKey = pemToDer(recipientPrivateKeyPem);
+  const recipientPrivateKey = pemToDer(recipientPrivateKeyPem);
 
-	const recipientCertificate = new pkijs.Certificate({ schema: pemToAsn1(recipientCertificatePem) });
+  const recipientCertificate = new pkijs.Certificate({ schema: pemToAsn1(recipientCertificatePem) });
 
-	const contentInfo = new pkijs.ContentInfo({ schema: pemToAsn1(envelopedDataPem) });
-	const envelopedData = new pkijs.EnvelopedData({ schema: contentInfo.content });
+  const contentInfo = new pkijs.ContentInfo({ schema: pemToAsn1(envelopedDataPem) });
+  const envelopedData = new pkijs.EnvelopedData({ schema: contentInfo.content });
 
-	const plaintext = await envelopedData.decrypt(0, { recipientCertificate, recipientPrivateKey });
-	assert.equal("Hi. My name is Alice.", pvtsutils.Convert.ToUtf8String(plaintext));
+  const plaintext = await envelopedData.decrypt(0, { recipientCertificate, recipientPrivateKey });
+  assert.equal("Hi. My name is Alice.", pvtsutils.Convert.ToUtf8String(plaintext));
 });
 
 function pemToDer(pemString: string) {
-	const derBase64 = pemString.replace(/(-----(BEGIN|END) [\w ]+-----|\n)/g, "").replace(/[\r\n]/g, "");
-	return pvtsutils.Convert.FromBase64(derBase64);
+  const derBase64 = pemString.replace(/(-----(BEGIN|END) [\w ]+-----|\n)/g, "").replace(/[\r\n]/g, "");
+  return pvtsutils.Convert.FromBase64(derBase64);
 }
 
 function pemToAsn1(pemString: string) {
-	const der = pemToDer(pemString);
-	const asn1 = asn1js.fromBER(der);
-	pkijs.AsnError.assert(asn1, "DER-encoded data");
+  const der = pemToDer(pemString);
+  const asn1 = asn1js.fromBER(der);
+  pkijs.AsnError.assert(asn1, "DER-encoded data");
 
-	return asn1.result;
+  return asn1.result;
 }

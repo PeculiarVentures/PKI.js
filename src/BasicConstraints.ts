@@ -1,72 +1,80 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const PATH_LENGTH_CONSTRAINT = "pathLenConstraint";
 const CA = "cA";
 
+export interface IBasicConstraints {
+  cA: boolean;
+  pathLenConstraint?: number | asn1js.Integer;
+}
 
-export interface BasicConstraintsParameters extends Schema.SchemaConstructor {
+export type BasicConstraintsParameters = PkiObjectParameters & Partial<IBasicConstraints>;
+
+export interface BasicConstraintsJson {
   cA?: boolean;
-  pathLenConstraint?: number;
+  pathLenConstraint?: Schema.AsnIntegerJson | number;
 }
 
 /**
- * Class from RFC5280
+ * Represents the BasicConstraints structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
-export class BasicConstraints implements Schema.SchemaCompatible {
+export class BasicConstraints extends PkiObject implements IBasicConstraints {
 
-  public cA: boolean;
+  public static override CLASS_NAME = "BasicConstraints";
+
+  public cA!: boolean;
   public pathLenConstraint?: number | asn1js.Integer;
 
   /**
-   * Constructor for BasicConstraints class
-   * @param parameters
+   * Initializes a new instance of the {@link AuthorityKeyIdentifier} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: BasicConstraintsParameters = {}) {
-    //#region Internal properties of the object
-    this.cA = pvutils.getParametersValue(parameters, CA, false);
+    super();
 
+    this.cA = pvutils.getParametersValue(parameters, CA, false);
     if (PATH_LENGTH_CONSTRAINT in parameters) {
       this.pathLenConstraint = pvutils.getParametersValue(parameters, PATH_LENGTH_CONSTRAINT, 0);
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof CA): boolean;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof CA): boolean;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CA:
         return false;
       default:
-        throw new Error(`Invalid member name for BasicConstraints class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * BasicConstraints ::= SEQUENCE {
    *    cA                      BOOLEAN DEFAULT FALSE,
    *    pathLenConstraint       INTEGER (0..MAX) OPTIONAL }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  static schema(parameters: Schema.SchemaParameters<{ cA?: string; pathLenConstraint?: string; }> = {}): Schema.SchemaType {
+  static override schema(parameters: Schema.SchemaParameters<{ cA?: string; pathLenConstraint?: string; }> = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -84,19 +92,14 @@ export class BasicConstraints implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, [
       CA,
       PATH_LENGTH_CONSTRAINT
     ]);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       BasicConstraints.schema({
@@ -106,11 +109,7 @@ export class BasicConstraints implements Schema.SchemaCompatible {
         }
       })
     );
-
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for BasicConstraints");
-    }
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     if (CA in asn1.result) {
@@ -127,10 +126,6 @@ export class BasicConstraints implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -158,8 +153,8 @@ export class BasicConstraints implements Schema.SchemaCompatible {
    * Conversion for the class to JSON object
    * @returns
    */
-  public toJSON(): any {
-    const object: any = {};
+  public toJSON(): BasicConstraintsJson {
+    const object: BasicConstraintsJson = {};
 
     if (this.cA !== BasicConstraints.defaultValues(CA)) {
       object.cA = this.cA;
@@ -167,7 +162,7 @@ export class BasicConstraints implements Schema.SchemaCompatible {
 
     if (PATH_LENGTH_CONSTRAINT in this) {
       if (this.pathLenConstraint instanceof asn1js.Integer) {
-        object.pathLenConstraint = this.pathLenConstraint.toJSON();
+        object.pathLenConstraint = this.pathLenConstraint.toJSON() as Schema.AsnIntegerJson;
       } else {
         object.pathLenConstraint = this.pathLenConstraint;
       }

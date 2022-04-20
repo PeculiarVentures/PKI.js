@@ -1,48 +1,57 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as bs from "bytestreamjs";
-import { SignedCertificateTimestamp } from "./SignedCertificateTimestamp";
+import { SignedCertificateTimestamp, SignedCertificateTimestampJson } from "./SignedCertificateTimestamp";
 import * as Schema from "./Schema";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const TIMESTAMPS = "timestamps";
 
-export interface SignedCertificateTimestampListParameters extends Schema.SchemaConstructor {
-  timestamps?: SignedCertificateTimestamp[];
+export interface ISignedCertificateTimestampList {
+  timestamps: SignedCertificateTimestamp[];
 }
 
-/**
- * Class from RFC6962
- */
-export class SignedCertificateTimestampList implements Schema.SchemaCompatible {
+export interface SignedCertificateTimestampListJson {
+  timestamps: SignedCertificateTimestampJson[];
+}
 
-  public timestamps: SignedCertificateTimestamp[];
+export type SignedCertificateTimestampListParameters = PkiObjectParameters & Partial<ISignedCertificateTimestampList>;
+
+/**
+ * Represents the SignedCertificateTimestampList structure described in [RFC6962](https://datatracker.ietf.org/doc/html/rfc6962)
+ */
+export class SignedCertificateTimestampList extends PkiObject implements ISignedCertificateTimestampList {
+
+  public static override CLASS_NAME = "SignedCertificateTimestampList";
+
+  public timestamps!: SignedCertificateTimestamp[];
 
   /**
-   * Constructor for SignedCertificateTimestampList class
-   * @param parameters
+   * Initializes a new instance of the {@link SignedCertificateTimestampList} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: SignedCertificateTimestampListParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.timestamps = pvutils.getParametersValue(parameters, TIMESTAMPS, SignedCertificateTimestampList.defaultValues(TIMESTAMPS));
-    //#endregion
-    //#region If input argument array contains "schema" for this object
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof TIMESTAMPS): SignedCertificateTimestamp[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof TIMESTAMPS): SignedCertificateTimestamp[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TIMESTAMPS:
         return [];
       default:
-        throw new Error(`Invalid member name for SignedCertificateTimestampList class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -56,22 +65,22 @@ export class SignedCertificateTimestampList implements Schema.SchemaCompatible {
       case TIMESTAMPS:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for SignedCertificateTimestampList class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * SignedCertificateTimestampList ::= OCTET STRING
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters = {}): Schema.SchemaType {
+  public static override schema(parameters: Schema.SchemaParameters = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     names.optional ??= false;
@@ -82,10 +91,6 @@ export class SignedCertificateTimestampList implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Check the schema is valid
     if ((schema instanceof asn1js.OctetString) === false) {
@@ -110,10 +115,6 @@ export class SignedCertificateTimestampList implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Initial variables
     const stream = new bs.SeqStream();
@@ -139,12 +140,9 @@ export class SignedCertificateTimestampList implements Schema.SchemaCompatible {
     return new asn1js.OctetString({ valueHex: stream.stream.buffer.slice(0) });
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
+  public toJSON(): SignedCertificateTimestampListJson {
     return {
-      timestamps: Array.from(this.timestamps, element => element.toJSON())
+      timestamps: Array.from(this.timestamps, o => o.toJSON())
     };
   }
 

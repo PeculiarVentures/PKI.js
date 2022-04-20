@@ -1,170 +1,163 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { PolicyQualifierInfo } from "./PolicyQualifierInfo";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PolicyQualifierInfo, PolicyQualifierInfoJson } from "./PolicyQualifierInfo";
 import * as Schema from "./Schema";
 
-export interface PolicyInformationParameters extends Schema.SchemaConstructor {
-	policyIdentifier?: string;
-	policyQualifiers?: PolicyQualifierInfo[];
+export const POLICY_IDENTIFIER = "policyIdentifier";
+export const POLICY_QUALIFIERS = "policyQualifiers";
+const CLEAR_PROPS = [
+  POLICY_IDENTIFIER,
+  POLICY_QUALIFIERS
+];
+
+export interface IPolicyInformation {
+  policyIdentifier: string;
+  policyQualifiers?: PolicyQualifierInfo[];
+}
+
+export type PolicyInformationParameters = PkiObjectParameters & Partial<IPolicyInformation>;
+
+export interface PolicyInformationJson {
+  policyIdentifier: string;
+  policyQualifiers?: PolicyQualifierInfoJson[];
 }
 
 /**
- * Class from RFC5280
+ * Represents the PolicyInformation structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
-export class PolicyInformation {
+export class PolicyInformation extends PkiObject implements IPolicyInformation {
 
-	public policyIdentifier: string;
-	public policyQualifiers?: PolicyQualifierInfo[];
+  public static override CLASS_NAME = "PolicyInformation";
 
-	/**
-	 * Constructor for PolicyInformation class
-	 * @param parameters
-	 */
-	constructor(parameters: PolicyInformationParameters = {}) {
-		//#region Internal properties of the object
-		this.policyIdentifier = pvutils.getParametersValue(parameters, "policyIdentifier", PolicyInformation.defaultValues("policyIdentifier"));
+  public policyIdentifier!: string;
+  public policyQualifiers?: PolicyQualifierInfo[];
 
-		if ("policyQualifiers" in parameters)
-			/**
-			 * @type {Array.<PolicyQualifierInfo>}
-			 * @desc Value of the TIME class
-			 */
-			this.policyQualifiers = pvutils.getParametersValue(parameters, "policyQualifiers", PolicyInformation.defaultValues("policyQualifiers"));
-		//#endregion
+  /**
+   * Initializes a new instance of the {@link PolicyInformation} class
+   * @param parameters Initialization parameters
+   */
+  constructor(parameters: PolicyInformationParameters = {}) {
+    super();
 
-		//#region If input argument array contains "schema" for this object
-		if (parameters.schema)
-			this.fromSchema(parameters.schema);
-		//#endregion
-	}
+    this.policyIdentifier = pvutils.getParametersValue(parameters, POLICY_IDENTIFIER, PolicyInformation.defaultValues(POLICY_IDENTIFIER));
+    if (POLICY_QUALIFIERS in parameters) {
+      this.policyQualifiers = pvutils.getParametersValue(parameters, POLICY_QUALIFIERS, PolicyInformation.defaultValues(POLICY_QUALIFIERS));
+    }
+    if (parameters.schema) {
+      this.fromSchema(parameters.schema);
+    }
+  }
 
-	/**
-	 * Return default values for all class members
-	 * @param memberName String name for a class member
-	 */
-	public static defaultValues(memberName: "policyIdentifier"): string;
-	public static defaultValues(memberName: "policyQualifiers"): PolicyQualifierInfo[];
-	public static defaultValues(memberName: string): any {
-		switch (memberName) {
-			case "policyIdentifier":
-				return "";
-			case "policyQualifiers":
-				return [];
-			default:
-				throw new Error(`Invalid member name for PolicyInformation class: ${memberName}`);
-		}
-	}
+  /**
+   * Returns default values for all class members
+   * @param memberName String name for a class member
+   * @returns Default value
+   */
+  public static override defaultValues(memberName: typeof POLICY_IDENTIFIER): string;
+  public static override defaultValues(memberName: typeof POLICY_QUALIFIERS): PolicyQualifierInfo[];
+  public static override defaultValues(memberName: string): any {
+    switch (memberName) {
+      case POLICY_IDENTIFIER:
+        return "";
+      case POLICY_QUALIFIERS:
+        return [];
+      default:
+        return super.defaultValues(memberName);
+    }
+  }
 
-	/**
-	 * Return value of pre-defined ASN.1 schema for current class
-	 *
-	 * ASN.1 schema:
-	 * ```
-	 * PolicyInformation ::= SEQUENCE {
-	 *    policyIdentifier   CertPolicyId,
-	 *    policyQualifiers   SEQUENCE SIZE (1..MAX) OF
-	 *    PolicyQualifierInfo OPTIONAL }
-	 *
-	 * CertPolicyId ::= OBJECT IDENTIFIER
-	 * ```
-	 *
-	 * @param parameters Input parameters for the schema
-	 * @returns asn1js schema object
-	 */
-	public static schema(parameters: Schema.SchemaParameters<{ policyIdentifier?: string; policyQualifiers?: string; }> = {}): Schema.SchemaType {
-		const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  /**
+   * Returns value of pre-defined ASN.1 schema for current class
+   *
+   * ASN.1 schema:
+   * ```asn
+   * PolicyInformation ::= SEQUENCE {
+   *    policyIdentifier   CertPolicyId,
+   *    policyQualifiers   SEQUENCE SIZE (1..MAX) OF
+   *    PolicyQualifierInfo OPTIONAL }
+   *
+   * CertPolicyId ::= OBJECT IDENTIFIER
+   * ```
+   *
+   * @param parameters Input parameters for the schema
+   * @returns ASN.1 schema object
+   */
+  public static override schema(parameters: Schema.SchemaParameters<{ policyIdentifier?: string; policyQualifiers?: string; }> = {}): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
-		return (new asn1js.Sequence({
-			name: (names.blockName || ""),
-			value: [
-				new asn1js.ObjectIdentifier({ name: (names.policyIdentifier || "") }),
-				new asn1js.Sequence({
-					optional: true,
-					value: [
-						new asn1js.Repeated({
-							name: (names.policyQualifiers || ""),
-							value: PolicyQualifierInfo.schema()
-						})
-					]
-				})
-			]
-		}));
-	}
+    return (new asn1js.Sequence({
+      name: (names.blockName || ""),
+      value: [
+        new asn1js.ObjectIdentifier({ name: (names.policyIdentifier || "") }),
+        new asn1js.Sequence({
+          optional: true,
+          value: [
+            new asn1js.Repeated({
+              name: (names.policyQualifiers || ""),
+              value: PolicyQualifierInfo.schema()
+            })
+          ]
+        })
+      ]
+    }));
+  }
 
-	/**
-	 * Convert parsed asn1js object into current class
-	 * @param schema
-	 */
-	fromSchema(schema: Schema.SchemaType): void {
-		//#region Clear input data first
-		pvutils.clearProps(schema, [
-			"policyIdentifier",
-			"policyQualifiers"
-		]);
-		//#endregion
+  /**
+   * Converts parsed ASN.1 object into current class
+   * @param schema
+   */
+  fromSchema(schema: Schema.SchemaType): void {
+    // Clear input data first
+    pvutils.clearProps(schema, CLEAR_PROPS);
 
-		//#region Check the schema is valid
-		const asn1 = asn1js.compareSchema(schema,
-			schema,
-			PolicyInformation.schema({
-				names: {
-					policyIdentifier: "policyIdentifier",
-					policyQualifiers: "policyQualifiers"
-				}
-			})
-		);
+    // Check the schema is valid
+    const asn1 = asn1js.compareSchema(schema,
+      schema,
+      PolicyInformation.schema({
+        names: {
+          policyIdentifier: POLICY_IDENTIFIER,
+          policyQualifiers: POLICY_QUALIFIERS
+        }
+      })
+    );
+    AsnError.assertSchema(asn1, this.className);
 
-		if (!asn1.verified) {
-			throw new Error("Object's schema was not verified against input data for PolicyInformation");
-		}
-		//#endregion
+    // Get internal properties from parsed schema
+    this.policyIdentifier = asn1.result.policyIdentifier.valueBlock.toString();
+    if (POLICY_QUALIFIERS in asn1.result) {
+      this.policyQualifiers = Array.from(asn1.result.policyQualifiers, element => new PolicyQualifierInfo({ schema: element }));
+    }
+  }
 
-		//#region Get internal properties from parsed schema
-		this.policyIdentifier = asn1.result.policyIdentifier.valueBlock.toString();
+  public toSchema(): asn1js.Sequence {
+    //Create array for output sequence
+    const outputArray = [];
 
-		if ("policyQualifiers" in asn1.result) {
-			this.policyQualifiers = Array.from(asn1.result.policyQualifiers, element => new PolicyQualifierInfo({ schema: element }));
-		}
-		//#endregion
-	}
+    outputArray.push(new asn1js.ObjectIdentifier({ value: this.policyIdentifier }));
 
-	/**
-	 * Convert current object to asn1js object and set correct values
-	 * @returns asn1js object
-	 */
-	public toSchema(): asn1js.Sequence {
-		//#region Create array for output sequence
-		const outputArray = [];
+    if (this.policyQualifiers) {
+      outputArray.push(new asn1js.Sequence({
+        value: Array.from(this.policyQualifiers, o => o.toSchema())
+      }));
+    }
 
-		outputArray.push(new asn1js.ObjectIdentifier({ value: this.policyIdentifier }));
+    // Construct and return new ASN.1 schema for this object
+    return (new asn1js.Sequence({
+      value: outputArray
+    }));
+  }
 
-		if (this.policyQualifiers) {
-			outputArray.push(new asn1js.Sequence({
-				value: Array.from(this.policyQualifiers, element => element.toSchema())
-			}));
-		}
-		//#endregion
+  public toJSON(): PolicyInformationJson {
+    const res: PolicyInformationJson = {
+      policyIdentifier: this.policyIdentifier
+    };
 
-		//#region Construct and return new ASN.1 schema for this object
-		return (new asn1js.Sequence({
-			value: outputArray
-		}));
-		//#endregion
-	}
+    if (this.policyQualifiers)
+      res.policyQualifiers = Array.from(this.policyQualifiers, o => o.toJSON());
 
-	/**
-	 * Conversion for the class to JSON object
-	 * @returns
-	 */
-	public toJSON(): any {
-		const object: any = {
-			policyIdentifier: this.policyIdentifier
-		};
-
-		if (this.policyQualifiers)
-			object.policyQualifiers = Array.from(this.policyQualifiers, element => element.toJSON());
-
-		return object;
-	}
+    return res;
+  }
 
 }

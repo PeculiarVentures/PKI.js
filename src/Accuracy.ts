@@ -1,16 +1,20 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 export const SECONDS = "seconds";
 export const MILLIS = "millis";
 export const MICROS = "micros";
 
-export interface AccuracyParameters extends Schema.SchemaConstructor {
+export interface IAccuracy {
   seconds?: number;
   millis?: number;
   micros?: number;
 }
+
+export type AccuracyParameters = PkiObjectParameters & Partial<IAccuracy>;
 
 export type AccuracySchema = Schema.SchemaParameters<{
   seconds?: string;
@@ -18,67 +22,71 @@ export type AccuracySchema = Schema.SchemaParameters<{
   micros?: string;
 }>;
 
-/**
- * Class from RFC3161. Accuracy represents the time deviation around the UTC time contained in GeneralizedTime.
- */
-export class Accuracy {
+export interface AccuracyJson {
+  seconds?: number;
+  millis?: number;
+  micros?: number;
+}
 
+/**
+ * Represents the time deviation around the UTC time contained in GeneralizedTime. Described in [RFC3161](https://www.ietf.org/rfc/rfc3161.txt)
+ */
+export class Accuracy extends PkiObject implements IAccuracy {
+
+  public static override CLASS_NAME = "Accuracy";
 
   public seconds?: number;
   public millis?: number;
   public micros?: number;
 
   /**
-   * Constructor for Accuracy class
-   * @param parameters
+   * Initializes a new instance of the {@link Accuracy} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: AccuracyParameters = {}) {
-    //#region Internal properties of the object
-    if (parameters.seconds !== undefined) {
+    super();
+
+    if (SECONDS in parameters) {
       this.seconds = pvutils.getParametersValue(parameters, SECONDS, Accuracy.defaultValues(SECONDS));
     }
-
-    if (parameters.millis !== undefined) {
+    if (MILLIS in parameters) {
       this.millis = pvutils.getParametersValue(parameters, MILLIS, Accuracy.defaultValues(MILLIS));
     }
-
-    if (parameters.micros !== undefined) {
+    if (MICROS in parameters) {
       this.micros = pvutils.getParametersValue(parameters, MICROS, Accuracy.defaultValues(MICROS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof SECONDS): number;
-  public static defaultValues(memberName: typeof MILLIS): number;
-  public static defaultValues(memberName: typeof MICROS): number;
-  public static defaultValues(memberName: string): any;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof SECONDS): number;
+  public static override defaultValues(memberName: typeof MILLIS): number;
+  public static override defaultValues(memberName: typeof MICROS): number;
+  public static override defaultValues(memberName: string): any;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case SECONDS:
       case MILLIS:
       case MICROS:
         return 0;
       default:
-        throw new Error(`Invalid member name for Accuracy class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
-  public static compareWithDefault(memberName: typeof SECONDS | typeof MILLIS | typeof MICROS, memberValue: number): boolean;
   /**
    * Compare values with default values for all class members
    * @param memberName String name for a class member
    * @param memberValue Value to compare with default value
    */
+  public static compareWithDefault(memberName: typeof SECONDS | typeof MILLIS | typeof MICROS, memberValue: number): boolean;
   public static compareWithDefault(memberName: string, memberValue: any): boolean;
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
@@ -87,15 +95,15 @@ export class Accuracy {
       case MICROS:
         return (memberValue === Accuracy.defaultValues(memberName));
       default:
-        throw new Error(`Invalid member name for Accuracy class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * Accuracy ::= SEQUENCE {
    *    seconds        INTEGER              OPTIONAL,
    *    millis     [0] INTEGER  (1..999)    OPTIONAL,
@@ -103,9 +111,9 @@ export class Accuracy {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  static schema(parameters: AccuracySchema = {}): any {
+  public static override schema(parameters: AccuracySchema = {}): any {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -136,20 +144,15 @@ export class Accuracy {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, [
       SECONDS,
       MILLIS,
       MICROS,
     ]);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       Accuracy.schema({
@@ -160,32 +163,22 @@ export class Accuracy {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for Accuracy");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
-    if ("seconds" in asn1.result)
+    // Get internal properties from parsed schema
+    if ("seconds" in asn1.result) {
       this.seconds = asn1.result.seconds.valueBlock.valueDec;
-
+    }
     if ("millis" in asn1.result) {
       const intMillis = new asn1js.Integer({ valueHex: asn1.result.millis.valueBlock.valueHex });
       this.millis = intMillis.valueBlock.valueDec;
     }
-
     if ("micros" in asn1.result) {
       const intMicros = new asn1js.Integer({ valueHex: asn1.result.micros.valueBlock.valueHex });
       this.micros = intMicros.valueBlock.valueDec;
     }
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array of output sequence
     const outputArray = [];
@@ -218,18 +211,12 @@ export class Accuracy {
     }
     //#endregion
 
-    //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: outputArray
     }));
-    //#endregion
   }
-
-  /**
-   * Conversion for the class to JSON object
-   */
-  toJSON(): any {
-    const _object: any = {};
+  public toJSON(): AccuracyJson {
+    const _object: AccuracyJson = {};
 
     if (this.seconds !== undefined)
       _object.seconds = this.seconds;

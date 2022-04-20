@@ -7,6 +7,7 @@ import * as Schema from "./Schema";
 import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { Certificate } from "./Certificate";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const VERSION = "version";
 const LOG_ID = "logID";
@@ -28,384 +29,379 @@ const RSA = "rsa";
 const DSA = "dsa";
 const ECDSA = "ecdsa";
 
-export interface SignedCertificateTimestampParameters extends Schema.SchemaConstructor {
-	version?: number;
-	logID?: ArrayBuffer;
-	timestamp?: Date;
-	extensions?: ArrayBuffer;
-	hashAlgorithm?: string;
-	signatureAlgorithm?: string;
-	signature?: Schema.SchemaType;
-	stream?: bs.SeqStream;
+export interface ISignedCertificateTimestamp {
+  version: number;
+  logID: ArrayBuffer;
+  timestamp: Date;
+  extensions: ArrayBuffer;
+  hashAlgorithm: string;
+  signatureAlgorithm: string;
+  signature: Schema.SchemaType;
 }
+
+export interface SignedCertificateTimestampJson {
+  version: number;
+  logID: string;
+  timestamp: Date;
+  extensions: string;
+  hashAlgorithm: string;
+  signatureAlgorithm: string;
+  signature: Schema.SchemaType;
+}
+
+export type SignedCertificateTimestampParameters = PkiObjectParameters & Partial<ISignedCertificateTimestamp> & { stream?: bs.SeqStream; };
 
 export interface Log {
-	/**
-	 * Identifier of the CT Log encoded in BASE-64 format
-	 */
-	log_id: string;
-	/**
-	 * Public key of the CT Log encoded in BASE-64 format
-	 */
-	key: string;
+  /**
+   * Identifier of the CT Log encoded in BASE-64 format
+   */
+  log_id: string;
+  /**
+   * Public key of the CT Log encoded in BASE-64 format
+   */
+  key: string;
 }
 
-export class SignedCertificateTimestamp implements Schema.SchemaCompatible {
+export class SignedCertificateTimestamp extends PkiObject implements ISignedCertificateTimestamp {
 
-	public version: number;
-	public logID: ArrayBuffer;
-	public timestamp: Date;
-	public extensions: ArrayBuffer;
-	public hashAlgorithm: string;
-	public signatureAlgorithm: string;
-	public signature: Schema.SchemaType;
+  public static override CLASS_NAME = "SignedCertificateTimestamp";
 
-	/**
-	 * Constructor for SignedCertificateTimestamp class
-	 * @param parameters
-	 */
-	constructor(parameters: SignedCertificateTimestampParameters = {}) {
-		//#region Internal properties of the object
-		this.version = pvutils.getParametersValue(parameters, VERSION, SignedCertificateTimestamp.defaultValues(VERSION));
-		this.logID = pvutils.getParametersValue(parameters, LOG_ID, SignedCertificateTimestamp.defaultValues(LOG_ID));
-		this.timestamp = pvutils.getParametersValue(parameters, TIMESTAMP, SignedCertificateTimestamp.defaultValues(TIMESTAMP));
-		this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, SignedCertificateTimestamp.defaultValues(EXTENSIONS));
-		this.hashAlgorithm = pvutils.getParametersValue(parameters, HASH_ALGORITHM, SignedCertificateTimestamp.defaultValues(HASH_ALGORITHM));
-		this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, SignedCertificateTimestamp.defaultValues(SIGNATURE_ALGORITHM));
-		this.signature = pvutils.getParametersValue(parameters, SIGNATURE, SignedCertificateTimestamp.defaultValues(SIGNATURE));
-		//#endregion
+  public version!: number;
+  public logID!: ArrayBuffer;
+  public timestamp!: Date;
+  public extensions!: ArrayBuffer;
+  public hashAlgorithm!: string;
+  public signatureAlgorithm!: string;
+  public signature: Schema.SchemaType;
 
-		//#region If input argument array contains "schema" for this object
-		if (parameters.schema) {
-			this.fromSchema(parameters.schema);
-		}
-		//#endregion
+  /**
+   * Initializes a new instance of the {@link SignedCertificateTimestamp} class
+   * @param parameters Initialization parameters
+   */
+  constructor(parameters: SignedCertificateTimestampParameters = {}) {
+    super();
 
-		//#region If input argument array contains "stream"
-		if (parameters.stream) {
-			this.fromStream(parameters.stream);
-		}
-		//#endregion
-	}
+    this.version = pvutils.getParametersValue(parameters, VERSION, SignedCertificateTimestamp.defaultValues(VERSION));
+    this.logID = pvutils.getParametersValue(parameters, LOG_ID, SignedCertificateTimestamp.defaultValues(LOG_ID));
+    this.timestamp = pvutils.getParametersValue(parameters, TIMESTAMP, SignedCertificateTimestamp.defaultValues(TIMESTAMP));
+    this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, SignedCertificateTimestamp.defaultValues(EXTENSIONS));
+    this.hashAlgorithm = pvutils.getParametersValue(parameters, HASH_ALGORITHM, SignedCertificateTimestamp.defaultValues(HASH_ALGORITHM));
+    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, SignedCertificateTimestamp.defaultValues(SIGNATURE_ALGORITHM));
+    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, SignedCertificateTimestamp.defaultValues(SIGNATURE));
 
-	/**
-	 * Return default values for all class members
-	 * @param memberName String name for a class member
-	 */
-	public static defaultValues(memberName: typeof VERSION): number;
-	public static defaultValues(memberName: typeof LOG_ID): ArrayBuffer;
-	public static defaultValues(memberName: typeof EXTENSIONS): ArrayBuffer;
-	public static defaultValues(memberName: typeof TIMESTAMP): Date;
-	public static defaultValues(memberName: typeof HASH_ALGORITHM): string;
-	public static defaultValues(memberName: typeof SIGNATURE_ALGORITHM): string;
-	public static defaultValues(memberName: typeof SIGNATURE): Schema.SchemaType;
-	public static defaultValues(memberName: string): any {
-		switch (memberName) {
-			case VERSION:
-				return 0;
-			case LOG_ID:
-			case EXTENSIONS:
-				return new ArrayBuffer(0);
-			case TIMESTAMP:
-				return new Date(0);
-			case HASH_ALGORITHM:
-			case SIGNATURE_ALGORITHM:
-				return "";
-			case SIGNATURE:
-				return new asn1js.Any();
-			default:
-				throw new Error(`Invalid member name for SignedCertificateTimestamp class: ${memberName}`);
-		}
-	}
+    if ("stream" in parameters && parameters.stream) {
+      this.fromStream(parameters.stream);
+    }
 
-	/**
-	 * Convert parsed asn1js object into current class
-	 * @param schema
-	 */
-	public fromSchema(schema: Schema.SchemaType): void {
-		if ((schema instanceof asn1js.RawData) === false)
-			throw new Error("Object's schema was not verified against input data for SignedCertificateTimestamp");
+    if (parameters.schema) {
+      this.fromSchema(parameters.schema);
+    }
+  }
 
-		const seqStream = new bs.SeqStream({
-			stream: new bs.ByteStream({
-				buffer: schema.data
-			})
-		});
+  /**
+   * Returns default values for all class members
+   * @param memberName String name for a class member
+   * @returns Default value
+   */
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof LOG_ID): ArrayBuffer;
+  public static override defaultValues(memberName: typeof EXTENSIONS): ArrayBuffer;
+  public static override defaultValues(memberName: typeof TIMESTAMP): Date;
+  public static override defaultValues(memberName: typeof HASH_ALGORITHM): string;
+  public static override defaultValues(memberName: typeof SIGNATURE_ALGORITHM): string;
+  public static override defaultValues(memberName: typeof SIGNATURE): Schema.SchemaType;
+  public static override defaultValues(memberName: string): any {
+    switch (memberName) {
+      case VERSION:
+        return 0;
+      case LOG_ID:
+      case EXTENSIONS:
+        return new ArrayBuffer(0);
+      case TIMESTAMP:
+        return new Date(0);
+      case HASH_ALGORITHM:
+      case SIGNATURE_ALGORITHM:
+        return "";
+      case SIGNATURE:
+        return new asn1js.Any();
+      default:
+        return super.defaultValues(memberName);
+    }
+  }
 
-		this.fromStream(seqStream);
-	}
+  public fromSchema(schema: Schema.SchemaType): void {
+    if ((schema instanceof asn1js.RawData) === false)
+      throw new Error("Object's schema was not verified against input data for SignedCertificateTimestamp");
 
-	/**
-	 * Convert SeqStream data into current class
-	 * @param stream
-	 */
-	public fromStream(stream: bs.SeqStream): void {
-		const blockLength = stream.getUint16();
+    const seqStream = new bs.SeqStream({
+      stream: new bs.ByteStream({
+        buffer: schema.data
+      })
+    });
 
-		this.version = (stream.getBlock(1))[0];
+    this.fromStream(seqStream);
+  }
 
-		if (this.version === 0) {
-			this.logID = (new Uint8Array(stream.getBlock(32))).buffer.slice(0);
-			this.timestamp = new Date(pvutils.utilFromBase(new Uint8Array(stream.getBlock(8)), 8));
+  /**
+   * Converts SeqStream data into current class
+   * @param stream
+   */
+  public fromStream(stream: bs.SeqStream): void {
+    const blockLength = stream.getUint16();
 
-			//#region Extensions
-			const extensionsLength = stream.getUint16();
-			this.extensions = (new Uint8Array(stream.getBlock(extensionsLength))).buffer.slice(0);
-			//#endregion
+    this.version = (stream.getBlock(1))[0];
 
-			//#region Hash algorithm
-			switch ((stream.getBlock(1))[0]) {
-				case 0:
-					this.hashAlgorithm = NONE;
-					break;
-				case 1:
-					this.hashAlgorithm = MD5;
-					break;
-				case 2:
-					this.hashAlgorithm = SHA1;
-					break;
-				case 3:
-					this.hashAlgorithm = SHA224;
-					break;
-				case 4:
-					this.hashAlgorithm = SHA256;
-					break;
-				case 5:
-					this.hashAlgorithm = SHA384;
-					break;
-				case 6:
-					this.hashAlgorithm = SHA512;
-					break;
-				default:
-					throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
-			}
-			//#endregion
+    if (this.version === 0) {
+      this.logID = (new Uint8Array(stream.getBlock(32))).buffer.slice(0);
+      this.timestamp = new Date(pvutils.utilFromBase(new Uint8Array(stream.getBlock(8)), 8));
 
-			//#region Signature algorithm
-			switch ((stream.getBlock(1))[0]) {
-				case 0:
-					this.signatureAlgorithm = ANONYMOUS;
-					break;
-				case 1:
-					this.signatureAlgorithm = RSA;
-					break;
-				case 2:
-					this.signatureAlgorithm = DSA;
-					break;
-				case 3:
-					this.signatureAlgorithm = ECDSA;
-					break;
-				default:
-					throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
-			}
-			//#endregion
+      //#region Extensions
+      const extensionsLength = stream.getUint16();
+      this.extensions = (new Uint8Array(stream.getBlock(extensionsLength))).buffer.slice(0);
+      //#endregion
 
-			//#region Signature
-			const signatureLength = stream.getUint16();
-			const signatureData = new Uint8Array(stream.getBlock(signatureLength)).buffer.slice(0);
+      //#region Hash algorithm
+      switch ((stream.getBlock(1))[0]) {
+        case 0:
+          this.hashAlgorithm = NONE;
+          break;
+        case 1:
+          this.hashAlgorithm = MD5;
+          break;
+        case 2:
+          this.hashAlgorithm = SHA1;
+          break;
+        case 3:
+          this.hashAlgorithm = SHA224;
+          break;
+        case 4:
+          this.hashAlgorithm = SHA256;
+          break;
+        case 5:
+          this.hashAlgorithm = SHA384;
+          break;
+        case 6:
+          this.hashAlgorithm = SHA512;
+          break;
+        default:
+          throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
+      }
+      //#endregion
 
-			const asn1 = asn1js.fromBER(signatureData);
-			AsnError.assert(asn1, "SignedCertificateTimestamp");
-			this.signature = asn1.result;
-			//#endregion
+      //#region Signature algorithm
+      switch ((stream.getBlock(1))[0]) {
+        case 0:
+          this.signatureAlgorithm = ANONYMOUS;
+          break;
+        case 1:
+          this.signatureAlgorithm = RSA;
+          break;
+        case 2:
+          this.signatureAlgorithm = DSA;
+          break;
+        case 3:
+          this.signatureAlgorithm = ECDSA;
+          break;
+        default:
+          throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
+      }
+      //#endregion
 
-			if (blockLength !== (47 + extensionsLength + signatureLength)) {
-				throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
-			}
-		}
-	}
+      //#region Signature
+      const signatureLength = stream.getUint16();
+      const signatureData = new Uint8Array(stream.getBlock(signatureLength)).buffer.slice(0);
 
-	/**
-	 * Convert current object to asn1js object and set correct values
-	 * @returns asn1js object
-	 */
-	public toSchema(): asn1js.RawData {
-		const stream = this.toStream();
+      const asn1 = asn1js.fromBER(signatureData);
+      AsnError.assert(asn1, "SignedCertificateTimestamp");
+      this.signature = asn1.result;
+      //#endregion
 
-		return new asn1js.RawData({ data: stream.stream.buffer });
-	}
+      if (blockLength !== (47 + extensionsLength + signatureLength)) {
+        throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
+      }
+    }
+  }
 
-	/**
-	 * Convert current object to SeqStream data
-	 * @returns SeqStream object
-	 */
-	public toStream(): bs.SeqStream {
-		const stream = new bs.SeqStream();
+  public toSchema(): asn1js.RawData {
+    const stream = this.toStream();
 
-		stream.appendUint16(47 + this.extensions.byteLength + this.signature.valueBeforeDecode.byteLength);
-		stream.appendChar(this.version);
-		stream.appendView(new Uint8Array(this.logID));
+    return new asn1js.RawData({ data: stream.stream.buffer });
+  }
 
-		const timeBuffer = new ArrayBuffer(8);
-		const timeView = new Uint8Array(timeBuffer);
+  /**
+   * Converts current object to SeqStream data
+   * @returns SeqStream object
+   */
+  public toStream(): bs.SeqStream {
+    const stream = new bs.SeqStream();
 
-		const baseArray = pvutils.utilToBase(this.timestamp.valueOf(), 8);
-		timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
+    stream.appendUint16(47 + this.extensions.byteLength + this.signature.valueBeforeDecode.byteLength);
+    stream.appendChar(this.version);
+    stream.appendView(new Uint8Array(this.logID));
 
-		stream.appendView(timeView);
-		stream.appendUint16(this.extensions.byteLength);
+    const timeBuffer = new ArrayBuffer(8);
+    const timeView = new Uint8Array(timeBuffer);
 
-		if (this.extensions.byteLength)
-			stream.appendView(new Uint8Array(this.extensions));
+    const baseArray = pvutils.utilToBase(this.timestamp.valueOf(), 8);
+    timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
 
-		let _hashAlgorithm;
+    stream.appendView(timeView);
+    stream.appendUint16(this.extensions.byteLength);
 
-		switch (this.hashAlgorithm.toLowerCase()) {
-			case NONE:
-				_hashAlgorithm = 0;
-				break;
-			case MD5:
-				_hashAlgorithm = 1;
-				break;
-			case SHA1:
-				_hashAlgorithm = 2;
-				break;
-			case SHA224:
-				_hashAlgorithm = 3;
-				break;
-			case SHA256:
-				_hashAlgorithm = 4;
-				break;
-			case SHA384:
-				_hashAlgorithm = 5;
-				break;
-			case SHA512:
-				_hashAlgorithm = 6;
-				break;
-			default:
-				throw new Error(`Incorrect data for hashAlgorithm: ${this.hashAlgorithm}`);
-		}
+    if (this.extensions.byteLength)
+      stream.appendView(new Uint8Array(this.extensions));
 
-		stream.appendChar(_hashAlgorithm);
+    let _hashAlgorithm;
 
-		let _signatureAlgorithm;
+    switch (this.hashAlgorithm.toLowerCase()) {
+      case NONE:
+        _hashAlgorithm = 0;
+        break;
+      case MD5:
+        _hashAlgorithm = 1;
+        break;
+      case SHA1:
+        _hashAlgorithm = 2;
+        break;
+      case SHA224:
+        _hashAlgorithm = 3;
+        break;
+      case SHA256:
+        _hashAlgorithm = 4;
+        break;
+      case SHA384:
+        _hashAlgorithm = 5;
+        break;
+      case SHA512:
+        _hashAlgorithm = 6;
+        break;
+      default:
+        throw new Error(`Incorrect data for hashAlgorithm: ${this.hashAlgorithm}`);
+    }
 
-		switch (this.signatureAlgorithm.toLowerCase()) {
-			case ANONYMOUS:
-				_signatureAlgorithm = 0;
-				break;
-			case RSA:
-				_signatureAlgorithm = 1;
-				break;
-			case DSA:
-				_signatureAlgorithm = 2;
-				break;
-			case ECDSA:
-				_signatureAlgorithm = 3;
-				break;
-			default:
-				throw new Error(`Incorrect data for signatureAlgorithm: ${this.signatureAlgorithm}`);
-		}
+    stream.appendChar(_hashAlgorithm);
 
-		stream.appendChar(_signatureAlgorithm);
+    let _signatureAlgorithm;
 
-		const _signature = this.signature.toBER(false);
+    switch (this.signatureAlgorithm.toLowerCase()) {
+      case ANONYMOUS:
+        _signatureAlgorithm = 0;
+        break;
+      case RSA:
+        _signatureAlgorithm = 1;
+        break;
+      case DSA:
+        _signatureAlgorithm = 2;
+        break;
+      case ECDSA:
+        _signatureAlgorithm = 3;
+        break;
+      default:
+        throw new Error(`Incorrect data for signatureAlgorithm: ${this.signatureAlgorithm}`);
+    }
 
-		stream.appendUint16(_signature.byteLength);
-		stream.appendView(new Uint8Array(_signature));
+    stream.appendChar(_signatureAlgorithm);
 
-		return stream;
-	}
+    const _signature = this.signature.toBER(false);
 
-	/**
-	 * Conversion for the class to JSON object
-	 * @returns
-	 */
-	public toJSON(): any {
-		return {
-			version: this.version,
-			logID: pvutils.bufferToHexCodes(this.logID),
-			timestamp: this.timestamp,
-			extensions: pvutils.bufferToHexCodes(this.extensions),
-			hashAlgorithm: this.hashAlgorithm,
-			signatureAlgorithm: this.signatureAlgorithm,
-			signature: this.signature.toJSON()
-		};
-	}
+    stream.appendUint16(_signature.byteLength);
+    stream.appendView(new Uint8Array(_signature));
 
-	/**
-	 * Verify SignedCertificateTimestamp for specific input data
-	 * @param {Object[]} logs Array of objects with information about each CT Log (like here: https://ct.grahamedgecombe.com/logs.json)
-	 * @param {String} logs.log_id
-	 * @param {String} logs.key
-	 * @param data Data to verify signature against. Could be encoded Certificate or encoded PreCert
-	 * @param dataType Type = 0 (data is encoded Certificate), type = 1 (data is encoded PreCert)
-	 * @return {Promise<void>}
-	 */
-	async verify(logs: Log[], data: ArrayBuffer, dataType = 0) {
-		//#region Initial variables
-		const logId = pvutils.toBase64(pvutils.arrayBufferToString(this.logID));
+    return stream;
+  }
 
-		let publicKeyBase64 = null;
+  public toJSON(): SignedCertificateTimestampJson {
+    return {
+      version: this.version,
+      logID: pvutils.bufferToHexCodes(this.logID),
+      timestamp: this.timestamp,
+      extensions: pvutils.bufferToHexCodes(this.extensions),
+      hashAlgorithm: this.hashAlgorithm,
+      signatureAlgorithm: this.signatureAlgorithm,
+      signature: this.signature.toJSON()
+    };
+  }
 
-		const stream = new bs.SeqStream();
-		//#endregion
+  /**
+   * Verify SignedCertificateTimestamp for specific input data
+   * @param logs Array of objects with information about each CT Log (like here: https://ct.grahamedgecombe.com/logs.json)
+   * @param data Data to verify signature against. Could be encoded Certificate or encoded PreCert
+   * @param dataType Type = 0 (data is encoded Certificate), type = 1 (data is encoded PreCert)
+   */
+  async verify(logs: Log[], data: ArrayBuffer, dataType = 0): Promise<boolean> {
+    //#region Initial variables
+    const logId = pvutils.toBase64(pvutils.arrayBufferToString(this.logID));
 
-		//#region Found and init public key
-		for (const log of logs) {
-			if (log.log_id === logId) {
-				publicKeyBase64 = log.key;
-				break;
-			}
-		}
+    let publicKeyBase64 = null;
 
-		if (!publicKeyBase64) {
-			throw new Error(`Public key not found for CT with logId: ${logId}`);
-		}
+    const stream = new bs.SeqStream();
+    //#endregion
 
-		const asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(publicKeyBase64)));
-		AsnError.assert(asn1, `CT Log with logId: ${logId}`);
+    //#region Found and init public key
+    for (const log of logs) {
+      if (log.log_id === logId) {
+        publicKeyBase64 = log.key;
+        break;
+      }
+    }
 
-		const publicKeyInfo = new PublicKeyInfo({ schema: asn1.result });
-		//#endregion
+    if (!publicKeyBase64) {
+      throw new Error(`Public key not found for CT with logId: ${logId}`);
+    }
 
-		//#region Initialize signed data block
-		stream.appendChar(0x00); // sct_version
-		stream.appendChar(0x00); // signature_type = certificate_timestamp
+    const asn1 = asn1js.fromBER(pvutils.stringToArrayBuffer(pvutils.fromBase64(publicKeyBase64)));
+    AsnError.assert(asn1, `CT Log with logId: ${logId}`);
 
-		const timeBuffer = new ArrayBuffer(8);
-		const timeView = new Uint8Array(timeBuffer);
+    const publicKeyInfo = new PublicKeyInfo({ schema: asn1.result });
+    //#endregion
 
-		const baseArray = pvutils.utilToBase(this.timestamp.valueOf(), 8);
-		timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
+    //#region Initialize signed data block
+    stream.appendChar(0x00); // sct_version
+    stream.appendChar(0x00); // signature_type = certificate_timestamp
 
-		stream.appendView(timeView);
+    const timeBuffer = new ArrayBuffer(8);
+    const timeView = new Uint8Array(timeBuffer);
 
-		stream.appendUint16(dataType);
+    const baseArray = pvutils.utilToBase(this.timestamp.valueOf(), 8);
+    timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
 
-		if (dataType === 0)
-			stream.appendUint24(data.byteLength);
+    stream.appendView(timeView);
 
-		stream.appendView(new Uint8Array(data));
+    stream.appendUint16(dataType);
 
-		stream.appendUint16(this.extensions.byteLength);
+    if (dataType === 0)
+      stream.appendUint24(data.byteLength);
 
-		if (this.extensions.byteLength !== 0)
-			stream.appendView(new Uint8Array(this.extensions));
-		//#endregion
+    stream.appendView(new Uint8Array(data));
 
-		//#region Perform verification
-		return common.getCrypto(true).verifyWithPublicKey(
-			stream.buffer.slice(0, stream.length),
-			{ valueBlock: { valueHex: this.signature.toBER(false) } } as any,
-			publicKeyInfo,
-			{ algorithmId: "" } as AlgorithmIdentifier,
-			"SHA-256"
-		);
-		//#endregion
-	}
+    stream.appendUint16(this.extensions.byteLength);
+
+    if (this.extensions.byteLength !== 0)
+      stream.appendView(new Uint8Array(this.extensions));
+    //#endregion
+
+    //#region Perform verification
+    return common.getCrypto(true).verifyWithPublicKey(
+      stream.buffer.slice(0, stream.length),
+      { valueBlock: { valueHex: this.signature.toBER(false) } } as any,
+      publicKeyInfo,
+      { algorithmId: "" } as AlgorithmIdentifier,
+      "SHA-256"
+    );
+    //#endregion
+  }
 
 }
 
 export interface Log {
-	/**
-	 * Identifier of the CT Log encoded in BASE-64 format
-	 */
-	log_id: string;
-	/**
-	 * Public key of the CT Log encoded in BASE-64 format
-	 */
-	key: string;
+  /**
+   * Identifier of the CT Log encoded in BASE-64 format
+   */
+  log_id: string;
+  /**
+   * Public key of the CT Log encoded in BASE-64 format
+   */
+  key: string;
 }
 
 /**
@@ -417,71 +413,71 @@ export interface Log {
  * @return Array of verification results
  */
 export async function verifySCTsForCertificate(certificate: Certificate, issuerCertificate: Certificate, logs: Log[], index = (-1)) {
-	//#region Initial variables
-	let parsedValue = null;
+  //#region Initial variables
+  let parsedValue = null;
 
-	const stream = new bs.SeqStream();
-	//#endregion
+  const stream = new bs.SeqStream();
+  //#endregion
 
-	//#region Get a "crypto" extension
-	const crypto = common.getCrypto(true);
-	//#endregion
+  //#region Get a "crypto" extension
+  const crypto = common.getCrypto(true);
+  //#endregion
 
-	//#region Remove certificate extension
-	for (let i = 0; certificate.extensions && i < certificate.extensions.length; i++) {
-		switch (certificate.extensions[i].extnID) {
-			case "1.3.6.1.4.1.11129.2.4.2":
-				{
-					parsedValue = certificate.extensions[i].parsedValue;
+  //#region Remove certificate extension
+  for (let i = 0; certificate.extensions && i < certificate.extensions.length; i++) {
+    switch (certificate.extensions[i].extnID) {
+      case "1.3.6.1.4.1.11129.2.4.2":
+        {
+          parsedValue = certificate.extensions[i].parsedValue;
 
-					if (parsedValue.timestamps.length === 0)
-						throw new Error("Nothing to verify in the certificate");
+          if (parsedValue.timestamps.length === 0)
+            throw new Error("Nothing to verify in the certificate");
 
-					certificate.extensions.splice(i, 1);
-				}
-				break;
-			default:
-		}
-	}
-	//#endregion
+          certificate.extensions.splice(i, 1);
+        }
+        break;
+      default:
+    }
+  }
+  //#endregion
 
-	//#region Check we do have what to verify
-	if (parsedValue === null)
-		throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
-	//#endregion
+  //#region Check we do have what to verify
+  if (parsedValue === null)
+    throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
+  //#endregion
 
-	//#region Prepare modifier TBS value
-	const tbs = certificate.encodeTBS().toBER();
-	//#endregion
+  //#region Prepare modifier TBS value
+  const tbs = certificate.encodeTBS().toBER();
+  //#endregion
 
-	//#region Initialize "issuer_key_hash" value
-	const issuerId = await crypto.digest({ name: "SHA-256" }, new Uint8Array(issuerCertificate.subjectPublicKeyInfo.toSchema().toBER(false)));
-	//#endregion
+  //#region Initialize "issuer_key_hash" value
+  const issuerId = await crypto.digest({ name: "SHA-256" }, new Uint8Array(issuerCertificate.subjectPublicKeyInfo.toSchema().toBER(false)));
+  //#endregion
 
-	//#region Make final "PreCert" value
-	stream.appendView(new Uint8Array(issuerId));
-	stream.appendUint24(tbs.byteLength);
-	stream.appendView(new Uint8Array(tbs));
+  //#region Make final "PreCert" value
+  stream.appendView(new Uint8Array(issuerId));
+  stream.appendUint24(tbs.byteLength);
+  stream.appendView(new Uint8Array(tbs));
 
-	const preCert = stream.stream.slice(0, stream.length);
-	//#endregion
+  const preCert = stream.stream.slice(0, stream.length);
+  //#endregion
 
-	//#region Call verification function for specified index
-	if (index === (-1)) {
-		const verifyArray = [];
+  //#region Call verification function for specified index
+  if (index === (-1)) {
+    const verifyArray = [];
 
-		for (const timestamp of parsedValue.timestamps) {
-			const verifyResult = await timestamp.verify(logs, preCert, 1);
-			verifyArray.push(verifyResult);
-		}
+    for (const timestamp of parsedValue.timestamps) {
+      const verifyResult = await timestamp.verify(logs, preCert, 1);
+      verifyArray.push(verifyResult);
+    }
 
-		return verifyArray;
-	}
+    return verifyArray;
+  }
 
-	if (index >= parsedValue.timestamps.length)
-		index = (parsedValue.timestamps.length - 1);
+  if (index >= parsedValue.timestamps.length)
+    index = (parsedValue.timestamps.length - 1);
 
-	return [await parsedValue.timestamps[index].verify(logs, preCert, 1)];
-	//#endregion
+  return [await parsedValue.timestamps[index].verify(logs, preCert, 1)];
+  //#endregion
 }
 

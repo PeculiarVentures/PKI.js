@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { GeneralName } from "./GeneralName";
+import { AsnError } from "./errors";
+import { GeneralName, GeneralNameJson } from "./GeneralName";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const ALT_NAMES = "altNames";
@@ -8,65 +10,69 @@ const CLEAR_PROPS = [
   ALT_NAMES
 ];
 
-export interface AltNameParameters extends Schema.SchemaConstructor {
+export interface IAltName {
   /**
    * Array of alternative names in GeneralName type
    */
-  altNames?: GeneralName[];
+  altNames: GeneralName[];
+}
+
+export type AltNameParameters = PkiObjectParameters & Partial<IAltName>;
+
+export interface AltNameJson {
+  altNames: GeneralNameJson[];
 }
 
 /**
- * Class from RFC5280
+ * Represents the AltName structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
-export class AltName implements Schema.SchemaCompatible {
+export class AltName extends PkiObject implements IAltName {
+
+  public static override CLASS_NAME = "AltName";
+
+  public altNames!: GeneralName[];
 
   /**
-   * Array of alternative names in GeneralName type
-   */
-  public altNames: GeneralName[];
-
-  /**
-   * Constructor for AltName class
-   * @param parameters
+   * Initializes a new instance of the {@link AltName} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: AltNameParameters = {}) {
-    //#region Internal properties of the object
-    this.altNames = pvutils.getParametersValue(parameters, ALT_NAMES, AltName.defaultValues(ALT_NAMES));
-    //#endregion
+    super();
 
-    //#region If input argument array contains "schema" for this object
+    this.altNames = pvutils.getParametersValue(parameters, ALT_NAMES, AltName.defaultValues(ALT_NAMES));
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof ALT_NAMES): GeneralName[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof ALT_NAMES): GeneralName[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ALT_NAMES:
         return [];
       default:
-        throw new Error(`Invalid member name for AltName class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * AltName ::= GeneralNames
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{ altNames?: string; }> = {}): Schema.SchemaType {
+  public static override schema(parameters: Schema.SchemaParameters<{ altNames?: string; }> = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -80,16 +86,11 @@ export class AltName implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       AltName.schema({
@@ -98,40 +99,26 @@ export class AltName implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for AltName");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     if (ALT_NAMES in asn1.result) {
       this.altNames = Array.from(asn1.result.altNames, element => new GeneralName({ schema: element }));
     }
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
-      value: Array.from(this.altNames, element => element.toSchema())
+      value: Array.from(this.altNames, o => o.toSchema())
     }));
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): AltNameJson {
     return {
-      altNames: Array.from(this.altNames, element => element.toJSON())
+      altNames: Array.from(this.altNames, o => o.toJSON())
     };
   }
 
 }
-

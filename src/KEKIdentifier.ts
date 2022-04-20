@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { OtherKeyAttribute, OtherKeyAttributeSchema } from "./OtherKeyAttribute";
+import { AsnError } from "./errors";
+import { OtherKeyAttribute, OtherKeyAttributeJson, OtherKeyAttributeSchema } from "./OtherKeyAttribute";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const KEY_IDENTIFIER = "keyIdentifier";
@@ -12,11 +14,19 @@ const CLEAR_PROPS = [
   OTHER,
 ];
 
-export interface KEKIdentifierParameters extends Schema.SchemaConstructor {
-  keyIdentifier?: asn1js.OctetString;
+export interface IKEKIdentifier {
+  keyIdentifier: asn1js.OctetString;
   date?: asn1js.GeneralizedTime;
   other?: OtherKeyAttribute;
 }
+
+export interface KEKIdentifierJson {
+  keyIdentifier: Schema.AsnOctetStringJson;
+  date?: asn1js.GeneralizedTime;
+  other?: OtherKeyAttributeJson;
+}
+
+export type KEKIdentifierParameters = PkiObjectParameters & Partial<IKEKIdentifier>;
 
 export type KEKIdentifierSchema = Schema.SchemaParameters<{
   keyIdentifier?: string;
@@ -25,44 +35,45 @@ export type KEKIdentifierSchema = Schema.SchemaParameters<{
 }>;
 
 /**
- * Class from RFC5652
+ * Represents the KEKIdentifier structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
-export class KEKIdentifier implements Schema.SchemaCompatible {
+export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
 
-  public keyIdentifier: asn1js.OctetString;
+  public static override CLASS_NAME = "KEKIdentifier";
+
+  public keyIdentifier!: asn1js.OctetString;
   public date?: asn1js.GeneralizedTime;
   public other?: OtherKeyAttribute;
 
   /**
-   * Constructor for KEKIdentifier class
-   * @param parameters
+   * Initializes a new instance of the {@link KEKIdentifier} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: KEKIdentifierParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.keyIdentifier = pvutils.getParametersValue(parameters, KEY_IDENTIFIER, KEKIdentifier.defaultValues(KEY_IDENTIFIER));
-    if (parameters.date) {
+    if (DATE in parameters) {
       this.date = pvutils.getParametersValue(parameters, DATE, KEKIdentifier.defaultValues(DATE));
     }
-    if (parameters.other) {
+    if (OTHER in parameters) {
       this.other = pvutils.getParametersValue(parameters, OTHER, KEKIdentifier.defaultValues(OTHER));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof KEY_IDENTIFIER): asn1js.OctetString;
-  public static defaultValues(memberName: typeof DATE): asn1js.GeneralizedTime;
-  public static defaultValues(memberName: typeof OTHER): OtherKeyAttribute;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof KEY_IDENTIFIER): asn1js.OctetString;
+  public static override defaultValues(memberName: typeof DATE): asn1js.GeneralizedTime;
+  public static override defaultValues(memberName: typeof OTHER): OtherKeyAttribute;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case KEY_IDENTIFIER:
         return new asn1js.OctetString();
@@ -71,7 +82,7 @@ export class KEKIdentifier implements Schema.SchemaCompatible {
       case OTHER:
         return new OtherKeyAttribute();
       default:
-        throw new Error(`Invalid member name for KEKIdentifier class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -97,15 +108,15 @@ export class KEKIdentifier implements Schema.SchemaCompatible {
         return ((memberValue.compareWithDefault("keyAttrId", memberValue.keyAttrId)) &&
           (("keyAttr" in memberValue) === false));
       default:
-        throw new Error(`Invalid member name for KEKIdentifier class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * KEKIdentifier ::= SEQUENCE {
    *    keyIdentifier OCTET STRING,
    *    date GeneralizedTime OPTIONAL,
@@ -113,9 +124,9 @@ export class KEKIdentifier implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: KEKIdentifierSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: KEKIdentifierSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -131,16 +142,11 @@ export class KEKIdentifier implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       KEKIdentifier.schema({
@@ -155,26 +161,16 @@ export class KEKIdentifier implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for KEKIdentifier");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.keyIdentifier = asn1.result.keyIdentifier;
-
     if (DATE in asn1.result)
       this.date = asn1.result.date;
-
     if (OTHER in asn1.result)
       this.other = new OtherKeyAttribute({ schema: asn1.result.other });
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -196,24 +192,20 @@ export class KEKIdentifier implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
-      keyIdentifier: this.keyIdentifier.toJSON()
+  public toJSON(): KEKIdentifierJson {
+    const res: KEKIdentifierJson = {
+      keyIdentifier: this.keyIdentifier.toJSON() as Schema.AsnOctetStringJson
     };
 
     if (this.date) {
-      _object.date = this.date;
+      res.date = this.date;
     }
 
     if (this.other) {
-      _object.other = this.other.toJSON();
+      res.other = this.other.toJSON();
     }
 
-    return _object;
+    return res;
   }
 
 }

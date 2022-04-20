@@ -1,9 +1,11 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { GeneralNames } from "../GeneralNames";
-import { IssuerSerial } from "../AttributeCertificateV1";
-import { ObjectDigestInfo } from "./ObjectDigestInfo";
+import { GeneralNames, GeneralNamesJson } from "../GeneralNames";
+import { IssuerSerial, IssuerSerialJson } from "../AttributeCertificateV1";
+import { ObjectDigestInfo, ObjectDigestInfoJson } from "./ObjectDigestInfo";
 import * as Schema from "../Schema";
+import { PkiObject, PkiObjectParameters } from "../PkiObject";
+import { AsnError } from "../errors";
 
 const ISSUER_NAME = "issuerName";
 const BASE_CERTIFICATE_ID = "baseCertificateID";
@@ -14,52 +16,62 @@ const CLEAR_PROPS = [
   OBJECT_DIGEST_INFO
 ];
 
-export interface V2FormParameters extends Schema.SchemaConstructor {
+export interface IV2Form {
   issuerName?: GeneralNames;
   baseCertificateID?: IssuerSerial;
   objectDigestInfo?: ObjectDigestInfo;
 }
 
+export type V2FormParameters = PkiObjectParameters & Partial<IV2Form>;
+
+export interface V2FormJson {
+  issuerName?: GeneralNamesJson;
+  baseCertificateID?: IssuerSerialJson;
+  objectDigestInfo?: ObjectDigestInfoJson;
+}
+
 /**
- * Class from RFC5755
+ * Represents the V2Form structure described in [RFC5755](https://datatracker.ietf.org/doc/html/rfc5755)
  */
-export class V2Form implements Schema.SchemaCompatible {
+export class V2Form extends PkiObject implements IV2Form {
+
+  public static override CLASS_NAME = "V2Form";
 
   public issuerName?: GeneralNames;
   public baseCertificateID?: IssuerSerial;
   public objectDigestInfo?: ObjectDigestInfo;
 
   /**
-   * Constructor for V2Form class
-   * @param parameters
+   * Initializes a new instance of the {@link V2Form} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: V2FormParameters = {}) {
-    //#region Internal properties of the object
-    if (parameters.issuerName) {
+    super();
+
+    if (ISSUER_NAME in parameters) {
       this.issuerName = pvutils.getParametersValue(parameters, ISSUER_NAME, V2Form.defaultValues(ISSUER_NAME));
     }
-    if (parameters.baseCertificateID) {
+    if (BASE_CERTIFICATE_ID in parameters) {
       this.baseCertificateID = pvutils.getParametersValue(parameters, BASE_CERTIFICATE_ID, V2Form.defaultValues(BASE_CERTIFICATE_ID));
     }
-    if (parameters.objectDigestInfo) {
+    if (OBJECT_DIGEST_INFO in parameters) {
       this.objectDigestInfo = pvutils.getParametersValue(parameters, OBJECT_DIGEST_INFO, V2Form.defaultValues(OBJECT_DIGEST_INFO));
     }
-    //#endregion
-    //#region If input argument array contains "schema" for this object
+
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof ISSUER_NAME): GeneralNames;
-  public static defaultValues(memberName: typeof BASE_CERTIFICATE_ID): IssuerSerial;
-  public static defaultValues(memberName: typeof OBJECT_DIGEST_INFO): ObjectDigestInfo;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof ISSUER_NAME): GeneralNames;
+  public static override defaultValues(memberName: typeof BASE_CERTIFICATE_ID): IssuerSerial;
+  public static override defaultValues(memberName: typeof OBJECT_DIGEST_INFO): ObjectDigestInfo;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ISSUER_NAME:
         return new GeneralNames();
@@ -68,15 +80,15 @@ export class V2Form implements Schema.SchemaCompatible {
       case OBJECT_DIGEST_INFO:
         return new ObjectDigestInfo();
       default:
-        throw new Error(`Invalid member name for V2Form class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * V2Form ::= SEQUENCE {
    *   issuerName            GeneralNames  OPTIONAL,
    *   baseCertificateID     [0] IssuerSerial  OPTIONAL,
@@ -88,9 +100,9 @@ export class V2Form implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     issuerName?: string;
     baseCertificateID?: string;
     objectDigestInfo?: string;
@@ -127,15 +139,11 @@ export class V2Form implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
-    //#region Check the schema is valid
+
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       V2Form.schema({
@@ -146,11 +154,8 @@ export class V2Form implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for V2Form");
-    }
-    //#endregion
     //#region Get internal properties from parsed schema
     if (ISSUER_NAME in asn1.result)
       this.issuerName = new GeneralNames({ schema: asn1.result.issuerName });
@@ -173,10 +178,6 @@ export class V2Form implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     const result = new asn1js.Sequence();
 
@@ -203,17 +204,11 @@ export class V2Form implements Schema.SchemaCompatible {
       }));
     }
 
-    //#region Construct and return new ASN.1 schema for this object
     return result;
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const result: any = {};
+  public toJSON(): V2FormJson {
+    const result: V2FormJson = {};
 
     if (this.issuerName) {
       result.issuerName = this.issuerName.toJSON();

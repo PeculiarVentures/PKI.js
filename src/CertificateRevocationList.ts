@@ -1,16 +1,17 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
-import { Time, TimeSchema } from "./Time";
-import { RevokedCertificate } from "./RevokedCertificate";
-import { Extensions, ExtensionsSchema } from "./Extensions";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { RelativeDistinguishedNames, RelativeDistinguishedNamesJson, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import { Time, TimeJson, TimeSchema } from "./Time";
+import { RevokedCertificate, RevokedCertificateJson } from "./RevokedCertificate";
+import { Extensions, ExtensionsJson, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
 import { PublicKeyInfo } from "./PublicKeyInfo";
 import { id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BaseCRLNumber, id_CertificateIssuer, id_CRLNumber, id_CRLReason, id_FreshestCRL, id_InvalidityDate, id_IssuerAltName, id_IssuingDistributionPoint } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -22,18 +23,39 @@ const REVOKED_CERTIFICATES = "revokedCertificates";
 const CRL_EXTENSIONS = "crlExtensions";
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";
 const SIGNATURE_VALUE = "signatureValue";
+const TBS_CERT_LIST = "tbsCertList";
+const TBS_CERT_LIST_VERSION = `${TBS_CERT_LIST}.version`;
+const TBS_CERT_LIST_SIGNATURE = `${TBS_CERT_LIST}.signature`;
+const TBS_CERT_LIST_ISSUER = `${TBS_CERT_LIST}.issuer`;
+const TBS_CERT_LIST_THIS_UPDATE = `${TBS_CERT_LIST}.thisUpdate`;
+const TBS_CERT_LIST_NEXT_UPDATE = `${TBS_CERT_LIST}.nextUpdate`;
+const TBS_CERT_LIST_REVOKED_CERTIFICATES = `${TBS_CERT_LIST}.revokedCertificates`;
+const TBS_CERT_LIST_EXTENSIONS = `${TBS_CERT_LIST}.extensions`;
 const CLEAR_PROPS = [
-  "tbsCertList",
-  "tbsCertList.version",
-  "tbsCertList.signature",
-  "tbsCertList.issuer",
-  "tbsCertList.thisUpdate",
-  "tbsCertList.nextUpdate",
-  "tbsCertList.revokedCertificates",
-  "tbsCertList.extensions",
+  TBS_CERT_LIST,
+  TBS_CERT_LIST_VERSION,
+  TBS_CERT_LIST_SIGNATURE,
+  TBS_CERT_LIST_ISSUER,
+  TBS_CERT_LIST_THIS_UPDATE,
+  TBS_CERT_LIST_NEXT_UPDATE,
+  TBS_CERT_LIST_REVOKED_CERTIFICATES,
+  TBS_CERT_LIST_EXTENSIONS,
   SIGNATURE_ALGORITHM,
   SIGNATURE_VALUE
 ];
+
+export interface ICertificateRevocationList {
+  tbs: ArrayBuffer;
+  version: number;
+  signature: AlgorithmIdentifier;
+  issuer: RelativeDistinguishedNames;
+  thisUpdate: Time;
+  nextUpdate?: Time;
+  revokedCertificates?: RevokedCertificate[];
+  crlExtensions?: Extensions;
+  signatureAlgorithm: AlgorithmIdentifier;
+  signatureValue: asn1js.BitString;
+}
 
 export type TBSCertListSchema = Schema.SchemaParameters<{
   tbsCertListVersion?: string;
@@ -44,6 +66,19 @@ export type TBSCertListSchema = Schema.SchemaParameters<{
   tbsCertListRevokedCertificates?: string;
   crlExtensions?: ExtensionsSchema;
 }>;
+
+export interface CertificateRevocationListJson {
+  tbs: string;
+  version: number;
+  signature: AlgorithmIdentifierJson;
+  issuer: RelativeDistinguishedNamesJson;
+  thisUpdate: TimeJson;
+  nextUpdate?: TimeJson;
+  revokedCertificates?: RevokedCertificateJson[];
+  crlExtensions?: ExtensionsJson;
+  signatureAlgorithm: AlgorithmIdentifierJson;
+  signatureValue: Schema.AsnBitStringJson;
+}
 
 function tbsCertList(parameters: TBSCertListSchema = {}): Schema.SchemaType {
   //TBSCertList  ::=  SEQUENCE  {
@@ -65,40 +100,40 @@ function tbsCertList(parameters: TBSCertListSchema = {}): Schema.SchemaType {
   const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
   return (new asn1js.Sequence({
-    name: (names.blockName || "tbsCertList"),
+    name: (names.blockName || TBS_CERT_LIST),
     value: [
       new asn1js.Integer({
         optional: true,
-        name: (names.tbsCertListVersion || "tbsCertList.version"),
+        name: (names.tbsCertListVersion || TBS_CERT_LIST_VERSION),
         value: 2
       }), // EXPLICIT integer value (v2)
       AlgorithmIdentifier.schema(names.signature || {
         names: {
-          blockName: "tbsCertList.signature"
+          blockName: TBS_CERT_LIST_SIGNATURE
         }
       }),
       RelativeDistinguishedNames.schema(names.issuer || {
         names: {
-          blockName: "tbsCertList.issuer"
+          blockName: TBS_CERT_LIST_ISSUER
         }
       }),
       Time.schema(names.tbsCertListThisUpdate || {
         names: {
-          utcTimeName: "tbsCertList.thisUpdate",
-          generalTimeName: "tbsCertList.thisUpdate"
+          utcTimeName: TBS_CERT_LIST_THIS_UPDATE,
+          generalTimeName: TBS_CERT_LIST_THIS_UPDATE
         }
       }),
       Time.schema(names.tbsCertListNextUpdate || {
         names: {
-          utcTimeName: "tbsCertList.nextUpdate",
-          generalTimeName: "tbsCertList.nextUpdate"
+          utcTimeName: TBS_CERT_LIST_NEXT_UPDATE,
+          generalTimeName: TBS_CERT_LIST_NEXT_UPDATE
         }
       }, true),
       new asn1js.Sequence({
         optional: true,
         value: [
           new asn1js.Repeated({
-            name: (names.tbsCertListRevokedCertificates || "tbsCertList.revokedCertificates"),
+            name: (names.tbsCertListRevokedCertificates || TBS_CERT_LIST_REVOKED_CERTIFICATES),
             value: new asn1js.Sequence({
               value: [
                 new asn1js.Integer(),
@@ -117,7 +152,7 @@ function tbsCertList(parameters: TBSCertListSchema = {}): Schema.SchemaType {
         },
         value: [Extensions.schema(names.crlExtensions || {
           names: {
-            blockName: "tbsCertList.extensions"
+            blockName: TBS_CERT_LIST_EXTENSIONS
           }
         })]
       }) // EXPLICIT SEQUENCE value
@@ -125,18 +160,7 @@ function tbsCertList(parameters: TBSCertListSchema = {}): Schema.SchemaType {
   }));
 }
 
-export interface CertificateRevocationListParameters extends Schema.SchemaConstructor {
-  tbs?: ArrayBuffer;
-  version?: number;
-  signature?: AlgorithmIdentifier;
-  issuer?: RelativeDistinguishedNames;
-  thisUpdate?: Time;
-  nextUpdate?: Time;
-  revokedCertificates?: RevokedCertificate[];
-  crlExtensions?: Extensions;
-  signatureAlgorithm?: AlgorithmIdentifier;
-  signatureValue?: asn1js.BitString;
-}
+export type CertificateRevocationListParameters = PkiObjectParameters & Partial<ICertificateRevocationList>;
 
 export interface CertificateRevocationListVerifyParams {
   issuerCertificate?: Certificate;
@@ -156,67 +180,68 @@ const WELL_KNOWN_EXTENSIONS = [
   id_CertificateIssuer,
 ];
 /**
- * Class from RFC5280
+ * Represents the CertificateRevocationList structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
-export class CertificateRevocationList implements Schema.SchemaCompatible {
+export class CertificateRevocationList extends PkiObject implements ICertificateRevocationList {
 
-  public tbs: ArrayBuffer;
-  public version: number;
-  public signature: AlgorithmIdentifier;
-  public issuer: RelativeDistinguishedNames;
-  public thisUpdate: Time;
+  public static override CLASS_NAME = "CertificateRevocationList";
+
+  public tbs!: ArrayBuffer;
+  public version!: number;
+  public signature!: AlgorithmIdentifier;
+  public issuer!: RelativeDistinguishedNames;
+  public thisUpdate!: Time;
   public nextUpdate?: Time;
   public revokedCertificates?: RevokedCertificate[];
   public crlExtensions?: Extensions;
-  public signatureAlgorithm: AlgorithmIdentifier;
-  public signatureValue: asn1js.BitString;
+  public signatureAlgorithm!: AlgorithmIdentifier;
+  public signatureValue!: asn1js.BitString;
 
   /**
-   * Constructor for Attribute class
-   * @param parameters
+   * Initializes a new instance of the {@link CertificateRevocationList} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: CertificateRevocationListParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.tbs = pvutils.getParametersValue(parameters, TBS, CertificateRevocationList.defaultValues(TBS));
     this.version = pvutils.getParametersValue(parameters, VERSION, CertificateRevocationList.defaultValues(VERSION));
     this.signature = pvutils.getParametersValue(parameters, SIGNATURE, CertificateRevocationList.defaultValues(SIGNATURE));
     this.issuer = pvutils.getParametersValue(parameters, ISSUER, CertificateRevocationList.defaultValues(ISSUER));
     this.thisUpdate = pvutils.getParametersValue(parameters, THIS_UPDATE, CertificateRevocationList.defaultValues(THIS_UPDATE));
-    if (parameters.nextUpdate) {
+    if (NEXT_UPDATE in parameters) {
       this.nextUpdate = pvutils.getParametersValue(parameters, NEXT_UPDATE, CertificateRevocationList.defaultValues(NEXT_UPDATE));
     }
-    if (parameters.revokedCertificates) {
+    if (REVOKED_CERTIFICATES in parameters) {
       this.revokedCertificates = pvutils.getParametersValue(parameters, REVOKED_CERTIFICATES, CertificateRevocationList.defaultValues(REVOKED_CERTIFICATES));
     }
-    if (parameters.crlExtensions) {
+    if (CRL_EXTENSIONS in parameters) {
       this.crlExtensions = pvutils.getParametersValue(parameters, CRL_EXTENSIONS, CertificateRevocationList.defaultValues(CRL_EXTENSIONS));
     }
     this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, CertificateRevocationList.defaultValues(SIGNATURE_ALGORITHM));
     this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, CertificateRevocationList.defaultValues(SIGNATURE_VALUE));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof TBS): ArrayBuffer;
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof SIGNATURE): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof ISSUER): RelativeDistinguishedNames;
-  public static defaultValues(memberName: typeof THIS_UPDATE): Time;
-  public static defaultValues(memberName: typeof NEXT_UPDATE): Time;
-  public static defaultValues(memberName: typeof REVOKED_CERTIFICATES): RevokedCertificate[];
-  public static defaultValues(memberName: typeof CRL_EXTENSIONS): Extensions;
-  public static defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof SIGNATURE_VALUE): asn1js.BitString;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof TBS): ArrayBuffer;
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof SIGNATURE): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof ISSUER): RelativeDistinguishedNames;
+  public static override defaultValues(memberName: typeof THIS_UPDATE): Time;
+  public static override defaultValues(memberName: typeof NEXT_UPDATE): Time;
+  public static override defaultValues(memberName: typeof REVOKED_CERTIFICATES): RevokedCertificate[];
+  public static override defaultValues(memberName: typeof CRL_EXTENSIONS): Extensions;
+  public static override defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof SIGNATURE_VALUE): asn1js.BitString;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS:
         return new ArrayBuffer(0);
@@ -239,15 +264,15 @@ export class CertificateRevocationList implements Schema.SchemaCompatible {
       case SIGNATURE_VALUE:
         return new asn1js.BitString();
       default:
-        throw new Error(`Invalid member name for CertificateRevocationList class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * CertificateList  ::=  SEQUENCE  {
    *    tbsCertList          TBSCertList,
    *    signatureAlgorithm   AlgorithmIdentifier,
@@ -255,9 +280,9 @@ export class CertificateRevocationList implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     tbsCertListVersion?: string;
     signature?: AlgorithmIdentifierSchema;
     issuer?: RelativeDistinguishedNamesSchema;
@@ -284,42 +309,34 @@ export class CertificateRevocationList implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       CertificateRevocationList.schema()
     );
-
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for CertificateRevocationList");
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     this.tbs = asn1.result.tbsCertList.valueBeforeDecode;
 
-    if ("tbsCertList.version" in asn1.result) {
-      this.version = asn1.result["tbsCertList.version"].valueBlock.valueDec;
+    if (TBS_CERT_LIST_VERSION in asn1.result) {
+      this.version = asn1.result[TBS_CERT_LIST_VERSION].valueBlock.valueDec;
     }
-    this.signature = new AlgorithmIdentifier({ schema: asn1.result["tbsCertList.signature"] });
-    this.issuer = new RelativeDistinguishedNames({ schema: asn1.result["tbsCertList.issuer"] });
-    this.thisUpdate = new Time({ schema: asn1.result["tbsCertList.thisUpdate"] });
-    if ("tbsCertList.nextUpdate" in asn1.result) {
-      this.nextUpdate = new Time({ schema: asn1.result["tbsCertList.nextUpdate"] });
+    this.signature = new AlgorithmIdentifier({ schema: asn1.result[TBS_CERT_LIST_SIGNATURE] });
+    this.issuer = new RelativeDistinguishedNames({ schema: asn1.result[TBS_CERT_LIST_ISSUER] });
+    this.thisUpdate = new Time({ schema: asn1.result[TBS_CERT_LIST_THIS_UPDATE] });
+    if (TBS_CERT_LIST_NEXT_UPDATE in asn1.result) {
+      this.nextUpdate = new Time({ schema: asn1.result[TBS_CERT_LIST_NEXT_UPDATE] });
     }
-    if ("tbsCertList.revokedCertificates" in asn1.result) {
-      this.revokedCertificates = Array.from(asn1.result["tbsCertList.revokedCertificates"], element => new RevokedCertificate({ schema: element }));
+    if (TBS_CERT_LIST_REVOKED_CERTIFICATES in asn1.result) {
+      this.revokedCertificates = Array.from(asn1.result[TBS_CERT_LIST_REVOKED_CERTIFICATES], element => new RevokedCertificate({ schema: element }));
     }
-    if ("tbsCertList.extensions" in asn1.result) {
-      this.crlExtensions = new Extensions({ schema: asn1.result["tbsCertList.extensions"] });
+    if (TBS_CERT_LIST_EXTENSIONS in asn1.result) {
+      this.crlExtensions = new Extensions({ schema: asn1.result[TBS_CERT_LIST_EXTENSIONS] });
     }
 
     this.signatureAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.signatureAlgorithm });
@@ -345,7 +362,7 @@ export class CertificateRevocationList implements Schema.SchemaCompatible {
 
     if (this.revokedCertificates) {
       outputArray.push(new asn1js.Sequence({
-        value: Array.from(this.revokedCertificates, element => element.toSchema())
+        value: Array.from(this.revokedCertificates, o => o.toSchema())
       }));
     }
 
@@ -403,58 +420,56 @@ export class CertificateRevocationList implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const object: any = {
+  public toJSON(): CertificateRevocationListJson {
+    const res: CertificateRevocationListJson = {
       tbs: pvutils.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
+      version: this.version,
       signature: this.signature.toJSON(),
       issuer: this.issuer.toJSON(),
       thisUpdate: this.thisUpdate.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON()
+      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson
     };
 
     if (this.version !== CertificateRevocationList.defaultValues(VERSION))
-      object.version = this.version;
+      res.version = this.version;
 
     if (this.nextUpdate) {
-      object.nextUpdate = this.nextUpdate.toJSON();
+      res.nextUpdate = this.nextUpdate.toJSON();
     }
 
     if (this.revokedCertificates) {
-      object.revokedCertificates = Array.from(this.revokedCertificates, element => element.toJSON());
+      res.revokedCertificates = Array.from(this.revokedCertificates, o => o.toJSON());
     }
 
     if (this.crlExtensions) {
-      object.crlExtensions = this.crlExtensions.toJSON();
+      res.crlExtensions = this.crlExtensions.toJSON();
     }
 
-    return object;
+    return res;
   }
 
+  /**
+   * Returns `true` if supplied certificate is revoked, otherwise `false`
+   * @param certificate
+   */
   public isCertificateRevoked(certificate: Certificate): boolean {
-    //#region Check that issuer of the input certificate is the same with issuer of this CRL
+    // Check that issuer of the input certificate is the same with issuer of this CRL
     if (!this.issuer.isEqual(certificate.issuer)) {
       return false;
     }
-    //#endregion
 
-    //#region Check that there are revoked certificates in this CRL
+    // Check that there are revoked certificates in this CRL
     if (!this.revokedCertificates) {
       return false;
     }
-    //#endregion
 
-    //#region Search for input certificate in revoked certificates array
+    // Search for input certificate in revoked certificates array
     for (const revokedCertificate of this.revokedCertificates) {
       if (revokedCertificate.userCertificate.isEqual(certificate.serialNumber)) {
         return true;
       }
     }
-    //#endregion
 
     return false;
   }

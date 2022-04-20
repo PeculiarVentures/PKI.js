@@ -1,13 +1,14 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { TBSRequest, TBSRequestSchema } from "./TBSRequest";
-import { Signature, SignatureSchema } from "./Signature";
+import { TBSRequest, TBSRequestJson, TBSRequestSchema } from "./TBSRequest";
+import { Signature, SignatureJson, SignatureSchema } from "./Signature";
 import { Request } from "./Request";
 import { CertID, CertIDCreateParams } from "./CertID";
 import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
-import { ParameterError } from "./errors";
+import { AsnError, ParameterError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const TBS_REQUEST = "tbsRequest";
 const OPTIONAL_SIGNATURE = "optionalSignature";
@@ -16,10 +17,17 @@ const CLEAR_PROPS = [
   OPTIONAL_SIGNATURE
 ];
 
-export interface OCSPRequestParameters extends Schema.SchemaConstructor {
-  tbsRequest?: TBSRequest;
+export interface IOCSPRequest {
+  tbsRequest: TBSRequest;
   optionalSignature?: Signature;
 }
+
+export interface OCSPRequestJson {
+  tbsRequest: TBSRequestJson;
+  optionalSignature?: SignatureJson;
+}
+
+export type OCSPRequestParameters = PkiObjectParameters & Partial<IOCSPRequest>;
 
 /**
  * Represents an OCSP request described in [RFC6960 Section 4.1](https://datatracker.ietf.org/doc/html/rfc6960#section-4.1)
@@ -51,44 +59,45 @@ export interface OCSPRequestParameters extends Schema.SchemaConstructor {
  * const ocspReqRaw = ocspReq.toSchema(true).toBER();
  * ```
  */
-export class OCSPRequest {
+export class OCSPRequest extends PkiObject implements IOCSPRequest {
 
-  public tbsRequest: TBSRequest;
+  public static override CLASS_NAME = "OCSPRequest";
+
+  public tbsRequest!: TBSRequest;
   public optionalSignature?: Signature;
 
   /**
-   * Constructor for OCSPRequest class
-   * @param parameters
+   * Initializes a new instance of the {@link OCSPRequest} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: OCSPRequestParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.tbsRequest = pvutils.getParametersValue(parameters, TBS_REQUEST, OCSPRequest.defaultValues(TBS_REQUEST));
-    if (parameters.optionalSignature) {
+    if (OPTIONAL_SIGNATURE in parameters) {
       this.optionalSignature = pvutils.getParametersValue(parameters, OPTIONAL_SIGNATURE, OCSPRequest.defaultValues(OPTIONAL_SIGNATURE));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof TBS_REQUEST): TBSRequest;
-  public static defaultValues(memberName: typeof OPTIONAL_SIGNATURE): Signature;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof TBS_REQUEST): TBSRequest;
+  public static override defaultValues(memberName: typeof OPTIONAL_SIGNATURE): Signature;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS_REQUEST:
         return new TBSRequest();
       case OPTIONAL_SIGNATURE:
         return new Signature();
       default:
-        throw new Error(`Invalid member name for OCSPRequest class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -112,12 +121,12 @@ export class OCSPRequest {
           (Signature.compareWithDefault("signature", memberValue.signature)) &&
           (Signature.compareWithDefault("certs", memberValue.certs)));
       default:
-        throw new Error(`Invalid member name for OCSPRequest class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
    * ```asn
@@ -127,9 +136,9 @@ export class OCSPRequest {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     tbsRequest?: TBSRequestSchema;
     optionalSignature?: SignatureSchema;
   }> = {}): Schema.SchemaType {
@@ -161,38 +170,24 @@ export class OCSPRequest {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       OCSPRequest.schema()
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for OCSPRequest");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.tbsRequest = new TBSRequest({ schema: asn1.result.tbsRequest });
     if (OPTIONAL_SIGNATURE in asn1.result)
       this.optionalSignature = new Signature({ schema: asn1.result.optionalSignature });
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @param {boolean} encodeFlag If param equal to false then create TBS schema via decoding stored value. In othe case create TBS schema via assembling from TBS parts.
-   * @returns asn1js object
-   */
-  toSchema(encodeFlag = false) {
+  public toSchema(encodeFlag = false) {
     //#region Create array for output sequence
     const outputArray = [];
 
@@ -218,20 +213,16 @@ export class OCSPRequest {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns JSON oject
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): OCSPRequestJson {
+    const res: OCSPRequestJson = {
       tbsRequest: this.tbsRequest.toJSON()
     };
 
     if (this.optionalSignature) {
-      _object.optionalSignature = this.optionalSignature.toJSON();
+      res.optionalSignature = this.optionalSignature.toJSON();
     }
 
-    return _object;
+    return res;
   }
 
   /**

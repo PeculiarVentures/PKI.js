@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const KEY_INFO = "keyInfo";
@@ -12,49 +14,58 @@ const CLEAR_PROPS = [
   SUPP_PUB_INFO
 ];
 
-export interface ECCCMSSharedInfoParameters extends Schema.SchemaConstructor {
-  keyInfo?: AlgorithmIdentifier;
+export interface IECCCMSSharedInfo {
+  keyInfo: AlgorithmIdentifier;
   entityUInfo?: asn1js.OctetString;
-  suppPubInfo?: asn1js.OctetString;
+  suppPubInfo: asn1js.OctetString;
 }
 
-/**
- * Class from RFC6318
- */
-export class ECCCMSSharedInfo implements Schema.SchemaCompatible {
+export interface ECCCMSSharedInfoJson {
+  keyInfo: AlgorithmIdentifierJson;
+  entityUInfo?: Schema.AsnOctetStringJson;
+  suppPubInfo: Schema.AsnOctetStringJson;
+}
 
-  public keyInfo: AlgorithmIdentifier;
+export type ECCCMSSharedInfoParameters = PkiObjectParameters & Partial<IECCCMSSharedInfo>;
+
+/**
+ * Represents the ECCCMSSharedInfo structure described in [RFC6318](https://datatracker.ietf.org/doc/html/rfc6318)
+ */
+export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
+
+  public static override CLASS_NAME = "ECCCMSSharedInfo";
+
+  public keyInfo!: AlgorithmIdentifier;
   public entityUInfo?: asn1js.OctetString;
-  public suppPubInfo: asn1js.OctetString;
+  public suppPubInfo!: asn1js.OctetString;
 
   /**
-   * Constructor for ECCCMSSharedInfo class
-   * @param parameters
+   * Initializes a new instance of the {@link ECCCMSSharedInfo} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: ECCCMSSharedInfoParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.keyInfo = pvutils.getParametersValue(parameters, KEY_INFO, ECCCMSSharedInfo.defaultValues(KEY_INFO));
-    if (parameters.entityUInfo) {
+    if (ENTITY_U_INFO in parameters) {
       this.entityUInfo = pvutils.getParametersValue(parameters, ENTITY_U_INFO, ECCCMSSharedInfo.defaultValues(ENTITY_U_INFO));
     }
     this.suppPubInfo = pvutils.getParametersValue(parameters, SUPP_PUB_INFO, ECCCMSSharedInfo.defaultValues(SUPP_PUB_INFO));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof KEY_INFO): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof ENTITY_U_INFO): asn1js.OctetString;
-  public static defaultValues(memberName: typeof SUPP_PUB_INFO): asn1js.OctetString;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof KEY_INFO): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof ENTITY_U_INFO): asn1js.OctetString;
+  public static override defaultValues(memberName: typeof SUPP_PUB_INFO): asn1js.OctetString;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case KEY_INFO:
         return new AlgorithmIdentifier();
@@ -63,7 +74,7 @@ export class ECCCMSSharedInfo implements Schema.SchemaCompatible {
       case SUPP_PUB_INFO:
         return new asn1js.OctetString();
       default:
-        throw new Error(`Invalid member name for ECCCMSSharedInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -79,15 +90,15 @@ export class ECCCMSSharedInfo implements Schema.SchemaCompatible {
       case SUPP_PUB_INFO:
         return (memberValue.isEqual(ECCCMSSharedInfo.defaultValues(memberName as typeof SUPP_PUB_INFO)));
       default:
-        throw new Error(`Invalid member name for ECCCMSSharedInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * ECC-CMS-SharedInfo  ::=  SEQUENCE {
    *    keyInfo      AlgorithmIdentifier,
    *    entityUInfo  [0] EXPLICIT OCTET STRING OPTIONAL,
@@ -95,9 +106,9 @@ export class ECCCMSSharedInfo implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     keyInfo?: AlgorithmIdentifierSchema;
     entityUInfo?: string;
     suppPubInfo?: string;
@@ -136,16 +147,11 @@ export class ECCCMSSharedInfo implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       ECCCMSSharedInfo.schema({
@@ -160,25 +166,15 @@ export class ECCCMSSharedInfo implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for ECCCMSSharedInfo");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.keyInfo = new AlgorithmIdentifier({ schema: asn1.result.keyInfo });
-
     if (ENTITY_U_INFO in asn1.result)
       this.entityUInfo = asn1.result.entityUInfo.valueBlock.value[0];
-
     this.suppPubInfo = asn1.result.suppPubInfo.valueBlock.value[0];
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create output array for sequence
     const outputArray = [];
@@ -211,22 +207,17 @@ export class ECCCMSSharedInfo implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
-      keyInfo: this.keyInfo.toJSON()
+  public toJSON(): ECCCMSSharedInfoJson {
+    const res: ECCCMSSharedInfoJson = {
+      keyInfo: this.keyInfo.toJSON(),
+      suppPubInfo: this.suppPubInfo.toJSON() as Schema.AsnOctetStringJson,
     };
 
     if (this.entityUInfo) {
-      _object.entityUInfo = this.entityUInfo.toJSON();
+      res.entityUInfo = this.entityUInfo.toJSON() as Schema.AsnOctetStringJson;
     }
 
-    _object.suppPubInfo = this.suppPubInfo.toJSON();
-
-    return _object;
+    return res;
   }
 
 }

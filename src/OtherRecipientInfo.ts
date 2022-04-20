@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const ORI_TYPE = "oriType";
@@ -9,50 +11,58 @@ const CLEAR_PROPS = [
   ORI_VALUE
 ];
 
-export interface OtherRecipientInfoParameters extends Schema.SchemaConstructor {
-  oriType?: string;
+export interface IOtherRecipientInfo {
+  oriType: string;
+  oriValue: any;
+}
+
+export interface OtherRecipientInfoJson {
+  oriType: string;
   oriValue?: any;
 }
 
-/**
- * Class from RFC5652
- */
-export class OtherRecipientInfo implements Schema.SchemaCompatible {
+export type OtherRecipientInfoParameters = PkiObjectParameters & Partial<IOtherRecipientInfo>;
 
-  public oriType: string;
+/**
+ * Represents the OtherRecipientInfo structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ */
+export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo {
+
+  public static override CLASS_NAME = "OtherRecipientInfo";
+
+  public oriType!: string;
   public oriValue: any;
 
   /**
-   * Constructor for OtherRecipientInfo class
-   * @param parameters
+   * Initializes a new instance of the {@link OtherRecipientInfo} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: OtherRecipientInfoParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.oriType = pvutils.getParametersValue(parameters, ORI_TYPE, OtherRecipientInfo.defaultValues(ORI_TYPE));
     this.oriValue = pvutils.getParametersValue(parameters, ORI_VALUE, OtherRecipientInfo.defaultValues(ORI_VALUE));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  static defaultValues(memberName: typeof ORI_TYPE): string;
-  static defaultValues(memberName: typeof ORI_VALUE): any;
-  static defaultValues(memberName: string): any {
+  static override defaultValues(memberName: typeof ORI_TYPE): string;
+  static override defaultValues(memberName: typeof ORI_VALUE): any;
+  static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ORI_TYPE:
         return "";
       case ORI_VALUE:
         return {};
       default:
-        throw new Error(`Invalid member name for OtherRecipientInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -68,24 +78,24 @@ export class OtherRecipientInfo implements Schema.SchemaCompatible {
       case ORI_VALUE:
         return (Object.keys(memberValue).length === 0);
       default:
-        throw new Error(`Invalid member name for OtherRecipientInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * OtherRecipientInfo ::= SEQUENCE {
    *    oriType OBJECT IDENTIFIER,
    *    oriValue ANY DEFINED BY oriType }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     oriType?: string;
     oriValue?: string;
   }> = {}) {
@@ -100,16 +110,11 @@ export class OtherRecipientInfo implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       OtherRecipientInfo.schema({
@@ -119,22 +124,13 @@ export class OtherRecipientInfo implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified) {
-      throw new Error("Object's schema was not verified against input data for OtherRecipientInfo");
-    }
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.oriType = asn1.result.oriType.valueBlock.toString();
     this.oriValue = asn1.result.oriValue;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
@@ -146,20 +142,16 @@ export class OtherRecipientInfo implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): OtherRecipientInfoJson {
+    const res: OtherRecipientInfoJson = {
       oriType: this.oriType
     };
 
     if (!OtherRecipientInfo.compareWithDefault(ORI_VALUE, this.oriValue)) {
-      _object.oriValue = this.oriValue.toJSON();
+      res.oriValue = this.oriValue.toJSON();
     }
 
-    return _object;
+    return res;
   }
 
 }

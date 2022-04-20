@@ -24,7 +24,6 @@ export function initCryptoEngine() {
       if ("subtle" in self.crypto)
         subtleObject = self.crypto.subtle;
 
-
       common.engine.name = engineName;
       if (typeof subtleObject === "undefined") {
         common.engine.crypto = cryptoObject;

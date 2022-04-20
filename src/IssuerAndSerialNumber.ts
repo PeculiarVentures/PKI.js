@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { RelativeDistinguishedNames, RelativeDistinguishedNamesJson, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
 import * as Schema from "./Schema";
 
 const ISSUER = "issuer";
@@ -10,11 +12,23 @@ const CLEAR_PROPS = [
   SERIAL_NUMBER,
 ];
 
-
-export interface IssuerAndSerialNumberParameters extends Schema.SchemaConstructor {
-  issuer?: RelativeDistinguishedNames;
-  serialNumber?: asn1js.Integer;
+export interface IIssuerAndSerialNumber {
+  /**
+   * Certificate issuer name
+   */
+  issuer: RelativeDistinguishedNames;
+  /**
+   * Certificate serial number
+   */
+  serialNumber: asn1js.Integer;
 }
+
+export interface IssuerAndSerialNumberJson {
+  issuer: RelativeDistinguishedNamesJson;
+  serialNumber: Schema.AsnIntegerJson;
+}
+
+export type IssuerAndSerialNumberParameters = PkiObjectParameters & Partial<IIssuerAndSerialNumber>;
 
 export type IssuerAndSerialNumberSchema = Schema.SchemaParameters<{
   issuer?: RelativeDistinguishedNamesSchema;
@@ -22,52 +36,53 @@ export type IssuerAndSerialNumberSchema = Schema.SchemaParameters<{
 }>;
 
 /**
- * Class from RFC5652
+ * Represents the IssuerAndSerialNumber structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
-export class IssuerAndSerialNumber implements Schema.SchemaCompatible {
+export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerialNumber {
 
-  public issuer: RelativeDistinguishedNames;
-  public serialNumber: asn1js.Integer;
+  public static override CLASS_NAME = "IssuerAndSerialNumber";
+
+  public issuer!: RelativeDistinguishedNames;
+  public serialNumber!: asn1js.Integer;
 
   /**
-   * Constructor for IssuerAndSerialNumber class
-   * @param parameters
+   * Initializes a new instance of the {@link IssuerAndSerialNumber} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: IssuerAndSerialNumberParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.issuer = pvutils.getParametersValue(parameters, ISSUER, IssuerAndSerialNumber.defaultValues(ISSUER));
     this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, IssuerAndSerialNumber.defaultValues(SERIAL_NUMBER));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof ISSUER): RelativeDistinguishedNames;
-  public static defaultValues(memberName: typeof SERIAL_NUMBER): asn1js.Integer;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof ISSUER): RelativeDistinguishedNames;
+  public static override defaultValues(memberName: typeof SERIAL_NUMBER): asn1js.Integer;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ISSUER:
         return new RelativeDistinguishedNames();
       case SERIAL_NUMBER:
         return new asn1js.Integer();
       default:
-        throw new Error(`Invalid member name for IssuerAndSerialNumber class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * IssuerAndSerialNumber ::= SEQUENCE {
    *    issuer Name,
    *    serialNumber CertificateSerialNumber }
@@ -76,9 +91,9 @@ export class IssuerAndSerialNumber implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: IssuerAndSerialNumberSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: IssuerAndSerialNumberSchema = {}): Schema.SchemaType {
     /**
      * @type {Object}
      * @property {string} [blockName]
@@ -96,16 +111,11 @@ export class IssuerAndSerialNumber implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       IssuerAndSerialNumber.schema({
@@ -119,40 +129,27 @@ export class IssuerAndSerialNumber implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for IssuerAndSerialNumber");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.issuer = new RelativeDistinguishedNames({ schema: asn1.result.issuer });
     this.serialNumber = asn1.result.serialNumber;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
-    //#region Construct and return new ASN.1 schema for this object
+    // Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
       value: [
         this.issuer.toSchema(),
         this.serialNumber
       ]
     }));
-    //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): IssuerAndSerialNumberJson {
     return {
       issuer: this.issuer.toJSON(),
-      serialNumber: this.serialNumber.toJSON()
+      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
     };
   }
 

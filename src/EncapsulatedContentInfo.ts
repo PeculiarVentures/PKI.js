@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const E_CONTENT_TYPE = "eContentType";
@@ -9,10 +11,17 @@ const CLEAR_PROPS = [
   E_CONTENT,
 ];
 
-export interface EncapsulatedContentInfoParameters extends Schema.SchemaConstructor {
-  eContentType?: string;
+export interface IEncapsulatedContentInfo {
+  eContentType: string;
   eContent?: asn1js.OctetString;
 }
+
+export interface EncapsulatedContentInfoJson {
+  eContentType: string;
+  eContent?: Schema.AsnOctetStringJson;
+}
+
+export type EncapsulatedContentInfoParameters = PkiObjectParameters & Partial<IEncapsulatedContentInfo>;
 
 export type EncapsulatedContentInfoSchema = Schema.SchemaParameters<{
   eContentType?: string;
@@ -20,21 +29,24 @@ export type EncapsulatedContentInfoSchema = Schema.SchemaParameters<{
 }>;
 
 /**
- * Class from RFC5652
+ * Represents the EncapsulatedContentInfo structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
-export class EncapsulatedContentInfo implements Schema.SchemaCompatible {
+export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedContentInfo {
 
-  public eContentType: string;
+  public static override CLASS_NAME = "EncapsulatedContentInfo";
+
+  public eContentType!: string;
   public eContent?: asn1js.OctetString;
 
   /**
-   * Constructor for EncapsulatedContentInfo class
-   * @param parameters
+   * Initializes a new instance of the {@link EncapsulatedContentInfo} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: EncapsulatedContentInfoParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.eContentType = pvutils.getParametersValue(parameters, E_CONTENT_TYPE, EncapsulatedContentInfo.defaultValues(E_CONTENT_TYPE));
-    if (parameters.eContent) {
+    if (E_CONTENT in parameters) {
       this.eContent = pvutils.getParametersValue(parameters, E_CONTENT, EncapsulatedContentInfo.defaultValues(E_CONTENT));
       if ((this.eContent.idBlock.tagClass === 1) &&
         (this.eContent.idBlock.tagNumber === 4)) {
@@ -68,29 +80,27 @@ export class EncapsulatedContentInfo implements Schema.SchemaCompatible {
         //#endregion
       }
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof E_CONTENT_TYPE): string;
-  public static defaultValues(memberName: typeof E_CONTENT): asn1js.OctetString;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof E_CONTENT_TYPE): string;
+  public static override defaultValues(memberName: typeof E_CONTENT): asn1js.OctetString;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case E_CONTENT_TYPE:
         return "";
       case E_CONTENT:
         return new asn1js.OctetString();
       default:
-        throw new Error(`Invalid member name for EncapsulatedContentInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -111,24 +121,24 @@ export class EncapsulatedContentInfo implements Schema.SchemaCompatible {
           return false;
         }
       default:
-        throw new Error(`Invalid member name for EncapsulatedContentInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * EncapsulatedContentInfo ::= SEQUENCE {
    *    eContentType ContentType,
    *    eContent [0] EXPLICIT OCTET STRING OPTIONAL } * Changed it to ANY, as in PKCS#7
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: EncapsulatedContentInfoSchema = {}): Schema.SchemaType {
+  public static override schema(parameters: EncapsulatedContentInfoSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -149,16 +159,11 @@ export class EncapsulatedContentInfo implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       EncapsulatedContentInfo.schema({
@@ -168,22 +173,14 @@ export class EncapsulatedContentInfo implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for EncapsulatedContentInfo");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.eContentType = asn1.result.eContentType.valueBlock.toString();
     if (E_CONTENT in asn1.result)
       this.eContent = asn1.result.eContent;
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -210,19 +207,16 @@ export class EncapsulatedContentInfo implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): EncapsulatedContentInfoJson {
+    const res: EncapsulatedContentInfoJson = {
       eContentType: this.eContentType
     };
 
     if (this.eContent && EncapsulatedContentInfo.compareWithDefault(E_CONTENT, this.eContent) === false) {
-      _object.eContent = this.eContent.toJSON();
+      res.eContent = this.eContent.toJSON() as Schema.AsnOctetStringJson;
     }
 
-    return _object;
+    return res;
   }
 
 }

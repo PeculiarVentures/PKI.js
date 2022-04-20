@@ -1,8 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { MessageImprint, MessageImprintSchema } from "./MessageImprint";
-import { Extension } from "./Extension";
+import { MessageImprint, MessageImprintJson, MessageImprintSchema } from "./MessageImprint";
+import { Extension, ExtensionJson } from "./Extension";
 import * as Schema from "./Schema";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { AsnError } from "./errors";
 
 const VERSION = "version";
 const MESSAGE_IMPRINT = "messageImprint";
@@ -26,66 +28,79 @@ const CLEAR_PROPS = [
   TIME_STAMP_REQ_EXTENSIONS,
 ];
 
-export interface TimeStampReqParameters extends Schema.SchemaConstructor {
-  version?: number;
-  messageImprint?: MessageImprint;
+export interface ITimeStampReq {
+  version: number;
+  messageImprint: MessageImprint;
   reqPolicy?: string;
   nonce?: asn1js.Integer;
   certReq?: boolean;
   extensions?: Extension[];
 }
 
-/**
- * Class from RFC3161
- */
-export class TimeStampReq implements Schema.SchemaCompatible {
+export interface TimeStampReqJson {
+  version: number;
+  messageImprint: MessageImprintJson;
+  reqPolicy?: string;
+  nonce?: Schema.AsnIntegerJson;
+  certReq?: boolean;
+  extensions?: ExtensionJson[];
+}
 
-  public version: number;
-  public messageImprint: MessageImprint;
+export type TimeStampReqParameters = PkiObjectParameters & Partial<ITimeStampReq>;
+
+/**
+ * Represents the TimeStampReq structure described in [RFC3161](https://www.ietf.org/rfc/rfc3161.txt)
+ */
+export class TimeStampReq extends PkiObject implements ITimeStampReq {
+
+  public static override CLASS_NAME = "TimeStampReq";
+
+  public version!: number;
+  public messageImprint!: MessageImprint;
   public reqPolicy?: string;
   public nonce?: asn1js.Integer;
   public certReq?: boolean;
   public extensions?: Extension[];
 
   /**
-   * Constructor for TimeStampReq class
-   * @param parameters
+   * Initializes a new instance of the {@link TimeStampReq} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: TimeStampReqParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, TimeStampReq.defaultValues(VERSION));
     this.messageImprint = pvutils.getParametersValue(parameters, MESSAGE_IMPRINT, TimeStampReq.defaultValues(MESSAGE_IMPRINT));
-    if (parameters.reqPolicy !== undefined) {
+    if (REQ_POLICY in parameters) {
       this.reqPolicy = pvutils.getParametersValue(parameters, REQ_POLICY, TimeStampReq.defaultValues(REQ_POLICY));
     }
-    if (parameters.nonce) {
+    if (NONCE in parameters) {
       this.nonce = pvutils.getParametersValue(parameters, NONCE, TimeStampReq.defaultValues(NONCE));
     }
-    if (parameters.certReq !== undefined) {
+    if (CERT_REQ in parameters) {
       this.certReq = pvutils.getParametersValue(parameters, CERT_REQ, TimeStampReq.defaultValues(CERT_REQ));
     }
-    if (parameters.extensions) {
+    if (EXTENSIONS in parameters) {
       this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, TimeStampReq.defaultValues(EXTENSIONS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
-    if (parameters.schema)
+    if (parameters.schema) {
       this.fromSchema(parameters.schema);
-    //#endregion
+    }
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof MESSAGE_IMPRINT): MessageImprint;
-  public static defaultValues(memberName: typeof REQ_POLICY): string;
-  public static defaultValues(memberName: typeof NONCE): asn1js.Integer;
-  public static defaultValues(memberName: typeof CERT_REQ): boolean;
-  public static defaultValues(memberName: typeof EXTENSIONS): Extension[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof MESSAGE_IMPRINT): MessageImprint;
+  public static override defaultValues(memberName: typeof REQ_POLICY): string;
+  public static override defaultValues(memberName: typeof NONCE): asn1js.Integer;
+  public static override defaultValues(memberName: typeof CERT_REQ): boolean;
+  public static override defaultValues(memberName: typeof EXTENSIONS): Extension[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 0;
@@ -100,7 +115,7 @@ export class TimeStampReq implements Schema.SchemaCompatible {
       case EXTENSIONS:
         return [];
       default:
-        throw new Error(`Invalid member name for TimeStampReq class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -123,15 +138,15 @@ export class TimeStampReq implements Schema.SchemaCompatible {
       case EXTENSIONS:
         return (memberValue.length === 0);
       default:
-        throw new Error(`Invalid member name for TimeStampReq class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * TimeStampReq ::= SEQUENCE  {
    *    version               INTEGER  { v1(1) },
    *    messageImprint        MessageImprint,
@@ -144,9 +159,9 @@ export class TimeStampReq implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
     messageImprint?: MessageImprintSchema;
     reqPolicy?: string;
@@ -192,26 +207,19 @@ export class TimeStampReq implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       TimeStampReq.schema()
     );
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for TimeStampReq");
-    //#endregion
+    AsnError.assertSchema(asn1, this.className);
 
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.version = asn1.result[TIME_STAMP_REQ_VERSION].valueBlock.valueDec;
     this.messageImprint = new MessageImprint({ schema: asn1.result[TIME_STAMP_REQ_MESSAGE_IMPRINT] });
     if (TIME_STAMP_REQ_POLICY in asn1.result)
@@ -222,13 +230,8 @@ export class TimeStampReq implements Schema.SchemaCompatible {
       this.certReq = asn1.result[TIME_STAMP_REQ_CERT_REQ].valueBlock.value;
     if (TIME_STAMP_REQ_EXTENSIONS in asn1.result)
       this.extensions = Array.from(asn1.result[TIME_STAMP_REQ_EXTENSIONS], element => new Extension({ schema: element }));
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -249,7 +252,7 @@ export class TimeStampReq implements Schema.SchemaCompatible {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        value: Array.from(this.extensions, element => element.toSchema())
+        value: Array.from(this.extensions, o => o.toSchema())
       }));
     }
     //#endregion
@@ -262,30 +265,26 @@ export class TimeStampReq implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
+  public toJSON(): TimeStampReqJson {
+    const res: TimeStampReqJson = {
       version: this.version,
       messageImprint: this.messageImprint.toJSON()
     };
 
     if (this.reqPolicy !== undefined)
-      _object.reqPolicy = this.reqPolicy;
+      res.reqPolicy = this.reqPolicy;
 
     if (this.nonce !== undefined)
-      _object.nonce = this.nonce.toJSON();
+      res.nonce = this.nonce.toJSON() as Schema.AsnIntegerJson;
 
     if ((this.certReq !== undefined) && (TimeStampReq.compareWithDefault(CERT_REQ, this.certReq) === false))
-      _object.certReq = this.certReq;
+      res.certReq = this.certReq;
 
     if (this.extensions) {
-      _object.extensions = Array.from(this.extensions, element => element.toJSON());
+      res.extensions = Array.from(this.extensions, o => o.toJSON());
     }
 
-    return _object;
+    return res;
   }
 
 }

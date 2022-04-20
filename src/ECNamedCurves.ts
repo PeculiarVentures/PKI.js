@@ -50,5 +50,4 @@ export class ECNamedCurves {
     this.register("brainpoolP512r1", "1.3.36.3.3.2.8.1.1.13", 64);
   }
 
-
 }

@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { OriginatorInfo } from "./OriginatorInfo";
-import { RecipientInfo } from "./RecipientInfo";
-import { EncryptedContentInfo, EncryptedContentInfoSchema } from "./EncryptedContentInfo";
-import { Attribute } from "./Attribute";
+import { OriginatorInfo, OriginatorInfoJson } from "./OriginatorInfo";
+import { RecipientInfo, RecipientInfoJson } from "./RecipientInfo";
+import { EncryptedContentInfo, EncryptedContentInfoJson, EncryptedContentInfoSchema } from "./EncryptedContentInfo";
+import { Attribute, AttributeJson } from "./Attribute";
 import { AlgorithmIdentifier, AlgorithmIdentifierParameters } from "./AlgorithmIdentifier";
 import { RSAESOAEPParams } from "./RSAESOAEPParams";
 import { KeyTransRecipientInfo } from "./KeyTransRecipientInfo";
@@ -24,6 +24,7 @@ import { OriginatorPublicKey } from "./OriginatorPublicKey";
 import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
 import { ArgumentError, AsnError } from "./errors";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
 const VERSION = "version";
 const ORIGINATOR_INFO = "originatorInfo";
@@ -48,13 +49,23 @@ const curveLengthByName: Record<string, number> = {
   "P-521": 528
 };
 
-export interface EnvelopedDataParameters extends Schema.SchemaConstructor {
-  version?: number;
+export interface IEnvelopedData {
+  version: number;
   originatorInfo?: OriginatorInfo;
-  recipientInfos?: RecipientInfo[];
-  encryptedContentInfo?: EncryptedContentInfo;
+  recipientInfos: RecipientInfo[];
+  encryptedContentInfo: EncryptedContentInfo;
   unprotectedAttrs?: Attribute[];
 }
+
+export interface EnvelopedDataJson {
+  version: number;
+  originatorInfo?: OriginatorInfoJson;
+  recipientInfos: RecipientInfoJson[];
+  encryptedContentInfo: EncryptedContentInfoJson;
+  unprotectedAttrs?: AttributeJson[];
+}
+
+export type EnvelopedDataParameters = PkiObjectParameters & Partial<IEnvelopedData>;
 
 export interface EnvelopedDataEncryptionParams {
   kekEncryptionLength: number;
@@ -62,50 +73,51 @@ export interface EnvelopedDataEncryptionParams {
 }
 
 /**
- * Class from RFC5652
+ * Represents the EnvelopedData structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
-export class EnvelopedData implements Schema.SchemaCompatible {
+export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
-  public version: number;
+  public static override CLASS_NAME = "EnvelopedData";
+
+  public version!: number;
   public originatorInfo?: OriginatorInfo;
-  public recipientInfos: RecipientInfo[];
-  public encryptedContentInfo: EncryptedContentInfo;
+  public recipientInfos!: RecipientInfo[];
+  public encryptedContentInfo!: EncryptedContentInfo;
   public unprotectedAttrs?: Attribute[];
 
   /**
-   * Constructor for EnvelopedData class
-   * @param parameters
+   * Initializes a new instance of the {@link EnvelopedData} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: EnvelopedDataParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, EnvelopedData.defaultValues(VERSION));
-    if (parameters.originatorInfo) {
+    if (ORIGINATOR_INFO in parameters) {
       this.originatorInfo = pvutils.getParametersValue(parameters, ORIGINATOR_INFO, EnvelopedData.defaultValues(ORIGINATOR_INFO));
     }
     this.recipientInfos = pvutils.getParametersValue(parameters, RECIPIENT_INFOS, EnvelopedData.defaultValues(RECIPIENT_INFOS));
     this.encryptedContentInfo = pvutils.getParametersValue(parameters, ENCRYPTED_CONTENT_INFO, EnvelopedData.defaultValues(ENCRYPTED_CONTENT_INFO));
-    if (parameters.unprotectedAttrs) {
+    if (UNPROTECTED_ATTRS in parameters) {
       this.unprotectedAttrs = pvutils.getParametersValue(parameters, UNPROTECTED_ATTRS, EnvelopedData.defaultValues(UNPROTECTED_ATTRS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof ORIGINATOR_INFO): OriginatorInfo;
-  public static defaultValues(memberName: typeof RECIPIENT_INFOS): RecipientInfo[];
-  public static defaultValues(memberName: typeof ENCRYPTED_CONTENT_INFO): EncryptedContentInfo;
-  public static defaultValues(memberName: typeof UNPROTECTED_ATTRS): Attribute[];
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof ORIGINATOR_INFO): OriginatorInfo;
+  public static override defaultValues(memberName: typeof RECIPIENT_INFOS): RecipientInfo[];
+  public static override defaultValues(memberName: typeof ENCRYPTED_CONTENT_INFO): EncryptedContentInfo;
+  public static override defaultValues(memberName: typeof UNPROTECTED_ATTRS): Attribute[];
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 0;
@@ -118,7 +130,7 @@ export class EnvelopedData implements Schema.SchemaCompatible {
       case UNPROTECTED_ATTRS:
         return [];
       default:
-        throw new Error(`Invalid member name for EnvelopedData class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -141,15 +153,15 @@ export class EnvelopedData implements Schema.SchemaCompatible {
           (EncryptedContentInfo.compareWithDefault("contentEncryptionAlgorithm", memberValue.contentEncryptionAlgorithm) &&
             (EncryptedContentInfo.compareWithDefault("encryptedContent", memberValue.encryptedContent))));
       default:
-        throw new Error(`Invalid member name for EnvelopedData class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * EnvelopedData ::= SEQUENCE {
    *    version CMSVersion,
    *    originatorInfo [0] IMPLICIT OriginatorInfo OPTIONAL,
@@ -159,9 +171,9 @@ export class EnvelopedData implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
     originatorInfo?: string;
     recipientInfos?: string;
@@ -209,16 +221,11 @@ export class EnvelopedData implements Schema.SchemaCompatible {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       EnvelopedData.schema({
@@ -235,12 +242,9 @@ export class EnvelopedData implements Schema.SchemaCompatible {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for EnvelopedData");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.version = asn1.result.version.valueBlock.valueDec;
 
     if (ORIGINATOR_INFO in asn1.result) {
@@ -251,18 +255,13 @@ export class EnvelopedData implements Schema.SchemaCompatible {
       });
     }
 
-    this.recipientInfos = Array.from(asn1.result.recipientInfos, element => new RecipientInfo({ schema: element }));
+    this.recipientInfos = Array.from(asn1.result.recipientInfos, o => new RecipientInfo({ schema: o }));
     this.encryptedContentInfo = new EncryptedContentInfo({ schema: asn1.result.encryptedContentInfo });
 
     if (UNPROTECTED_ATTRS in asn1.result)
-      this.unprotectedAttrs = Array.from(asn1.result.unprotectedAttrs, element => new Attribute({ schema: element }));
-    //#endregion
+      this.unprotectedAttrs = Array.from(asn1.result.unprotectedAttrs, o => new Attribute({ schema: o }));
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
@@ -281,7 +280,7 @@ export class EnvelopedData implements Schema.SchemaCompatible {
     }
 
     outputArray.push(new asn1js.Set({
-      value: Array.from(this.recipientInfos, element => element.toSchema())
+      value: Array.from(this.recipientInfos, o => o.toSchema())
     }));
 
     outputArray.push(this.encryptedContentInfo.toSchema());
@@ -293,7 +292,7 @@ export class EnvelopedData implements Schema.SchemaCompatible {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 1 // [1]
         },
-        value: Array.from(this.unprotectedAttrs, element => element.toSchema())
+        value: Array.from(this.unprotectedAttrs, o => o.toSchema())
       }));
     }
     //#endregion
@@ -305,25 +304,20 @@ export class EnvelopedData implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
-    const _object: any = {
-      version: this.version
+  public toJSON(): EnvelopedDataJson {
+    const res: EnvelopedDataJson = {
+      version: this.version,
+      recipientInfos: Array.from(this.recipientInfos, o => o.toJSON()),
+      encryptedContentInfo: this.encryptedContentInfo.toJSON(),
     };
 
     if (this.originatorInfo)
-      _object.originatorInfo = this.originatorInfo.toJSON();
-
-    _object.recipientInfos = Array.from(this.recipientInfos, element => element.toJSON());
-    _object.encryptedContentInfo = this.encryptedContentInfo.toJSON();
+      res.originatorInfo = this.originatorInfo.toJSON();
 
     if (this.unprotectedAttrs)
-      _object.unprotectedAttrs = Array.from(this.unprotectedAttrs, element => element.toJSON());
+      res.unprotectedAttrs = Array.from(this.unprotectedAttrs, o => o.toJSON());
 
-    return _object;
+    return res;
   }
 
   /**
@@ -718,7 +712,6 @@ export class EnvelopedData implements Schema.SchemaCompatible {
     //#endregion
     //#region Export raw content of content encryption key
     const exportedSessionKey = await crypto.exportKey("raw", sessionKey);
-
 
     //#endregion
     //#region Append common information to CMS_ENVELOPED_DATA

@@ -1,9 +1,11 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { SignedAndUnsignedAttributes, SignedAndUnsignedAttributesSchema } from "./SignedAndUnsignedAttributes";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { SignedAndUnsignedAttributes, SignedAndUnsignedAttributesJson, SignedAndUnsignedAttributesSchema } from "./SignedAndUnsignedAttributes";
 import { IssuerAndSerialNumber, IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
 import * as Schema from "./Schema";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { AsnError } from "./errors";
 
 const VERSION = "version";
 const SID = "sid";
@@ -30,67 +32,80 @@ const CLEAR_PROPS = [
   SIGNER_INFO_UNSIGNED_ATTRS
 ];
 
-export interface SignerInfoParameters extends Schema.SchemaConstructor {
-  version?: number;
-  sid?: Schema.SchemaType;
-  digestAlgorithm?: AlgorithmIdentifier;
+export interface ISignerInfo {
+  version: number;
+  sid: Schema.SchemaType;
+  digestAlgorithm: AlgorithmIdentifier;
   signedAttrs?: SignedAndUnsignedAttributes;
-  signatureAlgorithm?: AlgorithmIdentifier;
-  signature?: asn1js.OctetString;
+  signatureAlgorithm: AlgorithmIdentifier;
+  signature: asn1js.OctetString;
   unsignedAttrs?: SignedAndUnsignedAttributes;
 }
 
-/**
- * Class from RFC5652
- */
-export class SignerInfo implements Schema.SchemaCompatible {
+export interface SignerInfoJson {
+  version: number;
+  sid?: Schema.SchemaType;
+  digestAlgorithm: AlgorithmIdentifierJson;
+  signedAttrs?: SignedAndUnsignedAttributesJson;
+  signatureAlgorithm: AlgorithmIdentifierJson;
+  signature: Schema.AsnOctetStringJson;
+  unsignedAttrs?: SignedAndUnsignedAttributesJson;
+}
 
-  public version: number;
+export type SignerInfoParameters = PkiObjectParameters & Partial<ISignerInfo>;
+
+/**
+ * Represents the SignerInfo structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ */
+export class SignerInfo extends PkiObject implements ISignerInfo {
+
+  public static override CLASS_NAME = "SignerInfo";
+
+  public version!: number;
   public sid: Schema.SchemaType;
-  public digestAlgorithm: AlgorithmIdentifier;
+  public digestAlgorithm!: AlgorithmIdentifier;
   public signedAttrs?: SignedAndUnsignedAttributes;
-  public signatureAlgorithm: AlgorithmIdentifier;
-  public signature: asn1js.OctetString;
+  public signatureAlgorithm!: AlgorithmIdentifier;
+  public signature!: asn1js.OctetString;
   public unsignedAttrs?: SignedAndUnsignedAttributes;
 
   /**
-   * Constructor for SignerInfo class
-   * @param parameters
+   * Initializes a new instance of the {@link SignerInfo} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: SignerInfoParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.version = pvutils.getParametersValue(parameters, VERSION, SignerInfo.defaultValues(VERSION));
     this.sid = pvutils.getParametersValue(parameters, SID, SignerInfo.defaultValues(SID));
     this.digestAlgorithm = pvutils.getParametersValue(parameters, DIGEST_ALGORITHM, SignerInfo.defaultValues(DIGEST_ALGORITHM));
-    if (parameters.signedAttrs) {
+    if (SIGNED_ATTRS in parameters) {
       this.signedAttrs = pvutils.getParametersValue(parameters, SIGNED_ATTRS, SignerInfo.defaultValues(SIGNED_ATTRS));
     }
     this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, SignerInfo.defaultValues(SIGNATURE_ALGORITHM));
     this.signature = pvutils.getParametersValue(parameters, SIGNATURE, SignerInfo.defaultValues(SIGNATURE));
-    if (parameters.unsignedAttrs) {
+    if (UNSIGNED_ATTRS in parameters) {
       this.unsignedAttrs = pvutils.getParametersValue(parameters, UNSIGNED_ATTRS, SignerInfo.defaultValues(UNSIGNED_ATTRS));
     }
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof VERSION): number;
-  public static defaultValues(memberName: typeof SID): Schema.SchemaType;
-  public static defaultValues(memberName: typeof DIGEST_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof SIGNED_ATTRS): SignedAndUnsignedAttributes;
-  public static defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
-  public static defaultValues(memberName: typeof SIGNATURE): asn1js.OctetString;
-  public static defaultValues(memberName: typeof UNSIGNED_ATTRS): SignedAndUnsignedAttributes;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof VERSION): number;
+  public static override defaultValues(memberName: typeof SID): Schema.SchemaType;
+  public static override defaultValues(memberName: typeof DIGEST_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof SIGNED_ATTRS): SignedAndUnsignedAttributes;
+  public static override defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof SIGNATURE): asn1js.OctetString;
+  public static override defaultValues(memberName: typeof UNSIGNED_ATTRS): SignedAndUnsignedAttributes;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
         return 0;
@@ -107,7 +122,7 @@ export class SignerInfo implements Schema.SchemaCompatible {
       case UNSIGNED_ATTRS:
         return new SignedAndUnsignedAttributes({ type: 1 });
       default:
-        throw new Error(`Invalid member name for SignerInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
@@ -142,15 +157,15 @@ export class SignerInfo implements Schema.SchemaCompatible {
           && (SignedAndUnsignedAttributes.compareWithDefault("attributes", memberValue.attributes))
           && (SignedAndUnsignedAttributes.compareWithDefault("encodedValue", memberValue.encodedValue)));
       default:
-        throw new Error(`Invalid member name for SignerInfo class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * SignerInfo ::= SEQUENCE {
    *    version CMSVersion,
    *    sid SignerIdentifier,
@@ -168,9 +183,9 @@ export class SignerInfo implements Schema.SchemaCompatible {
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(parameters: Schema.SchemaParameters<{
+  public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
     sidSchema?: IssuerAndSerialNumberSchema;
     sid?: string;
@@ -246,26 +261,18 @@ export class SignerInfo implements Schema.SchemaCompatible {
     );
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       SignerInfo.schema()
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for SignerInfo");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.version = asn1.result[SIGNER_INFO_VERSION].valueBlock.valueDec;
 
     const currentSid = asn1.result[SIGNER_INFO_SID];
@@ -282,13 +289,8 @@ export class SignerInfo implements Schema.SchemaCompatible {
     this.signature = asn1.result[SIGNER_INFO_SIGNATURE];
     if (SIGNER_INFO_UNSIGNED_ATTRS in asn1.result)
       this.unsignedAttrs = new SignedAndUnsignedAttributes({ type: 1, schema: asn1.result[SIGNER_INFO_UNSIGNED_ATTRS] });
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     if (SignerInfo.compareWithDefault(SID, this.sid))
       throw new Error("Incorrectly initialized \"SignerInfo\" class");
@@ -326,36 +328,30 @@ export class SignerInfo implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): SignerInfoJson {
     if (SignerInfo.compareWithDefault(SID, this.sid)) {
       throw new Error("Incorrectly initialized \"SignerInfo\" class");
     }
 
-    const _object: any = {
-      version: this.version
+    const res: SignerInfoJson = {
+      version: this.version,
+      digestAlgorithm: this.digestAlgorithm.toJSON(),
+      signatureAlgorithm: this.signatureAlgorithm.toJSON(),
+      signature: this.signature.toJSON() as Schema.AsnOctetStringJson,
     };
 
     if (!(this.sid instanceof asn1js.Any))
-      _object.sid = this.sid.toJSON();
-
-    _object.digestAlgorithm = this.digestAlgorithm.toJSON();
+      res.sid = this.sid.toJSON();
 
     if (this.signedAttrs && SignerInfo.compareWithDefault(SIGNED_ATTRS, this.signedAttrs) === false) {
-      _object.signedAttrs = this.signedAttrs.toJSON();
+      res.signedAttrs = this.signedAttrs.toJSON();
     }
-
-    _object.signatureAlgorithm = this.signatureAlgorithm.toJSON();
-    _object.signature = this.signature.toJSON();
 
     if (this.unsignedAttrs && SignerInfo.compareWithDefault(UNSIGNED_ATTRS, this.unsignedAttrs) === false) {
-      _object.unsignedAttrs = this.unsignedAttrs.toJSON();
+      res.unsignedAttrs = this.unsignedAttrs.toJSON();
     }
 
-    return _object;
+    return res;
   }
 
 }

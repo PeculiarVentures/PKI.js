@@ -1,6 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { GeneralName, GeneralNameSchema } from "./GeneralName";
+import { AsnError } from "./errors";
+import { GeneralName, GeneralNameJson, GeneralNameSchema } from "./GeneralName";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const ACCESS_METHOD = "accessMethod";
@@ -10,73 +12,81 @@ const CLEAR_PROPS = [
   ACCESS_LOCATION,
 ];
 
-export interface AccessDescriptionParameters extends Schema.SchemaConstructor {
-  accessMethod?: string;
-  accessLocation?: GeneralName;
-}
-
-/**
- * Class from RFC5280
- */
-export class AccessDescription {
-
+export interface IAccessDescription {
   /**
    * The type and format of the information are specified by the accessMethod field. This profile defines two accessMethod OIDs: id-ad-caIssuers and id-ad-ocsp
    */
-  public accessMethod: string;
+  accessMethod: string;
   /**
    * The accessLocation field specifies the location of the information
    */
-  public accessLocation: GeneralName;
+  accessLocation: GeneralName;
+}
+
+export type AccessDescriptionParameters = PkiObjectParameters & Partial<IAccessDescription>;
+
+export interface AccessDescriptionJson {
+  accessMethod: string;
+  accessLocation: GeneralNameJson;
+}
+
+/**
+ * Represents the AccessDescription structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
+ */
+export class AccessDescription extends PkiObject implements IAccessDescription {
+
+  public static override CLASS_NAME = "AccessDescription";
+
+  public accessMethod!: string;
+  public accessLocation!: GeneralName;
 
   /**
-   * Constructor for AccessDescription class
-   * @param parameters
+   * Initializes a new instance of the {@link AccessDescription} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: AccessDescriptionParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.accessMethod = pvutils.getParametersValue(parameters, ACCESS_METHOD, AccessDescription.defaultValues(ACCESS_METHOD));
     this.accessLocation = pvutils.getParametersValue(parameters, ACCESS_LOCATION, AccessDescription.defaultValues(ACCESS_LOCATION));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof ACCESS_METHOD): string;
-  public static defaultValues(memberName: typeof ACCESS_LOCATION): GeneralName;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof ACCESS_METHOD): string;
+  public static override defaultValues(memberName: typeof ACCESS_LOCATION): GeneralName;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ACCESS_METHOD:
         return "";
       case ACCESS_LOCATION:
         return new GeneralName();
       default:
-        throw new Error(`Invalid member name for AccessDescription class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * AccessDescription  ::=  SEQUENCE {
    *    accessMethod          OBJECT IDENTIFIER,
    *    accessLocation        GeneralName  }
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  static schema(parameters: Schema.SchemaParameters<{ accessMethod?: string; accessLocation?: GeneralNameSchema; }> = {}) {
+  static override schema(parameters: Schema.SchemaParameters<{ accessMethod?: string; accessLocation?: GeneralNameSchema; }> = {}) {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
@@ -88,16 +98,11 @@ export class AccessDescription {
     }));
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType): void {
-    //#region Clear input data first
+    // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
-    //#endregion
 
-    //#region Check the schema is valid
+    // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema,
       schema,
       AccessDescription.schema({
@@ -111,21 +116,13 @@ export class AccessDescription {
         }
       })
     );
+    AsnError.assertSchema(asn1, this.className);
 
-    if (!asn1.verified)
-      throw new Error("Object's schema was not verified against input data for AccessDescription");
-    //#endregion
-
-    //#region Get internal properties from parsed schema
+    // Get internal properties from parsed schema
     this.accessMethod = asn1.result.accessMethod.valueBlock.toString();
     this.accessLocation = new GeneralName({ schema: asn1.result.accessLocation });
-    //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return (new asn1js.Sequence({
@@ -137,11 +134,7 @@ export class AccessDescription {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   * @returns
-   */
-  public toJSON(): any {
+  public toJSON(): AccessDescriptionJson {
     return {
       accessMethod: this.accessMethod,
       accessLocation: this.accessLocation.toJSON()

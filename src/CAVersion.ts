@@ -1,75 +1,81 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { IAccessDescription } from "./AccessDescription";
+import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const CERTIFICATE_INDEX = "certificateIndex";
 const KEY_INDEX = "keyIndex";
 
-export interface CAVersionParameters extends Schema.SchemaConstructor {
-  certificateIndex?: number;
-  keyIndex?: number;
+export interface ICAVersion {
+  certificateIndex: number;
+  keyIndex: number;
+}
+
+export type CAVersionParameters = PkiObjectParameters & Partial<ICAVersion>;
+
+export interface CAVersionJson {
+  certificateIndex: number;
+  keyIndex: number;
 }
 
 /**
- * Class from https://docs.microsoft.com/en-us/windows/desktop/seccrypto/certification-authority-renewal
+ * Represents an CAVersion described in [Certification Authority Renewal](https://docs.microsoft.com/en-us/windows/desktop/seccrypto/certification-authority-renewal)
  */
-export class CAVersion implements Schema.SchemaCompatible {
+export class CAVersion extends PkiObject implements ICAVersion {
 
-  public certificateIndex: number;
-  public keyIndex: number;
+  public static override CLASS_NAME = "CAVersion";
+
+  public certificateIndex!: number;
+  public keyIndex!: number;
 
   /**
-   * Constructor for BasicConstraints class
-   * @param parameters
+   * Initializes a new instance of the {@link CAVersion} class
+   * @param parameters Initialization parameters
    */
   constructor(parameters: CAVersionParameters = {}) {
-    //#region Internal properties of the object
+    super();
+
     this.certificateIndex = pvutils.getParametersValue(parameters, CERTIFICATE_INDEX, CAVersion.defaultValues(CERTIFICATE_INDEX));
     this.keyIndex = pvutils.getParametersValue(parameters, KEY_INDEX, CAVersion.defaultValues(KEY_INDEX));
-    //#endregion
 
-    //#region If input argument array contains "schema" for this object
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
     }
-    //#endregion
   }
 
   /**
-   * Return default values for all class members
+   * Returns default values for all class members
    * @param memberName String name for a class member
+   * @returns Default value
    */
-  public static defaultValues(memberName: typeof CERTIFICATE_INDEX): number;
-  public static defaultValues(memberName: typeof KEY_INDEX): number;
-  public static defaultValues(memberName: string): any {
+  public static override defaultValues(memberName: typeof CERTIFICATE_INDEX): number;
+  public static override defaultValues(memberName: typeof KEY_INDEX): number;
+  public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CERTIFICATE_INDEX:
       case KEY_INDEX:
         return 0;
       default:
-        throw new Error(`Invalid member name for CAVersion class: ${memberName}`);
+        return super.defaultValues(memberName);
     }
   }
 
   /**
-   * Return value of pre-defined ASN.1 schema for current class
+   * Returns value of pre-defined ASN.1 schema for current class
    *
    * ASN.1 schema:
-   * ```
+   * ```asn
    * CAVersion ::= INTEGER
    * ```
    *
    * @param parameters Input parameters for the schema
-   * @returns asn1js schema object
+   * @returns ASN.1 schema object
    */
-  public static schema(): Schema.SchemaType {
+  public static override schema(): Schema.SchemaType {
     return (new asn1js.Integer());
   }
 
-  /**
-   * Convert parsed asn1js object into current class
-   * @param schema
-   */
   public fromSchema(schema: Schema.SchemaType) {
     //#region Check the schema is valid
     if (schema.constructor.blockName() !== asn1js.Integer.blockName()) {
@@ -129,10 +135,6 @@ export class CAVersion implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Convert current object to asn1js object and set correct values
-   * @returns asn1js object
-   */
   public toSchema(): asn1js.Integer {
     //#region Create raw values
     const certificateIndexBuffer = new ArrayBuffer(2);
@@ -163,10 +165,7 @@ export class CAVersion implements Schema.SchemaCompatible {
     //#endregion
   }
 
-  /**
-   * Conversion for the class to JSON object
-   */
-  public toJSON(): any {
+  public toJSON(): CAVersionJson {
     return {
       certificateIndex: this.certificateIndex,
       keyIndex: this.keyIndex
