@@ -9,8 +9,17 @@ export const MILLIS = "millis";
 export const MICROS = "micros";
 
 export interface IAccuracy {
+  /**
+   * Seconds
+   */
   seconds?: number;
+  /**
+   * Milliseconds
+   */
   millis?: number;
+  /**
+   * Microseconds
+   */
   micros?: number;
 }
 
@@ -22,6 +31,9 @@ export type AccuracySchema = Schema.SchemaParameters<{
   micros?: string;
 }>;
 
+/**
+ * JSON representation of {@link Accuracy}
+ */
 export interface AccuracyJson {
   seconds?: number;
   millis?: number;

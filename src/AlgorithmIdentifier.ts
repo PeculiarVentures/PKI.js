@@ -26,6 +26,9 @@ export interface IAlgorithmIdentifier {
 
 export type AlgorithmIdentifierParameters = PkiObjectParameters & Partial<IAlgorithmIdentifier>;
 
+/**
+ * JSON representation of {@link AlgorithmIdentifier}
+ */
 export interface AlgorithmIdentifierJson {
   algorithmId: string;
   algorithmParams?: any;
