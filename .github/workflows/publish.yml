@@ -6,17 +6,11 @@ on:
       - "master"
 
 jobs:
-  examples:
+  pages:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Checkout gh-pages
-        uses: actions/checkout@v3
-        with:
-          ref: gh-pages
-          path: pages
 
       - name: Use Node.js 16.x
         uses: actions/setup-node@v3
@@ -24,20 +18,34 @@ jobs:
           node-version: 16.x
 
       - name: Instal and build examples
-        run: |
-          yarn
-          npm run build:examples
+        run: yarn
 
-      - name: Copy examples
+      - name: Build documentation 📦
+        run: npm run build:docs
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: pages
+
+      - name: Build examples 📦
+        run: npm run build:examples
+
+      - name: Copy files to pages 📦
         run: |
           # Remove odd files
-          rm examples/rollup.config.js
-          rm -r examples/NodePKCS12Example
-          rm -r examples/**/*.ts
-          rm -r examples/**/*.md
+          rm -f examples/rollup.config.js
+          rm -rf examples/NodePKCS12Example
+          rm -rf examples/**/*.ts
+          rm -rf examples/**/*.md
+
+          # copy docs to pages
+          rm -rf pages/docs
+          cp -r docs pages
 
           # copy examples to pages
-          rm -r pages/examples
+          rm -rf pages/examples
           cp -r examples pages
 
       - name: Deploy 🚀
