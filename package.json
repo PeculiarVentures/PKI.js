@@ -44,7 +44,7 @@
     "tslib": "^2.3.1"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=12.0.0"
   },
   "scripts": {
     "build": "rollup -c",
@@ -70,6 +70,11 @@
     "OCSP",
     "timestamp",
     "PKCS"
+  ],
+  "files": [
+    "build",
+    "README.md",
+    "LICENSE"
   ],
   "module": "build/index.es.js",
   "main": "./build/index.js",
