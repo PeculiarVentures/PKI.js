@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
-import { Convert } from "pvtsutils";
 import { AsnError } from "./errors";
 import * as Schema from "./Schema";
 
@@ -87,7 +86,7 @@ export abstract class PkiObject {
   public abstract toJSON(): any;
 
   public toString(encoding: "hex" | "base64" | "base64url" = "hex"): string {
-    return Convert.ToString(this.toSchema(true).toBER(), encoding);
+    return pvtsutils.Convert.ToString(this.toSchema(true).toBER(), encoding);
   }
 
 }
