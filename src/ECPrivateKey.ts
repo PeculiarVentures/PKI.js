@@ -117,9 +117,8 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * ECPrivateKey ::= SEQUENCE {
    * version        INTEGER { ecPrivkeyVer1(1) } (ecPrivkeyVer1),
@@ -127,10 +126,7 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
    * parameters [0] ECParameters {{ NamedCurve }} OPTIONAL,
    * publicKey  [1] BIT STRING OPTIONAL
    * }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;

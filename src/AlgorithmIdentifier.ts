@@ -98,17 +98,13 @@ export class AlgorithmIdentifier extends PkiObject implements IAlgorithmIdentifi
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
-   * AlgorithmIdentifier  ::=  Sequence  {
+   * AlgorithmIdentifier ::= Sequence  {
    *    algorithm               OBJECT IDENTIFIER,
    *    parameters              ANY DEFINED BY algorithm OPTIONAL  }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: AlgorithmIdentifierSchema = {}): any {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

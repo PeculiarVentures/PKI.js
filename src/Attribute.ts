@@ -95,18 +95,14 @@ export class Attribute extends PkiObject implements IAttribute {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * Attribute { ATTRIBUTE:IOSet } ::= SEQUENCE {
    *    type   ATTRIBUTE.&id({IOSet}),
    *    values SET SIZE(1..MAX) OF ATTRIBUTE.&Type({IOSet}{@type})
    * }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: AttributeSchema = {}) {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

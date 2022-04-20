@@ -66,9 +66,8 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * CertificateSet ::= SET OF CertificateChoices
    *
@@ -78,10 +77,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
    *    v1AttrCert [1] IMPLICIT AttributeCertificateV1,        -- Obsolete
    *    v2AttrCert [2] IMPLICIT AttributeCertificateV2,
    *    other [3] IMPLICIT OtherCertificateFormat }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     certificates?: string;

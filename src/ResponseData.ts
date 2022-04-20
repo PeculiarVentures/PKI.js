@@ -148,9 +148,8 @@ export class ResponseData extends PkiObject implements IResponseData {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * ResponseData ::= SEQUENCE {
    *    version              [0] EXPLICIT Version DEFAULT v1,
@@ -158,10 +157,7 @@ export class ResponseData extends PkiObject implements IResponseData {
    *    producedAt               GeneralizedTime,
    *    responses                SEQUENCE OF SingleResponse,
    *    responseExtensions   [1] EXPLICIT Extensions OPTIONAL }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: ResponseDataSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

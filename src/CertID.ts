@@ -118,19 +118,15 @@ export class CertID extends PkiObject implements ICertID {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
-   * CertID          ::=     SEQUENCE {
+   * CertID ::= SEQUENCE {
    *    hashAlgorithm       AlgorithmIdentifier,
    *    issuerNameHash      OCTET STRING, -- Hash of issuer's DN
    *    issuerKeyHash       OCTET STRING, -- Hash of issuer's public key
    *    serialNumber        CertificateSerialNumber }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: CertIDSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

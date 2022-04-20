@@ -118,19 +118,15 @@ export class KEKRecipientInfo extends PkiObject implements IKEKRecipientInfo {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * KEKRecipientInfo ::= SEQUENCE {
    *    version CMSVersion,  -- always set to 4
    *    kekid KEKIdentifier,
    *    keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
    *    encryptedKey EncryptedKey }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;

@@ -72,9 +72,8 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * PrivateKeyUsagePeriod OID ::= 2.5.29.16
    *
@@ -82,10 +81,7 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
    *    notBefore       [0]     GeneralizedTime OPTIONAL,
    *    notAfter        [1]     GeneralizedTime OPTIONAL }
    * -- either notBefore or notAfter MUST be present
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     notBefore?: string;

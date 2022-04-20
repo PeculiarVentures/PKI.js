@@ -120,19 +120,15 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * KeyTransRecipientInfo ::= SEQUENCE {
    *    version CMSVersion,  -- always set to 0 or 2
    *    rid RecipientIdentifier,
    *    keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
    *    encryptedKey EncryptedKey }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;

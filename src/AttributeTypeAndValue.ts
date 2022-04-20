@@ -77,9 +77,8 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * AttributeTypeAndValue ::= Sequence {
    *    type     AttributeType,
@@ -88,10 +87,7 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
    * AttributeType ::= OBJECT IDENTIFIER
    *
    * AttributeValue ::= ANY -- DEFINED BY AttributeType
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   static override schema(parameters: Schema.SchemaParameters<{ type?: string, value?: string; }> = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

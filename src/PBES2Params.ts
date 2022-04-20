@@ -68,17 +68,13 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * PBES2-params ::= SEQUENCE {
    *    keyDerivationFunc AlgorithmIdentifier {{PBES2-KDFs}},
    *    encryptionScheme AlgorithmIdentifier {{PBES2-Encs}} }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     keyDerivationFunc?: AlgorithmIdentifierSchema;

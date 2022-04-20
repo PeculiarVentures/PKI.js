@@ -83,9 +83,8 @@ export class Time extends PkiObject implements ITime {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * Time ::= CHOICE {
      *   utcTime        UTCTime,

@@ -67,23 +67,19 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * PolicyQualifierInfo ::= SEQUENCE {
    *    policyQualifierId  PolicyQualifierId,
    *    qualifier          ANY DEFINED BY policyQualifierId }
    *
-   * id-qt          OBJECT IDENTIFIER ::=  { id-pkix 2 }
-   * id-qt-cps      OBJECT IDENTIFIER ::=  { id-qt 1 }
-   * id-qt-unotice  OBJECT IDENTIFIER ::=  { id-qt 2 }
+   * id-qt          OBJECT IDENTIFIER ::= { id-pkix 2 }
+   * id-qt-cps      OBJECT IDENTIFIER ::= { id-qt 1 }
+   * id-qt-unotice  OBJECT IDENTIFIER ::= { id-qt 2 }
    *
    * PolicyQualifierId ::= OBJECT IDENTIFIER ( id-qt-cps | id-qt-unotice )
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   static override schema(parameters: Schema.SchemaParameters<{ policyQualifierId?: string; qualifier?: string; }> = {}) {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

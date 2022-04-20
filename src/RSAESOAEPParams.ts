@@ -89,19 +89,15 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * RSAES-OAEP-params ::= SEQUENCE {
    *    hashAlgorithm     [0] HashAlgorithm    DEFAULT sha1,
    *    maskGenAlgorithm  [1] MaskGenAlgorithm DEFAULT mgf1SHA1,
    *    pSourceAlgorithm  [2] PSourceAlgorithm DEFAULT pSpecifiedEmpty
    * }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     hashAlgorithm?: AlgorithmIdentifierSchema;

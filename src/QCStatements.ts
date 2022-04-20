@@ -94,18 +94,14 @@ export class QCStatement extends PkiObject implements IQCStatement {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * QCStatement ::= SEQUENCE {
    *       statementId   QC-STATEMENT.&id({SupportedStatements}),
    *       statementInfo QC-STATEMENT.&Type({SupportedStatements}{@statementId}) OPTIONAL
    *   }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: QCStatementSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
@@ -235,15 +231,11 @@ export class QCStatements extends PkiObject implements IQCStatements {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * QCStatements ::= SEQUENCE OF QCStatement
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     values?: string;

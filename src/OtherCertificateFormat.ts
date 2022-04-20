@@ -65,17 +65,13 @@ export class OtherCertificateFormat extends PkiObject implements IOtherCertifica
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * OtherCertificateFormat ::= SEQUENCE {
    *    otherCertFormat OBJECT IDENTIFIER,
    *    otherCert ANY DEFINED BY otherCertFormat }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     otherCertFormat?: string;

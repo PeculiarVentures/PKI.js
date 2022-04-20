@@ -111,18 +111,14 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * RecipientKeyIdentifier ::= SEQUENCE {
    *    subjectKeyIdentifier SubjectKeyIdentifier,
    *    date GeneralizedTime OPTIONAL,
    *    other OtherKeyAttribute OPTIONAL }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: RecipientKeyIdentifierSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

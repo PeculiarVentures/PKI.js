@@ -323,9 +323,8 @@ export class GeneralName extends PkiObject implements IGeneralName {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * GeneralName ::= Choice {
    *    otherName                       [0]     OtherName,
@@ -337,10 +336,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
    *    uniformResourceIdentifier       [6]     IA5String,
    *    iPAddress                       [7]     OCTET STRING,
    *    registeredID                    [8]     OBJECT IDENTIFIER }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   static override schema(parameters: GeneralNameSchema = {}): asn1js.Choice {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

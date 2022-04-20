@@ -67,11 +67,10 @@ export class Extensions extends PkiObject implements IExtensions {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
-   * Extensions  ::=  SEQUENCE SIZE (1..MAX) OF Extension
+   * Extensions ::= SEQUENCE SIZE (1..MAX) OF Extension
    * ```
    *
    * @param parameters Input parameters for the schema

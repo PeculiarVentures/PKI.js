@@ -73,7 +73,7 @@ export type TBSCertificateSchema = Schema.SchemaParameters<{
 }>;
 
 function tbsCertificate(parameters: TBSCertificateSchema = {}): Schema.SchemaType {
-  //TBSCertificate  ::=  SEQUENCE  {
+  //TBSCertificate ::= SEQUENCE  {
   //    version         [0]  EXPLICIT Version DEFAULT v1,
   //    serialNumber         CertificateSerialNumber,
   //    signature            AlgorithmIdentifier,
@@ -449,16 +449,15 @@ export class Certificate extends PkiObject implements ICertificate {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
-   * Certificate  ::=  SEQUENCE  {
+   * Certificate ::= SEQUENCE  {
    *    tbsCertificate       TBSCertificate,
    *    signatureAlgorithm   AlgorithmIdentifier,
    *    signatureValue       BIT STRING  }
    *
-   * TBSCertificate  ::=  SEQUENCE  {
+   * TBSCertificate ::= SEQUENCE  {
    *     version         [0]  EXPLICIT Version DEFAULT v1,
    *     serialNumber         CertificateSerialNumber,
    *     signature            AlgorithmIdentifier,
@@ -474,9 +473,9 @@ export class Certificate extends PkiObject implements ICertificate {
    *                           -- If present, version MUST be v3
    *     }
    *
-   * Version  ::=  INTEGER  {  v1(0), v2(1), v3(2)  }
+   * Version ::= INTEGER  {  v1(0), v2(1), v3(2)  }
    *
-   * CertificateSerialNumber  ::=  INTEGER
+   * CertificateSerialNumber ::= INTEGER
    *
    * Validity ::= SEQUENCE {
    *     notBefore      Time,
@@ -486,15 +485,15 @@ export class Certificate extends PkiObject implements ICertificate {
    *     utcTime        UTCTime,
    *     generalTime    GeneralizedTime }
    *
-   * UniqueIdentifier  ::=  BIT STRING
+   * UniqueIdentifier ::= BIT STRING
    *
-   * SubjectPublicKeyInfo  ::=  SEQUENCE  {
+   * SubjectPublicKeyInfo ::= SEQUENCE  {
    *     algorithm            AlgorithmIdentifier,
    *     subjectPublicKey     BIT STRING  }
    *
-   * Extensions  ::=  SEQUENCE SIZE (1..MAX) OF Extension
+   * Extensions ::= SEQUENCE SIZE (1..MAX) OF Extension
    *
-   * Extension  ::=  SEQUENCE  {
+   * Extension ::= SEQUENCE  {
    *     extnID      OBJECT IDENTIFIER,
    *     critical    BOOLEAN DEFAULT FALSE,
    *     extnValue   OCTET STRING
@@ -502,10 +501,7 @@ export class Certificate extends PkiObject implements ICertificate {
    *                 -- corresponding to the extension type identified
    *                 -- by extnID
    *     }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: CertificateSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

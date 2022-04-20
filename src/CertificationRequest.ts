@@ -178,19 +178,15 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * CertificationRequest ::= SEQUENCE {
    *    certificationRequestInfo CertificationRequestInfo,
    *    signatureAlgorithm       AlgorithmIdentifier{{ SignatureAlgorithms }},
    *    signature                BIT STRING
    * }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   static override schema(parameters: Schema.SchemaParameters<{
     certificationRequestInfo?: CertificationRequestInfoParameters;

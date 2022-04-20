@@ -141,19 +141,15 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
-   * BasicOCSPResponse       ::= SEQUENCE {
+   * BasicOCSPResponse ::= SEQUENCE {
    *    tbsResponseData      ResponseData,
    *    signatureAlgorithm   AlgorithmIdentifier,
    *    signature            BIT STRING,
    *    certs            [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     tbsResponseData?: ResponseDataSchema;

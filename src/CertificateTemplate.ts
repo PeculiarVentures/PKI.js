@@ -77,19 +77,15 @@ export class CertificateTemplate extends PkiObject implements ICertificateTempla
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * CertificateTemplateOID ::= SEQUENCE {
    *    templateID              OBJECT IDENTIFIER,
    *    templateMajorVersion    INTEGER (0..4294967295) OPTIONAL,
    *    templateMinorVersion    INTEGER (0..4294967295) OPTIONAL
    * }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   static override schema(parameters: Schema.SchemaParameters<{
     templateID?: string,
