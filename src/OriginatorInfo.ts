@@ -14,7 +14,15 @@ const CLEAR_PROPS = [
 ];
 
 export interface IOriginatorInfo {
+  /**
+   * Collection of certificates. In may contain originator certificates associated with several different
+   * key management algorithms. It may also contain attribute certificates associated with the originator.
+   */
   certs?: CertificateSet;
+  /**
+   * Collection of CRLs. It is intended that the set contain information sufficient to determine whether
+   * or not the certificates in the certs field are valid, but such correspondence is not necessary
+   */
   crls?: RevocationInfoChoices;
 }
 

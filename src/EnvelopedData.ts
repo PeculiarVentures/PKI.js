@@ -50,13 +50,54 @@ const curveLengthByName: Record<string, number> = {
 };
 
 export interface IEnvelopedData {
+  /**
+   * Version number.
+   *
+   * The appropriate value depends on `originatorInfo`, `RecipientInfo`, and `unprotectedAttrs`.
+   *
+   * The version MUST be assigned as follows:
+   * ```
+   * IF (originatorInfo is present) AND
+   *    ((any certificates with a type of other are present) OR
+   *    (any crls with a type of other are present))
+   * THEN version is 4
+   * ELSE
+   *    IF ((originatorInfo is present) AND
+   *       (any version 2 attribute certificates are present)) OR
+   *       (any RecipientInfo structures include pwri) OR
+   *       (any RecipientInfo structures include ori)
+   *    THEN version is 3
+   *    ELSE
+   *       IF (originatorInfo is absent) AND
+   *          (unprotectedAttrs is absent) AND
+   *          (all RecipientInfo structures are version 0)
+   *       THEN version is 0
+   *       ELSE version is 2
+   * ```
+   */
   version: number;
+  /**
+   * Optionally provides information about the originator. It is present only if required by the key management algorithm.
+   * It may contain certificates and CRLs.
+   */
   originatorInfo?: OriginatorInfo;
+  /**
+   * Collection of per-recipient information. There MUST be at least one element in the collection.
+   */
   recipientInfos: RecipientInfo[];
+  /**
+   * Encrypted content information
+   */
   encryptedContentInfo: EncryptedContentInfo;
+  /**
+   * Collection of attributes that are not encrypted
+   */
   unprotectedAttrs?: Attribute[];
 }
 
+/**
+ * JSON representation of {@link EnvelopedData}
+ */
 export interface EnvelopedDataJson {
   version: number;
   originatorInfo?: OriginatorInfoJson;
@@ -74,6 +115,51 @@ export interface EnvelopedDataEncryptionParams {
 
 /**
  * Represents the EnvelopedData structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ *
+ * @example The following example demonstrates how to create and encrypt CMS Enveloped Data
+ * ```js
+ * const cmsEnveloped = new pkijs.EnvelopedData();
+ *
+ * // Add recipient
+ * cmsEnveloped.addRecipientByCertificate(cert, { oaepHashAlgorithm: "SHA-256" });
+ *
+ * // Secret key algorithm
+ * const alg = {
+ *   name: "AES-GCM",
+ *   length: 256,
+ * }
+ * await cmsEnveloped.encrypt(alg, dataToEncrypt);
+ *
+ * // Add Enveloped Data into CMS Content Info
+ * const cmsContent = new pkijs.ContentInfo();
+ * cmsContent.contentType = pkijs.ContentInfo.ENVELOPED_DATA;
+ * cmsContent.content = cmsEnveloped.toSchema();
+ *
+ * const cmsContentRaw = cmsContent.toSchema().toBER();
+ * ```
+ *
+ * @example The following example demonstrates how to decrypt CMS Enveloped Data
+ * ```js
+ * // Get a "crypto" extension
+ * const crypto = pkijs.getCrypto();
+ *
+ * // Parse CMS Content Info
+ * const cmsContent = pkijs.ContentInfo.fromBER(cmsContentRaw);
+ * if (cmsContent.contentType !== pkijs.ContentInfo.ENVELOPED_DATA) {
+ *   throw new Error("CMS is not Enveloped Data");
+ * }
+ * // Parse CMS Enveloped Data
+ * const cmsEnveloped = new pkijs.EnvelopedData({ schema: cmsContent.content });
+ *
+ * // Export private key to PKCS#8
+ * const pkcs8 = await crypto.exportKey("pkcs8", keys.privateKey);
+ *
+ * // Decrypt data
+ * const decryptedData = await cmsEnveloped.decrypt(0, {
+ *   recipientCertificate: cert,
+ *   recipientPrivateKey: pkcs8,
+ * });
+ * ```
  */
 export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
@@ -674,7 +760,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
   }
 
   /**
-   * Create a new CMS Enveloped Data content with encrypted data
+   * Creates a new CMS Enveloped Data content with encrypted data
    * @param contentEncryptionAlgorithm WebCrypto algorithm. For the moment here could be only "AES-CBC" or "AES-GCM" algorithms.
    * @param contentToEncrypt Content to encrypt
    */
@@ -1023,7 +1109,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
   }
 
   /**
-   * Decrypt existing CMS Enveloped Data content
+   * Decrypts existing CMS Enveloped Data content
    * @param recipientIndex Index of recipient
    * @param parameters Additional parameters
    */
