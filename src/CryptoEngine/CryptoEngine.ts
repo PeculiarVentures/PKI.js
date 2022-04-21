@@ -1721,7 +1721,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     const encryptedContent = parameters.encryptedContentInfo.encryptedContent;
     if (!encryptedContent) {
-      throw new Error(`Required parameter 'encryptedContent' is missed`);
+      throw new Error("Required parameter 'encryptedContent' is missed");
     }
     if (encryptedContent.idBlock.isConstructed === false)
       dataBuffer = encryptedContent.valueBlock.valueHex;

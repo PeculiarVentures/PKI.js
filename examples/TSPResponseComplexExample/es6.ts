@@ -269,7 +269,7 @@ async function verifyTSPResp() {
     alert(`Verification result: ${result}`);
   } catch (error) {
     console.error(error);
-    alert(`Error during verification. See developer console for detailed information`);
+    alert("Error during verification. See developer console for detailed information");
   }
 }
 

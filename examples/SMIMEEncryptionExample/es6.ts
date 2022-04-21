@@ -31,7 +31,7 @@ async function createCertificate() {
     alert("Certificate created successfully!");
   } catch (e) {
     console.error(e);
-    alert(`Error certificate creation. See developer console for more details`);
+    alert("Error certificate creation. See developer console for more details");
   }
 }
 
@@ -53,7 +53,7 @@ async function smimeEncrypt() {
     await cmsEnveloped.encrypt(encAlg, pvutils.stringToArrayBuffer(common.getElement("content", "textarea").value));
   } catch (e) {
     console.error(e);
-    alert(`Error during encryption process. See developer console for more details`);
+    alert("Error during encryption process. See developer console for more details");
   }
 
   const cmsContentSimpl = new pkijs.ContentInfo();
@@ -109,7 +109,7 @@ async function smimeDecrypt() {
     common.getElement("decrypted_content").innerHTML = pvutils.arrayBufferToString(result);
   } catch (e) {
     console.error(e);
-    alert(`error during decryption process. See developer console for more details`);
+    alert("error during decryption process. See developer console for more details");
   }
 }
 
