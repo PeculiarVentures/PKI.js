@@ -6,7 +6,6 @@ build
 coverage
 .vs
 .vscode
-docs
 
 bundle.js
 test/browser/*.js
@@ -17,5 +16,3 @@ test/n_*.js
 .DS_Store
 
 examples/pkijs.es.js
-
-.docusaurus

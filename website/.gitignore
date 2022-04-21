@@ -1,0 +1,3 @@
+.docusaurus
+**/docs/**/*.md
+**/docs/**/*.yml

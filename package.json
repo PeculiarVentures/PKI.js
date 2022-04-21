@@ -33,7 +33,6 @@
     "rollup-plugin-dts": "^4.2.0",
     "rollup-plugin-typescript2": "^0.31.2",
     "ts-node": "^10.7.0",
-    "typedoc": "^0.22.15",
     "typescript": "^4.6.2"
   },
   "dependencies": {
@@ -49,7 +48,6 @@
   "scripts": {
     "build": "rollup -c",
     "build:examples": "rollup -c examples/rollup.config.js",
-    "build:docs": "typedoc",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint --fix . --ext .ts",
     "coverage": "nyc npm test",
