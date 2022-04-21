@@ -64,6 +64,28 @@ export interface CertificateChainValidationEngineVerifyParams {
   passedWhenNotRevValues?: boolean;
 }
 
+/**
+ * Represents a chain-building engine for {@link Certificate} certificates.
+ *
+ * @example
+ * ```js The following example demonstrates how to verify certificate chain
+ * const rootCa = pkijs.Certificate.fromBER(certRaw1);
+ * const intermediateCa = pkijs.Certificate.fromBER(certRaw2);
+ * const leafCert = pkijs.Certificate.fromBER(certRaw3);
+ * const crl1 = pkijs.CertificateRevocationList.fromBER(crlRaw1);
+ * const ocsp1 = pkijs.BasicOCSPResponse.fromBER(ocspRaw1);
+ *
+ * const chainEngine = new pkijs.CertificateChainValidationEngine({
+ *   certs: [rootCa, intermediateCa, leafCert],
+ *   crls: [crl1],
+ *   ocsps: [ocsp1],
+ *   checkDate: new Date("2015-07-13"), // optional
+ *   trustedCerts: [rootCa],
+ * });
+ *
+ * const chain = await chainEngine.verify();
+ * ```
+ */
 export class CertificateChainValidationEngine {
 
   /**
