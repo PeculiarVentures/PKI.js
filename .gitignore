@@ -17,3 +17,5 @@ test/n_*.js
 .DS_Store
 
 examples/pkijs.es.js
+
+.docusaurus
