@@ -19,9 +19,23 @@ const CLEAR_PROPS = [
 ];
 
 export interface ICertID {
+  /**
+   * Hash algorithm used to generate the `issuerNameHash` and `issuerKeyHash` values
+   */
   hashAlgorithm: AlgorithmIdentifier;
+  /**
+   * Hash of the issuer's distinguished name (DN). The hash shall be calculated over the DER encoding
+   * of the issuer's name field in the certificate being checked.
+   */
   issuerNameHash: asn1js.OctetString;
+  /**
+   * Hash of the issuer's public key. The hash shall be calculated over the value (excluding tag and length)
+   * of the subject public key field in the issuer's certificate.
+   */
   issuerKeyHash: asn1js.OctetString;
+  /**
+   * Serial number of the certificate for which status is being requested
+   */
   serialNumber: asn1js.Integer;
 }
 
@@ -53,6 +67,19 @@ export interface CertIDCreateParams {
 export class CertID extends PkiObject implements ICertID {
 
   public static override CLASS_NAME = "CertID";
+
+  /**
+   * Making OCSP certificate identifier for specific certificate
+   * @param certificate Certificate making OCSP Request for
+   * @param parameters Additional parameters
+   * @returns Returns created CertID object
+   */
+  public static async create(certificate: Certificate, parameters: CertIDCreateParams): Promise<CertID> {
+    const certID = new CertID();
+    await certID.createForCertificate(certificate, parameters);
+
+    return certID;
+  }
 
   public hashAlgorithm!: AlgorithmIdentifier;
   public issuerNameHash!: asn1js.OctetString;
