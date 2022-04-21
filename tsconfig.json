@@ -9,6 +9,7 @@
     "experimentalDecorators": true
   },
   "exclude": [
+    "website",
     "build/*.ts"
   ]
 }
