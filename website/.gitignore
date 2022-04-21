@@ -19,5 +19,5 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-**/docs/**/*.md
-**/docs/**/*.yml
+
+/docs/api/

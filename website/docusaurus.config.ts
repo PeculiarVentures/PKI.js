@@ -1,5 +1,6 @@
-import type {Config} from '@docusaurus/types';
+import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import npm2yarn from '@docusaurus/remark-plugin-npm2yarn';
 
 const config: Config = {
   title: 'pki.js',
@@ -27,9 +28,15 @@ const config: Config = {
     [
       'classic',
       {
+        docs: {
+          path: 'docs',
+          sidebarPath: './sidebars.ts',
+          remarkPlugins: [npm2yarn],
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
+        blog: false,
       } satisfies Preset.Options,
     ],
   ],
@@ -64,9 +71,16 @@ const config: Config = {
       },
       items: [
         {
-          label: 'API',
-          to: '/docs/api',
+          type: 'docSidebar',
           position: 'right',
+          sidebarId: 'docs',
+          label: 'Docs',
+        },
+        {
+          type: 'docSidebar',
+          position: 'right',
+          sidebarId: 'examples',
+          label: 'Examples',
         },
         {
           href: 'https://github.com/PeculiarVentures/PKI.js',

@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from '@theme/Layout';
+import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import FeaturesList from './_features.md';
 import Preview from './_preview.md';
@@ -16,6 +17,15 @@ export default function Home() {
         <div className={s.m_width}>
           <div className={s.preview_content}>
             <Preview />
+
+            <div>
+              <Link
+                to="/docs/installation"
+                className="button button--secondary button--lg"
+              >
+                Get started ➞
+              </Link>
+            </div>
           </div>
         </div>
       </div>
