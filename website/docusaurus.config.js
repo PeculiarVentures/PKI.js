@@ -29,11 +29,6 @@ const config = {
           position: 'right',
         },
         {
-          label: 'Examples',
-          to: '/examples',
-          position: 'right',
-        },
-        {
           href: 'https://github.com/PeculiarVentures/PKI.js',
           position: 'right',
           className: 'header-github-link',
@@ -62,6 +57,8 @@ const config = {
       {
         entryPoints: ['../src/index.ts'],
         tsconfig: '../tsconfig.json',
+        disableSources: true,
+        hideInPageTOC: true,
       },
     ],
     'docusaurus-plugin-sass'
