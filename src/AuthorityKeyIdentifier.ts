@@ -83,9 +83,8 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * AuthorityKeyIdentifier OID ::= 2.5.29.35
    *
@@ -95,10 +94,7 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
    *    authorityCertSerialNumber [2] CertificateSerialNumber OPTIONAL  }
    *
    * KeyIdentifier ::= OCTET STRING
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     keyIdentifier?: string;

@@ -95,18 +95,14 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
-   * ECC-CMS-SharedInfo  ::=  SEQUENCE {
+   * ECC-CMS-SharedInfo ::= SEQUENCE {
    *    keyInfo      AlgorithmIdentifier,
    *    entityUInfo  [0] EXPLICIT OCTET STRING OPTIONAL,
    *    suppPubInfo  [2] EXPLICIT OCTET STRING }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     keyInfo?: AlgorithmIdentifierSchema;

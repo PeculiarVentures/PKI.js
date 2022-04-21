@@ -104,18 +104,14 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * PKIStatusInfo ::= SEQUENCE {
    *    status        PKIStatus,
    *    statusString  PKIFreeText     OPTIONAL,
    *    failInfo      PKIFailureInfo  OPTIONAL  }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: PKIStatusInfoSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

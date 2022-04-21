@@ -89,17 +89,13 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * MessageImprint ::= SEQUENCE  {
    *    hashAlgorithm                AlgorithmIdentifier,
    *    hashedMessage                OCTET STRING  }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: MessageImprintSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

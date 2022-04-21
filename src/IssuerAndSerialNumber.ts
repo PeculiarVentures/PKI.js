@@ -79,19 +79,15 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * IssuerAndSerialNumber ::= SEQUENCE {
    *    issuer Name,
    *    serialNumber CertificateSerialNumber }
    *
    * CertificateSerialNumber ::= INTEGER
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: IssuerAndSerialNumberSchema = {}): Schema.SchemaType {
     /**

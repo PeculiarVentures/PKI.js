@@ -107,19 +107,15 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
-   * RSASSA-PSS-params  ::=  Sequence  {
+   * RSASSA-PSS-params ::= Sequence  {
    *    hashAlgorithm      [0] HashAlgorithm DEFAULT sha1Identifier,
    *    maskGenAlgorithm   [1] MaskGenAlgorithm DEFAULT mgf1SHA1Identifier,
    *    saltLength         [2] Integer DEFAULT 20,
    *    trailerField       [3] Integer DEFAULT 1  }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     hashAlgorithm?: AlgorithmIdentifierSchema;

@@ -93,17 +93,13 @@ export class Request extends PkiObject implements IRequest {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
-   * Request         ::=     SEQUENCE {
+   * Request ::= SEQUENCE {
    *    reqCert                     CertID,
    *    singleRequestExtensions     [0] EXPLICIT Extensions OPTIONAL }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: RequestSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

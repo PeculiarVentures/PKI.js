@@ -93,9 +93,8 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * PBKDF2-params ::= SEQUENCE {
    *    salt CHOICE {
@@ -105,10 +104,7 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
    *  keyLength INTEGER (1..MAX) OPTIONAL,
    *  prf AlgorithmIdentifier
    *    DEFAULT { algorithm hMAC-SHA1, parameters NULL } }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     saltPrimitive?: string;

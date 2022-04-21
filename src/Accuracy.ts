@@ -9,8 +9,17 @@ export const MILLIS = "millis";
 export const MICROS = "micros";
 
 export interface IAccuracy {
+  /**
+   * Seconds
+   */
   seconds?: number;
+  /**
+   * Milliseconds
+   */
   millis?: number;
+  /**
+   * Microseconds
+   */
   micros?: number;
 }
 
@@ -22,6 +31,9 @@ export type AccuracySchema = Schema.SchemaParameters<{
   micros?: string;
 }>;
 
+/**
+ * JSON representation of {@link Accuracy}
+ */
 export interface AccuracyJson {
   seconds?: number;
   millis?: number;
@@ -100,18 +112,14 @@ export class Accuracy extends PkiObject implements IAccuracy {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * Accuracy ::= SEQUENCE {
    *    seconds        INTEGER              OPTIONAL,
    *    millis     [0] INTEGER  (1..999)    OPTIONAL,
    *    micros     [1] INTEGER  (1..999)    OPTIONAL  }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: AccuracySchema = {}): any {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

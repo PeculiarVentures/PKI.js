@@ -126,17 +126,13 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * EncapsulatedContentInfo ::= SEQUENCE {
    *    eContentType ContentType,
    *    eContent [0] EXPLICIT OCTET STRING OPTIONAL } * Changed it to ANY, as in PKCS#7
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: EncapsulatedContentInfoSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

@@ -143,9 +143,8 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * TimeStampReq ::= SEQUENCE  {
    *    version               INTEGER  { v1(1) },
@@ -156,10 +155,7 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
    *    extensions            [0] IMPLICIT Extensions  OPTIONAL  }
    *
    * TSAPolicyId ::= OBJECT IDENTIFIER
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;

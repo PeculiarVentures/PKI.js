@@ -104,9 +104,8 @@ export class MacData extends PkiObject implements IMacData {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * MacData ::= SEQUENCE {
    *    mac           DigestInfo,
@@ -115,10 +114,7 @@ export class MacData extends PkiObject implements IMacData {
    *    -- Note: The default is for historical reasons and its use is
    *    -- deprecated. A higher value, like 1024 is recommended.
    *    }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: MacDataSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

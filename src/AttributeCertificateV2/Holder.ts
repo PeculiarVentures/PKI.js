@@ -91,9 +91,8 @@ export class Holder extends PkiObject implements IHolder {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * Holder ::= SEQUENCE {
    *   baseCertificateID   [0] IssuerSerial OPTIONAL,
@@ -105,10 +104,7 @@ export class Holder extends PkiObject implements IHolder {
    *       -- used to directly authenticate the holder,
    *       -- for example, an executable
    * }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: HolderSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

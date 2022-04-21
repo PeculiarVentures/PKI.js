@@ -18,8 +18,19 @@ const CLEAR_PROPS = [
 ];
 
 export interface IEncryptedData {
+  /**
+   * Version number.
+   *
+   * If `unprotectedAttrs` is present, then the version MUST be 2. If `unprotectedAttrs` is absent, then version MUST be 0.
+   */
   version: number;
+  /**
+   * Encrypted content information
+   */
   encryptedContentInfo: EncryptedContentInfo;
+  /**
+   * Collection of attributes that are not encrypted
+   */
   unprotectedAttrs?: Attribute[];
 }
 
@@ -33,6 +44,45 @@ export type EncryptedDataParameters = PkiObjectParameters & Partial<IEncryptedDa
 
 /**
  * Represents the EncryptedData structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
+ *
+ * @example The following example demonstrates how to create and encrypt CMS Encrypted Data
+ * ```js
+ * const cmsEncrypted = new pkijs.EncryptedData();
+ *
+ * await cmsEncrypted.encrypt({
+ *   contentEncryptionAlgorithm: {
+ *     name: "AES-GCM",
+ *     length: 256,
+ *   },
+ *   hmacHashAlgorithm: "SHA-256",
+ *   iterationCount: 1000,
+ *   password: password,
+ *   contentToEncrypt: dataToEncrypt,
+ * });
+ *
+ * // Add Encrypted Data into CMS Content Info
+ * const cmsContent = new pkijs.ContentInfo();
+ * cmsContent.contentType = pkijs.ContentInfo.ENCRYPTED_DATA;
+ * cmsContent.content = cmsEncrypted.toSchema();
+ *
+ * const cmsContentRaw = cmsContent.toSchema().toBER();
+ * ```
+ *
+ * @example The following example demonstrates how to decrypt CMS Encrypted Data
+ * ```js
+ * // Parse CMS Content Info
+ * const cmsContent = pkijs.ContentInfo.fromBER(cmsContentRaw);
+ * if (cmsContent.contentType !== pkijs.ContentInfo.ENCRYPTED_DATA) {
+ *   throw new Error("CMS is not Encrypted Data");
+ * }
+ * // Parse CMS Encrypted Data
+ * const cmsEncrypted = new pkijs.EncryptedData({ schema: cmsContent.content });
+ *
+ * // Decrypt data
+ * const decryptedData = await cmsEncrypted.decrypt({
+ *   password: password,
+ * });
+ * ```
  */
 export class EncryptedData extends PkiObject implements IEncryptedData {
 
@@ -103,18 +153,14 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * EncryptedData ::= SEQUENCE {
    *    version CMSVersion,
    *    encryptedContentInfo EncryptedContentInfo,
    *    unprotectedAttrs [1] IMPLICIT UnprotectedAttributes OPTIONAL }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     version?: string;
@@ -212,10 +258,10 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
   }
 
   /**
-   * Create a new CMS Encrypted Data content
+   * Creates a new CMS Encrypted Data content
    * @param parameters Parameters necessary for encryption
    */
-  public async encrypt(parameters: CryptoEngineEncryptParams): Promise<void> {
+  public async encrypt(parameters: Omit<CryptoEngineEncryptParams, "contentType">): Promise<void> {
     //#region Check for input parameters
     ArgumentError.assert(parameters, "parameters", "object");
     //#endregion
@@ -231,7 +277,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
   }
 
   /**
-   * Create a new CMS Encrypted Data content
+   * Creates a new CMS Encrypted Data content
    * @param parameters Parameters necessary for encryption
    * @returns Returns decrypted raw data
    */

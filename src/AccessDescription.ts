@@ -25,6 +25,9 @@ export interface IAccessDescription {
 
 export type AccessDescriptionParameters = PkiObjectParameters & Partial<IAccessDescription>;
 
+/**
+ * JSON representation of {@link AccessDescription}
+ */
 export interface AccessDescriptionJson {
   accessMethod: string;
   accessLocation: GeneralNameJson;
@@ -32,6 +35,13 @@ export interface AccessDescriptionJson {
 
 /**
  * Represents the AccessDescription structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
+ *
+ * The authority information access extension indicates how to access
+ * information and services for the issuer of the certificate in which
+ * the extension appears. Information and services may include on-line
+ * validation services and CA policy data. This extension may be included in
+ * end entity or CA certificates. Conforming CAs MUST mark this
+ * extension as non-critical.
  */
 export class AccessDescription extends PkiObject implements IAccessDescription {
 
@@ -74,17 +84,13 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
-   * AccessDescription  ::=  SEQUENCE {
+   * AccessDescription ::= SEQUENCE {
    *    accessMethod          OBJECT IDENTIFIER,
    *    accessLocation        GeneralName  }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   static override schema(parameters: Schema.SchemaParameters<{ accessMethod?: string; accessLocation?: GeneralNameSchema; }> = {}) {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

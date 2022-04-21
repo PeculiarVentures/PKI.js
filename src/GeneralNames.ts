@@ -64,9 +64,8 @@ export class GeneralNames extends PkiObject implements IGeneralNames {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
    * ```

@@ -85,9 +85,8 @@ export class V2Form extends PkiObject implements IV2Form {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * V2Form ::= SEQUENCE {
    *   issuerName            GeneralNames  OPTIONAL,
@@ -97,10 +96,7 @@ export class V2Form extends PkiObject implements IV2Form {
    *     -- baseCertificateID and objectDigestInfo MUST NOT
    *     -- be present in this profile
    * }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     issuerName?: string;

@@ -112,18 +112,14 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * KEKIdentifier ::= SEQUENCE {
    *    keyIdentifier OCTET STRING,
    *    date GeneralizedTime OPTIONAL,
    *    other OtherKeyAttribute OPTIONAL }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: KEKIdentifierSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

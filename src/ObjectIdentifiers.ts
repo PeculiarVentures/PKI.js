@@ -48,4 +48,10 @@ export const id_CertBag_AttributeCertificate = "1.2.840.113549.1.9.22.3";
 // CRLBag
 export const id_CRLBag_X509CRL = "1.2.840.113549.1.9.23.1";
 
-export const id_PKIX_OCSP_Basic = "1.3.6.1.5.5.7.48.1.1";
+export const id_pkix = "1.3.6.1.5.5.7";
+export const id_ad = `${id_pkix}.48`;
+
+export const id_PKIX_OCSP_Basic = `${id_ad}.1.1`;
+
+export const id_ad_caIssuers = `${id_ad}.2`;
+export const id_ad_ocsp = `${id_ad}.1`;

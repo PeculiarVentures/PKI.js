@@ -136,9 +136,8 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * EncryptedContentInfo ::= SEQUENCE {
    *    contentType ContentType,
@@ -148,10 +147,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
    * Comment: Strange, but modern crypto engines create ENCRYPTED_CONTENT as "[0] EXPLICIT EncryptedContent"
    *
    * EncryptedContent ::= OCTET STRING
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: EncryptedContentInfoSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

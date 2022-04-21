@@ -84,19 +84,15 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * OtherPrimeInfo ::= Sequence {
    *    prime             Integer,  -- ri
    *    exponent          Integer,  -- di
    *    coefficient       Integer   -- ti
    * }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: OtherPrimeInfoSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

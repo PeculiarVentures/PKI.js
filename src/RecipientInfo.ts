@@ -92,9 +92,8 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * RecipientInfo ::= CHOICE {
    *    ktri KeyTransRecipientInfo,
@@ -102,10 +101,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
    *    kekri [2] KEKRecipientInfo,
    *    pwri [3] PasswordRecipientinfo,
    *    ori [4] OtherRecipientInfo }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

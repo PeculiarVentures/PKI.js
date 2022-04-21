@@ -100,9 +100,8 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * PKCS8ShroudedKeyBag ::= EncryptedPrivateKeyInfo
    *
@@ -112,10 +111,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
    * }
    *
    * EncryptedData ::= OCTET STRING
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     encryptionAlgorithm?: AlgorithmIdentifierSchema;

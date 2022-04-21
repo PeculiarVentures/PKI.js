@@ -72,19 +72,15 @@ export class RevocationInfoChoices extends PkiObject implements IRevocationInfoC
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * RevocationInfoChoices ::= SET OF RevocationInfoChoice
    *
    * RevocationInfoChoice ::= CHOICE {
    *    crl CertificateList,
    *    other [1] IMPLICIT OtherRevocationInfoFormat }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: RevocationInfoChoicesSchema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});

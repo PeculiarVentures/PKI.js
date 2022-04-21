@@ -71,17 +71,13 @@ export class NameConstraints extends PkiObject implements INameConstraints {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * NameConstraints ::= SEQUENCE {
    *    permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
    *    excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     permittedSubtrees?: string;

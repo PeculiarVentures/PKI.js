@@ -88,18 +88,14 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * AuthenticatedSafe ::= SEQUENCE OF ContentInfo
    * -- Data if unencrypted
    * -- EncryptedData if password-encrypted
    * -- EnvelopedData if public key-encrypted
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{
     contentInfos?: string;

@@ -187,9 +187,8 @@ export class AttributeCertificateInfoV1 extends PkiObject implements IAttributeC
   }
 
   /**
-   * Returns value of pre-defined ASN.1 schema for current class
-   *
-   * ASN.1 schema:
+   * @inheritdoc
+   * @asn ASN.1 schema
    * ```asn
    * AttributeCertificateInfo ::= SEQUENCE {
    *   version Version DEFAULT v1,
@@ -204,10 +203,7 @@ export class AttributeCertificateInfoV1 extends PkiObject implements IAttributeC
    *   issuerUniqueID UniqueIdentifier OPTIONAL,
    *   extensions Extensions OPTIONAL
    * }
-   * ```
-   *
-   * @param parameters Input parameters for the schema
-   * @returns ASN.1 schema object
+   *```
    */
   public static override schema(parameters: AttributeCertificateInfoV1Schema = {}): Schema.SchemaType {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
