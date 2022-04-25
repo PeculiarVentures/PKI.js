@@ -83,31 +83,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
   //#endregion
 
   //#region Put information about TSP response status
-  let status = "";
-
-  switch (tspRespSimpl.status.status) {
-    case 0:
-      status = "granted";
-      break;
-    case 1:
-      status = "grantedWithMods";
-      break;
-    case 2:
-      status = "rejection";
-      break;
-    case 3:
-      status = "waiting";
-      break;
-    case 4:
-      status = "revocationWarning";
-      break;
-    case 5:
-      status = "revocationNotification";
-      break;
-    default:
-  }
-
-  $respStatus.innerHTML = status;
+  $respStatus.innerHTML = pkijs.PKIStatus[tspRespSimpl.status.status] || "unknown";
   //#endregion
 
   //#region Parse internal CMS Signed Data
