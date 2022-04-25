@@ -29,11 +29,41 @@ const CLEAR_PROPS = [
 ];
 
 export interface ITimeStampReq {
+  /**
+   * Version of the Time-Stamp request. Should be version 1.
+   */
   version: number;
+  /**
+   * Contains the hash of the datum to be time-stamped
+   */
   messageImprint: MessageImprint;
+  /**
+   * Indicates the TSA policy under which the TimeStampToken SHOULD be provided.
+   */
   reqPolicy?: string;
+  /**
+   * The nonce, if included, allows the client to verify the timeliness of
+   * the response when no local clock is available. The nonce is a large
+   * random number with a high probability that the client generates it
+   * only once.
+   */
   nonce?: asn1js.Integer;
+  /**
+   * If the certReq field is present and set to true, the TSA's public key
+   * certificate that is referenced by the ESSCertID identifier inside a
+   * SigningCertificate attribute in the response MUST be provided by the
+   * TSA in the certificates field from the SignedData structure in that
+   * response. That field may also contain other certificates.
+   *
+   * If the certReq field is missing or if the certReq field is present
+   * and set to false then the certificates field from the SignedData
+   * structure MUST not be present in the response.
+   */
   certReq?: boolean;
+  /**
+   * The extensions field is a generic way to add additional information
+   * to the request in the future.
+   */
   extensions?: Extension[];
 }
 
@@ -50,6 +80,20 @@ export type TimeStampReqParameters = PkiObjectParameters & Partial<ITimeStampReq
 
 /**
  * Represents the TimeStampReq structure described in [RFC3161](https://www.ietf.org/rfc/rfc3161.txt)
+ *
+ * @example The following example demonstrates how to create Time-Stamp Request
+ * ```js
+ * const nonce = pkijs.getRandomValues(new Uint8Array(10)).buffer;
+ *
+ * const tspReq = new pkijs.TimeStampReq({
+ *   version: 1,
+ *   messageImprint: await pkijs.MessageImprint.create("SHA-256", message),
+ *   reqPolicy: "1.2.3.4.5.6",
+ *   certReq: true,
+ *   nonce: new asn1js.Integer({ valueHex: nonce }),
+ * });
+ *
+ * const tspReqRaw = tspReq.toSchema().toBER();
  */
 export class TimeStampReq extends PkiObject implements ITimeStampReq {
 
