@@ -69,10 +69,12 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
           });
 
           let offset = 0;
-          let length = this.encryptedContent.valueBlock.valueHex.byteLength;
+          const valueHex = this.encryptedContent.valueBlock.valueHex;
+          let length = valueHex.byteLength;
 
+          const pieceSize = 1024;
           while (length > 0) {
-            const pieceView = new Uint8Array(this.encryptedContent.valueBlock.valueHex, offset, ((offset + 1024) > this.encryptedContent.valueBlock.valueHex.byteLength) ? (this.encryptedContent.valueBlock.valueHex.byteLength - offset) : 1024);
+            const pieceView = new Uint8Array(valueHex, offset, ((offset + pieceSize) > valueHex.byteLength) ? (valueHex.byteLength - offset) : pieceSize);
             const _array = new ArrayBuffer(pieceView.length);
             const _view = new Uint8Array(_array);
 
