@@ -86,7 +86,15 @@ export abstract class PkiObject {
   public abstract toJSON(): any;
 
   public toString(encoding: "hex" | "base64" | "base64url" = "hex"): string {
-    return pvtsutils.Convert.ToString(this.toSchema(true).toBER(), encoding);
+    let schema: Schema.SchemaType;
+
+    try {
+      schema = this.toSchema();
+    } catch {
+      schema = this.toSchema(true);
+    }
+
+    return pvtsutils.Convert.ToString(schema.toBER(), encoding);
   }
 
 }

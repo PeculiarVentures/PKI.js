@@ -18,9 +18,13 @@
     "@typescript-eslint/explicit-function-return-type": 0,
     "@typescript-eslint/interface-name-prefix": 0,
     "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/semi": 1,
+    "semi": 0,
+    "@typescript-eslint/semi": 2,
+    "quotes": 0,
+    "@typescript-eslint/quotes": 2,
+    "no-duplicate-imports": 2,
     "@typescript-eslint/explicit-module-boundary-types": 0,
     "@typescript-eslint/triple-slash-reference": 0,
-    "semi": "off"
+    "no-trailing-spaces": 2
   }
 }

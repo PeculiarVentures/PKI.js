@@ -4,6 +4,7 @@ import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
+import * as common from "./common";
 
 export const HASH_ALGORITHM = "hashAlgorithm";
 export const HASHED_MESSAGE = "hashedMessage";
@@ -35,6 +36,30 @@ export type MessageImprintSchema = Schema.SchemaParameters<{
 export class MessageImprint extends PkiObject implements IMessageImprint {
 
   public static override CLASS_NAME = "MessageImprint";
+
+  /**
+   * Creates and fills a new instance of {@link MessageImprint}
+   * @param hashAlgorithm
+   * @param message
+   * @returns New instance of {@link MessageImprint}
+   */
+  public static async create(hashAlgorithm: string, message: BufferSource): Promise<MessageImprint> {
+    const crypto = common.getCrypto(true);
+
+    const hashAlgorithmOID = common.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
+
+    const hashedMessage = await crypto.digest(hashAlgorithm, message);
+
+    const res = new MessageImprint({
+      hashAlgorithm: new AlgorithmIdentifier({
+        algorithmId: hashAlgorithmOID,
+        algorithmParams: new asn1js.Null(),
+      }),
+      hashedMessage: new asn1js.OctetString({ valueHex: hashedMessage })
+    });
+
+    return res;
+  }
 
   public hashAlgorithm!: AlgorithmIdentifier;
   public hashedMessage!: asn1js.OctetString;

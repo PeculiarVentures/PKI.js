@@ -14,13 +14,13 @@ const CLEAR_PROPS = [
 ];
 
 export interface IPKIStatusInfo {
-  status: number;
+  status: PKIStatus;
   statusStrings?: asn1js.Utf8String[];
   failInfo?: asn1js.BitString;
 }
 
 export interface PKIStatusInfoJson {
-  status: number;
+  status: PKIStatus;
   statusStrings?: Schema.AsnBlockJson[];
   failInfo?: Schema.AsnBitStringJson;
 }
@@ -33,6 +33,15 @@ export type PKIStatusInfoSchema = Schema.SchemaParameters<{
   failInfo?: string;
 }>;
 
+export enum PKIStatus {
+  granted = 0,
+  grantedWithMods = 1,
+  rejection = 2,
+  waiting = 3,
+  revocationWarning = 4,
+  revocationNotification = 5,
+}
+
 /**
  * Represents the PKIStatusInfo structure described in [RFC3161](https://www.ietf.org/rfc/rfc3161.txt)
  */
@@ -40,7 +49,7 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
 
   public static override CLASS_NAME = "PKIStatusInfo";
 
-  public status!: number;
+  public status!: PKIStatus;
   public statusStrings?: asn1js.Utf8String[];
   public failInfo?: asn1js.BitString;
 

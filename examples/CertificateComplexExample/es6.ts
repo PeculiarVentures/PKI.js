@@ -1,4 +1,3 @@
-import * as asn1js from "asn1js";
 import * as pkijs from "../../src";
 import * as utils from "../../test/utils";
 import * as example from "../../test/certificateComplexExample";

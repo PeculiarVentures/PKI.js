@@ -1,4 +1,3 @@
-import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as pkijs from "../../src";
 import * as utils from "../../test/utils";
@@ -84,31 +83,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
   //#endregion
 
   //#region Put information about TSP response status
-  let status = "";
-
-  switch (tspRespSimpl.status.status) {
-    case 0:
-      status = "granted";
-      break;
-    case 1:
-      status = "grantedWithMods";
-      break;
-    case 2:
-      status = "rejection";
-      break;
-    case 3:
-      status = "waiting";
-      break;
-    case 4:
-      status = "revocationWarning";
-      break;
-    case 5:
-      status = "revocationNotification";
-      break;
-    default:
-  }
-
-  $respStatus.innerHTML = status;
+  $respStatus.innerHTML = pkijs.PKIStatus[tspRespSimpl.status.status] || "unknown";
   //#endregion
 
   //#region Parse internal CMS Signed Data
@@ -270,7 +245,7 @@ async function verifyTSPResp() {
     alert(`Verification result: ${result}`);
   } catch (error) {
     console.error(error);
-    alert(`Error during verification. See developer console for detailed information`);
+    alert("Error during verification. See developer console for detailed information");
   }
 }
 

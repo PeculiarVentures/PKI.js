@@ -44,7 +44,7 @@ async function verifySMIME() {
         alert(`S/MIME message ${(!result) ? "verification failed" : "successfully verified"}!`);
       } catch (e) {
         console.error(e);
-        alert(`Error during verification. Please see developer console for more details`);
+        alert("Error during verification. Please see developer console for more details");
       }
 
     }

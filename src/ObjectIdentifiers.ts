@@ -55,3 +55,10 @@ export const id_PKIX_OCSP_Basic = `${id_ad}.1.1`;
 
 export const id_ad_caIssuers = `${id_ad}.2`;
 export const id_ad_ocsp = `${id_ad}.1`;
+
+// Algorithms
+
+export const id_sha1 = "1.3.14.3.2.26";
+export const id_sha256 = "2.16.840.1.101.3.4.2.1";
+export const id_sha384 = "2.16.840.1.101.3.4.2.2";
+export const id_sha512 = "2.16.840.1.101.3.4.2.3";

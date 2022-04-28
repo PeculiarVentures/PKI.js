@@ -617,7 +617,7 @@ export class SignedData extends PkiObject implements ISignedData {
           throw new SignedDataVerifyError({
             date: checkDate,
             code: 15,
-            message: `Error during verification: TSTInfo eContent is empty`,
+            message: "Error during verification: TSTInfo eContent is empty",
             signatureVerified: null,
             signerCertificate: signerCert,
             timestampSerial,
@@ -636,7 +636,7 @@ export class SignedData extends PkiObject implements ISignedData {
           throw new SignedDataVerifyError({
             date: checkDate,
             code: 15,
-            message: `Error during verification: TSTInfo wrong ASN.1 schema `,
+            message: "Error during verification: TSTInfo wrong ASN.1 schema ",
             signatureVerified: null,
             signerCertificate: signerCert,
             timestampSerial,
@@ -664,7 +664,7 @@ export class SignedData extends PkiObject implements ISignedData {
           throw new SignedDataVerifyError({
             date: checkDate,
             code: 15,
-            message: `Error during verification: TSTInfo verification is failed`,
+            message: "Error during verification: TSTInfo verification is failed",
             signatureVerified: null,
             signerCertificate: signerCert,
             timestampSerial,
@@ -837,7 +837,7 @@ export class SignedData extends PkiObject implements ISignedData {
           throw new SignedDataVerifyError({
             date: checkDate,
             code: 15,
-            message: `Error during verification: Message digest doesn't match`,
+            message: "Error during verification: Message digest doesn't match",
             signatureVerified: null,
             signerCertificate: signerCert,
             timestampSerial,
@@ -971,3 +971,5 @@ export class SignedData extends PkiObject implements ISignedData {
   }
 
 }
+
+
