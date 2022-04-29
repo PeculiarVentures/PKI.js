@@ -552,8 +552,9 @@ export default class Certificate
 	 * Make a signature for current value from TBS section
 	 * @param {Object} privateKey Private key for "subjectPublicKeyInfo" structure
 	 * @param {string} [hashAlgorithm="SHA-1"] Hashing algorithm
+	 * @param {CryptoEngine} customEngine The engine to use, if different from default one
 	 */
-	sign(privateKey, hashAlgorithm = "SHA-1")
+	sign(privateKey, hashAlgorithm = "SHA-1", customEngine = null)
 	{
 		//region Initial checking
 		//region Check private key
@@ -565,8 +566,8 @@ export default class Certificate
 		//region Initial variables
 		let sequence = Promise.resolve();
 		let parameters;
-		
-		const engine = getEngine();
+
+		const engine = customEngine ? customEngine : getEngine();
 		//endregion
 		
 		//region Get a "default parameters" for current algorithm and set correct signature algorithm
