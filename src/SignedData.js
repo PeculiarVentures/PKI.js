@@ -418,6 +418,7 @@ export default class SignedData
 	 * @param {Boolean} [param.extendedMode=false]
 	 * @param {?Function} [findOrigin=null]
 	 * @param {?Function} [findIssuer=null]
+	 * @param {?CryptoEngine} [customEngine=null]
 	 */
 	verify({
 		signer = (-1),
@@ -428,7 +429,8 @@ export default class SignedData
 		extendedMode = false,
 		passedWhenNotRevValues = false,
 		findOrigin = null,
-		findIssuer = null
+		findIssuer = null,
+		customEngine = null
 	} = {})
 	{
 		//region Global variables
@@ -443,8 +445,8 @@ export default class SignedData
 		let timestampSerial = null;
 		
 		let certificatePath = [];
-		
-		const engine = getEngine();
+
+		const engine = customEngine ? customEngine : getEngine();
 		//endregion
 		
 		//region Get a "crypto" extension
@@ -982,9 +984,10 @@ export default class SignedData
 	 * @param {number} signerIndex Index number (starting from 0) of signer index to make signature for
 	 * @param {string} [hashAlgorithm="SHA-1"] Hashing algorithm. Default SHA-1
 	 * @param {ArrayBuffer} [data] Detached data
+	 * @param {CryptoEngine} customEngine The engine to use, if different from default one
 	 * @returns {*}
 	 */
-	sign(privateKey, signerIndex, hashAlgorithm = "SHA-1", data = (new ArrayBuffer(0)))
+	sign(privateKey, signerIndex, hashAlgorithm = "SHA-1", data = (new ArrayBuffer(0)), customEngine = null)
 	{
 		//region Initial checking
 		if(typeof privateKey === "undefined")
@@ -994,8 +997,8 @@ export default class SignedData
 		//region Initial variables
 		let sequence = Promise.resolve();
 		let parameters;
-		
-		const engine = getEngine();
+
+		const engine = customEngine ? customEngine : getEngine();
 		//endregion
 		
 		//region Simple check for supported algorithm

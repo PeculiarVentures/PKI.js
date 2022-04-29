@@ -718,9 +718,10 @@ export default class EnvelopedData
 	 * Create a new CMS Enveloped Data content with encrypted data
 	 * @param {Object} contentEncryptionAlgorithm WebCrypto algorithm. For the moment here could be only "AES-CBC" or "AES-GCM" algorithms.
 	 * @param {ArrayBuffer} contentToEncrypt Content to encrypt
+	 * @param {CryptoEngine} customEngine The engine to use, if different from default one
 	 * @returns {Promise}
 	 */
-	encrypt(contentEncryptionAlgorithm, contentToEncrypt)
+	encrypt(contentEncryptionAlgorithm, contentToEncrypt, customEngine = null)
 	{
 		//region Initial variables
 		let sequence = Promise.resolve();
@@ -747,7 +748,7 @@ export default class EnvelopedData
 		//endregion
 
 		//region Get a "crypto" extension
-		const crypto = getCrypto();
+		const crypto = customEngine ? customEngine.subtle : getCrypto();
 		if(typeof crypto === "undefined")
 			return Promise.reject("Unable to create WebCrypto object");
 		//endregion
@@ -1264,7 +1265,7 @@ export default class EnvelopedData
 		//endregion
 
 		//region Get a "crypto" extension
-		const crypto = getCrypto();
+		const crypto = "customEngine" in decryptionParameters ? decryptionParameters.customEngine.subtle : getCrypto();
 		if(typeof crypto === "undefined")
 			return Promise.reject("Unable to create WebCrypto object");
 		//endregion
