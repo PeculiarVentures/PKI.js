@@ -1,6 +1,8 @@
 import React from 'react';
 import Layout from '@theme/Layout';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import FeaturesList from './_features.md';
+import Preview from './_preview.md';
 import s from './index.module.scss';
 
 export default function Home() {
@@ -9,15 +11,24 @@ export default function Home() {
   return (
     <Layout
       description={siteConfig.customFields.description}
-      wrapperClassName={s.wrapper}
     >
-      <div className={s.content}>
-        <h1 className={s.title}>
-          PKIjs provides a Typescript implementation of the most common formats and algorithms needed to build PKI-enabled applications.
-        </h1>
-        <p>
-          We created PKIjs to make it easy to build modern web applications that can interoperate with existing X.509 solutions. It is built on top of Web Crypto so that these applications get to rely on the quality cryptographic implementations provided by browsers and Node.js.
-        </p>
+      <div className={s.preview}>
+        <div className={s.m_width}>
+          <div className={s.preview_content}>
+            <Preview />
+          </div>
+        </div>
+      </div>
+
+      <div className={s.features}>
+        <div className={s.m_width}>
+          <h2 className={s.features_title}>
+            Features
+          </h2>
+          <ul className={s.features_list}>
+            <FeaturesList />
+          </ul>
+        </div>
       </div>
     </Layout>
   );
