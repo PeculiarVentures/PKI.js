@@ -1997,12 +1997,10 @@ export class CryptoEngine extends AbstractCryptoEngine {
       parameters = this.fillPublicKeyParameters(publicKeyInfo, signatureAlgorithm);
     }
 
-    const publicKeyInfoSchema = publicKeyInfo.toSchema();
-    const publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
-    const publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
+    const publicKeyInfoBuffer = publicKeyInfo.toSchema().toBER(false);
 
     return this.importKey("spki",
-      publicKeyInfoView,
+      publicKeyInfoBuffer,
       parameters.algorithm.algorithm as Algorithm,
       true,
       parameters.algorithm.usages
