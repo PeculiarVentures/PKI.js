@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -58,7 +59,7 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
   static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ORI_TYPE:
-        return "";
+        return EMPTY_STRING;
       case ORI_VALUE:
         return {};
       default:
@@ -74,7 +75,7 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case ORI_TYPE:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case ORI_VALUE:
         return (Object.keys(memberValue).length === 0);
       default:
@@ -98,10 +99,10 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.oriType || "") }),
-        new asn1js.Any({ name: (names.oriValue || "") })
+        new asn1js.ObjectIdentifier({ name: (names.oriType || EMPTY_STRING) }),
+        new asn1js.Any({ name: (names.oriValue || EMPTY_STRING) })
       ]
     }));
   }

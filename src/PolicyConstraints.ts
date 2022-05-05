@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -88,10 +89,10 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Primitive({
-          name: (names.requireExplicitPolicy || ""),
+          name: (names.requireExplicitPolicy || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -99,7 +100,7 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
           }
         }), // IMPLICIT integer value
         new asn1js.Primitive({
-          name: (names.inhibitPolicyMapping || ""),
+          name: (names.inhibitPolicyMapping || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC

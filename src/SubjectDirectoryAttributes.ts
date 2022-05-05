@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { Attribute, AttributeJson } from "./Attribute";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -71,10 +72,10 @@ export class SubjectDirectoryAttributes extends PkiObject implements ISubjectDir
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.attributes || ""),
+          name: (names.attributes || EMPTY_STRING),
           value: Attribute.schema()
         })
       ]

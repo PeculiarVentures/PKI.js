@@ -10,6 +10,7 @@ import { CertificateChainValidationEngine } from "./CertificateChainValidationEn
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const TBS_RESPONSE_DATA = "tbsResponseData";
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";
@@ -130,7 +131,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
           return comparisonResult;
         }
       case SIGNATURE_ALGORITHM:
-        return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));
+        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
       case SIGNATURE:
         return (memberValue.isEqual(BasicOCSPResponse.defaultValues(memberName)));
       case CERTS:

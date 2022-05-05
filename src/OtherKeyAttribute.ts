@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -62,7 +63,7 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case KEY_ATTR_ID:
-        return "";
+        return EMPTY_STRING;
       case KEY_ATTR:
         return {};
       default:
@@ -78,7 +79,7 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
   public static compareWithDefault<T>(memberName: string, memberValue: T): memberValue is T {
     switch (memberName) {
       case KEY_ATTR_ID:
-        return (typeof memberValue === "string" && memberValue === "");
+        return (typeof memberValue === "string" && memberValue === EMPTY_STRING);
       case KEY_ATTR:
         return (Object.keys(memberValue).length === 0);
       default:
@@ -100,12 +101,12 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
 
     return (new asn1js.Sequence({
       optional: (names.optional || true),
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.keyAttrId || "") }),
+        new asn1js.ObjectIdentifier({ name: (names.keyAttrId || EMPTY_STRING) }),
         new asn1js.Any({
           optional: true,
-          name: (names.keyAttr || "")
+          name: (names.keyAttr || EMPTY_STRING)
         })
       ]
     }));

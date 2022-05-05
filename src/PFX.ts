@@ -17,6 +17,7 @@ import { Certificate } from "./Certificate";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { BufferSourceConverter } from "pvtsutils";
+import { EMPTY_STRING, EMPTY_BUFFER } from "./constants";
 
 const VERSION = "version";
 const AUTH_SAFE = "authSafe";
@@ -165,7 +166,7 @@ export class PFX extends PkiObject implements IPFX {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Integer({ name: (names.version || VERSION) }),
         ContentInfo.schema(names.authSafe || {
@@ -450,7 +451,7 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Check we have "constructive encoding" for AuthSafe content
-          let authSafeContent = new ArrayBuffer(0);
+          let authSafeContent = EMPTY_BUFFER;
 
           if (this.authSafe.content.valueBlock.isConstructed) {
             const array: Uint8Array[] = [];
@@ -519,7 +520,7 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Create correct data block for verification
-          let data = new ArrayBuffer(0);
+          let data = EMPTY_BUFFER;
 
           if (eContent.idBlock.isConstructed === false)
             data = eContent.valueBlock.valueHexView;

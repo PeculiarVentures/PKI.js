@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, GeneralNameJson } from "./GeneralName";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -72,10 +73,10 @@ export class AltName extends PkiObject implements IAltName {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.altNames || ""),
+          name: (names.altNames || EMPTY_STRING),
           value: GeneralName.schema()
         })
       ]

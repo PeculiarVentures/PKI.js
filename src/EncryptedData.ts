@@ -7,6 +7,7 @@ import * as Schema from "./Schema";
 import { ArgumentError, AsnError } from "./errors";
 import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const ENCRYPTED_CONTENT_INFO = "encryptedContentInfo";
@@ -170,9 +171,9 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
         EncryptedContentInfo.schema(names.encryptedContentInfo || {}),
         new asn1js.Constructed({
           optional: true,
@@ -182,7 +183,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
           },
           value: [
             new asn1js.Repeated({
-              name: (names.unprotectedAttrs || ""),
+              name: (names.unprotectedAttrs || EMPTY_STRING),
               value: Attribute.schema()
             })
           ]

@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -99,11 +100,11 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.prime || "") }),
-        new asn1js.Integer({ name: (names.exponent || "") }),
-        new asn1js.Integer({ name: (names.coefficient || "") })
+        new asn1js.Integer({ name: (names.prime || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.exponent || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.coefficient || EMPTY_STRING) })
       ]
     }));
   }

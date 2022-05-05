@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -89,7 +90,7 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
       case ENCRYPTED_KEY:
         return new asn1js.OctetString();
       case PASSWORD:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       default:
         return super.defaultValues(memberName);
     }
@@ -106,7 +107,7 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
         return (memberValue === (-1));
       case KEY_DERIVATION_ALGORITHM:
       case KEY_ENCRYPTION_ALGORITHM:
-        return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));
+        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
       case ENCRYPTED_KEY:
         return (memberValue.isEqual(PasswordRecipientinfo.defaultValues(ENCRYPTED_KEY)));
       case PASSWORD:
@@ -136,11 +137,11 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
         new asn1js.Constructed({
-          name: (names.keyDerivationAlgorithm || ""),
+          name: (names.keyDerivationAlgorithm || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -149,7 +150,7 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
           value: AlgorithmIdentifier.schema().valueBlock.value
         }),
         AlgorithmIdentifier.schema(names.keyEncryptionAlgorithm || {}),
-        new asn1js.OctetString({ name: (names.encryptedKey || "") })
+        new asn1js.OctetString({ name: (names.encryptedKey || EMPTY_STRING) })
       ]
     }));
   }

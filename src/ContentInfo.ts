@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData, id_ContentType_SignedData } from "./ObjectIdentifiers";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -65,7 +66,7 @@ export class ContentInfo extends PkiObject implements IContentInfo {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CONTENT_TYPE:
-        return "";
+        return EMPTY_STRING;
       case CONTENT:
         return new asn1js.Any();
       default:

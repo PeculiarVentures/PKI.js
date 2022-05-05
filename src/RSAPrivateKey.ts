@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
 import { OtherPrimeInfo, OtherPrimeInfoJson, OtherPrimeInfoSchema } from "./OtherPrimeInfo";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -181,22 +182,22 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
-        new asn1js.Integer({ name: (names.modulus || "") }),
-        new asn1js.Integer({ name: (names.publicExponent || "") }),
-        new asn1js.Integer({ name: (names.privateExponent || "") }),
-        new asn1js.Integer({ name: (names.prime1 || "") }),
-        new asn1js.Integer({ name: (names.prime2 || "") }),
-        new asn1js.Integer({ name: (names.exponent1 || "") }),
-        new asn1js.Integer({ name: (names.exponent2 || "") }),
-        new asn1js.Integer({ name: (names.coefficient || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.modulus || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.publicExponent || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.privateExponent || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.prime1 || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.prime2 || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.exponent1 || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.exponent2 || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.coefficient || EMPTY_STRING) }),
         new asn1js.Sequence({
           optional: true,
           value: [
             new asn1js.Repeated({
-              name: (names.otherPrimeInfosName || ""),
+              name: (names.otherPrimeInfosName || EMPTY_STRING),
               value: OtherPrimeInfo.schema(names.otherPrimeInfo || {})
             })
           ]

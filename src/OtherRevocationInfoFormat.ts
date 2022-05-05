@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -58,7 +59,7 @@ export class OtherRevocationInfoFormat extends PkiObject implements IOtherRevoca
   static override defaultValues(memberName: string): any {
     switch (memberName) {
       case OTHER_REV_INFO_FORMAT:
-        return "";
+        return EMPTY_STRING;
       case OTHER_REV_INFO:
         return new asn1js.Any();
       default:
@@ -82,7 +83,7 @@ export class OtherRevocationInfoFormat extends PkiObject implements IOtherRevoca
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.ObjectIdentifier({ name: (names.otherRevInfoFormat || OTHER_REV_INFO_FORMAT) }),
         new asn1js.Any({ name: (names.otherRevInfo || OTHER_REV_INFO) })

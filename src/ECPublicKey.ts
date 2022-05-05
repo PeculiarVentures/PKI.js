@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import { BufferSourceConverter } from "pvtsutils";
 import * as pvutils from "pvutils";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { ECNamedCurves } from "./ECNamedCurves";
 import { ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -66,9 +67,9 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
     switch (memberName) {
       case X:
       case Y:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case NAMED_CURVE:
-        return "";
+        return EMPTY_STRING;
       default:
         return super.defaultValues(memberName);
     }

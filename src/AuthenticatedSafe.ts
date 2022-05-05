@@ -9,6 +9,7 @@ import * as Schema from "./Schema";
 import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData } from "./ObjectIdentifiers";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 
 const SAFE_CONTENTS = "safeContents";
 const PARSED_VALUE = "parsedValue";
@@ -104,10 +105,10 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.contentInfos || ""),
+          name: (names.contentInfos || EMPTY_STRING),
           value: ContentInfo.schema()
         })
       ]
@@ -172,7 +173,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             ArgumentError.assert(content.content, "this.safeContents[j].content", asn1js.OctetString);
 
             //#region Check we have "constructive encoding" for AuthSafe content
-            let authSafeContent: BufferSource = new ArrayBuffer(0);
+            let authSafeContent: BufferSource = EMPTY_BUFFER;
 
             if (content.content.valueBlock.isConstructed) {
               const array: Uint8Array[] = [];

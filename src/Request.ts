@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { CertID, CertIDJson, CertIDSchema } from "./CertID";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { Extension, ExtensionJson, ExtensionSchema } from "./Extension";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -105,7 +106,7 @@ export class Request extends PkiObject implements IRequest {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         CertID.schema(names.reqCert || {}),
         new asn1js.Constructed({
@@ -116,7 +117,7 @@ export class Request extends PkiObject implements IRequest {
           },
           value: [Extension.schema(names.extensions || {
             names: {
-              blockName: (names.singleRequestExtensions || "")
+              blockName: (names.singleRequestExtensions || EMPTY_STRING)
             }
           })]
         })

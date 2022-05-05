@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -67,7 +68,7 @@ export class CertificateTemplate extends PkiObject implements ICertificateTempla
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TEMPLATE_ID:
-        return "";
+        return EMPTY_STRING;
       case TEMPLATE_MAJOR_VERSION:
       case TEMPLATE_MINOR_VERSION:
         return 0;
@@ -95,15 +96,15 @@ export class CertificateTemplate extends PkiObject implements ICertificateTempla
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.templateID || "") }),
+        new asn1js.ObjectIdentifier({ name: (names.templateID || EMPTY_STRING) }),
         new asn1js.Integer({
-          name: (names.templateMajorVersion || ""),
+          name: (names.templateMajorVersion || EMPTY_STRING),
           optional: true
         }),
         new asn1js.Integer({
-          name: (names.templateMinorVersion || ""),
+          name: (names.templateMinorVersion || EMPTY_STRING),
           optional: true
         }),
       ]

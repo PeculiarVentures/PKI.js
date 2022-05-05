@@ -9,6 +9,7 @@ import * as Schema from "./Schema";
 import { CryptoEnginePublicKeyParams } from "./CryptoEngine/CryptoEngineInterface";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER } from "./constants";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -275,7 +276,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case VERSION:
         return 0;
       case SUBJECT:

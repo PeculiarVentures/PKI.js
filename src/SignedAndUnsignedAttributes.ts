@@ -2,6 +2,7 @@ import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { Attribute, AttributeJson } from "./Attribute";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -76,7 +77,7 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
       case ATTRIBUTES:
         return [];
       case ENCODED_VALUE:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       default:
         return super.defaultValues(memberName);
     }
@@ -113,7 +114,7 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Constructed({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       optional: true,
       idBlock: {
         tagClass: 3, // CONTEXT-SPECIFIC
@@ -121,7 +122,7 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
       },
       value: [
         new asn1js.Repeated({
-          name: (names.attributes || ""),
+          name: (names.attributes || EMPTY_STRING),
           value: Attribute.schema()
         })
       ]

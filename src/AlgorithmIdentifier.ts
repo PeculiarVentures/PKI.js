@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -76,7 +77,7 @@ export class AlgorithmIdentifier extends PkiObject implements IAlgorithmIdentifi
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ALGORITHM_ID:
-        return "";
+        return EMPTY_STRING;
       case ALGORITHM_PARAMS:
         return new asn1js.Any();
       default:
@@ -92,7 +93,7 @@ export class AlgorithmIdentifier extends PkiObject implements IAlgorithmIdentifi
   static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case ALGORITHM_ID:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case ALGORITHM_PARAMS:
         return (memberValue instanceof asn1js.Any);
       default:
@@ -113,11 +114,11 @@ export class AlgorithmIdentifier extends PkiObject implements IAlgorithmIdentifi
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       optional: (names.optional || false),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.algorithmIdentifier || "") }),
-        new asn1js.Any({ name: (names.algorithmParams || ""), optional: true })
+        new asn1js.ObjectIdentifier({ name: (names.algorithmIdentifier || EMPTY_STRING) }),
+        new asn1js.Any({ name: (names.algorithmParams || EMPTY_STRING), optional: true })
       ]
     }));
   }

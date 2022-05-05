@@ -9,6 +9,7 @@ import { Extension, ExtensionJson, ExtensionSchema } from "./Extension";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const POLICY = "policy";
@@ -207,7 +208,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       case VERSION:
         return 0;
       case POLICY:
-        return "";
+        return EMPTY_STRING;
       case MESSAGE_IMPRINT:
         return new MessageImprint();
       case SERIAL_NUMBER:

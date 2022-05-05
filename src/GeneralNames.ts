@@ -4,6 +4,7 @@ import * as Schema from "./Schema";
 import { GeneralName, GeneralNameJson } from "./GeneralName";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const NAMES = "names";
 const GENERAL_NAMES = "generalNames";
@@ -79,10 +80,10 @@ export class GeneralNames extends PkiObject implements IGeneralNames {
 
     return (new asn1js.Sequence({
       optional,
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.generalNames || ""),
+          name: (names.generalNames || EMPTY_STRING),
           value: GeneralName.schema()
         })
       ]

@@ -7,6 +7,7 @@ import { Certificate } from "./Certificate";
 import * as Schema from "./Schema";
 import { AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_STRING } from "./constants";
 
 const HASH_ALGORITHM = "hashAlgorithm";
 const ISSUER_NAME_HASH = "issuerNameHash";
@@ -135,7 +136,7 @@ export class CertID extends PkiObject implements ICertID {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case HASH_ALGORITHM:
-        return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));
+        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
       case ISSUER_NAME_HASH:
       case ISSUER_KEY_HASH:
       case SERIAL_NUMBER:
@@ -160,16 +161,16 @@ export class CertID extends PkiObject implements ICertID {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AlgorithmIdentifier.schema(names.hashAlgorithmObject || {
           names: {
-            blockName: (names.hashAlgorithm || "")
+            blockName: (names.hashAlgorithm || EMPTY_STRING)
           }
         }),
-        new asn1js.OctetString({ name: (names.issuerNameHash || "") }),
-        new asn1js.OctetString({ name: (names.issuerKeyHash || "") }),
-        new asn1js.Integer({ name: (names.serialNumber || "") })
+        new asn1js.OctetString({ name: (names.issuerNameHash || EMPTY_STRING) }),
+        new asn1js.OctetString({ name: (names.issuerKeyHash || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.serialNumber || EMPTY_STRING) })
       ]
     }));
   }

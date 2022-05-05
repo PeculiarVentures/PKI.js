@@ -4,6 +4,7 @@ import * as Schema from "./Schema";
 import { ExtensionParsedValue, ExtensionValueFactory } from "./ExtensionValueFactory";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const EXTN_ID = "extnID";
 const CRITICAL = "critical";
@@ -104,7 +105,7 @@ export class Extension extends PkiObject implements IExtension {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case EXTN_ID:
-        return "";
+        return EMPTY_STRING;
       case CRITICAL:
         return false;
       case EXTN_VALUE:
@@ -131,14 +132,14 @@ export class Extension extends PkiObject implements IExtension {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.extnID || "") }),
+        new asn1js.ObjectIdentifier({ name: (names.extnID || EMPTY_STRING) }),
         new asn1js.Boolean({
-          name: (names.critical || ""),
+          name: (names.critical || EMPTY_STRING),
           optional: true
         }),
-        new asn1js.OctetString({ name: (names.extnValue || "") })
+        new asn1js.OctetString({ name: (names.extnValue || EMPTY_STRING) })
       ]
     }));
   }

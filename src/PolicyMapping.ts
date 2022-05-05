@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -58,9 +59,9 @@ export class PolicyMapping extends PkiObject implements IPolicyMapping {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ISSUER_DOMAIN_POLICY:
-        return "";
+        return EMPTY_STRING;
       case SUBJECT_DOMAIN_POLICY:
-        return "";
+        return EMPTY_STRING;
       default:
         return super.defaultValues(memberName);
     }
@@ -82,10 +83,10 @@ export class PolicyMapping extends PkiObject implements IPolicyMapping {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.issuerDomainPolicy || "") }),
-        new asn1js.ObjectIdentifier({ name: (names.subjectDomainPolicy || "") })
+        new asn1js.ObjectIdentifier({ name: (names.issuerDomainPolicy || EMPTY_STRING) }),
+        new asn1js.ObjectIdentifier({ name: (names.subjectDomainPolicy || EMPTY_STRING) })
       ]
     }));
   }

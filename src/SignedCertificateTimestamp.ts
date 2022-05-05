@@ -8,6 +8,7 @@ import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { Certificate } from "./Certificate";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const LOG_ID = "logID";
@@ -116,12 +117,12 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
         return 0;
       case LOG_ID:
       case EXTENSIONS:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case TIMESTAMP:
         return new Date(0);
       case HASH_ALGORITHM:
       case SIGNATURE_ALGORITHM:
-        return "";
+        return EMPTY_STRING;
       case SIGNATURE:
         return new asn1js.Any();
       default:
@@ -383,7 +384,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
       stream.buffer.slice(0, stream.length),
       { valueBlock: { valueHex: this.signature.toBER(false) } } as any,
       publicKeyInfo,
-      { algorithmId: "" } as AlgorithmIdentifier,
+      { algorithmId: EMPTY_STRING } as AlgorithmIdentifier,
       "SHA-256"
     );
     //#endregion

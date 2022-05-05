@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, GeneralNameJson } from "./GeneralName";
 import { DistributionPointName, DistributionPointNameJson } from "./IssuingDistributionPoint";
@@ -132,7 +133,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Constructed({
           optional: true,
@@ -144,7 +145,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
             new asn1js.Choice({
               value: [
                 new asn1js.Constructed({
-                  name: (names.distributionPoint || ""),
+                  name: (names.distributionPoint || EMPTY_STRING),
                   optional: true,
                   idBlock: {
                     tagClass: 3, // CONTEXT-SPECIFIC
@@ -152,13 +153,13 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
                   },
                   value: [
                     new asn1js.Repeated({
-                      name: (names.distributionPointNames || ""),
+                      name: (names.distributionPointNames || EMPTY_STRING),
                       value: GeneralName.schema()
                     })
                   ]
                 }),
                 new asn1js.Constructed({
-                  name: (names.distributionPoint || ""),
+                  name: (names.distributionPoint || EMPTY_STRING),
                   optional: true,
                   idBlock: {
                     tagClass: 3, // CONTEXT-SPECIFIC
@@ -171,7 +172,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
           ]
         }),
         new asn1js.Primitive({
-          name: (names.reasons || ""),
+          name: (names.reasons || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -179,7 +180,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
           }
         }), // IMPLICIT BitString value
         new asn1js.Constructed({
-          name: (names.cRLIssuer || ""),
+          name: (names.cRLIssuer || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -187,7 +188,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
           },
           value: [
             new asn1js.Repeated({
-              name: (names.cRLIssuerNames || ""),
+              name: (names.cRLIssuerNames || EMPTY_STRING),
               value: GeneralName.schema()
             })
           ]

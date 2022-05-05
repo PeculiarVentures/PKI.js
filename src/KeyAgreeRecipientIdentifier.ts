@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { IssuerAndSerialNumber, IssuerAndSerialNumberJson, IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -104,18 +105,18 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
       value: [
         IssuerAndSerialNumber.schema(names.issuerAndSerialNumber || {
           names: {
-            blockName: (names.blockName || "")
+            blockName: (names.blockName || EMPTY_STRING)
           }
         }),
         new asn1js.Constructed({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
           value: RecipientKeyIdentifier.schema(names.rKeyId || {
             names: {
-              blockName: (names.blockName || "")
+              blockName: (names.blockName || EMPTY_STRING)
             }
           }).valueBlock.value
         })

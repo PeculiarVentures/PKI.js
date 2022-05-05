@@ -5,6 +5,7 @@ import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 import * as common from "./common";
+import { EMPTY_STRING } from "./constants";
 
 export const HASH_ALGORITHM = "hashAlgorithm";
 export const HASHED_MESSAGE = "hashedMessage";
@@ -105,7 +106,7 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case HASH_ALGORITHM:
-        return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));
+        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
       case HASHED_MESSAGE:
         return (memberValue.isEqual(MessageImprint.defaultValues(memberName)) === 0);
       default:
@@ -126,10 +127,10 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AlgorithmIdentifier.schema(names.hashAlgorithm || {}),
-        new asn1js.OctetString({ name: (names.hashedMessage || "") })
+        new asn1js.OctetString({ name: (names.hashedMessage || EMPTY_STRING) })
       ]
     }));
   }

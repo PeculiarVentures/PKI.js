@@ -1,3 +1,5 @@
+import { EMPTY_STRING } from "./constants";
+
 /**
  * String preparation function. In a future here will be realization of algorithm from RFC4518
  * @param inputString JavaScript string. As soon as for each ASN.1 string type we have a specific
@@ -7,7 +9,7 @@
 export function stringPrep(inputString: string): string {
   //#region Initial variables
   let isSpace = false;
-  let cutResult = "";
+  let cutResult = EMPTY_STRING;
   //#endregion
 
   const result = inputString.trim(); // Trim input string

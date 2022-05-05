@@ -8,6 +8,7 @@ import { id_ContentType_SignedData } from "./ObjectIdentifiers";
 import { Certificate } from "./Certificate";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 
 const STATUS = "status";
 const TIME_STAMP_TOKEN = "timeStampToken";
@@ -157,7 +158,7 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
           (("statusStrings" in memberValue) === false) &&
           (("failInfo" in memberValue) === false));
       case TIME_STAMP_TOKEN:
-        return ((memberValue.contentType === "") &&
+        return ((memberValue.contentType === EMPTY_STRING) &&
           (memberValue.content instanceof asn1js.Any));
       default:
         return super.defaultValues(memberName);
@@ -261,7 +262,7 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
    * Verify current TSP Response
    * @param verificationParameters Input parameters for verification
    */
-  public async verify(verificationParameters: TimeStampRespVerifyParams = { signer: 0, trustedCerts: [], data: new ArrayBuffer(0) }): Promise<boolean> {
+  public async verify(verificationParameters: TimeStampRespVerifyParams = { signer: 0, trustedCerts: [], data: EMPTY_BUFFER }): Promise<boolean> {
     this.assertContentType();
 
     // Verify internal signed data value

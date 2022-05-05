@@ -5,6 +5,7 @@ import { Extension, ExtensionJson } from "./Extension";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const MESSAGE_IMPRINT = "messageImprint";
@@ -151,7 +152,7 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
       case MESSAGE_IMPRINT:
         return new MessageImprint();
       case REQ_POLICY:
-        return "";
+        return EMPTY_STRING;
       case NONCE:
         return new asn1js.Integer();
       case CERT_REQ:

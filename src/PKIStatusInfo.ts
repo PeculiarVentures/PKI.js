@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -126,20 +127,20 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.status || "") }),
+        new asn1js.Integer({ name: (names.status || EMPTY_STRING) }),
         new asn1js.Sequence({
           optional: true,
           value: [
             new asn1js.Repeated({
-              name: (names.statusStrings || ""),
+              name: (names.statusStrings || EMPTY_STRING),
               value: new asn1js.Utf8String()
             })
           ]
         }),
         new asn1js.BitString({
-          name: (names.failInfo || ""),
+          name: (names.failInfo || EMPTY_STRING),
           optional: true
         })
       ]

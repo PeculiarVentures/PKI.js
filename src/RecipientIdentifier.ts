@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { IssuerAndSerialNumber, IssuerAndSerialNumberJson } from "./IssuerAndSerialNumber";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -104,11 +105,11 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
       value: [
         IssuerAndSerialNumber.schema({
           names: {
-            blockName: (names.blockName || "")
+            blockName: (names.blockName || EMPTY_STRING)
           }
         }),
         new asn1js.Primitive({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]

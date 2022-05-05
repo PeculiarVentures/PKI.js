@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, GeneralNameJson } from "./GeneralName";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -150,7 +151,7 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Constructed({
           optional: true,
@@ -162,20 +163,20 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
             new asn1js.Choice({
               value: [
                 new asn1js.Constructed({
-                  name: (names.distributionPoint || ""),
+                  name: (names.distributionPoint || EMPTY_STRING),
                   idBlock: {
                     tagClass: 3, // CONTEXT-SPECIFIC
                     tagNumber: 0 // [0]
                   },
                   value: [
                     new asn1js.Repeated({
-                      name: (names.distributionPointNames || ""),
+                      name: (names.distributionPointNames || EMPTY_STRING),
                       value: GeneralName.schema()
                     })
                   ]
                 }),
                 new asn1js.Constructed({
-                  name: (names.distributionPoint || ""),
+                  name: (names.distributionPoint || EMPTY_STRING),
                   idBlock: {
                     tagClass: 3, // CONTEXT-SPECIFIC
                     tagNumber: 1 // [1]
@@ -187,7 +188,7 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
           ]
         }),
         new asn1js.Primitive({
-          name: (names.onlyContainsUserCerts || ""),
+          name: (names.onlyContainsUserCerts || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -195,7 +196,7 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
           }
         }), // IMPLICIT boolean value
         new asn1js.Primitive({
-          name: (names.onlyContainsCACerts || ""),
+          name: (names.onlyContainsCACerts || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -203,7 +204,7 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
           }
         }), // IMPLICIT boolean value
         new asn1js.Primitive({
-          name: (names.onlySomeReasons || ""),
+          name: (names.onlySomeReasons || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -211,7 +212,7 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
           }
         }), // IMPLICIT BitString value
         new asn1js.Primitive({
-          name: (names.indirectCRL || ""),
+          name: (names.indirectCRL || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -219,7 +220,7 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
           }
         }), // IMPLICIT boolean value
         new asn1js.Primitive({
-          name: (names.onlyContainsAttributeCerts || ""),
+          name: (names.onlyContainsAttributeCerts || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC

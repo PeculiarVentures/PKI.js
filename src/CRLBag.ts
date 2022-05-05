@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { CertificateRevocationList } from "./CertificateRevocationList";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { id_CRLBag_X509CRL } from "./ObjectIdentifiers";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -68,7 +69,7 @@ export class CRLBag extends PkiObject implements ICRLBag {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CRL_ID:
-        return "";
+        return EMPTY_STRING;
       case CRL_VALUE:
         return (new asn1js.Any());
       case PARSED_VALUE:
@@ -86,7 +87,7 @@ export class CRLBag extends PkiObject implements ICRLBag {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case CRL_ID:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case CRL_VALUE:
         return (memberValue instanceof asn1js.Any);
       case PARSED_VALUE:
@@ -113,7 +114,7 @@ export class CRLBag extends PkiObject implements ICRLBag {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.ObjectIdentifier({ name: (names.id || "id") }),
         new asn1js.Constructed({

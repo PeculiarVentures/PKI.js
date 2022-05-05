@@ -81,10 +81,10 @@ export class SafeContents extends PkiObject implements ISafeContents {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.safeBags || ""),
+          name: (names.safeBags || EMPTY_STRING),
           value: SafeBag.schema()
         })
       ]
@@ -128,4 +128,5 @@ export class SafeContents extends PkiObject implements ISafeContents {
 
 }
 
-import { SafeBag, SafeBagJson } from "./SafeBag";
+import { SafeBag, SafeBagJson } from "./SafeBag";import { EMPTY_STRING } from "./constants";
+

@@ -13,6 +13,7 @@ import { BasicConstraints } from "./BasicConstraints";
 import { CryptoEnginePublicKeyParams } from "./CryptoEngine/CryptoEngineInterface";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -416,7 +417,7 @@ export class Certificate extends PkiObject implements ICertificate {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case VERSION:
         return 0;
       case SERIAL_NUMBER:
@@ -434,9 +435,9 @@ export class Certificate extends PkiObject implements ICertificate {
       case SUBJECT_PUBLIC_KEY_INFO:
         return new PublicKeyInfo();
       case ISSUER_UNIQUE_ID:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case SUBJECT_UNIQUE_ID:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case EXTENSIONS:
         return [];
       case SIGNATURE_ALGORITHM:
@@ -507,7 +508,7 @@ export class Certificate extends PkiObject implements ICertificate {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         tbsCertificate(names.tbsCertificate),
         AlgorithmIdentifier.schema(names.signatureAlgorithm || {

@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { stringPrep } from "./Helpers";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -69,7 +70,7 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TYPE:
-        return "";
+        return EMPTY_STRING;
       case VALUE:
         return {};
       default:
@@ -94,10 +95,10 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.type || "") }),
-        new asn1js.Any({ name: (names.value || "") })
+        new asn1js.ObjectIdentifier({ name: (names.type || EMPTY_STRING) }),
+        new asn1js.Any({ name: (names.value || EMPTY_STRING) })
       ]
     }));
   }

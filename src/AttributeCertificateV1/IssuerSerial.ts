@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "../constants";
 import { AsnError } from "../errors";
 import { GeneralNames, GeneralNamesJson, GeneralNamesSchema } from "../GeneralNames";
 import { PkiObject, PkiObjectParameters } from "../PkiObject";
@@ -109,13 +110,13 @@ export class IssuerSerial extends PkiObject implements IIssuerSerial {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         GeneralNames.schema(names.issuer || {}),
-        new asn1js.Integer({ name: (names.serialNumber || "") }),
+        new asn1js.Integer({ name: (names.serialNumber || EMPTY_STRING) }),
         new asn1js.BitString({
           optional: true,
-          name: (names.issuerUID || "")
+          name: (names.issuerUID || EMPTY_STRING)
         })
       ]
     }));

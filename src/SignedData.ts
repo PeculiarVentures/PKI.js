@@ -21,6 +21,7 @@ import * as Schema from "./Schema";
 import { id_ContentType_Data, id_eContentType_TSTInfo, id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 
 export type SignedDataCRL = CertificateRevocationList | OtherRevocationInfoFormat;
 export type SignedDataCRLJson = CertificateRevocationListJson | OtherRevocationInfoFormatJson;
@@ -529,7 +530,7 @@ export class SignedData extends PkiObject implements ISignedData {
   public verify(params: SignedDataVerifyParams & { extendedMode: true; }): Promise<SignedDataVerifyResult>;
   public async verify({
     signer = (-1),
-    data = (new ArrayBuffer(0)),
+    data = (EMPTY_BUFFER),
     trustedCerts = [],
     checkDate = (new Date()),
     checkChain = false,
@@ -542,8 +543,8 @@ export class SignedData extends PkiObject implements ISignedData {
     let timestampSerial: ArrayBuffer | null = null;
     try {
       //#region Global variables
-      let messageDigestValue = new ArrayBuffer(0);
-      let shaAlgorithm = "";
+      let messageDigestValue = EMPTY_BUFFER;
+      let shaAlgorithm = EMPTY_STRING;
       let certificatePath: Certificate[] = [];
 
       const crypto = common.getCrypto(true);
@@ -860,7 +861,7 @@ export class SignedData extends PkiObject implements ISignedData {
         return {
           date: checkDate,
           code: 14,
-          message: "",
+          message: EMPTY_STRING,
           signatureVerified: verifyResult,
           signerCertificate: signerCert,
           timestampSerial,
@@ -893,7 +894,7 @@ export class SignedData extends PkiObject implements ISignedData {
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
    * @param data Detached data
    */
-  public async sign(privateKey: CryptoKey, signerIndex: number, hashAlgorithm = "SHA-1", data: BufferSource = (new ArrayBuffer(0))): Promise<void> {
+  public async sign(privateKey: CryptoKey, signerIndex: number, hashAlgorithm = "SHA-1", data: BufferSource = (EMPTY_BUFFER)): Promise<void> {
     //#region Initial checking
     if (!privateKey)
       throw new Error("Need to provide a private key for signing");

@@ -26,6 +26,7 @@ import { Certificate } from "./Certificate";
 import { ArgumentError, AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { BufferSourceConverter } from "pvtsutils";
+import { EMPTY_STRING, EMPTY_BUFFER } from "./constants";
 
 const VERSION = "version";
 const ORIGINATOR_INFO = "originatorInfo";
@@ -266,11 +267,11 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
         new asn1js.Constructed({
-          name: (names.originatorInfo || ""),
+          name: (names.originatorInfo || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -281,7 +282,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         new asn1js.Set({
           value: [
             new asn1js.Repeated({
-              name: (names.recipientInfos || ""),
+              name: (names.recipientInfos || EMPTY_STRING),
               value: RecipientInfo.schema()
             })
           ]
@@ -295,7 +296,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           },
           value: [
             new asn1js.Repeated({
-              name: (names.unprotectedAttrs || ""),
+              name: (names.unprotectedAttrs || EMPTY_STRING),
               value: Attribute.schema()
             })
           ]
@@ -474,7 +475,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
             algorithmId = common.getOIDByAlgorithm({
               name: "RSAES-PKCS1-v1_5"
             });
-            if (algorithmId === "")
+            if (algorithmId === EMPTY_STRING)
               throw new Error("Can not find OID for RSAES-PKCS1-v1_5");
             //#endregion
 
@@ -1510,7 +1511,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     //#endregion
 
     //#region Create correct data block for decryption
-    let dataBuffer: BufferSource = new ArrayBuffer(0);
+    let dataBuffer: BufferSource = EMPTY_BUFFER;
 
     if (!this.encryptedContentInfo.encryptedContent) {
       throw new Error("Required property `encryptedContent` is empty");

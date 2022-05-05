@@ -1,6 +1,7 @@
 import { BitString, OctetString } from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier } from "../AlgorithmIdentifier";
+import { EMPTY_STRING } from "../constants";
 import { EncryptedContentInfo } from "../EncryptedContentInfo";
 import { PublicKeyInfo } from "../PublicKeyInfo";
 import * as type from "./CryptoEngineInterface";
@@ -17,7 +18,7 @@ export abstract class AbstractCryptoEngine implements type.ICryptoEngine {
   constructor(parameters: type.CryptoEngineParameters) {
     this.crypto = parameters.crypto;
     this.subtle = parameters.subtle;
-    this.name = pvutils.getParametersValue(parameters, "name", "");
+    this.name = pvutils.getParametersValue(parameters, "name", EMPTY_STRING);
   }
 
   public abstract getOIDByAlgorithm(algorithm: Algorithm, safety?: boolean, target?: string): string;

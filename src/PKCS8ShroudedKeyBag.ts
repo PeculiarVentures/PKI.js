@@ -8,6 +8,7 @@ import * as Schema from "./Schema";
 import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_STRING } from "./constants";
 
 const ENCRYPTION_ALGORITHM = "encryptionAlgorithm";
 const ENCRYPTED_DATA = "encryptedData";
@@ -126,7 +127,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AlgorithmIdentifier.schema(names.encryptionAlgorithm || {
           names: {

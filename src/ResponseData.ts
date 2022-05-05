@@ -7,6 +7,7 @@ import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER } from "./constants";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -112,7 +113,7 @@ export class ResponseData extends PkiObject implements IResponseData {
       case VERSION:
         return 0;
       case TBS:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case RESPONDER_ID:
         return {};
       case PRODUCED_AT:

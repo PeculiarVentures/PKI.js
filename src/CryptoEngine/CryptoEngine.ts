@@ -12,6 +12,7 @@ import { PBES2Params } from "../PBES2Params";
 import { ArgumentError, AsnError, ParameterError } from "../errors";
 import * as type from "./CryptoEngineInterface";
 import { AbstractCryptoEngine } from "./AbstractCryptoEngine";
+import { EMPTY_STRING, EMPTY_BUFFER } from "../constants";
 
 /**
  * Making MAC key using algorithm described in B.2 of PKCS#12 standard.
@@ -880,14 +881,14 @@ export class CryptoEngine extends AbstractCryptoEngine {
     }
 
     if (safety) {
-      throw new Error(`Unsupported algorithm identifier ${target ? `for ${target} ` : ""}: ${oid}`);
+      throw new Error(`Unsupported algorithm identifier ${target ? `for ${target} ` : EMPTY_STRING}: ${oid}`);
     }
 
     return {};
   }
 
   public getOIDByAlgorithm(algorithm: Algorithm, safety = false, target?: string): string {
-    let result = "";
+    let result = EMPTY_STRING;
 
     switch (algorithm.name.toUpperCase()) {
       case "RSAES-PKCS1-V1_5":
@@ -1065,7 +1066,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     }
 
     if (!result && safety) {
-      throw new Error(`Unsupported algorithm ${target ? `for ${target} ` : ""}: ${algorithm.name}`);
+      throw new Error(`Unsupported algorithm ${target ? `for ${target} ` : EMPTY_STRING}: ${algorithm.name}`);
     }
 
     return result;
@@ -1496,7 +1497,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
    */
   // TODO use safety
   getHashAlgorithm(signatureAlgorithm: AlgorithmIdentifier): string {
-    let result = "";
+    let result = EMPTY_STRING;
 
     switch (signatureAlgorithm.algorithmId) {
       case "1.2.840.10045.4.1": // ecdsa-with-SHA1
@@ -1525,7 +1526,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
                 result = algorithm.name;
               }
               else {
-                return "";
+                return EMPTY_STRING;
               }
             }
             else
@@ -1717,7 +1718,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     //#region Decrypt internal content using derived key
     //#region Create correct data block for decryption
-    let dataBuffer: BufferSource = new ArrayBuffer(0);
+    let dataBuffer: BufferSource = EMPTY_BUFFER;
 
     const encryptedContent = parameters.encryptedContentInfo.encryptedContent;
     if (!encryptedContent) {
@@ -1954,7 +1955,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     //#region Find signer's hashing algorithm
     const shaAlgorithm = this.getHashAlgorithm(signatureAlgorithm);
-    if (shaAlgorithm === "")
+    if (shaAlgorithm === EMPTY_STRING)
       throw new Error(`Unsupported signature algorithm: ${signatureAlgorithm.algorithmId}`);
     //#endregion
 

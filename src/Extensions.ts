@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { Extension, ExtensionJson, ExtensionSchema } from "./Extension";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -82,10 +83,10 @@ export class Extensions extends PkiObject implements IExtensions {
 
     return (new asn1js.Sequence({
       optional,
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.extensions || ""),
+          name: (names.extensions || EMPTY_STRING),
           value: Extension.schema(names.extension || {})
         })
       ]

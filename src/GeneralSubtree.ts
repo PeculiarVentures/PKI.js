@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, GeneralNameJson, GeneralNameSchema } from "./GeneralName";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -98,7 +99,7 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         GeneralName.schema(names.base || {}),
         new asn1js.Constructed({
@@ -107,7 +108,7 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          value: [new asn1js.Integer({ name: (names.minimum || "") })]
+          value: [new asn1js.Integer({ name: (names.minimum || EMPTY_STRING) })]
         }),
         new asn1js.Constructed({
           optional: true,
@@ -115,7 +116,7 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 1 // [1]
           },
-          value: [new asn1js.Integer({ name: (names.maximum || "") })]
+          value: [new asn1js.Integer({ name: (names.maximum || EMPTY_STRING) })]
         })
       ]
     }));

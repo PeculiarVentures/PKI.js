@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -109,21 +110,14 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
     entityUInfo?: string;
     suppPubInfo?: string;
   }> = {}): Schema.SchemaType {
-    /**
-     * @type {Object}
-     * @property {string} [blockName]
-     * @property {string} [keyInfo]
-     * @property {string} [entityUInfo]
-     * @property {string} [suppPubInfo]
-     */
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AlgorithmIdentifier.schema(names.keyInfo || {}),
         new asn1js.Constructed({
-          name: (names.entityUInfo || ""),
+          name: (names.entityUInfo || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
@@ -132,7 +126,7 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
           value: [new asn1js.OctetString()]
         }),
         new asn1js.Constructed({
-          name: (names.suppPubInfo || ""),
+          name: (names.suppPubInfo || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 2 // [2]

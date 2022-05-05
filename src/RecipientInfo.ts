@@ -8,6 +8,7 @@ import { OtherRecipientInfo, OtherRecipientInfoJson } from "./OtherRecipientInfo
 import * as Schema from "./Schema";
 import { AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_STRING } from "./constants";
 
 const VARIANT = "variant";
 const VALUE = "value";
@@ -110,11 +111,11 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
       value: [
         KeyTransRecipientInfo.schema({
           names: {
-            blockName: (names.blockName || "")
+            blockName: (names.blockName || EMPTY_STRING)
           }
         }),
         new asn1js.Constructed({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 1 // [1]
@@ -122,7 +123,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
           value: KeyAgreeRecipientInfo.schema().valueBlock.value
         }),
         new asn1js.Constructed({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 2 // [2]
@@ -130,7 +131,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
           value: KEKRecipientInfo.schema().valueBlock.value
         }),
         new asn1js.Constructed({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 3 // [3]
@@ -138,7 +139,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
           value: PasswordRecipientinfo.schema().valueBlock.value
         }),
         new asn1js.Constructed({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 4 // [4]

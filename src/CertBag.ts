@@ -6,6 +6,7 @@ import * as Schema from "./Schema";
 import { id_CertBag_AttributeCertificate, id_CertBag_SDSICertificate, id_CertBag_X509Certificate } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_STRING } from "./constants";
 
 const CERT_ID = "certId";
 const CERT_VALUE = "certValue";
@@ -68,7 +69,7 @@ export class CertBag extends PkiObject implements ICertBag {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CERT_ID:
-        return "";
+        return EMPTY_STRING;
       case CERT_VALUE:
         return (new asn1js.Any());
       case PARSED_VALUE:
@@ -86,7 +87,7 @@ export class CertBag extends PkiObject implements ICertBag {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case CERT_ID:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case CERT_VALUE:
         return (memberValue instanceof asn1js.Any);
       case PARSED_VALUE:
@@ -113,7 +114,7 @@ export class CertBag extends PkiObject implements ICertBag {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.ObjectIdentifier({ name: (names.id || "id") }),
         new asn1js.Constructed({

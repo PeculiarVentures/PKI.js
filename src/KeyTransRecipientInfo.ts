@@ -7,6 +7,7 @@ import { IssuerAndSerialNumber, IssuerAndSerialNumberJson } from "./IssuerAndSer
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const RID = "rid";
@@ -139,12 +140,12 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
         RecipientIdentifier.schema(names.rid || {}),
         AlgorithmIdentifier.schema(names.keyEncryptionAlgorithm || {}),
-        new asn1js.OctetString({ name: (names.encryptedKey || "") })
+        new asn1js.OctetString({ name: (names.encryptedKey || EMPTY_STRING) })
       ]
     }));
   }

@@ -12,6 +12,7 @@ import { PublicKeyInfo } from "./PublicKeyInfo";
 import { id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BaseCRLNumber, id_CertificateIssuer, id_CRLNumber, id_CRLReason, id_FreshestCRL, id_InvalidityDate, id_IssuerAltName, id_IssuingDistributionPoint } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER } from "./constants";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -244,7 +245,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case VERSION:
         return 1;
       case SIGNATURE:

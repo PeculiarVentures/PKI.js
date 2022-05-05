@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import { EMPTY_BUFFER } from "./constants";
 import type { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
 import { ArgumentError } from "./errors";
 
@@ -138,7 +139,7 @@ export function getAlgorithmParameters(algorithmName: string, operation: CryptoE
 export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuffer {
   //#region Initial check for correct length
   if ((signatureBuffer.byteLength % 2) !== 0)
-    return new ArrayBuffer(0);
+    return EMPTY_BUFFER;
   //#endregion
 
   //#region Initial variables
@@ -176,7 +177,7 @@ export function createECDSASignatureFromCMS(cmsSignature: asn1js.AsnType): Array
     && cmsSignature.valueBlock.value.length === 2
     && cmsSignature.valueBlock.value[0] instanceof asn1js.Integer
     && cmsSignature.valueBlock.value[1] instanceof asn1js.Integer))
-    return new ArrayBuffer(0);
+    return EMPTY_BUFFER;
 
   const rValueView = cmsSignature.valueBlock.value[0].convertFromDER().valueBlock.valueHexView;
   const sValueView = cmsSignature.valueBlock.value[1].convertFromDER().valueBlock.valueHexView;
@@ -291,7 +292,7 @@ export async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer,
   counterView[2] = 0x00;
   counterView[3] = Counter;
 
-  let combinedBuffer = new ArrayBuffer(0);
+  let combinedBuffer = EMPTY_BUFFER;
   //#endregion
 
   //#region Get a "crypto" extension
@@ -372,7 +373,7 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
 
   //#region Return combined digest with specified length
   //#region Initial variables
-  let combinedBuffer = new ArrayBuffer(0);
+  let combinedBuffer = EMPTY_BUFFER;
   let currentCounter = 1;
   let found = true;
   //#endregion

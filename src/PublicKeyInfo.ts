@@ -7,6 +7,7 @@ import { RSAPublicKey } from "./RSAPublicKey";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const ALGORITHM = "algorithm";
 const SUBJECT_PUBLIC_KEY = "subjectPublicKey";
@@ -146,10 +147,10 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AlgorithmIdentifier.schema(names.algorithm || {}),
-        new asn1js.BitString({ name: (names.subjectPublicKey || "") })
+        new asn1js.BitString({ name: (names.subjectPublicKey || EMPTY_STRING) })
       ]
     }));
   }

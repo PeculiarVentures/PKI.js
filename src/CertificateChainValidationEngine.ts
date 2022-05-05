@@ -11,6 +11,7 @@ import { GeneralName } from "./GeneralName";
 import { id_AnyPolicy, id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BasicConstraints, id_CertificatePolicies, id_CRLDistributionPoints, id_FreshestCRL, id_InhibitAnyPolicy, id_KeyUsage, id_NameConstraints, id_PolicyConstraints, id_PolicyMappings, id_SubjectAltName, id_SubjectKeyIdentifier } from "./ObjectIdentifiers";
 import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
 import { GeneralSubtree } from "./GeneralSubtree";
+import { EMPTY_STRING } from "./constants";
 
 const TRUSTED_CERTS = "trustedCerts";
 const CERTS = "certs";
@@ -438,7 +439,7 @@ export class CertificateChainValidationEngine {
       if (crlsAndCertificates.length) {
         return {
           status: 0,
-          statusMessage: "",
+          statusMessage: EMPTY_STRING,
           result: crlsAndCertificates
         };
       }
@@ -557,7 +558,7 @@ export class CertificateChainValidationEngine {
       return {
         result: true,
         resultCode: 0,
-        resultMessage: ""
+        resultMessage: EMPTY_STRING
       };
     }
     //#endregion
@@ -611,7 +612,7 @@ export class CertificateChainValidationEngine {
           let ocspResult = 2;
           let crlResult: FindCrlResult = {
             status: 0,
-            statusMessage: ""
+            statusMessage: EMPTY_STRING
           };
           //#endregion
 
@@ -1449,7 +1450,7 @@ export class CertificateChainValidationEngine {
       const policyResult: CertificateChainValidationEngineVerifyResult = {
         result: (userConstrPolicies.length > 0),
         resultCode: 0,
-        resultMessage: (userConstrPolicies.length > 0) ? "" : "Zero \"userConstrPolicies\" array, no intersections with \"authConstrPolicies\"",
+        resultMessage: (userConstrPolicies.length > 0) ? EMPTY_STRING : "Zero \"userConstrPolicies\" array, no intersections with \"authConstrPolicies\"",
         authConstrPolicies,
         userConstrPolicies,
         explicitPolicyIndicator,

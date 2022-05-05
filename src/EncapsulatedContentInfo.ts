@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -97,7 +98,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case E_CONTENT_TYPE:
-        return "";
+        return EMPTY_STRING;
       case E_CONTENT:
         return new asn1js.OctetString();
       default:
@@ -113,7 +114,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case E_CONTENT_TYPE:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case E_CONTENT:
         {
           if ((memberValue.idBlock.tagClass === 1) && (memberValue.idBlock.tagNumber === 4))
@@ -139,9 +140,9 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.eContentType || "") }),
+        new asn1js.ObjectIdentifier({ name: (names.eContentType || EMPTY_STRING) }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
@@ -149,7 +150,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
             tagNumber: 0 // [0]
           },
           value: [
-            new asn1js.Any({ name: (names.eContent || "") }) // In order to aling this with PKCS#7 and CMS as well
+            new asn1js.Any({ name: (names.eContent || EMPTY_STRING) }) // In order to aling this with PKCS#7 and CMS as well
           ]
         })
       ]

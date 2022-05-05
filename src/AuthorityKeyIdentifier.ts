@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, GeneralNameJson } from "./GeneralName";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -104,10 +105,10 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Primitive({
-          name: (names.keyIdentifier || ""),
+          name: (names.keyIdentifier || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -122,13 +123,13 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
           },
           value: [
             new asn1js.Repeated({
-              name: (names.authorityCertIssuer || ""),
+              name: (names.authorityCertIssuer || EMPTY_STRING),
               value: GeneralName.schema()
             })
           ]
         }),
         new asn1js.Primitive({
-          name: (names.authorityCertSerialNumber || ""),
+          name: (names.authorityCertSerialNumber || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC

@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -101,8 +102,8 @@ export class Time extends PkiObject implements ITime {
     return (new asn1js.Choice({
       optional,
       value: [
-        new asn1js.UTCTime({ name: (names.utcTimeName || "") }),
-        new asn1js.GeneralizedTime({ name: (names.generalTimeName || "") })
+        new asn1js.UTCTime({ name: (names.utcTimeName || EMPTY_STRING) }),
+        new asn1js.GeneralizedTime({ name: (names.generalTimeName || EMPTY_STRING) })
       ]
     }));
   }

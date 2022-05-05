@@ -2,6 +2,7 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { Attribute, AttributeJson } from "./Attribute";
+import { EMPTY_STRING } from "./constants";
 import { ECPrivateKey } from "./ECPrivateKey";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -124,11 +125,11 @@ export class PrivateKeyInfo extends PkiObject implements IPrivateKeyInfo {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
         AlgorithmIdentifier.schema(names.privateKeyAlgorithm || {}),
-        new asn1js.OctetString({ name: (names.privateKey || "") }),
+        new asn1js.OctetString({ name: (names.privateKey || EMPTY_STRING) }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
@@ -137,7 +138,7 @@ export class PrivateKeyInfo extends PkiObject implements IPrivateKeyInfo {
           },
           value: [
             new asn1js.Repeated({
-              name: (names.attributes || ""),
+              name: (names.attributes || EMPTY_STRING),
               value: Attribute.schema()
             })
           ]

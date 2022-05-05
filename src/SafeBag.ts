@@ -68,7 +68,7 @@ export class SafeBag extends PkiObject implements ISafeBag {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case BAG_ID:
-        return "";
+        return EMPTY_STRING;
       case BAG_VALUE:
         return (new asn1js.Any());
       case BAG_ATTRIBUTES:
@@ -86,7 +86,7 @@ export class SafeBag extends PkiObject implements ISafeBag {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case BAG_ID:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case BAG_VALUE:
         return (memberValue instanceof asn1js.Any);
       case BAG_ATTRIBUTES:
@@ -115,7 +115,7 @@ export class SafeBag extends PkiObject implements ISafeBag {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.ObjectIdentifier({ name: (names.bagId || BAG_ID) }),
         new asn1js.Constructed({
@@ -211,4 +211,5 @@ export class SafeBag extends PkiObject implements ISafeBag {
 }
 
 import { type BagType, SafeBagValueFactory, BagTypeJson } from "./SafeBagValueFactory";
+import { EMPTY_STRING } from "./constants";
 

@@ -6,6 +6,7 @@ import { ObjectDigestInfo, ObjectDigestInfoJson } from "./ObjectDigestInfo";
 import * as Schema from "../Schema";
 import { PkiObject, PkiObjectParameters } from "../PkiObject";
 import { AsnError } from "../errors";
+import { EMPTY_STRING } from "../constants";
 
 const BASE_CERTIFICATE_ID = "baseCertificateID";
 const ENTITY_NAME = "entityName";
@@ -110,11 +111,11 @@ export class Holder extends PkiObject implements IHolder {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Constructed({
           optional: true,
-          name: (names.baseCertificateID || ""),
+          name: (names.baseCertificateID || EMPTY_STRING),
           idBlock: {
             tagClass: 3,
             tagNumber: 0 // [0]
@@ -123,7 +124,7 @@ export class Holder extends PkiObject implements IHolder {
         }),
         new asn1js.Constructed({
           optional: true,
-          name: (names.entityName || ""),
+          name: (names.entityName || EMPTY_STRING),
           idBlock: {
             tagClass: 3,
             tagNumber: 1 // [2]
@@ -132,7 +133,7 @@ export class Holder extends PkiObject implements IHolder {
         }),
         new asn1js.Constructed({
           optional: true,
-          name: (names.objectDigestInfo || ""),
+          name: (names.objectDigestInfo || EMPTY_STRING),
           idBlock: {
             tagClass: 3,
             tagNumber: 2 // [2]

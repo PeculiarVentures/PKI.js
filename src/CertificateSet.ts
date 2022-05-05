@@ -7,6 +7,7 @@ import { OtherCertificateFormat, OtherCertificateFormatJson } from "./OtherCerti
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const CERTIFICATES = "certificates";
 const CLEAR_PROPS = [
@@ -86,7 +87,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
 
     return (
       new asn1js.Set({
-        name: (names.blockName || ""),
+        name: (names.blockName || EMPTY_STRING),
         value: [
           new asn1js.Repeated({
             name: (names.certificates || CERTIFICATES),

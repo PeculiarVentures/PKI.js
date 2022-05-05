@@ -6,6 +6,7 @@ import { ObjectDigestInfo, ObjectDigestInfoJson } from "./ObjectDigestInfo";
 import * as Schema from "../Schema";
 import { PkiObject, PkiObjectParameters } from "../PkiObject";
 import { AsnError } from "../errors";
+import { EMPTY_STRING } from "../constants";
 
 const ISSUER_NAME = "issuerName";
 const BASE_CERTIFICATE_ID = "baseCertificateID";
@@ -106,7 +107,7 @@ export class V2Form extends PkiObject implements IV2Form {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         GeneralNames.schema({
           names: {
@@ -115,7 +116,7 @@ export class V2Form extends PkiObject implements IV2Form {
         }, true),
         new asn1js.Constructed({
           optional: true,
-          name: (names.baseCertificateID || ""),
+          name: (names.baseCertificateID || EMPTY_STRING),
           idBlock: {
             tagClass: 3,
             tagNumber: 0 // [0]
@@ -124,7 +125,7 @@ export class V2Form extends PkiObject implements IV2Form {
         }),
         new asn1js.Constructed({
           optional: true,
-          name: (names.objectDigestInfo || ""),
+          name: (names.objectDigestInfo || EMPTY_STRING),
           idBlock: {
             tagClass: 3,
             tagNumber: 1 // [1]
