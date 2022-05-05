@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
@@ -187,7 +188,20 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
 
   public static override CLASS_NAME = "CertificateRevocationList";
 
-  public tbs!: ArrayBuffer;
+  public tbsView!: Uint8Array;
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public get tbs(): ArrayBuffer {
+    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+  }
+
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public set tbs(value: ArrayBuffer) {
+    this.tbsView = new Uint8Array(value);
+  }
   public version!: number;
   public signature!: AlgorithmIdentifier;
   public issuer!: RelativeDistinguishedNames;
@@ -205,7 +219,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
   constructor(parameters: CertificateRevocationListParameters = {}) {
     super();
 
-    this.tbs = pvutils.getParametersValue(parameters, TBS, CertificateRevocationList.defaultValues(TBS));
+    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, CertificateRevocationList.defaultValues(TBS)));
     this.version = pvutils.getParametersValue(parameters, VERSION, CertificateRevocationList.defaultValues(VERSION));
     this.signature = pvutils.getParametersValue(parameters, SIGNATURE, CertificateRevocationList.defaultValues(SIGNATURE));
     this.issuer = pvutils.getParametersValue(parameters, ISSUER, CertificateRevocationList.defaultValues(ISSUER));
@@ -318,7 +332,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
-    this.tbs = (asn1.result.tbsCertList as asn1js.Sequence).valueBeforeDecodeView.slice().buffer;
+    this.tbsView = (asn1.result.tbsCertList as asn1js.Sequence).valueBeforeDecodeView;
 
     if (TBS_CERT_LIST_VERSION in asn1.result) {
       this.version = asn1.result[TBS_CERT_LIST_VERSION].valueBlock.valueDec;
@@ -391,11 +405,11 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     let tbsSchema;
 
     if (!encodeFlag) {
-      if (!this.tbs.byteLength) { // No stored TBS part
+      if (!this.tbsView.byteLength) { // No stored TBS part
         return CertificateRevocationList.schema();
       }
 
-      const asn1 = asn1js.fromBER(this.tbs);
+      const asn1 = asn1js.fromBER(this.tbsView);
       AsnError.assert(asn1, "TBS Certificate Revocation List");
       tbsSchema = asn1.result;
     }
@@ -419,7 +433,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
 
   public toJSON(): CertificateRevocationListJson {
     const res: CertificateRevocationListJson = {
-      tbs: pvutils.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
+      tbs: pvtsutils.Convert.ToHex(this.tbsView),
       version: this.version,
       signature: this.signature.toJSON(),
       issuer: this.issuer.toJSON(),
@@ -497,11 +511,11 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     //#endregion
 
     //#region Create TBS data for signing
-    this.tbs = this.encodeTBS().toBER(false);
+    this.tbsView = new Uint8Array(this.encodeTBS().toBER());
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await crypto.signWithPrivateKey(this.tbs, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(this.tbsView, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -550,7 +564,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     }
     //#endregion
 
-    return crypto.verifyWithPublicKey(this.tbs, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(this.tbsView, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

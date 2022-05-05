@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
@@ -347,7 +348,21 @@ export class Certificate extends PkiObject implements ICertificate {
 
   public static override CLASS_NAME = "Certificate";
 
-  public tbs!: ArrayBuffer;
+  public tbsView!: Uint8Array;
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public get tbs(): ArrayBuffer {
+    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+  }
+
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public set tbs(value: ArrayBuffer) {
+    this.tbsView = new Uint8Array(value);
+  }
+
   public version!: number;
   public serialNumber!: asn1js.Integer;
   public signature!: AlgorithmIdentifier;
@@ -369,7 +384,7 @@ export class Certificate extends PkiObject implements ICertificate {
   constructor(parameters: CertificateParameters = {}) {
     super();
 
-    this.tbs = pvutils.getParametersValue(parameters, TBS, Certificate.defaultValues(TBS));
+    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, Certificate.defaultValues(TBS)));
     this.version = pvutils.getParametersValue(parameters, VERSION, Certificate.defaultValues(VERSION));
     this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, Certificate.defaultValues(SERIAL_NUMBER));
     this.signature = pvutils.getParametersValue(parameters, SIGNATURE, Certificate.defaultValues(SIGNATURE));
@@ -546,7 +561,7 @@ export class Certificate extends PkiObject implements ICertificate {
     //#endregion
 
     //#region Get internal properties from parsed schema
-    this.tbs = (asn1.result.tbsCertificate as asn1js.Sequence).valueBeforeDecodeView.slice().buffer;
+    this.tbsView = (asn1.result.tbsCertificate as asn1js.Sequence).valueBeforeDecodeView;
 
     if (TBS_CERTIFICATE_VERSION in asn1.result)
       this.version = asn1.result[TBS_CERTIFICATE_VERSION].valueBlock.valueDec;
@@ -651,11 +666,11 @@ export class Certificate extends PkiObject implements ICertificate {
 
     // Decode stored TBS value
     if (encodeFlag === false) {
-      if (!this.tbs.byteLength) { // No stored certificate TBS part
+      if (!this.tbsView.byteLength) { // No stored certificate TBS part
         return Certificate.schema().value[0];
       }
 
-      const asn1 = asn1js.fromBER(this.tbs);
+      const asn1 = asn1js.fromBER(this.tbsView);
       AsnError.assert(asn1, "TBS Certificate");
 
       tbsSchema = asn1.result;
@@ -676,7 +691,7 @@ export class Certificate extends PkiObject implements ICertificate {
 
   public toJSON(): CertificateJson {
     const res: CertificateJson = {
-      tbs: pvutils.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
+      tbs: pvtsutils.Convert.ToHex(this.tbsView),
       version: this.version,
       serialNumber: this.serialNumber.toJSON(),
       signature: this.signature.toJSON(),
@@ -694,11 +709,11 @@ export class Certificate extends PkiObject implements ICertificate {
     }
 
     if (this.issuerUniqueID) {
-      res.issuerUniqueID = pvutils.bufferToHexCodes(this.issuerUniqueID, 0, this.issuerUniqueID.byteLength);
+      res.issuerUniqueID = pvtsutils.Convert.ToHex(this.issuerUniqueID);
     }
 
     if (this.subjectUniqueID) {
-      res.subjectUniqueID = pvutils.bufferToHexCodes(this.subjectUniqueID, 0, this.subjectUniqueID.byteLength);
+      res.subjectUniqueID = pvtsutils.Convert.ToHex(this.subjectUniqueID);
     }
 
     if (this.extensions) {
@@ -747,11 +762,11 @@ export class Certificate extends PkiObject implements ICertificate {
     this.signatureAlgorithm = signatureParameters.signatureAlgorithm;
 
     // Create TBS data for signing
-    this.tbs = this.encodeTBS().toBER();
+    this.tbsView = new Uint8Array(this.encodeTBS().toBER());
 
     // Signing TBS data on provided private key
     // TODO remove any
-    const signature = await crypto.signWithPrivateKey(this.tbs, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(this.tbsView, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
   }
 
@@ -774,7 +789,7 @@ export class Certificate extends PkiObject implements ICertificate {
       throw new Error("Please provide issuer certificate as a parameter");
     }
 
-    return common.getCrypto(true).verifyWithPublicKey(this.tbs, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
+    return common.getCrypto(true).verifyWithPublicKey(this.tbsView, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

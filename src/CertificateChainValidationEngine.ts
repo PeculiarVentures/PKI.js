@@ -137,20 +137,20 @@ export class CertificateChainValidationEngine {
 
   public static defaultFindOrigin(certificate: Certificate, validationEngine: CertificateChainValidationEngine): string {
     //#region Firstly encode TBS for certificate
-    if (certificate.tbs.byteLength === 0) {
-      certificate.tbs = certificate.encodeTBS().toBER();
+    if (certificate.tbsView.byteLength === 0) {
+      certificate.tbsView = new Uint8Array(certificate.encodeTBS().toBER());
     }
     //#endregion
 
     //#region Search in Intermediate Certificates
     for (const localCert of validationEngine.certs) {
       //#region Firstly encode TBS for certificate
-      if (localCert.tbs.byteLength === 0) {
-        localCert.tbs = localCert.encodeTBS().toBER();
+      if (localCert.tbsView.byteLength === 0) {
+        localCert.tbsView = new Uint8Array(localCert.encodeTBS().toBER());
       }
       //#endregion
 
-      if (pvutils.isEqualBuffer(certificate.tbs, localCert.tbs))
+      if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, localCert.tbsView))
         return "Intermediate Certificates";
     }
     //#endregion
@@ -158,11 +158,11 @@ export class CertificateChainValidationEngine {
     //#region Search in Trusted Certificates
     for (const trustedCert of validationEngine.trustedCerts) {
       //#region Firstly encode TBS for certificate
-      if (trustedCert.tbs.byteLength === 0)
-        trustedCert.tbs = trustedCert.encodeTBS().toBER();
+      if (trustedCert.tbsView.byteLength === 0)
+        trustedCert.tbsView = new Uint8Array(trustedCert.encodeTBS().toBER());
       //#endregion
 
-      if (pvutils.isEqualBuffer(certificate.tbs, trustedCert.tbs))
+      if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, trustedCert.tbsView))
         return "Trusted Certificates";
     }
     //#endregion
@@ -355,7 +355,7 @@ export class CertificateChainValidationEngine {
       }
 
       for (let i = 0; i < findIssuerResult.length; i++) {
-        if (pvutils.isEqualBuffer(findIssuerResult[i].tbs, certificate.tbs)) {
+        if (pvtsutils.BufferSourceConverter.isEqual(findIssuerResult[i].tbsView, certificate.tbsView)) {
           result.push([findIssuerResult[i]]);
           continue;
         }
@@ -752,7 +752,7 @@ export class CertificateChainValidationEngine {
         if (i === j)
           continue;
 
-        if (pvutils.isEqualBuffer(localCerts[i].tbs, localCerts[j].tbs)) {
+        if (pvtsutils.BufferSourceConverter.isEqual(localCerts[i].tbsView, localCerts[j].tbsView)) {
           localCerts.splice(j, 1);
           i = 0;
           break;
@@ -785,7 +785,7 @@ export class CertificateChainValidationEngine {
         const certificate = (result[i])[j];
 
         for (let k = 0; k < this.trustedCerts.length; k++) {
-          if (pvutils.isEqualBuffer(certificate.tbs, this.trustedCerts[k].tbs)) {
+          if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, this.trustedCerts[k].tbsView)) {
             found = true;
             break;
           }

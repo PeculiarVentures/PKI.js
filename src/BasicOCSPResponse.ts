@@ -367,11 +367,11 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     //#endregion
 
     //#region Create TBS data for signing
-    this.tbsResponseData.tbs = this.tbsResponseData.toSchema(true).toBER(false);
+    this.tbsResponseData.tbsView = new Uint8Array(this.tbsResponseData.toSchema(true).toBER());
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await crypto.signWithPrivateKey(this.tbsResponseData.tbs, privateKey, { algorithm });
+    const signature = await crypto.signWithPrivateKey(this.tbsResponseData.tbsView, privateKey, { algorithm });
     this.signature = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -442,7 +442,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       throw new Error("Validation of signer's certificate failed");
     }
 
-    return crypto.verifyWithPublicKey(this.tbsResponseData.tbs, this.signature, this.certs[certIndex].subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(this.tbsResponseData.tbsView, this.signature, this.certs[certIndex].subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

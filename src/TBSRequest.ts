@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { GeneralName, GeneralNameJson, GeneralNameSchema } from "./GeneralName";
 import { Request, RequestJson, RequestSchema } from "./Request";
@@ -62,7 +63,20 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
 
   public static override CLASS_NAME = "TBSRequest";
 
-  public tbs!: ArrayBuffer;
+  public tbsView!: Uint8Array;
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public get tbs(): ArrayBuffer {
+    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+  }
+
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public set tbs(value: ArrayBuffer) {
+    this.tbsView = new Uint8Array(value);
+  }
   public version?: number;
   public requestorName?: GeneralName;
   public requestList!: Request[];
@@ -75,7 +89,7 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
   constructor(parameters: TBSRequestParameters = {}) {
     super();
 
-    this.tbs = pvutils.getParametersValue(parameters, TBS, TBSRequest.defaultValues(TBS));
+    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, TBSRequest.defaultValues(TBS)));
     if (VERSION in parameters) {
       this.version = pvutils.getParametersValue(parameters, VERSION, TBSRequest.defaultValues(VERSION));
     }
@@ -213,7 +227,7 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.tbs = asn1.result.TBSRequest.valueBeforeDecodeView.slice().buffer;
+    this.tbsView = asn1.result.TBSRequest.valueBeforeDecodeView;
 
     if (TBS_REQUEST_VERSION in asn1.result)
       this.version = asn1.result[TBS_REQUEST_VERSION].valueBlock.valueDec;
@@ -236,10 +250,10 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
     let tbsSchema;
 
     if (encodeFlag === false) {
-      if (this.tbs.byteLength === 0) // No stored TBS part
+      if (this.tbsView.byteLength === 0) // No stored TBS part
         return TBSRequest.schema();
 
-      const asn1 = asn1js.fromBER(this.tbs);
+      const asn1 = asn1js.fromBER(this.tbsView);
       AsnError.assert(asn1, "TBS Request");
       if (!(asn1.result instanceof asn1js.Sequence)) {
         throw new Error("ASN.1 result should be SEQUENCE");
