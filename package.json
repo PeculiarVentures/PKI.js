@@ -30,7 +30,7 @@
     "eslint-plugin-deprecation": "^1.3.2",
     "mocha": "^10.0.0",
     "nyc": "^15.1.0",
-    "rollup": "^2.71.1",
+    "rollup": "^2.72.0",
     "rollup-plugin-dts": "^4.2.1",
     "rollup-plugin-typescript2": "^0.31.2",
     "ts-node": "^10.7.0",
@@ -40,7 +40,7 @@
   "dependencies": {
     "asn1js": "^2.4.0",
     "bytestreamjs": "^1.1.3-beta.0",
-    "pvtsutils": "^1.3.1",
+    "pvtsutils": "^1.3.2",
     "pvutils": "^1.1.3",
     "tslib": "^2.4.0"
   },
