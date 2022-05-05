@@ -66,7 +66,7 @@ export class Extension extends PkiObject implements IExtension {
     return this._parsedValue || undefined;
   }
   public set parsedValue(value: ExtensionParsedValue | undefined) {
-    this._parsedValue = value || null;
+    this._parsedValue = value;
   }
 
   /**

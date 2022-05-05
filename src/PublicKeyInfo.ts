@@ -47,7 +47,50 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
 
   public algorithm!: AlgorithmIdentifier;
   public subjectPublicKey!: asn1js.BitString;
-  public parsedKey?: ECPublicKey | RSAPublicKey;
+  private _parsedKey?: ECPublicKey | RSAPublicKey | null;
+  public get parsedKey(): ECPublicKey | RSAPublicKey | undefined {
+    if (this._parsedKey === undefined) {
+      switch (this.algorithm.algorithmId) {
+        // TODO Use fabric
+        case "1.2.840.10045.2.1": // ECDSA
+          if ("algorithmParams" in this.algorithm) {
+            if (this.algorithm.algorithmParams.constructor.blockName() === asn1js.ObjectIdentifier.blockName()) {
+              try {
+                this._parsedKey = new ECPublicKey({
+                  namedCurve: this.algorithm.algorithmParams.valueBlock.toString(),
+                  schema: this.subjectPublicKey.valueBlock.valueHexView
+                });
+              }
+              catch (ex) {
+                // nothing
+              } // Could be a problems during recognition of internal public key data here. Let's ignore them.
+            }
+          }
+          break;
+        case "1.2.840.113549.1.1.1": // RSA
+          {
+            const publicKeyASN1 = asn1js.fromBER(this.subjectPublicKey.valueBlock.valueHexView);
+            if (publicKeyASN1.offset !== -1) {
+              try {
+                this._parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
+              }
+              catch (ex) {
+                // nothing
+              } // Could be a problems during recognition of internal public key data here. Let's ignore them.
+            }
+          }
+          break;
+        default:
+      }
+
+      this._parsedKey ||= null;
+    }
+
+    return this._parsedKey || undefined;
+  }
+  public set parsedKey(value: ECPublicKey | RSAPublicKey | undefined) {
+    this._parsedKey = value;
+  }
 
   /**
    * Initializes a new instance of the {@link PublicKeyInfo} class
@@ -134,39 +177,6 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
     //#region Get internal properties from parsed schema
     this.algorithm = new AlgorithmIdentifier({ schema: asn1.result.algorithm });
     this.subjectPublicKey = asn1.result.subjectPublicKey;
-
-    switch (this.algorithm.algorithmId) {
-      // TODO Use fabric
-      case "1.2.840.10045.2.1": // ECDSA
-        if ("algorithmParams" in this.algorithm) {
-          if (this.algorithm.algorithmParams.constructor.blockName() === asn1js.ObjectIdentifier.blockName()) {
-            try {
-              this.parsedKey = new ECPublicKey({
-                namedCurve: this.algorithm.algorithmParams.valueBlock.toString(),
-                schema: this.subjectPublicKey.valueBlock.valueHexView
-              });
-            }
-            catch (ex) {
-              // nothing
-            } // Could be a problems during recognition of internal public key data here. Let's ignore them.
-          }
-        }
-        break;
-      case "1.2.840.113549.1.1.1": // RSA
-        {
-          const publicKeyASN1 = asn1js.fromBER(this.subjectPublicKey.valueBlock.valueHexView);
-          if (publicKeyASN1.offset !== -1) {
-            try {
-              this.parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
-            }
-            catch (ex) {
-              // nothing
-            } // Could be a problems during recognition of internal public key data here. Let's ignore them.
-          }
-        }
-        break;
-      default:
-    }
     //#endregion
   }
 
