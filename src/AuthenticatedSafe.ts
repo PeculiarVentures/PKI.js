@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { ContentInfo, ContentInfoJson } from "./ContentInfo";
 import { SafeContents } from "./SafeContents";
@@ -171,14 +172,18 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             ArgumentError.assert(content.content, "this.safeContents[j].content", asn1js.OctetString);
 
             //#region Check we have "constructive encoding" for AuthSafe content
-            let authSafeContent = new ArrayBuffer(0);
+            let authSafeContent: BufferSource = new ArrayBuffer(0);
 
             if (content.content.valueBlock.isConstructed) {
+              const array: Uint8Array[] = [];
+
               for (const contentValue of content.content.valueBlock.value) {
-                authSafeContent = pvutils.utilConcatBuf(authSafeContent, (contentValue as any).valueBlock.valueHex);
+                array.push(contentValue.valueBlock.valueHexView);
               }
+
+              authSafeContent = pvtsutils.BufferSourceConverter.concat(array);
             } else {
-              authSafeContent = content.content.valueBlock.valueHex;
+              authSafeContent = content.content.valueBlock.valueHexView;
             }
             //#endregion
 

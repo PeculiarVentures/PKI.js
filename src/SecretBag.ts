@@ -18,7 +18,7 @@ export interface ISecretBag {
 
 export interface SecretBagJson {
   secretTypeId: string;
-  secretValue: Schema.AsnBlockJson;
+  secretValue: asn1js.BaseBlockJson;
 }
 
 export type SecretBagParameters = PkiObjectParameters & Partial<ISecretBag>;

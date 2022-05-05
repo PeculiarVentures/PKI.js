@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { AsnError } from "./errors";
 import { stringPrep } from "./Helpers";
@@ -175,21 +176,21 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
     ];
 
     if (compareTo instanceof ArrayBuffer) {
-      return pvutils.isEqualBuffer(this.value.valueBeforeDecode, compareTo);
+      return pvtsutils.BufferSourceConverter.isEqual(this.value.valueBeforeDecodeView, compareTo);
     }
 
-    if ((compareTo.constructor as asn1js.LocalBaseBlockType).blockName() === AttributeTypeAndValue.blockName()) {
+    if ((compareTo.constructor as typeof AttributeTypeAndValue).blockName() === AttributeTypeAndValue.blockName()) {
       if (this.type !== compareTo.type)
         return false;
 
       //#region Check we do have both strings
       const isStringPair = [false, false];
-      const thisName = (this.value.constructor as asn1js.LocalBaseBlockType).blockName();
+      const thisName = (this.value.constructor as typeof asn1js.BaseBlock).blockName();
       for (const name of stringBlockNames) {
         if (thisName === name) {
           isStringPair[0] = true;
         }
-        if ((compareTo.value.constructor as asn1js.LocalBaseBlockType).blockName() === name) {
+        if ((compareTo.value.constructor as typeof asn1js.BaseBlock).blockName() === name) {
           isStringPair[1] = true;
         }
       }
@@ -210,7 +211,7 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
       }
       else // Comparing as two ArrayBuffers
       {
-        if (pvutils.isEqualBuffer(this.value.valueBeforeDecode, compareTo.value.valueBeforeDecode) === false)
+        if (!pvtsutils.BufferSourceConverter.isEqual(this.value.valueBeforeDecodeView, compareTo.value.valueBeforeDecodeView))
           return false;
       }
 

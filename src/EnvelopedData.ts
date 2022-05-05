@@ -25,6 +25,7 @@ import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
 import { ArgumentError, AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { BufferSourceConverter } from "pvtsutils";
 
 const VERSION = "version";
 const ORIGINATOR_INFO = "originatorInfo";
@@ -1290,7 +1291,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         //#endregion
 
         return crypto.unwrapKey("raw",
-          recipientInfo.recipientEncryptedKeys.encryptedKeys[0].encryptedKey.valueBlock.valueHex,
+          recipientInfo.recipientEncryptedKeys.encryptedKeys[0].encryptedKey.valueBlock.valueHexView,
           aesKwKey,
           { name: "AES-KW" },
           contentEncryptionAlgorithm,
@@ -1338,7 +1339,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       const sessionKey = await crypto.decrypt(
         privateKey.algorithm,
         privateKey,
-        recipientInfo.encryptedKey.valueBlock.valueHex
+        recipientInfo.encryptedKey.valueBlock.valueHexView
       );
 
       //#region Get WebCrypto form of content encryption algorithm
@@ -1386,7 +1387,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#endregion
 
       return crypto.unwrapKey("raw",
-        recipientInfo.encryptedKey.valueBlock.valueHex,
+        recipientInfo.encryptedKey.valueBlock.valueHexView,
         importedKey,
         kekAlgorithm,
         contentEncryptionAlgorithm,
@@ -1466,7 +1467,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#endregion
 
       return crypto.unwrapKey("raw",
-        recipientInfo.encryptedKey.valueBlock.valueHex,
+        recipientInfo.encryptedKey.valueBlock.valueHexView,
         kekKey,
         kekAlgorithm,
         contentEncryptionAlgorithm,
@@ -1509,24 +1510,29 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     //#endregion
 
     //#region Create correct data block for decryption
-    let dataBuffer = new ArrayBuffer(0);
+    let dataBuffer: BufferSource = new ArrayBuffer(0);
 
     if (!this.encryptedContentInfo.encryptedContent) {
       throw new Error("Required property `encryptedContent` is empty");
     }
     if (this.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false)
-      dataBuffer = this.encryptedContentInfo.encryptedContent.valueBlock.valueHex;
+      dataBuffer = this.encryptedContentInfo.encryptedContent.valueBlock.valueHexView;
     else {
+      const array: Uint8Array[] = [];
+
       for (const content of this.encryptedContentInfo.encryptedContent.valueBlock.value) {
-        dataBuffer = pvutils.utilConcatBuf(dataBuffer, content.valueBlock.valueHex);
+        array.push(content.valueBlock.valueHexView);
       }
+
+      dataBuffer = BufferSourceConverter.concat(array);
     }
     //#endregion
 
-    return crypto.decrypt({
-      name: (contentEncryptionAlgorithm as any).name,
-      iv: ivView
-    },
+    return crypto.decrypt(
+      {
+        name: (contentEncryptionAlgorithm as any).name,
+        iv: ivView
+      },
       unwrappedKey,
       dataBuffer);
     //#endregion

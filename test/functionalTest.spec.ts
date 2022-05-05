@@ -635,7 +635,7 @@ context("PKIjs functional testing", () => {
         const ok = await signedData.verify({
           checkChain: false,
           signer: 0,
-          trustedCerts: signedData.certificates,
+          trustedCerts: signedData.certificates as pkijs.Certificate[],
         });
         assert.deepEqual(ok, true);
       });
@@ -644,7 +644,7 @@ context("PKIjs functional testing", () => {
         const ok = await signedData.verify({
           checkChain: false,
           signer: 1,
-          trustedCerts: signedData.certificates,
+          trustedCerts: signedData.certificates as pkijs.Certificate[],
         });
         assert.deepEqual(ok, true);
       });
@@ -653,7 +653,7 @@ context("PKIjs functional testing", () => {
         const ok = await signedData.verify({
           checkChain: false,
           signer: 2,
-          trustedCerts: signedData.certificates,
+          trustedCerts: signedData.certificates as pkijs.Certificate[],
         });
         assert.deepEqual(ok, true);
       });

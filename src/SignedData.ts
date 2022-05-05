@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson } from "./AlgorithmIdentifier";
@@ -573,7 +574,7 @@ export class SignedData extends PkiObject implements ISignedData {
 
       if (signerInfo.sid instanceof IssuerAndSerialNumber) {
         for (const certificate of this.certificates) {
-          if ((certificate instanceof Certificate) === false)
+          if (!(certificate instanceof Certificate))
             continue;
 
           if ((certificate.issuer.isEqual(signerInfo.sid.issuer)) &&
@@ -593,7 +594,7 @@ export class SignedData extends PkiObject implements ISignedData {
             continue;
           }
 
-          const digest = await crypto.digest({ name: "sha-1" }, new Uint8Array(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
+          const digest = await crypto.digest({ name: "sha-1" }, certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
           if (pvutils.isEqualBuffer(digest, keyId)) {
             signerCert = certificate;
             break;
@@ -630,7 +631,7 @@ export class SignedData extends PkiObject implements ISignedData {
         let tstInfo: TSTInfo;
 
         try {
-          tstInfo = TSTInfo.fromBER(this.encapContentInfo.eContent.valueBlock.valueHex);
+          tstInfo = TSTInfo.fromBER(this.encapContentInfo.eContent.valueBlock.valueHexView);
         }
         catch (ex) {
           throw new SignedDataVerifyError({
@@ -647,7 +648,7 @@ export class SignedData extends PkiObject implements ISignedData {
 
         //#region Change "checkDate" and append "timestampSerial"
         checkDate = tstInfo.genTime;
-        timestampSerial = tstInfo.serialNumber.valueBlock.valueHex;
+        timestampSerial = tstInfo.serialNumber.valueBlock.valueHexView.slice();
         //#endregion
 
         //#region Check that we do have detached data content
@@ -676,7 +677,7 @@ export class SignedData extends PkiObject implements ISignedData {
       //#endregion
 
       if (checkChain) {
-        const certs = this.certificates.filter(certificate => (certificate instanceof Certificate && !!checkCA(certificate, signerCert)));
+        const certs = this.certificates.filter(certificate => (certificate instanceof Certificate && !!checkCA(certificate, signerCert))) as Certificate[];
         const chainParams: CertificateChainValidationEngineParameters = {
           checkDate,
           certs,
@@ -758,15 +759,18 @@ export class SignedData extends PkiObject implements ISignedData {
         if ((eContent.idBlock.tagClass === 1) &&
           (eContent.idBlock.tagNumber === 4)) {
           if (eContent.idBlock.isConstructed === false)
-            data = eContent.valueBlock.valueHex;
+            data = eContent.valueBlock.valueHexView;
           else {
-            for (const contentValue of eContent.valueBlock.value) {
-              data = pvutils.utilConcatBuf(data, contentValue.valueBlock.valueHex);
+            const array: Uint8Array[] = [];
+            for (const content of eContent.valueBlock.value) {
+              array.push(content.valueBlock.valueHexView);
             }
+
+            data = pvtsutils.BufferSourceConverter.concat(array);
           }
         }
         else
-          data = eContent.valueBlock.valueBeforeDecode;
+          data = eContent.valueBlock.valueBeforeDecodeView;
       }
       else // Detached data
       {
@@ -889,7 +893,7 @@ export class SignedData extends PkiObject implements ISignedData {
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
    * @param data Detached data
    */
-  public async sign(privateKey: CryptoKey, signerIndex: number, hashAlgorithm = "SHA-1", data = (new ArrayBuffer(0))): Promise<void> {
+  public async sign(privateKey: CryptoKey, signerIndex: number, hashAlgorithm = "SHA-1", data: BufferSource = (new ArrayBuffer(0))): Promise<void> {
     //#region Initial checking
     if (!privateKey)
       throw new Error("Need to provide a private key for signing");
@@ -932,10 +936,10 @@ export class SignedData extends PkiObject implements ISignedData {
       if (signerInfo.signedAttrs.encodedValue.byteLength !== 0)
         data = signerInfo.signedAttrs.encodedValue;
       else {
-        data = signerInfo.signedAttrs.toSchema().toBER(false);
+        data = signerInfo.signedAttrs.toSchema().toBER();
 
         //#region Change type from "[0]" to "SET" accordingly to standard
-        const view = new Uint8Array(data);
+        const view = pvtsutils.BufferSourceConverter.toUint8Array(data);
         view[0] = 0x31;
         //#endregion
       }
@@ -947,14 +951,18 @@ export class SignedData extends PkiObject implements ISignedData {
         if ((eContent.idBlock.tagClass === 1) &&
           (eContent.idBlock.tagNumber === 4)) {
           if (eContent.idBlock.isConstructed === false)
-            data = eContent.valueBlock.valueHex;
+            data = eContent.valueBlock.valueHexView;
           else {
-            for (const content of eContent.valueBlock.value)
-              data = pvutils.utilConcatBuf(data, content.valueBlock.valueHex);
+            const array: Uint8Array[] = [];
+            for (const content of eContent.valueBlock.value) {
+              array.push(content.valueBlock.valueHexView);
+            }
+
+            data = pvtsutils.BufferSourceConverter.concat(array);
           }
         }
         else
-          data = eContent.valueBlock.valueBeforeDecode;
+          data = eContent.valueBlock.valueBeforeDecodeView;
       }
       else // Detached data
       {

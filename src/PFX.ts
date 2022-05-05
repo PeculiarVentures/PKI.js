@@ -16,6 +16,7 @@ import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { BufferSourceConverter } from "pvtsutils";
 
 const VERSION = "version";
 const AUTH_SAFE = "authSafe";
@@ -452,11 +453,14 @@ export class PFX extends PkiObject implements IPFX {
           let authSafeContent = new ArrayBuffer(0);
 
           if (this.authSafe.content.valueBlock.isConstructed) {
+            const array: Uint8Array[] = [];
             for (const contentValue of this.authSafe.content.valueBlock.value)
-              authSafeContent = pvutils.utilConcatBuf(authSafeContent, contentValue.valueBlock.valueHex);
+              array.push(contentValue.valueBlock.valueHexView);
+
+            authSafeContent = BufferSourceConverter.concat(array);
           }
           else {
-            authSafeContent = this.authSafe.content.valueBlock.valueHex;
+            authSafeContent = this.authSafe.content.valueBlock.valueHexView;
           }
           //#endregion
 
@@ -480,10 +484,10 @@ export class PFX extends PkiObject implements IPFX {
             const result = await common.getCrypto(true).verifyDataStampedWithPassword({
               password: parameters.password,
               hashAlgorithm: hashAlgorithm.name,
-              salt: this.macData.macSalt.valueBlock.valueHex,
+              salt: BufferSourceConverter.toArrayBuffer(this.macData.macSalt.valueBlock.valueHexView),
               iterationCount: this.macData.iterations || 0,
               contentToVerify: authSafeContent,
-              signatureToVerify: this.macData.mac.digest.valueBlock.valueHex
+              signatureToVerify: BufferSourceConverter.toArrayBuffer(this.macData.mac.digest.valueBlock.valueHexView),
             });
             //#endregion
 
@@ -518,10 +522,13 @@ export class PFX extends PkiObject implements IPFX {
           let data = new ArrayBuffer(0);
 
           if (eContent.idBlock.isConstructed === false)
-            data = eContent.valueBlock.valueHex;
+            data = eContent.valueBlock.valueHexView;
           else {
+            const array: Uint8Array[] = [];
             for (let i = 0; i < eContent.valueBlock.value.length; i++)
-              data = pvutils.utilConcatBuf(data, eContent.valueBlock.value[i].valueBlock.valueHex);
+              array.push(eContent.valueBlock.value[i].valueBlock.valueHexView);
+
+            data = BufferSourceConverter.concat(array);
           }
           //#endregion
 

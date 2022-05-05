@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
+import * as pvtsutils from "pvtsutils";
 import * as pkijs from "../../src";
 import * as example from "../../test/crlComplexExample";
 import * as utils from "../../test/utils";
@@ -125,7 +125,7 @@ function parseCRL(crlBuffer: ArrayBuffer) {
     for (let i = 0; i < crlSimpl.revokedCertificates.length; i++) {
       const row = revokedTable.insertRow(revokedTable.rows.length);
       const cell0 = row.insertCell(0);
-      cell0.innerHTML = pvutils.bufferToHexCodes(crlSimpl.revokedCertificates[i].userCertificate.valueBlock.valueHex);
+      cell0.innerHTML = pvtsutils.Convert.ToHex(crlSimpl.revokedCertificates[i].userCertificate.valueBlock.valueHexView);
       const cell1 = row.insertCell(1);
       cell1.innerHTML = crlSimpl.revokedCertificates[i].revocationDate.value.toString();
     }

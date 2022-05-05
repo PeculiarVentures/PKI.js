@@ -23,9 +23,9 @@ export interface IAuthorityKeyIdentifier {
 export type AuthorityKeyIdentifierParameters = PkiObjectParameters & Partial<AuthorityKeyIdentifier>;
 
 export interface AuthorityKeyIdentifierJson {
-  keyIdentifier?: Schema.AsnOctetStringJson;
+  keyIdentifier?: asn1js.OctetStringJson;
   authorityCertIssuer?: GeneralNameJson[];
-  authorityCertSerialNumber?: Schema.AsnIntegerJson;
+  authorityCertSerialNumber?: asn1js.IntegerJson;
 }
 
 /**
@@ -178,7 +178,7 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        valueHex: this.keyIdentifier.valueBlock.valueHex
+        valueHex: this.keyIdentifier.valueBlock.valueHexView
       }));
     }
 
@@ -198,7 +198,7 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 2 // [2]
         },
-        valueHex: this.authorityCertSerialNumber.valueBlock.valueHex
+        valueHex: this.authorityCertSerialNumber.valueBlock.valueHexView
       }));
     }
     //#endregion
@@ -214,13 +214,13 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
     const object: AuthorityKeyIdentifierJson = {};
 
     if (this.keyIdentifier) {
-      object.keyIdentifier = this.keyIdentifier.toJSON() as Schema.AsnOctetStringJson;
+      object.keyIdentifier = this.keyIdentifier.toJSON();
     }
     if (this.authorityCertIssuer) {
       object.authorityCertIssuer = Array.from(this.authorityCertIssuer, o => o.toJSON());
     }
     if (this.authorityCertSerialNumber) {
-      object.authorityCertSerialNumber = this.authorityCertSerialNumber.toJSON() as Schema.AsnIntegerJson;
+      object.authorityCertSerialNumber = this.authorityCertSerialNumber.toJSON();
     }
 
     return object;

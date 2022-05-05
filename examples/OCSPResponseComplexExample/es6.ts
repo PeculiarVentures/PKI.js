@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
+import * as pvtsutils from "pvtsutils";
 import * as example from "../../test/ocspResponseComplexExample";
 import * as utils from "../../test/utils";
 import * as pkijs from "../../src";
@@ -97,7 +97,7 @@ function parseOCSPResp(source: ArrayBuffer) {
 
   //#region Check that we do have "responseBytes"
   if (ocspRespSimpl.responseBytes) {
-    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHex);
+    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHexView);
   }
   else
     return; // Nothing else to display - only status information exists
@@ -166,7 +166,7 @@ function parseOCSPResp(source: ArrayBuffer) {
   }
   else {
     if (ocspBasicResp.tbsResponseData.responderID instanceof asn1js.OctetString) {
-      common.getElement("ocsp-resp-respid-simpl").innerHTML = pvutils.bufferToHexCodes(ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHex, 0, ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHex.byteLength);
+      common.getElement("ocsp-resp-respid-simpl").innerHTML = pvtsutils.Convert.ToHex(ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.subarray(0, ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.byteLength));
       common.getElement("ocsp-resp-rspid-simpl").style.display = "block";
     }
     else {
@@ -211,7 +211,7 @@ function parseOCSPResp(source: ArrayBuffer) {
 
   //#region Put information about OCSP responses
   for (let i = 0; i < ocspBasicResp.tbsResponseData.responses.length; i++) {
-    const typeval = pvutils.bufferToHexCodes(ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHex);
+    const typeval = pvtsutils.Convert.ToHex(ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHexView);
     let subjval = "";
 
     switch (ocspBasicResp.tbsResponseData.responses[i].certStatus.idBlock.tagNumber) {

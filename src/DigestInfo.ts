@@ -19,7 +19,7 @@ export interface IDigestInfo {
 
 export interface DigestInfoJson {
   digestAlgorithm: AlgorithmIdentifierJson;
-  digest: Schema.AsnOctetStringJson;
+  digest: asn1js.OctetStringJson;
 }
 
 export type DigestInfoParameters = PkiObjectParameters & Partial<IDigestInfo>;
@@ -154,7 +154,7 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
   public toJSON(): DigestInfoJson {
     return {
       digestAlgorithm: this.digestAlgorithm.toJSON(),
-      digest: this.digest.toJSON() as Schema.AsnOctetStringJson,
+      digest: this.digest.toJSON(),
     };
   }
 

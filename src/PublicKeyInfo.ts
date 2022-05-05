@@ -30,7 +30,7 @@ export type PublicKeyInfoParameters = PkiObjectParameters & Partial<IPublicKeyIn
 
 export interface PublicKeyInfoJson {
   algorithm: AlgorithmIdentifierJson;
-  subjectPublicKey: Schema.AsnBitStringJson;
+  subjectPublicKey: asn1js.BitStringJson;
 }
 
 export type PublicKeyInfoSchema = Schema.SchemaParameters<{
@@ -143,7 +143,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
             try {
               this.parsedKey = new ECPublicKey({
                 namedCurve: this.algorithm.algorithmParams.valueBlock.toString(),
-                schema: this.subjectPublicKey.valueBlock.valueHex
+                schema: this.subjectPublicKey.valueBlock.valueHexView
               });
             }
             catch (ex) {
@@ -154,7 +154,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
         break;
       case "1.2.840.113549.1.1.1": // RSA
         {
-          const publicKeyASN1 = asn1js.fromBER(this.subjectPublicKey.valueBlock.valueHex);
+          const publicKeyASN1 = asn1js.fromBER(this.subjectPublicKey.valueBlock.valueHexView);
           if (publicKeyASN1.offset !== -1) {
             try {
               this.parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
@@ -184,7 +184,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
     if (!this.parsedKey) {
       return {
         algorithm: this.algorithm.toJSON(),
-        subjectPublicKey: this.subjectPublicKey.toJSON() as Schema.AsnBitStringJson,
+        subjectPublicKey: this.subjectPublicKey.toJSON(),
       };
     }
     //#endregion

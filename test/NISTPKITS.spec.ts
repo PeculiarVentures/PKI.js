@@ -1003,21 +1003,22 @@ context("PKITS's CRL parsing test", () => {
 //#region Context for PKITS's certificate pairs parsing test
 
 context("PKITS's certificate pairs parsing test", () => {
-  function parsingCheck(buffer: ArrayBuffer) {
+  function parsingCheck(buffer: BufferSource) {
     pkijs.Certificate.fromBER(buffer);
   }
 
   const keys = Object.keys(PKITS.certpairs);
 
   for (let i = 0; i < keys.length; i++) {
-    const runningFunction = (buffer: ArrayBuffer, func: (buffer: ArrayBuffer) => void) => {
+    const runningFunction = (buffer: BufferSource, func: (buffer: BufferSource) => void) => {
       return () => {
         const asn1 = asn1js.fromBER(buffer);
         pkijs.AsnError.assert(asn1, "buffer");
 
-        for (let j = 0; j < asn1.result.valueBlock.value.length; j++) {
+        const asnValue = asn1.result as asn1js.Sequence;
+        for (let j = 0; j < asnValue.valueBlock.value.length; j++) {
           //#region Initial variables
-          const value = asn1.result.valueBlock.value[j];
+          const value = asnValue.valueBlock.value[j] as asn1js.Sequence;
           let name = null;
           //#endregion
 
@@ -1033,7 +1034,7 @@ context("PKITS's certificate pairs parsing test", () => {
 
           if (name !== null) {
             assert.doesNotThrow(() => {
-              func(value.valueBlock.value[0].valueBeforeDecode);
+              func(value.valueBlock.value[0].valueBeforeDecodeView);
             }, Error, `Correct convertion to CERT for ${name}`);
           }
         }

@@ -1,7 +1,13 @@
 {
   "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
   "plugins": [
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "deprecation"
   ],
   "extends": [
     "eslint:recommended",
@@ -25,6 +31,7 @@
     "no-duplicate-imports": 2,
     "@typescript-eslint/explicit-module-boundary-types": 0,
     "@typescript-eslint/triple-slash-reference": 0,
-    "no-trailing-spaces": 2
+    "no-trailing-spaces": 2,
+    "deprecation/deprecation": 2
   }
 }

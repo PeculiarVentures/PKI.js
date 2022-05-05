@@ -146,7 +146,7 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
       this.typesAndValues = Array.from(asn1.result.typesAndValues, element => new AttributeTypeAndValue({ schema: element }));
     }
 
-    this.valueBeforeDecode = asn1.result.RDN.valueBeforeDecode;
+    this.valueBeforeDecode = (asn1.result.RDN as asn1js.BaseBlock).valueBeforeDecodeView.slice().buffer;
   }
 
   public toSchema(): asn1js.Sequence {
@@ -161,6 +161,9 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
 
     const asn1 = asn1js.fromBER(this.valueBeforeDecode);
     AsnError.assert(asn1, "RelativeDistinguishedNames");
+    if (!(asn1.result instanceof asn1js.Sequence)) {
+      throw new Error("ASN.1 result should be SEQUENCE");
+    }
 
     return asn1.result;
   }

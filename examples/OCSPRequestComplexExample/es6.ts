@@ -1,4 +1,4 @@
-import * as pvutils from "pvutils";
+import * as pvtsutils from "pvtsutils";
 import * as example from "../../test/ocspRequestComplexExample";
 import * as utils from "../../test/utils";
 import * as pkijs from "../../src";
@@ -111,7 +111,7 @@ function parseOCSPReq(source: ArrayBuffer) {
   for (let i = 0; i < ocspReqSimpl.tbsRequest.requestList.length; i++) {
     const row = requestsTable.insertRow(requestsTable.rows.length);
     const cell0 = row.insertCell(0);
-    cell0.innerHTML = pvutils.bufferToHexCodes(ocspReqSimpl.tbsRequest.requestList[i].reqCert.serialNumber.valueBlock.valueHex);
+    cell0.innerHTML = pvtsutils.Convert.ToHex(ocspReqSimpl.tbsRequest.requestList[i].reqCert.serialNumber.valueBlock.valueHexView);
   }
   //#endregion
   //#region Put information about request extensions

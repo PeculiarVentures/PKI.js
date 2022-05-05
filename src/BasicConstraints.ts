@@ -16,7 +16,7 @@ export type BasicConstraintsParameters = PkiObjectParameters & Partial<IBasicCon
 
 export interface BasicConstraintsJson {
   cA?: boolean;
-  pathLenConstraint?: Schema.AsnIntegerJson | number;
+  pathLenConstraint?: asn1js.IntegerJson | number;
 }
 
 /**
@@ -158,7 +158,7 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
 
     if (PATH_LENGTH_CONSTRAINT in this) {
       if (this.pathLenConstraint instanceof asn1js.Integer) {
-        object.pathLenConstraint = this.pathLenConstraint.toJSON() as Schema.AsnIntegerJson;
+        object.pathLenConstraint = this.pathLenConstraint.toJSON();
       } else {
         object.pathLenConstraint = this.pathLenConstraint;
       }

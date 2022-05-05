@@ -18,7 +18,7 @@ export interface IEncapsulatedContentInfo {
 
 export interface EncapsulatedContentInfoJson {
   eContentType: string;
-  eContent?: Schema.AsnOctetStringJson;
+  eContent?: asn1js.OctetStringJson;
 }
 
 export type EncapsulatedContentInfoParameters = PkiObjectParameters & Partial<IEncapsulatedContentInfo>;
@@ -58,10 +58,11 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
           });
 
           let offset = 0;
-          let length = this.eContent.valueBlock.valueHex.byteLength;
+          const viewHex = this.eContent.valueBlock.valueHexView.slice().buffer;
+          let length = viewHex.byteLength;
 
           while (length > 0) {
-            const pieceView = new Uint8Array(this.eContent.valueBlock.valueHex, offset, ((offset + 65536) > this.eContent.valueBlock.valueHex.byteLength) ? (this.eContent.valueBlock.valueHex.byteLength - offset) : 65536);
+            const pieceView = new Uint8Array(viewHex, offset, ((offset + 65536) > viewHex.byteLength) ? (viewHex.byteLength - offset) : 65536);
             const _array = new ArrayBuffer(pieceView.length);
             const _view = new Uint8Array(_array);
 
@@ -209,7 +210,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
     };
 
     if (this.eContent && EncapsulatedContentInfo.compareWithDefault(E_CONTENT, this.eContent) === false) {
-      res.eContent = this.eContent.toJSON() as Schema.AsnOctetStringJson;
+      res.eContent = this.eContent.toJSON();
     }
 
     return res;

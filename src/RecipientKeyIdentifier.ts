@@ -21,8 +21,8 @@ export interface IRecipientKeyIdentifier {
 }
 
 export interface RecipientKeyIdentifierJson {
-  subjectKeyIdentifier: Schema.AsnOctetStringJson;
-  date?: Schema.AsnBlockJson;
+  subjectKeyIdentifier: asn1js.OctetStringJson;
+  date?: asn1js.BaseBlockJson;
   other?: OtherKeyAttributeJson;
 }
 
@@ -193,7 +193,7 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
     };
 
     if (this.date) {
-      res.date = this.date;
+      res.date = this.date.toJSON();
     }
 
     if (this.other) {

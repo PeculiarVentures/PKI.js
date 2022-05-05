@@ -26,10 +26,10 @@ export interface IObjectDigestInfo {
 export type ObjectDigestInfoParameters = PkiObjectParameters & Partial<IObjectDigestInfo>;
 
 export interface ObjectDigestInfoJson {
-  digestedObjectType: Schema.AsnEnumeratedJson;
-  otherObjectTypeID?: Schema.AsnObjectIdentifierJson;
+  digestedObjectType: asn1js.EnumeratedJson;
+  otherObjectTypeID?: asn1js.ObjectIdentifierJson;
   digestAlgorithm: AlgorithmIdentifierJson;
-  objectDigest: Schema.AsnBitStringJson;
+  objectDigest: asn1js.BitStringJson;
 }
 
 /**
@@ -177,13 +177,13 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
 
   public toJSON(): ObjectDigestInfoJson {
     const result: ObjectDigestInfoJson = {
-      digestedObjectType: this.digestedObjectType.toJSON() as Schema.AsnEnumeratedJson,
+      digestedObjectType: this.digestedObjectType.toJSON(),
       digestAlgorithm: this.digestAlgorithm.toJSON(),
-      objectDigest: this.objectDigest.toJSON() as Schema.AsnBitStringJson,
+      objectDigest: this.objectDigest.toJSON(),
     };
 
     if (this.otherObjectTypeID) {
-      result.otherObjectTypeID = this.otherObjectTypeID.toJSON() as Schema.AsnObjectIdentifierJson;
+      result.otherObjectTypeID = this.otherObjectTypeID.toJSON();
     }
 
     return result;

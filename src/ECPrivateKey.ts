@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { ECNamedCurves } from "./ECNamedCurves";
 import { ECPublicKey, ECPublicKeyParameters } from "./ECPublicKey";
@@ -246,7 +247,7 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
 
     const privateKeyJSON: ECPrivateKeyJson = {
       crv: curve ? curve.name : this.namedCurve,
-      d: pvutils.toBase64(pvutils.arrayBufferToString(this.privateKey.valueBlock.valueHex), true, true, false)
+      d: pvtsutils.Convert.ToBase64Url(this.privateKey.valueBlock.valueHexView),
     };
 
     if (this.publicKey) {
@@ -274,7 +275,7 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
       coordinateLength = curve.size;
     }
 
-    const convertBuffer = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.d, true));
+    const convertBuffer = pvtsutils.Convert.FromBase64Url(json.d);
 
     if (convertBuffer.byteLength < coordinateLength) {
       const buffer = new ArrayBuffer(coordinateLength);

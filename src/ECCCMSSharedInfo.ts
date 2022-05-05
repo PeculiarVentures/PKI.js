@@ -22,8 +22,8 @@ export interface IECCCMSSharedInfo {
 
 export interface ECCCMSSharedInfoJson {
   keyInfo: AlgorithmIdentifierJson;
-  entityUInfo?: Schema.AsnOctetStringJson;
-  suppPubInfo: Schema.AsnOctetStringJson;
+  entityUInfo?: asn1js.OctetStringJson;
+  suppPubInfo: asn1js.OctetStringJson;
 }
 
 export type ECCCMSSharedInfoParameters = PkiObjectParameters & Partial<IECCCMSSharedInfo>;
@@ -177,7 +177,7 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
 
     outputArray.push(this.keyInfo.toSchema());
 
-    if (ENTITY_U_INFO in this) {
+    if (this.entityUInfo) {
       outputArray.push(new asn1js.Constructed({
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
@@ -206,11 +206,11 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
   public toJSON(): ECCCMSSharedInfoJson {
     const res: ECCCMSSharedInfoJson = {
       keyInfo: this.keyInfo.toJSON(),
-      suppPubInfo: this.suppPubInfo.toJSON() as Schema.AsnOctetStringJson,
+      suppPubInfo: this.suppPubInfo.toJSON(),
     };
 
     if (this.entityUInfo) {
-      res.entityUInfo = this.entityUInfo.toJSON() as Schema.AsnOctetStringJson;
+      res.entityUInfo = this.entityUInfo.toJSON();
     }
 
     return res;

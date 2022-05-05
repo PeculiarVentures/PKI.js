@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
+import { BufferSourceConverter } from "pvtsutils";
 import * as pkijs from "../../src";
 import * as nodeSpecificCrypto from "./NodeEngineNodeSpecific";
 
@@ -422,10 +422,14 @@ export default class NodeEngine extends pkijs.CryptoEngine {
       pkijs.ParameterError.assertEmpty(parameters.encryptedContentInfo.encryptedContent, "encryptedContent", "parameters.encryptedContentInfo");
     }
     if (parameters.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false) {
-      dataBuffer = parameters.encryptedContentInfo.encryptedContent.valueBlock.valueHex;
+      dataBuffer = parameters.encryptedContentInfo.encryptedContent.valueBlock.valueHexView;
     } else {
+      const array: Uint8Array[] = [];
+
       for (const content of parameters.encryptedContentInfo.encryptedContent.valueBlock.value)
-        dataBuffer = pvutils.utilConcatBuf(dataBuffer, content.valueBlock.valueHex);
+        array.push(content.valueBlock.valueHexView);
+
+      dataBuffer = BufferSourceConverter.concat(array);
     }
     //#endregion
 

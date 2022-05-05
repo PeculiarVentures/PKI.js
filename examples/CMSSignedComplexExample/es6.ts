@@ -110,6 +110,9 @@ function parseCMSSigned() {
     for (let j = 0; j < cmsSignedSimpl.certificates.length; j++) {
       let ul = "<ul>";
       const cert = cmsSignedSimpl.certificates[j];
+      if (!(cert instanceof pkijs.Certificate)) {
+        continue;
+      }
 
       for (let i = 0; i < cert.issuer.typesAndValues.length; i++) {
         let typeval = rdnmap[cert.issuer.typesAndValues[i].type];
@@ -125,7 +128,7 @@ function parseCMSSigned() {
 
       const row = certificatesTable.insertRow(certificatesTable.rows.length);
       const cell0 = row.insertCell(0);
-      cell0.innerHTML = pvutils.bufferToHexCodes(cert.serialNumber.valueBlock.valueHex);
+      cell0.innerHTML = pvutils.bufferToHexCodes(cert.serialNumber.valueBlock.valueHexView);
       const cell1 = row.insertCell(1);
       cell1.innerHTML = ul;
     }

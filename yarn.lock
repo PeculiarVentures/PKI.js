@@ -437,6 +437,13 @@
     semver "^7.3.5"
     tsutils "^3.21.0"
 
+"@typescript-eslint/experimental-utils@^5.0.0":
+  version "5.22.0"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/experimental-utils/-/experimental-utils-5.22.0.tgz#a2b40eaa52ae1d1e316bc861069c40883a7ccf6e"
+  integrity sha512-rKxoCUtAHwEH6IcAoVpqipY6Th+YKW7WFspAKu0IFdbdKZpveFBeqxxE9Xn+GWikhq1o03V3VXbxIe+GdhggiQ==
+  dependencies:
+    "@typescript-eslint/utils" "5.22.0"
+
 "@typescript-eslint/parser@^5.22.0":
   version "5.22.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/parser/-/parser-5.22.0.tgz#7bedf8784ef0d5d60567c5ba4ce162460e70c178"
@@ -1021,6 +1028,15 @@ escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
   integrity sha1-G2HAViGQqN/2rjuyzwIAyhMLhtQ=
+
+eslint-plugin-deprecation@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-deprecation/-/eslint-plugin-deprecation-1.3.2.tgz#a8125d28c56158cdfa1a685197e6be8ed86f189e"
+  integrity sha512-z93wbx9w7H/E3ogPw6AZMkkNJ6m51fTZRNZPNQqxQLmx+KKt7aLkMU9wN67s71i+VVHN4tLOZ3zT3QLbnlC0Mg==
+  dependencies:
+    "@typescript-eslint/experimental-utils" "^5.0.0"
+    tslib "^2.3.1"
+    tsutils "^3.21.0"
 
 eslint-scope@^5.1.1:
   version "5.1.1"
@@ -2183,10 +2199,10 @@ punycode@^2.1.0:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
-pvtsutils@^1.2.1, pvtsutils@^1.2.2, pvtsutils@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/pvtsutils/-/pvtsutils-1.3.0.tgz#3bb61f758c4c5ccd48a21a5b4943bfef643de47f"
-  integrity sha512-q/BKu90CcOTSxuaoUwfAbLReg2jwlXjKpUO5htADXdDmz/XG4rIkgvA5xkc24td2SCg3vcoH9182TEceK2Zn0g==
+pvtsutils@^1.2.1, pvtsutils@^1.2.2, pvtsutils@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/pvtsutils/-/pvtsutils-1.3.1.tgz#278635e071c263c4d21769a26af56f737036325f"
+  integrity sha512-wNLCrI23NQcL6pEqasPjt+4xJD8SRbDi2H0Hw2TRRxpPzL00MVNdv6kQuhFqe3sIpjks6XE73dOIwJph5M5mFA==
   dependencies:
     tslib "^2.4.0"
 

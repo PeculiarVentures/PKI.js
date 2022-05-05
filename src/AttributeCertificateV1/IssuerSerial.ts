@@ -33,8 +33,8 @@ export type IssuerSerialParameters = PkiObjectParameters & Partial<IIssuerSerial
 
 export interface IssuerSerialJson {
   issuer: GeneralNamesJson;
-  serialNumber: Schema.AsnIntegerJson;
-  issuerUID?: Schema.AsnBitStringJson;
+  serialNumber: asn1js.IntegerJson;
+  issuerUID?: asn1js.BitStringJson;
 }
 
 /**
@@ -173,7 +173,7 @@ export class IssuerSerial extends PkiObject implements IIssuerSerial {
     } as IssuerSerialJson;
 
     if (this.issuerUID) {
-      result.issuerUID = this.issuerUID.toJSON() as Schema.AsnBitStringJson;
+      result.issuerUID = this.issuerUID.toJSON();
     }
 
     return result;

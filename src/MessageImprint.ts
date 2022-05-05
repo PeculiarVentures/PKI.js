@@ -20,7 +20,7 @@ export interface IMessageImprint {
 
 export interface MessageImprintJson {
   hashAlgorithm: AlgorithmIdentifierJson;
-  hashedMessage: Schema.AsnOctetStringJson;
+  hashedMessage: asn1js.OctetStringJson;
 }
 
 export type MessageImprintParameters = PkiObjectParameters & Partial<IMessageImprint>;
@@ -173,7 +173,7 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
   public toJSON(): MessageImprintJson {
     return {
       hashAlgorithm: this.hashAlgorithm.toJSON(),
-      hashedMessage: this.hashedMessage.toJSON() as Schema.AsnOctetStringJson,
+      hashedMessage: this.hashedMessage.toJSON(),
     };
   }
 

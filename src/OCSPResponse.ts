@@ -17,7 +17,7 @@ export interface IOCSPResponse {
 }
 
 export interface OCSPResponseJson {
-  responseStatus: Schema.AsnEnumeratedJson;
+  responseStatus: asn1js.EnumeratedJson;
   responseBytes?: ResponseBytesJson;
 }
 
@@ -237,7 +237,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
 
   public toJSON(): OCSPResponseJson {
     const res: OCSPResponseJson = {
-      responseStatus: this.responseStatus.toJSON() as Schema.AsnEnumeratedJson
+      responseStatus: this.responseStatus.toJSON()
     };
 
     if (this.responseBytes) {
@@ -270,7 +270,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
       return result;
 
     try {
-      const asn1Basic = asn1js.fromBER(this.responseBytes.response.valueBlock.valueHex);
+      const asn1Basic = asn1js.fromBER(this.responseBytes.response.valueBlock.valueHexView);
       AsnError.assert(asn1Basic, "Basic OCSP response");
       basicResponse = new BasicOCSPResponse({ schema: asn1Basic.result });
     }
@@ -290,7 +290,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
   public async sign(privateKey: CryptoKey, hashAlgorithm?: string) {
     //#region Check that ResponseData has type BasicOCSPResponse and sign it
     if (this.responseBytes && this.responseBytes.responseType === id_PKIX_OCSP_Basic) {
-      const basicResponse = BasicOCSPResponse.fromBER(this.responseBytes.response.valueBlock.valueHex);
+      const basicResponse = BasicOCSPResponse.fromBER(this.responseBytes.response.valueBlock.valueHexView);
 
       return basicResponse.sign(privateKey, hashAlgorithm);
     }
@@ -311,7 +311,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
 
     //#region Check that ResponseData has type BasicOCSPResponse and verify it
     if (this.responseBytes && this.responseBytes.responseType === id_PKIX_OCSP_Basic) {
-      const basicResponse = BasicOCSPResponse.fromBER(this.responseBytes.response.valueBlock.valueHex);
+      const basicResponse = BasicOCSPResponse.fromBER(this.responseBytes.response.valueBlock.valueHexView);
 
       if (issuerCertificate !== null) {
         if (!basicResponse.certs) {

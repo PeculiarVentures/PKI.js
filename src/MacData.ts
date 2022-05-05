@@ -22,7 +22,7 @@ export interface IMacData {
 
 export interface MacDataJson {
   mac: DigestInfoJson;
-  macSalt: Schema.AsnOctetStringJson;
+  macSalt: asn1js.OctetStringJson;
   iterations?: number;
 }
 
@@ -185,7 +185,7 @@ export class MacData extends PkiObject implements IMacData {
   public toJSON(): MacDataJson {
     const res: MacDataJson = {
       mac: this.mac.toJSON(),
-      macSalt: this.macSalt.toJSON() as Schema.AsnOctetStringJson,
+      macSalt: this.macSalt.toJSON(),
     };
 
     if (this.iterations !== undefined) {

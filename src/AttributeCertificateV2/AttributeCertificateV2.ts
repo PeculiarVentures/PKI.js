@@ -35,7 +35,7 @@ export type AttributeCertificateV2Parameters = PkiObjectParameters & Partial<IAt
 export interface AttributeCertificateV2Json {
   acinfo: AttributeCertificateInfoV2Json;
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signatureValue: Schema.AsnBitStringJson;
+  signatureValue: asn1js.BitStringJson;
 }
 
 /**
@@ -160,7 +160,7 @@ export class AttributeCertificateV2 extends PkiObject implements IAttributeCerti
     return {
       acinfo: this.acinfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson,
+      signatureValue: this.signatureValue.toJSON(),
     };
   }
 

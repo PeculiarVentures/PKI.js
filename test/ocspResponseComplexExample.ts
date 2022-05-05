@@ -23,8 +23,7 @@ export async function createOCSPResp(hashAlg: string, signAlg: string): Promise<
   ocspRespSimpl.responseBytes = new pkijs.ResponseBytes();
   ocspRespSimpl.responseBytes.responseType = "1.3.6.1.5.5.7.48.1.1";
 
-  const responderIDBuffer = new ArrayBuffer(1);
-  const responderIDView = new Uint8Array(responderIDBuffer);
+  const responderIDView = new Uint8Array(1);
   responderIDView[0] = 0x01;
 
   ocspBasicResp.tbsResponseData.responderID = certWithKey.certificate.issuer;
@@ -32,15 +31,14 @@ export async function createOCSPResp(hashAlg: string, signAlg: string): Promise<
 
   const response = new pkijs.SingleResponse();
   response.certID.hashAlgorithm.algorithmId = "1.3.14.3.2.26"; // SHA-1
-  response.certID.issuerNameHash.valueBlock.valueHex = responderIDBuffer; // Fiction hash
-  response.certID.issuerKeyHash.valueBlock.valueHex = responderIDBuffer; // Fiction hash
+  response.certID.issuerNameHash.valueBlock.valueHexView = responderIDView; // Fiction hash
+  response.certID.issuerKeyHash.valueBlock.valueHexView = responderIDView; // Fiction hash
   response.certID.serialNumber.valueBlock.valueDec = 1; // Fiction serial number
   response.certStatus = new asn1js.Primitive({
     idBlock: {
       tagClass: 3, // CONTEXT-SPECIFIC
       tagNumber: 0 // [0]
     },
-    lenBlockLength: 1 // The length contains one byte 0x00
   }); // status - success
   response.thisUpdate = new Date();
 
@@ -73,7 +71,7 @@ export async function verifyOCSPResp(ocspResponseBuffer: ArrayBuffer, trustedCer
   const ocspRespSimpl = pkijs.OCSPResponse.fromBER(ocspResponseBuffer);
 
   if (ocspRespSimpl.responseBytes) {
-    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHex);
+    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHexView);
   } else {
     throw new Error("No \"ResponseBytes\" in the OCSP Response - nothing to verify");
   }

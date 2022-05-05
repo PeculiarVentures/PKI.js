@@ -19,7 +19,7 @@ export interface IOriginatorPublicKey {
 
 export interface OriginatorPublicKeyJson {
   algorithm: AlgorithmIdentifierJson;
-  publicKey: Schema.AsnBitStringJson;
+  publicKey: asn1js.BitStringJson;
 }
 
 export type OriginatorPublicKeyParameters = PkiObjectParameters & Partial<IOriginatorPublicKey>;
@@ -146,7 +146,7 @@ export class OriginatorPublicKey extends PkiObject implements IOriginatorPublicK
   public toJSON(): OriginatorPublicKeyJson {
     return {
       algorithm: this.algorithm.toJSON(),
-      publicKey: this.publicKey.toJSON() as Schema.AsnBitStringJson,
+      publicKey: this.publicKey.toJSON(),
     };
   }
 

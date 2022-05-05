@@ -74,7 +74,7 @@ export interface CertificationRequestJson {
   subjectPublicKeyInfo: PublicKeyInfoJson | JsonWebKey;
   attributes?: AttributeJson[];
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signatureValue: Schema.AsnBitStringJson;
+  signatureValue: asn1js.BitStringJson;
 }
 
 export interface CertificationRequestInfoParameters {
@@ -338,7 +338,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.tbs = asn1.result.CertificationRequestInfo.valueBeforeDecode;
+    this.tbs = (asn1.result.CertificationRequestInfo as asn1js.Sequence).valueBeforeDecodeView.slice().buffer;
     this.version = asn1.result[CSR_INFO_VERSION].valueBlock.valueDec;
     this.subject = new RelativeDistinguishedNames({ schema: asn1.result[CSR_INFO_SUBJECT] });
     this.subjectPublicKeyInfo = new PublicKeyInfo({ schema: asn1.result[CSR_INFO_SPKI] });
@@ -411,7 +411,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
       subject: this.subject.toJSON(),
       subjectPublicKeyInfo: this.subjectPublicKeyInfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson,
+      signatureValue: this.signatureValue.toJSON(),
     };
 
     if (ATTRIBUTES in this) {

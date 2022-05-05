@@ -22,8 +22,8 @@ export interface IGeneralSubtree {
 
 export interface GeneralSubtreeJson {
   base: GeneralNameJson;
-  minimum?: number | Schema.AsnIntegerJson;
-  maximum?: number | Schema.AsnIntegerJson;
+  minimum?: number | asn1js.IntegerJson;
+  maximum?: number | asn1js.IntegerJson;
 }
 
 export type GeneralSubtreeParameters = PkiObjectParameters & Partial<IGeneralSubtree>;
@@ -221,7 +221,7 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
       if (typeof this.minimum === "number") {
         res.minimum = this.minimum;
       } else {
-        res.minimum = this.minimum.toJSON() as Schema.AsnIntegerJson;
+        res.minimum = this.minimum.toJSON();
       }
     }
 
@@ -229,7 +229,7 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
       if (typeof this.maximum === "number") {
         res.maximum = this.maximum;
       } else {
-        res.maximum = this.maximum.toJSON() as Schema.AsnIntegerJson;
+        res.maximum = this.maximum.toJSON();
       }
     }
 

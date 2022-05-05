@@ -23,7 +23,7 @@ export interface IEncryptedContentInfo {
 export interface EncryptedContentInfoJson {
   contentType: string;
   contentEncryptionAlgorithm: AlgorithmIdentifierJson;
-  encryptedContent?: Schema.AsnOctetStringJson;
+  encryptedContent?: asn1js.OctetStringJson;
 }
 
 export type EncryptedContentParameters = PkiObjectParameters & Partial<IEncryptedContentInfo>;
@@ -69,7 +69,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
           });
 
           let offset = 0;
-          const valueHex = this.encryptedContent.valueBlock.valueHex;
+          const valueHex = this.encryptedContent.valueBlock.valueHexView.slice().buffer;
           let length = valueHex.byteLength;
 
           const pieceSize = 1024;
@@ -260,7 +260,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
     };
 
     if (this.encryptedContent) {
-      res.encryptedContent = this.encryptedContent.toJSON() as Schema.AsnOctetStringJson;
+      res.encryptedContent = this.encryptedContent.toJSON();
     }
 
     return res;

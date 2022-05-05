@@ -48,7 +48,7 @@ export interface SignerInfoJson {
   digestAlgorithm: AlgorithmIdentifierJson;
   signedAttrs?: SignedAndUnsignedAttributesJson;
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signature: Schema.AsnOctetStringJson;
+  signature: asn1js.OctetStringJson;
   unsignedAttrs?: SignedAndUnsignedAttributesJson;
 }
 
@@ -222,8 +222,7 @@ export class SignerInfo extends PkiObject implements ISignerInfo {
                     idBlock: {
                       tagClass: 3, // CONTEXT-SPECIFIC
                       tagNumber: 0 // [0]
-                    },
-                    value: [new asn1js.OctetString()],
+                    }
                   }),
                 ]
               }),
@@ -333,7 +332,7 @@ export class SignerInfo extends PkiObject implements ISignerInfo {
       version: this.version,
       digestAlgorithm: this.digestAlgorithm.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signature: this.signature.toJSON() as Schema.AsnOctetStringJson,
+      signature: this.signature.toJSON(),
     };
 
     if (!(this.sid instanceof asn1js.Any))

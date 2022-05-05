@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { AuthorityKeyIdentifier } from "./AuthorityKeyIdentifier";
 import { BasicOCSPResponse } from "./BasicOCSPResponse";
@@ -223,7 +224,7 @@ export class CertificateChainValidationEngine {
             if (extension.extnID === id_SubjectKeyIdentifier && extension.parsedValue) {
               extensionFound = true;
 
-              if (pvutils.isEqualBuffer(extension.parsedValue.valueBlock.valueHex, keyIdentifier.valueBlock.valueHex)) {
+              if (pvtsutils.BufferSourceConverter.isEqual(extension.parsedValue.valueBlock.valueHex, keyIdentifier.valueBlock.valueHexView)) {
                 result.push(possibleIssuer);
               }
 
@@ -1008,8 +1009,8 @@ export class CertificateChainValidationEngine {
      */
     function compareIPAddress(name: asn1js.OctetString, constraint: asn1js.OctetString): boolean {
       //#region Common variables
-      const nameView = new Uint8Array(name.valueBlock.valueHex);
-      const constraintView = new Uint8Array(constraint.valueBlock.valueHex);
+      const nameView = name.valueBlock.valueHexView;
+      const constraintView = constraint.valueBlock.valueHexView;
       //#endregion
 
       //#region Work with IPv4 addresses

@@ -27,8 +27,8 @@ export abstract class AbstractCryptoEngine implements type.ICryptoEngine {
   public abstract getAlgorithmByOID(oid: any, safety?: any, target?: any): object;
   public abstract getHashAlgorithm(signatureAlgorithm: AlgorithmIdentifier): string;
   public abstract getSignatureParameters(privateKey: CryptoKey, hashAlgorithm?: string): Promise<type.CryptoEngineSignatureParams>;
-  public abstract signWithPrivateKey(data: ArrayBuffer, privateKey: CryptoKey, parameters: type.CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer>;
-  public abstract verifyWithPublicKey(data: ArrayBuffer, signature: BitString | OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean>;
+  public abstract signWithPrivateKey(data: BufferSource, privateKey: CryptoKey, parameters: type.CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer>;
+  public abstract verifyWithPublicKey(data: BufferSource, signature: BitString | OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean>;
   public abstract getPublicKey(publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, parameters?: type.CryptoEnginePublicKeyParams): Promise<CryptoKey>;
   public abstract encryptEncryptedContentInfo(parameters: type.CryptoEngineEncryptParams): Promise<EncryptedContentInfo>;
   public abstract decryptEncryptedContentInfo(parameters: type.CryptoEngineDecryptParams): Promise<ArrayBuffer>;

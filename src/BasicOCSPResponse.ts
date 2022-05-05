@@ -51,7 +51,7 @@ export interface BasicOCSPResponseVerifyParams {
 export interface BasicOCSPResponseJson {
   tbsResponseData: ResponseDataJson;
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signature: Schema.AsnBitStringJson;
+  signature: asn1js.BitStringJson;
   certs?: CertificateJson[];
 }
 
@@ -251,7 +251,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     const res: BasicOCSPResponseJson = {
       tbsResponseData: this.tbsResponseData.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signature: this.signature.toJSON() as Schema.AsnBitStringJson,
+      signature: this.signature.toJSON(),
     };
 
     if (this.certs) {
@@ -406,7 +406,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
         break;
       case (this.tbsResponseData.responderID instanceof asn1js.OctetString): // [2] KeyHash
         for (const [index, cert] of this.certs.entries()) {
-          const hash = await crypto.digest({ name: "sha-1" }, new Uint8Array(cert.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
+          const hash = await crypto.digest({ name: "sha-1" }, cert.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
           if (pvutils.isEqualBuffer(hash, this.tbsResponseData.responderID.valueBlock.valueHex)) {
             certIndex = index;
             break;

@@ -21,7 +21,7 @@ export interface IKEKIdentifier {
 }
 
 export interface KEKIdentifierJson {
-  keyIdentifier: Schema.AsnOctetStringJson;
+  keyIdentifier: asn1js.OctetStringJson;
   date?: asn1js.GeneralizedTime;
   other?: OtherKeyAttributeJson;
 }
@@ -189,7 +189,7 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
 
   public toJSON(): KEKIdentifierJson {
     const res: KEKIdentifierJson = {
-      keyIdentifier: this.keyIdentifier.toJSON() as Schema.AsnOctetStringJson
+      keyIdentifier: this.keyIdentifier.toJSON()
     };
 
     if (this.date) {

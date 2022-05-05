@@ -18,7 +18,7 @@ export interface IResponseBytes {
 
 export interface ResponseBytesJson {
   responseType: string;
-  response: Schema.AsnOctetStringJson;
+  response: asn1js.OctetStringJson;
 }
 
 export type ResponseBytesParameters = PkiObjectParameters & Partial<IResponseBytes>;
@@ -142,7 +142,7 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
   public toJSON(): ResponseBytesJson {
     return {
       responseType: this.responseType,
-      response: this.response.toJSON() as Schema.AsnOctetStringJson,
+      response: this.response.toJSON(),
     };
   }
 

@@ -1,4 +1,4 @@
-import * as pvutils from "pvutils";
+import { Convert } from "pvtsutils";
 import * as pkijs from "../../src";
 import * as example from "../../test/tspReqComplexExample";
 import * as utils from "../../test/utils";
@@ -63,7 +63,7 @@ function parseTSPReq() {
   const cell0 = row.insertCell(0);
   cell0.innerHTML = hashAlgorithm;
   const cell1 = row.insertCell(1);
-  cell1.innerHTML = pvutils.bufferToHexCodes(tspReqSimpl.messageImprint.hashedMessage.valueBlock.valueHex);
+  cell1.innerHTML = Convert.ToHex(tspReqSimpl.messageImprint.hashedMessage.valueBlock.valueHexView);
   //#endregion
 
   //#region Put information about policy
@@ -75,7 +75,7 @@ function parseTSPReq() {
 
   //#region Put information about nonce
   if (tspReqSimpl.nonce) {
-    common.getElement("tsp-req-nonce").innerHTML = pvutils.bufferToHexCodes(tspReqSimpl.nonce.valueBlock.valueHex);
+    common.getElement("tsp-req-nonce").innerHTML = Convert.ToHex(tspReqSimpl.nonce.valueBlock.valueHexView);
     common.getElement("tsp-req-non").style.display = "block";
   }
   //#endregion

@@ -151,7 +151,7 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        valueHex: (new asn1js.GeneralizedTime({ valueDate: this.notBefore })).valueBlock.valueHex
+        valueHex: (new asn1js.GeneralizedTime({ valueDate: this.notBefore })).valueBlock.valueHexView
       }));
     }
 
@@ -161,7 +161,7 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 1 // [1]
         },
-        valueHex: (new asn1js.GeneralizedTime({ valueDate: this.notAfter })).valueBlock.valueHex
+        valueHex: (new asn1js.GeneralizedTime({ valueDate: this.notAfter })).valueBlock.valueHexView
       }));
     }
     //#endregion

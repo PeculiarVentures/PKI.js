@@ -526,7 +526,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
           const asnValue = asn1js.fromBER(valueBER);
           AsnError.assert(asnValue, "GeneralName value");
 
-          this.value = asnValue.result.valueBlock.value;
+          this.value = (asnValue.result as asn1js.BaseStringBlock).valueBlock.value;
         }
         break;
       case 3: // x400Address

@@ -34,7 +34,7 @@ export abstract class PkiObject {
    * @returns Initialized and filled current class object
    */
   public static fromBER<T extends PkiObject>(this: PkiObjectConstructor<T>, raw: BufferSource): T {
-    const asn1 = asn1js.fromBER(pvtsutils.BufferSourceConverter.toArrayBuffer(raw));
+    const asn1 = asn1js.fromBER(raw);
     AsnError.assert(asn1, this.name);
 
     try {

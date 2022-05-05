@@ -21,8 +21,8 @@ export interface IPKIStatusInfo {
 
 export interface PKIStatusInfoJson {
   status: PKIStatus;
-  statusStrings?: Schema.AsnBlockJson[];
-  failInfo?: Schema.AsnBitStringJson;
+  statusStrings?: asn1js.Utf8StringJson[];
+  failInfo?: asn1js.BitStringJson;
 }
 
 export type PKIStatusInfoParameters = PkiObjectParameters & Partial<IPKIStatusInfo>;
@@ -214,7 +214,7 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
       res.statusStrings = Array.from(this.statusStrings, o => o.toJSON());
     }
     if (this.failInfo) {
-      res.failInfo = this.failInfo.toJSON() as Schema.AsnBitStringJson;
+      res.failInfo = this.failInfo.toJSON();
     }
 
     return res;

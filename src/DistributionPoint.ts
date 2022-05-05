@@ -28,7 +28,7 @@ export interface IDistributionPoint {
 
 export interface DistributionPointJson {
   distributionPoint?: DistributionPointNameJson;
-  reasons?: Schema.AsnBitStringJson;
+  reasons?: asn1js.BitStringJson;
   cRLIssuer?: GeneralNameJson[];
 }
 
@@ -255,7 +255,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
           },
           value: Array.from(this.distributionPoint, o => o.toSchema())
         });
-      } else if (this.distributionPoint) {
+      } else {
         internalValue = new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -280,7 +280,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 1 // [1]
         },
-        valueHex: this.reasons.valueBlock.valueHex
+        valueHex: this.reasons.valueBlock.valueHexView
       }));
     }
 
@@ -314,7 +314,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
     }
 
     if (this.reasons) {
-      object.reasons = this.reasons.toJSON() as Schema.AsnBitStringJson;
+      object.reasons = this.reasons.toJSON();
     }
 
     if (this.cRLIssuer) {

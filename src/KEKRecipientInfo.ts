@@ -30,7 +30,7 @@ export interface KEKRecipientInfoJson {
   version: number;
   kekid: KEKIdentifierJson;
   keyEncryptionAlgorithm: AlgorithmIdentifierJson;
-  encryptedKey: Schema.AsnOctetStringJson;
+  encryptedKey: asn1js.OctetStringJson;
 }
 
 export type KEKRecipientInfoParameters = PkiObjectParameters & Partial<IKEKRecipientInfo>;
@@ -205,7 +205,7 @@ export class KEKRecipientInfo extends PkiObject implements IKEKRecipientInfo {
       version: this.version,
       kekid: this.kekid.toJSON(),
       keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
-      encryptedKey: this.encryptedKey.toJSON() as Schema.AsnOctetStringJson,
+      encryptedKey: this.encryptedKey.toJSON(),
     };
   }
 

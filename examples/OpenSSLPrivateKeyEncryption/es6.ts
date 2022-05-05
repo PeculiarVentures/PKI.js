@@ -109,7 +109,7 @@ async function generateOpenSSLPrivateKey() {
   const { privateKey } = await crypto.subtle.generateKey(alg, true, ["sign", "verify"]);
   const pkcs8 = await crypto.subtle.exportKey("pkcs8", privateKey);
   const pki = pkijs.PrivateKeyInfo.fromBER(pkcs8);
-  common.getElement("pkijs_data", "textarea").innerHTML = utils.toPEM(pki.privateKey.valueBlock.valueHex, "RSA PRIVATE KEY");
+  common.getElement("pkijs_data", "textarea").innerHTML = utils.toPEM(pki.privateKey.valueBlock.valueHexView, "RSA PRIVATE KEY");
 }
 
 common.getElement("open_ssl_encrypt").addEventListener("click", createOpenSSLPrivateKey);

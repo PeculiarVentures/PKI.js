@@ -250,7 +250,7 @@ export type CertificateSchema = Schema.SchemaParameters<{
 export interface CertificateJson {
   tbs: string;
   version: number;
-  serialNumber: Schema.AsnIntegerJson;
+  serialNumber: asn1js.IntegerJson;
   signature: AlgorithmIdentifierJson;
   issuer: RelativeDistinguishedNamesJson;
   notBefore: TimeJson;
@@ -261,7 +261,7 @@ export interface CertificateJson {
   subjectUniqueID?: string;
   extensions?: ExtensionJson[];
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signatureValue: Schema.AsnBitStringJson;
+  signatureValue: asn1js.BitStringJson;
 }
 
 /**
@@ -545,7 +545,7 @@ export class Certificate extends PkiObject implements ICertificate {
     //#endregion
 
     //#region Get internal properties from parsed schema
-    this.tbs = asn1.result.tbsCertificate.valueBeforeDecode;
+    this.tbs = (asn1.result.tbsCertificate as asn1js.Sequence).valueBeforeDecodeView.slice().buffer;
 
     if (TBS_CERTIFICATE_VERSION in asn1.result)
       this.version = asn1.result[TBS_CERTIFICATE_VERSION].valueBlock.valueDec;
@@ -646,7 +646,7 @@ export class Certificate extends PkiObject implements ICertificate {
   }
 
   public toSchema(encodeFlag = false): asn1js.Sequence {
-    let tbsSchema = {};
+    let tbsSchema: asn1js.AsnType;
 
     // Decode stored TBS value
     if (encodeFlag === false) {
@@ -677,7 +677,7 @@ export class Certificate extends PkiObject implements ICertificate {
     const res: CertificateJson = {
       tbs: pvutils.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
       version: this.version,
-      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
+      serialNumber: this.serialNumber.toJSON(),
       signature: this.signature.toJSON(),
       issuer: this.issuer.toJSON(),
       notBefore: this.notBefore.toJSON(),
@@ -685,7 +685,7 @@ export class Certificate extends PkiObject implements ICertificate {
       subject: this.subject.toJSON(),
       subjectPublicKeyInfo: this.subjectPublicKeyInfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson,
+      signatureValue: this.signatureValue.toJSON(),
     };
 
     if ((VERSION in this) && (this.version !== Certificate.defaultValues(VERSION))) {
@@ -722,7 +722,7 @@ export class Certificate extends PkiObject implements ICertificate {
    * @returns Computed hash value from `Certificate.tbsCertificate.subjectPublicKeyInfo.subjectPublicKey`
    */
   public async getKeyHash(hashAlgorithm = "SHA-1"): Promise<ArrayBuffer> {
-    return common.getCrypto(true).digest({ name: hashAlgorithm }, this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
+    return common.getCrypto(true).digest({ name: hashAlgorithm }, this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
   }
 
   /**

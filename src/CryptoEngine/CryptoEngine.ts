@@ -1717,17 +1717,21 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     //#region Decrypt internal content using derived key
     //#region Create correct data block for decryption
-    let dataBuffer = new ArrayBuffer(0);
+    let dataBuffer: BufferSource = new ArrayBuffer(0);
 
     const encryptedContent = parameters.encryptedContentInfo.encryptedContent;
     if (!encryptedContent) {
       throw new Error("Required parameter 'encryptedContent' is missed");
     }
-    if (encryptedContent.idBlock.isConstructed === false)
-      dataBuffer = encryptedContent.valueBlock.valueHex;
+    if (!encryptedContent.idBlock.isConstructed)
+      dataBuffer = encryptedContent.valueBlock.valueHexView;
     else {
-      for (const content of encryptedContent.valueBlock.value)
-        dataBuffer = pvutils.utilConcatBuf(dataBuffer, content.valueBlock.valueHex);
+      const array: Uint8Array[] = [];
+      for (const content of encryptedContent.valueBlock.value) {
+        array.push(content.valueBlock.valueHexView);
+      }
+
+      dataBuffer = pvtsutils.BufferSourceConverter.concat(array);
     }
     //#endregion
 
@@ -2007,7 +2011,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     );
   }
 
-  public async verifyWithPublicKey(data: ArrayBuffer, signature: asn1js.BitString | asn1js.OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean> {
+  public async verifyWithPublicKey(data: BufferSource, signature: asn1js.BitString | asn1js.OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean> {
     //#region Find signer's hashing algorithm
     let publicKey: CryptoKey;
     if (!shaAlgorithm) {
@@ -2073,7 +2077,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     //#endregion
 
     //#region Special case for ECDSA signatures
-    let signatureValue = signature.valueBlock.valueHex;
+    let signatureValue: BufferSource = signature.valueBlock.valueHexView;
 
     if (publicKey.algorithm.name === "ECDSA") {
       const asn1 = asn1js.fromBER(signatureValue);
@@ -2105,8 +2109,8 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     return this.verify((algorithm.algorithm as any),
       publicKey,
-      new Uint8Array(signatureValue),
-      new Uint8Array(data)
+      signatureValue,
+      data,
     );
     //#endregion
   }

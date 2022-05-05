@@ -87,7 +87,7 @@ function parseCertificate() {
   //#endregion
 
   //#region Put information about X.509 certificate serial number
-  common.getElement("cert-serial-number").innerHTML = pvtsutils.Convert.ToHex(certificate.serialNumber.valueBlock.valueHex);
+  common.getElement("cert-serial-number").innerHTML = pvtsutils.Convert.ToHex(certificate.serialNumber.valueBlock.valueHexView);
   //#endregion
 
   //#region Put information about issuance date
@@ -102,15 +102,15 @@ function parseCertificate() {
   let publicKeySize = "< unknown >";
 
   if (certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1)) {
-    const rsaPublicKey = pkijs.RSAPublicKey.fromBER(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
+    const rsaPublicKey = pkijs.RSAPublicKey.fromBER(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
 
-    const modulusView = new Uint8Array(rsaPublicKey.modulus.valueBlock.valueHex);
+    const modulusView = rsaPublicKey.modulus.valueBlock.valueHexView;
     let modulusBitLength = 0;
 
     if (modulusView[0] === 0x00)
-      modulusBitLength = (rsaPublicKey.modulus.valueBlock.valueHex.byteLength - 1) * 8;
+      modulusBitLength = (rsaPublicKey.modulus.valueBlock.valueHexView.byteLength - 1) * 8;
     else
-      modulusBitLength = rsaPublicKey.modulus.valueBlock.valueHex.byteLength * 8;
+      modulusBitLength = rsaPublicKey.modulus.valueBlock.valueHexView.byteLength * 8;
 
     publicKeySize = modulusBitLength.toString();
   }

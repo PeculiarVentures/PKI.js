@@ -1,7 +1,8 @@
 import * as asn1js from "asn1js";
+import { BufferSourceConverter } from "pvtsutils";
 import * as pvutils from "pvutils";
 import { ECNamedCurves } from "./ECNamedCurves";
-import { ArgumentError, ParameterError } from "./errors";
+import { ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
@@ -45,7 +46,7 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
     this.y = pvutils.getParametersValue(parameters, Y, ECPublicKey.defaultValues(Y));
     this.namedCurve = pvutils.getParametersValue(parameters, NAMED_CURVE, ECPublicKey.defaultValues(NAMED_CURVE));
 
-    if ("json" in parameters) {
+    if (parameters.json) {
       this.fromJSON(parameters.json);
     }
 
@@ -102,11 +103,10 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
     return new asn1js.RawData();
   }
 
-  public fromSchema(schema: ArrayBuffer): any {
+  public fromSchema(schema1: BufferSource): any {
     //#region Check the schema is valid
-    ArgumentError.assert(schema, "schema", "ArrayBuffer");
 
-    const view = new Uint8Array(schema);
+    const view = BufferSourceConverter.toUint8Array(schema1);
     if (view[0] !== 0x04) {
       throw new Error("Object's schema was not verified against input data for ECPublicKey");
     }
@@ -119,13 +119,13 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
     }
     const coordinateLength = namedCurve.size;
 
-    if (schema.byteLength !== (coordinateLength * 2 + 1)) {
+    if (view.byteLength !== (coordinateLength * 2 + 1)) {
       throw new Error("Object's schema was not verified against input data for ECPublicKey");
     }
 
     this.namedCurve = namedCurve.name;
-    this.x = schema.slice(1, coordinateLength + 1);
-    this.y = schema.slice(1 + coordinateLength, coordinateLength * 2 + 1);
+    this.x = view.slice(1, coordinateLength + 1).buffer;
+    this.y = view.slice(1 + coordinateLength, coordinateLength * 2 + 1).buffer;
     //#endregion
   }
 

@@ -25,7 +25,7 @@ export interface IIssuerAndSerialNumber {
 
 export interface IssuerAndSerialNumberJson {
   issuer: RelativeDistinguishedNamesJson;
-  serialNumber: Schema.AsnIntegerJson;
+  serialNumber: asn1js.IntegerJson;
 }
 
 export type IssuerAndSerialNumberParameters = PkiObjectParameters & Partial<IIssuerAndSerialNumber>;
@@ -145,7 +145,7 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
   public toJSON(): IssuerAndSerialNumberJson {
     return {
       issuer: this.issuer.toJSON(),
-      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
+      serialNumber: this.serialNumber.toJSON(),
     };
   }
 

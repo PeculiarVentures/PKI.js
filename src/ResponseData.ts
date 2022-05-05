@@ -236,7 +236,7 @@ export class ResponseData extends PkiObject implements IResponseData {
     //#endregion
 
     //#region Get internal properties from parsed schema
-    this.tbs = asn1.result.ResponseData.valueBeforeDecode;
+    this.tbs = (asn1.result.ResponseData as asn1js.Sequence).valueBeforeDecodeView.slice().buffer;
 
     if (RESPONSE_DATA_VERSION in asn1.result)
       this.version = asn1.result[RESPONSE_DATA_VERSION].valueBlock.valueDec;

@@ -170,90 +170,68 @@ export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuff
  * @param cmsSignature ASN.1 SEQUENCE contains CMS ECDSA signature
  * @returns {ArrayBuffer}
  */
-export function createECDSASignatureFromCMS(cmsSignature: asn1js.Sequence) {
-  //#region Check input variables
-  if ((cmsSignature instanceof asn1js.Sequence) === false)
+export function createECDSASignatureFromCMS(cmsSignature: asn1js.AsnType): ArrayBuffer {
+  // Check input variables
+  if (!(cmsSignature instanceof asn1js.Sequence
+    && cmsSignature.valueBlock.value.length === 2
+    && cmsSignature.valueBlock.value[0] instanceof asn1js.Integer
+    && cmsSignature.valueBlock.value[1] instanceof asn1js.Integer))
     return new ArrayBuffer(0);
 
-  if (cmsSignature.valueBlock.value.length !== 2)
-    return new ArrayBuffer(0);
-
-  if ((cmsSignature.valueBlock.value[0] instanceof asn1js.Integer) === false)
-    return new ArrayBuffer(0);
-
-  if ((cmsSignature.valueBlock.value[1] instanceof asn1js.Integer) === false)
-    return new ArrayBuffer(0);
-  //#endregion
-
-  const rValue = cmsSignature.valueBlock.value[0].convertFromDER();
-  const sValue = cmsSignature.valueBlock.value[1].convertFromDER();
+  const rValueView = cmsSignature.valueBlock.value[0].convertFromDER().valueBlock.valueHexView;
+  const sValueView = cmsSignature.valueBlock.value[1].convertFromDER().valueBlock.valueHexView;
 
   //#region Check the lengths of two parts are equal
   switch (true) {
-    case (rValue.valueBlock.valueHex.byteLength < sValue.valueBlock.valueHex.byteLength):
+    case (rValueView.byteLength < sValueView.byteLength):
       {
-        if ((sValue.valueBlock.valueHex.byteLength - rValue.valueBlock.valueHex.byteLength) !== 1)
+        if ((sValueView.byteLength - rValueView.byteLength) !== 1)
           throw new Error("Incorrect DER integer decoding");
 
-        const correctedLength = sValue.valueBlock.valueHex.byteLength;
+        const correctedLength = sValueView.byteLength;
+        const res = new Uint8Array(correctedLength * 2);
 
-        const rValueView = new Uint8Array(rValue.valueBlock.valueHex);
+        res.set(rValueView, 1);
+        res.set(sValueView, correctedLength + 1);
 
-        const rValueBufferCorrected = new ArrayBuffer(correctedLength);
-        const rValueViewCorrected = new Uint8Array(rValueBufferCorrected);
-
-        rValueViewCorrected.set(rValueView, 1);
-        rValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
-
-        return pvutils.utilConcatBuf(rValueBufferCorrected, sValue.valueBlock.valueHex);
+        return res.buffer;
       }
-    case (rValue.valueBlock.valueHex.byteLength > sValue.valueBlock.valueHex.byteLength):
+    case (rValueView.byteLength > sValueView.byteLength):
       {
-        if ((rValue.valueBlock.valueHex.byteLength - sValue.valueBlock.valueHex.byteLength) !== 1)
+        if ((rValueView.byteLength - sValueView.byteLength) !== 1)
           throw new Error("Incorrect DER integer decoding");
 
-        const correctedLength = rValue.valueBlock.valueHex.byteLength;
+        const correctedLength = rValueView.byteLength;
+        const res = new Uint8Array(correctedLength * 2);
 
-        const sValueView = new Uint8Array(sValue.valueBlock.valueHex);
+        res.set(rValueView);
+        res.set(sValueView, correctedLength + 1);
 
-        const sValueBufferCorrected = new ArrayBuffer(correctedLength);
-        const sValueViewCorrected = new Uint8Array(sValueBufferCorrected);
-
-        sValueViewCorrected.set(sValueView, 1);
-        sValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
-
-        return pvutils.utilConcatBuf(rValue.valueBlock.valueHex, sValueBufferCorrected);
+        return res.buffer;
       }
     default:
       {
         //#region In case we have equal length and the length is not even with 2
-        if (rValue.valueBlock.valueHex.byteLength % 2) {
-          const correctedLength = (rValue.valueBlock.valueHex.byteLength + 1);
+        if (rValueView.byteLength % 2) {
+          const correctedLength = (rValueView.byteLength + 1);
+          const res = new Uint8Array(correctedLength * 2);
 
-          const rValueView = new Uint8Array(rValue.valueBlock.valueHex);
+          res.set(rValueView);
+          res.set(sValueView, correctedLength + 1);
 
-          const rValueBufferCorrected = new ArrayBuffer(correctedLength);
-          const rValueViewCorrected = new Uint8Array(rValueBufferCorrected);
-
-          rValueViewCorrected.set(rValueView, 1);
-          rValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
-
-          const sValueView = new Uint8Array(sValue.valueBlock.valueHex);
-
-          const sValueBufferCorrected = new ArrayBuffer(correctedLength);
-          const sValueViewCorrected = new Uint8Array(sValueBufferCorrected);
-
-          sValueViewCorrected.set(sValueView, 1);
-          sValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
-
-          return pvutils.utilConcatBuf(rValueBufferCorrected, sValueBufferCorrected);
+          return res.buffer;
         }
         //#endregion
       }
   }
   //#endregion
 
-  return pvutils.utilConcatBuf(rValue.valueBlock.valueHex, sValue.valueBlock.valueHex);
+  const res = new Uint8Array(rValueView.byteLength + sValueView.byteLength);
+
+  res.set(rValueView);
+  res.set(sValueView, rValueView.byteLength);
+
+  return res.buffer;
 }
 
 /**

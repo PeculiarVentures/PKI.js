@@ -167,7 +167,6 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
                 tagClass: 3, // CONTEXT-SPECIFIC
                 tagNumber: 0 // [0]
               },
-              lenBlockLength: 1 // The length contains one byte 0x00
             }), // IMPLICIT NULL (no "valueBlock")
             new asn1js.Constructed({
               name: (names.certStatus || ""),

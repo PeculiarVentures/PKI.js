@@ -50,6 +50,7 @@ export function encryptUsingPBKDF2Password(
   if (iv.byteLength)
     cipher = crypto.createCipheriv(algorithm, key, Buffer.from(iv));
   else
+    // eslint-disable-next-line deprecation/deprecation
     cipher = crypto.createCipher(algorithm, key);
   //#endregion
 
@@ -93,6 +94,7 @@ export function decryptUsingPBKDF2Password(
   if (iv.byteLength)
     cipher = crypto.createDecipheriv(algorithm, key, Buffer.from(iv));
   else
+    // eslint-disable-next-line deprecation/deprecation
     cipher = crypto.createDecipher(algorithm, key);
   //#endregion
 

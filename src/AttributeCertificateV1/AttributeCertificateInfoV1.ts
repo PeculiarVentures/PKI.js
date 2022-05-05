@@ -73,10 +73,10 @@ export interface AttributeCertificateInfoV1Json {
   subjectName?: GeneralNamesJson;
   issuer: GeneralNamesJson;
   signature: AlgorithmIdentifierJson;
-  serialNumber: Schema.AsnIntegerJson;
+  serialNumber: asn1js.IntegerJson;
   attrCertValidityPeriod: AttCertValidityPeriodJson;
   attributes: AttributeJson[];
-  issuerUniqueID: Schema.AsnBitStringJson;
+  issuerUniqueID: asn1js.BitStringJson;
   extensions: ExtensionsJson;
 }
 
@@ -388,12 +388,12 @@ export class AttributeCertificateInfoV1 extends PkiObject implements IAttributeC
 
     result.issuer = this.issuer.toJSON();
     result.signature = this.signature.toJSON();
-    result.serialNumber = this.serialNumber.toJSON() as Schema.AsnIntegerJson;
+    result.serialNumber = this.serialNumber.toJSON();
     result.attrCertValidityPeriod = this.attrCertValidityPeriod.toJSON();
     result.attributes = Array.from(this.attributes, o => o.toJSON());
 
     if (this.issuerUniqueID) {
-      result.issuerUniqueID = this.issuerUniqueID.toJSON() as Schema.AsnBitStringJson;
+      result.issuerUniqueID = this.issuerUniqueID.toJSON();
     }
 
     if (this.extensions) {

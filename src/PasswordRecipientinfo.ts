@@ -29,7 +29,7 @@ export interface PasswordRecipientInfoJson {
   version: number;
   keyDerivationAlgorithm?: AlgorithmIdentifierJson;
   keyEncryptionAlgorithm: AlgorithmIdentifierJson;
-  encryptedKey: Schema.AsnOctetStringJson;
+  encryptedKey: asn1js.OctetStringJson;
 }
 
 export type PasswordRecipientinfoParameters = PkiObjectParameters & Partial<IPasswordRecipientInfo>;
@@ -221,7 +221,7 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
     const res: PasswordRecipientInfoJson = {
       version: this.version,
       keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
-      encryptedKey: this.encryptedKey.toJSON() as Schema.AsnOctetStringJson,
+      encryptedKey: this.encryptedKey.toJSON(),
     };
 
     if (this.keyDerivationAlgorithm) {

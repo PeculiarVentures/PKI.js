@@ -19,7 +19,7 @@ export interface IRecipientEncryptedKey {
 
 export interface RecipientEncryptedKeyJson {
   rid: KeyAgreeRecipientIdentifierJson;
-  encryptedKey: Schema.AsnOctetStringJson;
+  encryptedKey: asn1js.OctetStringJson;
 }
 
 export type RecipientEncryptedKeyParameters = PkiObjectParameters & Partial<IRecipientEncryptedKey>;
@@ -148,7 +148,7 @@ export class RecipientEncryptedKey extends PkiObject implements IRecipientEncryp
   public toJSON(): RecipientEncryptedKeyJson {
     return {
       rid: this.rid.toJSON(),
-      encryptedKey: this.encryptedKey.toJSON() as Schema.AsnOctetStringJson,
+      encryptedKey: this.encryptedKey.toJSON(),
     };
   }
 

@@ -137,7 +137,7 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
       const int1 = asn1js.fromBER(ber1);
       AsnError.assert(int1, "Integer");
 
-      this.requireExplicitPolicy = int1.result.valueBlock.valueDec;
+      this.requireExplicitPolicy = (int1.result as asn1js.Integer).valueBlock.valueDec;
     }
 
     if (INHIBIT_POLICY_MAPPING in asn1.result) {
@@ -150,7 +150,7 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
       const int2 = asn1js.fromBER(ber2);
       AsnError.assert(int2, "Integer");
 
-      this.inhibitPolicyMapping = int2.result.valueBlock.valueDec;
+      this.inhibitPolicyMapping = (int2.result as asn1js.Integer).valueBlock.valueDec;
     }
     //#endregion
   }

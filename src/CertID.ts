@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
@@ -51,9 +52,9 @@ export type CertIDSchema = Schema.SchemaParameters<{
 
 export interface CertIDJson {
   hashAlgorithm: AlgorithmIdentifierJson;
-  issuerNameHash: Schema.AsnOctetStringJson;
-  issuerKeyHash: Schema.AsnOctetStringJson;
-  serialNumber: Schema.AsnIntegerJson;
+  issuerNameHash: asn1js.OctetStringJson;
+  issuerKeyHash: asn1js.OctetStringJson;
+  serialNumber: asn1js.IntegerJson;
 }
 
 export interface CertIDCreateParams {
@@ -212,9 +213,9 @@ export class CertID extends PkiObject implements ICertID {
   public toJSON(): CertIDJson {
     return {
       hashAlgorithm: this.hashAlgorithm.toJSON(),
-      issuerNameHash: this.issuerNameHash.toJSON() as Schema.AsnOctetStringJson,
-      issuerKeyHash: this.issuerKeyHash.toJSON() as Schema.AsnOctetStringJson,
-      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
+      issuerNameHash: this.issuerNameHash.toJSON(),
+      issuerKeyHash: this.issuerKeyHash.toJSON(),
+      serialNumber: this.serialNumber.toJSON(),
     };
   }
 
@@ -229,12 +230,12 @@ export class CertID extends PkiObject implements ICertID {
     }
 
     // Check ISSUER_NAME_HASH
-    if (!pvutils.isEqualBuffer(this.issuerNameHash.valueBlock.valueHex, certificateID.issuerNameHash.valueBlock.valueHex)) {
+    if (!pvtsutils.BufferSourceConverter.isEqual(this.issuerNameHash.valueBlock.valueHexView, certificateID.issuerNameHash.valueBlock.valueHexView)) {
       return false;
     }
 
     // Check ISSUER_KEY_HASH
-    if (!pvutils.isEqualBuffer(this.issuerKeyHash.valueBlock.valueHex, certificateID.issuerKeyHash.valueBlock.valueHex)) {
+    if (!pvtsutils.BufferSourceConverter.isEqual(this.issuerKeyHash.valueBlock.valueHexView, certificateID.issuerKeyHash.valueBlock.valueHexView)) {
       return false;
     }
 
@@ -273,7 +274,7 @@ export class CertID extends PkiObject implements ICertID {
     this.issuerNameHash = new asn1js.OctetString({ valueHex: hashIssuerName });
 
     // Create ISSUER_KEY_HASH
-    const issuerKeyBuffer = issuerCertificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex;
+    const issuerKeyBuffer = issuerCertificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView;
     const hashIssuerKey = await crypto.digest({ name: parameters.hashAlgorithm }, issuerKeyBuffer);
     this.issuerKeyHash = new asn1js.OctetString({ valueHex: hashIssuerKey });
   }

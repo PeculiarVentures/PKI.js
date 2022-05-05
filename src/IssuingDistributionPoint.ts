@@ -301,7 +301,7 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
     //#region Create array for output sequence
     const outputArray = [];
 
-    if (DISTRIBUTION_POINT in this) {
+    if (this.distributionPoint) {
       let value;
 
       if (this.distributionPoint instanceof Array) {
@@ -312,7 +312,7 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
           },
           value: Array.from(this.distributionPoint, o => o.toSchema())
         });
-      } else if (this.distributionPoint) {
+      } else {
         value = this.distributionPoint.toSchema();
 
         value.idBlock.tagClass = 3; // CONTEXT - SPECIFIC

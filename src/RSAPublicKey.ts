@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -95,7 +96,7 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
     }));
   }
 
-  public fromSchema(schema: Schema.SchemaNames): void {
+  public fromSchema(schema: asn1js.AsnType): void {
     // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
 
@@ -127,8 +128,8 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
 
   public toJSON(): RSAPublicKeyJson {
     return {
-      n: pvutils.toBase64(pvutils.arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
-      e: pvutils.toBase64(pvutils.arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true)
+      n: pvtsutils.Convert.ToBase64Url(this.modulus.valueBlock.valueHexView),
+      e: pvtsutils.Convert.ToBase64Url(this.publicExponent.valueBlock.valueHexView),
     };
   }
 

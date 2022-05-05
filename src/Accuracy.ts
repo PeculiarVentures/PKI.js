@@ -202,7 +202,7 @@ export class Accuracy extends PkiObject implements IAccuracy {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        valueHex: intMillis.valueBlock.valueHex
+        valueHex: intMillis.valueBlock.valueHexView
       }));
     }
 
@@ -214,7 +214,7 @@ export class Accuracy extends PkiObject implements IAccuracy {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 1 // [1]
         },
-        valueHex: intMicros.valueBlock.valueHex
+        valueHex: intMicros.valueBlock.valueHexView
       }));
     }
     //#endregion

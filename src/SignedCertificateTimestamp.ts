@@ -72,7 +72,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   public extensions!: ArrayBuffer;
   public hashAlgorithm!: string;
   public signatureAlgorithm!: string;
-  public signature: Schema.SchemaType;
+  public signature: asn1js.BaseBlock;
 
   /**
    * Initializes a new instance of the {@link SignedCertificateTimestamp} class
@@ -235,7 +235,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   public toStream(): bs.SeqStream {
     const stream = new bs.SeqStream();
 
-    stream.appendUint16(47 + this.extensions.byteLength + this.signature.valueBeforeDecode.byteLength);
+    stream.appendUint16(47 + this.extensions.byteLength + this.signature.valueBeforeDecodeView.byteLength);
     stream.appendChar(this.version);
     stream.appendView(new Uint8Array(this.logID));
 

@@ -27,7 +27,7 @@ export type PKCS8ShroudedKeyBagParameters = PkiObjectParameters & Partial<IPKCS8
 
 export interface PKCS8ShroudedKeyBagJson {
   encryptionAlgorithm: AlgorithmIdentifierJson;
-  encryptedData: Schema.AsnOctetStringJson;
+  encryptedData: asn1js.OctetStringJson;
 }
 
 /**
@@ -185,7 +185,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
   public toJSON(): PKCS8ShroudedKeyBagJson {
     return {
       encryptionAlgorithm: this.encryptionAlgorithm.toJSON(),
-      encryptedData: this.encryptedData.toJSON() as Schema.AsnOctetStringJson,
+      encryptedData: this.encryptedData.toJSON(),
     };
   }
 

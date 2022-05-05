@@ -18,7 +18,7 @@ export interface ISignature {
 
 export interface SignatureJson {
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signature: Schema.AsnBitStringJson;
+  signature: asn1js.BitStringJson;
   certs?: CertificateJson[];
 }
 
@@ -201,7 +201,7 @@ export class Signature extends PkiObject implements ISignature {
   public toJSON(): SignatureJson {
     const res: SignatureJson = {
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signature: this.signature.toJSON() as Schema.AsnBitStringJson,
+      signature: this.signature.toJSON(),
     };
 
     if (this.certs) {

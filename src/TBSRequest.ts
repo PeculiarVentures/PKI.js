@@ -212,7 +212,7 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.tbs = asn1.result.TBSRequest.valueBeforeDecode;
+    this.tbs = asn1.result.TBSRequest.valueBeforeDecodeView.slice().buffer;
 
     if (TBS_REQUEST_VERSION in asn1.result)
       this.version = asn1.result[TBS_REQUEST_VERSION].valueBlock.valueDec;
@@ -240,6 +240,9 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
 
       const asn1 = asn1js.fromBER(this.tbs);
       AsnError.assert(asn1, "TBS Request");
+      if (!(asn1.result instanceof asn1js.Sequence)) {
+        throw new Error("ASN.1 result should be SEQUENCE");
+      }
 
       tbsSchema = asn1.result;
     }

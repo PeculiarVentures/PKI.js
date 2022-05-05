@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { MessageImprint, HASHED_MESSAGE, HASH_ALGORITHM, MessageImprintSchema, MessageImprintJson } from "./MessageImprint";
@@ -113,11 +114,11 @@ export interface TSTInfoJson {
   version: number;
   policy: string;
   messageImprint: MessageImprintJson;
-  serialNumber: Schema.AsnIntegerJson;
+  serialNumber: asn1js.IntegerJson;
   genTime: Date;
   accuracy?: AccuracyJson;
   ordering?: boolean;
-  nonce?: Schema.AsnIntegerJson;
+  nonce?: asn1js.IntegerJson;
   tsa?: GeneralNameJson;
   extensions?: ExtensionJson[];
 }
@@ -427,7 +428,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       version: this.version,
       policy: this.policy,
       messageImprint: this.messageImprint.toJSON(),
-      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
+      serialNumber: this.serialNumber.toJSON(),
       genTime: this.genTime
     };
 
@@ -438,7 +439,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       res.ordering = this.ordering;
 
     if (this.nonce)
-      res.nonce = this.nonce.toJSON() as Schema.AsnIntegerJson;
+      res.nonce = this.nonce.toJSON();
 
     if (this.tsa)
       res.tsa = this.tsa.toJSON();
@@ -479,7 +480,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
 
     // Calculate message digest for input "data" buffer
     const hash = await common.getCrypto(true).digest(shaAlgorithm.name, new Uint8Array(data));
-    return pvutils.isEqualBuffer(hash, this.messageImprint.hashedMessage.valueBlock.valueHex);
+    return pvtsutils.BufferSourceConverter.isEqual(hash, this.messageImprint.hashedMessage.valueBlock.valueHexView);
   }
 
 }

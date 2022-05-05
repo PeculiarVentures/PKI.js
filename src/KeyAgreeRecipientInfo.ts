@@ -36,7 +36,7 @@ export interface IKeyAgreeRecipientInfo {
 export interface KeyAgreeRecipientInfoJson {
   version: number;
   originator: OriginatorIdentifierOrKeyJson;
-  ukm?: Schema.AsnOctetStringJson;
+  ukm?: asn1js.OctetStringJson;
   keyEncryptionAlgorithm: AlgorithmIdentifierJson;
   recipientEncryptedKeys: RecipientEncryptedKeysJson;
 }
@@ -240,7 +240,7 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
       value: [this.originator.toSchema()]
     }));
 
-    if (UKM in this) {
+    if (this.ukm) {
       outputArray.push(new asn1js.Constructed({
         optional: true,
         idBlock: {
@@ -275,7 +275,7 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
     };
 
     if (this.ukm) {
-      res.ukm = this.ukm.toJSON() as Schema.AsnOctetStringJson;
+      res.ukm = this.ukm.toJSON();
     }
 
     return res;

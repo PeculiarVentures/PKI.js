@@ -24,7 +24,7 @@ export interface IRevokedCertificate {
 export type RevokedCertificateParameters = PkiObjectParameters & Partial<IRevokedCertificate>;
 
 export interface RevokedCertificateJson {
-  userCertificate: Schema.AsnIntegerJson;
+  userCertificate: asn1js.IntegerJson;
   revocationDate: TimeJson;
   crlEntryExtensions?: ExtensionsJson;
 }
@@ -154,7 +154,7 @@ export class RevokedCertificate extends PkiObject implements IRevokedCertificate
 
   public toJSON(): RevokedCertificateJson {
     const res: RevokedCertificateJson = {
-      userCertificate: this.userCertificate.toJSON() as Schema.AsnIntegerJson,
+      userCertificate: this.userCertificate.toJSON(),
       revocationDate: this.revocationDate.toJSON(),
     };
 

@@ -21,9 +21,9 @@ export interface CertificateSetJson {
   certificates: CertificateSetItemJson[];
 }
 
-export type CertificateSetItemJson = CertificateJson | AttributeCertificateV1Json | AttributeCertificateV2Json | OtherCertificateFormatJson | Schema.AsnBlockJson;
+export type CertificateSetItemJson = CertificateJson | AttributeCertificateV1Json | AttributeCertificateV2Json | OtherCertificateFormatJson;
 
-export type CertificateSetItem = Certificate | AttributeCertificateV1 | AttributeCertificateV2 | OtherCertificateFormat | Schema.SchemaType;
+export type CertificateSetItem = Certificate | AttributeCertificateV1 | AttributeCertificateV2 | OtherCertificateFormat;
 
 export type CertificateSetParameters = PkiObjectParameters & Partial<ICertificateSet>;
 

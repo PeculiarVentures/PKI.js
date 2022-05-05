@@ -279,14 +279,14 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
 
   public toJSON(): RSAPrivateKeyJson {
     const jwk: RSAPrivateKeyJson = {
-      n: pvutils.toBase64(pvutils.arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
-      e: pvutils.toBase64(pvutils.arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true),
-      d: pvutils.toBase64(pvutils.arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true, true),
-      p: pvutils.toBase64(pvutils.arrayBufferToString(this.prime1.valueBlock.valueHex), true, true, true),
-      q: pvutils.toBase64(pvutils.arrayBufferToString(this.prime2.valueBlock.valueHex), true, true, true),
-      dp: pvutils.toBase64(pvutils.arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true, true),
-      dq: pvutils.toBase64(pvutils.arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true, true),
-      qi: pvutils.toBase64(pvutils.arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true, true)
+      n: pvtsutils.Convert.ToBase64Url(this.modulus.valueBlock.valueHexView),
+      e: pvtsutils.Convert.ToBase64Url(this.publicExponent.valueBlock.valueHexView),
+      d: pvtsutils.Convert.ToBase64Url(this.privateExponent.valueBlock.valueHexView),
+      p: pvtsutils.Convert.ToBase64Url(this.prime1.valueBlock.valueHexView),
+      q: pvtsutils.Convert.ToBase64Url(this.prime2.valueBlock.valueHexView),
+      dp: pvtsutils.Convert.ToBase64Url(this.exponent1.valueBlock.valueHexView),
+      dq: pvtsutils.Convert.ToBase64Url(this.exponent2.valueBlock.valueHexView),
+      qi: pvtsutils.Convert.ToBase64Url(this.coefficient.valueBlock.valueHexView),
     };
     if (this.otherPrimeInfos) {
       jwk.oth = Array.from(this.otherPrimeInfos, o => o.toJSON());

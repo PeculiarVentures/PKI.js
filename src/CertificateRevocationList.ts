@@ -77,7 +77,7 @@ export interface CertificateRevocationListJson {
   revokedCertificates?: RevokedCertificateJson[];
   crlExtensions?: ExtensionsJson;
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signatureValue: Schema.AsnBitStringJson;
+  signatureValue: asn1js.BitStringJson;
 }
 
 function tbsCertList(parameters: TBSCertListSchema = {}): Schema.SchemaType {
@@ -317,7 +317,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
-    this.tbs = asn1.result.tbsCertList.valueBeforeDecode;
+    this.tbs = (asn1.result.tbsCertList as asn1js.Sequence).valueBeforeDecodeView.slice().buffer;
 
     if (TBS_CERT_LIST_VERSION in asn1.result) {
       this.version = asn1.result[TBS_CERT_LIST_VERSION].valueBlock.valueDec;
@@ -424,7 +424,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
       issuer: this.issuer.toJSON(),
       thisUpdate: this.thisUpdate.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson
+      signatureValue: this.signatureValue.toJSON()
     };
 
     if (this.version !== CertificateRevocationList.defaultValues(VERSION))

@@ -32,11 +32,11 @@ export interface KeyTransRecipientInfoJson {
   version: number;
   rid: RecipientIdentifierMixedJson;
   keyEncryptionAlgorithm: AlgorithmIdentifierJson;
-  encryptedKey: Schema.AsnOctetStringJson;
+  encryptedKey: asn1js.OctetStringJson;
 }
 
 export type RecipientIdentifierType = IssuerAndSerialNumber | asn1js.OctetString;
-export type RecipientIdentifierMixedJson = IssuerAndSerialNumberJson | Schema.AsnOctetStringJson;
+export type RecipientIdentifierMixedJson = IssuerAndSerialNumberJson | asn1js.OctetStringJson;
 
 export type KeyTransRecipientInfoParameters = PkiObjectParameters & Partial<IKeyTransRecipientInfo>;
 
@@ -205,7 +205,7 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        valueHex: this.rid.valueBlock.valueHex
+        valueHex: this.rid.valueBlock.valueHexView
       }));
     }
 
@@ -223,9 +223,9 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
   public toJSON(): KeyTransRecipientInfoJson {
     return {
       version: this.version,
-      rid: this.rid.toJSON() as Schema.AsnOctetStringJson,
+      rid: this.rid.toJSON(),
       keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
-      encryptedKey: this.encryptedKey.toJSON() as Schema.AsnOctetStringJson,
+      encryptedKey: this.encryptedKey.toJSON(),
     };
   }
 

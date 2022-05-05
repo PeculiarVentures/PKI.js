@@ -17,7 +17,7 @@ const CLEAR_PROPS = [
 
 export interface ICertBag {
   certId: string;
-  certValue: any;
+  certValue: asn1js.OctetString | PkiObject;
   parsedValue: any;
 }
 
@@ -36,7 +36,7 @@ export class CertBag extends PkiObject implements ICertBag {
   public static override CLASS_NAME = "CertBag";
 
   public certId!: string;
-  public certValue: any;
+  public certValue: PkiObject | asn1js.OctetString;
   public parsedValue: any;
 
   /**
@@ -145,9 +145,9 @@ export class CertBag extends PkiObject implements ICertBag {
 
     //#region Get internal properties from parsed schema
     this.certId = asn1.result.certId.valueBlock.toString();
-    this.certValue = asn1.result.certValue;
+    this.certValue = asn1.result.certValue as asn1js.OctetString;
 
-    const certValueHex = this.certValue.valueBlock.valueHex;
+    const certValueHex = this.certValue.valueBlock.valueHexView;
     switch (this.certId) {
       case id_CertBag_X509Certificate: // x509Certificate
         {
