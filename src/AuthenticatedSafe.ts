@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { ContentInfo, ContentInfoJson } from "./ContentInfo";
 import { SafeContents } from "./SafeContents";
@@ -9,7 +8,7 @@ import * as Schema from "./Schema";
 import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData } from "./ObjectIdentifiers";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
+import { EMPTY_STRING } from "./constants";
 
 const SAFE_CONTENTS = "safeContents";
 const PARSED_VALUE = "parsedValue";

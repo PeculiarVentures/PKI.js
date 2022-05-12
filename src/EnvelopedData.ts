@@ -25,8 +25,7 @@ import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
 import { ArgumentError, AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { BufferSourceConverter } from "pvtsutils";
-import { EMPTY_STRING, EMPTY_BUFFER } from "./constants";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const ORIGINATOR_INFO = "originatorInfo";

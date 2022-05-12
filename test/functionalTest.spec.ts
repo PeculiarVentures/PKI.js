@@ -258,7 +258,7 @@ context("PKIjs functional testing", () => {
         x: fakeHex,
         y: fakeHex,
         namedCurve: "1.2.840.10045.3.1.7"
-      })).toSchema().data, // Return specifically ArrayBuffer
+      })).toSchema().dataView.slice().buffer, // Return specifically ArrayBuffer
       namedCurve: "1.2.840.10045.3.1.7" // Needs specifically for this class
     });
   });

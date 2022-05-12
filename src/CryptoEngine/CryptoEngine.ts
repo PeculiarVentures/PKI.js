@@ -12,7 +12,7 @@ import { PBES2Params } from "../PBES2Params";
 import { ArgumentError, AsnError, ParameterError } from "../errors";
 import * as type from "./CryptoEngineInterface";
 import { AbstractCryptoEngine } from "./AbstractCryptoEngine";
-import { EMPTY_STRING, EMPTY_BUFFER } from "../constants";
+import { EMPTY_STRING } from "../constants";
 
 /**
  * Making MAC key using algorithm described in B.2 of PKCS#12 standard.

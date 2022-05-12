@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import { BufferSourceConverter } from "pvtsutils";
 import * as pkijs from "../../src";
 import * as nodeSpecificCrypto from "./NodeEngineNodeSpecific";
 

@@ -17,7 +17,7 @@ import { Certificate } from "./Certificate";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { BufferSourceConverter } from "pvtsutils";
-import { EMPTY_STRING, EMPTY_BUFFER } from "./constants";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const AUTH_SAFE = "authSafe";
