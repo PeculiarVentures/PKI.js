@@ -214,5 +214,5 @@ export { CAVersion };
 import { QCStatement } from "./QCStatements.js";
 import QCStatements from "./QCStatements.js";
 export { QCStatement, QCStatements };
-import ECNamedCurves from "./ECNamedCurves";
+import ECNamedCurves from "./ECNamedCurves.js";
 export { ECNamedCurves };
