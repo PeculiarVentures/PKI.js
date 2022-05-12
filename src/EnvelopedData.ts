@@ -1511,22 +1511,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     //#endregion
 
     //#region Create correct data block for decryption
-    let dataBuffer: BufferSource = EMPTY_BUFFER;
-
     if (!this.encryptedContentInfo.encryptedContent) {
       throw new Error("Required property `encryptedContent` is empty");
     }
-    if (this.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false)
-      dataBuffer = this.encryptedContentInfo.encryptedContent.valueBlock.valueHexView;
-    else {
-      const array: Uint8Array[] = [];
-
-      for (const content of this.encryptedContentInfo.encryptedContent.valueBlock.value) {
-        array.push(content.valueBlock.valueHexView);
-      }
-
-      dataBuffer = BufferSourceConverter.concat(array);
-    }
+    const dataBuffer = this.encryptedContentInfo.getEncryptedContent();
     //#endregion
 
     return crypto.decrypt(

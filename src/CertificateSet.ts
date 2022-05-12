@@ -214,7 +214,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
           default:
         }
 
-        return element;
+        return element.toSchema();
       })
     }));
   }

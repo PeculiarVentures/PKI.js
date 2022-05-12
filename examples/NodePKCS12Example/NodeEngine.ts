@@ -416,21 +416,10 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     //#endregion
 
     //#region Create correct data block for decryption
-    let dataBuffer = new ArrayBuffer(0);
-
     if (!parameters.encryptedContentInfo.encryptedContent) {
       pkijs.ParameterError.assertEmpty(parameters.encryptedContentInfo.encryptedContent, "encryptedContent", "parameters.encryptedContentInfo");
     }
-    if (parameters.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false) {
-      dataBuffer = parameters.encryptedContentInfo.encryptedContent.valueBlock.valueHexView;
-    } else {
-      const array: Uint8Array[] = [];
-
-      for (const content of parameters.encryptedContentInfo.encryptedContent.valueBlock.value)
-        array.push(content.valueBlock.valueHexView);
-
-      dataBuffer = BufferSourceConverter.concat(array);
-    }
+    const dataBuffer = parameters.encryptedContentInfo.getEncryptedContent();
     //#endregion
 
     //#region Check if we have PBES1

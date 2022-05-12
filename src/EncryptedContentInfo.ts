@@ -267,5 +267,19 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
     return res;
   }
 
+  /**
+   * Returns concatenated buffer from `encryptedContent` field.
+   * @returns Array buffer
+   * @since 3.0.0
+   * @throws Throws Error if `encryptedContent` is undefined
+   */
+  public getEncryptedContent(): ArrayBuffer {
+    if (!this.encryptedContent) {
+      throw new Error("Parameter 'encryptedContent' is undefined");
+    }
+    // NOTE encryptedContent can be CONSTRUCTED/PRIMITIVE
+    return asn1js.OctetString.prototype.getValue.call(this.encryptedContent);
+  }
+
 }
 

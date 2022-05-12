@@ -173,19 +173,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             ArgumentError.assert(content.content, "this.safeContents[j].content", asn1js.OctetString);
 
             //#region Check we have "constructive encoding" for AuthSafe content
-            let authSafeContent: BufferSource = EMPTY_BUFFER;
-
-            if (content.content.valueBlock.isConstructed) {
-              const array: Uint8Array[] = [];
-
-              for (const contentValue of content.content.valueBlock.value) {
-                array.push(contentValue.valueBlock.valueHexView);
-              }
-
-              authSafeContent = pvtsutils.BufferSourceConverter.concat(array);
-            } else {
-              authSafeContent = content.content.valueBlock.valueHexView;
-            }
+            const authSafeContent = content.content.getValue();
             //#endregion
 
             //#region Finally initialize initial values of SAFE_CONTENTS type

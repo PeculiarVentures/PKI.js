@@ -111,7 +111,7 @@ export class SignedCertificateTimestampList extends PkiObject implements ISigned
     //#endregion
   }
 
-  public toSchema(): asn1js.Sequence {
+  public toSchema(): asn1js.OctetString {
     //#region Initial variables
     const stream = new bs.SeqStream();
 

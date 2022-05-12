@@ -1718,22 +1718,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     //#region Decrypt internal content using derived key
     //#region Create correct data block for decryption
-    let dataBuffer: BufferSource = EMPTY_BUFFER;
-
-    const encryptedContent = parameters.encryptedContentInfo.encryptedContent;
-    if (!encryptedContent) {
-      throw new Error("Required parameter 'encryptedContent' is missed");
-    }
-    if (!encryptedContent.idBlock.isConstructed)
-      dataBuffer = encryptedContent.valueBlock.valueHexView;
-    else {
-      const array: Uint8Array[] = [];
-      for (const content of encryptedContent.valueBlock.value) {
-        array.push(content.valueBlock.valueHexView);
-      }
-
-      dataBuffer = pvtsutils.BufferSourceConverter.concat(array);
-    }
+    const dataBuffer = parameters.encryptedContentInfo.getEncryptedContent();
     //#endregion
 
     return this.decrypt({
@@ -1936,10 +1921,10 @@ export class CryptoEngine extends AbstractCryptoEngine {
     };
   }
 
-  public async signWithPrivateKey(data: ArrayBuffer, privateKey: CryptoKey, parameters: type.CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer> {
+  public async signWithPrivateKey(data: BufferSource, privateKey: CryptoKey, parameters: type.CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer> {
     const signature = await this.sign(parameters.algorithm,
       privateKey,
-      new Uint8Array(data));
+      data);
 
     //#region Special case for ECDSA algorithm
     if (parameters.algorithm.name === "ECDSA") {

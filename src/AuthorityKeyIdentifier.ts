@@ -21,7 +21,7 @@ export interface IAuthorityKeyIdentifier {
   authorityCertSerialNumber?: asn1js.Integer;
 }
 
-export type AuthorityKeyIdentifierParameters = PkiObjectParameters & Partial<AuthorityKeyIdentifier>;
+export type AuthorityKeyIdentifierParameters = PkiObjectParameters & Partial<IAuthorityKeyIdentifier>;
 
 export interface AuthorityKeyIdentifierJson {
   keyIdentifier?: asn1js.OctetStringJson;

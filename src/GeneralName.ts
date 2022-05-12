@@ -13,10 +13,10 @@ export const VALUE = "value";
 
 /**
  * Schema for "builtInStandardAttributes" of "ORAddress"
- * @param {Object} parameters
- * @property {Object} [names]
- * @param {boolean} optional
- * @returns {Sequence}
+ * @param parameters
+ * @property names
+ * @param optional
+ * @returns
  */
 function builtInStandardAttributes(parameters: Schema.SchemaParameters<{
   country_name?: string;
@@ -241,7 +241,7 @@ export interface IGeneralName {
   value: any;
 }
 
-export type GeneralNameParameters = PkiObjectParameters & Partial<IGeneralName>;
+export type GeneralNameParameters = PkiObjectParameters & Partial<{ type: 1 | 2 | 6; value: string; } | { type: 0 | 3 | 4 | 7 | 8; value: any; }>;
 
 export interface GeneralNameSchema {
   names?: {

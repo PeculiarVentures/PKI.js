@@ -451,18 +451,7 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Check we have "constructive encoding" for AuthSafe content
-          let authSafeContent = EMPTY_BUFFER;
-
-          if (this.authSafe.content.valueBlock.isConstructed) {
-            const array: Uint8Array[] = [];
-            for (const contentValue of this.authSafe.content.valueBlock.value)
-              array.push(contentValue.valueBlock.valueHexView);
-
-            authSafeContent = BufferSourceConverter.concat(array);
-          }
-          else {
-            authSafeContent = this.authSafe.content.valueBlock.valueHexView;
-          }
+          const authSafeContent = this.authSafe.content.getValue();
           //#endregion
 
           //#region Set "authenticatedSafe" value
@@ -520,17 +509,7 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Create correct data block for verification
-          let data = EMPTY_BUFFER;
-
-          if (eContent.idBlock.isConstructed === false)
-            data = eContent.valueBlock.valueHexView;
-          else {
-            const array: Uint8Array[] = [];
-            for (let i = 0; i < eContent.valueBlock.value.length; i++)
-              array.push(eContent.valueBlock.value[i].valueBlock.valueHexView);
-
-            data = BufferSourceConverter.concat(array);
-          }
+          const data = eContent.getValue();
           //#endregion
 
           //#region Set "authenticatedSafe" value

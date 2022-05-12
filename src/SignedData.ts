@@ -759,16 +759,7 @@ export class SignedData extends PkiObject implements ISignedData {
       {
         if ((eContent.idBlock.tagClass === 1) &&
           (eContent.idBlock.tagNumber === 4)) {
-          if (eContent.idBlock.isConstructed === false)
-            data = eContent.valueBlock.valueHexView;
-          else {
-            const array: Uint8Array[] = [];
-            for (const content of eContent.valueBlock.value) {
-              array.push(content.valueBlock.valueHexView);
-            }
-
-            data = pvtsutils.BufferSourceConverter.concat(array);
-          }
+          data = eContent.getValue();
         }
         else
           data = eContent.valueBlock.valueBeforeDecodeView;
@@ -951,16 +942,7 @@ export class SignedData extends PkiObject implements ISignedData {
       {
         if ((eContent.idBlock.tagClass === 1) &&
           (eContent.idBlock.tagNumber === 4)) {
-          if (eContent.idBlock.isConstructed === false)
-            data = eContent.valueBlock.valueHexView;
-          else {
-            const array: Uint8Array[] = [];
-            for (const content of eContent.valueBlock.value) {
-              array.push(content.valueBlock.valueHexView);
-            }
-
-            data = pvtsutils.BufferSourceConverter.concat(array);
-          }
+          data = eContent.getValue();
         }
         else
           data = eContent.valueBlock.valueBeforeDecodeView;

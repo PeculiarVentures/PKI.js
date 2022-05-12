@@ -261,7 +261,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
       case TBS:
         return EMPTY_BUFFER;
       case VERSION:
-        return 1;
+        return 0;
       case SIGNATURE:
         return new AlgorithmIdentifier();
       case ISSUER:
