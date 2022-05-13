@@ -169,9 +169,10 @@ export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuff
 /**
  * Create a single ArrayBuffer from CMS ECDSA signature
  * @param cmsSignature ASN.1 SEQUENCE contains CMS ECDSA signature
- * @returns {ArrayBuffer}
+ * @param pointSize Size of EC point. Use {@link ECNamedCurves.find} to get correct point size
+ * @returns WebCrypto signature
  */
-export function createECDSASignatureFromCMS(cmsSignature: asn1js.AsnType): ArrayBuffer {
+export function createECDSASignatureFromCMS(cmsSignature: asn1js.AsnType, pointSize: number): ArrayBuffer {
   // Check input variables
   if (!(cmsSignature instanceof asn1js.Sequence
     && cmsSignature.valueBlock.value.length === 2
@@ -182,55 +183,10 @@ export function createECDSASignatureFromCMS(cmsSignature: asn1js.AsnType): Array
   const rValueView = cmsSignature.valueBlock.value[0].convertFromDER().valueBlock.valueHexView;
   const sValueView = cmsSignature.valueBlock.value[1].convertFromDER().valueBlock.valueHexView;
 
-  //#region Check the lengths of two parts are equal
-  switch (true) {
-    case (rValueView.byteLength < sValueView.byteLength):
-      {
-        if ((sValueView.byteLength - rValueView.byteLength) !== 1)
-          throw new Error("Incorrect DER integer decoding");
+  const res = new Uint8Array(pointSize * 2);
 
-        const correctedLength = sValueView.byteLength;
-        const res = new Uint8Array(correctedLength * 2);
-
-        res.set(rValueView, 1);
-        res.set(sValueView, correctedLength + 1);
-
-        return res.buffer;
-      }
-    case (rValueView.byteLength > sValueView.byteLength):
-      {
-        if ((rValueView.byteLength - sValueView.byteLength) !== 1)
-          throw new Error("Incorrect DER integer decoding");
-
-        const correctedLength = rValueView.byteLength;
-        const res = new Uint8Array(correctedLength * 2);
-
-        res.set(rValueView);
-        res.set(sValueView, correctedLength + 1);
-
-        return res.buffer;
-      }
-    default:
-      {
-        //#region In case we have equal length and the length is not even with 2
-        if (rValueView.byteLength % 2) {
-          const correctedLength = (rValueView.byteLength + 1);
-          const res = new Uint8Array(correctedLength * 2);
-
-          res.set(rValueView);
-          res.set(sValueView, correctedLength + 1);
-
-          return res.buffer;
-        }
-        //#endregion
-      }
-  }
-  //#endregion
-
-  const res = new Uint8Array(rValueView.byteLength + sValueView.byteLength);
-
-  res.set(rValueView);
-  res.set(sValueView, rValueView.byteLength);
+  res.set(rValueView, pointSize - rValueView.byteLength);
+  res.set(sValueView, (2 * pointSize) - sValueView.byteLength);
 
   return res.buffer;
 }

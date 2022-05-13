@@ -13,6 +13,7 @@ import { ArgumentError, AsnError, ParameterError } from "../errors";
 import * as type from "./CryptoEngineInterface";
 import { AbstractCryptoEngine } from "./AbstractCryptoEngine";
 import { EMPTY_STRING } from "../constants";
+import { ECNamedCurves } from "../ECNamedCurves";
 
 /**
  * Making MAC key using algorithm described in B.2 of PKCS#12 standard.
@@ -2066,9 +2067,13 @@ export class CryptoEngine extends AbstractCryptoEngine {
     let signatureValue: BufferSource = signature.valueBlock.valueHexView;
 
     if (publicKey.algorithm.name === "ECDSA") {
+      const namedCurve = ECNamedCurves.find((publicKey.algorithm as EcKeyAlgorithm).namedCurve);
+      if (!namedCurve) {
+        throw new Error("Unsupported named curve in use");
+      }
       const asn1 = asn1js.fromBER(signatureValue);
       AsnError.assert(asn1, "Signature value");
-      signatureValue = common.createECDSASignatureFromCMS(asn1.result);
+      signatureValue = common.createECDSASignatureFromCMS(asn1.result, namedCurve.size);
     }
     //#endregion
 
