@@ -251,13 +251,12 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
     }
   }
 
-  public async importKey(publicKey: CryptoKey): Promise<void> {
+  public async importKey(publicKey: CryptoKey, crypto = common.getCrypto(true)): Promise<void> {
     try {
       if (!publicKey) {
         throw new Error("Need to provide publicKey input parameter");
       }
 
-      const crypto = common.getCrypto(true);
       const exportedKey = await crypto.exportKey("spki", publicKey);
       const asn1 = asn1js.fromBER(exportedKey);
       try {

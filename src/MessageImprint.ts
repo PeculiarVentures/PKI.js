@@ -42,12 +42,11 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
    * Creates and fills a new instance of {@link MessageImprint}
    * @param hashAlgorithm
    * @param message
+   * @param crypto Crypto engine
    * @returns New instance of {@link MessageImprint}
    */
-  public static async create(hashAlgorithm: string, message: BufferSource): Promise<MessageImprint> {
-    const crypto = common.getCrypto(true);
-
-    const hashAlgorithmOID = common.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
+  public static async create(hashAlgorithm: string, message: BufferSource, crypto = common.getCrypto(true)): Promise<MessageImprint> {
+    const hashAlgorithmOID = crypto.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
 
     const hashedMessage = await crypto.digest(hashAlgorithm, message);
 

@@ -489,19 +489,13 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
    * Make a signature for existing CRL data
    * @param privateKey Private key for "subjectPublicKeyInfo" structure
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
+   * @param crypto Crypto engine
    */
-  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<void> {
-    //#region Initial checking
-    //#region Get a private key from function parameter
+  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
+    // Get a private key from function parameter
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
     }
-    //#endregion
-    //#endregion
-
-    //#region Initial variables
-    const crypto = common.getCrypto(true);
-    //#endregion
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
     const signatureParameters = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
@@ -523,13 +517,10 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
   /**
    * Verify existing signature
    * @param parameters
+   * @param crypto Crypto engine
    */
-  public async verify(parameters: CertificateRevocationListVerifyParams = {}): Promise<boolean> {
-    //#region Global variables
+  public async verify(parameters: CertificateRevocationListVerifyParams = {}, crypto = common.getCrypto(true)): Promise<boolean> {
     let subjectPublicKeyInfo: PublicKeyInfo | undefined;
-
-    const crypto = common.getCrypto(true);
-    //#endregion
 
     //#region Get information about CRL issuer certificate
     if (parameters.issuerCertificate) { // "issuerCertificate" must be of type "Certificate"

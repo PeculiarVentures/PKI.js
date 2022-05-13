@@ -170,7 +170,7 @@ export class CertificateChainValidationEngine {
     return "Unknown";
   }
 
-  public async defaultFindIssuer(certificate: Certificate, validationEngine: CertificateChainValidationEngine): Promise<Certificate[]> {
+  public async defaultFindIssuer(certificate: Certificate, validationEngine: CertificateChainValidationEngine, crypto = common.getCrypto(true)): Promise<Certificate[]> {
     //#region Initial variables
     const result: Certificate[] = [];
 
@@ -182,7 +182,7 @@ export class CertificateChainValidationEngine {
     //#region Speed-up searching in case of self-signed certificates
     if (certificate.subject.isEqual(certificate.issuer)) {
       try {
-        const verificationResult = await certificate.verify();
+        const verificationResult = await certificate.verify(undefined, crypto);
         if (verificationResult) {
           return [certificate];
         }
@@ -274,7 +274,7 @@ export class CertificateChainValidationEngine {
     // Now perform certificate verification checking
     for (let i = 0; i < result.length; i++) {
       try {
-        const verificationResult = await certificate.verify(result[i]);
+        const verificationResult = await certificate.verify(result[i], crypto);
         if (verificationResult === false)
           result.splice(i, 1);
       }
@@ -319,7 +319,7 @@ export class CertificateChainValidationEngine {
     }
   }
 
-  public async sort(passedWhenNotRevValues = false): Promise<Certificate[]> {
+  public async sort(passedWhenNotRevValues = false, crypto = common.getCrypto(true)): Promise<Certificate[]> {
     // Initial variables
     const localCerts: Certificate[] = [];
 
@@ -419,7 +419,7 @@ export class CertificateChainValidationEngine {
 
         for (let j = 0; j < issuerCertificates.length; j++) {
           try {
-            const result = await crls[i].verify({ issuerCertificate: issuerCertificates[j] });
+            const result = await crls[i].verify({ issuerCertificate: issuerCertificates[j] }, crypto);
             if (result) {
               crlsAndCertificates.push({
                 crl: crls[i],
@@ -454,7 +454,7 @@ export class CertificateChainValidationEngine {
     //#region Find OCSP for specific certificate
     const findOCSP = async (certificate: Certificate, issuerCertificate: Certificate): Promise<number> => {
       //#region Get hash algorithm from certificate
-      const hashAlgorithm = common.getAlgorithmByOID<any>(certificate.signatureAlgorithm.algorithmId);
+      const hashAlgorithm = crypto.getAlgorithmByOID<any>(certificate.signatureAlgorithm.algorithmId);
       if (!hashAlgorithm.name) {
         return 1;
       }
@@ -466,7 +466,7 @@ export class CertificateChainValidationEngine {
       //#region Search for OCSP response for the certificate
       for (let i = 0; i < this.ocsps.length; i++) {
         const ocsp = this.ocsps[i];
-        const result = await ocsp.getCertificateStatus(certificate, issuerCertificate);
+        const result = await ocsp.getCertificateStatus(certificate, issuerCertificate, crypto);
         if (result.isForCertificate) {
           if (result.status === 0)
             return 0;
@@ -841,9 +841,10 @@ export class CertificateChainValidationEngine {
   /**
    * Major verification function for certificate chain.
    * @param parameters
-   * @returns {Promise}
+   * @param crypto Crypto engine
+   * @returns
    */
-  async verify(parameters: CertificateChainValidationEngineVerifyParams = {}): Promise<CertificateChainValidationEngineVerifyResult> {
+  async verify(parameters: CertificateChainValidationEngineVerifyParams = {}, crypto = common.getCrypto(true)): Promise<CertificateChainValidationEngineVerifyResult> {
     //#region Auxiliary functions for name constraints checking
     /**
      * Compare two dNSName values
@@ -1127,7 +1128,7 @@ export class CertificateChainValidationEngine {
       //#endregion
 
       //#region Sorting certificates in the chain array
-      this.certs = await this.sort(passedWhenNotRevValues);
+      this.certs = await this.sort(passedWhenNotRevValues, crypto);
       //#endregion
 
       //#region Work with policies
@@ -1338,7 +1339,7 @@ export class CertificateChainValidationEngine {
             let subjectDomainPolicyIndex = (-1);
             //#endregion
 
-            //#region Search for index of policies indedes
+            //#region Search for index of policies indexes
             for (let n = 0; n < allPolicies.length; n++) {
               if (allPolicies[n] === policyMappings[i + 1].mappings[k].issuerDomainPolicy)
                 issuerDomainPolicyIndex = n;

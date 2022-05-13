@@ -9,6 +9,7 @@ import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface"
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { EMPTY_STRING } from "./constants";
+import * as common from "./common";
 
 const ENCRYPTION_ALGORITHM = "encryptionAlgorithm";
 const ENCRYPTED_DATA = "encryptedData";
@@ -192,7 +193,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
 
   protected async parseInternalValues(parameters: {
     password: ArrayBuffer;
-  }) {
+  }, crypto = common.getCrypto(true)) {
     //#region Initial variables
     const cmsEncrypted = new EncryptedData({
       encryptedContentInfo: new EncryptedContentInfo({
@@ -203,7 +204,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
     //#endregion
 
     //#region Decrypt internal data
-    const decryptedData = await cmsEncrypted.decrypt(parameters);
+    const decryptedData = await cmsEncrypted.decrypt(parameters, crypto);
 
     //#endregion
 

@@ -440,15 +440,13 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
    * Makes signature for current certification request
    * @param privateKey WebCrypto private key
    * @param hashAlgorithm String representing current hashing algorithm
+   * @param crypto Crypto engine
    */
-  async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<void> {
-    //#region Initial checking
+  async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
+    // Initial checking
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
     }
-    //#endregion
-
-    const crypto = common.getCrypto(true);
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
     const signatureParams = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
@@ -468,19 +466,21 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
 
   /**
    * Verify existing certification request signature
+   * @param crypto Crypto engine
    * @returns Returns `true` if signature value is valid, otherwise `false`
    */
-  public async verify(): Promise<boolean> {
-    return common.getCrypto(true).verifyWithPublicKey(this.tbsView, this.signatureValue, this.subjectPublicKeyInfo, this.signatureAlgorithm);
+  public async verify(crypto = common.getCrypto(true)): Promise<boolean> {
+    return crypto.verifyWithPublicKey(this.tbsView, this.signatureValue, this.subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
   /**
    * Importing public key for current certificate request
    * @param parameters
+   * @param crypto Crypto engine
    * @returns WebCrypt public key
    */
-  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams): Promise<CryptoKey> {
-    return common.getCrypto(true).getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
+  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams, crypto = common.getCrypto(true)): Promise<CryptoKey> {
+    return crypto.getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
   }
 
 }

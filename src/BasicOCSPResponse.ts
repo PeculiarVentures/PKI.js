@@ -266,8 +266,9 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    * Get OCSP response status for specific certificate
    * @param certificate Certificate to be checked
    * @param issuerCertificate Certificate of issuer for certificate to be checked
+   * @param crypto Crypto engine
    */
-  public async getCertificateStatus(certificate: Certificate, issuerCertificate: Certificate): Promise<CertificateStatus> {
+  public async getCertificateStatus(certificate: Certificate, issuerCertificate: Certificate, crypto = common.getCrypto(true)): Promise<CertificateStatus> {
     //#region Initial variables
     const result = {
       isForCertificate: false,
@@ -281,7 +282,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
     //#region Create all "certIDs" for input certificates
     for (const response of this.tbsResponseData.responses) {
-      const hashAlgorithm = common.getAlgorithmByOID(response.certID.hashAlgorithm.algorithmId, true, "CertID.hashAlgorithm");
+      const hashAlgorithm = crypto.getAlgorithmByOID(response.certID.hashAlgorithm.algorithmId, true, "CertID.hashAlgorithm");
 
       if (!hashesObject[hashAlgorithm.name]) {
         hashesObject[hashAlgorithm.name] = 1;
@@ -292,7 +293,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
         await certID.createForCertificate(certificate, {
           hashAlgorithm: hashAlgorithm.name,
           issuerCertificate
-        });
+        }, crypto);
       }
     }
     //#endregion
@@ -342,19 +343,13 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    * Make signature for current OCSP Basic Response
    * @param privateKey Private key for "subjectPublicKeyInfo" structure
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
+   * @param crypto Crypto engine
    */
-  async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<void> {
-    //#region Initial checking
-    //#region Get a private key from function parameter
+  async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
+    // Get a private key from function parameter
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
     }
-    //#endregion
-    //#endregion
-
-    //#region Initial variables
-    const crypto = common.getCrypto(true);
-    //#endregion
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
     const signatureParams = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
@@ -379,14 +374,13 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
   /**
    * Verify existing OCSP Basic Response
    * @param params Additional parameters
+   * @param crypto Crypto engine
    */
-  public async verify(params: BasicOCSPResponseVerifyParams = {}): Promise<boolean> {
+  public async verify(params: BasicOCSPResponseVerifyParams = {}, crypto = common.getCrypto(true)): Promise<boolean> {
     //#region Initial variables
     let signerCert: Certificate | null = null;
     let certIndex = -1;
     const trustedCerts: Certificate[] = params.trustedCerts || [];
-
-    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Check amount of certificates
@@ -437,7 +431,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       trustedCerts,
     });
 
-    const verificationResult = await certChain.verify();
+    const verificationResult = await certChain.verify({}, crypto);
     if (!verificationResult.result) {
       throw new Error("Validation of signer's certificate failed");
     }

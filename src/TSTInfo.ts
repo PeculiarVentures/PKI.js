@@ -454,8 +454,9 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
   /**
    * Verify current TST Info value
    * @param params Input parameters
+   * @param crypto Crypto engine
    */
-  public async verify(params: TSTInfoVerifyParams): Promise<boolean> {
+  public async verify(params: TSTInfoVerifyParams, crypto = common.getCrypto(true)): Promise<boolean> {
 
     //#region Get initial parameters
     if (!params.data) {
@@ -477,10 +478,10 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
     //#endregion
 
     // Find hashing algorithm
-    const shaAlgorithm = common.getAlgorithmByOID(this.messageImprint.hashAlgorithm.algorithmId, true, "MessageImprint.hashAlgorithm");
+    const shaAlgorithm = crypto.getAlgorithmByOID(this.messageImprint.hashAlgorithm.algorithmId, true, "MessageImprint.hashAlgorithm");
 
     // Calculate message digest for input "data" buffer
-    const hash = await common.getCrypto(true).digest(shaAlgorithm.name, new Uint8Array(data));
+    const hash = await crypto.digest(shaAlgorithm.name, new Uint8Array(data));
     return pvtsutils.BufferSourceConverter.isEqual(hash, this.messageImprint.hashedMessage.valueBlock.valueHexView);
   }
 

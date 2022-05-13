@@ -224,14 +224,15 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
    * Making OCSP Request for specific certificate
    * @param certificate Certificate making OCSP Request for
    * @param parameters Additional parameters
+   * @param crypto Crypto engine
    */
-  public async createForCertificate(certificate: Certificate, parameters: CertIDCreateParams): Promise<void> {
+  public async createForCertificate(certificate: Certificate, parameters: CertIDCreateParams, crypto = common.getCrypto(true)): Promise<void> {
     //#region Initial variables
     const certID = new CertID();
     //#endregion
 
     //#region Create OCSP certificate identifier for the certificate
-    await certID.createForCertificate(certificate, parameters);
+    await certID.createForCertificate(certificate, parameters, crypto);
     //#endregion
 
     //#region Make final request data
@@ -245,21 +246,16 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
    * Make signature for current OCSP Request
    * @param privateKey Private key for "subjectPublicKeyInfo" structure
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
+   * @param crypto Crypto engine
    */
-  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1") {
-    //#region Initial checking
+  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)) {
+    // Initial checking
     ParameterError.assertEmpty(privateKey, "privateKey", "OCSPRequest.sign method");
 
-    //#region Check that OPTIONAL_SIGNATURE exists in the current request
+    // Check that OPTIONAL_SIGNATURE exists in the current request
     if (!this.optionalSignature) {
       throw new Error("Need to create \"optionalSignature\" field before signing");
     }
-    //#endregion
-    //#endregion
-
-    //#region Initial variables
-    const crypto = common.getCrypto(true);
-    //#endregion
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
     const signatureParams = await crypto.getSignatureParameters(privateKey, hashAlgorithm);

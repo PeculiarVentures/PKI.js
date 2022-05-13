@@ -22,6 +22,7 @@ import { id_ContentType_Data, id_eContentType_TSTInfo, id_PKIX_OCSP_Basic } from
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
+import { ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
 
 export type SignedDataCRL = CertificateRevocationList | OtherRevocationInfoFormat;
 export type SignedDataCRLJson = CertificateRevocationListJson | OtherRevocationInfoFormatJson;
@@ -526,8 +527,8 @@ export class SignedData extends PkiObject implements ISignedData {
     return res;
   }
 
-  public verify(params?: SignedDataVerifyParams & { extendedMode?: false; }): Promise<boolean>;
-  public verify(params: SignedDataVerifyParams & { extendedMode: true; }): Promise<SignedDataVerifyResult>;
+  public verify(params?: SignedDataVerifyParams & { extendedMode?: false; }, crypto?: ICryptoEngine): Promise<boolean>;
+  public verify(params: SignedDataVerifyParams & { extendedMode: true; }, crypto?: ICryptoEngine): Promise<SignedDataVerifyResult>;
   public async verify({
     signer = (-1),
     data = (EMPTY_BUFFER),
@@ -538,7 +539,7 @@ export class SignedData extends PkiObject implements ISignedData {
     extendedMode = false,
     findOrigin = null,
     findIssuer = null
-  }: SignedDataVerifyParams = {}): Promise<boolean | SignedDataVerifyResult> {
+  }: SignedDataVerifyParams = {}, crypto = common.getCrypto(true)): Promise<boolean | SignedDataVerifyResult> {
     let signerCert: Certificate | null = null;
     let timestampSerial: ArrayBuffer | null = null;
     try {
@@ -546,8 +547,6 @@ export class SignedData extends PkiObject implements ISignedData {
       let messageDigestValue = EMPTY_BUFFER;
       let shaAlgorithm = EMPTY_STRING;
       let certificatePath: Certificate[] = [];
-
-      const crypto = common.getCrypto(true);
       //#endregion
 
       //#region Get a signer number
@@ -662,7 +661,7 @@ export class SignedData extends PkiObject implements ISignedData {
         }
         //#endregion
 
-        if (!(await tstInfo.verify({ data }))) {
+        if (!(await tstInfo.verify({ data }, crypto))) {
           throw new SignedDataVerifyError({
             date: checkDate,
             code: 15,
@@ -711,7 +710,7 @@ export class SignedData extends PkiObject implements ISignedData {
           chainEngine.ocsps.push(...(this.ocsps));
         }
 
-        const verificationResult = await chainEngine.verify({ passedWhenNotRevValues })
+        const verificationResult = await chainEngine.verify({ passedWhenNotRevValues }, crypto)
           .catch(e => {
             throw new SignedDataVerifyError({
               date: checkDate,
@@ -738,7 +737,7 @@ export class SignedData extends PkiObject implements ISignedData {
 
       //#region Find signer's hashing algorithm
 
-      const signerInfoHashAlgorithm = common.getAlgorithmByOID(signerInfo.digestAlgorithm.algorithmId);
+      const signerInfoHashAlgorithm = crypto.getAlgorithmByOID(signerInfo.digestAlgorithm.algorithmId);
       if (!("name" in signerInfoHashAlgorithm)) {
         throw new SignedDataVerifyError({
           date: checkDate,
@@ -884,19 +883,16 @@ export class SignedData extends PkiObject implements ISignedData {
    * @param signerIndex Index number (starting from 0) of signer index to make signature for
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
    * @param data Detached data
+   * @param crypto Crypto engine
    */
-  public async sign(privateKey: CryptoKey, signerIndex: number, hashAlgorithm = "SHA-1", data: BufferSource = (EMPTY_BUFFER)): Promise<void> {
+  public async sign(privateKey: CryptoKey, signerIndex: number, hashAlgorithm = "SHA-1", data: BufferSource = (EMPTY_BUFFER), crypto = common.getCrypto(true)): Promise<void> {
     //#region Initial checking
     if (!privateKey)
       throw new Error("Need to provide a private key for signing");
     //#endregion
 
-    //#region Initial variables
-    const crypto = common.getCrypto(true);
-    //#endregion
-
     //#region Simple check for supported algorithm
-    const hashAlgorithmOID = common.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
+    const hashAlgorithmOID = crypto.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
     //#endregion
 
     //#region Append information about hash algorithm

@@ -262,8 +262,9 @@ export function getHashAlgorithm(signatureAlgorithm: AlgorithmIdentifier): strin
  * @param zBuffer ArrayBuffer containing ECDH shared secret to derive from
  * @param Counter
  * @param SharedInfo Usually DER encoded "ECC_CMS_SharedInfo" structure
+ * @param crypto Crypto engine
  */
-export async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer, Counter: number, SharedInfo: ArrayBuffer): Promise<{ counter: number; result: ArrayBuffer; }> {
+async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer, Counter: number, SharedInfo: ArrayBuffer, crypto: ICryptoEngine): Promise<{ counter: number; result: ArrayBuffer; }> {
   //#region Check of input parameters
   switch (hashFunction.toUpperCase()) {
     case "SHA-1":
@@ -295,10 +296,6 @@ export async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer,
   let combinedBuffer = EMPTY_BUFFER;
   //#endregion
 
-  //#region Get a "crypto" extension
-  const crypto = getCrypto(true);
-  //#endregion
-
   //#region Create a combined ArrayBuffer for digesting
   combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, zBuffer);
   combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, counterBuffer);
@@ -323,8 +320,9 @@ export async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer,
  * @param Zbuffer ArrayBuffer containing ECDH shared secret to derive from
  * @param keydatalen Length (!!! in BITS !!!) of used kew derivation function
  * @param SharedInfo Usually DER encoded "ECC_CMS_SharedInfo" structure
+ * @param crypto Crypto engine
  */
-export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen: number, SharedInfo: ArrayBuffer) {
+export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen: number, SharedInfo: ArrayBuffer, crypto = getCrypto(true)) {
   //#region Initial variables
   let hashLength = 0;
   let maxCounter = 1;
@@ -368,7 +366,7 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
   //#region Create an array of "kdfWithCounter"
   const incomingResult = [];
   for (let i = 1; i <= maxCounter; i++)
-    incomingResult.push(await kdfWithCounter(hashFunction, Zbuffer, i, SharedInfo));
+    incomingResult.push(await kdfWithCounter(hashFunction, Zbuffer, i, SharedInfo, crypto));
   //#endregion
 
   //#region Return combined digest with specified length

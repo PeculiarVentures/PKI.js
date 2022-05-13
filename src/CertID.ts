@@ -74,11 +74,12 @@ export class CertID extends PkiObject implements ICertID {
    * Making OCSP certificate identifier for specific certificate
    * @param certificate Certificate making OCSP Request for
    * @param parameters Additional parameters
+   * @param crypto Crypto engine
    * @returns Returns created CertID object
    */
-  public static async create(certificate: Certificate, parameters: CertIDCreateParams): Promise<CertID> {
+  public static async create(certificate: Certificate, parameters: CertIDCreateParams, crypto = common.getCrypto(true)): Promise<CertID> {
     const certID = new CertID();
-    await certID.createForCertificate(certificate, parameters);
+    await certID.createForCertificate(certificate, parameters, crypto);
 
     return certID;
   }
@@ -252,13 +253,13 @@ export class CertID extends PkiObject implements ICertID {
    * Making OCSP certificate identifier for specific certificate
    * @param certificate Certificate making OCSP Request for
    * @param parameters Additional parameters
+   * @param crypto Crypto engine
    */
-  public async createForCertificate(certificate: Certificate, parameters: CertIDCreateParams): Promise<void> {
+  public async createForCertificate(certificate: Certificate, parameters: CertIDCreateParams, crypto = common.getCrypto(true)): Promise<void> {
     //#region Check input parameters
     ParameterError.assert(parameters, HASH_ALGORITHM, "issuerCertificate");
 
-    const crypto = common.getCrypto(true);
-    const hashOID = common.getOIDByAlgorithm({ name: parameters.hashAlgorithm }, true, "hashAlgorithm");
+    const hashOID = crypto.getOIDByAlgorithm({ name: parameters.hashAlgorithm }, true, "hashAlgorithm");
 
     this.hashAlgorithm = new AlgorithmIdentifier({
       algorithmId: hashOID,

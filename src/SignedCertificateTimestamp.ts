@@ -9,6 +9,8 @@ import { Certificate } from "./Certificate";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
+import { SignedCertificateTimestampList } from "./SignedCertificateTimestampList";
+import { id_SignedCertificateTimestampList } from "./ObjectIdentifiers";
 
 const VERSION = "version";
 const LOG_ID = "logID";
@@ -328,8 +330,9 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
    * @param logs Array of objects with information about each CT Log (like here: https://ct.grahamedgecombe.com/logs.json)
    * @param data Data to verify signature against. Could be encoded Certificate or encoded PreCert
    * @param dataType Type = 0 (data is encoded Certificate), type = 1 (data is encoded PreCert)
+   * @param crypto Crypto engine
    */
-  async verify(logs: Log[], data: ArrayBuffer, dataType = 0): Promise<boolean> {
+  async verify(logs: Log[], data: ArrayBuffer, dataType = 0, crypto = common.getCrypto(true)): Promise<boolean> {
     //#region Initial variables
     const logId = pvutils.toBase64(pvutils.arrayBufferToString(this.logID));
 
@@ -380,7 +383,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
     //#endregion
 
     //#region Perform verification
-    return common.getCrypto(true).verifyWithPublicKey(
+    return crypto.verifyWithPublicKey(
       stream.buffer.slice(0, stream.length),
       { valueBlock: { valueHex: this.signature.toBER(false) } } as any,
       publicKeyInfo,
@@ -409,27 +412,22 @@ export interface Log {
  * @param issuerCertificate Certificate of the issuer of target certificate
  * @param logs Array of objects with information about each CT Log (like here: https://ct.grahamedgecombe.com/logs.json)
  * @param index Index of SignedCertificateTimestamp inside SignedCertificateTimestampList (for -1 would verify all)
+ * @param crypto Crypto engine
  * @return Array of verification results
  */
-export async function verifySCTsForCertificate(certificate: Certificate, issuerCertificate: Certificate, logs: Log[], index = (-1)) {
-  //#region Initial variables
-  let parsedValue = null;
+export async function verifySCTsForCertificate(certificate: Certificate, issuerCertificate: Certificate, logs: Log[], index = (-1), crypto = common.getCrypto(true)) {
+  let parsedValue: SignedCertificateTimestampList | null = null;
 
   const stream = new bs.SeqStream();
-  //#endregion
-
-  //#region Get a "crypto" extension
-  const crypto = common.getCrypto(true);
-  //#endregion
 
   //#region Remove certificate extension
   for (let i = 0; certificate.extensions && i < certificate.extensions.length; i++) {
     switch (certificate.extensions[i].extnID) {
-      case "1.3.6.1.4.1.11129.2.4.2":
+      case id_SignedCertificateTimestampList:
         {
           parsedValue = certificate.extensions[i].parsedValue;
 
-          if (parsedValue.timestamps.length === 0)
+          if (!parsedValue || parsedValue.timestamps.length === 0)
             throw new Error("Nothing to verify in the certificate");
 
           certificate.extensions.splice(i, 1);
@@ -466,7 +464,7 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
     const verifyArray = [];
 
     for (const timestamp of parsedValue.timestamps) {
-      const verifyResult = await timestamp.verify(logs, preCert, 1);
+      const verifyResult = await timestamp.verify(logs, preCert.buffer, 1, crypto);
       verifyArray.push(verifyResult);
     }
 
@@ -476,7 +474,7 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
   if (index >= parsedValue.timestamps.length)
     index = (parsedValue.timestamps.length - 1);
 
-  return [await parsedValue.timestamps[index].verify(logs, preCert, 1)];
+  return [await parsedValue.timestamps[index].verify(logs, preCert.buffer, 1, crypto)];
   //#endregion
 }
 

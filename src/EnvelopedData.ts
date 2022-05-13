@@ -411,10 +411,11 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param certificate Recipient's certificate
    * @param parameters Additional parameters necessary for "fine tunning" of encryption process
    * @param variant Variant = 1 is for "key transport", variant = 2 is for "key agreement". In fact the "variant" is unnecessary now because Google has no DH algorithm implementation. Thus key encryption scheme would be choosen by certificate type only: "key transport" for RSA and "key agreement" for ECC certificates.
+   * @param crypto Crypto engine
    */
   public addRecipientByCertificate(certificate: Certificate, parameters?: {
     // empty
-  }, variant?: number): boolean {
+  }, variant?: number, crypto = common.getCrypto(true)): boolean {
     //#region Initialize encryption parameters
     const encryptionParameters = Object.assign(
       { useOAEP: true, oaepHashAlgorithm: "SHA-512" },
@@ -443,12 +444,12 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
           if (encryptionParameters.useOAEP === true) {
             // keyEncryptionAlgorithm
-            algorithmId = common.getOIDByAlgorithm({
+            algorithmId = crypto.getOIDByAlgorithm({
               name: "RSA-OAEP"
             }, true, "keyEncryptionAlgorithm");
 
             //#region RSAES-OAEP-params
-            const hashOID = common.getOIDByAlgorithm({
+            const hashOID = crypto.getOIDByAlgorithm({
               name: encryptionParameters.oaepHashAlgorithm
             }, true, "RSAES-OAEP-params");
 
@@ -471,7 +472,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           else // Use old RSAES-PKCS1-v1_5 schema instead
           {
             //#region keyEncryptionAlgorithm
-            algorithmId = common.getOIDByAlgorithm({
+            algorithmId = crypto.getOIDByAlgorithm({
               name: "RSAES-PKCS1-v1_5"
             });
             if (algorithmId === EMPTY_STRING)
@@ -517,7 +518,8 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           this._addKeyAgreeRecipientInfo(
             recipientIdentifier,
             encryptionParameters,
-            { recipientCertificate: certificate }
+            { recipientCertificate: certificate },
+            crypto,
           );
         }
         break;
@@ -534,6 +536,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param preDefinedData ArrayBuffer with pre-defined data
    * @param parameters Additional parameters necessary for "fine tunning" of encryption process
    * @param variant Variant = 1 for pre-defined "key encryption key" (KEK). Variant = 2 for password-based encryption.
+   * @param crypto Crypto engine
    */
   public addRecipientByPreDefinedData(preDefinedData: ArrayBuffer, parameters: {
     keyIdentifier?: ArrayBuffer;
@@ -541,7 +544,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     iterationCount?: number;
     keyEncryptionAlgorithm?: AesKeyGenParams;
     keyEncryptionAlgorithmParams?: any;
-  } = {}, variant: number) {
+  } = {}, variant: number, crypto = common.getCrypto(true)) {
     //#region Check initial parameters
     ArgumentError.assert(preDefinedData, "preDefinedData", "ArrayBuffer");
     if (!preDefinedData.byteLength) {
@@ -553,7 +556,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     if (!parameters.keyIdentifier) {
       const keyIdentifierBuffer = new ArrayBuffer(16);
       const keyIdentifierView = new Uint8Array(keyIdentifierBuffer);
-      common.getRandomValues(keyIdentifierView);
+      crypto.getRandomValues(keyIdentifierView);
 
       parameters.keyIdentifier = keyIdentifierBuffer;
     }
@@ -581,7 +584,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       case 1: // KEKRecipientInfo
         {
           // keyEncryptionAlgorithm
-          const kekOID = common.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm, true, "keyEncryptionAlgorithm");
+          const kekOID = crypto.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm, true, "keyEncryptionAlgorithm");
 
           //#region KEKRecipientInfo
           const keyInfo = new KEKRecipientInfo({
@@ -612,16 +615,16 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       case 2: // PasswordRecipientinfo
         {
           // keyDerivationAlgorithm
-          const pbkdf2OID = common.getOIDByAlgorithm({ name: "PBKDF2" }, true, "keyDerivationAlgorithm");
+          const pbkdf2OID = crypto.getOIDByAlgorithm({ name: "PBKDF2" }, true, "keyDerivationAlgorithm");
 
           //#region Salt
           const saltBuffer = new ArrayBuffer(64);
           const saltView = new Uint8Array(saltBuffer);
-          common.getRandomValues(saltView);
+          crypto.getRandomValues(saltView);
           //#endregion
 
           //#region HMAC-based algorithm
-          const hmacOID = common.getOIDByAlgorithm({
+          const hmacOID = crypto.getOIDByAlgorithm({
             name: "HMAC",
             hash: {
               name: parameters.hmacHashAlgorithm
@@ -641,7 +644,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           //#endregion
 
           // keyEncryptionAlgorithm
-          const kekOID = common.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm, true, "keyEncryptionAlgorithm");
+          const kekOID = crypto.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm, true, "keyEncryptionAlgorithm");
 
           //#region PasswordRecipientinfo
           const keyInfo = new PasswordRecipientinfo({
@@ -658,7 +661,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
               algorithmParams: parameters.keyEncryptionAlgorithmParams
             }),
             password: preDefinedData
-            // "encryptedKey" would be set in "ecrypt" function
+            // "encryptedKey" would be set in "encrypt" function
           });
           //#endregion
 
@@ -681,8 +684,9 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param key Recipient's public key
    * @param keyId The id for the recipient's public key
    * @param parameters Additional parameters for "fine tuning" the encryption process
+   * @param crypto Crypto engine
    */
-  addRecipientByKeyIdentifier(key?: CryptoKey, keyId?: ArrayBuffer, parameters?: any) {
+  addRecipientByKeyIdentifier(key?: CryptoKey, keyId?: ArrayBuffer, parameters?: any, crypto = common.getCrypto(true)) {
     //#region Initialize encryption parameters
     const encryptionParameters = Object.assign({}, defaultEncryptionParams, parameters || {});
     //#endregion
@@ -696,7 +700,8 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     this._addKeyAgreeRecipientInfo(
       recipientIdentifier,
       encryptionParameters,
-      { recipientPublicKey: key }
+      { recipientPublicKey: key },
+      crypto,
     );
   }
 
@@ -705,8 +710,9 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param recipientIdentifier Recipient identifier
    * @param encryptionParameters Additional parameters for "fine tuning" the encryption process
    * @param extraRecipientInfoParams Additional params for KeyAgreeRecipientInfo
+   * @param crypto Crypto engine
    */
-  private _addKeyAgreeRecipientInfo(recipientIdentifier: KeyAgreeRecipientIdentifier, encryptionParameters: EnvelopedDataEncryptionParams, extraRecipientInfoParams: KeyAgreeRecipientInfoParameters) {
+  private _addKeyAgreeRecipientInfo(recipientIdentifier: KeyAgreeRecipientIdentifier, encryptionParameters: EnvelopedDataEncryptionParams, extraRecipientInfoParams: KeyAgreeRecipientInfoParameters, crypto = common.getCrypto(true)) {
     //#region RecipientEncryptedKey
     const encryptedKey = new RecipientEncryptedKey({
       rid: recipientIdentifier
@@ -715,7 +721,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     //#endregion
 
     //#region keyEncryptionAlgorithm
-    const aesKWoid = common.getOIDByAlgorithm({
+    const aesKWoid = crypto.getOIDByAlgorithm({
       name: "AES-KW",
       length: encryptionParameters.kekEncryptionLength
     } as Algorithm, true, "keyEncryptionAlgorithm");
@@ -726,7 +732,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     //#endregion
 
     //#region KeyAgreeRecipientInfo
-    const ecdhOID = common.getOIDByAlgorithm({
+    const ecdhOID = crypto.getOIDByAlgorithm({
       name: "ECDH",
       kdf: encryptionParameters.kdfAlgorithm
     } as Algorithm, true, "KeyAgreeRecipientInfo");
@@ -735,7 +741,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     // has requirement that "UserKeyMaterial" must be 512 bits long
     const ukmBuffer = new ArrayBuffer(64);
     const ukmView = new Uint8Array(ukmBuffer);
-    common.getRandomValues(ukmView); // Generate random values in 64 bytes long buffer
+    crypto.getRandomValues(ukmView); // Generate random values in 64 bytes long buffer
 
     const recipientInfoParams = {
       version: 3,
@@ -764,22 +770,19 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * Creates a new CMS Enveloped Data content with encrypted data
    * @param contentEncryptionAlgorithm WebCrypto algorithm. For the moment here could be only "AES-CBC" or "AES-GCM" algorithms.
    * @param contentToEncrypt Content to encrypt
+   * @param crypto Crypto engine
    */
-  public async encrypt(contentEncryptionAlgorithm: Algorithm, contentToEncrypt: ArrayBuffer) {
+  public async encrypt(contentEncryptionAlgorithm: Algorithm, contentToEncrypt: ArrayBuffer, crypto = common.getCrypto(true)) {
     //#region Initial variables
     const ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
     const ivView = new Uint8Array(ivBuffer);
-    common.getRandomValues(ivView);
+    crypto.getRandomValues(ivView);
 
     const contentView = new Uint8Array(contentToEncrypt);
     //#endregion
 
     // Check for input parameters
-    const contentEncryptionOID = common.getOIDByAlgorithm(contentEncryptionAlgorithm, true, "contentEncryptionAlgorithm");
-
-    //#region Get a "crypto" extension
-    const crypto = common.getCrypto(true);
-    //#endregion
+    const contentEncryptionOID = crypto.getOIDByAlgorithm(contentEncryptionAlgorithm, true, "contentEncryptionAlgorithm");
 
     //#region Generate new content encryption key
     const sessionKey = await crypto.generateKey(contentEncryptionAlgorithm as AesKeyAlgorithm, true, ["encrypt"]);
@@ -851,7 +854,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
             } as EcKeyAlgorithm,
             usages: []
           }
-        });
+        }, crypto);
       } else {
         throw new Error("Unsupported RecipientInfo");
       }
@@ -885,7 +888,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#region Get length of used AES-KW algorithm
       const aesKWAlgorithm = new AlgorithmIdentifier({ schema: recipientInfo.keyEncryptionAlgorithm.algorithmParams });
 
-      const kwAlgorithm = common.getAlgorithmByOID<AesKeyAlgorithm>(aesKWAlgorithm.algorithmId, true, "aesKWAlgorithm");
+      const kwAlgorithm = crypto.getAlgorithmByOID<AesKeyAlgorithm>(aesKWAlgorithm.algorithmId, true, "aesKWAlgorithm");
       //#endregion
 
       //#region Translate AES-KW length to ArrayBuffer
@@ -913,10 +916,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#endregion
 
       //#region Get SHA algorithm used together with ECDH
-      const ecdhAlgorithm = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "ecdhAlgorithm");
+      const ecdhAlgorithm = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "ecdhAlgorithm");
       //#endregion
 
-      const derivedKeyRaw = await common.kdf(ecdhAlgorithm.kdf, derivedBits, kwAlgorithm.length, encodedInfo);
+      const derivedKeyRaw = await common.kdf(ecdhAlgorithm.kdf, derivedBits, kwAlgorithm.length, encodedInfo, crypto);
       //#endregion
       //#region Import AES-KW key from result of KDF function
       const awsKW = await crypto.importKey("raw", derivedKeyRaw, { name: "AES-KW" }, true, ["wrapKey"]);
@@ -946,14 +949,14 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
     const SubKeyTransRecipientInfo = async (index: number) => {
       const recipientInfo = this.recipientInfos[index].value as KeyTransRecipientInfo; // TODO Remove `as KeyTransRecipientInfo`
-      const algorithmParameters = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
+      const algorithmParameters = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
 
       //#region RSA-OAEP case
       if (algorithmParameters.name === "RSA-OAEP") {
         const schema = recipientInfo.keyEncryptionAlgorithm.algorithmParams;
         const rsaOAEPParams = new RSAESOAEPParams({ schema });
 
-        algorithmParameters.hash = common.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId);
+        algorithmParameters.hash = crypto.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId);
         if (("name" in algorithmParameters.hash) === false)
           throw new Error(`Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`);
       }
@@ -965,7 +968,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
             algorithm: algorithmParameters,
             usages: ["encrypt", "wrapKey"]
           }
-        });
+        }, crypto);
 
         const encryptedKey = await crypto.encrypt(publicKey.algorithm, publicKey, exportedSessionKey);
 
@@ -986,7 +989,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#region Import KEK from pre-defined data
 
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = common.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
+      const kekAlgorithm = crypto.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
       //#endregion
 
       const kekKey = await crypto.importKey("raw",
@@ -1040,7 +1043,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#endregion
       //#region Derive key for "keyEncryptionAlgorithm"
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
+      const kekAlgorithm = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
 
       //#endregion
 
@@ -1048,7 +1051,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       let hmacHashAlgorithm = "SHA-1";
 
       if (pbkdf2Params.prf) {
-        const prfAlgorithm = common.getAlgorithmByOID<any>(pbkdf2Params.prf.algorithmId, true, "prfAlgorithm");
+        const prfAlgorithm = crypto.getAlgorithmByOID<any>(pbkdf2Params.prf.algorithmId, true, "prfAlgorithm");
         hmacHashAlgorithm = prfAlgorithm.hash.name;
       }
       //#endregion
@@ -1113,12 +1116,13 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * Decrypts existing CMS Enveloped Data content
    * @param recipientIndex Index of recipient
    * @param parameters Additional parameters
+   * @param crypto Crypto engine
    */
   async decrypt(recipientIndex: number, parameters: {
     recipientCertificate?: Certificate;
     recipientPrivateKey?: BufferSource;
     preDefinedData?: BufferSource;
-  }) {
+  }, crypto = common.getCrypto(true)) {
     //#region Initial variables
     const decryptionParameters = parameters || {};
     //#endregion
@@ -1127,10 +1131,6 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     if ((recipientIndex + 1) > this.recipientInfos.length) {
       throw new Error(`Maximum value for "index" is: ${this.recipientInfos.length - 1}`);
     }
-    //#endregion
-
-    //#region Get a "crypto" extension
-    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Special sub-functions to work with each recipient's type
@@ -1227,7 +1227,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         //#region Get length of used AES-KW algorithm
         const aesKWAlgorithm = new AlgorithmIdentifier({ schema: recipientInfo.keyEncryptionAlgorithm.algorithmParams });
 
-        const kwAlgorithm = common.getAlgorithmByOID<any>(aesKWAlgorithm.algorithmId, true, "kwAlgorithm");
+        const kwAlgorithm = crypto.getAlgorithmByOID<any>(aesKWAlgorithm.algorithmId, true, "kwAlgorithm");
         //#endregion
 
         //#region Translate AES-KW length to ArrayBuffer
@@ -1259,13 +1259,13 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         //#endregion
 
         //#region Get SHA algorithm used together with ECDH
-        const ecdhAlgorithm = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "ecdhAlgorithm");
+        const ecdhAlgorithm = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "ecdhAlgorithm");
         if (!ecdhAlgorithm.name) {
           throw new Error(`Incorrect OID for key encryption algorithm: ${recipientInfo.keyEncryptionAlgorithm.algorithmId}`);
         }
         //#endregion
 
-        return common.kdf(ecdhAlgorithm.kdf, sharedSecret, kwAlgorithm.length, encodedInfo);
+        return common.kdf(ecdhAlgorithm.kdf, sharedSecret, kwAlgorithm.length, encodedInfo, crypto);
       }
 
       const kdfResult = await applyKDF();
@@ -1287,7 +1287,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       const unwrapSessionKey = async (aesKwKey: CryptoKey) => {
         //#region Get WebCrypto form of content encryption algorithm
         const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-        const contentEncryptionAlgorithm = common.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
+        const contentEncryptionAlgorithm = crypto.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
         //#endregion
 
         return crypto.unwrapKey("raw",
@@ -1315,14 +1315,14 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         throw new Error("Parameter \"recipientPrivateKey\" is mandatory for \"KeyTransRecipientInfo\"");
       }
 
-      const algorithmParameters = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
+      const algorithmParameters = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
 
       //#region RSA-OAEP case
       if (algorithmParameters.name === "RSA-OAEP") {
         const schema = recipientInfo.keyEncryptionAlgorithm.algorithmParams;
         const rsaOAEPParams = new RSAESOAEPParams({ schema });
 
-        algorithmParameters.hash = common.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId);
+        algorithmParameters.hash = crypto.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId);
         if (("name" in algorithmParameters.hash) === false)
           throw new Error(`Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`);
       }
@@ -1344,7 +1344,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
       //#region Get WebCrypto form of content encryption algorithm
       const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-      const contentEncryptionAlgorithm = common.getAlgorithmByOID(algorithmId, true, "contentEncryptionAlgorithm");
+      const contentEncryptionAlgorithm = crypto.getAlgorithmByOID(algorithmId, true, "contentEncryptionAlgorithm");
       if (("name" in contentEncryptionAlgorithm) === false)
         throw new Error(`Incorrect "contentEncryptionAlgorithm": ${algorithmId}`);
       //#endregion
@@ -1367,7 +1367,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         throw new Error("Parameter \"preDefinedData\" is mandatory for \"KEKRecipientInfo\"");
 
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
+      const kekAlgorithm = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
       //#endregion
 
       const importedKey = await crypto.importKey("raw",
@@ -1380,7 +1380,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#region Unwrap previously exported session key
       //#region Get WebCrypto form of content encryption algorithm
       const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-      const contentEncryptionAlgorithm = common.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
+      const contentEncryptionAlgorithm = crypto.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
       if (!contentEncryptionAlgorithm.name) {
         throw new Error(`Incorrect "contentEncryptionAlgorithm": ${algorithmId}`);
       }
@@ -1431,12 +1431,12 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#endregion
       //#region Derive key for "keyEncryptionAlgorithm"
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = common.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
+      const kekAlgorithm = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
       //#endregion
 
       // Get HMAC hash algorithm
       const hmacHashAlgorithm = pbkdf2Params.prf
-        ? common.getAlgorithmByOID<any>(pbkdf2Params.prf.algorithmId, true, "prfAlgorithm").hash.name
+        ? crypto.getAlgorithmByOID<any>(pbkdf2Params.prf.algorithmId, true, "prfAlgorithm").hash.name
         : "SHA-1";
 
       //#region Get PBKDF2 "salt" value
@@ -1463,7 +1463,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#region Unwrap previously exported session key
       //#region Get WebCrypto form of content encryption algorithm
       const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-      const contentEncryptionAlgorithm = common.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
+      const contentEncryptionAlgorithm = crypto.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
       //#endregion
 
       return crypto.unwrapKey("raw",
@@ -1501,7 +1501,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     //#region Finally decrypt data by session key
     //#region Get WebCrypto form of content encryption algorithm
     const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-    const contentEncryptionAlgorithm = common.getAlgorithmByOID(algorithmId, true, "contentEncryptionAlgorithm");
+    const contentEncryptionAlgorithm = crypto.getAlgorithmByOID(algorithmId, true, "contentEncryptionAlgorithm");
     //#endregion
 
     //#region Get "initialization vector" for content encryption algorithm

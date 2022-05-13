@@ -7,6 +7,7 @@ import { Certificate } from "./Certificate";
 import { id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import * as common from "./common";
 
 const RESPONSE_STATUS = "responseStatus";
 const RESPONSE_BYTES = "responseBytes";
@@ -251,8 +252,9 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
    * Get OCSP response status for specific certificate
    * @param certificate
    * @param issuerCertificate
+   * @param crypto Crypto engine
    */
-  public async getCertificateStatus(certificate: Certificate, issuerCertificate: Certificate) {
+  public async getCertificateStatus(certificate: Certificate, issuerCertificate: Certificate, crypto = common.getCrypto(true)) {
     //#region Initial variables
     let basicResponse;
 
@@ -279,7 +281,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
     }
     //#endregion
 
-    return basicResponse.getCertificateStatus(certificate, issuerCertificate);
+    return basicResponse.getCertificateStatus(certificate, issuerCertificate, crypto);
   }
 
   /**
@@ -287,12 +289,12 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
    * @param privateKey Private key for "subjectPublicKeyInfo" structure
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
    */
-  public async sign(privateKey: CryptoKey, hashAlgorithm?: string) {
+  public async sign(privateKey: CryptoKey, hashAlgorithm?: string, crypto = common.getCrypto(true)) {
     //#region Check that ResponseData has type BasicOCSPResponse and sign it
     if (this.responseBytes && this.responseBytes.responseType === id_PKIX_OCSP_Basic) {
       const basicResponse = BasicOCSPResponse.fromBER(this.responseBytes.response.valueBlock.valueHexView);
 
-      return basicResponse.sign(privateKey, hashAlgorithm);
+      return basicResponse.sign(privateKey, hashAlgorithm, crypto);
     }
 
     throw new Error(`Unknown ResponseBytes type: ${this.responseBytes?.responseType || "Unknown"}`);
@@ -302,8 +304,9 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
   /**
    * Verify current OCSP Response
    * @param issuerCertificate In order to decrease size of resp issuer cert could be omitted. In such case you need manually provide it.
+   * @param crypto Crypto engine
    */
-  public async verify(issuerCertificate: Certificate | null = null): Promise<boolean> {
+  public async verify(issuerCertificate: Certificate | null = null, crypto = common.getCrypto(true)): Promise<boolean> {
     //#region Check that ResponseBytes exists in the object
     if ((RESPONSE_BYTES in this) === false)
       throw new Error("Empty ResponseBytes field");
@@ -321,7 +324,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
         basicResponse.certs.push(issuerCertificate);
       }
 
-      return basicResponse.verify();
+      return basicResponse.verify({}, crypto);
     }
 
     throw new Error(`Unknown ResponseBytes type: ${this.responseBytes?.responseType || "Unknown"}`);

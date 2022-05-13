@@ -249,8 +249,9 @@ export class PFX extends PkiObject implements IPFX {
   /**
    * Making ContentInfo from PARSED_VALUE object
    * @param parameters Parameters, specific to each "integrity mode"
+   * @param crypto Crypto engine
    */
-  public async makeInternalValues(parameters: MakeInternalValuesParams = {}) {
+  public async makeInternalValues(parameters: MakeInternalValuesParams = {}, crypto = common.getCrypto(true)) {
     //#region Check mandatory parameter
     ArgumentError.assert(parameters, "parameters", "object");
     if (!this.parsedValue) {
@@ -259,8 +260,6 @@ export class PFX extends PkiObject implements IPFX {
     ParameterError.assertEmpty(this.parsedValue.integrityMode, "integrityMode", "parsedValue");
     ParameterError.assertEmpty(this.parsedValue.authenticatedSafe, "authenticatedSafe", "parsedValue");
     //#endregion
-
-    const crypto = common.getCrypto(true);
 
     //#region Makes values for each particular integrity mode
     switch (this.parsedValue.integrityMode) {
@@ -279,7 +278,7 @@ export class PFX extends PkiObject implements IPFX {
           const saltBuffer = new ArrayBuffer(64);
           const saltView = new Uint8Array(saltBuffer);
 
-          common.getRandomValues(saltView);
+          crypto.getRandomValues(saltView);
 
           const data = this.parsedValue.authenticatedSafe.toSchema().toBER(false);
 
@@ -290,8 +289,6 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Call current crypto engine for making HMAC-based data stamp
-          const crypto = common.getCrypto(true);
-
           const result = await crypto.stampDataWithPassword({
             password: parameters.password,
             hashAlgorithm: parameters.hmacHashAlgorithm,
@@ -305,7 +302,7 @@ export class PFX extends PkiObject implements IPFX {
           this.macData = new MacData({
             mac: new DigestInfo({
               digestAlgorithm: new AlgorithmIdentifier({
-                algorithmId: common.getOIDByAlgorithm({ name: parameters.hmacHashAlgorithm }, true, "hmacHashAlgorithm"),
+                algorithmId: crypto.getOIDByAlgorithm({ name: parameters.hmacHashAlgorithm }, true, "hmacHashAlgorithm"),
               }),
               digest: new asn1js.OctetString({ valueHex: result })
             }),
@@ -399,7 +396,7 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Signing CMS Signed Data
-          await cmsSigned.sign(parameters.privateKey, 0, parameters.hashAlgorithm);
+          await cmsSigned.sign(parameters.privateKey, 0, parameters.hashAlgorithm, undefined, crypto);
           //#endregion
 
           //#region Making final CMS_CONTENT_INFO type
@@ -422,7 +419,7 @@ export class PFX extends PkiObject implements IPFX {
   public async parseInternalValues(parameters: {
     checkIntegrity?: boolean;
     password?: ArrayBuffer;
-  }) {
+  }, crypto = common.getCrypto(true)) {
     //#region Check input data from "parameters"
     ArgumentError.assert(parameters, "parameters", "object");
 
@@ -467,11 +464,11 @@ export class PFX extends PkiObject implements IPFX {
             //#endregion
 
             //#region Initial variables
-            const hashAlgorithm = common.getAlgorithmByOID(this.macData.mac.digestAlgorithm.algorithmId, true, "digestAlgorithm");
+            const hashAlgorithm = crypto.getAlgorithmByOID(this.macData.mac.digestAlgorithm.algorithmId, true, "digestAlgorithm");
             //#endregion
 
             //#region Call current crypto engine for verifying HMAC-based data stamp
-            const result = await common.getCrypto(true).verifyDataStampedWithPassword({
+            const result = await crypto.verifyDataStampedWithPassword({
               password: parameters.password,
               hashAlgorithm: hashAlgorithm.name,
               salt: BufferSourceConverter.toArrayBuffer(this.macData.macSalt.valueBlock.valueHexView),
@@ -517,7 +514,7 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Check integrity
-          const ok = await cmsSigned.verify({ signer: 0, checkChain: false });
+          const ok = await cmsSigned.verify({ signer: 0, checkChain: false }, crypto);
           if (!ok) {
             throw new Error("Integrity for the PKCS#12 data is broken!");
           }

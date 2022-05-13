@@ -726,34 +726,34 @@ export class Certificate extends PkiObject implements ICertificate {
   /**
    * Importing public key for current certificate
    * @param parameters Public key export parameters
+   * @param crypto Crypto engine
    * @returns WebCrypto public key
    */
-  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams): Promise<CryptoKey> {
-    return common.getCrypto(true).getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
+  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams, crypto = common.getCrypto(true)): Promise<CryptoKey> {
+    return crypto.getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
   }
 
   /**
    * Get hash value for subject public key (default SHA-1)
    * @param hashAlgorithm Hashing algorithm name
+   * @param crypto Crypto engine
    * @returns Computed hash value from `Certificate.tbsCertificate.subjectPublicKeyInfo.subjectPublicKey`
    */
-  public async getKeyHash(hashAlgorithm = "SHA-1"): Promise<ArrayBuffer> {
-    return common.getCrypto(true).digest({ name: hashAlgorithm }, this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
+  public async getKeyHash(hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<ArrayBuffer> {
+    return crypto.digest({ name: hashAlgorithm }, this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
   }
 
   /**
    * Make a signature for current value from TBS section
    * @param privateKey Private key for SUBJECT_PUBLIC_KEY_INFO structure
    * @param hashAlgorithm Hashing algorithm
+   * @param crypto Crypto engine
    */
-  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<void> {
-    //#region Initial checking
+  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
+    // Initial checking
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
     }
-    //#endregion
-
-    const crypto = common.getCrypto(true);
 
     // Get a "default parameters" for current algorithm and set correct signature algorithm
     const signatureParameters = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
@@ -773,8 +773,9 @@ export class Certificate extends PkiObject implements ICertificate {
   /**
    * Verifies the certificate signature
    * @param issuerCertificate
+   * @param crypto Crypto engine
    */
-  public async verify(issuerCertificate?: Certificate): Promise<boolean> {
+  public async verify(issuerCertificate?: Certificate, crypto = common.getCrypto(true)): Promise<boolean> {
     let subjectPublicKeyInfo: PublicKeyInfo | undefined;
 
     // Set correct SUBJECT_PUBLIC_KEY_INFO value
@@ -789,7 +790,7 @@ export class Certificate extends PkiObject implements ICertificate {
       throw new Error("Please provide issuer certificate as a parameter");
     }
 
-    return common.getCrypto(true).verifyWithPublicKey(this.tbsView, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(this.tbsView, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

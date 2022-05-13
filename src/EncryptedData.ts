@@ -280,23 +280,22 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
   /**
    * Creates a new CMS Encrypted Data content
    * @param parameters Parameters necessary for encryption
+   * @param crypto Crypto engine
    * @returns Returns decrypted raw data
    */
   async decrypt(parameters: {
     password: ArrayBuffer;
-  }): Promise<ArrayBuffer> {
-    //#region Check for input parameters
+  }, crypto = common.getCrypto(true)): Promise<ArrayBuffer> {
+    // Check for input parameters
     ArgumentError.assert(parameters, "parameters", "object");
-    //#endregion
 
-    //#region Set ENCRYPTED_CONTENT_INFO value
+    // Set ENCRYPTED_CONTENT_INFO value
     const decryptParams = {
       ...parameters,
       encryptedContentInfo: this.encryptedContentInfo,
     };
-    //#endregion
 
-    return common.getCrypto(true).decryptEncryptedContentInfo(decryptParams);
+    return crypto.decryptEncryptedContentInfo(decryptParams);
   }
 
 }

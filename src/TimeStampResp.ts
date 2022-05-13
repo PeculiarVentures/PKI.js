@@ -9,6 +9,7 @@ import { Certificate } from "./Certificate";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
+import * as common from "./common";
 
 const STATUS = "status";
 const TIME_STAMP_TOKEN = "timeStampToken";
@@ -248,27 +249,29 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
    * Sign current TSP Response
    * @param privateKey Private key for "subjectPublicKeyInfo" structure
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
+   * @param crypto Crypto engine
    */
-  public async sign(privateKey: CryptoKey, hashAlgorithm?: string) {
+  public async sign(privateKey: CryptoKey, hashAlgorithm?: string, crypto = common.getCrypto(true)) {
     this.assertContentType();
 
     // Sign internal signed data value
     const signed = new SignedData({ schema: this.timeStampToken.content });
 
-    return signed.sign(privateKey, 0, hashAlgorithm);
+    return signed.sign(privateKey, 0, hashAlgorithm, undefined, crypto);
   }
 
   /**
    * Verify current TSP Response
    * @param verificationParameters Input parameters for verification
+   * @param crypto Crypto engine
    */
-  public async verify(verificationParameters: TimeStampRespVerifyParams = { signer: 0, trustedCerts: [], data: EMPTY_BUFFER }): Promise<boolean> {
+  public async verify(verificationParameters: TimeStampRespVerifyParams = { signer: 0, trustedCerts: [], data: EMPTY_BUFFER }, crypto = common.getCrypto(true)): Promise<boolean> {
     this.assertContentType();
 
     // Verify internal signed data value
     const signed = new SignedData({ schema: this.timeStampToken.content });
 
-    return signed.verify(verificationParameters);
+    return signed.verify(verificationParameters, crypto);
   }
 
   private assertContentType(): asserts this is { timeStampToken: ContentInfo; } {
