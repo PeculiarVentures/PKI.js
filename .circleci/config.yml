@@ -1,0 +1,33 @@
+version: 2
+jobs:
+  build:
+    branches:
+      ignore:
+        - gh-pages
+    docker:
+      - image: "cimg/node:16.14.0"
+    environment:
+      COVERALLS_REPO_TOKEN: 5VZxtP3jvfuAygXWjgkaJCrHpT9FwiVTU
+    steps:
+      - run:
+          name: Installing global dependencies
+          command: sudo npm install -g typescript rollup nyc coveralls
+      - checkout
+      - run:
+          name: Installing PKI.js
+          command: npm install
+      - run:
+          name: Installing node-webcrypto-ossl
+          command: npm install node-webcrypto-ossl
+      - run:
+          name: Building tests
+          command: npm run build:examples
+      - run:
+          name: Run tests
+          command: npm test
+      - run:
+          name: Coveralls
+          command: cat ./coverage/lcov.info | coveralls
+      - store_artifacts:
+          path: ./coverage/lcov.info
+          destination: coverage
