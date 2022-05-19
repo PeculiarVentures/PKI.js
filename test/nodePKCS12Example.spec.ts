@@ -225,21 +225,21 @@ async function parsePKCS12(buffer: ArrayBuffer, password: string) {
 context("Node.js PKCS#12 Example", () => {
 
   let name: string;
-  let crypto: Crypto | null;
-  let subtle: pkijs.ICryptoEngine | null;
+  let crypto: pkijs.ICryptoEngine | null;
 
   before(() => {
     const prevEngine = pkijs.getEngine();
     name = prevEngine.name;
     crypto = prevEngine.crypto;
-    subtle = prevEngine.subtle;
 
     const nodeEngine = new NodeEngine();
-    pkijs.setEngine(nodeEngine.name, nodeEngine.crypto, nodeEngine);
+    pkijs.setEngine(nodeEngine.name, nodeEngine);
   });
 
   after(() => {
-    pkijs.setEngine(name, crypto, subtle);
+    if (crypto) {
+      pkijs.setEngine(name, crypto);
+    }
   });
 
   //#region Initial variables

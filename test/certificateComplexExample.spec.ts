@@ -2,7 +2,7 @@ import * as assert from "assert";
 import * as pkijs from "../src";
 import * as example from "./certificateComplexExample";
 
-context("Certificate Complex Example", () => {
+context.only("Certificate Complex Example", () => {
   //#region Initial variables
   const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
   const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];

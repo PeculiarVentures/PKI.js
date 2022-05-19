@@ -8,16 +8,56 @@ import { ArgumentError } from "./errors";
 //#region Crypto engine related function
 export interface GlobalCryptoEngine {
   name: string;
-  crypto: Crypto | null;
-  subtle: ICryptoEngine | null;
+  crypto: ICryptoEngine | null;
 }
 export let engine: GlobalCryptoEngine = {
   name: "none",
   crypto: null,
-  subtle: null
 };
 
-export function setEngine(name: string, crypto: Crypto | null = null, subtle: null | ICryptoEngine = null): void {
+function isCryptoEngine(engine: unknown): engine is ICryptoEngine {
+  return engine
+    && typeof engine === "object"
+    && "crypto" in engine
+    ? true
+    : false;
+}
+
+/**
+ * Sets global crypto engine
+ * @param name Name of the crypto engine
+ * @param crypto
+ * @param subtle
+ * @deprecated Since version 3.0.0
+ */
+export function setEngine(name: string, crypto: ICryptoEngine | Crypto, subtle: ICryptoEngine | SubtleCrypto): void;
+/**
+ * Sets global crypto engine
+ * @param name Name of the crypto engine
+ * @param crypto Crypto engine
+ * @since 3.0.0
+ */
+export function setEngine(name: string, crypto?: ICryptoEngine): void;
+export function setEngine(name: string, ...args: any[]): void {
+  let crypto: ICryptoEngine | null = null;
+  if (args.length === 1) {
+    // v3.0.0 implementation
+    crypto = args[0];
+  } else {
+    // prev implementation
+    const cryptoArg = args[0];
+    const subtleArg = args[1];
+    if (isCryptoEngine(subtleArg)) {
+      crypto = subtleArg;
+    } if (isCryptoEngine(cryptoArg)) {
+      crypto = cryptoArg;
+    } if ("subtle" in cryptoArg && "getRandomValues" in cryptoArg) {
+      crypto = new CryptoEngine({
+        crypto: cryptoArg,
+      });
+    }
+  }
+
   //#region We are in Node
   if ((typeof process !== "undefined") && ("pid" in process) && (typeof global !== "undefined") && (typeof window === "undefined")) {
     if (typeof (global as any)[process.pid] === "undefined") {
@@ -40,8 +80,7 @@ export function setEngine(name: string, crypto: Crypto | null = null, subtle: nu
 
     (global as any)[process.pid].pkijs.engine = {
       name: name,
-      crypto: crypto,
-      subtle: subtle
+      crypto,
     };
   }
   //#endregion
@@ -50,8 +89,7 @@ export function setEngine(name: string, crypto: Crypto | null = null, subtle: nu
     if (engine.name !== name) {
       engine = {
         name: name,
-        crypto: crypto,
-        subtle: subtle
+        crypto,
       };
     }
   }
@@ -96,11 +134,11 @@ export function getCrypto(safety: true): ICryptoEngine;
 export function getCrypto(safety = false): ICryptoEngine | null {
   const _engine = getEngine();
 
-  if (!_engine.subtle && safety) {
+  if (!_engine.crypto && safety) {
     throw new Error("Unable to create WebCrypto object");
   }
 
-  return _engine.subtle;
+  return _engine.crypto;
 }
 
 /**
@@ -367,3 +405,5 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
   //#endregion
 }
 //#endregion
+
+import { CryptoEngine } from "./CryptoEngine/CryptoEngine";

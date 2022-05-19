@@ -1,3 +1,4 @@
+/* eslint-disable deprecation/deprecation */
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pkijs from "../src";
@@ -52,7 +53,8 @@ export function isNode() {
 if (isNode()) {
   import("@peculiar/webcrypto").then(peculiarCrypto => {
     const webcrypto = new peculiarCrypto.Crypto();
-    pkijs.setEngine("newEngine", webcrypto, new pkijs.CryptoEngine({ name: "", crypto: webcrypto, subtle: webcrypto.subtle }));
+    const name = "newEngine";
+    pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: webcrypto }));
   });
 }
 

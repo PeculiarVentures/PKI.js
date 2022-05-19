@@ -167,7 +167,10 @@ export interface ICryptoEngine extends SubtleCrypto {
 export interface CryptoEngineParameters {
   name?: string;
   crypto: Crypto;
-  subtle: SubtleCrypto;
+  /**
+   * @deprecated
+   */
+  subtle?: SubtleCrypto;
 }
 
 export interface CryptoEngineConstructor {

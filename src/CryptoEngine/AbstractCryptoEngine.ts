@@ -17,7 +17,9 @@ export abstract class AbstractCryptoEngine implements type.ICryptoEngine {
    */
   constructor(parameters: type.CryptoEngineParameters) {
     this.crypto = parameters.crypto;
-    this.subtle = parameters.subtle;
+    this.subtle = "webkitSubtle" in parameters.crypto
+      ? (parameters.crypto as any).webkitSubtle
+      : parameters.crypto.subtle;
     this.name = pvutils.getParametersValue(parameters, "name", EMPTY_STRING);
   }
 
