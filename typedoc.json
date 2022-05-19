@@ -1,0 +1,8 @@
+{
+  "entryPoints": [
+    "./src/index.ts"
+  ],
+  "out": "docs",
+  "excludePrivate": true,
+  "categorizeByGroup": true
+}

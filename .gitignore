@@ -7,7 +7,12 @@ coverage
 .vscode
 docs
 
-# Build
-test/**/*.js
-examples/**/bundle.js
+bundle.js
+test/browser/*.js
+test/s_*.js
+test/n_*.js
+
+*.log
 .DS_Store
+
+examples/pkijs.es.js

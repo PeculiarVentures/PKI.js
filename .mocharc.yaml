@@ -1,5 +1,7 @@
-timeout: 10000
-require: '@babel/register'
+require:
+  - "ts-node/register"
+extension:
+  - ts
 spec:
-  - test/n_*.js
-  - test/s_*.js
+  - "test/**/*.spec.ts"
+timeout: 10000

@@ -1,7 +1,13 @@
 {
-    "reporter": [
-      "lcovonly"
-    ],
-    "sourceMap": false,
-    "instrument": false
+  "reporter": [
+    "lcov",
+    "text-summary"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "extension": [
+    ".ts",
+    ".tsx"
+  ]
 }

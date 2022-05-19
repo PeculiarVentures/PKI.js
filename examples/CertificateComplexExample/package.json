@@ -1,6 +1,0 @@
-{
-  "scripts": {
-    "build": "rollup -c && sed -f ../script.sed es6.js > ../../test/s_certificateComplexExample.js",
-    "build:es5": "npm run build && babel bundle.js -o bundle_es5.js && mv bundle_es5.js bundle.js"
-  }
-}

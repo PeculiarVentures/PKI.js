@@ -1,0 +1,55 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Install and build examples
+        run: yarn
+
+      - name: Build documentation 📦
+        run: npm run build:docs
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: pages
+
+      - name: Build examples 📦
+        run: npm run build:examples
+
+      - name: Copy files to pages 📦
+        run: |
+          # Remove odd files
+          rm -f examples/rollup.config.js
+          rm -rf examples/NodePKCS12Example
+          rm -rf examples/**/*.ts
+          rm -rf examples/**/*.md
+
+          # copy docs to pages
+          rm -rf pages/docs
+          cp -r docs pages
+
+          # copy examples to pages
+          rm -rf pages/examples
+          cp -r examples pages
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.3.0
+        with:
+          branch: gh-pages
+          folder: pages

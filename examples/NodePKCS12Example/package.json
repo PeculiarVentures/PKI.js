@@ -1,5 +1,0 @@
-{
-  "scripts": {
-    "build": "sed -f ../script.sed  es6.js > ../../test/n_nodePKCS12Example.js"
-  }
-}
