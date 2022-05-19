@@ -431,15 +431,7 @@ async function openSSLLike$1(password) {
     if (!(pkcs12.parsedValue && pkcs12.parsedValue.authenticatedSafe)) {
         throw new Error("pkcs12.parsedValue.authenticatedSafe is empty");
     }
-    await pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.makeInternalValues({
-        password: passwordConverted,
-        contentEncryptionAlgorithm: {
-            name: "AES-CBC",
-            length: 128
-        },
-        hmacHashAlgorithm: "SHA-1",
-        iterationCount: 100000
-    });
+    await pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.makeInternalValues();
     // Encode internal values for all "SafeContents" firts (create all "Privacy Protection" envelopes)
     await pkcs12.parsedValue.authenticatedSafe.makeInternalValues({
         safeContents: [
@@ -491,9 +483,7 @@ async function parsePKCS12$1(buffer, password) {
         ]
     });
     // Parse "PKCS8ShroudedKeyBag" value
-    await pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.parseInternalValues({
-        password: passwordConverted
-    });
+    await pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.parseInternalValues();
     return pkcs12;
 }
 
