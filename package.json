@@ -36,7 +36,7 @@
     "rollup-plugin-node-resolve": "4.0.1"
   },
   "dependencies": {
-    "asn1js": "^2.1.1",
+    "asn1js": "^3.0.3",
     "bytestreamjs": "^1.0.29",
     "pvutils": "^1.1.3"
   },
