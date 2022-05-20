@@ -15463,7 +15463,7 @@ function handleFileBrowse(evt, cb) {
         tempReader.readAsArrayBuffer(currentFiles[0]);
     }
 }
-function decodePEM(pem, tag) {
+function decodePEM(pem, tag = "[A-Z0-9 ]+") {
     const pattern = new RegExp(`-{5}BEGIN ${tag}-{5}([a-zA-Z0-9=+\\/\\n\\r]+)-{5}END ${tag}-{5}`, "g");
     const res = [];
     let matches = null;

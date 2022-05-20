@@ -421,7 +421,7 @@ RelativeDistinguishedNames.CLASS_NAME = "RelativeDistinguishedNames";
 
 const TYPE$4 = "type";
 const VALUE$5 = "value";
-function builtInStandardAttributes(parameters = {}, optional) {
+function builtInStandardAttributes(parameters = {}, optional = false) {
     const names = pvutils.getParametersValue(parameters, "names", {});
     return (new asn1js.Sequence({
         optional,
@@ -567,7 +567,7 @@ function builtInStandardAttributes(parameters = {}, optional) {
         ]
     }));
 }
-function builtInDomainDefinedAttributes(optional) {
+function builtInDomainDefinedAttributes(optional = false) {
     return (new asn1js.Sequence({
         optional,
         value: [
@@ -576,7 +576,7 @@ function builtInDomainDefinedAttributes(optional) {
         ]
     }));
 }
-function extensionAttributes(optional) {
+function extensionAttributes(optional = false) {
     return (new asn1js.Set({
         optional,
         value: [
@@ -13449,24 +13449,26 @@ class EnvelopedData extends PkiObject {
             const wrappedKey = await crypto.wrapKey("raw", sessionKey, derivedKey, kekAlgorithm);
             recipientInfo.encryptedKey = new asn1js.OctetString({ valueHex: wrappedKey });
         };
+        const res = [];
         for (let i = 0; i < this.recipientInfos.length; i++) {
             switch (this.recipientInfos[i].variant) {
                 case 1:
-                    await SubKeyTransRecipientInfo(i);
+                    res.push(await SubKeyTransRecipientInfo(i));
                     break;
                 case 2:
-                    await SubKeyAgreeRecipientInfo(i);
+                    res.push(await SubKeyAgreeRecipientInfo(i));
                     break;
                 case 3:
-                    await SubKEKRecipientInfo(i);
+                    res.push(await SubKEKRecipientInfo(i));
                     break;
                 case 4:
-                    await SubPasswordRecipientinfo(i);
+                    res.push(await SubPasswordRecipientinfo(i));
                     break;
                 default:
                     throw new Error(`Unknown recipient type in array with index ${i}`);
             }
         }
+        return res;
     }
     async decrypt(recipientIndex, parameters, crypto = getCrypto(true)) {
         const decryptionParameters = parameters || {};
