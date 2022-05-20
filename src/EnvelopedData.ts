@@ -772,7 +772,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param contentToEncrypt Content to encrypt
    * @param crypto Crypto engine
    */
-  public async encrypt(contentEncryptionAlgorithm: Algorithm, contentToEncrypt: ArrayBuffer, crypto = common.getCrypto(true)) {
+  public async encrypt(contentEncryptionAlgorithm: Algorithm, contentToEncrypt: ArrayBuffer, crypto = common.getCrypto(true)): Promise<(void | { ecdhPrivateKey: CryptoKey; })[]> {
     //#region Initial variables
     const ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
     const ivView = new Uint8Array(ivBuffer);
@@ -1090,26 +1090,28 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
     //#endregion
 
+    const res = [];
     //#region Create special routines for each "recipient"
     for (let i = 0; i < this.recipientInfos.length; i++) {
       switch (this.recipientInfos[i].variant) {
         case 1: // KeyTransRecipientInfo
-          await SubKeyTransRecipientInfo(i);
+          res.push(await SubKeyTransRecipientInfo(i));
           break;
         case 2: // KeyAgreeRecipientInfo
-          await SubKeyAgreeRecipientInfo(i);
+          res.push(await SubKeyAgreeRecipientInfo(i));
           break;
         case 3: // KEKRecipientInfo
-          await SubKEKRecipientInfo(i);
+          res.push(await SubKEKRecipientInfo(i));
           break;
         case 4: // PasswordRecipientinfo
-          await SubPasswordRecipientinfo(i);
+          res.push(await SubPasswordRecipientinfo(i));
           break;
         default:
           throw new Error(`Unknown recipient type in array with index ${i}`);
       }
     }
     //#endregion
+    return res;
   }
 
   /**
