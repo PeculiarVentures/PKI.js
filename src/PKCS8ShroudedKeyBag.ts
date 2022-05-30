@@ -214,7 +214,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
     //#endregion
   }
 
-  protected async makeInternalValues(parameters: Omit<CryptoEngineEncryptParams, "contentToEncrypt">): Promise<void> {
+  public async makeInternalValues(parameters: Omit<CryptoEngineEncryptParams, "contentToEncrypt">): Promise<void> {
     //#region Check that we do have PARSED_VALUE
     if (!this.parsedValue) {
       throw new Error("Please initialize \"parsedValue\" first");
