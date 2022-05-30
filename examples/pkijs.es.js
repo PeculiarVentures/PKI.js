@@ -421,7 +421,7 @@ RelativeDistinguishedNames.CLASS_NAME = "RelativeDistinguishedNames";
 
 const TYPE$4 = "type";
 const VALUE$5 = "value";
-function builtInStandardAttributes(parameters = {}, optional = false) {
+function builtInStandardAttributes(parameters = {}, optional) {
     const names = pvutils.getParametersValue(parameters, "names", {});
     return (new asn1js.Sequence({
         optional,
@@ -567,7 +567,7 @@ function builtInStandardAttributes(parameters = {}, optional = false) {
         ]
     }));
 }
-function builtInDomainDefinedAttributes(optional = false) {
+function builtInDomainDefinedAttributes(optional) {
     return (new asn1js.Sequence({
         optional,
         value: [
@@ -576,7 +576,7 @@ function builtInDomainDefinedAttributes(optional = false) {
         ]
     }));
 }
-function extensionAttributes(optional = false) {
+function extensionAttributes(optional) {
     return (new asn1js.Set({
         optional,
         value: [
