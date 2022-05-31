@@ -1565,6 +1565,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     //#region Initial variables
 
+    // TODO Should we reuse iv from parameters.contentEncryptionAlgorithm or use it's length for ivBuffer?
     const ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
     const ivView = new Uint8Array(ivBuffer);
     this.getRandomValues(ivView);
@@ -1606,12 +1607,13 @@ export class CryptoEngine extends AbstractCryptoEngine {
       iterations: parameters.iterationCount
     },
       pbkdfKey,
-      parameters.contentEncryptionAlgorithm as any,
+      parameters.contentEncryptionAlgorithm,
       false,
       ["encrypt"]);
     //#endregion
 
     //#region Encrypt content
+    // TODO encrypt doesn't use all parameters from parameters.contentEncryptionAlgorithm (eg additionalData and tagLength for AES-GCM)
     const encryptedData = await this.encrypt(
       {
         name: parameters.contentEncryptionAlgorithm.name,
