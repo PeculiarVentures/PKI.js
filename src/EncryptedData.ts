@@ -43,6 +43,8 @@ export interface EncryptedDataJson {
 
 export type EncryptedDataParameters = PkiObjectParameters & Partial<IEncryptedData>;
 
+export type EncryptedDataEncryptParams = Omit<CryptoEngineEncryptParams, "contentType">;
+
 /**
  * Represents the EncryptedData structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  *
@@ -262,7 +264,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
    * Creates a new CMS Encrypted Data content
    * @param parameters Parameters necessary for encryption
    */
-  public async encrypt(parameters: Omit<CryptoEngineEncryptParams, "contentType">): Promise<void> {
+  public async encrypt(parameters: EncryptedDataEncryptParams): Promise<void> {
     //#region Check for input parameters
     ArgumentError.assert(parameters, "parameters", "object");
     //#endregion
