@@ -14,13 +14,13 @@ const CLEAR_PROPS = [
   BAG_ATTRIBUTES
 ];
 
-export interface ISafeBag {
+export interface ISafeBag<T extends BagType = BagType> {
   bagId: string;
-  bagValue: BagType;
+  bagValue: T;
   bagAttributes?: Attribute[];
 }
 
-export type SafeBagParameters = PkiObjectParameters & Partial<ISafeBag>;
+export type SafeBagParameters<T extends BagType = BagType> = PkiObjectParameters & Partial<ISafeBag<T>>;
 
 export interface SafeBagJson {
   bagId: string;
@@ -31,23 +31,23 @@ export interface SafeBagJson {
 /**
  * Represents the SafeBag structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
-export class SafeBag extends PkiObject implements ISafeBag {
+export class SafeBag<T extends BagType = BagType> extends PkiObject implements ISafeBag<T> {
 
   public static override CLASS_NAME = "SafeBag";
 
   public bagId!: string;
-  public bagValue!: BagType;
+  public bagValue!: T;
   public bagAttributes?: Attribute[];
 
   /**
    * Initializes a new instance of the {@link SafeBag} class
    * @param parameters Initialization parameters
    */
-  constructor(parameters: SafeBagParameters = {}) {
+  constructor(parameters: SafeBagParameters<T> = {}) {
     super();
 
     this.bagId = pvutils.getParametersValue(parameters, BAG_ID, SafeBag.defaultValues(BAG_ID));
-    this.bagValue = pvutils.getParametersValue(parameters, BAG_VALUE, SafeBag.defaultValues(BAG_VALUE));
+    this.bagValue = pvutils.getParametersValue(parameters, BAG_VALUE, SafeBag.defaultValues(BAG_VALUE)) as unknown as T;
     if (BAG_ATTRIBUTES in parameters) {
       this.bagAttributes = pvutils.getParametersValue(parameters, BAG_ATTRIBUTES, SafeBag.defaultValues(BAG_ATTRIBUTES));
     }
@@ -162,7 +162,7 @@ export class SafeBag extends PkiObject implements ISafeBag {
     if (!bagType) {
       throw new Error(`Invalid BAG_ID for SafeBag: ${this.bagId}`);
     }
-    this.bagValue = new bagType({ schema: asn1.result.bagValue });
+    this.bagValue = new bagType({ schema: asn1.result.bagValue }) as unknown as T;
 
     if (BAG_ATTRIBUTES in asn1.result) {
       this.bagAttributes = Array.from(asn1.result.bagAttributes, element => new Attribute({ schema: element }));

@@ -1,11 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { EncryptedData } from "./EncryptedData";
+import { EncryptedData, EncryptedDataEncryptParams } from "./EncryptedData";
 import { EncryptedContentInfo } from "./EncryptedContentInfo";
 import { PrivateKeyInfo } from "./PrivateKeyInfo";
 import * as Schema from "./Schema";
-import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { EMPTY_STRING } from "./constants";
@@ -31,6 +30,8 @@ export interface PKCS8ShroudedKeyBagJson {
   encryptionAlgorithm: AlgorithmIdentifierJson;
   encryptedData: asn1js.OctetStringJson;
 }
+
+type PKCS8ShroudedKeyBagMakeInternalValuesParams = Omit<EncryptedDataEncryptParams, "contentToEncrypt">;
 
 /**
  * Represents the PKCS8ShroudedKeyBag structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
@@ -214,7 +215,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
     //#endregion
   }
 
-  public async makeInternalValues(parameters: Omit<CryptoEngineEncryptParams, "contentToEncrypt">): Promise<void> {
+  public async makeInternalValues(parameters: PKCS8ShroudedKeyBagMakeInternalValuesParams): Promise<void> {
     //#region Check that we do have PARSED_VALUE
     if (!this.parsedValue) {
       throw new Error("Please initialize \"parsedValue\" first");
@@ -226,7 +227,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
     //#endregion
 
     //#region Encrypt internal data
-    const encryptParams: CryptoEngineEncryptParams = {
+    const encryptParams: EncryptedDataEncryptParams = {
       ...parameters,
       contentToEncrypt: this.parsedValue.toSchema().toBER(false),
     };

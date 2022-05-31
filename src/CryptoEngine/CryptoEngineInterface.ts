@@ -38,9 +38,14 @@ export interface CryptoEnginePublicKeyParams {
   algorithm: CryptoEngineAlgorithmParams;
 }
 
+
+export type ContentEncryptionAesCbcParams = AesCbcParams & AesDerivedKeyParams;
+export type ContentEncryptionAesGcmParams = AesGcmParams & AesDerivedKeyParams;
+export type ContentEncryptionAlgorithm = ContentEncryptionAesCbcParams | ContentEncryptionAesGcmParams;
+
 export interface CryptoEngineEncryptParams {
   password: ArrayBuffer;
-  contentEncryptionAlgorithm: Algorithm;
+  contentEncryptionAlgorithm: ContentEncryptionAlgorithm;
   hmacHashAlgorithm: string;
   iterationCount: number;
   contentToEncrypt: ArrayBuffer;
