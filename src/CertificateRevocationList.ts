@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
@@ -12,6 +13,7 @@ import { PublicKeyInfo } from "./PublicKeyInfo";
 import { id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BaseCRLNumber, id_CertificateIssuer, id_CRLNumber, id_CRLReason, id_FreshestCRL, id_InvalidityDate, id_IssuerAltName, id_IssuingDistributionPoint } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER } from "./constants";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -77,7 +79,7 @@ export interface CertificateRevocationListJson {
   revokedCertificates?: RevokedCertificateJson[];
   crlExtensions?: ExtensionsJson;
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signatureValue: Schema.AsnBitStringJson;
+  signatureValue: asn1js.BitStringJson;
 }
 
 function tbsCertList(parameters: TBSCertListSchema = {}): Schema.SchemaType {
@@ -186,7 +188,20 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
 
   public static override CLASS_NAME = "CertificateRevocationList";
 
-  public tbs!: ArrayBuffer;
+  public tbsView!: Uint8Array;
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public get tbs(): ArrayBuffer {
+    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+  }
+
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public set tbs(value: ArrayBuffer) {
+    this.tbsView = new Uint8Array(value);
+  }
   public version!: number;
   public signature!: AlgorithmIdentifier;
   public issuer!: RelativeDistinguishedNames;
@@ -204,7 +219,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
   constructor(parameters: CertificateRevocationListParameters = {}) {
     super();
 
-    this.tbs = pvutils.getParametersValue(parameters, TBS, CertificateRevocationList.defaultValues(TBS));
+    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, CertificateRevocationList.defaultValues(TBS)));
     this.version = pvutils.getParametersValue(parameters, VERSION, CertificateRevocationList.defaultValues(VERSION));
     this.signature = pvutils.getParametersValue(parameters, SIGNATURE, CertificateRevocationList.defaultValues(SIGNATURE));
     this.issuer = pvutils.getParametersValue(parameters, ISSUER, CertificateRevocationList.defaultValues(ISSUER));
@@ -244,9 +259,9 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case VERSION:
-        return 1;
+        return 0;
       case SIGNATURE:
         return new AlgorithmIdentifier();
       case ISSUER:
@@ -317,7 +332,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
-    this.tbs = asn1.result.tbsCertList.valueBeforeDecode;
+    this.tbsView = (asn1.result.tbsCertList as asn1js.Sequence).valueBeforeDecodeView;
 
     if (TBS_CERT_LIST_VERSION in asn1.result) {
       this.version = asn1.result[TBS_CERT_LIST_VERSION].valueBlock.valueDec;
@@ -390,11 +405,11 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     let tbsSchema;
 
     if (!encodeFlag) {
-      if (!this.tbs.byteLength) { // No stored TBS part
+      if (!this.tbsView.byteLength) { // No stored TBS part
         return CertificateRevocationList.schema();
       }
 
-      const asn1 = asn1js.fromBER(this.tbs);
+      const asn1 = asn1js.fromBER(this.tbsView);
       AsnError.assert(asn1, "TBS Certificate Revocation List");
       tbsSchema = asn1.result;
     }
@@ -418,13 +433,13 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
 
   public toJSON(): CertificateRevocationListJson {
     const res: CertificateRevocationListJson = {
-      tbs: pvutils.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
+      tbs: pvtsutils.Convert.ToHex(this.tbsView),
       version: this.version,
       signature: this.signature.toJSON(),
       issuer: this.issuer.toJSON(),
       thisUpdate: this.thisUpdate.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson
+      signatureValue: this.signatureValue.toJSON()
     };
 
     if (this.version !== CertificateRevocationList.defaultValues(VERSION))
@@ -474,19 +489,13 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
    * Make a signature for existing CRL data
    * @param privateKey Private key for "subjectPublicKeyInfo" structure
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
+   * @param crypto Crypto engine
    */
-  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<void> {
-    //#region Initial checking
-    //#region Get a private key from function parameter
+  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
+    // Get a private key from function parameter
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
     }
-    //#endregion
-    //#endregion
-
-    //#region Initial variables
-    const crypto = common.getCrypto(true);
-    //#endregion
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
     const signatureParameters = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
@@ -496,11 +505,11 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     //#endregion
 
     //#region Create TBS data for signing
-    this.tbs = this.encodeTBS().toBER(false);
+    this.tbsView = new Uint8Array(this.encodeTBS().toBER());
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await crypto.signWithPrivateKey(this.tbs, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(this.tbsView, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -508,13 +517,10 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
   /**
    * Verify existing signature
    * @param parameters
+   * @param crypto Crypto engine
    */
-  public async verify(parameters: CertificateRevocationListVerifyParams = {}): Promise<boolean> {
-    //#region Global variables
+  public async verify(parameters: CertificateRevocationListVerifyParams = {}, crypto = common.getCrypto(true)): Promise<boolean> {
     let subjectPublicKeyInfo: PublicKeyInfo | undefined;
-
-    const crypto = common.getCrypto(true);
-    //#endregion
 
     //#region Get information about CRL issuer certificate
     if (parameters.issuerCertificate) { // "issuerCertificate" must be of type "Certificate"
@@ -549,7 +555,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     }
     //#endregion
 
-    return crypto.verifyWithPublicKey(this.tbs, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(this.tbsView, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

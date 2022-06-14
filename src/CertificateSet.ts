@@ -7,6 +7,7 @@ import { OtherCertificateFormat, OtherCertificateFormatJson } from "./OtherCerti
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const CERTIFICATES = "certificates";
 const CLEAR_PROPS = [
@@ -21,9 +22,9 @@ export interface CertificateSetJson {
   certificates: CertificateSetItemJson[];
 }
 
-export type CertificateSetItemJson = CertificateJson | AttributeCertificateV1Json | AttributeCertificateV2Json | OtherCertificateFormatJson | Schema.AsnBlockJson;
+export type CertificateSetItemJson = CertificateJson | AttributeCertificateV1Json | AttributeCertificateV2Json | OtherCertificateFormatJson;
 
-export type CertificateSetItem = Certificate | AttributeCertificateV1 | AttributeCertificateV2 | OtherCertificateFormat | Schema.SchemaType;
+export type CertificateSetItem = Certificate | AttributeCertificateV1 | AttributeCertificateV2 | OtherCertificateFormat;
 
 export type CertificateSetParameters = PkiObjectParameters & Partial<ICertificateSet>;
 
@@ -86,7 +87,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
 
     return (
       new asn1js.Set({
-        name: (names.blockName || ""),
+        name: (names.blockName || EMPTY_STRING),
         value: [
           new asn1js.Repeated({
             name: (names.certificates || CERTIFICATES),
@@ -213,7 +214,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
           default:
         }
 
-        return element;
+        return element.toSchema();
       })
     }));
   }

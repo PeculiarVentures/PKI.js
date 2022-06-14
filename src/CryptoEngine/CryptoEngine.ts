@@ -12,6 +12,8 @@ import { PBES2Params } from "../PBES2Params";
 import { ArgumentError, AsnError, ParameterError } from "../errors";
 import * as type from "./CryptoEngineInterface";
 import { AbstractCryptoEngine } from "./AbstractCryptoEngine";
+import { EMPTY_STRING } from "../constants";
+import { ECNamedCurves } from "../ECNamedCurves";
 
 /**
  * Making MAC key using algorithm described in B.2 of PKCS#12 standard.
@@ -880,14 +882,14 @@ export class CryptoEngine extends AbstractCryptoEngine {
     }
 
     if (safety) {
-      throw new Error(`Unsupported algorithm identifier ${target ? `for ${target} ` : ""}: ${oid}`);
+      throw new Error(`Unsupported algorithm identifier ${target ? `for ${target} ` : EMPTY_STRING}: ${oid}`);
     }
 
     return {};
   }
 
   public getOIDByAlgorithm(algorithm: Algorithm, safety = false, target?: string): string {
-    let result = "";
+    let result = EMPTY_STRING;
 
     switch (algorithm.name.toUpperCase()) {
       case "RSAES-PKCS1-V1_5":
@@ -1065,7 +1067,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     }
 
     if (!result && safety) {
-      throw new Error(`Unsupported algorithm ${target ? `for ${target} ` : ""}: ${algorithm.name}`);
+      throw new Error(`Unsupported algorithm ${target ? `for ${target} ` : EMPTY_STRING}: ${algorithm.name}`);
     }
 
     return result;
@@ -1496,7 +1498,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
    */
   // TODO use safety
   getHashAlgorithm(signatureAlgorithm: AlgorithmIdentifier): string {
-    let result = "";
+    let result = EMPTY_STRING;
 
     switch (signatureAlgorithm.algorithmId) {
       case "1.2.840.10045.4.1": // ecdsa-with-SHA1
@@ -1525,7 +1527,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
                 result = algorithm.name;
               }
               else {
-                return "";
+                return EMPTY_STRING;
               }
             }
             else
@@ -1563,6 +1565,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     //#region Initial variables
 
+    // TODO Should we reuse iv from parameters.contentEncryptionAlgorithm or use it's length for ivBuffer?
     const ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
     const ivView = new Uint8Array(ivBuffer);
     this.getRandomValues(ivView);
@@ -1604,12 +1607,13 @@ export class CryptoEngine extends AbstractCryptoEngine {
       iterations: parameters.iterationCount
     },
       pbkdfKey,
-      parameters.contentEncryptionAlgorithm as any,
+      parameters.contentEncryptionAlgorithm,
       false,
       ["encrypt"]);
     //#endregion
 
     //#region Encrypt content
+    // TODO encrypt doesn't use all parameters from parameters.contentEncryptionAlgorithm (eg additionalData and tagLength for AES-GCM)
     const encryptedData = await this.encrypt(
       {
         name: parameters.contentEncryptionAlgorithm.name,
@@ -1717,18 +1721,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     //#region Decrypt internal content using derived key
     //#region Create correct data block for decryption
-    let dataBuffer = new ArrayBuffer(0);
-
-    const encryptedContent = parameters.encryptedContentInfo.encryptedContent;
-    if (!encryptedContent) {
-      throw new Error("Required parameter 'encryptedContent' is missed");
-    }
-    if (encryptedContent.idBlock.isConstructed === false)
-      dataBuffer = encryptedContent.valueBlock.valueHex;
-    else {
-      for (const content of encryptedContent.valueBlock.value)
-        dataBuffer = pvutils.utilConcatBuf(dataBuffer, content.valueBlock.valueHex);
-    }
+    const dataBuffer = parameters.encryptedContentInfo.getEncryptedContent();
     //#endregion
 
     return this.decrypt({
@@ -1931,10 +1924,10 @@ export class CryptoEngine extends AbstractCryptoEngine {
     };
   }
 
-  public async signWithPrivateKey(data: ArrayBuffer, privateKey: CryptoKey, parameters: type.CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer> {
+  public async signWithPrivateKey(data: BufferSource, privateKey: CryptoKey, parameters: type.CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer> {
     const signature = await this.sign(parameters.algorithm,
       privateKey,
-      new Uint8Array(data));
+      data);
 
     //#region Special case for ECDSA algorithm
     if (parameters.algorithm.name === "ECDSA") {
@@ -1950,7 +1943,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     //#region Find signer's hashing algorithm
     const shaAlgorithm = this.getHashAlgorithm(signatureAlgorithm);
-    if (shaAlgorithm === "")
+    if (shaAlgorithm === EMPTY_STRING)
       throw new Error(`Unsupported signature algorithm: ${signatureAlgorithm.algorithmId}`);
     //#endregion
 
@@ -1997,19 +1990,17 @@ export class CryptoEngine extends AbstractCryptoEngine {
       parameters = this.fillPublicKeyParameters(publicKeyInfo, signatureAlgorithm);
     }
 
-    const publicKeyInfoSchema = publicKeyInfo.toSchema();
-    const publicKeyInfoBuffer = publicKeyInfoSchema.toBER(false);
-    const publicKeyInfoView = new Uint8Array(publicKeyInfoBuffer);
+    const publicKeyInfoBuffer = publicKeyInfo.toSchema().toBER(false);
 
     return this.importKey("spki",
-      publicKeyInfoView,
+      publicKeyInfoBuffer,
       parameters.algorithm.algorithm as Algorithm,
       true,
       parameters.algorithm.usages
     );
   }
 
-  public async verifyWithPublicKey(data: ArrayBuffer, signature: asn1js.BitString | asn1js.OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean> {
+  public async verifyWithPublicKey(data: BufferSource, signature: asn1js.BitString | asn1js.OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean> {
     //#region Find signer's hashing algorithm
     let publicKey: CryptoKey;
     if (!shaAlgorithm) {
@@ -2075,12 +2066,16 @@ export class CryptoEngine extends AbstractCryptoEngine {
     //#endregion
 
     //#region Special case for ECDSA signatures
-    let signatureValue = signature.valueBlock.valueHex;
+    let signatureValue: BufferSource = signature.valueBlock.valueHexView;
 
     if (publicKey.algorithm.name === "ECDSA") {
+      const namedCurve = ECNamedCurves.find((publicKey.algorithm as EcKeyAlgorithm).namedCurve);
+      if (!namedCurve) {
+        throw new Error("Unsupported named curve in use");
+      }
       const asn1 = asn1js.fromBER(signatureValue);
       AsnError.assert(asn1, "Signature value");
-      signatureValue = common.createECDSASignatureFromCMS(asn1.result);
+      signatureValue = common.createECDSASignatureFromCMS(asn1.result, namedCurve.size);
     }
     //#endregion
 
@@ -2107,8 +2102,8 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     return this.verify((algorithm.algorithm as any),
       publicKey,
-      new Uint8Array(signatureValue),
-      new Uint8Array(data)
+      signatureValue,
+      data,
     );
     //#endregion
   }

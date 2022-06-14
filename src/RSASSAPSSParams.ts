@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -126,7 +127,7 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Constructed({
           idBlock: {
@@ -150,7 +151,7 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
             tagNumber: 2 // [2]
           },
           optional: true,
-          value: [new asn1js.Integer({ name: (names.saltLength || "") })]
+          value: [new asn1js.Integer({ name: (names.saltLength || EMPTY_STRING) })]
         }),
         new asn1js.Constructed({
           idBlock: {
@@ -158,7 +159,7 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
             tagNumber: 3 // [3]
           },
           optional: true,
-          value: [new asn1js.Integer({ name: (names.trailerField || "") })]
+          value: [new asn1js.Integer({ name: (names.trailerField || EMPTY_STRING) })]
         })
       ]
     }));

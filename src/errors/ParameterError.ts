@@ -1,3 +1,4 @@
+import { EMPTY_STRING } from "../constants";
 import { ArgumentError } from "./ArgumentError";
 
 export class ParameterError extends TypeError {
@@ -49,7 +50,7 @@ export class ParameterError extends TypeError {
     if (message) {
       this.message = message;
     } else {
-      this.message = `Absent mandatory parameter '${field}' ${target ? ` in '${target}'` : ""}`;
+      this.message = `Absent mandatory parameter '${field}' ${target ? ` in '${target}'` : EMPTY_STRING}`;
     }
   }
 

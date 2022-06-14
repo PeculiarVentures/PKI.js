@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { DigestInfo, DigestInfoJson, DigestInfoSchema } from "./DigestInfo";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -22,7 +23,7 @@ export interface IMacData {
 
 export interface MacDataJson {
   mac: DigestInfoJson;
-  macSalt: Schema.AsnOctetStringJson;
+  macSalt: asn1js.OctetStringJson;
   iterations?: number;
 }
 
@@ -120,7 +121,7 @@ export class MacData extends PkiObject implements IMacData {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       optional: (names.optional || true),
       value: [
         DigestInfo.schema(names.mac || {
@@ -185,7 +186,7 @@ export class MacData extends PkiObject implements IMacData {
   public toJSON(): MacDataJson {
     const res: MacDataJson = {
       mac: this.mac.toJSON(),
-      macSalt: this.macSalt.toJSON() as Schema.AsnOctetStringJson,
+      macSalt: this.macSalt.toJSON(),
     };
 
     if (this.iterations !== undefined) {

@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
@@ -6,6 +7,7 @@ import { Certificate } from "./Certificate";
 import * as Schema from "./Schema";
 import { AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_STRING } from "./constants";
 
 const HASH_ALGORITHM = "hashAlgorithm";
 const ISSUER_NAME_HASH = "issuerNameHash";
@@ -51,9 +53,9 @@ export type CertIDSchema = Schema.SchemaParameters<{
 
 export interface CertIDJson {
   hashAlgorithm: AlgorithmIdentifierJson;
-  issuerNameHash: Schema.AsnOctetStringJson;
-  issuerKeyHash: Schema.AsnOctetStringJson;
-  serialNumber: Schema.AsnIntegerJson;
+  issuerNameHash: asn1js.OctetStringJson;
+  issuerKeyHash: asn1js.OctetStringJson;
+  serialNumber: asn1js.IntegerJson;
 }
 
 export interface CertIDCreateParams {
@@ -72,11 +74,12 @@ export class CertID extends PkiObject implements ICertID {
    * Making OCSP certificate identifier for specific certificate
    * @param certificate Certificate making OCSP Request for
    * @param parameters Additional parameters
+   * @param crypto Crypto engine
    * @returns Returns created CertID object
    */
-  public static async create(certificate: Certificate, parameters: CertIDCreateParams): Promise<CertID> {
+  public static async create(certificate: Certificate, parameters: CertIDCreateParams, crypto = common.getCrypto(true)): Promise<CertID> {
     const certID = new CertID();
-    await certID.createForCertificate(certificate, parameters);
+    await certID.createForCertificate(certificate, parameters, crypto);
 
     return certID;
   }
@@ -134,7 +137,7 @@ export class CertID extends PkiObject implements ICertID {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case HASH_ALGORITHM:
-        return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));
+        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
       case ISSUER_NAME_HASH:
       case ISSUER_KEY_HASH:
       case SERIAL_NUMBER:
@@ -159,16 +162,16 @@ export class CertID extends PkiObject implements ICertID {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AlgorithmIdentifier.schema(names.hashAlgorithmObject || {
           names: {
-            blockName: (names.hashAlgorithm || "")
+            blockName: (names.hashAlgorithm || EMPTY_STRING)
           }
         }),
-        new asn1js.OctetString({ name: (names.issuerNameHash || "") }),
-        new asn1js.OctetString({ name: (names.issuerKeyHash || "") }),
-        new asn1js.Integer({ name: (names.serialNumber || "") })
+        new asn1js.OctetString({ name: (names.issuerNameHash || EMPTY_STRING) }),
+        new asn1js.OctetString({ name: (names.issuerKeyHash || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.serialNumber || EMPTY_STRING) })
       ]
     }));
   }
@@ -212,9 +215,9 @@ export class CertID extends PkiObject implements ICertID {
   public toJSON(): CertIDJson {
     return {
       hashAlgorithm: this.hashAlgorithm.toJSON(),
-      issuerNameHash: this.issuerNameHash.toJSON() as Schema.AsnOctetStringJson,
-      issuerKeyHash: this.issuerKeyHash.toJSON() as Schema.AsnOctetStringJson,
-      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
+      issuerNameHash: this.issuerNameHash.toJSON(),
+      issuerKeyHash: this.issuerKeyHash.toJSON(),
+      serialNumber: this.serialNumber.toJSON(),
     };
   }
 
@@ -229,12 +232,12 @@ export class CertID extends PkiObject implements ICertID {
     }
 
     // Check ISSUER_NAME_HASH
-    if (!pvutils.isEqualBuffer(this.issuerNameHash.valueBlock.valueHex, certificateID.issuerNameHash.valueBlock.valueHex)) {
+    if (!pvtsutils.BufferSourceConverter.isEqual(this.issuerNameHash.valueBlock.valueHexView, certificateID.issuerNameHash.valueBlock.valueHexView)) {
       return false;
     }
 
     // Check ISSUER_KEY_HASH
-    if (!pvutils.isEqualBuffer(this.issuerKeyHash.valueBlock.valueHex, certificateID.issuerKeyHash.valueBlock.valueHex)) {
+    if (!pvtsutils.BufferSourceConverter.isEqual(this.issuerKeyHash.valueBlock.valueHexView, certificateID.issuerKeyHash.valueBlock.valueHexView)) {
       return false;
     }
 
@@ -250,13 +253,13 @@ export class CertID extends PkiObject implements ICertID {
    * Making OCSP certificate identifier for specific certificate
    * @param certificate Certificate making OCSP Request for
    * @param parameters Additional parameters
+   * @param crypto Crypto engine
    */
-  public async createForCertificate(certificate: Certificate, parameters: CertIDCreateParams): Promise<void> {
+  public async createForCertificate(certificate: Certificate, parameters: CertIDCreateParams, crypto = common.getCrypto(true)): Promise<void> {
     //#region Check input parameters
     ParameterError.assert(parameters, HASH_ALGORITHM, "issuerCertificate");
 
-    const crypto = common.getCrypto(true);
-    const hashOID = common.getOIDByAlgorithm({ name: parameters.hashAlgorithm }, true, "hashAlgorithm");
+    const hashOID = crypto.getOIDByAlgorithm({ name: parameters.hashAlgorithm }, true, "hashAlgorithm");
 
     this.hashAlgorithm = new AlgorithmIdentifier({
       algorithmId: hashOID,
@@ -273,7 +276,7 @@ export class CertID extends PkiObject implements ICertID {
     this.issuerNameHash = new asn1js.OctetString({ valueHex: hashIssuerName });
 
     // Create ISSUER_KEY_HASH
-    const issuerKeyBuffer = issuerCertificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex;
+    const issuerKeyBuffer = issuerCertificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView;
     const hashIssuerKey = await crypto.digest({ name: parameters.hashAlgorithm }, issuerKeyBuffer);
     this.issuerKeyHash = new asn1js.OctetString({ valueHex: hashIssuerKey });
   }

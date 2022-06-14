@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { RelativeDistinguishedNames, RelativeDistinguishedNamesJson, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
@@ -25,7 +26,7 @@ export interface IIssuerAndSerialNumber {
 
 export interface IssuerAndSerialNumberJson {
   issuer: RelativeDistinguishedNamesJson;
-  serialNumber: Schema.AsnIntegerJson;
+  serialNumber: asn1js.IntegerJson;
 }
 
 export type IssuerAndSerialNumberParameters = PkiObjectParameters & Partial<IIssuerAndSerialNumber>;
@@ -99,10 +100,10 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         RelativeDistinguishedNames.schema(names.issuer || {}),
-        new asn1js.Integer({ name: (names.serialNumber || "") })
+        new asn1js.Integer({ name: (names.serialNumber || EMPTY_STRING) })
       ]
     }));
   }
@@ -145,7 +146,7 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
   public toJSON(): IssuerAndSerialNumberJson {
     return {
       issuer: this.issuer.toJSON(),
-      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
+      serialNumber: this.serialNumber.toJSON(),
     };
   }
 

@@ -5,6 +5,7 @@ import { AttributeCertificateInfoV2, AttributeCertificateInfoV2Json, AttributeCe
 import * as Schema from "../Schema";
 import { PkiObject, PkiObjectParameters } from "../PkiObject";
 import { AsnError } from "../errors";
+import { EMPTY_STRING } from "../constants";
 
 const ACINFO = "acinfo";
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";
@@ -35,7 +36,7 @@ export type AttributeCertificateV2Parameters = PkiObjectParameters & Partial<IAt
 export interface AttributeCertificateV2Json {
   acinfo: AttributeCertificateInfoV2Json;
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signatureValue: Schema.AsnBitStringJson;
+  signatureValue: asn1js.BitStringJson;
 }
 
 /**
@@ -105,11 +106,11 @@ export class AttributeCertificateV2 extends PkiObject implements IAttributeCerti
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AttributeCertificateInfoV2.schema(names.acinfo || {}),
         AlgorithmIdentifier.schema(names.signatureAlgorithm || {}),
-        new asn1js.BitString({ name: (names.signatureValue || "") })
+        new asn1js.BitString({ name: (names.signatureValue || EMPTY_STRING) })
       ]
     }));
   }
@@ -160,7 +161,7 @@ export class AttributeCertificateV2 extends PkiObject implements IAttributeCerti
     return {
       acinfo: this.acinfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson,
+      signatureValue: this.signatureValue.toJSON(),
     };
   }
 

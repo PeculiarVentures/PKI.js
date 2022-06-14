@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -23,7 +24,7 @@ export interface IEncryptedContentInfo {
 export interface EncryptedContentInfoJson {
   contentType: string;
   contentEncryptionAlgorithm: AlgorithmIdentifierJson;
-  encryptedContent?: Schema.AsnOctetStringJson;
+  encryptedContent?: asn1js.OctetStringJson;
 }
 
 export type EncryptedContentParameters = PkiObjectParameters & Partial<IEncryptedContentInfo>;
@@ -69,7 +70,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
           });
 
           let offset = 0;
-          const valueHex = this.encryptedContent.valueBlock.valueHex;
+          const valueHex = this.encryptedContent.valueBlock.valueHexView.slice().buffer;
           let length = valueHex.byteLength;
 
           const pieceSize = 1024;
@@ -109,7 +110,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CONTENT_TYPE:
-        return "";
+        return EMPTY_STRING;
       case CONTENT_ENCRYPTION_ALGORITHM:
         return new AlgorithmIdentifier();
       case ENCRYPTED_CONTENT:
@@ -127,9 +128,9 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case CONTENT_TYPE:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case CONTENT_ENCRYPTION_ALGORITHM:
-        return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));
+        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
       case ENCRYPTED_CONTENT:
         return (memberValue.isEqual(EncryptedContentInfo.defaultValues(ENCRYPTED_CONTENT)));
       default:
@@ -155,16 +156,16 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.contentType || "") }),
+        new asn1js.ObjectIdentifier({ name: (names.contentType || EMPTY_STRING) }),
         AlgorithmIdentifier.schema(names.contentEncryptionAlgorithm || {}),
         // The CHOICE we need because ENCRYPTED_CONTENT could have either "constructive"
         // or "primitive" form of encoding and we need to handle both variants
         new asn1js.Choice({
           value: [
             new asn1js.Constructed({
-              name: (names.encryptedContent || ""),
+              name: (names.encryptedContent || EMPTY_STRING),
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
                 tagNumber: 0 // [0]
@@ -176,7 +177,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
               ]
             }),
             new asn1js.Primitive({
-              name: (names.encryptedContent || ""),
+              name: (names.encryptedContent || EMPTY_STRING),
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
                 tagNumber: 0 // [0]
@@ -260,10 +261,24 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
     };
 
     if (this.encryptedContent) {
-      res.encryptedContent = this.encryptedContent.toJSON() as Schema.AsnOctetStringJson;
+      res.encryptedContent = this.encryptedContent.toJSON();
     }
 
     return res;
+  }
+
+  /**
+   * Returns concatenated buffer from `encryptedContent` field.
+   * @returns Array buffer
+   * @since 3.0.0
+   * @throws Throws Error if `encryptedContent` is undefined
+   */
+  public getEncryptedContent(): ArrayBuffer {
+    if (!this.encryptedContent) {
+      throw new Error("Parameter 'encryptedContent' is undefined");
+    }
+    // NOTE encryptedContent can be CONSTRUCTED/PRIMITIVE
+    return asn1js.OctetString.prototype.getValue.call(this.encryptedContent);
   }
 
 }

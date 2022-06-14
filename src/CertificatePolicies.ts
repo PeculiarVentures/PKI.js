@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { PolicyInformation, PolicyInformationJson } from "./PolicyInformation";
@@ -69,10 +70,10 @@ export class CertificatePolicies extends PkiObject implements ICertificatePolici
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.certificatePolicies || ""),
+          name: (names.certificatePolicies || EMPTY_STRING),
           value: PolicyInformation.schema()
         })
       ]

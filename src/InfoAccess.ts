@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AccessDescription, AccessDescriptionJson } from "./AccessDescription";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -69,10 +70,10 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.accessDescriptions || ""),
+          name: (names.accessDescriptions || EMPTY_STRING),
           value: AccessDescription.schema()
         })
       ]

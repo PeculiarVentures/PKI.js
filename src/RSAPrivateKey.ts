@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
 import { OtherPrimeInfo, OtherPrimeInfoJson, OtherPrimeInfoSchema } from "./OtherPrimeInfo";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -181,22 +182,22 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
-        new asn1js.Integer({ name: (names.modulus || "") }),
-        new asn1js.Integer({ name: (names.publicExponent || "") }),
-        new asn1js.Integer({ name: (names.privateExponent || "") }),
-        new asn1js.Integer({ name: (names.prime1 || "") }),
-        new asn1js.Integer({ name: (names.prime2 || "") }),
-        new asn1js.Integer({ name: (names.exponent1 || "") }),
-        new asn1js.Integer({ name: (names.exponent2 || "") }),
-        new asn1js.Integer({ name: (names.coefficient || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.modulus || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.publicExponent || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.privateExponent || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.prime1 || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.prime2 || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.exponent1 || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.exponent2 || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.coefficient || EMPTY_STRING) }),
         new asn1js.Sequence({
           optional: true,
           value: [
             new asn1js.Repeated({
-              name: (names.otherPrimeInfosName || ""),
+              name: (names.otherPrimeInfosName || EMPTY_STRING),
               value: OtherPrimeInfo.schema(names.otherPrimeInfo || {})
             })
           ]
@@ -279,14 +280,14 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
 
   public toJSON(): RSAPrivateKeyJson {
     const jwk: RSAPrivateKeyJson = {
-      n: pvutils.toBase64(pvutils.arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
-      e: pvutils.toBase64(pvutils.arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true),
-      d: pvutils.toBase64(pvutils.arrayBufferToString(this.privateExponent.valueBlock.valueHex), true, true, true),
-      p: pvutils.toBase64(pvutils.arrayBufferToString(this.prime1.valueBlock.valueHex), true, true, true),
-      q: pvutils.toBase64(pvutils.arrayBufferToString(this.prime2.valueBlock.valueHex), true, true, true),
-      dp: pvutils.toBase64(pvutils.arrayBufferToString(this.exponent1.valueBlock.valueHex), true, true, true),
-      dq: pvutils.toBase64(pvutils.arrayBufferToString(this.exponent2.valueBlock.valueHex), true, true, true),
-      qi: pvutils.toBase64(pvutils.arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true, true)
+      n: pvtsutils.Convert.ToBase64Url(this.modulus.valueBlock.valueHexView),
+      e: pvtsutils.Convert.ToBase64Url(this.publicExponent.valueBlock.valueHexView),
+      d: pvtsutils.Convert.ToBase64Url(this.privateExponent.valueBlock.valueHexView),
+      p: pvtsutils.Convert.ToBase64Url(this.prime1.valueBlock.valueHexView),
+      q: pvtsutils.Convert.ToBase64Url(this.prime2.valueBlock.valueHexView),
+      dp: pvtsutils.Convert.ToBase64Url(this.exponent1.valueBlock.valueHexView),
+      dq: pvtsutils.Convert.ToBase64Url(this.exponent2.valueBlock.valueHexView),
+      qi: pvtsutils.Convert.ToBase64Url(this.coefficient.valueBlock.valueHexView),
     };
     if (this.otherPrimeInfos) {
       jwk.oth = Array.from(this.otherPrimeInfos, o => o.toJSON());

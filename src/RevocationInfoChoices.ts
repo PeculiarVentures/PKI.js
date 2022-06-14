@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { CertificateRevocationList, CertificateRevocationListJson } from "./CertificateRevocationList";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { OtherRevocationInfoFormat, OtherRevocationInfoFormatJson } from "./OtherRevocationInfoFormat";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -86,10 +87,10 @@ export class RevocationInfoChoices extends PkiObject implements IRevocationInfoC
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Set({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.crls || ""),
+          name: (names.crls || EMPTY_STRING),
           value: new asn1js.Choice({
             value: [
               CertificateRevocationList.schema(),

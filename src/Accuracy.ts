@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -125,15 +126,15 @@ export class Accuracy extends PkiObject implements IAccuracy {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       optional: true,
       value: [
         new asn1js.Integer({
           optional: true,
-          name: (names.seconds || "")
+          name: (names.seconds || EMPTY_STRING)
         }),
         new asn1js.Primitive({
-          name: (names.millis || ""),
+          name: (names.millis || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -141,7 +142,7 @@ export class Accuracy extends PkiObject implements IAccuracy {
           }
         }),
         new asn1js.Primitive({
-          name: (names.micros || ""),
+          name: (names.micros || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -202,7 +203,7 @@ export class Accuracy extends PkiObject implements IAccuracy {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        valueHex: intMillis.valueBlock.valueHex
+        valueHex: intMillis.valueBlock.valueHexView
       }));
     }
 
@@ -214,7 +215,7 @@ export class Accuracy extends PkiObject implements IAccuracy {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 1 // [1]
         },
-        valueHex: intMicros.valueBlock.valueHex
+        valueHex: intMicros.valueBlock.valueHexView
       }));
     }
     //#endregion

@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { PublicKeyInfo, PublicKeyInfoJson } from "./PublicKeyInfo";
@@ -9,6 +10,7 @@ import * as Schema from "./Schema";
 import { CryptoEnginePublicKeyParams } from "./CryptoEngine/CryptoEngineInterface";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER } from "./constants";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -74,7 +76,7 @@ export interface CertificationRequestJson {
   subjectPublicKeyInfo: PublicKeyInfoJson | JsonWebKey;
   attributes?: AttributeJson[];
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signatureValue: Schema.AsnBitStringJson;
+  signatureValue: asn1js.BitStringJson;
 }
 
 export interface CertificationRequestInfoParameters {
@@ -230,7 +232,20 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
 
   public static override CLASS_NAME = "CertificationRequest";
 
-  public tbs!: ArrayBuffer;
+  public tbsView!: Uint8Array;
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public get tbs(): ArrayBuffer {
+    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+  }
+
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public set tbs(value: ArrayBuffer) {
+    this.tbsView = new Uint8Array(value);
+  }
   public version!: number;
   public subject!: RelativeDistinguishedNames;
   public subjectPublicKeyInfo!: PublicKeyInfo;
@@ -245,7 +260,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
   constructor(parameters: CertificationRequestParameters = {}) {
     super();
 
-    this.tbs = pvutils.getParametersValue(parameters, TBS, CertificationRequest.defaultValues(TBS));
+    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, CertificationRequest.defaultValues(TBS)));
     this.version = pvutils.getParametersValue(parameters, VERSION, CertificationRequest.defaultValues(VERSION));
     this.subject = pvutils.getParametersValue(parameters, SUBJECT, CertificationRequest.defaultValues(SUBJECT));
     this.subjectPublicKeyInfo = pvutils.getParametersValue(parameters, SPKI, CertificationRequest.defaultValues(SPKI));
@@ -275,7 +290,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case VERSION:
         return 0;
       case SUBJECT:
@@ -338,7 +353,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.tbs = asn1.result.CertificationRequestInfo.valueBeforeDecode;
+    this.tbsView = (asn1.result.CertificationRequestInfo as asn1js.Sequence).valueBeforeDecodeView;
     this.version = asn1.result[CSR_INFO_VERSION].valueBlock.valueDec;
     this.subject = new RelativeDistinguishedNames({ schema: asn1.result[CSR_INFO_SUBJECT] });
     this.subjectPublicKeyInfo = new PublicKeyInfo({ schema: asn1.result[CSR_INFO_SPKI] });
@@ -381,11 +396,11 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
     let tbsSchema;
 
     if (encodeFlag === false) {
-      if (this.tbs.byteLength === 0) { // No stored TBS part
+      if (this.tbsView.byteLength === 0) { // No stored TBS part
         return CertificationRequest.schema();
       }
 
-      const asn1 = asn1js.fromBER(this.tbs);
+      const asn1 = asn1js.fromBER(this.tbsView);
       AsnError.assert(asn1, "PKCS#10 Certificate Request");
 
       tbsSchema = asn1.result;
@@ -406,12 +421,12 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
 
   public toJSON(): CertificationRequestJson {
     const object: CertificationRequestJson = {
-      tbs: pvutils.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
+      tbs: pvtsutils.Convert.ToHex(this.tbsView),
       version: this.version,
       subject: this.subject.toJSON(),
       subjectPublicKeyInfo: this.subjectPublicKeyInfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson,
+      signatureValue: this.signatureValue.toJSON(),
     };
 
     if (ATTRIBUTES in this) {
@@ -425,15 +440,13 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
    * Makes signature for current certification request
    * @param privateKey WebCrypto private key
    * @param hashAlgorithm String representing current hashing algorithm
+   * @param crypto Crypto engine
    */
-  async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<void> {
-    //#region Initial checking
+  async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
+    // Initial checking
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
     }
-    //#endregion
-
-    const crypto = common.getCrypto(true);
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
     const signatureParams = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
@@ -442,30 +455,32 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
     //#endregion
 
     //#region Create TBS data for signing
-    this.tbs = this.encodeTBS().toBER(false);
+    this.tbsView = new Uint8Array(this.encodeTBS().toBER());
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await crypto.signWithPrivateKey(this.tbs, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(this.tbsView, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
 
   /**
    * Verify existing certification request signature
+   * @param crypto Crypto engine
    * @returns Returns `true` if signature value is valid, otherwise `false`
    */
-  public async verify(): Promise<boolean> {
-    return common.getCrypto(true).verifyWithPublicKey(this.tbs, this.signatureValue, this.subjectPublicKeyInfo, this.signatureAlgorithm);
+  public async verify(crypto = common.getCrypto(true)): Promise<boolean> {
+    return crypto.verifyWithPublicKey(this.tbsView, this.signatureValue, this.subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
   /**
    * Importing public key for current certificate request
    * @param parameters
+   * @param crypto Crypto engine
    * @returns WebCrypt public key
    */
-  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams): Promise<CryptoKey> {
-    return common.getCrypto(true).getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
+  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams, crypto = common.getCrypto(true)): Promise<CryptoKey> {
+    return crypto.getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
   }
 
 }

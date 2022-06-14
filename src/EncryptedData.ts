@@ -7,6 +7,7 @@ import * as Schema from "./Schema";
 import { ArgumentError, AsnError } from "./errors";
 import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const ENCRYPTED_CONTENT_INFO = "encryptedContentInfo";
@@ -41,6 +42,8 @@ export interface EncryptedDataJson {
 }
 
 export type EncryptedDataParameters = PkiObjectParameters & Partial<IEncryptedData>;
+
+export type EncryptedDataEncryptParams = Omit<CryptoEngineEncryptParams, "contentType">;
 
 /**
  * Represents the EncryptedData structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
@@ -170,9 +173,9 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
         EncryptedContentInfo.schema(names.encryptedContentInfo || {}),
         new asn1js.Constructed({
           optional: true,
@@ -182,7 +185,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
           },
           value: [
             new asn1js.Repeated({
-              name: (names.unprotectedAttrs || ""),
+              name: (names.unprotectedAttrs || EMPTY_STRING),
               value: Attribute.schema()
             })
           ]
@@ -261,7 +264,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
    * Creates a new CMS Encrypted Data content
    * @param parameters Parameters necessary for encryption
    */
-  public async encrypt(parameters: Omit<CryptoEngineEncryptParams, "contentType">): Promise<void> {
+  public async encrypt(parameters: EncryptedDataEncryptParams): Promise<void> {
     //#region Check for input parameters
     ArgumentError.assert(parameters, "parameters", "object");
     //#endregion
@@ -279,23 +282,22 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
   /**
    * Creates a new CMS Encrypted Data content
    * @param parameters Parameters necessary for encryption
+   * @param crypto Crypto engine
    * @returns Returns decrypted raw data
    */
   async decrypt(parameters: {
     password: ArrayBuffer;
-  }): Promise<ArrayBuffer> {
-    //#region Check for input parameters
+  }, crypto = common.getCrypto(true)): Promise<ArrayBuffer> {
+    // Check for input parameters
     ArgumentError.assert(parameters, "parameters", "object");
-    //#endregion
 
-    //#region Set ENCRYPTED_CONTENT_INFO value
+    // Set ENCRYPTED_CONTENT_INFO value
     const decryptParams = {
       ...parameters,
       encryptedContentInfo: this.encryptedContentInfo,
     };
-    //#endregion
 
-    return common.getCrypto(true).decryptEncryptedContentInfo(decryptParams);
+    return crypto.decryptEncryptedContentInfo(decryptParams);
   }
 
 }

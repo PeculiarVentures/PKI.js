@@ -4,6 +4,7 @@ import * as Schema from "./Schema";
 import { ExtensionParsedValue, ExtensionValueFactory } from "./ExtensionValueFactory";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const EXTN_ID = "extnID";
 const CRITICAL = "critical";
@@ -39,7 +40,7 @@ export type ExtensionSchema = Schema.SchemaParameters<{
 
 export interface ExtensionJson {
   extnID: string;
-  extnValue: Schema.AsnOctetStringJson;
+  extnValue: asn1js.OctetStringJson;
   critical?: boolean;
   parsedValue?: any;
 }
@@ -54,7 +55,20 @@ export class Extension extends PkiObject implements IExtension {
   public extnID!: string;
   public critical!: boolean;
   public extnValue!: asn1js.OctetString;
-  public parsedValue?: ExtensionParsedValue;
+
+  private _parsedValue?: ExtensionParsedValue | null;
+  public get parsedValue(): ExtensionParsedValue | undefined {
+    if (this._parsedValue === undefined) {
+      // Get PARSED_VALUE for well-known extensions
+      const parsedValue = ExtensionValueFactory.fromBER(this.extnID, this.extnValue.valueBlock.valueHexView);
+      this._parsedValue = parsedValue;
+    }
+
+    return this._parsedValue || undefined;
+  }
+  public set parsedValue(value: ExtensionParsedValue | undefined) {
+    this._parsedValue = value;
+  }
 
   /**
    * Initializes a new instance of the {@link Extension} class
@@ -91,7 +105,7 @@ export class Extension extends PkiObject implements IExtension {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case EXTN_ID:
-        return "";
+        return EMPTY_STRING;
       case CRITICAL:
         return false;
       case EXTN_VALUE:
@@ -118,14 +132,14 @@ export class Extension extends PkiObject implements IExtension {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.extnID || "") }),
+        new asn1js.ObjectIdentifier({ name: (names.extnID || EMPTY_STRING) }),
         new asn1js.Boolean({
-          name: (names.critical || ""),
+          name: (names.critical || EMPTY_STRING),
           optional: true
         }),
-        new asn1js.OctetString({ name: (names.extnValue || "") })
+        new asn1js.OctetString({ name: (names.extnValue || EMPTY_STRING) })
       ]
     }));
   }
@@ -153,12 +167,6 @@ export class Extension extends PkiObject implements IExtension {
       this.critical = asn1.result.critical.valueBlock.value;
     }
     this.extnValue = asn1.result.extnValue;
-
-    // Get PARSED_VALUE for well-known extensions
-    const parsedValue = ExtensionValueFactory.fromBER(this.extnID, this.extnValue.valueBlock.valueHex);
-    if (parsedValue) {
-      this.parsedValue = parsedValue;
-    }
   }
 
   public toSchema(): asn1js.Sequence {
@@ -182,7 +190,7 @@ export class Extension extends PkiObject implements IExtension {
   public toJSON(): ExtensionJson {
     const object: ExtensionJson = {
       extnID: this.extnID,
-      extnValue: this.extnValue.toJSON() as Schema.AsnOctetStringJson,
+      extnValue: this.extnValue.toJSON(),
     };
 
     if (this.critical !== Extension.defaultValues(CRITICAL)) {

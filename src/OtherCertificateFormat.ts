@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -56,7 +57,7 @@ export class OtherCertificateFormat extends PkiObject implements IOtherCertifica
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case OTHER_CERT_FORMAT:
-        return "";
+        return EMPTY_STRING;
       case OTHER_CERT:
         return new asn1js.Any();
       default:
@@ -80,7 +81,7 @@ export class OtherCertificateFormat extends PkiObject implements IOtherCertifica
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.ObjectIdentifier({ name: (names.otherCertFormat || OTHER_CERT_FORMAT) }),
         new asn1js.Any({ name: (names.otherCert || OTHER_CERT) })

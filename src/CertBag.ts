@@ -6,6 +6,7 @@ import * as Schema from "./Schema";
 import { id_CertBag_AttributeCertificate, id_CertBag_SDSICertificate, id_CertBag_X509Certificate } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_STRING } from "./constants";
 
 const CERT_ID = "certId";
 const CERT_VALUE = "certValue";
@@ -17,7 +18,7 @@ const CLEAR_PROPS = [
 
 export interface ICertBag {
   certId: string;
-  certValue: any;
+  certValue: asn1js.OctetString | PkiObject;
   parsedValue: any;
 }
 
@@ -36,7 +37,7 @@ export class CertBag extends PkiObject implements ICertBag {
   public static override CLASS_NAME = "CertBag";
 
   public certId!: string;
-  public certValue: any;
+  public certValue: PkiObject | asn1js.OctetString;
   public parsedValue: any;
 
   /**
@@ -68,7 +69,7 @@ export class CertBag extends PkiObject implements ICertBag {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CERT_ID:
-        return "";
+        return EMPTY_STRING;
       case CERT_VALUE:
         return (new asn1js.Any());
       case PARSED_VALUE:
@@ -86,7 +87,7 @@ export class CertBag extends PkiObject implements ICertBag {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case CERT_ID:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case CERT_VALUE:
         return (memberValue instanceof asn1js.Any);
       case PARSED_VALUE:
@@ -113,7 +114,7 @@ export class CertBag extends PkiObject implements ICertBag {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.ObjectIdentifier({ name: (names.id || "id") }),
         new asn1js.Constructed({
@@ -145,9 +146,9 @@ export class CertBag extends PkiObject implements ICertBag {
 
     //#region Get internal properties from parsed schema
     this.certId = asn1.result.certId.valueBlock.toString();
-    this.certValue = asn1.result.certValue;
+    this.certValue = asn1.result.certValue as asn1js.OctetString;
 
-    const certValueHex = this.certValue.valueBlock.valueHex;
+    const certValueHex = this.certValue.valueBlock.valueHexView;
     switch (this.certId) {
       case id_CertBag_X509Certificate: // x509Certificate
         {

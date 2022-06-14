@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -90,10 +91,10 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Primitive({
-          name: (names.notBefore || ""),
+          name: (names.notBefore || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -101,7 +102,7 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
           }
         }),
         new asn1js.Primitive({
-          name: (names.notAfter || ""),
+          name: (names.notAfter || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -151,7 +152,7 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        valueHex: (new asn1js.GeneralizedTime({ valueDate: this.notBefore })).valueBlock.valueHex
+        valueHex: (new asn1js.GeneralizedTime({ valueDate: this.notBefore })).valueBlock.valueHexView
       }));
     }
 
@@ -161,7 +162,7 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 1 // [1]
         },
-        valueHex: (new asn1js.GeneralizedTime({ valueDate: this.notAfter })).valueBlock.valueHex
+        valueHex: (new asn1js.GeneralizedTime({ valueDate: this.notAfter })).valueBlock.valueHexView
       }));
     }
     //#endregion

@@ -5,6 +5,7 @@ import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 import * as common from "./common";
+import { EMPTY_STRING } from "./constants";
 
 export const HASH_ALGORITHM = "hashAlgorithm";
 export const HASHED_MESSAGE = "hashedMessage";
@@ -20,7 +21,7 @@ export interface IMessageImprint {
 
 export interface MessageImprintJson {
   hashAlgorithm: AlgorithmIdentifierJson;
-  hashedMessage: Schema.AsnOctetStringJson;
+  hashedMessage: asn1js.OctetStringJson;
 }
 
 export type MessageImprintParameters = PkiObjectParameters & Partial<IMessageImprint>;
@@ -41,12 +42,11 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
    * Creates and fills a new instance of {@link MessageImprint}
    * @param hashAlgorithm
    * @param message
+   * @param crypto Crypto engine
    * @returns New instance of {@link MessageImprint}
    */
-  public static async create(hashAlgorithm: string, message: BufferSource): Promise<MessageImprint> {
-    const crypto = common.getCrypto(true);
-
-    const hashAlgorithmOID = common.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
+  public static async create(hashAlgorithm: string, message: BufferSource, crypto = common.getCrypto(true)): Promise<MessageImprint> {
+    const hashAlgorithmOID = crypto.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
 
     const hashedMessage = await crypto.digest(hashAlgorithm, message);
 
@@ -105,7 +105,7 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case HASH_ALGORITHM:
-        return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));
+        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
       case HASHED_MESSAGE:
         return (memberValue.isEqual(MessageImprint.defaultValues(memberName)) === 0);
       default:
@@ -126,10 +126,10 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AlgorithmIdentifier.schema(names.hashAlgorithm || {}),
-        new asn1js.OctetString({ name: (names.hashedMessage || "") })
+        new asn1js.OctetString({ name: (names.hashedMessage || EMPTY_STRING) })
       ]
     }));
   }
@@ -173,7 +173,7 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
   public toJSON(): MessageImprintJson {
     return {
       hashAlgorithm: this.hashAlgorithm.toJSON(),
-      hashedMessage: this.hashedMessage.toJSON() as Schema.AsnOctetStringJson,
+      hashedMessage: this.hashedMessage.toJSON(),
     };
   }
 

@@ -1,8 +1,8 @@
-import * as pvutils from "pvutils";
 import * as pkijs from "../../src";
 import * as utils from "../../test/utils";
 import * as example from "../../test/tspRespComplexExample";
 import * as common from "../common";
+import { Convert } from "pvtsutils";
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-V1_5";
@@ -99,7 +99,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
   if (!signedSimpl.encapContentInfo.eContent) {
     throw new Error("'signedSimpl.encapContentInfo.eContent' is empty");
   }
-  const tstInfoSimpl = pkijs.TSTInfo.fromBER(signedSimpl.encapContentInfo.eContent.valueBlock.valueHex);
+  const tstInfoSimpl = pkijs.TSTInfo.fromBER(signedSimpl.encapContentInfo.eContent.valueBlock.valueHexView);
   //#endregion
 
   //#region Put information about policy
@@ -124,11 +124,11 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
   const cell0 = row.insertCell(0);
   cell0.innerHTML = hashAlgorithm;
   const cell1 = row.insertCell(1);
-  cell1.innerHTML = pvutils.bufferToHexCodes(tstInfoSimpl.messageImprint.hashedMessage.valueBlock.valueHex);
+  cell1.innerHTML = Convert.ToHex(tstInfoSimpl.messageImprint.hashedMessage.valueBlock.valueHexView);
   //#endregion
 
   //#region Put information about TST info serial number
-  $respSerial.innerHTML = pvutils.bufferToHexCodes(tstInfoSimpl.serialNumber.valueBlock.valueHex);
+  $respSerial.innerHTML = Convert.ToHex(tstInfoSimpl.serialNumber.valueBlock.valueHexView);
   //#endregion
 
   //#region Put information about the time when TST info was generated
@@ -158,7 +158,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
 
   //#region Put information about TST info nonce value
   if (tstInfoSimpl.nonce) {
-    $respNonce.innerHTML = pvutils.bufferToHexCodes(tstInfoSimpl.nonce.valueBlock.valueHex);
+    $respNonce.innerHTML = Convert.ToHex(tstInfoSimpl.nonce.valueBlock.valueHexView);
     $respNon.style.display = "block";
   }
   //#endregion

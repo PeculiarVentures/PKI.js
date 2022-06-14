@@ -1,13 +1,14 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { EncryptedData } from "./EncryptedData";
+import { EncryptedData, EncryptedDataEncryptParams } from "./EncryptedData";
 import { EncryptedContentInfo } from "./EncryptedContentInfo";
 import { PrivateKeyInfo } from "./PrivateKeyInfo";
 import * as Schema from "./Schema";
-import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_STRING } from "./constants";
+import * as common from "./common";
 
 const ENCRYPTION_ALGORITHM = "encryptionAlgorithm";
 const ENCRYPTED_DATA = "encryptedData";
@@ -27,8 +28,10 @@ export type PKCS8ShroudedKeyBagParameters = PkiObjectParameters & Partial<IPKCS8
 
 export interface PKCS8ShroudedKeyBagJson {
   encryptionAlgorithm: AlgorithmIdentifierJson;
-  encryptedData: Schema.AsnOctetStringJson;
+  encryptedData: asn1js.OctetStringJson;
 }
+
+type PKCS8ShroudedKeyBagMakeInternalValuesParams = Omit<EncryptedDataEncryptParams, "contentToEncrypt">;
 
 /**
  * Represents the PKCS8ShroudedKeyBag structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
@@ -126,7 +129,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AlgorithmIdentifier.schema(names.encryptionAlgorithm || {
           names: {
@@ -185,13 +188,13 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
   public toJSON(): PKCS8ShroudedKeyBagJson {
     return {
       encryptionAlgorithm: this.encryptionAlgorithm.toJSON(),
-      encryptedData: this.encryptedData.toJSON() as Schema.AsnOctetStringJson,
+      encryptedData: this.encryptedData.toJSON(),
     };
   }
 
   protected async parseInternalValues(parameters: {
     password: ArrayBuffer;
-  }) {
+  }, crypto = common.getCrypto(true)) {
     //#region Initial variables
     const cmsEncrypted = new EncryptedData({
       encryptedContentInfo: new EncryptedContentInfo({
@@ -202,7 +205,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
     //#endregion
 
     //#region Decrypt internal data
-    const decryptedData = await cmsEncrypted.decrypt(parameters);
+    const decryptedData = await cmsEncrypted.decrypt(parameters, crypto);
 
     //#endregion
 
@@ -212,7 +215,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
     //#endregion
   }
 
-  protected async makeInternalValues(parameters: Omit<CryptoEngineEncryptParams, "contentToEncrypt">): Promise<void> {
+  public async makeInternalValues(parameters: PKCS8ShroudedKeyBagMakeInternalValuesParams): Promise<void> {
     //#region Check that we do have PARSED_VALUE
     if (!this.parsedValue) {
       throw new Error("Please initialize \"parsedValue\" first");
@@ -224,7 +227,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
     //#endregion
 
     //#region Encrypt internal data
-    const encryptParams: CryptoEngineEncryptParams = {
+    const encryptParams: EncryptedDataEncryptParams = {
       ...parameters,
       contentToEncrypt: this.parsedValue.toSchema().toBER(false),
     };

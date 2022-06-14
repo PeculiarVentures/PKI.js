@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import { EMPTY_STRING } from "../constants";
 import { AsnError } from "../errors";
 import { PkiObject, PkiObjectParameters } from "../PkiObject";
 import * as Schema from "../Schema";
@@ -26,10 +27,10 @@ export interface IObjectDigestInfo {
 export type ObjectDigestInfoParameters = PkiObjectParameters & Partial<IObjectDigestInfo>;
 
 export interface ObjectDigestInfoJson {
-  digestedObjectType: Schema.AsnEnumeratedJson;
-  otherObjectTypeID?: Schema.AsnObjectIdentifierJson;
+  digestedObjectType: asn1js.EnumeratedJson;
+  otherObjectTypeID?: asn1js.ObjectIdentifierJson;
   digestAlgorithm: AlgorithmIdentifierJson;
-  objectDigest: Schema.AsnBitStringJson;
+  objectDigest: asn1js.BitStringJson;
 }
 
 /**
@@ -113,15 +114,15 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Enumerated({ name: (names.digestedObjectType || "") }),
+        new asn1js.Enumerated({ name: (names.digestedObjectType || EMPTY_STRING) }),
         new asn1js.ObjectIdentifier({
           optional: true,
-          name: (names.otherObjectTypeID || "")
+          name: (names.otherObjectTypeID || EMPTY_STRING)
         }),
         AlgorithmIdentifier.schema(names.digestAlgorithm || {}),
-        new asn1js.BitString({ name: (names.objectDigest || "") }),
+        new asn1js.BitString({ name: (names.objectDigest || EMPTY_STRING) }),
       ]
     }));
   }
@@ -177,13 +178,13 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
 
   public toJSON(): ObjectDigestInfoJson {
     const result: ObjectDigestInfoJson = {
-      digestedObjectType: this.digestedObjectType.toJSON() as Schema.AsnEnumeratedJson,
+      digestedObjectType: this.digestedObjectType.toJSON(),
       digestAlgorithm: this.digestAlgorithm.toJSON(),
-      objectDigest: this.objectDigest.toJSON() as Schema.AsnBitStringJson,
+      objectDigest: this.objectDigest.toJSON(),
     };
 
     if (this.otherObjectTypeID) {
-      result.otherObjectTypeID = this.otherObjectTypeID.toJSON() as Schema.AsnObjectIdentifierJson;
+      result.otherObjectTypeID = this.otherObjectTypeID.toJSON();
     }
 
     return result;

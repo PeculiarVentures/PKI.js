@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -116,17 +117,17 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Choice({
           value: [
-            new asn1js.OctetString({ name: (names.saltPrimitive || "") }),
+            new asn1js.OctetString({ name: (names.saltPrimitive || EMPTY_STRING) }),
             AlgorithmIdentifier.schema(names.saltConstructed || {})
           ]
         }),
-        new asn1js.Integer({ name: (names.iterationCount || "") }),
+        new asn1js.Integer({ name: (names.iterationCount || EMPTY_STRING) }),
         new asn1js.Integer({
-          name: (names.keyLength || ""),
+          name: (names.keyLength || EMPTY_STRING),
           optional: true
         }),
         AlgorithmIdentifier.schema(names.prf || {

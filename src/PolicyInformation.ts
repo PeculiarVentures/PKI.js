@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { PolicyQualifierInfo, PolicyQualifierInfoJson } from "./PolicyQualifierInfo";
@@ -60,7 +61,7 @@ export class PolicyInformation extends PkiObject implements IPolicyInformation {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case POLICY_IDENTIFIER:
-        return "";
+        return EMPTY_STRING;
       case POLICY_QUALIFIERS:
         return [];
       default:
@@ -84,14 +85,14 @@ export class PolicyInformation extends PkiObject implements IPolicyInformation {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.policyIdentifier || "") }),
+        new asn1js.ObjectIdentifier({ name: (names.policyIdentifier || EMPTY_STRING) }),
         new asn1js.Sequence({
           optional: true,
           value: [
             new asn1js.Repeated({
-              name: (names.policyQualifiers || ""),
+              name: (names.policyQualifiers || EMPTY_STRING),
               value: PolicyQualifierInfo.schema()
             })
           ]

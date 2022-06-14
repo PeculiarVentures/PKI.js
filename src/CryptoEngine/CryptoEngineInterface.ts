@@ -38,9 +38,14 @@ export interface CryptoEnginePublicKeyParams {
   algorithm: CryptoEngineAlgorithmParams;
 }
 
+
+export type ContentEncryptionAesCbcParams = AesCbcParams & AesDerivedKeyParams;
+export type ContentEncryptionAesGcmParams = AesGcmParams & AesDerivedKeyParams;
+export type ContentEncryptionAlgorithm = ContentEncryptionAesCbcParams | ContentEncryptionAesGcmParams;
+
 export interface CryptoEngineEncryptParams {
   password: ArrayBuffer;
-  contentEncryptionAlgorithm: Algorithm;
+  contentEncryptionAlgorithm: ContentEncryptionAlgorithm;
   hmacHashAlgorithm: string;
   iterationCount: number;
   contentToEncrypt: ArrayBuffer;
@@ -130,7 +135,7 @@ export interface ICryptoEngine extends SubtleCrypto {
    * @param privateKey Private key to use
    * @param parameters Parameters for used algorithm
    */
-  signWithPrivateKey(data: ArrayBuffer, privateKey: CryptoKey, parameters: CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer>;
+  signWithPrivateKey(data: BufferSource, privateKey: CryptoKey, parameters: CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer>;
 
   /**
    * Verify data with the public key
@@ -140,7 +145,7 @@ export interface ICryptoEngine extends SubtleCrypto {
    * @param signatureAlgorithm Signature algorithm
    * @param shaAlgorithm Hash algorithm
    */
-  verifyWithPublicKey(data: ArrayBuffer, signature: asn1js.BitString | asn1js.OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean>;
+  verifyWithPublicKey(data: BufferSource, signature: asn1js.BitString | asn1js.OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean>;
 
   getPublicKey(publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, parameters?: CryptoEnginePublicKeyParams): Promise<CryptoKey>;
 
@@ -167,7 +172,10 @@ export interface ICryptoEngine extends SubtleCrypto {
 export interface CryptoEngineParameters {
   name?: string;
   crypto: Crypto;
-  subtle: SubtleCrypto;
+  /**
+   * @deprecated
+   */
+  subtle?: SubtleCrypto;
 }
 
 export interface CryptoEngineConstructor {

@@ -7,6 +7,7 @@ import { RSAPublicKey } from "./RSAPublicKey";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const ALGORITHM = "algorithm";
 const SUBJECT_PUBLIC_KEY = "subjectPublicKey";
@@ -30,7 +31,7 @@ export type PublicKeyInfoParameters = PkiObjectParameters & Partial<IPublicKeyIn
 
 export interface PublicKeyInfoJson {
   algorithm: AlgorithmIdentifierJson;
-  subjectPublicKey: Schema.AsnBitStringJson;
+  subjectPublicKey: asn1js.BitStringJson;
 }
 
 export type PublicKeyInfoSchema = Schema.SchemaParameters<{
@@ -47,7 +48,50 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
 
   public algorithm!: AlgorithmIdentifier;
   public subjectPublicKey!: asn1js.BitString;
-  public parsedKey?: ECPublicKey | RSAPublicKey;
+  private _parsedKey?: ECPublicKey | RSAPublicKey | null;
+  public get parsedKey(): ECPublicKey | RSAPublicKey | undefined {
+    if (this._parsedKey === undefined) {
+      switch (this.algorithm.algorithmId) {
+        // TODO Use fabric
+        case "1.2.840.10045.2.1": // ECDSA
+          if ("algorithmParams" in this.algorithm) {
+            if (this.algorithm.algorithmParams.constructor.blockName() === asn1js.ObjectIdentifier.blockName()) {
+              try {
+                this._parsedKey = new ECPublicKey({
+                  namedCurve: this.algorithm.algorithmParams.valueBlock.toString(),
+                  schema: this.subjectPublicKey.valueBlock.valueHexView
+                });
+              }
+              catch (ex) {
+                // nothing
+              } // Could be a problems during recognition of internal public key data here. Let's ignore them.
+            }
+          }
+          break;
+        case "1.2.840.113549.1.1.1": // RSA
+          {
+            const publicKeyASN1 = asn1js.fromBER(this.subjectPublicKey.valueBlock.valueHexView);
+            if (publicKeyASN1.offset !== -1) {
+              try {
+                this._parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
+              }
+              catch (ex) {
+                // nothing
+              } // Could be a problems during recognition of internal public key data here. Let's ignore them.
+            }
+          }
+          break;
+        default:
+      }
+
+      this._parsedKey ||= null;
+    }
+
+    return this._parsedKey || undefined;
+  }
+  public set parsedKey(value: ECPublicKey | RSAPublicKey | undefined) {
+    this._parsedKey = value;
+  }
 
   /**
    * Initializes a new instance of the {@link PublicKeyInfo} class
@@ -103,10 +147,10 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AlgorithmIdentifier.schema(names.algorithm || {}),
-        new asn1js.BitString({ name: (names.subjectPublicKey || "") })
+        new asn1js.BitString({ name: (names.subjectPublicKey || EMPTY_STRING) })
       ]
     }));
   }
@@ -134,39 +178,6 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
     //#region Get internal properties from parsed schema
     this.algorithm = new AlgorithmIdentifier({ schema: asn1.result.algorithm });
     this.subjectPublicKey = asn1.result.subjectPublicKey;
-
-    switch (this.algorithm.algorithmId) {
-      // TODO Use fabric
-      case "1.2.840.10045.2.1": // ECDSA
-        if ("algorithmParams" in this.algorithm) {
-          if (this.algorithm.algorithmParams.constructor.blockName() === asn1js.ObjectIdentifier.blockName()) {
-            try {
-              this.parsedKey = new ECPublicKey({
-                namedCurve: this.algorithm.algorithmParams.valueBlock.toString(),
-                schema: this.subjectPublicKey.valueBlock.valueHex
-              });
-            }
-            catch (ex) {
-              // nothing
-            } // Could be a problems during recognition of internal public key data here. Let's ignore them.
-          }
-        }
-        break;
-      case "1.2.840.113549.1.1.1": // RSA
-        {
-          const publicKeyASN1 = asn1js.fromBER(this.subjectPublicKey.valueBlock.valueHex);
-          if (publicKeyASN1.offset !== -1) {
-            try {
-              this.parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
-            }
-            catch (ex) {
-              // nothing
-            } // Could be a problems during recognition of internal public key data here. Let's ignore them.
-          }
-        }
-        break;
-      default:
-    }
     //#endregion
   }
 
@@ -184,7 +195,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
     if (!this.parsedKey) {
       return {
         algorithm: this.algorithm.toJSON(),
-        subjectPublicKey: this.subjectPublicKey.toJSON() as Schema.AsnBitStringJson,
+        subjectPublicKey: this.subjectPublicKey.toJSON(),
       };
     }
     //#endregion
@@ -240,13 +251,12 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
     }
   }
 
-  public async importKey(publicKey: CryptoKey): Promise<void> {
+  public async importKey(publicKey: CryptoKey, crypto = common.getCrypto(true)): Promise<void> {
     try {
       if (!publicKey) {
         throw new Error("Need to provide publicKey input parameter");
       }
 
-      const crypto = common.getCrypto(true);
       const exportedKey = await crypto.exportKey("spki", publicKey);
       const asn1 = asn1js.fromBER(exportedKey);
       try {

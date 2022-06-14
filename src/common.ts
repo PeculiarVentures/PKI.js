@@ -1,22 +1,63 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import { EMPTY_BUFFER } from "./constants";
 import type { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
 import { ArgumentError } from "./errors";
 
 //#region Crypto engine related function
 export interface GlobalCryptoEngine {
   name: string;
-  crypto: Crypto | null;
-  subtle: ICryptoEngine | null;
+  crypto: ICryptoEngine | null;
 }
 export let engine: GlobalCryptoEngine = {
   name: "none",
   crypto: null,
-  subtle: null
 };
 
-export function setEngine(name: string, crypto: Crypto | null = null, subtle: null | ICryptoEngine = null): void {
+function isCryptoEngine(engine: unknown): engine is ICryptoEngine {
+  return engine
+    && typeof engine === "object"
+    && "crypto" in engine
+    ? true
+    : false;
+}
+
+/**
+ * Sets global crypto engine
+ * @param name Name of the crypto engine
+ * @param crypto
+ * @param subtle
+ * @deprecated Since version 3.0.0
+ */
+export function setEngine(name: string, crypto: ICryptoEngine | Crypto, subtle: ICryptoEngine | SubtleCrypto): void;
+/**
+ * Sets global crypto engine
+ * @param name Name of the crypto engine
+ * @param crypto Crypto engine
+ * @since 3.0.0
+ */
+export function setEngine(name: string, crypto?: ICryptoEngine): void;
+export function setEngine(name: string, ...args: any[]): void {
+  let crypto: ICryptoEngine | null = null;
+  if (args.length === 1) {
+    // v3.0.0 implementation
+    crypto = args[0];
+  } else {
+    // prev implementation
+    const cryptoArg = args[0];
+    const subtleArg = args[1];
+    if (isCryptoEngine(subtleArg)) {
+      crypto = subtleArg;
+    } if (isCryptoEngine(cryptoArg)) {
+      crypto = cryptoArg;
+    } if ("subtle" in cryptoArg && "getRandomValues" in cryptoArg) {
+      crypto = new CryptoEngine({
+        crypto: cryptoArg,
+      });
+    }
+  }
+
   //#region We are in Node
   if ((typeof process !== "undefined") && ("pid" in process) && (typeof global !== "undefined") && (typeof window === "undefined")) {
     if (typeof (global as any)[process.pid] === "undefined") {
@@ -39,8 +80,7 @@ export function setEngine(name: string, crypto: Crypto | null = null, subtle: nu
 
     (global as any)[process.pid].pkijs.engine = {
       name: name,
-      crypto: crypto,
-      subtle: subtle
+      crypto,
     };
   }
   //#endregion
@@ -49,8 +89,7 @@ export function setEngine(name: string, crypto: Crypto | null = null, subtle: nu
     if (engine.name !== name) {
       engine = {
         name: name,
-        crypto: crypto,
-        subtle: subtle
+        crypto,
       };
     }
   }
@@ -95,11 +134,11 @@ export function getCrypto(safety: true): ICryptoEngine;
 export function getCrypto(safety = false): ICryptoEngine | null {
   const _engine = getEngine();
 
-  if (!_engine.subtle && safety) {
+  if (!_engine.crypto && safety) {
     throw new Error("Unable to create WebCrypto object");
   }
 
-  return _engine.subtle;
+  return _engine.crypto;
 }
 
 /**
@@ -138,7 +177,7 @@ export function getAlgorithmParameters(algorithmName: string, operation: CryptoE
 export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuffer {
   //#region Initial check for correct length
   if ((signatureBuffer.byteLength % 2) !== 0)
-    return new ArrayBuffer(0);
+    return EMPTY_BUFFER;
   //#endregion
 
   //#region Initial variables
@@ -168,92 +207,26 @@ export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuff
 /**
  * Create a single ArrayBuffer from CMS ECDSA signature
  * @param cmsSignature ASN.1 SEQUENCE contains CMS ECDSA signature
- * @returns {ArrayBuffer}
+ * @param pointSize Size of EC point. Use {@link ECNamedCurves.find} to get correct point size
+ * @returns WebCrypto signature
  */
-export function createECDSASignatureFromCMS(cmsSignature: asn1js.Sequence) {
-  //#region Check input variables
-  if ((cmsSignature instanceof asn1js.Sequence) === false)
-    return new ArrayBuffer(0);
+export function createECDSASignatureFromCMS(cmsSignature: asn1js.AsnType, pointSize: number): ArrayBuffer {
+  // Check input variables
+  if (!(cmsSignature instanceof asn1js.Sequence
+    && cmsSignature.valueBlock.value.length === 2
+    && cmsSignature.valueBlock.value[0] instanceof asn1js.Integer
+    && cmsSignature.valueBlock.value[1] instanceof asn1js.Integer))
+    return EMPTY_BUFFER;
 
-  if (cmsSignature.valueBlock.value.length !== 2)
-    return new ArrayBuffer(0);
+  const rValueView = cmsSignature.valueBlock.value[0].convertFromDER().valueBlock.valueHexView;
+  const sValueView = cmsSignature.valueBlock.value[1].convertFromDER().valueBlock.valueHexView;
 
-  if ((cmsSignature.valueBlock.value[0] instanceof asn1js.Integer) === false)
-    return new ArrayBuffer(0);
+  const res = new Uint8Array(pointSize * 2);
 
-  if ((cmsSignature.valueBlock.value[1] instanceof asn1js.Integer) === false)
-    return new ArrayBuffer(0);
-  //#endregion
+  res.set(rValueView, pointSize - rValueView.byteLength);
+  res.set(sValueView, (2 * pointSize) - sValueView.byteLength);
 
-  const rValue = cmsSignature.valueBlock.value[0].convertFromDER();
-  const sValue = cmsSignature.valueBlock.value[1].convertFromDER();
-
-  //#region Check the lengths of two parts are equal
-  switch (true) {
-    case (rValue.valueBlock.valueHex.byteLength < sValue.valueBlock.valueHex.byteLength):
-      {
-        if ((sValue.valueBlock.valueHex.byteLength - rValue.valueBlock.valueHex.byteLength) !== 1)
-          throw new Error("Incorrect DER integer decoding");
-
-        const correctedLength = sValue.valueBlock.valueHex.byteLength;
-
-        const rValueView = new Uint8Array(rValue.valueBlock.valueHex);
-
-        const rValueBufferCorrected = new ArrayBuffer(correctedLength);
-        const rValueViewCorrected = new Uint8Array(rValueBufferCorrected);
-
-        rValueViewCorrected.set(rValueView, 1);
-        rValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
-
-        return pvutils.utilConcatBuf(rValueBufferCorrected, sValue.valueBlock.valueHex);
-      }
-    case (rValue.valueBlock.valueHex.byteLength > sValue.valueBlock.valueHex.byteLength):
-      {
-        if ((rValue.valueBlock.valueHex.byteLength - sValue.valueBlock.valueHex.byteLength) !== 1)
-          throw new Error("Incorrect DER integer decoding");
-
-        const correctedLength = rValue.valueBlock.valueHex.byteLength;
-
-        const sValueView = new Uint8Array(sValue.valueBlock.valueHex);
-
-        const sValueBufferCorrected = new ArrayBuffer(correctedLength);
-        const sValueViewCorrected = new Uint8Array(sValueBufferCorrected);
-
-        sValueViewCorrected.set(sValueView, 1);
-        sValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
-
-        return pvutils.utilConcatBuf(rValue.valueBlock.valueHex, sValueBufferCorrected);
-      }
-    default:
-      {
-        //#region In case we have equal length and the length is not even with 2
-        if (rValue.valueBlock.valueHex.byteLength % 2) {
-          const correctedLength = (rValue.valueBlock.valueHex.byteLength + 1);
-
-          const rValueView = new Uint8Array(rValue.valueBlock.valueHex);
-
-          const rValueBufferCorrected = new ArrayBuffer(correctedLength);
-          const rValueViewCorrected = new Uint8Array(rValueBufferCorrected);
-
-          rValueViewCorrected.set(rValueView, 1);
-          rValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
-
-          const sValueView = new Uint8Array(sValue.valueBlock.valueHex);
-
-          const sValueBufferCorrected = new ArrayBuffer(correctedLength);
-          const sValueViewCorrected = new Uint8Array(sValueBufferCorrected);
-
-          sValueViewCorrected.set(sValueView, 1);
-          sValueViewCorrected[0] = 0x00; // In order to be sure we do not have any garbage here
-
-          return pvutils.utilConcatBuf(rValueBufferCorrected, sValueBufferCorrected);
-        }
-        //#endregion
-      }
-  }
-  //#endregion
-
-  return pvutils.utilConcatBuf(rValue.valueBlock.valueHex, sValue.valueBlock.valueHex);
+  return res.buffer;
 }
 
 /**
@@ -283,8 +256,9 @@ export function getHashAlgorithm(signatureAlgorithm: AlgorithmIdentifier): strin
  * @param zBuffer ArrayBuffer containing ECDH shared secret to derive from
  * @param Counter
  * @param SharedInfo Usually DER encoded "ECC_CMS_SharedInfo" structure
+ * @param crypto Crypto engine
  */
-export async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer, Counter: number, SharedInfo: ArrayBuffer): Promise<{ counter: number; result: ArrayBuffer; }> {
+async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer, Counter: number, SharedInfo: ArrayBuffer, crypto: ICryptoEngine): Promise<{ counter: number; result: ArrayBuffer; }> {
   //#region Check of input parameters
   switch (hashFunction.toUpperCase()) {
     case "SHA-1":
@@ -313,11 +287,7 @@ export async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer,
   counterView[2] = 0x00;
   counterView[3] = Counter;
 
-  let combinedBuffer = new ArrayBuffer(0);
-  //#endregion
-
-  //#region Get a "crypto" extension
-  const crypto = getCrypto(true);
+  let combinedBuffer = EMPTY_BUFFER;
   //#endregion
 
   //#region Create a combined ArrayBuffer for digesting
@@ -344,8 +314,9 @@ export async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer,
  * @param Zbuffer ArrayBuffer containing ECDH shared secret to derive from
  * @param keydatalen Length (!!! in BITS !!!) of used kew derivation function
  * @param SharedInfo Usually DER encoded "ECC_CMS_SharedInfo" structure
+ * @param crypto Crypto engine
  */
-export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen: number, SharedInfo: ArrayBuffer) {
+export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen: number, SharedInfo: ArrayBuffer, crypto = getCrypto(true)) {
   //#region Initial variables
   let hashLength = 0;
   let maxCounter = 1;
@@ -389,12 +360,12 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
   //#region Create an array of "kdfWithCounter"
   const incomingResult = [];
   for (let i = 1; i <= maxCounter; i++)
-    incomingResult.push(await kdfWithCounter(hashFunction, Zbuffer, i, SharedInfo));
+    incomingResult.push(await kdfWithCounter(hashFunction, Zbuffer, i, SharedInfo, crypto));
   //#endregion
 
   //#region Return combined digest with specified length
   //#region Initial variables
-  let combinedBuffer = new ArrayBuffer(0);
+  let combinedBuffer = EMPTY_BUFFER;
   let currentCounter = 1;
   let found = true;
   //#endregion
@@ -434,3 +405,5 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
   //#endregion
 }
 //#endregion
+
+import { CryptoEngine } from "./CryptoEngine/CryptoEngine";

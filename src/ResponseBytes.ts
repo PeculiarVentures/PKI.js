@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -18,7 +19,7 @@ export interface IResponseBytes {
 
 export interface ResponseBytesJson {
   responseType: string;
-  response: Schema.AsnOctetStringJson;
+  response: asn1js.OctetStringJson;
 }
 
 export type ResponseBytesParameters = PkiObjectParameters & Partial<IResponseBytes>;
@@ -63,7 +64,7 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case RESPONSE_TYPE:
-        return "";
+        return EMPTY_STRING;
       case RESPONSE:
         return new asn1js.OctetString();
       default:
@@ -79,7 +80,7 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case RESPONSE_TYPE:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case RESPONSE:
         return (memberValue.isEqual(ResponseBytes.defaultValues(memberName)));
       default:
@@ -100,10 +101,10 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.responseType || "") }),
-        new asn1js.OctetString({ name: (names.response || "") })
+        new asn1js.ObjectIdentifier({ name: (names.responseType || EMPTY_STRING) }),
+        new asn1js.OctetString({ name: (names.response || EMPTY_STRING) })
       ]
     }));
   }
@@ -142,7 +143,7 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
   public toJSON(): ResponseBytesJson {
     return {
       responseType: this.responseType,
-      response: this.response.toJSON() as Schema.AsnOctetStringJson,
+      response: this.response.toJSON(),
     };
   }
 

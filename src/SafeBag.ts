@@ -14,13 +14,13 @@ const CLEAR_PROPS = [
   BAG_ATTRIBUTES
 ];
 
-export interface ISafeBag {
+export interface ISafeBag<T extends BagType = BagType> {
   bagId: string;
-  bagValue: BagType;
+  bagValue: T;
   bagAttributes?: Attribute[];
 }
 
-export type SafeBagParameters = PkiObjectParameters & Partial<ISafeBag>;
+export type SafeBagParameters<T extends BagType = BagType> = PkiObjectParameters & Partial<ISafeBag<T>>;
 
 export interface SafeBagJson {
   bagId: string;
@@ -31,23 +31,23 @@ export interface SafeBagJson {
 /**
  * Represents the SafeBag structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
-export class SafeBag extends PkiObject implements ISafeBag {
+export class SafeBag<T extends BagType = BagType> extends PkiObject implements ISafeBag<T> {
 
   public static override CLASS_NAME = "SafeBag";
 
   public bagId!: string;
-  public bagValue!: BagType;
+  public bagValue!: T;
   public bagAttributes?: Attribute[];
 
   /**
    * Initializes a new instance of the {@link SafeBag} class
    * @param parameters Initialization parameters
    */
-  constructor(parameters: SafeBagParameters = {}) {
+  constructor(parameters: SafeBagParameters<T> = {}) {
     super();
 
     this.bagId = pvutils.getParametersValue(parameters, BAG_ID, SafeBag.defaultValues(BAG_ID));
-    this.bagValue = pvutils.getParametersValue(parameters, BAG_VALUE, SafeBag.defaultValues(BAG_VALUE));
+    this.bagValue = pvutils.getParametersValue(parameters, BAG_VALUE, SafeBag.defaultValues(BAG_VALUE)) as unknown as T;
     if (BAG_ATTRIBUTES in parameters) {
       this.bagAttributes = pvutils.getParametersValue(parameters, BAG_ATTRIBUTES, SafeBag.defaultValues(BAG_ATTRIBUTES));
     }
@@ -68,7 +68,7 @@ export class SafeBag extends PkiObject implements ISafeBag {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case BAG_ID:
-        return "";
+        return EMPTY_STRING;
       case BAG_VALUE:
         return (new asn1js.Any());
       case BAG_ATTRIBUTES:
@@ -86,7 +86,7 @@ export class SafeBag extends PkiObject implements ISafeBag {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case BAG_ID:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case BAG_VALUE:
         return (memberValue instanceof asn1js.Any);
       case BAG_ATTRIBUTES:
@@ -115,7 +115,7 @@ export class SafeBag extends PkiObject implements ISafeBag {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.ObjectIdentifier({ name: (names.bagId || BAG_ID) }),
         new asn1js.Constructed({
@@ -162,7 +162,7 @@ export class SafeBag extends PkiObject implements ISafeBag {
     if (!bagType) {
       throw new Error(`Invalid BAG_ID for SafeBag: ${this.bagId}`);
     }
-    this.bagValue = new bagType({ schema: asn1.result.bagValue });
+    this.bagValue = new bagType({ schema: asn1.result.bagValue }) as unknown as T;
 
     if (BAG_ATTRIBUTES in asn1.result) {
       this.bagAttributes = Array.from(asn1.result.bagAttributes, element => new Attribute({ schema: element }));
@@ -211,4 +211,5 @@ export class SafeBag extends PkiObject implements ISafeBag {
 }
 
 import { type BagType, SafeBagValueFactory, BagTypeJson } from "./SafeBagValueFactory";
+import { EMPTY_STRING } from "./constants";
 

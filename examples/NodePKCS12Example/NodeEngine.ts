@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import * as pkijs from "../../src";
 import * as nodeSpecificCrypto from "./NodeEngineNodeSpecific";
 
@@ -416,17 +415,10 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     //#endregion
 
     //#region Create correct data block for decryption
-    let dataBuffer = new ArrayBuffer(0);
-
     if (!parameters.encryptedContentInfo.encryptedContent) {
       pkijs.ParameterError.assertEmpty(parameters.encryptedContentInfo.encryptedContent, "encryptedContent", "parameters.encryptedContentInfo");
     }
-    if (parameters.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false) {
-      dataBuffer = parameters.encryptedContentInfo.encryptedContent.valueBlock.valueHex;
-    } else {
-      for (const content of parameters.encryptedContentInfo.encryptedContent.valueBlock.value)
-        dataBuffer = pvutils.utilConcatBuf(dataBuffer, content.valueBlock.valueHex);
-    }
+    const dataBuffer = parameters.encryptedContentInfo.getEncryptedContent();
     //#endregion
 
     //#region Check if we have PBES1

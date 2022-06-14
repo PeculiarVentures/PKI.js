@@ -5,11 +5,10 @@
     "strict": true,
     "importHelpers": true,
     "noImplicitOverride": true,
-    "skipLibCheck": true,
     "noErrorTruncation": true,
     "experimentalDecorators": true
   },
   "exclude": [
-    "website"
+    "build/*.ts"
   ]
 }

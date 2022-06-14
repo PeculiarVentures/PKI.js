@@ -51,7 +51,7 @@ export class ExtensionValueFactory {
     return this.types;
   }
 
-  public static fromBER(id: string, raw: ArrayBuffer): ExtensionParsedValue | null {
+  public static fromBER(id: string, raw: BufferSource): ExtensionParsedValue | null {
     const asn1 = asn1js.fromBER(raw);
     if (asn1.offset === -1) {
       return null;

@@ -7,6 +7,7 @@ import { IssuerAndSerialNumber, IssuerAndSerialNumberJson } from "./IssuerAndSer
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const RID = "rid";
@@ -32,11 +33,11 @@ export interface KeyTransRecipientInfoJson {
   version: number;
   rid: RecipientIdentifierMixedJson;
   keyEncryptionAlgorithm: AlgorithmIdentifierJson;
-  encryptedKey: Schema.AsnOctetStringJson;
+  encryptedKey: asn1js.OctetStringJson;
 }
 
 export type RecipientIdentifierType = IssuerAndSerialNumber | asn1js.OctetString;
-export type RecipientIdentifierMixedJson = IssuerAndSerialNumberJson | Schema.AsnOctetStringJson;
+export type RecipientIdentifierMixedJson = IssuerAndSerialNumberJson | asn1js.OctetStringJson;
 
 export type KeyTransRecipientInfoParameters = PkiObjectParameters & Partial<IKeyTransRecipientInfo>;
 
@@ -139,12 +140,12 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
         RecipientIdentifier.schema(names.rid || {}),
         AlgorithmIdentifier.schema(names.keyEncryptionAlgorithm || {}),
-        new asn1js.OctetString({ name: (names.encryptedKey || "") })
+        new asn1js.OctetString({ name: (names.encryptedKey || EMPTY_STRING) })
       ]
     }));
   }
@@ -205,7 +206,7 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        valueHex: this.rid.valueBlock.valueHex
+        valueHex: this.rid.valueBlock.valueHexView
       }));
     }
 
@@ -223,9 +224,9 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
   public toJSON(): KeyTransRecipientInfoJson {
     return {
       version: this.version,
-      rid: this.rid.toJSON() as Schema.AsnOctetStringJson,
+      rid: this.rid.toJSON(),
       keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
-      encryptedKey: this.encryptedKey.toJSON() as Schema.AsnOctetStringJson,
+      encryptedKey: this.encryptedKey.toJSON(),
     };
   }
 

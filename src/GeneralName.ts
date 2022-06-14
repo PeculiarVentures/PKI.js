@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
@@ -12,10 +13,10 @@ export const VALUE = "value";
 
 /**
  * Schema for "builtInStandardAttributes" of "ORAddress"
- * @param {Object} parameters
- * @property {Object} [names]
- * @param {boolean} optional
- * @returns {Sequence}
+ * @param parameters
+ * @property names
+ * @param optional
+ * @returns
  */
 function builtInStandardAttributes(parameters: Schema.SchemaParameters<{
   country_name?: string;
@@ -49,7 +50,7 @@ function builtInStandardAttributes(parameters: Schema.SchemaParameters<{
           tagClass: 2, // APPLICATION-SPECIFIC
           tagNumber: 1 // [1]
         },
-        name: (names.country_name || ""),
+        name: (names.country_name || EMPTY_STRING),
         value: [
           new asn1js.Choice({
             value: [
@@ -65,7 +66,7 @@ function builtInStandardAttributes(parameters: Schema.SchemaParameters<{
           tagClass: 2, // APPLICATION-SPECIFIC
           tagNumber: 2 // [2]
         },
-        name: (names.administration_domain_name || ""),
+        name: (names.administration_domain_name || EMPTY_STRING),
         value: [
           new asn1js.Choice({
             value: [
@@ -81,7 +82,7 @@ function builtInStandardAttributes(parameters: Schema.SchemaParameters<{
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        name: (names.network_address || ""),
+        name: (names.network_address || EMPTY_STRING),
         isHexOnly: true
       }),
       new asn1js.Primitive({
@@ -90,7 +91,7 @@ function builtInStandardAttributes(parameters: Schema.SchemaParameters<{
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 1 // [1]
         },
-        name: (names.terminal_identifier || ""),
+        name: (names.terminal_identifier || EMPTY_STRING),
         isHexOnly: true
       }),
       new asn1js.Constructed({
@@ -99,7 +100,7 @@ function builtInStandardAttributes(parameters: Schema.SchemaParameters<{
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 2 // [2]
         },
-        name: (names.private_domain_name || ""),
+        name: (names.private_domain_name || EMPTY_STRING),
         value: [
           new asn1js.Choice({
             value: [
@@ -115,12 +116,12 @@ function builtInStandardAttributes(parameters: Schema.SchemaParameters<{
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 3 // [3]
         },
-        name: (names.organization_name || ""),
+        name: (names.organization_name || EMPTY_STRING),
         isHexOnly: true
       }),
       new asn1js.Primitive({
         optional: true,
-        name: (names.numeric_user_identifier || ""),
+        name: (names.numeric_user_identifier || EMPTY_STRING),
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 4 // [4]
@@ -129,7 +130,7 @@ function builtInStandardAttributes(parameters: Schema.SchemaParameters<{
       }),
       new asn1js.Constructed({
         optional: true,
-        name: (names.personal_name || ""),
+        name: (names.personal_name || EMPTY_STRING),
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 5 // [5]
@@ -170,7 +171,7 @@ function builtInStandardAttributes(parameters: Schema.SchemaParameters<{
       }),
       new asn1js.Constructed({
         optional: true,
-        name: (names.organizational_unit_names || ""),
+        name: (names.organizational_unit_names || EMPTY_STRING),
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 6 // [6]
@@ -240,7 +241,7 @@ export interface IGeneralName {
   value: any;
 }
 
-export type GeneralNameParameters = PkiObjectParameters & Partial<IGeneralName>;
+export type GeneralNameParameters = PkiObjectParameters & Partial<{ type: 1 | 2 | 6; value: string; } | { type: 0 | 3 | 4 | 7 | 8; value: any; }>;
 
 export interface GeneralNameSchema {
   names?: {
@@ -348,7 +349,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           value: [
             new asn1js.ObjectIdentifier(),
             new asn1js.Constructed({
@@ -361,14 +362,14 @@ export class GeneralName extends PkiObject implements IGeneralName {
           ]
         }),
         new asn1js.Primitive({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 1 // [1]
           }
         }),
         new asn1js.Primitive({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 2 // [2]
@@ -379,7 +380,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 3 // [3]
           },
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           value: [
             builtInStandardAttributes((names.builtInStandardAttributes || {}), false),
             builtInDomainDefinedAttributes(true),
@@ -391,7 +392,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 4 // [4]
           },
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           value: [RelativeDistinguishedNames.schema(names.directoryName || {})]
         }),
         new asn1js.Constructed({
@@ -399,7 +400,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 5 // [5]
           },
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           value: [
             new asn1js.Constructed({
               optional: true,
@@ -439,21 +440,21 @@ export class GeneralName extends PkiObject implements IGeneralName {
           ]
         }),
         new asn1js.Primitive({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 6 // [6]
           }
         }),
         new asn1js.Primitive({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 7 // [7]
           }
         }),
         new asn1js.Primitive({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 8 // [8]
@@ -526,7 +527,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
           const asnValue = asn1js.fromBER(valueBER);
           AsnError.assert(asnValue, "GeneralName value");
 
-          this.value = asnValue.result.valueBlock.value;
+          this.value = (asnValue.result as asn1js.BaseStringBlock).valueBlock.value;
         }
         break;
       case 3: // x400Address
@@ -621,7 +622,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
   public toJSON(): GeneralNameJson {
     const _object = {
       type: this.type,
-      value: ""
+      value: EMPTY_STRING
     } as GeneralNameJson;
 
     if ((typeof this.value) === "string")

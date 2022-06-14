@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { MessageImprint, HASHED_MESSAGE, HASH_ALGORITHM, MessageImprintSchema, MessageImprintJson } from "./MessageImprint";
@@ -8,6 +9,7 @@ import { Extension, ExtensionJson, ExtensionSchema } from "./Extension";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const POLICY = "policy";
@@ -113,11 +115,11 @@ export interface TSTInfoJson {
   version: number;
   policy: string;
   messageImprint: MessageImprintJson;
-  serialNumber: Schema.AsnIntegerJson;
+  serialNumber: asn1js.IntegerJson;
   genTime: Date;
   accuracy?: AccuracyJson;
   ordering?: boolean;
-  nonce?: Schema.AsnIntegerJson;
+  nonce?: asn1js.IntegerJson;
   tsa?: GeneralNameJson;
   extensions?: ExtensionJson[];
 }
@@ -206,7 +208,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       case VERSION:
         return 0;
       case POLICY:
-        return "";
+        return EMPTY_STRING;
       case MESSAGE_IMPRINT:
         return new MessageImprint();
       case SERIAL_NUMBER:
@@ -427,7 +429,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       version: this.version,
       policy: this.policy,
       messageImprint: this.messageImprint.toJSON(),
-      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
+      serialNumber: this.serialNumber.toJSON(),
       genTime: this.genTime
     };
 
@@ -438,7 +440,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       res.ordering = this.ordering;
 
     if (this.nonce)
-      res.nonce = this.nonce.toJSON() as Schema.AsnIntegerJson;
+      res.nonce = this.nonce.toJSON();
 
     if (this.tsa)
       res.tsa = this.tsa.toJSON();
@@ -452,8 +454,9 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
   /**
    * Verify current TST Info value
    * @param params Input parameters
+   * @param crypto Crypto engine
    */
-  public async verify(params: TSTInfoVerifyParams): Promise<boolean> {
+  public async verify(params: TSTInfoVerifyParams, crypto = common.getCrypto(true)): Promise<boolean> {
 
     //#region Get initial parameters
     if (!params.data) {
@@ -475,11 +478,11 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
     //#endregion
 
     // Find hashing algorithm
-    const shaAlgorithm = common.getAlgorithmByOID(this.messageImprint.hashAlgorithm.algorithmId, true, "MessageImprint.hashAlgorithm");
+    const shaAlgorithm = crypto.getAlgorithmByOID(this.messageImprint.hashAlgorithm.algorithmId, true, "MessageImprint.hashAlgorithm");
 
     // Calculate message digest for input "data" buffer
-    const hash = await common.getCrypto(true).digest(shaAlgorithm.name, new Uint8Array(data));
-    return pvutils.isEqualBuffer(hash, this.messageImprint.hashedMessage.valueBlock.valueHex);
+    const hash = await crypto.digest(shaAlgorithm.name, new Uint8Array(data));
+    return pvtsutils.BufferSourceConverter.isEqual(hash, this.messageImprint.hashedMessage.valueBlock.valueHexView);
   }
 
 }

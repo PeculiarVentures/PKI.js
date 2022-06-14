@@ -8,6 +8,8 @@ import * as Schema from "./Schema";
 import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData } from "./ObjectIdentifiers";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_STRING } from "./constants";
+import * as common from "./common";
 
 const SAFE_CONTENTS = "safeContents";
 const PARSED_VALUE = "parsedValue";
@@ -103,10 +105,10 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.contentInfos || ""),
+          name: (names.contentInfos || EMPTY_STRING),
           value: ContentInfo.schema()
         })
       ]
@@ -146,7 +148,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
     };
   }
 
-  public async parseInternalValues(parameters: { safeContents: SafeContent[]; }): Promise<void> {
+  public async parseInternalValues(parameters: { safeContents: SafeContent[]; }, crypto = common.getCrypto(true)): Promise<void> {
     //#region Check input data from "parameters"
     ParameterError.assert(parameters, SAFE_CONTENTS);
     ArgumentError.assert(parameters.safeContents, SAFE_CONTENTS, "Array");
@@ -171,15 +173,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             ArgumentError.assert(content.content, "this.safeContents[j].content", asn1js.OctetString);
 
             //#region Check we have "constructive encoding" for AuthSafe content
-            let authSafeContent = new ArrayBuffer(0);
-
-            if (content.content.valueBlock.isConstructed) {
-              for (const contentValue of content.content.valueBlock.value) {
-                authSafeContent = pvutils.utilConcatBuf(authSafeContent, (contentValue as any).valueBlock.valueHex);
-              }
-            } else {
-              authSafeContent = content.content.valueBlock.valueHex;
-            }
+            const authSafeContent = content.content.getValue();
             //#endregion
 
             //#region Finally initialize initial values of SAFE_CONTENTS type
@@ -209,7 +203,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             const decrypted = await cmsEnveloped.decrypt(0, {
               recipientCertificate,
               recipientPrivateKey: recipientKey
-            });
+            }, crypto);
 
             this.parsedValue.safeContents.push({
               privacyMode: 2, // Public-key privacy mode
@@ -235,7 +229,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             //#region Decrypt CMS EncryptedData using password
             const decrypted = await cmsEncrypted.decrypt({
               password
-            });
+            }, crypto);
             //#endregion
 
             //#region Initialize internal data
@@ -257,7 +251,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
   }
   public async makeInternalValues(parameters: {
     safeContents: any[];
-  }): Promise<this> {
+  }, crypto = common.getCrypto(true)): Promise<this> {
     //#region Check data in PARSED_VALUE
     if (!(this.parsedValue)) {
       throw new Error("Please run \"parseValues\" first or add \"parsedValue\" manually");
@@ -354,11 +348,11 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             //#endregion
 
             //#region Append recipient for enveloped data
-            cmsEnveloped.addRecipientByCertificate(safeContent.encryptingCertificate);
+            cmsEnveloped.addRecipientByCertificate(safeContent.encryptingCertificate, {}, undefined, crypto);
             //#endregion
 
             //#region Making encryption
-            await cmsEnveloped.encrypt(encryptionAlgorithm, contentToEncrypt);
+            await cmsEnveloped.encrypt(encryptionAlgorithm, contentToEncrypt, crypto);
 
             this.safeContents.push(new ContentInfo({
               contentType: "1.2.840.113549.1.7.3",

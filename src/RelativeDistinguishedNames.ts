@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AttributeTypeAndValue, AttributeTypeAndValueJson } from "./AttributeTypeAndValue";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -69,7 +70,7 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
       case TYPE_AND_VALUES:
         return [];
       case VALUE_BEFORE_DECODE:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       default:
         return super.defaultValues(memberName);
     }
@@ -105,14 +106,14 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.repeatedSequence || ""),
+          name: (names.repeatedSequence || EMPTY_STRING),
           value: new asn1js.Set({
             value: [
               new asn1js.Repeated({
-                name: (names.repeatedSet || ""),
+                name: (names.repeatedSet || EMPTY_STRING),
                 value: AttributeTypeAndValue.schema(names.typeAndValue || {})
               })
             ]
@@ -146,7 +147,7 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
       this.typesAndValues = Array.from(asn1.result.typesAndValues, element => new AttributeTypeAndValue({ schema: element }));
     }
 
-    this.valueBeforeDecode = asn1.result.RDN.valueBeforeDecode;
+    this.valueBeforeDecode = (asn1.result.RDN as asn1js.BaseBlock).valueBeforeDecodeView.slice().buffer;
   }
 
   public toSchema(): asn1js.Sequence {
@@ -161,6 +162,9 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
 
     const asn1 = asn1js.fromBER(this.valueBeforeDecode);
     AsnError.assert(asn1, "RelativeDistinguishedNames");
+    if (!(asn1.result instanceof asn1js.Sequence)) {
+      throw new Error("ASN.1 result should be SEQUENCE");
+    }
 
     return asn1.result;
   }

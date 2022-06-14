@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, GeneralNameJson } from "./GeneralName";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -20,12 +21,12 @@ export interface IAuthorityKeyIdentifier {
   authorityCertSerialNumber?: asn1js.Integer;
 }
 
-export type AuthorityKeyIdentifierParameters = PkiObjectParameters & Partial<AuthorityKeyIdentifier>;
+export type AuthorityKeyIdentifierParameters = PkiObjectParameters & Partial<IAuthorityKeyIdentifier>;
 
 export interface AuthorityKeyIdentifierJson {
-  keyIdentifier?: Schema.AsnOctetStringJson;
+  keyIdentifier?: asn1js.OctetStringJson;
   authorityCertIssuer?: GeneralNameJson[];
-  authorityCertSerialNumber?: Schema.AsnIntegerJson;
+  authorityCertSerialNumber?: asn1js.IntegerJson;
 }
 
 /**
@@ -104,10 +105,10 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Primitive({
-          name: (names.keyIdentifier || ""),
+          name: (names.keyIdentifier || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -122,13 +123,13 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
           },
           value: [
             new asn1js.Repeated({
-              name: (names.authorityCertIssuer || ""),
+              name: (names.authorityCertIssuer || EMPTY_STRING),
               value: GeneralName.schema()
             })
           ]
         }),
         new asn1js.Primitive({
-          name: (names.authorityCertSerialNumber || ""),
+          name: (names.authorityCertSerialNumber || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -178,7 +179,7 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 0 // [0]
         },
-        valueHex: this.keyIdentifier.valueBlock.valueHex
+        valueHex: this.keyIdentifier.valueBlock.valueHexView
       }));
     }
 
@@ -198,7 +199,7 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 2 // [2]
         },
-        valueHex: this.authorityCertSerialNumber.valueBlock.valueHex
+        valueHex: this.authorityCertSerialNumber.valueBlock.valueHexView
       }));
     }
     //#endregion
@@ -214,13 +215,13 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
     const object: AuthorityKeyIdentifierJson = {};
 
     if (this.keyIdentifier) {
-      object.keyIdentifier = this.keyIdentifier.toJSON() as Schema.AsnOctetStringJson;
+      object.keyIdentifier = this.keyIdentifier.toJSON();
     }
     if (this.authorityCertIssuer) {
       object.authorityCertIssuer = Array.from(this.authorityCertIssuer, o => o.toJSON());
     }
     if (this.authorityCertSerialNumber) {
-      object.authorityCertSerialNumber = this.authorityCertSerialNumber.toJSON() as Schema.AsnIntegerJson;
+      object.authorityCertSerialNumber = this.authorityCertSerialNumber.toJSON();
     }
 
     return object;

@@ -5,6 +5,7 @@ import { Extension, ExtensionJson } from "./Extension";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const MESSAGE_IMPRINT = "messageImprint";
@@ -71,7 +72,7 @@ export interface TimeStampReqJson {
   version: number;
   messageImprint: MessageImprintJson;
   reqPolicy?: string;
-  nonce?: Schema.AsnIntegerJson;
+  nonce?: asn1js.IntegerJson;
   certReq?: boolean;
   extensions?: ExtensionJson[];
 }
@@ -151,7 +152,7 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
       case MESSAGE_IMPRINT:
         return new MessageImprint();
       case REQ_POLICY:
-        return "";
+        return EMPTY_STRING;
       case NONCE:
         return new asn1js.Integer();
       case CERT_REQ:
@@ -278,9 +279,9 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
 
     outputArray.push(new asn1js.Integer({ value: this.version }));
     outputArray.push(this.messageImprint.toSchema());
-    if (REQ_POLICY in this)
+    if (this.reqPolicy)
       outputArray.push(new asn1js.ObjectIdentifier({ value: this.reqPolicy }));
-    if (NONCE in this)
+    if (this.nonce)
       outputArray.push(this.nonce);
     if ((CERT_REQ in this) && (TimeStampReq.compareWithDefault(CERT_REQ, this.certReq) === false))
       outputArray.push(new asn1js.Boolean({ value: this.certReq }));
@@ -315,7 +316,7 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
       res.reqPolicy = this.reqPolicy;
 
     if (this.nonce !== undefined)
-      res.nonce = this.nonce.toJSON() as Schema.AsnIntegerJson;
+      res.nonce = this.nonce.toJSON();
 
     if ((this.certReq !== undefined) && (TimeStampReq.compareWithDefault(CERT_REQ, this.certReq) === false))
       res.certReq = this.certReq;

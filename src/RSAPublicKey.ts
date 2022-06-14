@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -87,15 +89,15 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.modulus || "") }),
-        new asn1js.Integer({ name: (names.publicExponent || "") })
+        new asn1js.Integer({ name: (names.modulus || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.publicExponent || EMPTY_STRING) })
       ]
     }));
   }
 
-  public fromSchema(schema: Schema.SchemaNames): void {
+  public fromSchema(schema: asn1js.AsnType): void {
     // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
 
@@ -127,8 +129,8 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
 
   public toJSON(): RSAPublicKeyJson {
     return {
-      n: pvutils.toBase64(pvutils.arrayBufferToString(this.modulus.valueBlock.valueHex), true, true, true),
-      e: pvutils.toBase64(pvutils.arrayBufferToString(this.publicExponent.valueBlock.valueHex), true, true, true)
+      n: pvtsutils.Convert.ToBase64Url(this.modulus.valueBlock.valueHexView),
+      e: pvtsutils.Convert.ToBase64Url(this.publicExponent.valueBlock.valueHexView),
     };
   }
 

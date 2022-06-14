@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -69,7 +70,7 @@ export class QCStatement extends PkiObject implements IQCStatement {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case ID:
-        return "";
+        return EMPTY_STRING;
       case TYPE:
         return new asn1js.Null();
       default:
@@ -85,7 +86,7 @@ export class QCStatement extends PkiObject implements IQCStatement {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case ID:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case TYPE:
         return (memberValue instanceof asn1js.Null);
       default:
@@ -107,11 +108,11 @@ export class QCStatement extends PkiObject implements IQCStatement {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.id || "") }),
+        new asn1js.ObjectIdentifier({ name: (names.id || EMPTY_STRING) }),
         new asn1js.Any({
-          name: (names.type || ""),
+          name: (names.type || EMPTY_STRING),
           optional: true
         })
       ]
@@ -249,10 +250,10 @@ export class QCStatements extends PkiObject implements IQCStatements {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.values || ""),
+          name: (names.values || EMPTY_STRING),
           value: QCStatement.schema(names.value || {})
         }),
       ]

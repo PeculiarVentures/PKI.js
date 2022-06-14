@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { CertID, CertIDJson, CertIDSchema } from "./CertID";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { Extension, ExtensionJson } from "./Extension";
 import { Extensions, ExtensionsSchema } from "./Extensions";
@@ -156,21 +157,20 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         CertID.schema(names.certID || {}),
         new asn1js.Choice({
           value: [
             new asn1js.Primitive({
-              name: (names.certStatus || ""),
+              name: (names.certStatus || EMPTY_STRING),
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
                 tagNumber: 0 // [0]
               },
-              lenBlockLength: 1 // The length contains one byte 0x00
             }), // IMPLICIT NULL (no "valueBlock")
             new asn1js.Constructed({
-              name: (names.certStatus || ""),
+              name: (names.certStatus || EMPTY_STRING),
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
                 tagNumber: 1 // [1]
@@ -188,7 +188,7 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
               ]
             }),
             new asn1js.Primitive({
-              name: (names.certStatus || ""),
+              name: (names.certStatus || EMPTY_STRING),
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
                 tagNumber: 2 // [2]
@@ -197,14 +197,14 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
             }) // IMPLICIT NULL (no "valueBlock")
           ]
         }),
-        new asn1js.GeneralizedTime({ name: (names.thisUpdate || "") }),
+        new asn1js.GeneralizedTime({ name: (names.thisUpdate || EMPTY_STRING) }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          value: [new asn1js.GeneralizedTime({ name: (names.nextUpdate || "") })]
+          value: [new asn1js.GeneralizedTime({ name: (names.nextUpdate || EMPTY_STRING) })]
         }),
         new asn1js.Constructed({
           optional: true,

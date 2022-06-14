@@ -10,6 +10,7 @@ import { CertificateChainValidationEngine } from "./CertificateChainValidationEn
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const TBS_RESPONSE_DATA = "tbsResponseData";
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";
@@ -51,7 +52,7 @@ export interface BasicOCSPResponseVerifyParams {
 export interface BasicOCSPResponseJson {
   tbsResponseData: ResponseDataJson;
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signature: Schema.AsnBitStringJson;
+  signature: asn1js.BitStringJson;
   certs?: CertificateJson[];
 }
 
@@ -130,7 +131,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
           return comparisonResult;
         }
       case SIGNATURE_ALGORITHM:
-        return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));
+        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
       case SIGNATURE:
         return (memberValue.isEqual(BasicOCSPResponse.defaultValues(memberName)));
       case CERTS:
@@ -251,7 +252,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     const res: BasicOCSPResponseJson = {
       tbsResponseData: this.tbsResponseData.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signature: this.signature.toJSON() as Schema.AsnBitStringJson,
+      signature: this.signature.toJSON(),
     };
 
     if (this.certs) {
@@ -265,8 +266,9 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    * Get OCSP response status for specific certificate
    * @param certificate Certificate to be checked
    * @param issuerCertificate Certificate of issuer for certificate to be checked
+   * @param crypto Crypto engine
    */
-  public async getCertificateStatus(certificate: Certificate, issuerCertificate: Certificate): Promise<CertificateStatus> {
+  public async getCertificateStatus(certificate: Certificate, issuerCertificate: Certificate, crypto = common.getCrypto(true)): Promise<CertificateStatus> {
     //#region Initial variables
     const result = {
       isForCertificate: false,
@@ -280,7 +282,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
     //#region Create all "certIDs" for input certificates
     for (const response of this.tbsResponseData.responses) {
-      const hashAlgorithm = common.getAlgorithmByOID(response.certID.hashAlgorithm.algorithmId, true, "CertID.hashAlgorithm");
+      const hashAlgorithm = crypto.getAlgorithmByOID(response.certID.hashAlgorithm.algorithmId, true, "CertID.hashAlgorithm");
 
       if (!hashesObject[hashAlgorithm.name]) {
         hashesObject[hashAlgorithm.name] = 1;
@@ -291,7 +293,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
         await certID.createForCertificate(certificate, {
           hashAlgorithm: hashAlgorithm.name,
           issuerCertificate
-        });
+        }, crypto);
       }
     }
     //#endregion
@@ -341,19 +343,13 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    * Make signature for current OCSP Basic Response
    * @param privateKey Private key for "subjectPublicKeyInfo" structure
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
+   * @param crypto Crypto engine
    */
-  async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<void> {
-    //#region Initial checking
-    //#region Get a private key from function parameter
+  async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
+    // Get a private key from function parameter
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
     }
-    //#endregion
-    //#endregion
-
-    //#region Initial variables
-    const crypto = common.getCrypto(true);
-    //#endregion
 
     //#region Get a "default parameters" for current algorithm and set correct signature algorithm
     const signatureParams = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
@@ -366,11 +362,11 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     //#endregion
 
     //#region Create TBS data for signing
-    this.tbsResponseData.tbs = this.tbsResponseData.toSchema(true).toBER(false);
+    this.tbsResponseData.tbsView = new Uint8Array(this.tbsResponseData.toSchema(true).toBER());
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await crypto.signWithPrivateKey(this.tbsResponseData.tbs, privateKey, { algorithm });
+    const signature = await crypto.signWithPrivateKey(this.tbsResponseData.tbsView, privateKey, { algorithm });
     this.signature = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -378,14 +374,13 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
   /**
    * Verify existing OCSP Basic Response
    * @param params Additional parameters
+   * @param crypto Crypto engine
    */
-  public async verify(params: BasicOCSPResponseVerifyParams = {}): Promise<boolean> {
+  public async verify(params: BasicOCSPResponseVerifyParams = {}, crypto = common.getCrypto(true)): Promise<boolean> {
     //#region Initial variables
     let signerCert: Certificate | null = null;
     let certIndex = -1;
     const trustedCerts: Certificate[] = params.trustedCerts || [];
-
-    const crypto = common.getCrypto(true);
     //#endregion
 
     //#region Check amount of certificates
@@ -406,7 +401,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
         break;
       case (this.tbsResponseData.responderID instanceof asn1js.OctetString): // [2] KeyHash
         for (const [index, cert] of this.certs.entries()) {
-          const hash = await crypto.digest({ name: "sha-1" }, new Uint8Array(cert.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
+          const hash = await crypto.digest({ name: "sha-1" }, cert.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
           if (pvutils.isEqualBuffer(hash, this.tbsResponseData.responderID.valueBlock.valueHex)) {
             certIndex = index;
             break;
@@ -436,12 +431,12 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       trustedCerts,
     });
 
-    const verificationResult = await certChain.verify();
+    const verificationResult = await certChain.verify({}, crypto);
     if (!verificationResult.result) {
       throw new Error("Validation of signer's certificate failed");
     }
 
-    return crypto.verifyWithPublicKey(this.tbsResponseData.tbs, this.signature, this.certs[certIndex].subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(this.tbsResponseData.tbsView, this.signature, this.certs[certIndex].subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

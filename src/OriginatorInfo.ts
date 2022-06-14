@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { CertificateSet, CertificateSetJson } from "./CertificateSet";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { RevocationInfoChoices, RevocationInfoChoicesJson } from "./RevocationInfoChoices";
@@ -107,10 +108,10 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Constructed({
-          name: (names.certs || ""),
+          name: (names.certs || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -119,7 +120,7 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
           value: CertificateSet.schema().valueBlock.value
         }),
         new asn1js.Constructed({
-          name: (names.crls || ""),
+          name: (names.crls || EMPTY_STRING),
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC

@@ -59,14 +59,14 @@ function parsePKCS10() {
   let publicKeySize = "< unknown >";
 
   if (pkcs10.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1)) {
-    const rsaPublicKeySimple = pkijs.RSAPublicKey.fromBER(pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
-    const modulusView = new Uint8Array(rsaPublicKeySimple.modulus.valueBlock.valueHex);
+    const rsaPublicKeySimple = pkijs.RSAPublicKey.fromBER(pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
+    const modulusView = rsaPublicKeySimple.modulus.valueBlock.valueHexView;
     let modulusBitLength = 0;
 
     if (modulusView[0] === 0x00)
-      modulusBitLength = (rsaPublicKeySimple.modulus.valueBlock.valueHex.byteLength - 1) * 8;
+      modulusBitLength = (rsaPublicKeySimple.modulus.valueBlock.valueHexView.byteLength - 1) * 8;
     else
-      modulusBitLength = rsaPublicKeySimple.modulus.valueBlock.valueHex.byteLength * 8;
+      modulusBitLength = rsaPublicKeySimple.modulus.valueBlock.valueHexView.byteLength * 8;
 
     publicKeySize = modulusBitLength.toString();
   }

@@ -1,6 +1,7 @@
 import { BitString, OctetString } from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier } from "../AlgorithmIdentifier";
+import { EMPTY_STRING } from "../constants";
 import { EncryptedContentInfo } from "../EncryptedContentInfo";
 import { PublicKeyInfo } from "../PublicKeyInfo";
 import * as type from "./CryptoEngineInterface";
@@ -16,8 +17,10 @@ export abstract class AbstractCryptoEngine implements type.ICryptoEngine {
    */
   constructor(parameters: type.CryptoEngineParameters) {
     this.crypto = parameters.crypto;
-    this.subtle = parameters.subtle;
-    this.name = pvutils.getParametersValue(parameters, "name", "");
+    this.subtle = "webkitSubtle" in parameters.crypto
+      ? (parameters.crypto as any).webkitSubtle
+      : parameters.crypto.subtle;
+    this.name = pvutils.getParametersValue(parameters, "name", EMPTY_STRING);
   }
 
   public abstract getOIDByAlgorithm(algorithm: Algorithm, safety?: boolean, target?: string): string;
@@ -27,8 +30,8 @@ export abstract class AbstractCryptoEngine implements type.ICryptoEngine {
   public abstract getAlgorithmByOID(oid: any, safety?: any, target?: any): object;
   public abstract getHashAlgorithm(signatureAlgorithm: AlgorithmIdentifier): string;
   public abstract getSignatureParameters(privateKey: CryptoKey, hashAlgorithm?: string): Promise<type.CryptoEngineSignatureParams>;
-  public abstract signWithPrivateKey(data: ArrayBuffer, privateKey: CryptoKey, parameters: type.CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer>;
-  public abstract verifyWithPublicKey(data: ArrayBuffer, signature: BitString | OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean>;
+  public abstract signWithPrivateKey(data: BufferSource, privateKey: CryptoKey, parameters: type.CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer>;
+  public abstract verifyWithPublicKey(data: BufferSource, signature: BitString | OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean>;
   public abstract getPublicKey(publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, parameters?: type.CryptoEnginePublicKeyParams): Promise<CryptoKey>;
   public abstract encryptEncryptedContentInfo(parameters: type.CryptoEngineEncryptParams): Promise<EncryptedContentInfo>;
   public abstract decryptEncryptedContentInfo(parameters: type.CryptoEngineDecryptParams): Promise<ArrayBuffer>;

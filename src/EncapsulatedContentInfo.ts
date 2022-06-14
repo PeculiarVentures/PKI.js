@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -18,7 +19,7 @@ export interface IEncapsulatedContentInfo {
 
 export interface EncapsulatedContentInfoJson {
   eContentType: string;
-  eContent?: Schema.AsnOctetStringJson;
+  eContent?: asn1js.OctetStringJson;
 }
 
 export type EncapsulatedContentInfoParameters = PkiObjectParameters & Partial<IEncapsulatedContentInfo>;
@@ -58,10 +59,11 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
           });
 
           let offset = 0;
-          let length = this.eContent.valueBlock.valueHex.byteLength;
+          const viewHex = this.eContent.valueBlock.valueHexView.slice().buffer;
+          let length = viewHex.byteLength;
 
           while (length > 0) {
-            const pieceView = new Uint8Array(this.eContent.valueBlock.valueHex, offset, ((offset + 65536) > this.eContent.valueBlock.valueHex.byteLength) ? (this.eContent.valueBlock.valueHex.byteLength - offset) : 65536);
+            const pieceView = new Uint8Array(viewHex, offset, ((offset + 65536) > viewHex.byteLength) ? (viewHex.byteLength - offset) : 65536);
             const _array = new ArrayBuffer(pieceView.length);
             const _view = new Uint8Array(_array);
 
@@ -96,7 +98,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case E_CONTENT_TYPE:
-        return "";
+        return EMPTY_STRING;
       case E_CONTENT:
         return new asn1js.OctetString();
       default:
@@ -112,7 +114,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case E_CONTENT_TYPE:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case E_CONTENT:
         {
           if ((memberValue.idBlock.tagClass === 1) && (memberValue.idBlock.tagNumber === 4))
@@ -138,9 +140,9 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.eContentType || "") }),
+        new asn1js.ObjectIdentifier({ name: (names.eContentType || EMPTY_STRING) }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
@@ -148,7 +150,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
             tagNumber: 0 // [0]
           },
           value: [
-            new asn1js.Any({ name: (names.eContent || "") }) // In order to aling this with PKCS#7 and CMS as well
+            new asn1js.Any({ name: (names.eContent || EMPTY_STRING) }) // In order to aling this with PKCS#7 and CMS as well
           ]
         })
       ]
@@ -209,7 +211,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
     };
 
     if (this.eContent && EncapsulatedContentInfo.compareWithDefault(E_CONTENT, this.eContent) === false) {
-      res.eContent = this.eContent.toJSON() as Schema.AsnOctetStringJson;
+      res.eContent = this.eContent.toJSON();
     }
 
     return res;

@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { IssuerAndSerialNumber, IssuerAndSerialNumberJson } from "./IssuerAndSerialNumber";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -18,7 +19,7 @@ export interface IRecipientIdentifier {
 
 export interface RecipientIdentifierJson {
   variant: number;
-  value?: IssuerAndSerialNumberJson | Schema.AsnOctetStringJson;
+  value?: IssuerAndSerialNumberJson | asn1js.OctetStringJson;
 }
 
 export type RecipientIdentifierParameters = PkiObjectParameters & Partial<IRecipientIdentifier>;
@@ -104,11 +105,11 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
       value: [
         IssuerAndSerialNumber.schema({
           names: {
-            blockName: (names.blockName || "")
+            blockName: (names.blockName || EMPTY_STRING)
           }
         }),
         new asn1js.Primitive({
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
@@ -160,7 +161,7 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          valueHex: this.value.valueBlock.valueHex
+          valueHex: this.value.valueBlock.valueHexView
         });
       default:
         return new asn1js.Any() as any;
@@ -173,7 +174,7 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
     };
 
     if ((this.variant === 1 || this.variant === 2) && this.value) {
-      res.value = this.value.toJSON() as Schema.AsnOctetStringJson;
+      res.value = this.value.toJSON();
     }
 
     return res;

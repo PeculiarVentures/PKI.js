@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -19,7 +20,7 @@ export interface IDigestInfo {
 
 export interface DigestInfoJson {
   digestAlgorithm: AlgorithmIdentifierJson;
-  digest: Schema.AsnOctetStringJson;
+  digest: asn1js.OctetStringJson;
 }
 
 export type DigestInfoParameters = PkiObjectParameters & Partial<IDigestInfo>;
@@ -104,7 +105,7 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AlgorithmIdentifier.schema(names.digestAlgorithm || {
           names: {
@@ -154,7 +155,7 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
   public toJSON(): DigestInfoJson {
     return {
       digestAlgorithm: this.digestAlgorithm.toJSON(),
-      digest: this.digest.toJSON() as Schema.AsnOctetStringJson,
+      digest: this.digest.toJSON(),
     };
   }
 

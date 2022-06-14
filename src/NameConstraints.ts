@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralSubtree, GeneralSubtreeJson } from "./GeneralSubtree";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -86,7 +87,7 @@ export class NameConstraints extends PkiObject implements INameConstraints {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Constructed({
           optional: true,
@@ -96,7 +97,7 @@ export class NameConstraints extends PkiObject implements INameConstraints {
           },
           value: [
             new asn1js.Repeated({
-              name: (names.permittedSubtrees || ""),
+              name: (names.permittedSubtrees || EMPTY_STRING),
               value: GeneralSubtree.schema()
             })
           ]
@@ -109,7 +110,7 @@ export class NameConstraints extends PkiObject implements INameConstraints {
           },
           value: [
             new asn1js.Repeated({
-              name: (names.excludedSubtrees || ""),
+              name: (names.excludedSubtrees || EMPTY_STRING),
               value: GeneralSubtree.schema()
             })
           ]

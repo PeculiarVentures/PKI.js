@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { stringPrep } from "./Helpers";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -68,7 +70,7 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TYPE:
-        return "";
+        return EMPTY_STRING;
       case VALUE:
         return {};
       default:
@@ -93,10 +95,10 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.type || "") }),
-        new asn1js.Any({ name: (names.value || "") })
+        new asn1js.ObjectIdentifier({ name: (names.type || EMPTY_STRING) }),
+        new asn1js.Any({ name: (names.value || EMPTY_STRING) })
       ]
     }));
   }
@@ -175,21 +177,21 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
     ];
 
     if (compareTo instanceof ArrayBuffer) {
-      return pvutils.isEqualBuffer(this.value.valueBeforeDecode, compareTo);
+      return pvtsutils.BufferSourceConverter.isEqual(this.value.valueBeforeDecodeView, compareTo);
     }
 
-    if ((compareTo.constructor as asn1js.LocalBaseBlockType).blockName() === AttributeTypeAndValue.blockName()) {
+    if ((compareTo.constructor as typeof AttributeTypeAndValue).blockName() === AttributeTypeAndValue.blockName()) {
       if (this.type !== compareTo.type)
         return false;
 
       //#region Check we do have both strings
       const isStringPair = [false, false];
-      const thisName = (this.value.constructor as asn1js.LocalBaseBlockType).blockName();
+      const thisName = (this.value.constructor as typeof asn1js.BaseBlock).blockName();
       for (const name of stringBlockNames) {
         if (thisName === name) {
           isStringPair[0] = true;
         }
-        if ((compareTo.value.constructor as asn1js.LocalBaseBlockType).blockName() === name) {
+        if ((compareTo.value.constructor as typeof asn1js.BaseBlock).blockName() === name) {
           isStringPair[1] = true;
         }
       }
@@ -210,7 +212,7 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
       }
       else // Comparing as two ArrayBuffers
       {
-        if (pvutils.isEqualBuffer(this.value.valueBeforeDecode, compareTo.value.valueBeforeDecode) === false)
+        if (!pvtsutils.BufferSourceConverter.isEqual(this.value.valueBeforeDecodeView, compareTo.value.valueBeforeDecodeView))
           return false;
       }
 

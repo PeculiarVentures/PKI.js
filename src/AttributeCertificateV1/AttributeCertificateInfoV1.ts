@@ -9,6 +9,7 @@ import { IssuerSerial, IssuerSerialJson } from "./IssuerSerial";
 import * as Schema from "../Schema";
 import { PkiObject, PkiObjectParameters } from "../PkiObject";
 import { AsnError } from "../errors";
+import { EMPTY_STRING } from "../constants";
 
 const VERSION = "version";
 const BASE_CERTIFICATE_ID = "baseCertificateID";
@@ -73,10 +74,10 @@ export interface AttributeCertificateInfoV1Json {
   subjectName?: GeneralNamesJson;
   issuer: GeneralNamesJson;
   signature: AlgorithmIdentifierJson;
-  serialNumber: Schema.AsnIntegerJson;
+  serialNumber: asn1js.IntegerJson;
   attrCertValidityPeriod: AttCertValidityPeriodJson;
   attributes: AttributeJson[];
-  issuerUniqueID: Schema.AsnBitStringJson;
+  issuerUniqueID: asn1js.BitStringJson;
   extensions: ExtensionsJson;
 }
 
@@ -209,13 +210,13 @@ export class AttributeCertificateInfoV1 extends PkiObject implements IAttributeC
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
         new asn1js.Choice({
           value: [
             new asn1js.Constructed({
-              name: (names.baseCertificateID || ""),
+              name: (names.baseCertificateID || EMPTY_STRING),
               idBlock: {
                 tagClass: 3,
                 tagNumber: 0 // [0]
@@ -223,7 +224,7 @@ export class AttributeCertificateInfoV1 extends PkiObject implements IAttributeC
               value: IssuerSerial.schema().valueBlock.value
             }),
             new asn1js.Constructed({
-              name: (names.subjectName || ""),
+              name: (names.subjectName || EMPTY_STRING),
               idBlock: {
                 tagClass: 3,
                 tagNumber: 1 // [2]
@@ -234,14 +235,14 @@ export class AttributeCertificateInfoV1 extends PkiObject implements IAttributeC
         }),
         GeneralNames.schema({
           names: {
-            blockName: (names.issuer || "")
+            blockName: (names.issuer || EMPTY_STRING)
           }
         }),
         AlgorithmIdentifier.schema(names.signature || {}),
-        new asn1js.Integer({ name: (names.serialNumber || "") }),
+        new asn1js.Integer({ name: (names.serialNumber || EMPTY_STRING) }),
         AttCertValidityPeriod.schema(names.attrCertValidityPeriod || {}),
         new asn1js.Sequence({
-          name: (names.attributes || ""),
+          name: (names.attributes || EMPTY_STRING),
           value: [
             new asn1js.Repeated({
               value: Attribute.schema()
@@ -250,7 +251,7 @@ export class AttributeCertificateInfoV1 extends PkiObject implements IAttributeC
         }),
         new asn1js.BitString({
           optional: true,
-          name: (names.issuerUniqueID || "")
+          name: (names.issuerUniqueID || EMPTY_STRING)
         }),
         Extensions.schema(names.extensions || {}, true)
       ]
@@ -388,12 +389,12 @@ export class AttributeCertificateInfoV1 extends PkiObject implements IAttributeC
 
     result.issuer = this.issuer.toJSON();
     result.signature = this.signature.toJSON();
-    result.serialNumber = this.serialNumber.toJSON() as Schema.AsnIntegerJson;
+    result.serialNumber = this.serialNumber.toJSON();
     result.attrCertValidityPeriod = this.attrCertValidityPeriod.toJSON();
     result.attributes = Array.from(this.attributes, o => o.toJSON());
 
     if (this.issuerUniqueID) {
-      result.issuerUniqueID = this.issuerUniqueID.toJSON() as Schema.AsnBitStringJson;
+      result.issuerUniqueID = this.issuerUniqueID.toJSON();
     }
 
     if (this.extensions) {

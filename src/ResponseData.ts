@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
 import { SingleResponse, SingleResponseJson, SingleResponseSchema } from "./SingleResponse";
@@ -7,6 +8,7 @@ import { Extensions, ExtensionsSchema } from "./Extensions";
 import * as Schema from "./Schema";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER } from "./constants";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -67,7 +69,20 @@ export class ResponseData extends PkiObject implements IResponseData {
   public static override CLASS_NAME = "ResponseData";
 
   public version?: number;
-  public tbs!: ArrayBuffer;
+  public tbsView!: Uint8Array;
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public get tbs(): ArrayBuffer {
+    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+  }
+
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public set tbs(value: ArrayBuffer) {
+    this.tbsView = new Uint8Array(value);
+  }
   public responderID: any;
   public producedAt!: Date;
   public responses!: SingleResponse[];
@@ -80,7 +95,7 @@ export class ResponseData extends PkiObject implements IResponseData {
   constructor(parameters: ResponseDataParameters = {}) {
     super();
 
-    this.tbs = pvutils.getParametersValue(parameters, TBS, ResponseData.defaultValues(TBS));
+    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, ResponseData.defaultValues(TBS)));
     if (VERSION in parameters) {
       this.version = pvutils.getParametersValue(parameters, VERSION, ResponseData.defaultValues(VERSION));
     }
@@ -112,7 +127,7 @@ export class ResponseData extends PkiObject implements IResponseData {
       case VERSION:
         return 0;
       case TBS:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case RESPONDER_ID:
         return {};
       case PRODUCED_AT:
@@ -236,7 +251,7 @@ export class ResponseData extends PkiObject implements IResponseData {
     //#endregion
 
     //#region Get internal properties from parsed schema
-    this.tbs = asn1.result.ResponseData.valueBeforeDecode;
+    this.tbsView = (asn1.result.ResponseData as asn1js.Sequence).valueBeforeDecodeView;
 
     if (RESPONSE_DATA_VERSION in asn1.result)
       this.version = asn1.result[RESPONSE_DATA_VERSION].valueBlock.valueDec;
@@ -259,11 +274,11 @@ export class ResponseData extends PkiObject implements IResponseData {
     let tbsSchema;
 
     if (encodeFlag === false) {
-      if (!this.tbs.byteLength) {// No stored certificate TBS part
+      if (!this.tbsView.byteLength) {// No stored certificate TBS part
         return ResponseData.schema();
       }
 
-      const asn1 = asn1js.fromBER(this.tbs);
+      const asn1 = asn1js.fromBER(this.tbsView);
       AsnError.assert(asn1, "TBS Response Data");
       tbsSchema = asn1.result;
     }

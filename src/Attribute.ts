@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -70,7 +71,7 @@ export class Attribute extends PkiObject implements IAttribute {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TYPE:
-        return "";
+        return EMPTY_STRING;
       case VALUES:
         return [];
       default:
@@ -86,7 +87,7 @@ export class Attribute extends PkiObject implements IAttribute {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case TYPE:
-        return (memberValue === "");
+        return (memberValue === EMPTY_STRING);
       case VALUES:
         return (memberValue.length === 0);
       default:
@@ -108,14 +109,14 @@ export class Attribute extends PkiObject implements IAttribute {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.type || "") }),
+        new asn1js.ObjectIdentifier({ name: (names.type || EMPTY_STRING) }),
         new asn1js.Set({
-          name: (names.setName || ""),
+          name: (names.setName || EMPTY_STRING),
           value: [
             new asn1js.Repeated({
-              name: (names.values || ""),
+              name: (names.values || EMPTY_STRING),
               value: new asn1js.Any()
             })
           ]

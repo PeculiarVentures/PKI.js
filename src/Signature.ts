@@ -2,6 +2,7 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { Certificate, CertificateJson } from "./Certificate";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -18,7 +19,7 @@ export interface ISignature {
 
 export interface SignatureJson {
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signature: Schema.AsnBitStringJson;
+  signature: asn1js.BitStringJson;
   certs?: CertificateJson[];
 }
 
@@ -87,7 +88,7 @@ export class Signature extends PkiObject implements ISignature {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case SIGNATURE_ALGORITHM:
-        return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));
+        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
       case SIGNATURE:
         return (memberValue.isEqual(Signature.defaultValues(memberName)));
       case CERTS:
@@ -111,10 +112,10 @@ export class Signature extends PkiObject implements ISignature {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         AlgorithmIdentifier.schema(names.signatureAlgorithm || {}),
-        new asn1js.BitString({ name: (names.signature || "") }),
+        new asn1js.BitString({ name: (names.signature || EMPTY_STRING) }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
@@ -124,7 +125,7 @@ export class Signature extends PkiObject implements ISignature {
           value: [
             new asn1js.Sequence({
               value: [new asn1js.Repeated({
-                name: (names.certs || ""),
+                name: (names.certs || EMPTY_STRING),
                 // TODO Double check
                 // value: Certificate.schema(names.certs || {})
                 value: Certificate.schema({})
@@ -201,7 +202,7 @@ export class Signature extends PkiObject implements ISignature {
   public toJSON(): SignatureJson {
     const res: SignatureJson = {
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signature: this.signature.toJSON() as Schema.AsnBitStringJson,
+      signature: this.signature.toJSON(),
     };
 
     if (this.certs) {

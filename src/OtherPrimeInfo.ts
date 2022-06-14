@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -98,11 +100,11 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.prime || "") }),
-        new asn1js.Integer({ name: (names.exponent || "") }),
-        new asn1js.Integer({ name: (names.coefficient || "") })
+        new asn1js.Integer({ name: (names.prime || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.exponent || EMPTY_STRING) }),
+        new asn1js.Integer({ name: (names.coefficient || EMPTY_STRING) })
       ]
     }));
   }
@@ -143,9 +145,9 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
 
   public toJSON(): OtherPrimeInfoJson {
     return {
-      r: pvutils.toBase64(pvutils.arrayBufferToString(this.prime.valueBlock.valueHex), true, true),
-      d: pvutils.toBase64(pvutils.arrayBufferToString(this.exponent.valueBlock.valueHex), true, true),
-      t: pvutils.toBase64(pvutils.arrayBufferToString(this.coefficient.valueBlock.valueHex), true, true)
+      r: pvtsutils.Convert.ToBase64Url(this.prime.valueBlock.valueHexView),
+      d: pvtsutils.Convert.ToBase64Url(this.exponent.valueBlock.valueHexView),
+      t: pvtsutils.Convert.ToBase64Url(this.coefficient.valueBlock.valueHexView),
     };
   }
 
@@ -156,9 +158,9 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
   public fromJSON(json: OtherPrimeInfoJson): void {
     ParameterError.assert("json", json, "r", "d", "r");
 
-    this.prime = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.r, true)) });
-    this.exponent = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.d, true)) });
-    this.coefficient = new asn1js.Integer({ valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.t, true)) });
+    this.prime = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.r) });
+    this.exponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.d) });
+    this.coefficient = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.t) });
   }
 
 }

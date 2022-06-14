@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { DistributionPoint, DistributionPointJson } from "./DistributionPoint";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -76,10 +77,10 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Repeated({
-          name: (names.distributionPoints || ""),
+          name: (names.distributionPoints || EMPTY_STRING),
           value: DistributionPoint.schema()
         })
       ]

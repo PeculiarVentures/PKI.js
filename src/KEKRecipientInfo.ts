@@ -5,6 +5,7 @@ import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const KEK_ID = "kekid";
@@ -30,7 +31,7 @@ export interface KEKRecipientInfoJson {
   version: number;
   kekid: KEKIdentifierJson;
   keyEncryptionAlgorithm: AlgorithmIdentifierJson;
-  encryptedKey: Schema.AsnOctetStringJson;
+  encryptedKey: asn1js.OctetStringJson;
 }
 
 export type KEKRecipientInfoParameters = PkiObjectParameters & Partial<IKEKRecipientInfo>;
@@ -87,7 +88,7 @@ export class KEKRecipientInfo extends PkiObject implements IKEKRecipientInfo {
       case ENCRYPTED_KEY:
         return new asn1js.OctetString();
       case PER_DEFINED_KEK:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       default:
         return super.defaultValues(memberName);
     }
@@ -107,7 +108,7 @@ export class KEKRecipientInfo extends PkiObject implements IKEKRecipientInfo {
           (("date" in memberValue) === false) &&
           (("other" in memberValue) === false));
       case KEY_ENCRYPTION_ALGORITHM:
-        return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));
+        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
       case ENCRYPTED_KEY:
         return (memberValue.isEqual(KEKRecipientInfo.defaultValues(ENCRYPTED_KEY)));
       case PER_DEFINED_KEK:
@@ -145,12 +146,12 @@ export class KEKRecipientInfo extends PkiObject implements IKEKRecipientInfo {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
         KEKIdentifier.schema(names.kekid || {}),
         AlgorithmIdentifier.schema(names.keyEncryptionAlgorithm || {}),
-        new asn1js.OctetString({ name: (names.encryptedKey || "") })
+        new asn1js.OctetString({ name: (names.encryptedKey || EMPTY_STRING) })
       ]
     }));
   }
@@ -205,7 +206,7 @@ export class KEKRecipientInfo extends PkiObject implements IKEKRecipientInfo {
       version: this.version,
       kekid: this.kekid.toJSON(),
       keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
-      encryptedKey: this.encryptedKey.toJSON() as Schema.AsnOctetStringJson,
+      encryptedKey: this.encryptedKey.toJSON(),
     };
   }
 

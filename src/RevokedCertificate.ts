@@ -5,6 +5,7 @@ import { Extensions, ExtensionsJson } from "./Extensions";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const USER_CERTIFICATE = "userCertificate";
 const REVOCATION_DATE = "revocationDate";
@@ -24,7 +25,7 @@ export interface IRevokedCertificate {
 export type RevokedCertificateParameters = PkiObjectParameters & Partial<IRevokedCertificate>;
 
 export interface RevokedCertificateJson {
-  userCertificate: Schema.AsnIntegerJson;
+  userCertificate: asn1js.IntegerJson;
   revocationDate: TimeJson;
   crlEntryExtensions?: ExtensionsJson;
 }
@@ -99,7 +100,7 @@ export class RevokedCertificate extends PkiObject implements IRevokedCertificate
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Integer({ name: (names.userCertificate || USER_CERTIFICATE) }),
         Time.schema({
@@ -154,7 +155,7 @@ export class RevokedCertificate extends PkiObject implements IRevokedCertificate
 
   public toJSON(): RevokedCertificateJson {
     const res: RevokedCertificateJson = {
-      userCertificate: this.userCertificate.toJSON() as Schema.AsnIntegerJson,
+      userCertificate: this.userCertificate.toJSON(),
       revocationDate: this.revocationDate.toJSON(),
     };
 

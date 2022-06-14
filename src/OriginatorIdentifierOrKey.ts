@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
 import { OriginatorPublicKey } from "./OriginatorPublicKey";
@@ -104,7 +105,7 @@ export class OriginatorIdentifierOrKey extends PkiObject implements IOriginatorI
       value: [
         IssuerAndSerialNumber.schema({
           names: {
-            blockName: (names.blockName || "")
+            blockName: (names.blockName || EMPTY_STRING)
           }
         }),
         new asn1js.Primitive({
@@ -112,14 +113,14 @@ export class OriginatorIdentifierOrKey extends PkiObject implements IOriginatorI
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          name: (names.blockName || "")
+          name: (names.blockName || EMPTY_STRING)
         }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 1 // [1]
           },
-          name: (names.blockName || ""),
+          name: (names.blockName || EMPTY_STRING),
           value: OriginatorPublicKey.schema().valueBlock.value
         })
       ]

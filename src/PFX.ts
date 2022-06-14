@@ -16,6 +16,8 @@ import * as Schema from "./Schema";
 import { Certificate } from "./Certificate";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { BufferSourceConverter } from "pvtsutils";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const AUTH_SAFE = "authSafe";
@@ -164,7 +166,7 @@ export class PFX extends PkiObject implements IPFX {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Integer({ name: (names.version || VERSION) }),
         ContentInfo.schema(names.authSafe || {
@@ -247,8 +249,9 @@ export class PFX extends PkiObject implements IPFX {
   /**
    * Making ContentInfo from PARSED_VALUE object
    * @param parameters Parameters, specific to each "integrity mode"
+   * @param crypto Crypto engine
    */
-  public async makeInternalValues(parameters: MakeInternalValuesParams = {}) {
+  public async makeInternalValues(parameters: MakeInternalValuesParams = {}, crypto = common.getCrypto(true)) {
     //#region Check mandatory parameter
     ArgumentError.assert(parameters, "parameters", "object");
     if (!this.parsedValue) {
@@ -257,8 +260,6 @@ export class PFX extends PkiObject implements IPFX {
     ParameterError.assertEmpty(this.parsedValue.integrityMode, "integrityMode", "parsedValue");
     ParameterError.assertEmpty(this.parsedValue.authenticatedSafe, "authenticatedSafe", "parsedValue");
     //#endregion
-
-    const crypto = common.getCrypto(true);
 
     //#region Makes values for each particular integrity mode
     switch (this.parsedValue.integrityMode) {
@@ -277,7 +278,7 @@ export class PFX extends PkiObject implements IPFX {
           const saltBuffer = new ArrayBuffer(64);
           const saltView = new Uint8Array(saltBuffer);
 
-          common.getRandomValues(saltView);
+          crypto.getRandomValues(saltView);
 
           const data = this.parsedValue.authenticatedSafe.toSchema().toBER(false);
 
@@ -288,8 +289,6 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Call current crypto engine for making HMAC-based data stamp
-          const crypto = common.getCrypto(true);
-
           const result = await crypto.stampDataWithPassword({
             password: parameters.password,
             hashAlgorithm: parameters.hmacHashAlgorithm,
@@ -303,7 +302,7 @@ export class PFX extends PkiObject implements IPFX {
           this.macData = new MacData({
             mac: new DigestInfo({
               digestAlgorithm: new AlgorithmIdentifier({
-                algorithmId: common.getOIDByAlgorithm({ name: parameters.hmacHashAlgorithm }, true, "hmacHashAlgorithm"),
+                algorithmId: crypto.getOIDByAlgorithm({ name: parameters.hmacHashAlgorithm }, true, "hmacHashAlgorithm"),
               }),
               digest: new asn1js.OctetString({ valueHex: result })
             }),
@@ -397,7 +396,7 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Signing CMS Signed Data
-          await cmsSigned.sign(parameters.privateKey, 0, parameters.hashAlgorithm);
+          await cmsSigned.sign(parameters.privateKey, 0, parameters.hashAlgorithm, undefined, crypto);
           //#endregion
 
           //#region Making final CMS_CONTENT_INFO type
@@ -420,7 +419,7 @@ export class PFX extends PkiObject implements IPFX {
   public async parseInternalValues(parameters: {
     checkIntegrity?: boolean;
     password?: ArrayBuffer;
-  }) {
+  }, crypto = common.getCrypto(true)) {
     //#region Check input data from "parameters"
     ArgumentError.assert(parameters, "parameters", "object");
 
@@ -449,15 +448,7 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Check we have "constructive encoding" for AuthSafe content
-          let authSafeContent = new ArrayBuffer(0);
-
-          if (this.authSafe.content.valueBlock.isConstructed) {
-            for (const contentValue of this.authSafe.content.valueBlock.value)
-              authSafeContent = pvutils.utilConcatBuf(authSafeContent, contentValue.valueBlock.valueHex);
-          }
-          else {
-            authSafeContent = this.authSafe.content.valueBlock.valueHex;
-          }
+          const authSafeContent = this.authSafe.content.getValue();
           //#endregion
 
           //#region Set "authenticatedSafe" value
@@ -473,17 +464,17 @@ export class PFX extends PkiObject implements IPFX {
             //#endregion
 
             //#region Initial variables
-            const hashAlgorithm = common.getAlgorithmByOID(this.macData.mac.digestAlgorithm.algorithmId, true, "digestAlgorithm");
+            const hashAlgorithm = crypto.getAlgorithmByOID(this.macData.mac.digestAlgorithm.algorithmId, true, "digestAlgorithm");
             //#endregion
 
             //#region Call current crypto engine for verifying HMAC-based data stamp
-            const result = await common.getCrypto(true).verifyDataStampedWithPassword({
+            const result = await crypto.verifyDataStampedWithPassword({
               password: parameters.password,
               hashAlgorithm: hashAlgorithm.name,
-              salt: this.macData.macSalt.valueBlock.valueHex,
+              salt: BufferSourceConverter.toArrayBuffer(this.macData.macSalt.valueBlock.valueHexView),
               iterationCount: this.macData.iterations || 0,
               contentToVerify: authSafeContent,
-              signatureToVerify: this.macData.mac.digest.valueBlock.valueHex
+              signatureToVerify: BufferSourceConverter.toArrayBuffer(this.macData.mac.digest.valueBlock.valueHexView),
             });
             //#endregion
 
@@ -515,14 +506,7 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Create correct data block for verification
-          let data = new ArrayBuffer(0);
-
-          if (eContent.idBlock.isConstructed === false)
-            data = eContent.valueBlock.valueHex;
-          else {
-            for (let i = 0; i < eContent.valueBlock.value.length; i++)
-              data = pvutils.utilConcatBuf(data, eContent.valueBlock.value[i].valueBlock.valueHex);
-          }
+          const data = eContent.getValue();
           //#endregion
 
           //#region Set "authenticatedSafe" value
@@ -530,7 +514,7 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region Check integrity
-          const ok = await cmsSigned.verify({ signer: 0, checkChain: false });
+          const ok = await cmsSigned.verify({ signer: 0, checkChain: false }, crypto);
           if (!ok) {
             throw new Error("Integrity for the PKCS#12 data is broken!");
           }

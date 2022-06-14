@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
@@ -13,6 +14,7 @@ import { BasicConstraints } from "./BasicConstraints";
 import { CryptoEnginePublicKeyParams } from "./CryptoEngine/CryptoEngineInterface";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 
 const TBS = "tbs";
 const VERSION = "version";
@@ -250,7 +252,7 @@ export type CertificateSchema = Schema.SchemaParameters<{
 export interface CertificateJson {
   tbs: string;
   version: number;
-  serialNumber: Schema.AsnIntegerJson;
+  serialNumber: asn1js.IntegerJson;
   signature: AlgorithmIdentifierJson;
   issuer: RelativeDistinguishedNamesJson;
   notBefore: TimeJson;
@@ -261,7 +263,7 @@ export interface CertificateJson {
   subjectUniqueID?: string;
   extensions?: ExtensionJson[];
   signatureAlgorithm: AlgorithmIdentifierJson;
-  signatureValue: Schema.AsnBitStringJson;
+  signatureValue: asn1js.BitStringJson;
 }
 
 /**
@@ -346,7 +348,21 @@ export class Certificate extends PkiObject implements ICertificate {
 
   public static override CLASS_NAME = "Certificate";
 
-  public tbs!: ArrayBuffer;
+  public tbsView!: Uint8Array;
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public get tbs(): ArrayBuffer {
+    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+  }
+
+  /**
+   * @deprecated Since version 3.0.0
+   */
+  public set tbs(value: ArrayBuffer) {
+    this.tbsView = new Uint8Array(value);
+  }
+
   public version!: number;
   public serialNumber!: asn1js.Integer;
   public signature!: AlgorithmIdentifier;
@@ -368,7 +384,7 @@ export class Certificate extends PkiObject implements ICertificate {
   constructor(parameters: CertificateParameters = {}) {
     super();
 
-    this.tbs = pvutils.getParametersValue(parameters, TBS, Certificate.defaultValues(TBS));
+    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, Certificate.defaultValues(TBS)));
     this.version = pvutils.getParametersValue(parameters, VERSION, Certificate.defaultValues(VERSION));
     this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, Certificate.defaultValues(SERIAL_NUMBER));
     this.signature = pvutils.getParametersValue(parameters, SIGNATURE, Certificate.defaultValues(SIGNATURE));
@@ -416,7 +432,7 @@ export class Certificate extends PkiObject implements ICertificate {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TBS:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case VERSION:
         return 0;
       case SERIAL_NUMBER:
@@ -434,9 +450,9 @@ export class Certificate extends PkiObject implements ICertificate {
       case SUBJECT_PUBLIC_KEY_INFO:
         return new PublicKeyInfo();
       case ISSUER_UNIQUE_ID:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case SUBJECT_UNIQUE_ID:
-        return new ArrayBuffer(0);
+        return EMPTY_BUFFER;
       case EXTENSIONS:
         return [];
       case SIGNATURE_ALGORITHM:
@@ -507,7 +523,7 @@ export class Certificate extends PkiObject implements ICertificate {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         tbsCertificate(names.tbsCertificate),
         AlgorithmIdentifier.schema(names.signatureAlgorithm || {
@@ -545,7 +561,7 @@ export class Certificate extends PkiObject implements ICertificate {
     //#endregion
 
     //#region Get internal properties from parsed schema
-    this.tbs = asn1.result.tbsCertificate.valueBeforeDecode;
+    this.tbsView = (asn1.result.tbsCertificate as asn1js.Sequence).valueBeforeDecodeView;
 
     if (TBS_CERTIFICATE_VERSION in asn1.result)
       this.version = asn1.result[TBS_CERTIFICATE_VERSION].valueBlock.valueDec;
@@ -646,15 +662,15 @@ export class Certificate extends PkiObject implements ICertificate {
   }
 
   public toSchema(encodeFlag = false): asn1js.Sequence {
-    let tbsSchema = {};
+    let tbsSchema: asn1js.AsnType;
 
     // Decode stored TBS value
     if (encodeFlag === false) {
-      if (!this.tbs.byteLength) { // No stored certificate TBS part
+      if (!this.tbsView.byteLength) { // No stored certificate TBS part
         return Certificate.schema().value[0];
       }
 
-      const asn1 = asn1js.fromBER(this.tbs);
+      const asn1 = asn1js.fromBER(this.tbsView);
       AsnError.assert(asn1, "TBS Certificate");
 
       tbsSchema = asn1.result;
@@ -675,9 +691,9 @@ export class Certificate extends PkiObject implements ICertificate {
 
   public toJSON(): CertificateJson {
     const res: CertificateJson = {
-      tbs: pvutils.bufferToHexCodes(this.tbs, 0, this.tbs.byteLength),
+      tbs: pvtsutils.Convert.ToHex(this.tbsView),
       version: this.version,
-      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
+      serialNumber: this.serialNumber.toJSON(),
       signature: this.signature.toJSON(),
       issuer: this.issuer.toJSON(),
       notBefore: this.notBefore.toJSON(),
@@ -685,7 +701,7 @@ export class Certificate extends PkiObject implements ICertificate {
       subject: this.subject.toJSON(),
       subjectPublicKeyInfo: this.subjectPublicKeyInfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON() as Schema.AsnBitStringJson,
+      signatureValue: this.signatureValue.toJSON(),
     };
 
     if ((VERSION in this) && (this.version !== Certificate.defaultValues(VERSION))) {
@@ -693,11 +709,11 @@ export class Certificate extends PkiObject implements ICertificate {
     }
 
     if (this.issuerUniqueID) {
-      res.issuerUniqueID = pvutils.bufferToHexCodes(this.issuerUniqueID, 0, this.issuerUniqueID.byteLength);
+      res.issuerUniqueID = pvtsutils.Convert.ToHex(this.issuerUniqueID);
     }
 
     if (this.subjectUniqueID) {
-      res.subjectUniqueID = pvutils.bufferToHexCodes(this.subjectUniqueID, 0, this.subjectUniqueID.byteLength);
+      res.subjectUniqueID = pvtsutils.Convert.ToHex(this.subjectUniqueID);
     }
 
     if (this.extensions) {
@@ -710,34 +726,34 @@ export class Certificate extends PkiObject implements ICertificate {
   /**
    * Importing public key for current certificate
    * @param parameters Public key export parameters
+   * @param crypto Crypto engine
    * @returns WebCrypto public key
    */
-  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams): Promise<CryptoKey> {
-    return common.getCrypto(true).getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
+  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams, crypto = common.getCrypto(true)): Promise<CryptoKey> {
+    return crypto.getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
   }
 
   /**
    * Get hash value for subject public key (default SHA-1)
    * @param hashAlgorithm Hashing algorithm name
+   * @param crypto Crypto engine
    * @returns Computed hash value from `Certificate.tbsCertificate.subjectPublicKeyInfo.subjectPublicKey`
    */
-  public async getKeyHash(hashAlgorithm = "SHA-1"): Promise<ArrayBuffer> {
-    return common.getCrypto(true).digest({ name: hashAlgorithm }, this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex);
+  public async getKeyHash(hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<ArrayBuffer> {
+    return crypto.digest({ name: hashAlgorithm }, this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
   }
 
   /**
    * Make a signature for current value from TBS section
    * @param privateKey Private key for SUBJECT_PUBLIC_KEY_INFO structure
    * @param hashAlgorithm Hashing algorithm
+   * @param crypto Crypto engine
    */
-  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<void> {
-    //#region Initial checking
+  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
+    // Initial checking
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
     }
-    //#endregion
-
-    const crypto = common.getCrypto(true);
 
     // Get a "default parameters" for current algorithm and set correct signature algorithm
     const signatureParameters = await crypto.getSignatureParameters(privateKey, hashAlgorithm);
@@ -746,19 +762,20 @@ export class Certificate extends PkiObject implements ICertificate {
     this.signatureAlgorithm = signatureParameters.signatureAlgorithm;
 
     // Create TBS data for signing
-    this.tbs = this.encodeTBS().toBER();
+    this.tbsView = new Uint8Array(this.encodeTBS().toBER());
 
     // Signing TBS data on provided private key
     // TODO remove any
-    const signature = await crypto.signWithPrivateKey(this.tbs, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(this.tbsView, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
   }
 
   /**
    * Verifies the certificate signature
    * @param issuerCertificate
+   * @param crypto Crypto engine
    */
-  public async verify(issuerCertificate?: Certificate): Promise<boolean> {
+  public async verify(issuerCertificate?: Certificate, crypto = common.getCrypto(true)): Promise<boolean> {
     let subjectPublicKeyInfo: PublicKeyInfo | undefined;
 
     // Set correct SUBJECT_PUBLIC_KEY_INFO value
@@ -773,7 +790,7 @@ export class Certificate extends PkiObject implements ICertificate {
       throw new Error("Please provide issuer certificate as a parameter");
     }
 
-    return common.getCrypto(true).verifyWithPublicKey(this.tbs, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(this.tbsView, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

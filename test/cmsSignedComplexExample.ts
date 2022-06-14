@@ -93,17 +93,17 @@ export async function createCMSSigned(hashAlg: string, signAlg: string, dataBuff
   //#region Make length of some elements in "indefinite form"
   _cmsSignedSchema.lenBlock.isIndefiniteForm = true;
 
-  const block1 = _cmsSignedSchema.valueBlock.value[1];
+  const block1 = _cmsSignedSchema.valueBlock.value[1] as asn1js.Constructed;
   block1.lenBlock.isIndefiniteForm = true;
 
-  const block2 = block1.valueBlock.value[0];
+  const block2 = block1.valueBlock.value[0] as asn1js.Constructed;
   block2.lenBlock.isIndefiniteForm = true;
 
   if (detachedSignature === false) {
-    const block3 = block2.valueBlock.value[2];
+    const block3 = block2.valueBlock.value[2] as asn1js.Constructed;
     block3.lenBlock.isIndefiniteForm = true;
     block3.valueBlock.value[1].lenBlock.isIndefiniteForm = true;
-    block3.valueBlock.value[1].valueBlock.value[0].lenBlock.isIndefiniteForm = true;
+    ((block3.valueBlock.value[1] as asn1js.Constructed).valueBlock.value[0] as asn1js.Constructed).lenBlock.isIndefiniteForm = true;
   }
   //#endregion
 

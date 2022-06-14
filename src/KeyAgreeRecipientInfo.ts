@@ -7,6 +7,7 @@ import { Certificate } from "./Certificate";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
+import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
 const ORIGINATOR = "originator";
@@ -36,7 +37,7 @@ export interface IKeyAgreeRecipientInfo {
 export interface KeyAgreeRecipientInfoJson {
   version: number;
   originator: OriginatorIdentifierOrKeyJson;
-  ukm?: Schema.AsnOctetStringJson;
+  ukm?: asn1js.OctetStringJson;
   keyEncryptionAlgorithm: AlgorithmIdentifierJson;
   recipientEncryptedKeys: RecipientEncryptedKeysJson;
 }
@@ -127,7 +128,7 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
       case UKM:
         return (memberValue.isEqual(KeyAgreeRecipientInfo.defaultValues(UKM)));
       case KEY_ENCRYPTION_ALGORITHM:
-        return ((memberValue.algorithmId === "") && (("algorithmParams" in memberValue) === false));
+        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
       case RECIPIENT_ENCRYPTED_KEY:
         return (memberValue.encryptedKeys.length === 0);
       case RECIPIENT_CERTIFICATE:
@@ -161,9 +162,9 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: names.blockName || "",
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.Integer({ name: names.version || "" }),
+        new asn1js.Integer({ name: names.version || EMPTY_STRING }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -179,7 +180,7 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 1 // [1]
           },
-          value: [new asn1js.OctetString({ name: names.ukm || "" })]
+          value: [new asn1js.OctetString({ name: names.ukm || EMPTY_STRING })]
         }),
         AlgorithmIdentifier.schema(names.keyEncryptionAlgorithm || {}),
         RecipientEncryptedKeys.schema(names.recipientEncryptedKeys || {})
@@ -240,7 +241,7 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
       value: [this.originator.toSchema()]
     }));
 
-    if (UKM in this) {
+    if (this.ukm) {
       outputArray.push(new asn1js.Constructed({
         optional: true,
         idBlock: {
@@ -275,7 +276,7 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
     };
 
     if (this.ukm) {
-      res.ukm = this.ukm.toJSON() as Schema.AsnOctetStringJson;
+      res.ukm = this.ukm.toJSON();
     }
 
     return res;

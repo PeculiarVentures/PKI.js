@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson } from "./AlgorithmIdentifier";
@@ -20,6 +21,8 @@ import * as Schema from "./Schema";
 import { id_ContentType_Data, id_eContentType_TSTInfo, id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
+import { ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
 
 export type SignedDataCRL = CertificateRevocationList | OtherRevocationInfoFormat;
 export type SignedDataCRLJson = CertificateRevocationListJson | OtherRevocationInfoFormatJson;
@@ -524,11 +527,11 @@ export class SignedData extends PkiObject implements ISignedData {
     return res;
   }
 
-  public verify(params?: SignedDataVerifyParams & { extendedMode?: false; }): Promise<boolean>;
-  public verify(params: SignedDataVerifyParams & { extendedMode: true; }): Promise<SignedDataVerifyResult>;
+  public verify(params?: SignedDataVerifyParams & { extendedMode?: false; }, crypto?: ICryptoEngine): Promise<boolean>;
+  public verify(params: SignedDataVerifyParams & { extendedMode: true; }, crypto?: ICryptoEngine): Promise<SignedDataVerifyResult>;
   public async verify({
     signer = (-1),
-    data = (new ArrayBuffer(0)),
+    data = (EMPTY_BUFFER),
     trustedCerts = [],
     checkDate = (new Date()),
     checkChain = false,
@@ -536,16 +539,14 @@ export class SignedData extends PkiObject implements ISignedData {
     extendedMode = false,
     findOrigin = null,
     findIssuer = null
-  }: SignedDataVerifyParams = {}): Promise<boolean | SignedDataVerifyResult> {
+  }: SignedDataVerifyParams = {}, crypto = common.getCrypto(true)): Promise<boolean | SignedDataVerifyResult> {
     let signerCert: Certificate | null = null;
     let timestampSerial: ArrayBuffer | null = null;
     try {
       //#region Global variables
-      let messageDigestValue = new ArrayBuffer(0);
-      let shaAlgorithm = "";
+      let messageDigestValue = EMPTY_BUFFER;
+      let shaAlgorithm = EMPTY_STRING;
       let certificatePath: Certificate[] = [];
-
-      const crypto = common.getCrypto(true);
       //#endregion
 
       //#region Get a signer number
@@ -573,7 +574,7 @@ export class SignedData extends PkiObject implements ISignedData {
 
       if (signerInfo.sid instanceof IssuerAndSerialNumber) {
         for (const certificate of this.certificates) {
-          if ((certificate instanceof Certificate) === false)
+          if (!(certificate instanceof Certificate))
             continue;
 
           if ((certificate.issuer.isEqual(signerInfo.sid.issuer)) &&
@@ -593,7 +594,7 @@ export class SignedData extends PkiObject implements ISignedData {
             continue;
           }
 
-          const digest = await crypto.digest({ name: "sha-1" }, new Uint8Array(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHex));
+          const digest = await crypto.digest({ name: "sha-1" }, certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
           if (pvutils.isEqualBuffer(digest, keyId)) {
             signerCert = certificate;
             break;
@@ -630,7 +631,7 @@ export class SignedData extends PkiObject implements ISignedData {
         let tstInfo: TSTInfo;
 
         try {
-          tstInfo = TSTInfo.fromBER(this.encapContentInfo.eContent.valueBlock.valueHex);
+          tstInfo = TSTInfo.fromBER(this.encapContentInfo.eContent.valueBlock.valueHexView);
         }
         catch (ex) {
           throw new SignedDataVerifyError({
@@ -647,7 +648,7 @@ export class SignedData extends PkiObject implements ISignedData {
 
         //#region Change "checkDate" and append "timestampSerial"
         checkDate = tstInfo.genTime;
-        timestampSerial = tstInfo.serialNumber.valueBlock.valueHex;
+        timestampSerial = tstInfo.serialNumber.valueBlock.valueHexView.slice();
         //#endregion
 
         //#region Check that we do have detached data content
@@ -660,7 +661,7 @@ export class SignedData extends PkiObject implements ISignedData {
         }
         //#endregion
 
-        if (!(await tstInfo.verify({ data }))) {
+        if (!(await tstInfo.verify({ data }, crypto))) {
           throw new SignedDataVerifyError({
             date: checkDate,
             code: 15,
@@ -676,7 +677,7 @@ export class SignedData extends PkiObject implements ISignedData {
       //#endregion
 
       if (checkChain) {
-        const certs = this.certificates.filter(certificate => (certificate instanceof Certificate && !!checkCA(certificate, signerCert)));
+        const certs = this.certificates.filter(certificate => (certificate instanceof Certificate && !!checkCA(certificate, signerCert))) as Certificate[];
         const chainParams: CertificateChainValidationEngineParameters = {
           checkDate,
           certs,
@@ -709,7 +710,7 @@ export class SignedData extends PkiObject implements ISignedData {
           chainEngine.ocsps.push(...(this.ocsps));
         }
 
-        const verificationResult = await chainEngine.verify({ passedWhenNotRevValues })
+        const verificationResult = await chainEngine.verify({ passedWhenNotRevValues }, crypto)
           .catch(e => {
             throw new SignedDataVerifyError({
               date: checkDate,
@@ -736,7 +737,7 @@ export class SignedData extends PkiObject implements ISignedData {
 
       //#region Find signer's hashing algorithm
 
-      const signerInfoHashAlgorithm = common.getAlgorithmByOID(signerInfo.digestAlgorithm.algorithmId);
+      const signerInfoHashAlgorithm = crypto.getAlgorithmByOID(signerInfo.digestAlgorithm.algorithmId);
       if (!("name" in signerInfoHashAlgorithm)) {
         throw new SignedDataVerifyError({
           date: checkDate,
@@ -757,16 +758,10 @@ export class SignedData extends PkiObject implements ISignedData {
       {
         if ((eContent.idBlock.tagClass === 1) &&
           (eContent.idBlock.tagNumber === 4)) {
-          if (eContent.idBlock.isConstructed === false)
-            data = eContent.valueBlock.valueHex;
-          else {
-            for (const contentValue of eContent.valueBlock.value) {
-              data = pvutils.utilConcatBuf(data, contentValue.valueBlock.valueHex);
-            }
-          }
+          data = eContent.getValue();
         }
         else
-          data = eContent.valueBlock.valueBeforeDecode;
+          data = eContent.valueBlock.valueBeforeDecodeView;
       }
       else // Detached data
       {
@@ -856,7 +851,7 @@ export class SignedData extends PkiObject implements ISignedData {
         return {
           date: checkDate,
           code: 14,
-          message: "",
+          message: EMPTY_STRING,
           signatureVerified: verifyResult,
           signerCertificate: signerCert,
           timestampSerial,
@@ -888,19 +883,16 @@ export class SignedData extends PkiObject implements ISignedData {
    * @param signerIndex Index number (starting from 0) of signer index to make signature for
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
    * @param data Detached data
+   * @param crypto Crypto engine
    */
-  public async sign(privateKey: CryptoKey, signerIndex: number, hashAlgorithm = "SHA-1", data = (new ArrayBuffer(0))): Promise<void> {
+  public async sign(privateKey: CryptoKey, signerIndex: number, hashAlgorithm = "SHA-1", data: BufferSource = (EMPTY_BUFFER), crypto = common.getCrypto(true)): Promise<void> {
     //#region Initial checking
     if (!privateKey)
       throw new Error("Need to provide a private key for signing");
     //#endregion
 
-    //#region Initial variables
-    const crypto = common.getCrypto(true);
-    //#endregion
-
     //#region Simple check for supported algorithm
-    const hashAlgorithmOID = common.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
+    const hashAlgorithmOID = crypto.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
     //#endregion
 
     //#region Append information about hash algorithm
@@ -932,10 +924,10 @@ export class SignedData extends PkiObject implements ISignedData {
       if (signerInfo.signedAttrs.encodedValue.byteLength !== 0)
         data = signerInfo.signedAttrs.encodedValue;
       else {
-        data = signerInfo.signedAttrs.toSchema().toBER(false);
+        data = signerInfo.signedAttrs.toSchema().toBER();
 
         //#region Change type from "[0]" to "SET" accordingly to standard
-        const view = new Uint8Array(data);
+        const view = pvtsutils.BufferSourceConverter.toUint8Array(data);
         view[0] = 0x31;
         //#endregion
       }
@@ -946,15 +938,10 @@ export class SignedData extends PkiObject implements ISignedData {
       {
         if ((eContent.idBlock.tagClass === 1) &&
           (eContent.idBlock.tagNumber === 4)) {
-          if (eContent.idBlock.isConstructed === false)
-            data = eContent.valueBlock.valueHex;
-          else {
-            for (const content of eContent.valueBlock.value)
-              data = pvutils.utilConcatBuf(data, content.valueBlock.valueHex);
-          }
+          data = eContent.getValue();
         }
         else
-          data = eContent.valueBlock.valueBeforeDecode;
+          data = eContent.valueBlock.valueBeforeDecodeView;
       }
       else // Detached data
       {

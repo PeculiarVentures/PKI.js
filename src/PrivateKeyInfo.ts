@@ -2,6 +2,7 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { Attribute, AttributeJson } from "./Attribute";
+import { EMPTY_STRING } from "./constants";
 import { ECPrivateKey } from "./ECPrivateKey";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -33,7 +34,7 @@ export type PrivateKeyInfoParameters = PkiObjectParameters & Partial<IPrivateKey
 export interface PrivateKeyInfoJson {
   version: number;
   privateKeyAlgorithm: AlgorithmIdentifierJson;
-  privateKey: Schema.AsnOctetStringJson;
+  privateKey: asn1js.OctetStringJson;
   attributes?: AttributeJson[];
 }
 
@@ -124,11 +125,11 @@ export class PrivateKeyInfo extends PkiObject implements IPrivateKeyInfo {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
         AlgorithmIdentifier.schema(names.privateKeyAlgorithm || {}),
-        new asn1js.OctetString({ name: (names.privateKey || "") }),
+        new asn1js.OctetString({ name: (names.privateKey || EMPTY_STRING) }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
@@ -137,7 +138,7 @@ export class PrivateKeyInfo extends PkiObject implements IPrivateKeyInfo {
           },
           value: [
             new asn1js.Repeated({
-              name: (names.attributes || ""),
+              name: (names.attributes || EMPTY_STRING),
               value: Attribute.schema()
             })
           ]
@@ -180,7 +181,7 @@ export class PrivateKeyInfo extends PkiObject implements IPrivateKeyInfo {
     switch (this.privateKeyAlgorithm.algorithmId) {
       case "1.2.840.113549.1.1.1": // RSA
         {
-          const privateKeyASN1 = asn1js.fromBER(this.privateKey.valueBlock.valueHex);
+          const privateKeyASN1 = asn1js.fromBER(this.privateKey.valueBlock.valueHexView);
           if (privateKeyASN1.offset !== -1)
             this.parsedKey = new RSAPrivateKey({ schema: privateKeyASN1.result });
         }
@@ -188,7 +189,7 @@ export class PrivateKeyInfo extends PkiObject implements IPrivateKeyInfo {
       case "1.2.840.10045.2.1": // ECDSA
         if ("algorithmParams" in this.privateKeyAlgorithm) {
           if (this.privateKeyAlgorithm.algorithmParams instanceof asn1js.ObjectIdentifier) {
-            const privateKeyASN1 = asn1js.fromBER(this.privateKey.valueBlock.valueHex);
+            const privateKeyASN1 = asn1js.fromBER(this.privateKey.valueBlock.valueHexView);
             if (privateKeyASN1.offset !== -1) {
               this.parsedKey = new ECPrivateKey({
                 namedCurve: this.privateKeyAlgorithm.algorithmParams.valueBlock.toString(),
@@ -236,7 +237,7 @@ export class PrivateKeyInfo extends PkiObject implements IPrivateKeyInfo {
       const object: PrivateKeyInfoJson = {
         version: this.version,
         privateKeyAlgorithm: this.privateKeyAlgorithm.toJSON(),
-        privateKey: this.privateKey.toJSON() as Schema.AsnOctetStringJson,
+        privateKey: this.privateKey.toJSON(),
       };
 
       if (this.attributes) {

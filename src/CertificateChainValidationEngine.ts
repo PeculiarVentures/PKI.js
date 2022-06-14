@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { AuthorityKeyIdentifier } from "./AuthorityKeyIdentifier";
 import { BasicOCSPResponse } from "./BasicOCSPResponse";
@@ -10,6 +11,7 @@ import { GeneralName } from "./GeneralName";
 import { id_AnyPolicy, id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BasicConstraints, id_CertificatePolicies, id_CRLDistributionPoints, id_FreshestCRL, id_InhibitAnyPolicy, id_KeyUsage, id_NameConstraints, id_PolicyConstraints, id_PolicyMappings, id_SubjectAltName, id_SubjectKeyIdentifier } from "./ObjectIdentifiers";
 import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
 import { GeneralSubtree } from "./GeneralSubtree";
+import { EMPTY_STRING } from "./constants";
 
 const TRUSTED_CERTS = "trustedCerts";
 const CERTS = "certs";
@@ -135,20 +137,20 @@ export class CertificateChainValidationEngine {
 
   public static defaultFindOrigin(certificate: Certificate, validationEngine: CertificateChainValidationEngine): string {
     //#region Firstly encode TBS for certificate
-    if (certificate.tbs.byteLength === 0) {
-      certificate.tbs = certificate.encodeTBS().toBER();
+    if (certificate.tbsView.byteLength === 0) {
+      certificate.tbsView = new Uint8Array(certificate.encodeTBS().toBER());
     }
     //#endregion
 
     //#region Search in Intermediate Certificates
     for (const localCert of validationEngine.certs) {
       //#region Firstly encode TBS for certificate
-      if (localCert.tbs.byteLength === 0) {
-        localCert.tbs = localCert.encodeTBS().toBER();
+      if (localCert.tbsView.byteLength === 0) {
+        localCert.tbsView = new Uint8Array(localCert.encodeTBS().toBER());
       }
       //#endregion
 
-      if (pvutils.isEqualBuffer(certificate.tbs, localCert.tbs))
+      if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, localCert.tbsView))
         return "Intermediate Certificates";
     }
     //#endregion
@@ -156,11 +158,11 @@ export class CertificateChainValidationEngine {
     //#region Search in Trusted Certificates
     for (const trustedCert of validationEngine.trustedCerts) {
       //#region Firstly encode TBS for certificate
-      if (trustedCert.tbs.byteLength === 0)
-        trustedCert.tbs = trustedCert.encodeTBS().toBER();
+      if (trustedCert.tbsView.byteLength === 0)
+        trustedCert.tbsView = new Uint8Array(trustedCert.encodeTBS().toBER());
       //#endregion
 
-      if (pvutils.isEqualBuffer(certificate.tbs, trustedCert.tbs))
+      if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, trustedCert.tbsView))
         return "Trusted Certificates";
     }
     //#endregion
@@ -168,7 +170,7 @@ export class CertificateChainValidationEngine {
     return "Unknown";
   }
 
-  public async defaultFindIssuer(certificate: Certificate, validationEngine: CertificateChainValidationEngine): Promise<Certificate[]> {
+  public async defaultFindIssuer(certificate: Certificate, validationEngine: CertificateChainValidationEngine, crypto = common.getCrypto(true)): Promise<Certificate[]> {
     //#region Initial variables
     const result: Certificate[] = [];
 
@@ -180,7 +182,7 @@ export class CertificateChainValidationEngine {
     //#region Speed-up searching in case of self-signed certificates
     if (certificate.subject.isEqual(certificate.issuer)) {
       try {
-        const verificationResult = await certificate.verify();
+        const verificationResult = await certificate.verify(undefined, crypto);
         if (verificationResult) {
           return [certificate];
         }
@@ -223,7 +225,7 @@ export class CertificateChainValidationEngine {
             if (extension.extnID === id_SubjectKeyIdentifier && extension.parsedValue) {
               extensionFound = true;
 
-              if (pvutils.isEqualBuffer(extension.parsedValue.valueBlock.valueHex, keyIdentifier.valueBlock.valueHex)) {
+              if (pvtsutils.BufferSourceConverter.isEqual(extension.parsedValue.valueBlock.valueHex, keyIdentifier.valueBlock.valueHexView)) {
                 result.push(possibleIssuer);
               }
 
@@ -272,7 +274,7 @@ export class CertificateChainValidationEngine {
     // Now perform certificate verification checking
     for (let i = 0; i < result.length; i++) {
       try {
-        const verificationResult = await certificate.verify(result[i]);
+        const verificationResult = await certificate.verify(result[i], crypto);
         if (verificationResult === false)
           result.splice(i, 1);
       }
@@ -317,7 +319,7 @@ export class CertificateChainValidationEngine {
     }
   }
 
-  public async sort(passedWhenNotRevValues = false): Promise<Certificate[]> {
+  public async sort(passedWhenNotRevValues = false, crypto = common.getCrypto(true)): Promise<Certificate[]> {
     // Initial variables
     const localCerts: Certificate[] = [];
 
@@ -353,7 +355,7 @@ export class CertificateChainValidationEngine {
       }
 
       for (let i = 0; i < findIssuerResult.length; i++) {
-        if (pvutils.isEqualBuffer(findIssuerResult[i].tbs, certificate.tbs)) {
+        if (pvtsutils.BufferSourceConverter.isEqual(findIssuerResult[i].tbsView, certificate.tbsView)) {
           result.push([findIssuerResult[i]]);
           continue;
         }
@@ -417,7 +419,7 @@ export class CertificateChainValidationEngine {
 
         for (let j = 0; j < issuerCertificates.length; j++) {
           try {
-            const result = await crls[i].verify({ issuerCertificate: issuerCertificates[j] });
+            const result = await crls[i].verify({ issuerCertificate: issuerCertificates[j] }, crypto);
             if (result) {
               crlsAndCertificates.push({
                 crl: crls[i],
@@ -437,7 +439,7 @@ export class CertificateChainValidationEngine {
       if (crlsAndCertificates.length) {
         return {
           status: 0,
-          statusMessage: "",
+          statusMessage: EMPTY_STRING,
           result: crlsAndCertificates
         };
       }
@@ -452,7 +454,7 @@ export class CertificateChainValidationEngine {
     //#region Find OCSP for specific certificate
     const findOCSP = async (certificate: Certificate, issuerCertificate: Certificate): Promise<number> => {
       //#region Get hash algorithm from certificate
-      const hashAlgorithm = common.getAlgorithmByOID<any>(certificate.signatureAlgorithm.algorithmId);
+      const hashAlgorithm = crypto.getAlgorithmByOID<any>(certificate.signatureAlgorithm.algorithmId);
       if (!hashAlgorithm.name) {
         return 1;
       }
@@ -464,7 +466,7 @@ export class CertificateChainValidationEngine {
       //#region Search for OCSP response for the certificate
       for (let i = 0; i < this.ocsps.length; i++) {
         const ocsp = this.ocsps[i];
-        const result = await ocsp.getCertificateStatus(certificate, issuerCertificate);
+        const result = await ocsp.getCertificateStatus(certificate, issuerCertificate, crypto);
         if (result.isForCertificate) {
           if (result.status === 0)
             return 0;
@@ -556,7 +558,7 @@ export class CertificateChainValidationEngine {
       return {
         result: true,
         resultCode: 0,
-        resultMessage: ""
+        resultMessage: EMPTY_STRING
       };
     }
     //#endregion
@@ -610,7 +612,7 @@ export class CertificateChainValidationEngine {
           let ocspResult = 2;
           let crlResult: FindCrlResult = {
             status: 0,
-            statusMessage: ""
+            statusMessage: EMPTY_STRING
           };
           //#endregion
 
@@ -750,7 +752,7 @@ export class CertificateChainValidationEngine {
         if (i === j)
           continue;
 
-        if (pvutils.isEqualBuffer(localCerts[i].tbs, localCerts[j].tbs)) {
+        if (pvtsutils.BufferSourceConverter.isEqual(localCerts[i].tbsView, localCerts[j].tbsView)) {
           localCerts.splice(j, 1);
           i = 0;
           break;
@@ -783,7 +785,7 @@ export class CertificateChainValidationEngine {
         const certificate = (result[i])[j];
 
         for (let k = 0; k < this.trustedCerts.length; k++) {
-          if (pvutils.isEqualBuffer(certificate.tbs, this.trustedCerts[k].tbs)) {
+          if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, this.trustedCerts[k].tbsView)) {
             found = true;
             break;
           }
@@ -839,9 +841,10 @@ export class CertificateChainValidationEngine {
   /**
    * Major verification function for certificate chain.
    * @param parameters
-   * @returns {Promise}
+   * @param crypto Crypto engine
+   * @returns
    */
-  async verify(parameters: CertificateChainValidationEngineVerifyParams = {}): Promise<CertificateChainValidationEngineVerifyResult> {
+  async verify(parameters: CertificateChainValidationEngineVerifyParams = {}, crypto = common.getCrypto(true)): Promise<CertificateChainValidationEngineVerifyResult> {
     //#region Auxiliary functions for name constraints checking
     /**
      * Compare two dNSName values
@@ -1008,8 +1011,8 @@ export class CertificateChainValidationEngine {
      */
     function compareIPAddress(name: asn1js.OctetString, constraint: asn1js.OctetString): boolean {
       //#region Common variables
-      const nameView = new Uint8Array(name.valueBlock.valueHex);
-      const constraintView = new Uint8Array(constraint.valueBlock.valueHex);
+      const nameView = name.valueBlock.valueHexView;
+      const constraintView = constraint.valueBlock.valueHexView;
       //#endregion
 
       //#region Work with IPv4 addresses
@@ -1125,7 +1128,7 @@ export class CertificateChainValidationEngine {
       //#endregion
 
       //#region Sorting certificates in the chain array
-      this.certs = await this.sort(passedWhenNotRevValues);
+      this.certs = await this.sort(passedWhenNotRevValues, crypto);
       //#endregion
 
       //#region Work with policies
@@ -1336,7 +1339,7 @@ export class CertificateChainValidationEngine {
             let subjectDomainPolicyIndex = (-1);
             //#endregion
 
-            //#region Search for index of policies indedes
+            //#region Search for index of policies indexes
             for (let n = 0; n < allPolicies.length; n++) {
               if (allPolicies[n] === policyMappings[i + 1].mappings[k].issuerDomainPolicy)
                 issuerDomainPolicyIndex = n;
@@ -1448,7 +1451,7 @@ export class CertificateChainValidationEngine {
       const policyResult: CertificateChainValidationEngineVerifyResult = {
         result: (userConstrPolicies.length > 0),
         resultCode: 0,
-        resultMessage: (userConstrPolicies.length > 0) ? "" : "Zero \"userConstrPolicies\" array, no intersections with \"authConstrPolicies\"",
+        resultMessage: (userConstrPolicies.length > 0) ? EMPTY_STRING : "Zero \"userConstrPolicies\" array, no intersections with \"authConstrPolicies\"",
         authConstrPolicies,
         userConstrPolicies,
         explicitPolicyIndicator,

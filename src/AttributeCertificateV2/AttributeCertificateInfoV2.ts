@@ -10,6 +10,7 @@ import { Holder, HolderJson, HolderSchema } from "./Holder";
 import * as Schema from "../Schema";
 import { PkiObject, PkiObjectParameters } from "../PkiObject";
 import { AsnError } from "../errors";
+import { EMPTY_STRING } from "../constants";
 
 const VERSION = "version";
 const HOLDER = "holder";
@@ -63,10 +64,10 @@ export interface AttributeCertificateInfoV2Json {
   holder: HolderJson;
   issuer: GeneralNamesJson | V2FormJson;
   signature: AlgorithmIdentifierJson;
-  serialNumber: Schema.AsnIntegerJson;
+  serialNumber: asn1js.IntegerJson;
   attrCertValidityPeriod: AttCertValidityPeriodJson;
   attributes: AttributeJson[];
-  issuerUniqueID?: Schema.AsnBitStringJson;
+  issuerUniqueID?: asn1js.BitStringJson;
   extensions?: ExtensionsJson;
 }
 
@@ -173,19 +174,19 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
-        new asn1js.Integer({ name: (names.version || "") }),
+        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
         Holder.schema(names.holder || {}),
         new asn1js.Choice({
           value: [
             GeneralNames.schema({
               names: {
-                blockName: (names.issuer || "")
+                blockName: (names.issuer || EMPTY_STRING)
               }
             }),
             new asn1js.Constructed({
-              name: (names.issuer || ""),
+              name: (names.issuer || EMPTY_STRING),
               idBlock: {
                 tagClass: 3,
                 tagNumber: 0 // [0]
@@ -195,10 +196,10 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
           ]
         }),
         AlgorithmIdentifier.schema(names.signature || {}),
-        new asn1js.Integer({ name: (names.serialNumber || "") }),
+        new asn1js.Integer({ name: (names.serialNumber || EMPTY_STRING) }),
         AttCertValidityPeriod.schema(names.attrCertValidityPeriod || {}),
         new asn1js.Sequence({
-          name: (names.attributes || ""),
+          name: (names.attributes || EMPTY_STRING),
           value: [
             new asn1js.Repeated({
               value: Attribute.schema()
@@ -207,7 +208,7 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
         }),
         new asn1js.BitString({
           optional: true,
-          name: (names.issuerUniqueID || "")
+          name: (names.issuerUniqueID || EMPTY_STRING)
         }),
         Extensions.schema(names.extensions || {}, true)
       ]
@@ -322,13 +323,13 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
       holder: this.holder.toJSON(),
       issuer: this.issuer.toJSON(),
       signature: this.signature.toJSON(),
-      serialNumber: this.serialNumber.toJSON() as Schema.AsnIntegerJson,
+      serialNumber: this.serialNumber.toJSON(),
       attrCertValidityPeriod: this.attrCertValidityPeriod.toJSON(),
       attributes: Array.from(this.attributes, o => o.toJSON())
     };
 
     if (this.issuerUniqueID) {
-      result.issuerUniqueID = this.issuerUniqueID.toJSON() as Schema.AsnBitStringJson;
+      result.issuerUniqueID = this.issuerUniqueID.toJSON();
     }
     if (this.extensions) {
       result.extensions = this.extensions.toJSON();

@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
@@ -16,7 +17,7 @@ export type BasicConstraintsParameters = PkiObjectParameters & Partial<IBasicCon
 
 export interface BasicConstraintsJson {
   cA?: boolean;
-  pathLenConstraint?: Schema.AsnIntegerJson | number;
+  pathLenConstraint?: asn1js.IntegerJson | number;
 }
 
 /**
@@ -74,15 +75,15 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
     const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return (new asn1js.Sequence({
-      name: (names.blockName || ""),
+      name: (names.blockName || EMPTY_STRING),
       value: [
         new asn1js.Boolean({
           optional: true,
-          name: (names.cA || "")
+          name: (names.cA || EMPTY_STRING)
         }),
         new asn1js.Integer({
           optional: true,
-          name: (names.pathLenConstraint || "")
+          name: (names.pathLenConstraint || EMPTY_STRING)
         })
       ]
     }));
@@ -158,7 +159,7 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
 
     if (PATH_LENGTH_CONSTRAINT in this) {
       if (this.pathLenConstraint instanceof asn1js.Integer) {
-        object.pathLenConstraint = this.pathLenConstraint.toJSON() as Schema.AsnIntegerJson;
+        object.pathLenConstraint = this.pathLenConstraint.toJSON();
       } else {
         object.pathLenConstraint = this.pathLenConstraint;
       }
