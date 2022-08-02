@@ -385,7 +385,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
     //#region Perform verification
     return crypto.verifyWithPublicKey(
       stream.buffer.slice(0, stream.length),
-      { valueBlock: { valueHexView: this.signature.toBER(false) } } as any,
+      new asn1js.OctetString({ valueHex: this.signature.toBER(false) }),
       publicKeyInfo,
       { algorithmId: EMPTY_STRING } as AlgorithmIdentifier,
       "SHA-256"
