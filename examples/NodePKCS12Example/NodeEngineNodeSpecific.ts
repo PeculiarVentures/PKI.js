@@ -1,3 +1,4 @@
+/* eslint-disable deprecation/deprecation */
 import * as crypto from "crypto";
 
 export function getRandomValues(length: number): Uint8Array {
@@ -50,7 +51,6 @@ export function encryptUsingPBKDF2Password(
   if (iv.byteLength)
     cipher = crypto.createCipheriv(algorithm, key, Buffer.from(iv));
   else
-    // eslint-disable-next-line deprecation/deprecation
     cipher = crypto.createCipher(algorithm, key);
   //#endregion
 
