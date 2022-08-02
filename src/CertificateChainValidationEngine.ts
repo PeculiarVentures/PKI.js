@@ -33,7 +33,7 @@ export interface CertificateChainValidationEngineVerifyResult {
 }
 
 export type FindOriginCallback = (certificate: Certificate, validationEngine: CertificateChainValidationEngine) => string;
-export type FindIssuerCallback = (certificate: Certificate, validationEngine: CertificateChainValidationEngine) => Promise<Certificate[]>;
+export type FindIssuerCallback = (certificate: Certificate, validationEngine: CertificateChainValidationEngine, crypto?: common.ICryptoEngine) => Promise<Certificate[]>;
 
 export interface CertificateChainValidationEngineParameters {
   trustedCerts?: Certificate[];
@@ -324,7 +324,7 @@ export class CertificateChainValidationEngine {
     const localCerts: Certificate[] = [];
 
     //#region Building certificate path
-    const buildPath = async (certificate: Certificate): Promise<Certificate[][]> => {
+    const buildPath = async (certificate: Certificate, crypto: common.ICryptoEngine): Promise<Certificate[][]> => {
       const result: Certificate[][] = [];
 
       // Aux function checking array for unique elements
@@ -349,7 +349,7 @@ export class CertificateChainValidationEngine {
         return unique;
       }
 
-      const findIssuerResult = await this.findIssuer(certificate, this);
+      const findIssuerResult = await this.findIssuer(certificate, this, crypto);
       if (findIssuerResult.length === 0) {
         throw new Error("No valid certificate paths found");
       }
@@ -360,7 +360,7 @@ export class CertificateChainValidationEngine {
           continue;
         }
 
-        const buildPathResult = await buildPath(findIssuerResult[i]);
+        const buildPathResult = await buildPath(findIssuerResult[i], crypto);
 
         for (let j = 0; j < buildPathResult.length; j++) {
           const copy = buildPathResult[j].slice();
@@ -767,7 +767,7 @@ export class CertificateChainValidationEngine {
     //#endregion
 
     //#region Build path for "end entity" certificate
-    result = await buildPath(localCerts[localCerts.length - 1]);
+    result = await buildPath(localCerts[localCerts.length - 1], crypto);
     if (result.length === 0) {
       throw {
         result: false,
