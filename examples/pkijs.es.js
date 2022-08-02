@@ -421,7 +421,7 @@ RelativeDistinguishedNames.CLASS_NAME = "RelativeDistinguishedNames";
 
 const TYPE$4 = "type";
 const VALUE$5 = "value";
-function builtInStandardAttributes(parameters = {}, optional) {
+function builtInStandardAttributes(parameters = {}, optional = false) {
     const names = pvutils.getParametersValue(parameters, "names", {});
     return (new asn1js.Sequence({
         optional,
@@ -567,7 +567,7 @@ function builtInStandardAttributes(parameters = {}, optional) {
         ]
     }));
 }
-function builtInDomainDefinedAttributes(optional) {
+function builtInDomainDefinedAttributes(optional = false) {
     return (new asn1js.Sequence({
         optional,
         value: [
@@ -576,7 +576,7 @@ function builtInDomainDefinedAttributes(optional) {
         ]
     }));
 }
-function extensionAttributes(optional) {
+function extensionAttributes(optional = false) {
     return (new asn1js.Set({
         optional,
         value: [
@@ -7192,7 +7192,7 @@ class SignedCertificateTimestamp extends PkiObject {
         stream.appendUint16(this.extensions.byteLength);
         if (this.extensions.byteLength !== 0)
             stream.appendView(new Uint8Array(this.extensions));
-        return crypto.verifyWithPublicKey(stream.buffer.slice(0, stream.length), { valueBlock: { valueHexView: this.signature.toBER(false) } }, publicKeyInfo, { algorithmId: EMPTY_STRING }, "SHA-256");
+        return crypto.verifyWithPublicKey(stream.buffer.slice(0, stream.length), new asn1js.OctetString({ valueHex: this.signature.toBER(false) }), publicKeyInfo, { algorithmId: EMPTY_STRING }, "SHA-256");
     }
 }
 SignedCertificateTimestamp.CLASS_NAME = "SignedCertificateTimestamp";

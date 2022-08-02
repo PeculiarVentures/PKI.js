@@ -123,7 +123,7 @@ async function createSelfSignedCertificate(hashAlg, signAlg) {
 /**
  * Create CMS_Signed
  */
-async function createCMSSigned$1(hashAlg, signAlg, dataBuffer, detachedSignature, addExt) {
+async function createCMSSigned$1(hashAlg, signAlg, dataBuffer, detachedSignature = false, addExt = false) {
     // Get a "crypto" extension
     const crypto = pkijs.getCrypto(true);
     const certWithKey = await createSelfSignedCertificate(hashAlg, signAlg);
@@ -215,7 +215,7 @@ async function createCMSSigned$1(hashAlg, signAlg, dataBuffer, detachedSignature
 /**
  * Verify existing CMS_Signed
  */
-async function verifyCMSSigned$1(cmsSignedBuffer, trustedCertificates, dataBuffer) {
+async function verifyCMSSigned$1(cmsSignedBuffer, trustedCertificates = [], dataBuffer) {
     //#region Initial check
     if (cmsSignedBuffer.byteLength === 0)
         throw new Error("Nothing to verify!");
@@ -272,7 +272,7 @@ function handleFileBrowse$1(evt, cb) {
         tempReader.readAsArrayBuffer(currentFiles[0]);
     }
 }
-function decodePEM(pem, tag) {
+function decodePEM(pem, tag = "[A-Z0-9 ]+") {
     const pattern = new RegExp(`-{5}BEGIN ${tag}-{5}([a-zA-Z0-9=+\\/\\n\\r]+)-{5}END ${tag}-{5}`, "g");
     const res = [];
     let matches = null;
