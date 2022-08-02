@@ -7192,7 +7192,7 @@ class SignedCertificateTimestamp extends PkiObject {
         stream.appendUint16(this.extensions.byteLength);
         if (this.extensions.byteLength !== 0)
             stream.appendView(new Uint8Array(this.extensions));
-        return crypto.verifyWithPublicKey(stream.buffer.slice(0, stream.length), { valueBlock: { valueHex: this.signature.toBER(false) } }, publicKeyInfo, { algorithmId: EMPTY_STRING }, "SHA-256");
+        return crypto.verifyWithPublicKey(stream.buffer.slice(0, stream.length), { valueBlock: { valueHexView: this.signature.toBER(false) } }, publicKeyInfo, { algorithmId: EMPTY_STRING }, "SHA-256");
     }
 }
 SignedCertificateTimestamp.CLASS_NAME = "SignedCertificateTimestamp";
