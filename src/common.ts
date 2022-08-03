@@ -6,6 +6,8 @@ import type { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, ICryp
 import { ArgumentError } from "./errors";
 
 //#region Crypto engine related function
+export { ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
+
 export interface GlobalCryptoEngine {
   name: string;
   crypto: ICryptoEngine | null;
