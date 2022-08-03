@@ -14586,7 +14586,7 @@ class CertificateChainValidationEngine {
     }
     async sort(passedWhenNotRevValues = false, crypto = getCrypto(true)) {
         const localCerts = [];
-        const buildPath = async (certificate) => {
+        const buildPath = async (certificate, crypto) => {
             const result = [];
             function checkUnique(array) {
                 let unique = true;
@@ -14604,7 +14604,7 @@ class CertificateChainValidationEngine {
                 }
                 return unique;
             }
-            const findIssuerResult = await this.findIssuer(certificate, this);
+            const findIssuerResult = await this.findIssuer(certificate, this, crypto);
             if (findIssuerResult.length === 0) {
                 throw new Error("No valid certificate paths found");
             }
@@ -14613,7 +14613,7 @@ class CertificateChainValidationEngine {
                     result.push([findIssuerResult[i]]);
                     continue;
                 }
-                const buildPathResult = await buildPath(findIssuerResult[i]);
+                const buildPathResult = await buildPath(findIssuerResult[i], crypto);
                 for (let j = 0; j < buildPathResult.length; j++) {
                     const copy = buildPathResult[j].slice();
                     copy.splice(0, 0, findIssuerResult[i]);
@@ -14905,7 +14905,7 @@ class CertificateChainValidationEngine {
         }
         let result;
         const certificatePath = [localCerts[localCerts.length - 1]];
-        result = await buildPath(localCerts[localCerts.length - 1]);
+        result = await buildPath(localCerts[localCerts.length - 1], crypto);
         if (result.length === 0) {
             throw {
                 result: false,
