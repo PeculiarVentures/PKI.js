@@ -81,6 +81,6 @@
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "name": "pkijs",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "license": "BSD-3-Clause"
 }
