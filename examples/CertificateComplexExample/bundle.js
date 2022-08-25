@@ -300,7 +300,11 @@ function parseCertificate() {
         extensionTable.deleteRow(extensionTable.rows.length - 1);
     //#endregion
     //#region Decode existing X.509 certificate
-    const certificate = pkijs.Certificate.fromBER(certificateBuffer);
+    const certificates = parseCertificate$1(certificateBuffer);
+    if (!certificates.length) {
+        throw new Error("Cannot get certificate from the file");
+    }
+    const certificate = certificates[0];
     //#endregion
     //#region Put information about X.509 certificate issuer
     const rdnmap = {
