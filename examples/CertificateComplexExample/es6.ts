@@ -37,7 +37,11 @@ function parseCertificate() {
   //#endregion
 
   //#region Decode existing X.509 certificate
-  const certificate = pkijs.Certificate.fromBER(certificateBuffer);
+  const certificates = common.parseCertificate(certificateBuffer);
+  if (!certificates.length) {
+    throw new Error("Cannot get certificate from the file");
+  }
+  const certificate = certificates[0];
   //#endregion
 
   //#region Put information about X.509 certificate issuer
