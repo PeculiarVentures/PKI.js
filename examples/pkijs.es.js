@@ -17827,7 +17827,7 @@ const CLEAR_PROPS$3 = [
     SIGNED_DATA_SIGNER_INFOS
 ];
 class SignedDataVerifyError extends Error {
-    constructor({ message, code = 0, date = new Date(), signatureVerified = null, signerCertificate = null, signerCertificateVerified = null, timestampSerial = null, }) {
+    constructor({ message, code = 0, date = new Date(), signatureVerified = null, signerCertificate = null, signerCertificateVerified = null, timestampSerial = null, certificatePath = [], }) {
         super(message);
         this.name = "SignedDataVerifyError";
         this.date = date;
@@ -17836,6 +17836,7 @@ class SignedDataVerifyError extends Error {
         this.signatureVerified = signatureVerified;
         this.signerCertificate = signerCertificate;
         this.signerCertificateVerified = signerCertificateVerified;
+        this.certificatePath = certificatePath;
     }
 }
 class SignedData extends PkiObject {
@@ -18147,7 +18148,7 @@ class SignedData extends PkiObject {
                         date: checkDate,
                         code: 15,
                         message: "Error during verification: TSTInfo verification is failed",
-                        signatureVerified: null,
+                        signatureVerified: false,
                         signerCertificate: signerCert,
                         timestampSerial,
                         signerCertificateVerified: true
