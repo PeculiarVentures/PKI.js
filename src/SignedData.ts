@@ -92,6 +92,7 @@ export interface SignedDataVerifyErrorParams {
   signatureVerified?: boolean | null;
   signerCertificate?: Certificate | null;
   signerCertificateVerified?: boolean | null;
+  certificatePath?: Certificate[];
 }
 
 export interface SignedDataVerifyResult {
@@ -105,7 +106,7 @@ export interface SignedDataVerifyResult {
   certificatePath: Certificate[];
 }
 
-export class SignedDataVerifyError extends Error {
+export class SignedDataVerifyError extends Error implements SignedDataVerifyResult {
 
   public date: Date;
   public code: number;
@@ -113,6 +114,7 @@ export class SignedDataVerifyError extends Error {
   public signerCertificate: Certificate | null;
   public signerCertificateVerified: boolean | null;
   public timestampSerial: ArrayBuffer | null;
+  public certificatePath: Certificate[];
 
   constructor({
     message,
@@ -122,6 +124,7 @@ export class SignedDataVerifyError extends Error {
     signerCertificate = null,
     signerCertificateVerified = null,
     timestampSerial = null,
+    certificatePath = [],
   }: SignedDataVerifyErrorParams) {
     super(message);
     this.name = "SignedDataVerifyError";
@@ -132,6 +135,7 @@ export class SignedDataVerifyError extends Error {
     this.signatureVerified = signatureVerified;
     this.signerCertificate = signerCertificate;
     this.signerCertificateVerified = signerCertificateVerified;
+    this.certificatePath = certificatePath;
 
   }
 }
@@ -666,7 +670,7 @@ export class SignedData extends PkiObject implements ISignedData {
             date: checkDate,
             code: 15,
             message: "Error during verification: TSTInfo verification is failed",
-            signatureVerified: null,
+            signatureVerified: false,
             signerCertificate: signerCert,
             timestampSerial,
             signerCertificateVerified: true
