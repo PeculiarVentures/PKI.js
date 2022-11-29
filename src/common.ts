@@ -36,32 +36,37 @@ export function setEngine(name: string, crypto: ICryptoEngine | Crypto, subtle: 
 /**
  * Sets global crypto engine
  * @param name Name of the crypto engine
- * @param crypto Crypto engine
+ * @param crypto Crypto engine. If the parameter is omitted, `CryptoEngine` with `self.crypto` are used
  * @since 3.0.0
  */
 export function setEngine(name: string, crypto?: ICryptoEngine): void;
 export function setEngine(name: string, ...args: any[]): void {
   let crypto: ICryptoEngine | null = null;
-  if (args.length === 1) {
+  if (args.length < 2) {
     // v3.0.0 implementation
-    crypto = args[0];
+    if (args.length) {
+      crypto = args[0];
+    } else {
+      // crypto param is omitted, use CryptoEngine(self.crypto)
+      crypto = typeof self !== "undefined" && self.crypto ? new CryptoEngine({ name: "browser", crypto: self.crypto }) : null;
+    }
   } else {
     // prev implementation
     const cryptoArg = args[0];
     const subtleArg = args[1];
     if (isCryptoEngine(subtleArg)) {
       crypto = subtleArg;
-    } if (isCryptoEngine(cryptoArg)) {
+    } else if (isCryptoEngine(cryptoArg)) {
       crypto = cryptoArg;
-    } if ("subtle" in cryptoArg && "getRandomValues" in cryptoArg) {
+    } else if ("subtle" in cryptoArg && "getRandomValues" in cryptoArg) {
       crypto = new CryptoEngine({
         crypto: cryptoArg,
       });
     }
   }
 
-  //#region We are in Node
   if ((typeof process !== "undefined") && ("pid" in process) && (typeof global !== "undefined") && (typeof window === "undefined")) {
+    // We are in Node
     if (typeof (global as any)[process.pid] === "undefined") {
       (global as any)[process.pid] = {};
     }
@@ -84,18 +89,13 @@ export function setEngine(name: string, ...args: any[]): void {
       name: name,
       crypto,
     };
+  } else {
+    // We are in browser
+    engine = {
+      name: name,
+      crypto,
+    };
   }
-  //#endregion
-  //#region We are in browser
-  else {
-    if (engine.name !== name) {
-      engine = {
-        name: name,
-        crypto,
-      };
-    }
-  }
-  //#endregion
 }
 
 export function getEngine(): GlobalCryptoEngine {
