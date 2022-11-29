@@ -6757,8 +6757,13 @@ function isCryptoEngine(engine) {
 }
 function setEngine(name, ...args) {
     let crypto = null;
-    if (args.length === 1) {
-        crypto = args[0];
+    if (args.length < 2) {
+        if (args.length) {
+            crypto = args[0];
+        }
+        else {
+            crypto = typeof self !== "undefined" && self.crypto ? new CryptoEngine({ name: "browser", crypto: self.crypto }) : null;
+        }
     }
     else {
         const cryptoArg = args[0];
@@ -6766,10 +6771,10 @@ function setEngine(name, ...args) {
         if (isCryptoEngine(subtleArg)) {
             crypto = subtleArg;
         }
-        if (isCryptoEngine(cryptoArg)) {
+        else if (isCryptoEngine(cryptoArg)) {
             crypto = cryptoArg;
         }
-        if ("subtle" in cryptoArg && "getRandomValues" in cryptoArg) {
+        else if ("subtle" in cryptoArg && "getRandomValues" in cryptoArg) {
             crypto = new CryptoEngine({
                 crypto: cryptoArg,
             });
@@ -6798,12 +6803,10 @@ function setEngine(name, ...args) {
         };
     }
     else {
-        if (engine.name !== name) {
-            engine = {
-                name: name,
-                crypto,
-            };
-        }
+        engine = {
+            name: name,
+            crypto,
+        };
     }
 }
 function getEngine() {
