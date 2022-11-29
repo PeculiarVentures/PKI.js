@@ -1,6 +1,7 @@
 import * as assert from "assert";
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
+import { Crypto } from "@peculiar/webcrypto";
 import * as pkijs from "../src";
 
 context("PKIjs functional testing", () => {
@@ -86,7 +87,7 @@ context("PKIjs functional testing", () => {
     });
   });
 
-  it("Attribute", () => {
+  it("Attribute #1", () => {
     results["Attribute"] = new pkijs.Attribute({
       schema: (new pkijs.Attribute({
         type: fakeOID,
@@ -118,7 +119,7 @@ context("PKIjs functional testing", () => {
     });
   });
 
-  it("Attribute", () => {
+  it("Attribute #2", () => {
     results["Attribute"] = new pkijs.Attribute({
       schema: (new pkijs.Attribute({
         type: fakeOID,
@@ -661,4 +662,93 @@ context("PKIjs functional testing", () => {
     });
 
   });
+
+  context("setEngine/getEngine", () => {
+
+    const crypto = new Crypto();
+    const provider = new pkijs.CryptoEngine({
+      name: "",
+      crypto,
+    });
+
+    const tests: {
+      name: string;
+      args: [string, ...any[]];
+      want: null | Crypto;
+      browser?: boolean;
+    }[] = [
+        {
+          name: "use deprecated (name, crypto, subtle)",
+          args: ["test", crypto, crypto.subtle],
+          want: crypto,
+        },
+        {
+          name: "use deprecated (name, provider, provider)",
+          args: ["test", provider, provider],
+          want: crypto,
+        },
+        {
+          name: "name, provider",
+          args: ["test", provider],
+          want: crypto,
+        },
+        {
+          name: "default NodeJS",
+          args: ["test"],
+          want: null,
+        },
+        {
+          name: "default Browser",
+          args: ["test"],
+          want: crypto,
+          browser: true,
+        },
+      ];
+
+    let oldEngine: pkijs.GlobalCryptoEngine;
+    before(() => {
+      oldEngine = pkijs.getEngine();
+    });
+
+    beforeEach(() => {
+      pkijs.engine.name = "none";
+      pkijs.engine.crypto = null;
+      delete (global as any)[process.pid];
+    });
+
+    after(() => {
+      if (oldEngine.crypto) {
+        pkijs.setEngine(oldEngine.name, oldEngine.crypto);
+      }
+    });
+
+    for (const t of tests) {
+      it(t.name, () => {
+        if (t.browser) {
+          (global as any).self = (global as any).window = { crypto };
+        }
+
+        try {
+          // eslint-disable-next-line deprecation/deprecation
+          pkijs.setEngine.apply(undefined, t.args as any);
+          const engine = pkijs.getEngine();
+          assert.strictEqual(engine.name, t.args[0], "incorrect name");
+          if (t.want === null) {
+            assert.strictEqual(engine.crypto, t.want, "engine.crypto shall be null");
+          } else {
+            assert.ok(engine.crypto instanceof pkijs.CryptoEngine, "engine.crypto shall be CryptoEngine");
+            assert.ok(engine.crypto.crypto instanceof Crypto, "engine.crypto.crypto shall be Crypto");
+            assert.equal(engine.crypto.subtle, crypto.subtle, "engine.subtle shall be SubtleCrypto");
+          }
+        } finally {
+          if (t.browser) {
+            delete (global as any).self;
+            delete (global as any).window;
+          }
+        }
+      });
+    }
+
+  });
+
 });
