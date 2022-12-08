@@ -1102,13 +1102,12 @@ function simpleVerification(params: {
       crls
     });
 
+    const result = await certChain.verify(params.verifyParameters || {});
     if (params.successExpected) {
-      const result = await certChain.verify(params.verifyParameters || {});
       if (!result.result) {
         throw new Error(`Successfull verification expected, but FAILED return: ${result.resultMessage}`);
       }
     } else {
-      const result = await certChain.verify(params.verifyParameters || {});
       if (result.result)
         throw new Error("Fail on verification expected, but SUCCESS return");
     }
@@ -1211,6 +1210,33 @@ context("NIST PKITS tests", () => {
       ],
       successExpected: false
     }));
+
+    it("4.1.7 Valid Signatures Trusted Intermediate", simpleVerification({
+      trustedCertificates: [
+        "GoodCACert.crt",
+      ],
+      certificates: [
+        "ValidCertificatePathTest1EE.crt"
+      ],
+      crls: [
+        "GoodCACRL.crl",
+      ],
+      successExpected: true,
+    }));
+
+    it("4.1.8 Inalid Signatures Trusted Intermediate no CRL", simpleVerification({
+      trustedCertificates: [
+        "GoodCACert.crt",
+      ],
+      certificates: [
+        "ValidCertificatePathTest1EE.crt"
+      ],
+      crls: [
+        "TrustAnchorRootCRL.crl",
+      ],
+      successExpected: false,
+    }));
+
   });
   //#endregion
 

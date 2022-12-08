@@ -21,10 +21,36 @@ const CHECK_DATE = "checkDate";
 const FIND_ORIGIN = "findOrigin";
 const FIND_ISSUER = "findIssuer";
 
+
+export enum ChainValidationCode {
+  unknown = -1,
+  success = 0,
+  noRevocation = 11,
+  noPath = 60,
+  noValidPath = 97,
+}
+
+export class ChainValidationError extends Error {
+
+  public static readonly NAME = "ChainValidationError";
+
+  public code: ChainValidationCode;
+
+  constructor(code: ChainValidationCode, message: string) {
+    super(message);
+
+    this.name = ChainValidationError.NAME;
+    this.code = code;
+    this.message = message;
+  }
+
+}
+
 export interface CertificateChainValidationEngineVerifyResult {
   result: boolean;
   resultCode: number;
   resultMessage: string;
+  error?: Error | ChainValidationError;
   authConstrPolicies?: string[];
   userConstrPolicies?: string[];
   explicitPolicyIndicator?: boolean;
@@ -64,6 +90,22 @@ export interface CertificateChainValidationEngineVerifyParams {
   initialExcludedSubtreesSet?: GeneralSubtree[];
   initialRequiredNameForms?: GeneralSubtree[];
   passedWhenNotRevValues?: boolean;
+}
+
+/**
+ * Returns `true` if the certificate is in the trusted list, otherwise `false`
+ * @param cert A certificate that is expected to be in the trusted list
+ * @param trustedList List of trusted certificates
+ * @returns
+ */
+function isTrusted(cert: Certificate, trustedList: Certificate[]): boolean {
+  for (let i = 0; i < trustedList.length; i++) {
+    if (pvtsutils.BufferSourceConverter.isEqual(cert.tbsView, trustedList[i].tbsView)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -347,6 +389,10 @@ export class CertificateChainValidationEngine {
         }
 
         return unique;
+      }
+
+      if (isTrusted(certificate, this.trustedCerts)) {
+        return [[certificate]];
       }
 
       const findIssuerResult = await this.findIssuer(certificate, this, crypto);
@@ -666,12 +712,7 @@ export class CertificateChainValidationEngine {
               }
             } else {
               if (passedWhenNotRevValues === false) {
-                // TODO use CertificateChainValidationError
-                throw {
-                  result: false,
-                  resultCode: 11,
-                  resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
-                };
+                throw new ChainValidationError(ChainValidationCode.noRevocation, `No revocation values found for one of certificates: ${crlResult.statusMessage}`);
               }
             }
           } else {
@@ -704,11 +745,7 @@ export class CertificateChainValidationEngine {
             }
 
             if (extensionFound) {
-              throw {
-                result: false,
-                resultCode: 11,
-                resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
-              };
+              throw new ChainValidationError(ChainValidationCode.noRevocation, `No revocation values found for one of certificates: ${crlResult.statusMessage}`);
             }
           }
           //#endregion
@@ -761,19 +798,17 @@ export class CertificateChainValidationEngine {
     }
     //#endregion
 
+    const leafCert = localCerts[localCerts.length - 1];
+
     //#region Initial variables
     let result;
-    const certificatePath = [localCerts[localCerts.length - 1]]; // The "end entity" certificate must be the least in CERTS array
+    const certificatePath = [leafCert]; // The "end entity" certificate must be the least in CERTS array
     //#endregion
 
     //#region Build path for "end entity" certificate
-    result = await buildPath(localCerts[localCerts.length - 1], crypto);
+    result = await buildPath(leafCert, crypto);
     if (result.length === 0) {
-      throw {
-        result: false,
-        resultCode: 60,
-        resultMessage: "Unable to find certificate path"
-      };
+      throw new ChainValidationError(ChainValidationCode.noPath, "Unable to find certificate path");
     }
     //#endregion
 
@@ -802,12 +837,7 @@ export class CertificateChainValidationEngine {
     }
 
     if (result.length === 0) {
-      // TODO use error
-      throw {
-        result: false,
-        resultCode: 97,
-        resultMessage: "No valid certificate paths found"
-      };
+      throw new ChainValidationError(ChainValidationCode.noValidPath, "No valid certificate paths found");
     }
     //#endregion
 
@@ -1764,26 +1794,33 @@ export class CertificateChainValidationEngine {
 
       return policyResult;
       //#endregion
-    }
-    catch (error) {
-      // TODO check error
-      if (error instanceof Object) {
-        if ("resultMessage" in error)
-          return error;
-
-        if ("message" in error) {
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error instanceof ChainValidationError) {
           return {
             result: false,
-            resultCode: -1,
-            resultMessage: (error as Error).message
+            resultCode: error.code,
+            resultMessage: error.message,
+            error: error,
           };
         }
+
+        return {
+          result: false,
+          resultCode: ChainValidationCode.unknown,
+          resultMessage: error.message,
+          error: error,
+        };
+      }
+
+      if (error && typeof error === "object" && "resultMessage" in error) {
+        return error as CertificateChainValidationEngineVerifyResult;
       }
 
       return {
         result: false,
         resultCode: -1,
-        resultMessage: error as string,
+        resultMessage: `${error}`,
       };
     }
   }
