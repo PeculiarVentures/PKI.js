@@ -14455,6 +14455,31 @@ const OCSPS$1 = "ocsps";
 const CHECK_DATE = "checkDate";
 const FIND_ORIGIN = "findOrigin";
 const FIND_ISSUER = "findIssuer";
+var ChainValidationCode;
+(function (ChainValidationCode) {
+    ChainValidationCode[ChainValidationCode["unknown"] = -1] = "unknown";
+    ChainValidationCode[ChainValidationCode["success"] = 0] = "success";
+    ChainValidationCode[ChainValidationCode["noRevocation"] = 11] = "noRevocation";
+    ChainValidationCode[ChainValidationCode["noPath"] = 60] = "noPath";
+    ChainValidationCode[ChainValidationCode["noValidPath"] = 97] = "noValidPath";
+})(ChainValidationCode || (ChainValidationCode = {}));
+class ChainValidationError extends Error {
+    constructor(code, message) {
+        super(message);
+        this.name = ChainValidationError.NAME;
+        this.code = code;
+        this.message = message;
+    }
+}
+ChainValidationError.NAME = "ChainValidationError";
+function isTrusted(cert, trustedList) {
+    for (let i = 0; i < trustedList.length; i++) {
+        if (pvtsutils.BufferSourceConverter.isEqual(cert.tbsView, trustedList[i].tbsView)) {
+            return true;
+        }
+    }
+    return false;
+}
 class CertificateChainValidationEngine {
     constructor(parameters = {}) {
         this.trustedCerts = pvutils.getParametersValue(parameters, TRUSTED_CERTS, this.defaultValues(TRUSTED_CERTS));
@@ -14606,6 +14631,9 @@ class CertificateChainValidationEngine {
                         break;
                 }
                 return unique;
+            }
+            if (isTrusted(certificate, this.trustedCerts)) {
+                return [[certificate]];
             }
             const findIssuerResult = await this.findIssuer(certificate, this, crypto);
             if (findIssuerResult.length === 0) {
@@ -14835,11 +14863,7 @@ class CertificateChainValidationEngine {
                         }
                         else {
                             if (passedWhenNotRevValues === false) {
-                                throw {
-                                    result: false,
-                                    resultCode: 11,
-                                    resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
-                                };
+                                throw new ChainValidationError(ChainValidationCode.noRevocation, `No revocation values found for one of certificates: ${crlResult.statusMessage}`);
                             }
                         }
                     }
@@ -14867,11 +14891,7 @@ class CertificateChainValidationEngine {
                             }
                         }
                         if (extensionFound) {
-                            throw {
-                                result: false,
-                                resultCode: 11,
-                                resultMessage: `No revocation values found for one of certificates: ${crlResult.statusMessage}`
-                            };
+                            throw new ChainValidationError(ChainValidationCode.noRevocation, `No revocation values found for one of certificates: ${crlResult.statusMessage}`);
                         }
                     }
                 }
@@ -14906,15 +14926,12 @@ class CertificateChainValidationEngine {
                 }
             }
         }
+        const leafCert = localCerts[localCerts.length - 1];
         let result;
-        const certificatePath = [localCerts[localCerts.length - 1]];
-        result = await buildPath(localCerts[localCerts.length - 1], crypto);
+        const certificatePath = [leafCert];
+        result = await buildPath(leafCert, crypto);
         if (result.length === 0) {
-            throw {
-                result: false,
-                resultCode: 60,
-                resultMessage: "Unable to find certificate path"
-            };
+            throw new ChainValidationError(ChainValidationCode.noPath, "Unable to find certificate path");
         }
         for (let i = 0; i < result.length; i++) {
             let found = false;
@@ -14935,11 +14952,7 @@ class CertificateChainValidationEngine {
             }
         }
         if (result.length === 0) {
-            throw {
-                result: false,
-                resultCode: 97,
-                resultMessage: "No valid certificate paths found"
-            };
+            throw new ChainValidationError(ChainValidationCode.noValidPath, "No valid certificate paths found");
         }
         let shortestLength = result[0].length;
         let shortestIndex = 0;
@@ -15552,21 +15565,29 @@ class CertificateChainValidationEngine {
             return policyResult;
         }
         catch (error) {
-            if (error instanceof Object) {
-                if ("resultMessage" in error)
-                    return error;
-                if ("message" in error) {
+            if (error instanceof Error) {
+                if (error instanceof ChainValidationError) {
                     return {
                         result: false,
-                        resultCode: -1,
-                        resultMessage: error.message
+                        resultCode: error.code,
+                        resultMessage: error.message,
+                        error: error,
                     };
                 }
+                return {
+                    result: false,
+                    resultCode: ChainValidationCode.unknown,
+                    resultMessage: error.message,
+                    error: error,
+                };
+            }
+            if (error && typeof error === "object" && "resultMessage" in error) {
+                return error;
             }
             return {
                 result: false,
                 resultCode: -1,
-                resultMessage: error,
+                resultMessage: `${error}`,
             };
         }
     }
@@ -19075,4 +19096,4 @@ function initCryptoEngine() {
 
 initCryptoEngine();
 
-export { AbstractCryptoEngine, AccessDescription, Accuracy, AlgorithmIdentifier, AltName, ArgumentError, AsnError, AttCertValidityPeriod, Attribute, AttributeCertificateInfoV1, AttributeCertificateInfoV2, AttributeCertificateV1, AttributeCertificateV2, AttributeTypeAndValue, AuthenticatedSafe, AuthorityKeyIdentifier, BasicConstraints, BasicOCSPResponse, CAVersion, CRLBag, CRLDistributionPoints, CertBag, CertID, Certificate, CertificateChainValidationEngine, CertificatePolicies, CertificateRevocationList, CertificateSet, CertificateTemplate, CertificationRequest, ContentInfo, CryptoEngine, DigestInfo, DistributionPoint, ECCCMSSharedInfo, ECNamedCurves, ECPrivateKey, ECPublicKey, EncapsulatedContentInfo, EncryptedContentInfo, EncryptedData, EnvelopedData, ExtKeyUsage, Extension, ExtensionValueFactory, Extensions, GeneralName, GeneralNames, GeneralSubtree, HASHED_MESSAGE, HASH_ALGORITHM, Holder, InfoAccess, IssuerAndSerialNumber, IssuerSerial, IssuingDistributionPoint, KEKIdentifier, KEKRecipientInfo, KeyAgreeRecipientIdentifier, KeyAgreeRecipientInfo, KeyBag, KeyTransRecipientInfo, MICROS, MILLIS, MacData, MessageImprint, NameConstraints, OCSPRequest, OCSPResponse, ObjectDigestInfo, OriginatorIdentifierOrKey, OriginatorInfo, OriginatorPublicKey, OtherCertificateFormat, OtherKeyAttribute, OtherPrimeInfo, OtherRecipientInfo, OtherRevocationInfoFormat, PBES2Params, PBKDF2Params, PFX, PKCS8ShroudedKeyBag, PKIStatus, PKIStatusInfo, POLICY_IDENTIFIER, POLICY_QUALIFIERS, ParameterError, PasswordRecipientinfo, PkiObject, PolicyConstraints, PolicyInformation, PolicyMapping, PolicyMappings, PolicyQualifierInfo, PrivateKeyInfo, PrivateKeyUsagePeriod, PublicKeyInfo, QCStatement, QCStatements, RDN, RSAESOAEPParams, RSAPrivateKey, RSAPublicKey, RSASSAPSSParams, RecipientEncryptedKey, RecipientEncryptedKeys, RecipientIdentifier, RecipientInfo, RecipientKeyIdentifier, RelativeDistinguishedNames, Request, ResponseBytes, ResponseData, RevocationInfoChoices, RevokedCertificate, SECONDS, SafeBag, SafeBagValueFactory, SafeContents, SecretBag, Signature, SignedAndUnsignedAttributes, SignedCertificateTimestamp, SignedCertificateTimestampList, SignedData, SignedDataVerifyError, SignerInfo, SingleResponse, SubjectDirectoryAttributes, TBSRequest, TSTInfo, TYPE$4 as TYPE, TYPE_AND_VALUES, Time, TimeStampReq, TimeStampResp, TimeType, V2Form, VALUE$5 as VALUE, VALUE_BEFORE_DECODE, checkCA, createCMSECDSASignature, createECDSASignatureFromCMS, engine, getAlgorithmByOID, getAlgorithmParameters, getCrypto, getEngine, getHashAlgorithm, getOIDByAlgorithm, getRandomValues, id_AnyPolicy, id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BaseCRLNumber, id_BasicConstraints, id_CRLBag_X509CRL, id_CRLDistributionPoints, id_CRLNumber, id_CRLReason, id_CertBag_AttributeCertificate, id_CertBag_SDSICertificate, id_CertBag_X509Certificate, id_CertificateIssuer, id_CertificatePolicies, id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData, id_ContentType_SignedData, id_ExtKeyUsage, id_FreshestCRL, id_InhibitAnyPolicy, id_InvalidityDate, id_IssuerAltName, id_IssuingDistributionPoint, id_KeyUsage, id_MicrosoftAppPolicies, id_MicrosoftCaVersion, id_MicrosoftCertTemplateV1, id_MicrosoftCertTemplateV2, id_MicrosoftPrevCaCertHash, id_NameConstraints, id_PKIX_OCSP_Basic, id_PolicyConstraints, id_PolicyMappings, id_PrivateKeyUsagePeriod, id_QCStatements, id_SignedCertificateTimestampList, id_SubjectAltName, id_SubjectDirectoryAttributes, id_SubjectInfoAccess, id_SubjectKeyIdentifier, id_ad, id_ad_caIssuers, id_ad_ocsp, id_eContentType_TSTInfo, id_pkix, id_sha1, id_sha256, id_sha384, id_sha512, kdf, setEngine, stringPrep, verifySCTsForCertificate };
+export { AbstractCryptoEngine, AccessDescription, Accuracy, AlgorithmIdentifier, AltName, ArgumentError, AsnError, AttCertValidityPeriod, Attribute, AttributeCertificateInfoV1, AttributeCertificateInfoV2, AttributeCertificateV1, AttributeCertificateV2, AttributeTypeAndValue, AuthenticatedSafe, AuthorityKeyIdentifier, BasicConstraints, BasicOCSPResponse, CAVersion, CRLBag, CRLDistributionPoints, CertBag, CertID, Certificate, CertificateChainValidationEngine, CertificatePolicies, CertificateRevocationList, CertificateSet, CertificateTemplate, CertificationRequest, ChainValidationCode, ChainValidationError, ContentInfo, CryptoEngine, DigestInfo, DistributionPoint, ECCCMSSharedInfo, ECNamedCurves, ECPrivateKey, ECPublicKey, EncapsulatedContentInfo, EncryptedContentInfo, EncryptedData, EnvelopedData, ExtKeyUsage, Extension, ExtensionValueFactory, Extensions, GeneralName, GeneralNames, GeneralSubtree, HASHED_MESSAGE, HASH_ALGORITHM, Holder, InfoAccess, IssuerAndSerialNumber, IssuerSerial, IssuingDistributionPoint, KEKIdentifier, KEKRecipientInfo, KeyAgreeRecipientIdentifier, KeyAgreeRecipientInfo, KeyBag, KeyTransRecipientInfo, MICROS, MILLIS, MacData, MessageImprint, NameConstraints, OCSPRequest, OCSPResponse, ObjectDigestInfo, OriginatorIdentifierOrKey, OriginatorInfo, OriginatorPublicKey, OtherCertificateFormat, OtherKeyAttribute, OtherPrimeInfo, OtherRecipientInfo, OtherRevocationInfoFormat, PBES2Params, PBKDF2Params, PFX, PKCS8ShroudedKeyBag, PKIStatus, PKIStatusInfo, POLICY_IDENTIFIER, POLICY_QUALIFIERS, ParameterError, PasswordRecipientinfo, PkiObject, PolicyConstraints, PolicyInformation, PolicyMapping, PolicyMappings, PolicyQualifierInfo, PrivateKeyInfo, PrivateKeyUsagePeriod, PublicKeyInfo, QCStatement, QCStatements, RDN, RSAESOAEPParams, RSAPrivateKey, RSAPublicKey, RSASSAPSSParams, RecipientEncryptedKey, RecipientEncryptedKeys, RecipientIdentifier, RecipientInfo, RecipientKeyIdentifier, RelativeDistinguishedNames, Request, ResponseBytes, ResponseData, RevocationInfoChoices, RevokedCertificate, SECONDS, SafeBag, SafeBagValueFactory, SafeContents, SecretBag, Signature, SignedAndUnsignedAttributes, SignedCertificateTimestamp, SignedCertificateTimestampList, SignedData, SignedDataVerifyError, SignerInfo, SingleResponse, SubjectDirectoryAttributes, TBSRequest, TSTInfo, TYPE$4 as TYPE, TYPE_AND_VALUES, Time, TimeStampReq, TimeStampResp, TimeType, V2Form, VALUE$5 as VALUE, VALUE_BEFORE_DECODE, checkCA, createCMSECDSASignature, createECDSASignatureFromCMS, engine, getAlgorithmByOID, getAlgorithmParameters, getCrypto, getEngine, getHashAlgorithm, getOIDByAlgorithm, getRandomValues, id_AnyPolicy, id_AuthorityInfoAccess, id_AuthorityKeyIdentifier, id_BaseCRLNumber, id_BasicConstraints, id_CRLBag_X509CRL, id_CRLDistributionPoints, id_CRLNumber, id_CRLReason, id_CertBag_AttributeCertificate, id_CertBag_SDSICertificate, id_CertBag_X509Certificate, id_CertificateIssuer, id_CertificatePolicies, id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData, id_ContentType_SignedData, id_ExtKeyUsage, id_FreshestCRL, id_InhibitAnyPolicy, id_InvalidityDate, id_IssuerAltName, id_IssuingDistributionPoint, id_KeyUsage, id_MicrosoftAppPolicies, id_MicrosoftCaVersion, id_MicrosoftCertTemplateV1, id_MicrosoftCertTemplateV2, id_MicrosoftPrevCaCertHash, id_NameConstraints, id_PKIX_OCSP_Basic, id_PolicyConstraints, id_PolicyMappings, id_PrivateKeyUsagePeriod, id_QCStatements, id_SignedCertificateTimestampList, id_SubjectAltName, id_SubjectDirectoryAttributes, id_SubjectInfoAccess, id_SubjectKeyIdentifier, id_ad, id_ad_caIssuers, id_ad_ocsp, id_eContentType_TSTInfo, id_pkix, id_sha1, id_sha256, id_sha384, id_sha512, kdf, setEngine, stringPrep, verifySCTsForCertificate };
