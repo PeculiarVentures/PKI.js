@@ -472,7 +472,7 @@ export class PFX extends PkiObject implements IPFX {
               password: parameters.password,
               hashAlgorithm: hashAlgorithm.name,
               salt: BufferSourceConverter.toArrayBuffer(this.macData.macSalt.valueBlock.valueHexView),
-              iterationCount: this.macData.iterations || 0,
+              iterationCount: this.macData.iterations || 1,
               contentToVerify: authSafeContent,
               signatureToVerify: BufferSourceConverter.toArrayBuffer(this.macData.mac.digest.valueBlock.valueHexView),
             });
