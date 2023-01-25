@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
+import { BufferSourceConverter } from "pvtsutils";
 import * as common from "./common";
 import { OriginatorInfo, OriginatorInfoJson } from "./OriginatorInfo";
 import { RecipientInfo, RecipientInfoJson } from "./RecipientInfo";
@@ -113,6 +114,25 @@ export interface EnvelopedDataEncryptionParams {
   kekEncryptionLength: number;
   kdfAlgorithm: string;
 }
+
+export interface EnvelopedDataDecryptBaseParams {
+  preDefinedData?: BufferSource;
+  recipientCertificate?: Certificate;
+}
+
+export interface EnvelopedDataDecryptKeyParams extends EnvelopedDataDecryptBaseParams {
+  recipientPrivateKey: CryptoKey;
+  /**
+   * Crypto provider assigned to `recipientPrivateKey`. If the filed is empty uses default crypto provider.
+   */
+  crypto?: Crypto;
+}
+
+export interface EnvelopedDataDecryptBufferParams extends EnvelopedDataDecryptBaseParams {
+  recipientPrivateKey?: BufferSource;
+}
+
+export type EnvelopedDataDecryptParams = EnvelopedDataDecryptBufferParams | EnvelopedDataDecryptKeyParams;
 
 /**
  * Represents the EnvelopedData structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
@@ -1120,11 +1140,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param parameters Additional parameters
    * @param crypto Crypto engine
    */
-  async decrypt(recipientIndex: number, parameters: {
-    recipientCertificate?: Certificate;
-    recipientPrivateKey?: BufferSource;
-    preDefinedData?: BufferSource;
-  }, crypto = common.getCrypto(true)) {
+  async decrypt(recipientIndex: number, parameters: EnvelopedDataDecryptParams, crypto = common.getCrypto(true)) {
     //#region Initial variables
     const decryptionParameters = parameters || {};
     //#endregion
@@ -1184,15 +1200,24 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           throw new Error(`Incorrect curve OID for index ${index}`);
       }
 
-      const ecdhPrivateKey = await crypto.importKey("pkcs8",
-        decryptionParameters.recipientPrivateKey,
-        {
-          name: "ECDH",
-          namedCurve: recipientCurve
-        } as EcKeyImportParams,
-        true,
-        ["deriveBits"]
-      );
+      let ecdhPrivateKey: CryptoKey;
+      let keyCrypto: SubtleCrypto = crypto;
+      if (BufferSourceConverter.isBufferSource(decryptionParameters.recipientPrivateKey)) {
+        ecdhPrivateKey = await crypto.importKey("pkcs8",
+          decryptionParameters.recipientPrivateKey,
+          {
+            name: "ECDH",
+            namedCurve: recipientCurve
+          } as EcKeyImportParams,
+          true,
+          ["deriveBits"]
+        );
+      } else {
+        ecdhPrivateKey = decryptionParameters.recipientPrivateKey;
+        if ("crypto" in decryptionParameters && decryptionParameters.crypto) {
+          keyCrypto = decryptionParameters.crypto.subtle;
+        }
+      }
       //#endregion
       //#region Import sender's ephemeral public key
       //#region Change "OriginatorPublicKey" if "curve" parameter absent
@@ -1215,7 +1240,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
       //#endregion
       //#region Create shared secret
-      const sharedSecret = await crypto.deriveBits({
+      const sharedSecret = await keyCrypto.deriveBits({
         name: "ECDH",
         public: ecdhPublicKey
       },
@@ -1330,15 +1355,24 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       }
       //#endregion
 
-      const privateKey = await crypto.importKey(
-        "pkcs8",
-        decryptionParameters.recipientPrivateKey,
-        algorithmParameters,
-        true,
-        ["decrypt"]
-      );
+      let privateKey: CryptoKey;
+      let keyCrypto: SubtleCrypto = crypto;
+      if (BufferSourceConverter.isBufferSource(decryptionParameters.recipientPrivateKey)) {
+        privateKey = await crypto.importKey(
+          "pkcs8",
+          decryptionParameters.recipientPrivateKey,
+          algorithmParameters,
+          true,
+          ["decrypt"]
+        );
+      } else {
+        privateKey = decryptionParameters.recipientPrivateKey;
+        if ("crypto" in decryptionParameters && decryptionParameters.crypto) {
+          keyCrypto = decryptionParameters.crypto.subtle;
+        }
+      }
 
-      const sessionKey = await crypto.decrypt(
+      const sessionKey = await keyCrypto.decrypt(
         privateKey.algorithm,
         privateKey,
         recipientInfo.encryptedKey.valueBlock.valueHexView
