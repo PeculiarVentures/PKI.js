@@ -13519,10 +13519,20 @@ class EnvelopedData extends PkiObject {
                 default:
                     throw new Error(`Incorrect curve OID for index ${index}`);
             }
-            const ecdhPrivateKey = await crypto.importKey("pkcs8", decryptionParameters.recipientPrivateKey, {
-                name: "ECDH",
-                namedCurve: recipientCurve
-            }, true, ["deriveBits"]);
+            let ecdhPrivateKey;
+            let keyCrypto = crypto;
+            if (BufferSourceConverter.isBufferSource(decryptionParameters.recipientPrivateKey)) {
+                ecdhPrivateKey = await crypto.importKey("pkcs8", decryptionParameters.recipientPrivateKey, {
+                    name: "ECDH",
+                    namedCurve: recipientCurve
+                }, true, ["deriveBits"]);
+            }
+            else {
+                ecdhPrivateKey = decryptionParameters.recipientPrivateKey;
+                if ("crypto" in decryptionParameters && decryptionParameters.crypto) {
+                    keyCrypto = decryptionParameters.crypto.subtle;
+                }
+            }
             if (("algorithmParams" in originator.value.algorithm) === false)
                 originator.value.algorithm.algorithmParams = new asn1js.ObjectIdentifier({ value: curveOID });
             const buffer = originator.value.toSchema().toBER(false);
@@ -13530,7 +13540,7 @@ class EnvelopedData extends PkiObject {
                 name: "ECDH",
                 namedCurve: recipientCurve
             }, true, []);
-            const sharedSecret = await crypto.deriveBits({
+            const sharedSecret = await keyCrypto.deriveBits({
                 name: "ECDH",
                 public: ecdhPublicKey
             }, ecdhPrivateKey, recipientCurveLength);
@@ -13595,8 +13605,18 @@ class EnvelopedData extends PkiObject {
                 if (("name" in algorithmParameters.hash) === false)
                     throw new Error(`Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`);
             }
-            const privateKey = await crypto.importKey("pkcs8", decryptionParameters.recipientPrivateKey, algorithmParameters, true, ["decrypt"]);
-            const sessionKey = await crypto.decrypt(privateKey.algorithm, privateKey, recipientInfo.encryptedKey.valueBlock.valueHexView);
+            let privateKey;
+            let keyCrypto = crypto;
+            if (BufferSourceConverter.isBufferSource(decryptionParameters.recipientPrivateKey)) {
+                privateKey = await crypto.importKey("pkcs8", decryptionParameters.recipientPrivateKey, algorithmParameters, true, ["decrypt"]);
+            }
+            else {
+                privateKey = decryptionParameters.recipientPrivateKey;
+                if ("crypto" in decryptionParameters && decryptionParameters.crypto) {
+                    keyCrypto = decryptionParameters.crypto.subtle;
+                }
+            }
+            const sessionKey = await keyCrypto.decrypt(privateKey.algorithm, privateKey, recipientInfo.encryptedKey.valueBlock.valueHexView);
             const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
             const contentEncryptionAlgorithm = crypto.getAlgorithmByOID(algorithmId, true, "contentEncryptionAlgorithm");
             if (("name" in contentEncryptionAlgorithm) === false)
