@@ -4,7 +4,7 @@ import { BufferSourceConverter } from "pvtsutils";
 import * as common from "./common";
 import { OriginatorInfo, OriginatorInfoJson } from "./OriginatorInfo";
 import { RecipientInfo, RecipientInfoJson } from "./RecipientInfo";
-import { EncryptedContentInfo, EncryptedContentInfoJson, EncryptedContentInfoSchema } from "./EncryptedContentInfo";
+import { EncryptedContentInfo, EncryptedContentInfoJson, EncryptedContentInfoSchema, EncryptedContentInfoSplit } from "./EncryptedContentInfo";
 import { Attribute, AttributeJson } from "./Attribute";
 import { AlgorithmIdentifier, AlgorithmIdentifierParameters } from "./AlgorithmIdentifier";
 import { RSAESOAEPParams } from "./RSAESOAEPParams";
@@ -108,7 +108,7 @@ export interface EnvelopedDataJson {
   unprotectedAttrs?: AttributeJson[];
 }
 
-export type EnvelopedDataParameters = PkiObjectParameters & Partial<IEnvelopedData>;
+export type EnvelopedDataParameters = PkiObjectParameters & Partial<IEnvelopedData> & EncryptedContentInfoSplit;
 
 export interface EnvelopedDataEncryptionParams {
   kekEncryptionLength: number;
@@ -192,6 +192,8 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
   public encryptedContentInfo!: EncryptedContentInfo;
   public unprotectedAttrs?: Attribute[];
 
+  public policy: Required<EncryptedContentInfoSplit>;
+
   /**
    * Initializes a new instance of the {@link EnvelopedData} class
    * @param parameters Initialization parameters
@@ -208,6 +210,9 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     if (UNPROTECTED_ATTRS in parameters) {
       this.unprotectedAttrs = pvutils.getParametersValue(parameters, UNPROTECTED_ATTRS, EnvelopedData.defaultValues(UNPROTECTED_ATTRS));
     }
+    this.policy = {
+      disableSplit: !!parameters.disableSplit,
+    };
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -823,6 +828,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     //#region Append common information to CMS_ENVELOPED_DATA
     this.version = 2;
     this.encryptedContentInfo = new EncryptedContentInfo({
+      disableSplit: this.policy.disableSplit,
       contentType: "1.2.840.113549.1.7.1", // "data"
       contentEncryptionAlgorithm: new AlgorithmIdentifier({
         algorithmId: contentEncryptionOID,

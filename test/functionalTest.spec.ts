@@ -3,6 +3,7 @@ import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import { Crypto } from "@peculiar/webcrypto";
 import * as pkijs from "../src";
+import { createCertificate } from "./certificateComplexExample";
 
 context("PKIjs functional testing", () => {
   //region Initial variables
@@ -305,6 +306,70 @@ context("PKIjs functional testing", () => {
           results["Attribute"]
         ]
       })).toSchema()
+    });
+  });
+
+  context("EnvelopedData", () => {
+    context("disableSplit", () => {
+
+      const tests: {
+        name: string;
+        params: {
+          disableSplit?: boolean;
+        };
+        want: boolean;
+      }[] = [
+          {
+            name: "disabled",
+            params: {
+              disableSplit: true,
+            },
+            want: false,
+          },
+          {
+            name: "enabled",
+            params: {
+              disableSplit: false,
+            },
+            want: true,
+          },
+          {
+            name: "default",
+            params: {},
+            want: true,
+          },
+        ];
+      const crypto = new Crypto();
+
+      for (const t of tests) {
+        it(t.name, async () => {
+          const data = new Uint8Array(10);
+          const certData = await createCertificate("SHA-256", "RSASSA-PKCS1-v1_5");
+
+          let envelopedData = new pkijs.EnvelopedData({
+            version: 0,
+            ...t.params,
+          });
+          envelopedData.addRecipientByCertificate(certData.certificate, { oaepHashAlgorithm: "SHA-256" });
+
+          await envelopedData.encrypt({ name: "AES-CBC", length: 256 } as AesKeyGenParams, data);
+
+          const raw = envelopedData.toSchema().toBER(false);
+
+          const key = await crypto.subtle.importKey("pkcs8", certData.privateKeyBuffer, { name: "RSA-OAEP", hash: "SHA-256" }, false, ["decrypt"]);
+          envelopedData = pkijs.EnvelopedData.fromBER(raw);
+          assert.ok(envelopedData.encryptedContentInfo.encryptedContent);
+          assert.equal(envelopedData.encryptedContentInfo.encryptedContent.idBlock.isConstructed, t.want);
+
+          const decryptedData = await envelopedData.decrypt(0, {
+            recipientPrivateKey: key,
+            crypto: pkijs.getCrypto(true).crypto,
+          });
+
+          assert.equal(pvtsutils.Convert.ToHex(decryptedData), pvtsutils.Convert.ToHex(data));
+        });
+      }
+
     });
   });
 
@@ -664,7 +729,6 @@ context("PKIjs functional testing", () => {
   });
 
   context("setEngine/getEngine", () => {
-
     const crypto = new Crypto();
     const provider = new pkijs.CryptoEngine({
       name: "",

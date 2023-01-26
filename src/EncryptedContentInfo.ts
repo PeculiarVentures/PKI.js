@@ -27,13 +27,22 @@ export interface EncryptedContentInfoJson {
   encryptedContent?: asn1js.OctetStringJson;
 }
 
-export type EncryptedContentParameters = PkiObjectParameters & Partial<IEncryptedContentInfo>;
+export interface EncryptedContentInfoSplit {
+  /**
+   * Disables OctetString splitting for encryptedContent.
+   */
+  disableSplit?: boolean;
+}
+
+export type EncryptedContentParameters = PkiObjectParameters & Partial<IEncryptedContentInfo> & EncryptedContentInfoSplit;
 
 export type EncryptedContentInfoSchema = Schema.SchemaParameters<{
   contentType?: string;
   contentEncryptionAlgorithm?: AlgorithmIdentifierSchema;
   encryptedContent?: string;
 }>;
+
+const PIECE_SIZE = 1024;
 
 /**
  * Represents the EncryptedContentInfo structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
@@ -47,7 +56,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
   public encryptedContent?: asn1js.OctetString;
 
   /**
-   * Initializes a new instance of the {@link EncryptedContent} class
+   * Initializes a new instance of the {@link EncryptedContentInfo} class
    * @param parameters Initialization parameters
    */
   constructor(parameters: EncryptedContentParameters = {}) {
@@ -63,7 +72,8 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
       if ((this.encryptedContent.idBlock.tagClass === 1) &&
         (this.encryptedContent.idBlock.tagNumber === 4)) {
         //#region Divide OCTET STRING value down to small pieces
-        if (this.encryptedContent.idBlock.isConstructed === false) {
+        // NOTE: Acrobat cannot decrypt the content, if constructed OctetString is used
+        if (this.encryptedContent.idBlock.isConstructed === false && !parameters.disableSplit) {
           const constrString = new asn1js.OctetString({
             idBlock: { isConstructed: true },
             isConstructed: true
@@ -73,9 +83,8 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
           const valueHex = this.encryptedContent.valueBlock.valueHexView.slice().buffer;
           let length = valueHex.byteLength;
 
-          const pieceSize = 1024;
           while (length > 0) {
-            const pieceView = new Uint8Array(valueHex, offset, ((offset + pieceSize) > valueHex.byteLength) ? (valueHex.byteLength - offset) : pieceSize);
+            const pieceView = new Uint8Array(valueHex, offset, ((offset + PIECE_SIZE) > valueHex.byteLength) ? (valueHex.byteLength - offset) : PIECE_SIZE);
             const _array = new ArrayBuffer(pieceView.length);
             const _view = new Uint8Array(_array);
 
