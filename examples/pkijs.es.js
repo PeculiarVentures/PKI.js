@@ -4554,6 +4554,7 @@ const CLEAR_PROPS$15 = [
     CONTENT_ENCRYPTION_ALGORITHM,
     ENCRYPTED_CONTENT,
 ];
+const PIECE_SIZE = 1024;
 class EncryptedContentInfo extends PkiObject {
     constructor(parameters = {}) {
         super();
@@ -4563,7 +4564,7 @@ class EncryptedContentInfo extends PkiObject {
             this.encryptedContent = parameters.encryptedContent;
             if ((this.encryptedContent.idBlock.tagClass === 1) &&
                 (this.encryptedContent.idBlock.tagNumber === 4)) {
-                if (this.encryptedContent.idBlock.isConstructed === false) {
+                if (this.encryptedContent.idBlock.isConstructed === false && !parameters.disableSplit) {
                     const constrString = new asn1js.OctetString({
                         idBlock: { isConstructed: true },
                         isConstructed: true
@@ -4571,9 +4572,8 @@ class EncryptedContentInfo extends PkiObject {
                     let offset = 0;
                     const valueHex = this.encryptedContent.valueBlock.valueHexView.slice().buffer;
                     let length = valueHex.byteLength;
-                    const pieceSize = 1024;
                     while (length > 0) {
-                        const pieceView = new Uint8Array(valueHex, offset, ((offset + pieceSize) > valueHex.byteLength) ? (valueHex.byteLength - offset) : pieceSize);
+                        const pieceView = new Uint8Array(valueHex, offset, ((offset + PIECE_SIZE) > valueHex.byteLength) ? (valueHex.byteLength - offset) : PIECE_SIZE);
                         const _array = new ArrayBuffer(pieceView.length);
                         const _view = new Uint8Array(_array);
                         for (let i = 0; i < _view.length; i++)
@@ -12933,6 +12933,9 @@ class EnvelopedData extends PkiObject {
         if (UNPROTECTED_ATTRS in parameters) {
             this.unprotectedAttrs = pvutils.getParametersValue(parameters, UNPROTECTED_ATTRS, EnvelopedData.defaultValues(UNPROTECTED_ATTRS));
         }
+        this.policy = {
+            disableSplit: !!parameters.disableSplit,
+        };
         if (parameters.schema) {
             this.fromSchema(parameters.schema);
         }
@@ -13307,6 +13310,7 @@ class EnvelopedData extends PkiObject {
         const exportedSessionKey = await crypto.exportKey("raw", sessionKey);
         this.version = 2;
         this.encryptedContentInfo = new EncryptedContentInfo({
+            disableSplit: this.policy.disableSplit,
             contentType: "1.2.840.113549.1.7.1",
             contentEncryptionAlgorithm: new AlgorithmIdentifier({
                 algorithmId: contentEncryptionOID,
