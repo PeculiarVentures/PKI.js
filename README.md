@@ -37,28 +37,28 @@ This assumes you are using [npm](https://www.npmjs.com/) as your package manager
 
 ### Certificates and Revocation
 
-- [Create and validate an X.509 certificate](https://pkijs.org/examples/X509_cert_complex_example.html)
-- [Working with certificate requests](https://pkijs.org/examples/PKCS10_complex_example.html)
-- [Creating and parsing CRLs](https://pkijs.org/examples/CRL_complex_example.html)
-- [Working with OCSP requests](https://pkijs.org/examples/OCSP_req_complex_example.html)
-- [Working with OCSP responses](https://pkijs.org/examples/OCSP_resp_complex_example.html)
+- [Create and validate an X.509 certificate](https://pkijs.org/examples/CertificateComplexExample/X509_cert_complex_example.html)
+- [Working with certificate requests](https://pkijs.org/examples/PKCS10ComplexExample/PKCS10_complex_example.html)
+- [Creating and parsing CRLs](https://pkijs.org/examples/CRLComplexExample/CRL_complex_example.html)
+- [Working with OCSP requests](https://pkijs.org/examples/OCSPRequestComplexExample/OCSP_req_complex_example.html)
+- [Working with OCSP responses](https://pkijs.org/examples/OCSPResponseComplexExample/OCSP_resp_complex_example.html)
 
 ### Signing and Encryption with CMS
 
-- [Working with CMS Signing](https://pkijs.org/examples/CMSSigned_complex_example.html)
-- [Working with CMS Certificate-based Encryption](https://pkijs.org/examples/CMSEnvelopedExample.html)
-- [Working with CMS password-based Encryption](https://pkijs.org/examples/CMSEnvelopedPreDefineDataExample.html)
-- [Working with PKCS#7 Certificate bags (P7B)](https://pkijs.org/examples/P7BSimpleExample.html)
+- [Working with CMS Signing](https://pkijs.org/examples/CMSSignedComplexExample/CMSSigned_complex_example.html)
+- [Working with CMS Certificate-based Encryption](https://pkijs.org/examples/HowToEncryptCMSviaCertificate/CMSEnvelopedExample.html)
+- [Working with CMS password-based Encryption](https://pkijs.org/examples/HowToEncryptCMSviaPassword/CMSEnvelopedPreDefineDataExample.html)
+- [Working with PKCS#7 Certificate bags (P7B)](https://pkijs.org/examples/P7BSimpleExample/P7BSimpleExample.html)
 
 ### Timestamping
-- [Creating a Timestamp request](https://pkijs.org/examples/TSP_req_complex_example.html)
-- [Creating a Timestamp response](https://pkijs.org/examples/TSP_resp_complex_example.html)
+- [Creating a Timestamp request](https://pkijs.org/examples/TSPRequestComplexExample/TSP_req_complex_example.html)
+- [Creating a Timestamp response](https://pkijs.org/examples/TSPResponseComplexExample/TSP_resp_complex_example.html)
 
 ### Other
-- [How to verify a signature in a PDF file](https://pkijs.org/examples/PDFexample.html)
-- [S/MIME signature verification](https://pkijs.org/examples/SMIMEexample.html)
-- [S/MIME signature encryption](https://pkijs.org/examples/SMIMEEncryptionExample.html)
-- [Working with PKCS#12 files](https://pkijs.org/examples/PKCS12SimpleExample.html)
+- [How to verify a signature in a PDF file](https://pkijs.org/examples/PDFExample/PDFexample.html)
+- [S/MIME signature verification](https://pkijs.org/examples/SMIMEVerificationExample/SMIMEexample.html)
+- [S/MIME signature encryption](https://pkijs.org/examples/SMIMEEncryptionExample/SMIMEEncryptionExample.html)
+- [Working with PKCS#12 files](https://pkijs.org/examples/PKCS12SimpleExample/PKCS12SimpleExample.html)
 
 ## Documentation
 You can find the PKI.js documentation [on the website](https://pkijs.org/docs).
