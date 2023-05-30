@@ -301,7 +301,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             //#endregion
 
             //#region Encrypt CMS EncryptedData using password
-            await cmsEncrypted.encrypt(currentParameters);
+            await cmsEncrypted.encrypt(currentParameters, crypto);
             //#endregion
 
             //#region Store result content in CMS_CONTENT_INFO type
