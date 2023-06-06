@@ -215,7 +215,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
     //#endregion
   }
 
-  public async makeInternalValues(parameters: PKCS8ShroudedKeyBagMakeInternalValuesParams): Promise<void> {
+  public async makeInternalValues(parameters: PKCS8ShroudedKeyBagMakeInternalValuesParams, crypto = common.getCrypto(true)): Promise<void> {
     //#region Check that we do have PARSED_VALUE
     if (!this.parsedValue) {
       throw new Error("Please initialize \"parsedValue\" first");
@@ -232,7 +232,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
       contentToEncrypt: this.parsedValue.toSchema().toBER(false),
     };
 
-    await cmsEncrypted.encrypt(encryptParams);
+    await cmsEncrypted.encrypt(encryptParams, crypto);
     if (!cmsEncrypted.encryptedContentInfo.encryptedContent) {
       throw new Error("The filed `encryptedContent` in EncryptedContentInfo is empty");
     }

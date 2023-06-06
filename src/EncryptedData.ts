@@ -264,7 +264,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
    * Creates a new CMS Encrypted Data content
    * @param parameters Parameters necessary for encryption
    */
-  public async encrypt(parameters: EncryptedDataEncryptParams): Promise<void> {
+  public async encrypt(parameters: EncryptedDataEncryptParams, crypto = common.getCrypto(true)): Promise<void> {
     //#region Check for input parameters
     ArgumentError.assert(parameters, "parameters", "object");
     //#endregion
@@ -276,7 +276,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
     };
     //#endregion
 
-    this.encryptedContentInfo = await common.getCrypto(true).encryptEncryptedContentInfo(encryptParams);
+    this.encryptedContentInfo = await crypto.encryptEncryptedContentInfo(encryptParams);
   }
 
   /**
