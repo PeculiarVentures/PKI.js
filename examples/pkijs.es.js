@@ -10007,13 +10007,13 @@ class EncryptedData extends PkiObject {
             res.unprotectedAttrs = Array.from(this.unprotectedAttrs, o => o.toJSON());
         return res;
     }
-    async encrypt(parameters) {
+    async encrypt(parameters, crypto = getCrypto(true)) {
         ArgumentError.assert(parameters, "parameters", "object");
         const encryptParams = {
             ...parameters,
             contentType: "1.2.840.113549.1.7.1",
         };
-        this.encryptedContentInfo = await getCrypto(true).encryptEncryptedContentInfo(encryptParams);
+        this.encryptedContentInfo = await crypto.encryptEncryptedContentInfo(encryptParams);
     }
     async decrypt(parameters, crypto = getCrypto(true)) {
         ArgumentError.assert(parameters, "parameters", "object");
@@ -10134,7 +10134,7 @@ class PKCS8ShroudedKeyBag extends PkiObject {
         const decryptedData = await cmsEncrypted.decrypt(parameters, crypto);
         this.parsedValue = PrivateKeyInfo.fromBER(decryptedData);
     }
-    async makeInternalValues(parameters) {
+    async makeInternalValues(parameters, crypto = getCrypto(true)) {
         if (!this.parsedValue) {
             throw new Error("Please initialize \"parsedValue\" first");
         }
@@ -10143,7 +10143,7 @@ class PKCS8ShroudedKeyBag extends PkiObject {
             ...parameters,
             contentToEncrypt: this.parsedValue.toSchema().toBER(false),
         };
-        await cmsEncrypted.encrypt(encryptParams);
+        await cmsEncrypted.encrypt(encryptParams, crypto);
         if (!cmsEncrypted.encryptedContentInfo.encryptedContent) {
             throw new Error("The filed `encryptedContent` in EncryptedContentInfo is empty");
         }
@@ -13868,7 +13868,7 @@ class AuthenticatedSafe extends PkiObject {
                         const cmsEncrypted = new EncryptedData();
                         const currentParameters = parameters.safeContents[index];
                         currentParameters.contentToEncrypt = content.value.toSchema().toBER(false);
-                        await cmsEncrypted.encrypt(currentParameters);
+                        await cmsEncrypted.encrypt(currentParameters, crypto);
                         this.safeContents.push(new ContentInfo({
                             contentType: "1.2.840.113549.1.7.6",
                             content: cmsEncrypted.toSchema()
