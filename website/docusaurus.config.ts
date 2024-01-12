@@ -1,29 +1,23 @@
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import npm2yarn from '@docusaurus/remark-plugin-npm2yarn';
+import packageJSON from '../package.json';
 
 const config: Config = {
   title: 'pki.js',
   tagline: 'pki.js',
   favicon: 'img/favicon.ico',
-
-  // Set the production url of your site here
   url: 'https://pkijs.org',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
-
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
   },
-
+  customFields: {
+    description: packageJSON.description,
+  },
   presets: [
     [
       'classic',
@@ -37,6 +31,10 @@ const config: Config = {
           customCss: './src/css/custom.css',
         },
         blog: false,
+        // TODO: Add gtag trackingID.
+        // gtag: {
+        //   trackingID: '',
+        // },
       } satisfies Preset.Options,
     ],
   ],
@@ -55,13 +53,12 @@ const config: Config = {
   ],
 
   themeConfig: {
+    image: 'img/card.png',
     colorMode: {
       defaultMode: 'light',
       disableSwitch: true,
       respectPrefersColorScheme: false,
     },
-    // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
     navbar: {
       style: 'dark',
       logo: {
@@ -93,6 +90,41 @@ const config: Config = {
     footer: {
       style: 'dark',
       copyright: 'Made with ❤️ across the globe',
+      links: [
+        {
+          title: 'Learn',
+          items: [
+            {
+              label: 'Installation',
+              to: '/docs/installation',
+            },
+            {
+              label: 'Examples',
+              to: '/docs/examples/certificates-and-revocation',
+            },
+            {
+              label: 'API',
+              to: '/docs/api/',
+            },
+          ],
+        },
+        {
+          title: 'More',
+          items: [
+            {
+              label: 'GitHub',
+              href: 'https://github.com/PeculiarVentures/PKI.js',
+            },
+            {
+              label: 'Contact us',
+              href: 'mailto:info@peculiarventures.com',
+            }
+          ],
+        },
+        {
+          title: `Version: ${packageJSON.version}`,
+        },
+      ],
     },
   } satisfies Preset.ThemeConfig,
 };

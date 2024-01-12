@@ -37,31 +37,31 @@ This assumes you are using [npm](https://www.npmjs.com/) as your package manager
 
 ### Certificates and Revocation
 
-- [Create and validate an X.509 certificate](https://pkijs.org/examples/CertificateComplexExample/X509_cert_complex_example.html)
-- [Working with certificate requests](https://pkijs.org/examples/PKCS10ComplexExample/PKCS10_complex_example.html)
-- [Creating and parsing CRLs](https://pkijs.org/examples/CRLComplexExample/CRL_complex_example.html)
-- [Working with OCSP requests](https://pkijs.org/examples/OCSPRequestComplexExample/OCSP_req_complex_example.html)
-- [Working with OCSP responses](https://pkijs.org/examples/OCSPResponseComplexExample/OCSP_resp_complex_example.html)
+- [Create and validate an X.509 certificate](https://pkijs.org/docs/examples/certificates-and-revocation/create-and-validate-certificate)
+- [Working with certificate requests](https://pkijs.org/docs/examples/certificates-and-revocation/working-with-certificate-requests)
+- [Creating and parsing CRLs](https://pkijs.org/docs/examples/certificates-and-revocation/creating-and-parsing-CRLs)
+- [Working with OCSP requests](https://pkijs.org/docs/examples/certificates-and-revocation/working-with-OCSP-requests)
+- [Working with OCSP responses](https://pkijs.org/docs/examples/certificates-and-revocation/working-with-OCSP-responses)
 
 ### Signing and Encryption with CMS
 
-- [Working with CMS Signing](https://pkijs.org/examples/CMSSignedComplexExample/CMSSigned_complex_example.html)
-- [Working with CMS Certificate-based Encryption](https://pkijs.org/examples/HowToEncryptCMSviaCertificate/CMSEnvelopedExample.html)
-- [Working with CMS password-based Encryption](https://pkijs.org/examples/HowToEncryptCMSviaPassword/CMSEnvelopedPreDefineDataExample.html)
-- [Working with PKCS#7 Certificate bags (P7B)](https://pkijs.org/examples/P7BSimpleExample/P7BSimpleExample.html)
+- [Working with CMS Signing](https://pkijs.org/docs/examples/signing-and-encryption-with-CMS/working-with-CMS-signing)
+- [Working with CMS Certificate-based Encryption](https://pkijs.org/docs/examples/signing-and-encryption-with-CMS/working-with-CMS-certificate-based-encryption)
+- [Working with CMS password-based Encryption](https://pkijs.org/docs/examples/signing-and-encryption-with-CMS/working-with-CMS-password-based-encryption)
+- [Working with PKCS#7 Certificate bags (P7B)](https://pkijs.org/docs/examples/signing-and-encryption-with-CMS/working-with-PKCS-7-certificate-bags-P7B)
 
 ### Timestamping
-- [Creating a Timestamp request](https://pkijs.org/examples/TSPRequestComplexExample/TSP_req_complex_example.html)
-- [Creating a Timestamp response](https://pkijs.org/examples/TSPResponseComplexExample/TSP_resp_complex_example.html)
+- [Creating a Timestamp request](https://pkijs.org/docs/examples/timestamping/creating-a-timestamp-request)
+- [Creating a Timestamp response](https://pkijs.org/docs/examples/timestamping/creating-a-timestamp-response)
 
 ### Other
-- [How to verify a signature in a PDF file](https://pkijs.org/examples/PDFExample/PDFexample.html)
-- [S/MIME signature verification](https://pkijs.org/examples/SMIMEVerificationExample/SMIMEexample.html)
-- [S/MIME signature encryption](https://pkijs.org/examples/SMIMEEncryptionExample/SMIMEEncryptionExample.html)
-- [Working with PKCS#12 files](https://pkijs.org/examples/PKCS12SimpleExample/PKCS12SimpleExample.html)
+- [How to verify a signature in a PDF file](https://pkijs.org/docs/examples/other/how-to-verify-a-signature-in-a-PDF-file)
+- [S/MIME signature verification](https://pkijs.org/docs/examples/other/S-MIME-signature-verification)
+- [S/MIME signature encryption](https://pkijs.org/docs/examples/other/S-MIME-signature-encryption)
+- [Working with PKCS#12 files](https://pkijs.org/docs/examples/other/working-with-PKCS-12-files)
 
 ## Documentation
-You can find the PKI.js documentation [on the website](https://pkijs.org/docs).
+You can find the PKI.js documentation [on the website](https://pkijs.org/docs/installation).
 
 ## Want to help?
 Want to file a bug, contribute some code, or improve documentation? Excellent! Read up on our guidelines for [contribution](https://github.com/PeculiarVentures/PKI.js/blob/master/CONTRIBUTING.md).
