@@ -1,5 +1,6 @@
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import { themes as prismThemes } from 'prism-react-renderer';
 import npm2yarn from '@docusaurus/remark-plugin-npm2yarn';
 import packageJSON from '../package.json';
 
@@ -53,6 +54,9 @@ const config: Config = {
   ],
 
   themeConfig: {
+    prism: {
+      theme: prismThemes.oneDark,
+    },
     image: 'img/card.png',
     colorMode: {
       defaultMode: 'light',
