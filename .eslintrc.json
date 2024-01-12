@@ -16,7 +16,8 @@
   ],
   "ignorePatterns": [
     "build/**/*.ts",
-    "**/*.js"
+    "**/*.js",
+    "website"
   ],
   "rules": {
     "@typescript-eslint/ban-ts-ignore": 0,

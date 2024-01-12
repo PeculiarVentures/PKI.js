@@ -5,7 +5,6 @@ build
 coverage
 .vs
 .vscode
-docs
 
 bundle.js
 test/browser/*.js

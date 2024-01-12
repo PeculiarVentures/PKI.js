@@ -95,6 +95,7 @@ export type TimeStampReqParameters = PkiObjectParameters & Partial<ITimeStampReq
  * });
  *
  * const tspReqRaw = tspReq.toSchema().toBER();
+ * ```
  */
 export class TimeStampReq extends PkiObject implements ITimeStampReq {
 
