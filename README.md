@@ -20,7 +20,7 @@ existed before a particular time. It is commonly used in signing applications to
 ## Objectives
 - Typescript and object-oriented implementation
 - Contains no cryptographic implementations and instead leverages Web Crypto API
-- Work uniformly both in browser and in Node/Dino
+- Work uniformly both in browser and in [Node](https://nodejs.org/)/[Deno](https://deno.com/)
 
 ## Installation
 
