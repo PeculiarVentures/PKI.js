@@ -421,19 +421,21 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
   const stream = new bs.SeqStream();
 
   //#region Remove certificate extension
-  for (let i = 0; certificate.extensions && i < certificate.extensions.length; i++) {
-    switch (certificate.extensions[i].extnID) {
-      case id_SignedCertificateTimestampList:
-        {
-          parsedValue = certificate.extensions[i].parsedValue;
+  if (certificate.extensions) {
+    for (let i = certificate.extensions.length - 1; i >=0; i--) {
+      switch (certificate.extensions[i].extnID) {
+        case id_SignedCertificateTimestampList:
+          {
+            parsedValue = certificate.extensions[i].parsedValue;
 
-          if (!parsedValue || parsedValue.timestamps.length === 0)
-            throw new Error("Nothing to verify in the certificate");
+            if (!parsedValue || parsedValue.timestamps.length === 0)
+              throw new Error("Nothing to verify in the certificate");
 
-          certificate.extensions.splice(i, 1);
-        }
-        break;
-      default:
+            certificate.extensions.splice(i, 1);
+          }
+          break;
+        default:
+      }
     }
   }
   //#endregion
