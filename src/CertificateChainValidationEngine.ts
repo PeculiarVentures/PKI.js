@@ -314,7 +314,7 @@ export class CertificateChainValidationEngine {
     }
 
     // Now perform certificate verification checking
-    for (let i = 0; i < result.length; i++) {
+    for (let i = result.length - 1; i >= 0; i--) {
       try {
         const verificationResult = await certificate.verify(result[i], crypto);
         if (verificationResult === false)
@@ -813,7 +813,7 @@ export class CertificateChainValidationEngine {
     //#endregion
 
     //#region Exclude certificate paths not ended with "trusted roots"
-    for (let i = 0; i < result.length; i++) {
+    for (let i = result.length - 1; i >= 0; i--) {
       let found = false;
 
       for (let j = 0; j < (result[i]).length; j++) {
@@ -832,7 +832,6 @@ export class CertificateChainValidationEngine {
 
       if (!found) {
         result.splice(i, 1);
-        i = 0;
       }
     }
 
