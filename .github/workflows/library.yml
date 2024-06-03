@@ -43,3 +43,15 @@ jobs:
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel: true
+          flag-name: run-${{ matrix.node-version }}
+
+  finish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close parallel build
+        uses: coverallsapp/github-action@master
+        with:
+          parallel-finished: true
+          carryforward: "run-18.x,run-20.x"
