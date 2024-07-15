@@ -1,4 +1,5 @@
 import * as assert from "assert";
+import * as crypto from "crypto";
 import "./utils";
 import * as example from "./pkcs12SimpleExample";
 import { CryptoEngine } from "../src";
@@ -51,7 +52,7 @@ context("PKCS#12 Simple Example", () => {
   });
 
   it("Speed test for stampDataWithPassword", async () => {
-    const engine = new CryptoEngine({ name: "node", crypto: crypto });
+    const engine = new CryptoEngine({ name: "node", crypto: crypto.webcrypto as globalThis.Crypto });
     const encData = await engine.stampDataWithPassword({
       password: Convert.FromUtf8String(password),
       salt: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]),
