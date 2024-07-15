@@ -141,18 +141,21 @@ function makePKCS12B2Key(
 
   //#region Main algorithm making key
   //#region Transform password to UTF-8 like string
-  const passwordViewInitial = new Uint8Array(password);
-
-  const passwordTransformed = new ArrayBuffer((password.byteLength * 2) + 2);
-  const passwordTransformedView = new Uint8Array(passwordTransformed);
-
-  for (let i = 0; i < passwordViewInitial.length; i++) {
-    passwordTransformedView[i * 2] = 0x00;
-    passwordTransformedView[i * 2 + 1] = passwordViewInitial[i];
+  const originalPassword = new Uint8Array(password);
+  let decodedPassword = new TextDecoder().decode(password);
+  const encodedPassword = new TextEncoder().encode(decodedPassword);
+  if (encodedPassword.some((byte, i) => byte !== originalPassword[i])) {
+    decodedPassword = String.fromCharCode(...originalPassword);
   }
 
-  passwordTransformedView[passwordTransformedView.length - 2] = 0x00;
-  passwordTransformedView[passwordTransformedView.length - 1] = 0x00;
+  // Transform the password into a byte array
+  const passwordTransformed = new Uint8Array(decodedPassword.length * 2 + 2);
+  const passwordDataView = new DataView(passwordTransformed.buffer);
+  for (let i = 0; i < decodedPassword.length; i++) {
+    passwordDataView.setUint16(i * 2, decodedPassword.charCodeAt(i), false);
+  }
+  // Add null-terminator
+  passwordDataView.setUint16(decodedPassword.length * 2, 0, false);
 
   password = passwordTransformed.slice(0);
   //#endregion
