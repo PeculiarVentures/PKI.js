@@ -52,13 +52,21 @@ async function makePKCS12B2Key(hashAlgorithm: string, keyLength: number, passwor
       throw new Error("Unsupported hashing algorithm");
   }
 
-  // Transform the password into a null-terminated UCS-2 encoded string
-  const passwordViewInitial = new Uint8Array(password);
-  const passwordTransformed = new Uint8Array((password.byteLength * 2) + 2);
-  for (let i = 0; i < passwordViewInitial.length; i++) {
-    passwordTransformed[i * 2] = 0x00;
-    passwordTransformed[i * 2 + 1] = passwordViewInitial[i];
+  const originalPassword = new Uint8Array(password);
+  let decodedPassword = new TextDecoder().decode(password);
+  const encodedPassword = new TextEncoder().encode(decodedPassword);
+  if (encodedPassword.some((byte, i) => byte !== originalPassword[i])) {
+    decodedPassword = String.fromCharCode(...originalPassword);
   }
+
+  // Transform the password into a byte array
+  const passwordTransformed = new Uint8Array(decodedPassword.length * 2 + 2);
+  const passwordView = new DataView(passwordTransformed.buffer);
+  for (let i = 0; i < decodedPassword.length; i++) {
+    passwordView.setUint16(i * 2, decodedPassword.charCodeAt(i), false);
+  }
+  // Add null-terminator
+  passwordView.setUint16(decodedPassword.length * 2, 0, false);
 
   // Create a filled array D with the value 3 (ID for MACing)
   const D = new Uint8Array(v).fill(3);
