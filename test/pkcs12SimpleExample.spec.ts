@@ -46,9 +46,23 @@ context("PKCS#12 Simple Example", () => {
     await example.certificatePrivacy(password);
   });
 
-  it("Making OpenSSL-like PKCS#12 Data", async () => {
-    const pfx = await example.openSSLLike(password);
-    await example.parsePKCS12(pfx, password);
+  context("Making OpenSSL-like PKCS#12 Data", () => {
+    it("ASCII", async () => {
+      const pfx = await example.openSSLLike(password);
+      await example.parsePKCS12(pfx, password);
+    });
+
+    it("UTF-8", async () => {
+      const password = "пароль";
+      const pfx = await example.openSSLLike(password);
+      await example.parsePKCS12(pfx, password);
+    });
+
+    it("Binary", async () => {
+      const password = "\x04\xff\x20\x21"; // decode/encode -> [ 4, 239, 191, 189, 32, 33 ]
+      const pfx = await example.openSSLLike(password);
+      await example.parsePKCS12(pfx, password);
+    });
   });
 
   it("Speed test for stampDataWithPassword", async () => {
