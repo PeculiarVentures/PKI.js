@@ -59,7 +59,6 @@ context("CMS Signed Complex Example", () => {
       new pkijs.SignedData({ schema: cmsContentSimpl.content });
     });
     //#endregion
-    console.log(Buffer.from(cms.cmsSignedData).toString("base64"));
 
     // Verify the CMS SignedData using the provided certificate and original data buffer
     const result = await example.verifyCMSSigned(cms.cmsSignedData, [cms.certificate], dataBuffer);
@@ -74,7 +73,6 @@ context("CMS Signed Complex Example", () => {
       new pkijs.SignedData({ schema: cmsContentSimpl.content });
     });
     //#endregion
-    console.log(Buffer.from(cms.cmsSignedData).toString("base64"));
 
     // Verify the CMS SignedData using the provided certificate and original data buffer
     const result = await example.verifyCMSSigned(cms.cmsSignedData, [cms.certificate], dataBuffer);
