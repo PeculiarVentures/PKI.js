@@ -847,7 +847,12 @@ export class SignedData extends PkiObject implements ISignedData {
       }
       //#endregion
 
-      const verifyResult = await crypto.verifyWithPublicKey(data, signerInfo.signature, signerCert.subjectPublicKeyInfo, signerCert.signatureAlgorithm, shaAlgorithm);
+      const signAlg = crypto.getAlgorithmByOID(signerInfo.signatureAlgorithm.algorithmId, true);
+      // In some cases, the signature algorithm may not include a hash component.
+      // In such scenarios, we utilize the hash mechanism specified in signerInfo.digestAlgorithm.
+      const verifyResult = ("hash" in signAlg)
+        ? await crypto.verifyWithPublicKey(data, signerInfo.signature, signerCert.subjectPublicKeyInfo, signerCert.signatureAlgorithm)
+        : await crypto.verifyWithPublicKey(data, signerInfo.signature, signerCert.subjectPublicKeyInfo, signerCert.signatureAlgorithm, shaAlgorithm);
 
       //#region Make a final result
 
@@ -893,9 +898,18 @@ export class SignedData extends PkiObject implements ISignedData {
     //#region Initial checking
     if (!privateKey)
       throw new Error("Need to provide a private key for signing");
+
+    const signerInfo = this.signerInfos[signerIndex];
+    if (!signerInfo) {
+      throw new RangeError("SignerInfo index is out of range");
+    }
+
     //#endregion
 
-    //#region Simple check for supported algorithm
+    //#region Adjust hashAlgorithm based on privateKey if signedAttrs are missing
+    if (!signerInfo.signedAttrs?.attributes.length && "hash" in privateKey.algorithm && "hash" in privateKey.algorithm && privateKey.algorithm.hash) {
+      hashAlgorithm = (privateKey.algorithm.hash as Algorithm).name;
+    }
     const hashAlgorithmOID = crypto.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
     //#endregion
 
@@ -907,10 +921,6 @@ export class SignedData extends PkiObject implements ISignedData {
       }));
     }
 
-    const signerInfo = this.signerInfos[signerIndex];
-    if (!signerInfo) {
-      throw new RangeError("SignerInfo index is out of range");
-    }
     signerInfo.digestAlgorithm = new AlgorithmIdentifier({
       algorithmId: hashAlgorithmOID,
       algorithmParams: new asn1js.Null()

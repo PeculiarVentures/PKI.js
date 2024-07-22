@@ -5,11 +5,11 @@ import * as pkijs from "../src";
 /**
  * Create CMS_Signed
  */
-export async function createCMSSigned(hashAlg: string, signAlg: string, dataBuffer: ArrayBuffer, detachedSignature = false, addExt = false) {
+export async function createCMSSigned(hashAlg: string, signAlg: string, dataBuffer: ArrayBuffer, detachedSignature = false, addExt = false, signHashAlg?: string) {
   // Get a "crypto" extension
   const crypto = pkijs.getCrypto(true);
 
-  const certWithKey = await utils.createSelfSignedCertificate(hashAlg, signAlg);
+  const certWithKey = await utils.createSelfSignedCertificate(signHashAlg || hashAlg, signAlg);
 
   //#region Initialize CMS Signed Data structures and sign it
   const cmsSignedSimpl = new pkijs.SignedData({
