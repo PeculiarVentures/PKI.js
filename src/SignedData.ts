@@ -850,8 +850,8 @@ export class SignedData extends PkiObject implements ISignedData {
       // This adjustment is specifically for cases where the signature algorithm is rsaEncryption.
       // In such cases, we rely on the hash mechanism defined in signerInfo.digestAlgorithm for verification.
       const verifyResult = signerInfo.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.1"
-        ? await crypto.verifyWithPublicKey(data, signerInfo.signature, signerCert.subjectPublicKeyInfo, signerCert.signatureAlgorithm, shaAlgorithm)
-        : await crypto.verifyWithPublicKey(data, signerInfo.signature, signerCert.subjectPublicKeyInfo, signerCert.signatureAlgorithm);
+        ? await crypto.verifyWithPublicKey(data, signerInfo.signature, signerCert.subjectPublicKeyInfo, signerInfo.signatureAlgorithm, shaAlgorithm)
+        : await crypto.verifyWithPublicKey(data, signerInfo.signature, signerCert.subjectPublicKeyInfo, signerInfo.signatureAlgorithm);
 
       //#region Make a final result
 
