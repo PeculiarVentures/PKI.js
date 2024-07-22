@@ -50,5 +50,33 @@ context("CMS Signed Complex Example", () => {
     const ok = await example.verifyCMSSigned(cmsSignedBuffer);
     assert.equal(ok, true, "CMS SignedData must be verified successfully");
   });
+
+  it("should sign data using SHA-256 for message digest and SHA-1 for signature hash, then verify the signature", async () => {
+    const cms = await example.createCMSSigned("SHA-256", "RSASSA-PKCS1-V1_5", dataBuffer, false, true, "SHA-1");
+    //#region Verify that the CMS SignedData can be decoded without errors
+    assert.doesNotThrow(() => {
+      const cmsContentSimpl = pkijs.ContentInfo.fromBER(cms.cmsSignedData);
+      new pkijs.SignedData({ schema: cmsContentSimpl.content });
+    });
+    //#endregion
+
+    // Verify the CMS SignedData using the provided certificate and original data buffer
+    const result = await example.verifyCMSSigned(cms.cmsSignedData, [cms.certificate], dataBuffer);
+    assert.equal(result, true, "The CMS SignedData should be verified successfully");
+  });
+
+  it("should sign data using SHA-256 for message digest and SHA-1 for signature hash without considering the message hash, then verify the signature", async () => {
+    const cms = await example.createCMSSigned("SHA-256", "RSASSA-PKCS1-V1_5", dataBuffer, false, false, "SHA-1");
+    //#region Verify that the CMS SignedData can be decoded without errors
+    assert.doesNotThrow(() => {
+      const cmsContentSimpl = pkijs.ContentInfo.fromBER(cms.cmsSignedData);
+      new pkijs.SignedData({ schema: cmsContentSimpl.content });
+    });
+    //#endregion
+
+    // Verify the CMS SignedData using the provided certificate and original data buffer
+    const result = await example.verifyCMSSigned(cms.cmsSignedData, [cms.certificate], dataBuffer);
+    assert.equal(result, true, "The CMS SignedData should be verified successfully");
+  });
 });
 

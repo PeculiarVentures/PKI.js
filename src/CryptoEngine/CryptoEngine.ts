@@ -1783,16 +1783,21 @@ export class CryptoEngine extends AbstractCryptoEngine {
     // Initial variables
     const signatureAlgorithm = new AlgorithmIdentifier();
 
-    //#region Get a "default parameters" for current algorithm
+    //#region Get "default parameters" for the current algorithm
     const parameters = this.getAlgorithmParameters(privateKey.algorithm.name, "sign");
     if (!Object.keys(parameters.algorithm).length) {
       throw new Error("Parameter 'algorithm' is empty");
     }
+    // Use the hash from the privateKey.algorithm.hash.name for keys with hash algorithms (like RSA)
     const algorithm = parameters.algorithm as any; // TODO remove `as any`
-    algorithm.hash.name = hashAlgorithm;
+    if ("hash" in privateKey.algorithm && privateKey.algorithm.hash && (privateKey.algorithm.hash as Algorithm).name) {
+      algorithm.hash.name = (privateKey.algorithm.hash as Algorithm).name;
+    } else {
+      algorithm.hash.name = hashAlgorithm;
+    }
     //#endregion
 
-    //#region Fill internal structures base on "privateKey" and "hashAlgorithm"
+    //#region Fill internal structures based on "privateKey" and "hashAlgorithm"
     switch (privateKey.algorithm.name.toUpperCase()) {
       case "RSASSA-PKCS1-V1_5":
       case "ECDSA":
@@ -1800,8 +1805,8 @@ export class CryptoEngine extends AbstractCryptoEngine {
         break;
       case "RSA-PSS":
         {
-          //#region Set "saltLength" as a length (in octets) of hash function result
-          switch (hashAlgorithm.toUpperCase()) {
+          //#region Set "saltLength" as the length (in octets) of the hash function result
+          switch (algorithm.hash.name.toUpperCase()) {
             case "SHA-256":
               algorithm.saltLength = 32;
               break;
@@ -1818,8 +1823,8 @@ export class CryptoEngine extends AbstractCryptoEngine {
           //#region Fill "RSASSA_PSS_params" object
           const paramsObject: Partial<IRSASSAPSSParams> = {};
 
-          if (hashAlgorithm.toUpperCase() !== "SHA-1") {
-            const hashAlgorithmOID = this.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
+          if (algorithm.hash.name.toUpperCase() !== "SHA-1") {
+            const hashAlgorithmOID = this.getOIDByAlgorithm({ name: algorithm.hash.name }, true, "hashAlgorithm");
 
             paramsObject.hashAlgorithm = new AlgorithmIdentifier({
               algorithmId: hashAlgorithmOID,
