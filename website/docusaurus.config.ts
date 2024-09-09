@@ -21,7 +21,7 @@ const config: Config = {
   },
   presets: [
     [
-      'classic',
+      '@docusaurus/preset-classic',
       {
         docs: {
           path: 'docs',
@@ -47,7 +47,16 @@ const config: Config = {
         entryPoints: ['../src/index.ts'],
         tsconfig: '../tsconfig.json',
         disableSources: true,
-        hideInPageTOC: true,
+        membersWithOwnFile: ["Class", "Enum", "Interface"],
+        entryFileName: 'pkijs',
+        readme: '../src/README.MD',
+        sidebar: {
+          pretty: true,
+          autoConfiguration: true,
+        },
+        textContentMappings: {
+          'title.memberPage': '{name}',
+        },
       },
     ],
     'docusaurus-plugin-sass',
@@ -108,7 +117,7 @@ const config: Config = {
             },
             {
               label: 'API',
-              to: '/docs/api/',
+              to: '/docs/api/pkijs',
             },
           ],
         },
