@@ -25,7 +25,7 @@ export interface IPublicKeyInfo {
   /**
    * Parsed public key value
    */
-  parsedKey?: ECPublicKey | RSAPublicKey;
+  parsedKey?: ECPublicKey | RSAPublicKey | undefined;
 }
 export type PublicKeyInfoParameters = PkiObjectParameters & Partial<IPublicKeyInfo> & { json?: JsonWebKey; };
 
