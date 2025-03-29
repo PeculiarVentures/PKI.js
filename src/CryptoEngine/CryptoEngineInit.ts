@@ -13,11 +13,17 @@ export function initCryptoEngine() {
 
       common.setEngine(engineName, new CryptoEngine({ name: engineName, crypto: crypto }));
     }
-  } else if (typeof crypto !== "undefined" && "webcrypto" in crypto) {
-    // NodeJS ^15
-    const name = "NodeJS ^15";
-    const nodeCrypto = (crypto as any).webcrypto as Crypto;
-    common.setEngine(name, new CryptoEngine({ name, crypto: nodeCrypto }));
+  } else if (typeof crypto !== "undefined") {
+    if ("webcrypto" in crypto) {
+      // NodeJS ^15
+      const name = "NodeJS ^15";
+      const nodeCrypto = (crypto as any).webcrypto as Crypto;
+      common.setEngine(name, new CryptoEngine({ name, crypto: nodeCrypto }));
+    } else if ("subtle" in crypto) {
+      // NodeJS ^19
+      const name = "NodeJS ^19";
+      common.setEngine(name, new CryptoEngine({ name, crypto }));
+    }
   }
 
 }
