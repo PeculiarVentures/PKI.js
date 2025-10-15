@@ -13,7 +13,6 @@ const banner = [
   "",
 ].join("\n");
 const input = "src/index.ts";
-const external = Object.keys(pkg.dependencies || {});
 
 const pkijsName = "pkijs.es.js";
 

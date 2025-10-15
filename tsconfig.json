@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES2019",
     "module": "CommonJS",
+    "moduleResolution": "node",
     "strict": true,
     "importHelpers": true,
     "noImplicitOverride": true,
