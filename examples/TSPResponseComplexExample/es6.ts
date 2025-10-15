@@ -99,7 +99,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
   if (!signedSimpl.encapContentInfo.eContent) {
     throw new Error("'signedSimpl.encapContentInfo.eContent' is empty");
   }
-  const tstInfoSimpl = pkijs.TSTInfo.fromBER(signedSimpl.encapContentInfo.eContent.valueBlock.valueHexView);
+  const tstInfoSimpl = pkijs.TSTInfo.fromBER(signedSimpl.encapContentInfo.eContent.valueBlock.valueHexView as BufferSource);
   //#endregion
 
   //#region Put information about policy

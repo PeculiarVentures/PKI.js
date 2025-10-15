@@ -2,17 +2,15 @@ import * as common from "../common";
 import { CryptoEngine } from "./CryptoEngine";
 
 export function initCryptoEngine() {
-  if (typeof self !== "undefined") {
-    if ("crypto" in self) {
-      let engineName = "webcrypto";
+  if (typeof globalThis !== "undefined" && "crypto" in globalThis) {
+    let engineName = "webcrypto";
 
-      // Apple Safari support
-      if ("webkitSubtle" in self.crypto) {
-        engineName = "safari";
-      }
-
-      common.setEngine(engineName, new CryptoEngine({ name: engineName, crypto: crypto }));
+    // Apple Safari support
+    if ("webkitSubtle" in globalThis.crypto) {
+      engineName = "safari";
     }
+
+    common.setEngine(engineName, new CryptoEngine({ name: engineName, crypto: globalThis.crypto }));
   } else if (typeof crypto !== "undefined" && "webcrypto" in crypto) {
     // NodeJS ^15
     const name = "NodeJS ^15";

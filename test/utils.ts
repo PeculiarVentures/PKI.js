@@ -1,4 +1,3 @@
-/* eslint-disable deprecation/deprecation */
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pkijs from "../src";

@@ -211,7 +211,7 @@ async function parsePKCS12(buffer: ArrayBuffer, password: string) {
       password: passwordConverted
     });
   }
-  catch (ex) {
+  catch {
     pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.parseInternalValues({
       password: passwordConverted
     });

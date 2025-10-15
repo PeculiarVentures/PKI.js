@@ -276,7 +276,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
       AsnError.assert(asn1Basic, "Basic OCSP response");
       basicResponse = new BasicOCSPResponse({ schema: asn1Basic.result });
     }
-    catch (ex) {
+    catch {
       return result;
     }
     //#endregion
@@ -292,7 +292,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
   public async sign(privateKey: CryptoKey, hashAlgorithm?: string, crypto = common.getCrypto(true)) {
     //#region Check that ResponseData has type BasicOCSPResponse and sign it
     if (this.responseBytes && this.responseBytes.responseType === id_PKIX_OCSP_Basic) {
-      const basicResponse = BasicOCSPResponse.fromBER(this.responseBytes.response.valueBlock.valueHexView);
+      const basicResponse = BasicOCSPResponse.fromBER(this.responseBytes.response.valueBlock.valueHexView as BufferSource);
 
       return basicResponse.sign(privateKey, hashAlgorithm, crypto);
     }
@@ -314,7 +314,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
 
     //#region Check that ResponseData has type BasicOCSPResponse and verify it
     if (this.responseBytes && this.responseBytes.responseType === id_PKIX_OCSP_Basic) {
-      const basicResponse = BasicOCSPResponse.fromBER(this.responseBytes.response.valueBlock.valueHexView);
+      const basicResponse = BasicOCSPResponse.fromBER(this.responseBytes.response.valueBlock.valueHexView as BufferSource);
 
       if (issuerCertificate !== null) {
         if (!basicResponse.certs) {

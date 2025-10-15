@@ -128,7 +128,7 @@ function parseCMSSigned() {
 
       const row = certificatesTable.insertRow(certificatesTable.rows.length);
       const cell0 = row.insertCell(0);
-      cell0.innerHTML = pvutils.bufferToHexCodes(cert.serialNumber.valueBlock.valueHexView);
+      cell0.innerHTML = pvutils.bufferToHexCodes(cert.serialNumber.valueBlock.valueHexView.slice().buffer);
       const cell1 = row.insertCell(1);
       cell1.innerHTML = ul;
     }

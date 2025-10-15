@@ -229,7 +229,7 @@ export class CertificateChainValidationEngine {
           return [certificate];
         }
       }
-      catch (ex) {
+      catch {
         // nothing
       }
     }
@@ -320,7 +320,7 @@ export class CertificateChainValidationEngine {
         if (verificationResult === false)
           result.splice(i, 1);
       }
-      catch (ex) {
+      catch {
         result.splice(i, 1); // Something wrong, remove the certificate
       }
     }
@@ -475,7 +475,7 @@ export class CertificateChainValidationEngine {
               break;
             }
           }
-          catch (ex) {
+          catch {
             // nothing
           }
         }

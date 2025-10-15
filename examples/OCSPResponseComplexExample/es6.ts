@@ -97,7 +97,7 @@ function parseOCSPResp(source: ArrayBuffer) {
 
   //#region Check that we do have "responseBytes"
   if (ocspRespSimpl.responseBytes) {
-    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHexView);
+    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHexView as BufferSource);
   }
   else
     return; // Nothing else to display - only status information exists

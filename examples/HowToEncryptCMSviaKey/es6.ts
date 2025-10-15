@@ -40,7 +40,7 @@ async function createKeyPair() {
 async function envelopedEncrypt() {
   keys.spki = utils.fromPEM(common.getElement("pkcs8_key_pub", "textarea").value);
 
-  keys.keyPairIdBuffer = new Uint8Array(pvtsutils.Convert.FromBase64(common.getElement("pkcs8_key_id", "textarea").value));
+  keys.keyPairIdBuffer = pvtsutils.Convert.FromBase64(common.getElement("pkcs8_key_id", "textarea").value);
 
   valueBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("content", "textarea").value);
   cmsEnvelopedBuffer = await example.envelopedEncrypt(

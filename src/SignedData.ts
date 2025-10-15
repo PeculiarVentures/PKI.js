@@ -598,7 +598,7 @@ export class SignedData extends PkiObject implements ISignedData {
             continue;
           }
 
-          const digest = await crypto.digest({ name: "sha-1" }, certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
+          const digest = await crypto.digest({ name: "sha-1" }, certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
           if (pvutils.isEqualBuffer(digest, keyId)) {
             signerCert = certificate;
             break;
@@ -635,9 +635,9 @@ export class SignedData extends PkiObject implements ISignedData {
         let tstInfo: TSTInfo;
 
         try {
-          tstInfo = TSTInfo.fromBER(this.encapContentInfo.eContent.valueBlock.valueHexView);
+          tstInfo = TSTInfo.fromBER(this.encapContentInfo.eContent.valueBlock.valueHexView as BufferSource);
         }
-        catch (ex) {
+        catch {
           throw new SignedDataVerifyError({
             date: checkDate,
             code: 15,
@@ -652,7 +652,7 @@ export class SignedData extends PkiObject implements ISignedData {
 
         //#region Change "checkDate" and append "timestampSerial"
         checkDate = tstInfo.genTime;
-        timestampSerial = tstInfo.serialNumber.valueBlock.valueHexView.slice();
+        timestampSerial = tstInfo.serialNumber.valueBlock.valueHexView.slice().buffer;
         //#endregion
 
         //#region Check that we do have detached data content
@@ -765,7 +765,7 @@ export class SignedData extends PkiObject implements ISignedData {
           data = eContent.getValue();
         }
         else
-          data = eContent.valueBlock.valueBeforeDecodeView;
+          data = eContent.valueBlock.valueBeforeDecodeView.slice().buffer;
       }
       else // Detached data
       {
@@ -954,7 +954,7 @@ export class SignedData extends PkiObject implements ISignedData {
           data = eContent.getValue();
         }
         else
-          data = eContent.valueBlock.valueBeforeDecodeView;
+          data = eContent.valueBlock.valueBeforeDecodeView.slice().buffer;
       }
       else // Detached data
       {

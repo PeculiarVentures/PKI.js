@@ -740,7 +740,7 @@ export class Certificate extends PkiObject implements ICertificate {
    * @returns Computed hash value from `Certificate.tbsCertificate.subjectPublicKeyInfo.subjectPublicKey`
    */
   public async getKeyHash(hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<ArrayBuffer> {
-    return crypto.digest({ name: hashAlgorithm }, this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
+    return crypto.digest({ name: hashAlgorithm }, this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
   }
 
   /**
@@ -766,7 +766,7 @@ export class Certificate extends PkiObject implements ICertificate {
 
     // Signing TBS data on provided private key
     // TODO remove any
-    const signature = await crypto.signWithPrivateKey(this.tbsView, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(this.tbsView as BufferSource, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
   }
 
@@ -790,7 +790,7 @@ export class Certificate extends PkiObject implements ICertificate {
       throw new Error("Please provide issuer certificate as a parameter");
     }
 
-    return crypto.verifyWithPublicKey(this.tbsView, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(this.tbsView as BufferSource, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

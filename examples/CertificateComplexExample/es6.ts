@@ -106,7 +106,7 @@ function parseCertificate() {
   let publicKeySize = "< unknown >";
 
   if (certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1)) {
-    const rsaPublicKey = pkijs.RSAPublicKey.fromBER(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
+    const rsaPublicKey = pkijs.RSAPublicKey.fromBER(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
 
     const modulusView = rsaPublicKey.modulus.valueBlock.valueHexView;
     let modulusBitLength = 0;
