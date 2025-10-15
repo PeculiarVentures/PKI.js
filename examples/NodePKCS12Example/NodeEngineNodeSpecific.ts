@@ -1,4 +1,3 @@
-/* eslint-disable deprecation/deprecation */
 import * as crypto from "crypto";
 
 export function getRandomValues(length: number): Uint8Array {
@@ -6,7 +5,7 @@ export function getRandomValues(length: number): Uint8Array {
 }
 
 function pbkdf1(password: Buffer, salt: Buffer, iterationCount: number, keyLength: number, hashAlgorithm: string): Buffer {
-  let key = Buffer.concat([password, salt]);
+  let key: Buffer = Buffer.concat([password, salt]);
 
   for (let i = 0; i < iterationCount; i++)
     key = crypto.createHash(hashAlgorithm).update(key).digest();
@@ -94,7 +93,6 @@ export function decryptUsingPBKDF2Password(
   if (iv.byteLength)
     cipher = crypto.createDecipheriv(algorithm, key, Buffer.from(iv));
   else
-    // eslint-disable-next-line deprecation/deprecation
     cipher = crypto.createDecipher(algorithm, key);
   //#endregion
 
@@ -157,7 +155,7 @@ function makePKCS12B2Key(
   // Add null-terminator
   passwordDataView.setUint16(decodedPassword.length * 2, 0, false);
 
-  password = passwordTransformed.slice(0);
+  password = passwordTransformed.slice(0).buffer;
   //#endregion
 
   //#region Construct a string D (the "diversifier") by concatenating v/8 copies of ID
@@ -219,7 +217,7 @@ function makePKCS12B2Key(
     //#endregion
 
     //#region Make "iterationCount" rounds of hashing
-    let roundBuffer = Buffer.from(dAndI);
+    let roundBuffer: Buffer = Buffer.from(dAndI);
 
     for (let j = 0; j < iterationCount; j++) {
       const hash = crypto.createHash(hashAlgorithm);

@@ -1034,7 +1034,7 @@ context("PKITS's certificate pairs parsing test", () => {
 
           if (name !== null) {
             assert.doesNotThrow(() => {
-              func(value.valueBlock.value[0].valueBeforeDecodeView);
+              func(value.valueBlock.value[0].valueBeforeDecodeView as BufferSource);
             }, Error, `Correct convertion to CERT for ${name}`);
           }
         }

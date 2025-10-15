@@ -60,7 +60,7 @@ export class Extension extends PkiObject implements IExtension {
   public get parsedValue(): ExtensionParsedValue | undefined {
     if (this._parsedValue === undefined) {
       // Get PARSED_VALUE for well-known extensions
-      const parsedValue = ExtensionValueFactory.fromBER(this.extnID, this.extnValue.valueBlock.valueHexView);
+      const parsedValue = ExtensionValueFactory.fromBER(this.extnID, this.extnValue.valueBlock.valueHexView as BufferSource);
       this._parsedValue = parsedValue;
     }
 

@@ -277,7 +277,7 @@ export class CertID extends PkiObject implements ICertID {
 
     // Create ISSUER_KEY_HASH
     const issuerKeyBuffer = issuerCertificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView;
-    const hashIssuerKey = await crypto.digest({ name: parameters.hashAlgorithm }, issuerKeyBuffer);
+    const hashIssuerKey = await crypto.digest({ name: parameters.hashAlgorithm }, issuerKeyBuffer as BufferSource);
     this.issuerKeyHash = new asn1js.OctetString({ valueHex: hashIssuerKey });
   }
 

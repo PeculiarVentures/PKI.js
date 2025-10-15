@@ -61,7 +61,7 @@ export async function createPKCS10Internal(hashAlg: string, signAlg: string) {
   //#endregion
 
   // SubjectKeyIdentifier
-  const subjectKeyIdentifier = await crypto.digest({ name: "SHA-1" }, pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
+  const subjectKeyIdentifier = await crypto.digest({ name: "SHA-1" }, pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
   pkcs10.attributes.push(new pkijs.Attribute({
     type: "1.2.840.113549.1.9.14",
     values: [(new pkijs.Extensions({

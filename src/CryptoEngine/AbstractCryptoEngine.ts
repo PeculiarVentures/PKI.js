@@ -106,7 +106,11 @@ export abstract class AbstractCryptoEngine implements type.ICryptoEngine {
   }
 
   public getRandomValues<T extends ArrayBufferView | null>(array: T): T {
-    return this.crypto.getRandomValues(array);
+    if (array === null) {
+      throw new Error("Argument \"array\" must not be null");
+    }
+
+    return this.crypto.getRandomValues(array) as T;
   }
 
 }

@@ -343,7 +343,7 @@ context("PKIjs functional testing", () => {
 
       for (const t of tests) {
         it(t.name, async () => {
-          const data = new Uint8Array(10);
+          const data = new Uint8Array(10).buffer;
           const certData = await createCertificate("SHA-256", "RSASSA-PKCS1-v1_5");
 
           let envelopedData = new pkijs.EnvelopedData({
@@ -793,7 +793,6 @@ context("PKIjs functional testing", () => {
         }
 
         try {
-          // eslint-disable-next-line deprecation/deprecation
           pkijs.setEngine.apply(undefined, t.args as any);
           const engine = pkijs.getEngine();
           assert.strictEqual(engine.name, t.args[0], "incorrect name");

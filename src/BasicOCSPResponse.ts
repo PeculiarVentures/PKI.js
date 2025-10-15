@@ -326,7 +326,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
               default:
             }
           }
-          catch (ex) {
+          catch {
             // nothing
           }
 
@@ -366,7 +366,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await crypto.signWithPrivateKey(this.tbsResponseData.tbsView, privateKey, { algorithm });
+    const signature = await crypto.signWithPrivateKey(this.tbsResponseData.tbsView as BufferSource, privateKey, { algorithm });
     this.signature = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -401,7 +401,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
         break;
       case (this.tbsResponseData.responderID instanceof asn1js.OctetString): // [2] KeyHash
         for (const [index, cert] of this.certs.entries()) {
-          const hash = await crypto.digest({ name: "sha-1" }, cert.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
+          const hash = await crypto.digest({ name: "sha-1" }, cert.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
           if (pvutils.isEqualBuffer(hash, this.tbsResponseData.responderID.valueBlock.valueHex)) {
             certIndex = index;
             break;
@@ -436,7 +436,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       throw new Error("Validation of signer's certificate failed");
     }
 
-    return crypto.verifyWithPublicKey(this.tbsResponseData.tbsView, this.signature, this.certs[certIndex].subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(this.tbsResponseData.tbsView as BufferSource, this.signature, this.certs[certIndex].subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
 }

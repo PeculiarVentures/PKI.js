@@ -62,7 +62,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
                   schema: this.subjectPublicKey.valueBlock.valueHexView
                 });
               }
-              catch (ex) {
+              catch {
                 // nothing
               } // Could be a problems during recognition of internal public key data here. Let's ignore them.
             }
@@ -75,7 +75,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
               try {
                 this._parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
               }
-              catch (ex) {
+              catch {
                 // nothing
               } // Could be a problems during recognition of internal public key data here. Let's ignore them.
             }
@@ -262,7 +262,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
       try {
         this.fromSchema(asn1.result);
       }
-      catch (exception) {
+      catch {
         throw new Error("Error during initializing object from schema");
       }
     } catch (e) {

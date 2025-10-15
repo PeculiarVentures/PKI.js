@@ -97,7 +97,6 @@ async function smimeDecrypt() {
   const cmsContentSimpl = pkijs.ContentInfo.fromBER(parser.content.buffer);
   const cmsEnvelopedSimp = new pkijs.EnvelopedData({ schema: cmsContentSimpl.content });
 
-  JSON.parse;
   let result: ArrayBuffer;
   try {
     result = await cmsEnvelopedSimp.decrypt(0,

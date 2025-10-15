@@ -9,7 +9,7 @@ function getKeyAgreeAlgorithmParams(operation: pkijs.CryptoEngineAlgorithmOperat
 export interface CreateKeyPairResult {
   pkcs8: ArrayBuffer;
   spki: ArrayBuffer;
-  keyPairIdBuffer: Uint8Array;
+  keyPairIdBuffer: ArrayBuffer;
 }
 
 /**
@@ -30,7 +30,7 @@ export async function createKeyPair(curveName: string): Promise<CreateKeyPairRes
 
   // Export key id
   const value = new ArrayBuffer(4);
-  const keyPairIdBuffer = crypto.getRandomValues(new Uint8Array(value));
+  const keyPairIdBuffer = crypto.getRandomValues(new Uint8Array(value)).buffer;
 
   return {
     pkcs8,
