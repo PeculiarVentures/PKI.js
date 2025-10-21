@@ -1,10 +1,16 @@
-# PKIjs
+<h1 align="center">
+  PKIjs
+</h1>
 
-[![License](https://img.shields.io/badge/license-BSD-green.svg?style=flat)](https://github.com/PeculiarVentures/PKI.js/blob/master/LICENSE)
-[![CircleCI](https://circleci.com/gh/PeculiarVentures/PKI.js/tree/master.svg?style=svg)](https://circleci.com/gh/PeculiarVentures/PKI.js/tree/master)
- [![Known Vulnerabilities](https://snyk.io/test/github/PeculiarVentures/PKI.js/badge.svg)](https://snyk.io/test/github/PeculiarVentures/PKI.js) [![Coverage Status](https://coveralls.io/repos/github/PeculiarVentures/PKI.js/badge.svg)](https://coveralls.io/github/PeculiarVentures/PKI.js)
+<div align="center">
 
-[![NPM](https://nodei.co/npm/pkijs.png?downloads=true&downloadRank=true)](https://nodei.co/npm/pkijs/)
+![NPM License](https://img.shields.io/npm/l/pkijs)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/PeculiarVentures/PKI.js/library.yml?label=test)
+[![npm version](https://img.shields.io/npm/v/pkijs.svg)](https://www.npmjs.com/package/pkijs)
+![Coveralls](https://img.shields.io/coverallsCoverage/github/PeculiarVentures/PKI.js)
+[![npm downloads](https://img.shields.io/npm/dm/pkijs.svg)](https://www.npmjs.com/package/pkijs)
+
+</div>
 
 PKIjs provides a Typescript implementation of the most common formats and algorithms needed to build PKI-enabled applications
 
