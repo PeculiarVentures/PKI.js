@@ -46,6 +46,7 @@ const config: Config = {
       {
         entryPoints: ['../src/index.ts'],
         tsconfig: '../tsconfig.json',
+        skipErrorChecking: true,
         disableSources: true,
         membersWithOwnFile: ["Class", "Enum", "Interface"],
         entryFileName: 'pkijs',
