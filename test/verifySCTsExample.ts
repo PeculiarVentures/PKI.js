@@ -90,3 +90,90 @@ export async function verifySCTs(): Promise<boolean[]> {
 
   return pkijs.verifySCTsForCertificate(certificate, issuer, logs, -1);
 }
+
+// Certificate w/ 3 SCTs to be verified (2 RSA, 1 ECDSA)
+const rsaCertPem = `
+-----BEGIN CERTIFICATE-----
+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
+/vlGuL4ILy9KOA==
+-----END CERTIFICATE-----
+`;
+
+// Issuer for certificate above
+const rsaIssuerPEM = `
+-----BEGIN CERTIFICATE-----
+MIIC0zCCAbugAwIBAgIUbRl0jsaZB1HOw2TSFqJE/hUf4x8wDQYJKoZIhvcNAQEL
+BQAwEjEQMA4GA1UEAwwHVGVzdCBDQTAiGA8yMDIzMTEyODAwMDAwMFoYDzIwMjYw
+MjA1MDAwMDAwWjASMRAwDgYDVQQDDAdUZXN0IENBMIIBIjANBgkqhkiG9w0BAQEF
+AAOCAQ8AMIIBCgKCAQEAuohRqESOFtZB/W62iAY2ED08E9nq5DVKtOz1aFdsJHvB
+xyWo4NgfvbGcBptuGobya+KvWnVramRxCHqlWqdFh/cc1SScAn7NQ/weadA4ICmT
+qyDDSeTbuUzCa2wO7RWCD/F+rWkasdMCOosqQe6ncOAPDY39ZgsrsCSSpH25iGF5
+kLFXkD3SO8XguEgfqDfTiEPvJxbYVbdmWqp+ApAvOnsQgAYkzBxsl62WYVu34pYS
+wHUxowyR3bTK9/ytHSXTCe+5Fw6naOGzey8ib2njtIqVYR3uJtYlnauRCE42yxwk
+BCy/Fosv5fGPmRcxuLP+SSP6clHEMdUDrNoYCjXtjQIDAQABox0wGzAMBgNVHRME
+BTADAQH/MAsGA1UdDwQEAwIBBjANBgkqhkiG9w0BAQsFAAOCAQEAHldkZY/n8EPM
+hmKw7mLxMd66agv+HCe46PCv75LkAPh3CS7ovLFuU5C8IJUNMMRT2NXOtXwm/COb
+bMPqk/5+jRnBxkCdRCEerIp6tPBmcxci+bGZFdI+Xnq+/4vf9gcISphlrfCukbve
+7t/WNPIXMfu4yZnkMdQsoYWi2dE02GZNuaGj1oHTdWVgN/nRWtCo/cApupRN77GV
+nN1uE1fB07PQU75meGwsQOu6HMgVz2kQD9nZhfaisSJlGElYUGZmE2ySPr+OhTmT
+zHFD2cq6WQGCyWCH8cZY2a5pylOsG4auHwKCgbdSELMnIkUtWtmjGa6/2duQKOcr
+XHn6ZozclA==
+-----END CERTIFICATE-----`;
+
+const rsaLogs = [
+  {
+    description: "Mozilla Test RSA Log 1",
+    log_id: "VCIlmPM9NkgFQtrs4Oa5TeFcDu6MWRTKSNdePEhOgD8=",
+    key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuohRqESOFtZB/W62iAY2ED08E9nq5DVKtOz1aFdsJHvBxyWo4NgfvbGcBptuGobya+KvWnVramRxCHqlWqdFh/cc1SScAn7NQ/weadA4ICmTqyDDSeTbuUzCa2wO7RWCD/F+rWkasdMCOosqQe6ncOAPDY39ZgsrsCSSpH25iGF5kLFXkD3SO8XguEgfqDfTiEPvJxbYVbdmWqp+ApAvOnsQgAYkzBxsl62WYVu34pYSwHUxowyR3bTK9/ytHSXTCe+5Fw6naOGzey8ib2njtIqVYR3uJtYlnauRCE42yxwkBCy/Fosv5fGPmRcxuLP+SSP6clHEMdUDrNoYCjXtjQIDAQAB",
+  },
+  {
+    description: "Mozilla Test RSA Log 2",
+    log_id: "MQj2tt1yGAfwFpWETYUCVrZxk2CD2705NKBQUlAaKJI=",
+    key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwXXGUmYJn3cIKmeR8bh2w39c5TiwbErNIrHL1G+mWtoq3UHIwkmKxKOzwfYUh/QbaYlBvYClHDwSAkTFhKTESDMF5ROMAQbPCL6ahidguuai6PNvI8XZgxO53683g0XazlHU1tzSpss8xwbrzTBw7JjM5AqlkdcpWn9xxb5maR0rLf7ISURZC8Wj6kn9k7HXU0BfF3N2mZWGZiVHl+1CaQiICBFCIGmYikP+5Izmh4HdIramnNKDdRMfkysSjOKG+n0lHAYq0n7wFvGHzdVOgys1uJMPdLqQqovHYWckKrH9bWIUDRjEwLjGj8N0hFcyStfehuZVLx0eGR1xIWjTuwIDAQAB",
+  },
+  {
+    description: "Mozilla Test EC Log",
+    log_id: "KrgwRDO5FN7S8x5CB/JRwXo3oJJoUtkIAgb4Xlc5Fio=",
+    key: "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAET7+7u2Hg+PmxpgpZrIcE4uwFC0I+PPcukj8sT3lLRVwqadIzRWw2xBGdBwbgDu3I0ZOQ15kbey0HowTqoEqmwA==",
+  },
+];
+
+export async function verifySCTsWithRSA(): Promise<boolean[]> {
+  const certBuffer = utils.fromPEM(rsaCertPem);
+  const issuerBuffer = utils.fromPEM(rsaIssuerPEM);
+
+  const certificate = pkijs.Certificate.fromBER(certBuffer);
+  const issuer = pkijs.Certificate.fromBER(issuerBuffer);
+
+  return pkijs.verifySCTsForCertificate(certificate, issuer, rsaLogs, -1);
+}
