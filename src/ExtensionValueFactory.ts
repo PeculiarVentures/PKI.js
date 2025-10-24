@@ -61,7 +61,7 @@ export class ExtensionValueFactory {
     if (item) {
       try {
         return new item.type({ schema: asn1.result });
-      } catch (ex) {
+      } catch {
         const res: ExtensionParsedValue = new item.type();
         res.parsingError = `Incorrectly formatted value of extension ${item.name} (${id})`;
 

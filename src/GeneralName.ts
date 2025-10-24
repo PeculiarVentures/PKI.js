@@ -631,7 +631,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
       try {
         _object.value = this.value.toJSON();
       }
-      catch (ex) {
+      catch {
         // nothing
       }
     }

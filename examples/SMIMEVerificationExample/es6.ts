@@ -30,7 +30,7 @@ async function verifySMIME() {
         cmsContentSimpl = pkijs.ContentInfo.fromBER(lastNode.content.buffer);
         cmsSignedSimpl = new pkijs.SignedData({ schema: cmsContentSimpl.content });
       }
-      catch (ex) {
+      catch {
         alert("Incorrect message format!");
         return;
       }

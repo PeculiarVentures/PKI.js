@@ -459,7 +459,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await crypto.signWithPrivateKey(this.tbsView, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(this.tbsView as BufferSource, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -470,7 +470,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
    * @returns Returns `true` if signature value is valid, otherwise `false`
    */
   public async verify(crypto = common.getCrypto(true)): Promise<boolean> {
-    return crypto.verifyWithPublicKey(this.tbsView, this.signatureValue, this.subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(this.tbsView as BufferSource, this.signatureValue, this.subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
   /**

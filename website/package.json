@@ -3,15 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "docusaurus start",
+    "dev": "docusaurus start",
     "build": "docusaurus build",
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@docusaurus/core": "3.7.0",
-    "@docusaurus/preset-classic": "3.7.0",
-    "@docusaurus/remark-plugin-npm2yarn": "3.7.0",
-    "@mdx-js/react": "^3.1.0",
+    "@docusaurus/core": "^3.9.2",
+    "@docusaurus/preset-classic": "^3.9.2",
+    "@docusaurus/remark-plugin-npm2yarn": "^3.9.2",
+    "@mdx-js/react": "^3.1.1",
     "clsx": "^2.1.1",
     "pkijs": "../",
     "prism-react-renderer": "^2.4.1",
@@ -19,15 +19,15 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.7.0",
-    "@docusaurus/tsconfig": "3.7.0",
-    "@docusaurus/types": "3.7.0",
+    "@docusaurus/module-type-aliases": "^3.9.2",
+    "@docusaurus/tsconfig": "^3.9.2",
+    "@docusaurus/types": "^3.9.2",
     "docusaurus-plugin-sass": "^0.2.6",
-    "docusaurus-plugin-typedoc": "1.2.3",
+    "docusaurus-plugin-typedoc": "^1.4.2",
     "raw-loader": "^4.0.2",
-    "sass": "^1.85.1",
-    "typedoc": "0.27.9",
-    "typedoc-plugin-markdown": "4.4.2",
+    "sass": "^1.93.2",
+    "typedoc": "^0.28.14",
+    "typedoc-plugin-markdown": "^4.4.2",
     "typescript": "~5.5.4"
   },
   "browserslist": {
@@ -42,7 +42,11 @@
       "last 5 safari version"
     ]
   },
-  "engines": {
-    "node": ">=18.0"
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": ">=10",
+      "onFail": "error"
+    }
   }
 }

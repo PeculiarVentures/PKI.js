@@ -106,7 +106,7 @@ export function getEngine(): GlobalCryptoEngine {
     try {
       _engine = (global as any)[process.pid].pkijs.engine;
     }
-    catch (ex) {
+    catch {
       throw new Error("Please call 'setEngine' before call to 'getEngine'");
     }
 

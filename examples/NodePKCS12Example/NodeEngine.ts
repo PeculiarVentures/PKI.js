@@ -136,7 +136,6 @@ export default class NodeEngine extends pkijs.CryptoEngine {
               },
               usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
             };
-            break;
           default:
             return {
               algorithm: {
@@ -157,7 +156,6 @@ export default class NodeEngine extends pkijs.CryptoEngine {
               },
               usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
             };
-            break;
           case "decrypt":
           case "encrypt":
             return {
@@ -438,14 +436,14 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     try {
       pbes2Parameters = new pkijs.PBES2Params({ schema: parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams });
     }
-    catch (ex) {
+    catch {
       throw new Error("Incorrectly encoded 'pbes2Parameters'");
     }
 
     try {
       pbkdf2Params = new pkijs.PBKDF2Params({ schema: pbes2Parameters.keyDerivationFunc.algorithmParams });
     }
-    catch (ex) {
+    catch {
       throw new Error("Incorrectly encoded 'pbkdf2Params'");
     }
 
@@ -473,13 +471,10 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     switch (hashAlgorithm.toLowerCase()) {
       case "sha-1":
         return 160;
-        break;
       case "sha-256":
         return 256;
-        break;
       case "sha-384":
         return 384;
-        break;
       case "sha-512":
         return 512;
       default:

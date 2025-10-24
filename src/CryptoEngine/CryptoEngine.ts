@@ -1,6 +1,5 @@
 import { sha1 } from "@noble/hashes/sha1";
-import { sha256 } from "@noble/hashes/sha256";
-import { sha384, sha512 } from "@noble/hashes/sha512";
+import { sha256, sha384, sha512 } from "@noble/hashes/sha2";
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as pvtsutils from "pvtsutils";
@@ -90,7 +89,7 @@ async function makePKCS12B2Key(hashAlgorithm: string, keyLength: number, passwor
   // Main loop to generate the key material
   for (let i = 0; i < c; i++) {
     // Concatenate D and I
-    let A = new Uint8Array(D.length + I.length);
+    let A: Uint8Array = new Uint8Array(D.length + I.length);
     A.set(D);
     A.set(I, D.length);
 
@@ -330,7 +329,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
           try {
             privateKeyInfo.fromSchema(asn1.result);
           }
-          catch (ex) {
+          catch {
             throw new Error("Incorrect keyData");
           }
 
@@ -532,7 +531,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
         try {
           publicKeyInfo.fromJSON(jwk);
         }
-        catch (ex) {
+        catch {
           throw new Error("Incorrect key data");
         }
 
@@ -544,7 +543,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
         try {
           privateKeyInfo.fromJSON(jwk);
         }
-        catch (ex) {
+        catch {
           throw new Error("Incorrect key data");
         }
 
@@ -1595,7 +1594,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     try {
       pbes2Parameters = new PBES2Params({ schema: parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams });
     }
-    catch (ex) {
+    catch {
       throw new Error("Incorrectly encoded \"pbes2Parameters\"");
     }
 
@@ -1604,7 +1603,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     try {
       pbkdf2Params = new PBKDF2Params({ schema: pbes2Parameters.keyDerivationFunc.algorithmParams });
     }
-    catch (ex) {
+    catch {
       throw new Error("Incorrectly encoded \"pbkdf2Params\"");
     }
 
@@ -2002,7 +2001,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     //#endregion
 
     //#region Special case for ECDSA signatures
-    let signatureValue: BufferSource = signature.valueBlock.valueHexView;
+    let signatureValue: Uint8Array | ArrayBuffer = signature.valueBlock.valueHexView;
 
     if (publicKey.algorithm.name === "ECDSA") {
       const namedCurve = ECNamedCurves.find((publicKey.algorithm as EcKeyAlgorithm).namedCurve);
@@ -2038,7 +2037,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     return this.verify((algorithm.algorithm as any),
       publicKey,
-      signatureValue,
+      signatureValue as BufferSource,
       data,
     );
     //#endregion

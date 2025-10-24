@@ -6,7 +6,6 @@ import { PublicKeyInfo } from "./PublicKeyInfo";
 import * as Schema from "./Schema";
 import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { Certificate } from "./Certificate";
-import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { SignedCertificateTimestampList } from "./SignedCertificateTimestampList";
@@ -39,7 +38,7 @@ export interface ISignedCertificateTimestamp {
   extensions: ArrayBuffer;
   hashAlgorithm: string;
   signatureAlgorithm: string;
-  signature: Schema.SchemaType;
+  signature: ArrayBuffer;
 }
 
 export interface SignedCertificateTimestampJson {
@@ -49,7 +48,7 @@ export interface SignedCertificateTimestampJson {
   extensions: string;
   hashAlgorithm: string;
   signatureAlgorithm: string;
-  signature: Schema.SchemaType;
+  signature: string;
 }
 
 export type SignedCertificateTimestampParameters = PkiObjectParameters & Partial<ISignedCertificateTimestamp> & { stream?: bs.SeqStream; };
@@ -75,7 +74,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   public extensions!: ArrayBuffer;
   public hashAlgorithm!: string;
   public signatureAlgorithm!: string;
-  public signature: asn1js.BaseBlock;
+  public signature!: ArrayBuffer;
 
   /**
    * Initializes a new instance of the {@link SignedCertificateTimestamp} class
@@ -112,7 +111,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   public static override defaultValues(memberName: typeof TIMESTAMP): Date;
   public static override defaultValues(memberName: typeof HASH_ALGORITHM): string;
   public static override defaultValues(memberName: typeof SIGNATURE_ALGORITHM): string;
-  public static override defaultValues(memberName: typeof SIGNATURE): Schema.SchemaType;
+  public static override defaultValues(memberName: typeof SIGNATURE): ArrayBuffer;
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
@@ -126,7 +125,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
       case SIGNATURE_ALGORITHM:
         return EMPTY_STRING;
       case SIGNATURE:
-        return new asn1js.Any();
+        return EMPTY_BUFFER;
       default:
         return super.defaultValues(memberName);
     }
@@ -212,11 +211,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
 
       //#region Signature
       const signatureLength = stream.getUint16();
-      const signatureData = new Uint8Array(stream.getBlock(signatureLength)).buffer.slice(0);
-
-      const asn1 = asn1js.fromBER(signatureData);
-      AsnError.assert(asn1, "SignedCertificateTimestamp");
-      this.signature = asn1.result;
+      this.signature = new Uint8Array(stream.getBlock(signatureLength)).buffer.slice(0);
       //#endregion
 
       if (blockLength !== (47 + extensionsLength + signatureLength)) {
@@ -238,7 +233,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   public toStream(): bs.SeqStream {
     const stream = new bs.SeqStream();
 
-    stream.appendUint16(47 + this.extensions.byteLength + this.signature.valueBeforeDecodeView.byteLength);
+    stream.appendUint16(47 + this.extensions.byteLength + this.signature.byteLength);
     stream.appendChar(this.version);
     stream.appendView(new Uint8Array(this.logID));
 
@@ -305,10 +300,8 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
 
     stream.appendChar(_signatureAlgorithm);
 
-    const _signature = this.signature.toBER(false);
-
-    stream.appendUint16(_signature.byteLength);
-    stream.appendView(new Uint8Array(_signature));
+    stream.appendUint16(this.signature.byteLength);
+    stream.appendView(new Uint8Array(this.signature));
 
     return stream;
   }
@@ -321,7 +314,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
       extensions: pvutils.bufferToHexCodes(this.extensions),
       hashAlgorithm: this.hashAlgorithm,
       signatureAlgorithm: this.signatureAlgorithm,
-      signature: this.signature.toJSON()
+      signature: pvutils.bufferToHexCodes(this.signature),
     };
   }
 
@@ -385,7 +378,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
     //#region Perform verification
     return crypto.verifyWithPublicKey(
       stream.buffer.slice(0, stream.length),
-      new asn1js.OctetString({ valueHex: this.signature.toBER(false) }),
+      new asn1js.OctetString({ valueHex: this.signature }),
       publicKeyInfo,
       { algorithmId: EMPTY_STRING } as AlgorithmIdentifier,
       "SHA-256"

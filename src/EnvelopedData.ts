@@ -438,9 +438,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param variant Variant = 1 is for "key transport", variant = 2 is for "key agreement". In fact the "variant" is unnecessary now because Google has no DH algorithm implementation. Thus key encryption scheme would be choosen by certificate type only: "key transport" for RSA and "key agreement" for ECC certificates.
    * @param crypto Crypto engine
    */
-  public addRecipientByCertificate(certificate: Certificate, parameters?: {
-    // empty
-  }, variant?: number, crypto = common.getCrypto(true)): boolean {
+  public addRecipientByCertificate(certificate: Certificate, parameters?: object, variant?: number, crypto = common.getCrypto(true)): boolean {
     //#region Initialize encryption parameters
     const encryptionParameters = Object.assign(
       { useOAEP: true, oaepHashAlgorithm: "SHA-512" },
@@ -1053,7 +1051,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       try {
         pbkdf2Params = new PBKDF2Params({ schema: recipientInfo.keyDerivationAlgorithm.algorithmParams });
       }
-      catch (ex) {
+      catch {
         throw new Error("Incorrectly encoded \"keyDerivationAlgorithm\"");
       }
 
@@ -1324,7 +1322,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         //#endregion
 
         return crypto.unwrapKey("raw",
-          recipientInfo.recipientEncryptedKeys.encryptedKeys[0].encryptedKey.valueBlock.valueHexView,
+          recipientInfo.recipientEncryptedKeys.encryptedKeys[0].encryptedKey.valueBlock.valueHexView as BufferSource,
           aesKwKey,
           { name: "AES-KW" },
           contentEncryptionAlgorithm,
@@ -1381,7 +1379,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       const sessionKey = await keyCrypto.decrypt(
         privateKey.algorithm,
         privateKey,
-        recipientInfo.encryptedKey.valueBlock.valueHexView
+        recipientInfo.encryptedKey.valueBlock.valueHexView as BufferSource
       );
 
       //#region Get WebCrypto form of content encryption algorithm
@@ -1429,7 +1427,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#endregion
 
       return crypto.unwrapKey("raw",
-        recipientInfo.encryptedKey.valueBlock.valueHexView,
+        recipientInfo.encryptedKey.valueBlock.valueHexView as BufferSource,
         importedKey,
         kekAlgorithm,
         contentEncryptionAlgorithm,
@@ -1461,7 +1459,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       try {
         pbkdf2Params = new PBKDF2Params({ schema: recipientInfo.keyDerivationAlgorithm.algorithmParams });
       }
-      catch (ex) {
+      catch {
         throw new Error("Incorrectly encoded \"keyDerivationAlgorithm\"");
       }
 
@@ -1509,7 +1507,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#endregion
 
       return crypto.unwrapKey("raw",
-        recipientInfo.encryptedKey.valueBlock.valueHexView,
+        recipientInfo.encryptedKey.valueBlock.valueHexView as BufferSource,
         kekKey,
         kekAlgorithm,
         contentEncryptionAlgorithm,

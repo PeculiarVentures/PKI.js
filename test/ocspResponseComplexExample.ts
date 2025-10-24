@@ -71,7 +71,7 @@ export async function verifyOCSPResp(ocspResponseBuffer: ArrayBuffer, trustedCer
   const ocspRespSimpl = pkijs.OCSPResponse.fromBER(ocspResponseBuffer);
 
   if (ocspRespSimpl.responseBytes) {
-    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHexView);
+    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHexView as BufferSource);
   } else {
     throw new Error("No \"ResponseBytes\" in the OCSP Response - nothing to verify");
   }
