@@ -3,13 +3,14 @@ import * as asn1js from "asn1js";
 import * as assert from "assert";
 import * as crypto from "crypto";
 import {KeyObject} from "node:crypto";
+import {getCrypto} from "../src";
 
 
 it("demonstrate webcrypto verify error", async function () {
-    this.timeout(600000);
-    const cryptoEngine =  crypto.webcrypto.subtle;
+    this.timeout(100000);
+    const cryptoEngine =  getCrypto(true);
 
-    const caKeyPair = await cryptoEngine.generateKey( {name: "ECDSA", namedCurve: "P-521"}, false, ["sign", "verify"]);
+    const caKeyPair = await cryptoEngine.subtle.generateKey( {name: "ECDSA", namedCurve: "P-521"}, true, ["sign", "verify"]);
 
     const caCert = await getCACertificate(caKeyPair);
 
