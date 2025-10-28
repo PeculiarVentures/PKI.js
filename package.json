@@ -76,10 +76,10 @@
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "name": "pkijs",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "license": "BSD-3-Clause",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=16.0.0"
   },
   "devEngines": {
     "packageManager": {
