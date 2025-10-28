@@ -2,31 +2,21 @@ import * as pkijs from "pkijs";
 import * as asn1js from "asn1js";
 import * as assert from "assert";
 import * as crypto from "crypto";
-import {KeyObject} from "node:crypto";
 import {getCrypto} from "../src";
+import {createPublicKey} from "node:crypto";
 
 
 it("demonstrate webcrypto verify error", async function () {
     this.timeout(100000);
+
     const cryptoEngine =  getCrypto(true);
 
     const caKeyPair = await cryptoEngine.subtle.generateKey( {name: "ECDSA", namedCurve: "P-521"}, true, ["sign", "verify"]);
 
     const caCert = await getCACertificate(caKeyPair);
-
-    const {publicKey, privateKey} = await cryptoEngine.generateKey(
-        {
-            name: "ECDSA",
-            namedCurve: "P-521"
-        },
-        true,
-        ["sign", "verify"]
-    );
-
-    const certificateSigningRequest = await getCertificateSigningRequest(cryptoEngine, publicKey, privateKey);
+    const certificateSigningRequest = await getCertificateSigningRequest(cryptoEngine, caKeyPair.publicKey, caKeyPair.privateKey);
 
     const certificate = new pkijs.Certificate();
-
     certificate.version = 2;
     certificate.serialNumber = new asn1js.Integer({value: 1});
 
@@ -42,8 +32,7 @@ it("demonstrate webcrypto verify error", async function () {
 
     certificate.issuer = caCert.subject;
 
-
-    for (let i = 1; i <= 100; i++) {
+    for (let i = 1; i <= 1000; i++) {
         console.log(`verifying signature [${i}]`);
         await certificate.sign(caKeyPair.privateKey, "SHA-256");
         const certDER = certificate.toSchema(true).toBER(false);
@@ -53,7 +42,14 @@ it("demonstrate webcrypto verify error", async function () {
 
         assert(verified_pkijs);
 
-        const verified_crypto = x509Certificate.verify(KeyObject.from(publicKey)); // this sometimes fails
+        const spki = await cryptoEngine.subtle.exportKey("spki", caKeyPair.publicKey);
+        const nodeKey = createPublicKey({
+            key: Buffer.from(spki),
+            format: "der",
+            type: "spki",
+        });
+
+        const verified_crypto = x509Certificate.verify(nodeKey);
 
         assert(verified_crypto);
     }
