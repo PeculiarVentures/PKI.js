@@ -274,8 +274,12 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
     }
 
     if (this.singleExtensions) {
-      outputArray.push(new asn1js.Sequence({
-        value: Array.from(this.singleExtensions, o => o.toSchema())
+      outputArray.push(new asn1js.Constructed({
+        idBlock: {
+          tagClass: 3, // CONTEXT-SPECIFIC
+          tagNumber: 1 // [1]
+        },
+        value: [new asn1js.Sequence({ value: Array.from(this.singleExtensions, o => o.toSchema()) })]
       }));
     }
 
