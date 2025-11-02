@@ -33,6 +33,17 @@ export async function createOCSPReq(): Promise<ArrayBuffer> {
   fictionView[2] = 0x02;
   fictionView[3] = 0x03;
 
+  const issuerName = new pkijs.RelativeDistinguishedNames({
+    typesAndValues: [
+      new pkijs.AttributeTypeAndValue({
+        type: "2.5.4.3", // CN
+        value: new asn1js.Utf8String({ value: "test-issuer" }),
+      }),
+    ],
+  });
+  const serviceLocatorDer = new asn1js.Sequence({
+    value: [issuerName.toSchema()],
+  }).toBER(false);
   ocspReqSimpl.tbsRequest.requestList = [new pkijs.Request({
     reqCert: new pkijs.CertID({
       hashAlgorithm: new pkijs.AlgorithmIdentifier({
@@ -41,7 +52,14 @@ export async function createOCSPReq(): Promise<ArrayBuffer> {
       issuerNameHash: new asn1js.OctetString({ valueHex: fictionBuffer }),
       issuerKeyHash: new asn1js.OctetString({ valueHex: fictionBuffer }),
       serialNumber: new asn1js.Integer({ valueHex: fictionBuffer })
-    })
+    }),
+    singleRequestExtensions: [
+      new pkijs.Extension({
+        extnID: "1.3.6.1.5.5.7.48.1.7", // id-pkix-ocsp-service-locator
+        critical: false,
+        extnValue: serviceLocatorDer,
+      }),
+    ]
   })];
 
   ocspReqSimpl.tbsRequest.requestExtensions = [
