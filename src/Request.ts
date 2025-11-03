@@ -3,7 +3,8 @@ import * as pvutils from "pvutils";
 import { CertID, CertIDJson, CertIDSchema } from "./CertID";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { Extension, ExtensionJson, ExtensionSchema } from "./Extension";
+import { Extension, ExtensionJson } from "./Extension";
+import { Extensions, ExtensionsSchema } from "./Extensions";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
@@ -28,7 +29,7 @@ export type RequestParameters = PkiObjectParameters & Partial<IRequest>;
 
 export type RequestSchema = Schema.SchemaParameters<{
   reqCert?: CertIDSchema;
-  extensions?: ExtensionSchema;
+  extensions?: ExtensionsSchema;
   singleRequestExtensions?: string;
 }>;
 
@@ -115,7 +116,7 @@ export class Request extends PkiObject implements IRequest {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          value: [Extension.schema(names.extensions || {
+          value: [Extensions.schema(names.extensions || {
             names: {
               blockName: (names.singleRequestExtensions || EMPTY_STRING)
             }
