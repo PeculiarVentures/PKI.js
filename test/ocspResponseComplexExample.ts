@@ -41,6 +41,15 @@ export async function createOCSPResp(hashAlg: string, signAlg: string): Promise<
     },
   }); // status - success
   response.thisUpdate = new Date();
+  response.nextUpdate = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); // Next day
+  const archiveCutoffDate = new Date(Date.now() - 7 * 365 * 24 * 60 * 60 * 1000); // 7 years ago
+  response.singleExtensions = [
+    new pkijs.Extension({
+      extnID: "1.3.6.1.5.5.7.48.1.6", // id-pkix-ocsp-archive-cutoff
+      critical: false,
+      extnValue: (new asn1js.GeneralizedTime({ valueDate: archiveCutoffDate })).toBER(false)
+    })
+  ];
 
   ocspBasicResp.tbsResponseData.responses.push(response);
 
