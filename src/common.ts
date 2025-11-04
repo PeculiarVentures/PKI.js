@@ -1,9 +1,14 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
-import { EMPTY_BUFFER } from "./constants";
-import type { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
-import { ArgumentError } from "./errors";
+import {AlgorithmIdentifier} from "./AlgorithmIdentifier";
+import {EMPTY_BUFFER} from "./constants";
+import type {
+    CryptoEngineAlgorithmOperation,
+    CryptoEngineAlgorithmParams,
+    ICryptoEngine
+} from "./CryptoEngine/CryptoEngineInterface";
+import {ArgumentError} from "./errors";
+import {CryptoEngine} from "./CryptoEngine/CryptoEngine";
 
 //#region Crypto engine related function
 export { ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
@@ -185,17 +190,26 @@ export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuff
   //#region Initial variables
   const length = signatureBuffer.byteLength / 2; // There are two equal parts inside incoming ArrayBuffer
 
+    //** To avoid padding in asn1js: convert buffer to bigInt instead using Integer*/
+    function bufferToBigInt(buffer: ArrayBuffer) {
+        const bytes = new Uint8Array(buffer);
+        let hex = "0x" + Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
+        return BigInt(hex);
+    }
+
   const rBuffer = new ArrayBuffer(length);
   const rView = new Uint8Array(rBuffer);
   rView.set(new Uint8Array(signatureBuffer, 0, length));
 
-  const rInteger = new asn1js.Integer({ valueHex: rBuffer });
+  const rBigInt= bufferToBigInt(rBuffer);
+  const rInteger= asn1js.Integer.fromBigInt(rBigInt);
 
   const sBuffer = new ArrayBuffer(length);
   const sView = new Uint8Array(sBuffer);
   sView.set(new Uint8Array(signatureBuffer, length, length));
 
-  const sInteger = new asn1js.Integer({ valueHex: sBuffer });
+  const sBigInt = bufferToBigInt(sBuffer);
+  const sInteger = asn1js.Integer.fromBigInt(sBigInt);
   //#endregion
 
   return (new asn1js.Sequence({
@@ -407,5 +421,3 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
   //#endregion
 }
 //#endregion
-
-import { CryptoEngine } from "./CryptoEngine/CryptoEngine";
