@@ -33,15 +33,14 @@ it("demonstrate webcrypto verify error", async function () {
     certificate.issuer = caCert.subject;
 
     for (let i = 1; i <= 1000; i++) {
-        console.log(`verifying signature [${i}]`);
-        await certificate.sign(caKeyPair.privateKey, "SHA-256");
-        const certDER = certificate.toSchema(true).toBER(false);
-        const x509Certificate = new crypto.X509Certificate(Buffer.from(certDER));
-
-        const verified_pkijs = await certificate.verify(caCert); // this always worksR
-
+        console.log(`verifying certificate [${i}]`);
+        await certificate.sign(caKeyPair.privateKey, "SHA-512");
+        const verified_pkijs = await certificate.verify(caCert);
         assert(verified_pkijs);
 
+        console.log(`verifying public key use [${i}]`);
+        const certDER = certificate.toSchema(true).toBER(false);
+        const x509Certificate = new crypto.X509Certificate(Buffer.from(certDER));
         const spki = await cryptoEngine.subtle.exportKey("spki", caKeyPair.publicKey);
         const nodeKey = createPublicKey({
             key: Buffer.from(spki),
@@ -50,7 +49,6 @@ it("demonstrate webcrypto verify error", async function () {
         });
 
         const verified_crypto = x509Certificate.verify(nodeKey);
-
         assert(verified_crypto);
     }
 });
