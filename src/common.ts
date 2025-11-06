@@ -190,7 +190,7 @@ export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuff
   //#region Initial variables
   const length = signatureBuffer.byteLength / 2; // There are two equal parts inside incoming ArrayBuffer
 
-    //** To avoid padding in asn1js: convert buffer to bigInt instead using Integer*/
+    //** To ensure correct ASN.1 formatting, convert buffer to BigInt to use asn1js.Integer.fromBigInt*/
     function bufferToBigInt(buffer: ArrayBuffer) {
         const bytes = new Uint8Array(buffer);
         let hex = "0x" + Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
