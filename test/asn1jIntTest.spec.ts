@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
 import * as assert from "assert";
-import {createCMSECDSASignature} from "../src";
 import {Convert} from "pvtsutils";
+import {createCMSECDSASignature} from "../src";
 
 const testVectors = [
   {
     rHex: "010fc11f9fa733d62042904c2a4f5077d84a0cb61162e10dec784830521327a4a50d8be8a7b3778568a6c51355519ea12dad6347583c0ff6921285c7ed3db7439586",
-    sHex: "00008bde7dadfe9ce0563383ef6dc2f06a6cb35f72cc66b5626bf91a1508b309207390ff302164c2e78f7e2958ee8d9e9cc7cca4a6a20cb9a011b0850212a50ca515"
+    sHex: "000000000dadfe9ce0563383ef6dc2f06a6cb35f72cc66b5626bf91a1508b309207390ff302164c2e78f7e2958ee8d9e9cc7cca4a6a20cb9a011b0850212a50ca515"
 
   },
   {
