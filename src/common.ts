@@ -8,7 +8,6 @@ import type {
   CryptoEngineAlgorithmParams,
   ICryptoEngine
 } from "./CryptoEngine/CryptoEngineInterface";
-import {CryptoEngine} from "./CryptoEngine/CryptoEngine";
 import {ArgumentError} from "./errors";
 
 //#region Crypto engine related function
@@ -420,4 +419,6 @@ function bufferToBigInt(buffer: ArrayBuffer): bigint {
     const hex = "0x" + Convert.ToHex(buffer);
     return BigInt(hex);
 }
+
 //#endregion
+import {CryptoEngine} from "./CryptoEngine/CryptoEngine";
