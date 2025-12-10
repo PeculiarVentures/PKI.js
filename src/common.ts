@@ -1,9 +1,14 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
-import { EMPTY_BUFFER } from "./constants";
-import type { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
-import { ArgumentError } from "./errors";
+import {Convert} from "pvtsutils";
+import {AlgorithmIdentifier} from "./AlgorithmIdentifier";
+import {EMPTY_BUFFER} from "./constants";
+import type {
+  CryptoEngineAlgorithmOperation,
+  CryptoEngineAlgorithmParams,
+  ICryptoEngine
+} from "./CryptoEngine/CryptoEngineInterface";
+import {ArgumentError} from "./errors";
 
 //#region Crypto engine related function
 export { ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
@@ -189,13 +194,15 @@ export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuff
   const rView = new Uint8Array(rBuffer);
   rView.set(new Uint8Array(signatureBuffer, 0, length));
 
-  const rInteger = new asn1js.Integer({ valueHex: rBuffer });
+  const rBigInt= bufferToBigInt(rBuffer);
+  const rInteger= asn1js.Integer.fromBigInt(rBigInt);
 
   const sBuffer = new ArrayBuffer(length);
   const sView = new Uint8Array(sBuffer);
   sView.set(new Uint8Array(signatureBuffer, length, length));
 
-  const sInteger = new asn1js.Integer({ valueHex: sBuffer });
+  const sBigInt = bufferToBigInt(sBuffer);
+  const sInteger = asn1js.Integer.fromBigInt(sBigInt);
   //#endregion
 
   return (new asn1js.Sequence({
@@ -406,6 +413,13 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
   //#endregion
   //#endregion
 }
-//#endregion
 
-import { CryptoEngine } from "./CryptoEngine/CryptoEngine";
+//#region To ensure correct ASN.1 formatting, convert buffer to BigInt to use asn1js.Integer.fromBigInt
+function bufferToBigInt(buffer: ArrayBuffer): bigint {
+    const hex = "0x" + Convert.ToHex(buffer);
+    return BigInt(hex);
+}
+
+//#endregion
+//#endregion
+import {CryptoEngine} from "./CryptoEngine/CryptoEngine";
