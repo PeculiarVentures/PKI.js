@@ -414,11 +414,12 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
   //#endregion
 }
 
-/** To ensure correct ASN.1 formatting, convert buffer to BigInt to use asn1js.Integer.fromBigInt*/
+//#region To ensure correct ASN.1 formatting, convert buffer to BigInt to use asn1js.Integer.fromBigInt
 function bufferToBigInt(buffer: ArrayBuffer): bigint {
     const hex = "0x" + Convert.ToHex(buffer);
     return BigInt(hex);
 }
 
+//#endregion
 //#endregion
 import {CryptoEngine} from "./CryptoEngine/CryptoEngine";
