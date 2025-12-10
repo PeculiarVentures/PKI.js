@@ -413,44 +413,51 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
 
   const stream = new bs.SeqStream();
 
-  //#region Remove certificate extension
-  if (certificate.extensions) {
-    for (let i = certificate.extensions.length - 1; i >=0; i--) {
-      switch (certificate.extensions[i].extnID) {
-        case id_SignedCertificateTimestampList:
-          {
-            parsedValue = certificate.extensions[i].parsedValue;
+  const certificateExtensions = certificate.extensions?.slice();
+  try {
+    //#region Remove certificate extension
+    if (certificate.extensions) {
+      for (let i = certificate.extensions.length - 1; i >=0; i--) {
+        switch (certificate.extensions[i].extnID) {
+          case id_SignedCertificateTimestampList:
+            {
+              parsedValue = certificate.extensions[i].parsedValue;
 
-            if (!parsedValue || parsedValue.timestamps.length === 0)
-              throw new Error("Nothing to verify in the certificate");
+              if (!parsedValue || parsedValue.timestamps.length === 0)
+                throw new Error("Nothing to verify in the certificate");
 
-            certificate.extensions.splice(i, 1);
-          }
-          break;
-        default:
+              certificate.extensions.splice(i, 1);
+            }
+            break;
+          default:
+        }
       }
     }
+    //#endregion
+
+    //#region Check we do have what to verify
+    if (parsedValue === null)
+      throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
+    //#endregion
+
+    //#region Prepare modifier TBS value
+    const tbs = certificate.encodeTBS().toBER();
+    //#endregion
+
+    //#region Initialize "issuer_key_hash" value
+    const issuerId = await crypto.digest({ name: "SHA-256" }, new Uint8Array(issuerCertificate.subjectPublicKeyInfo.toSchema().toBER(false)));
+    //#endregion
+
+    //#region Write "PreCert" value to stream
+    stream.appendView(new Uint8Array(issuerId));
+    stream.appendUint24(tbs.byteLength);
+    stream.appendView(new Uint8Array(tbs));
+    //#endregion
+  } finally {
+    certificate.extensions = certificateExtensions;
   }
-  //#endregion
-
-  //#region Check we do have what to verify
-  if (parsedValue === null)
-    throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
-  //#endregion
-
-  //#region Prepare modifier TBS value
-  const tbs = certificate.encodeTBS().toBER();
-  //#endregion
-
-  //#region Initialize "issuer_key_hash" value
-  const issuerId = await crypto.digest({ name: "SHA-256" }, new Uint8Array(issuerCertificate.subjectPublicKeyInfo.toSchema().toBER(false)));
-  //#endregion
 
   //#region Make final "PreCert" value
-  stream.appendView(new Uint8Array(issuerId));
-  stream.appendUint24(tbs.byteLength);
-  stream.appendView(new Uint8Array(tbs));
-
   const preCert = stream.stream.slice(0, stream.length);
   //#endregion
 
