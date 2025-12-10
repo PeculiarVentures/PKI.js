@@ -88,6 +88,11 @@ export async function verifySCTs(): Promise<boolean[]> {
   const certificate = pkijs.Certificate.fromBER(certBuffer);
   const issuer = pkijs.Certificate.fromBER(issuerBuffer);
 
+  // Verify SCTs individually
+  for (let i = 0; i < 3; i++) {
+    await pkijs.verifySCTsForCertificate(certificate, issuer, logs, i);
+  }
+  // Verify all SCTs
   return pkijs.verifySCTsForCertificate(certificate, issuer, logs, -1);
 }
 
@@ -175,5 +180,10 @@ export async function verifySCTsWithRSA(): Promise<boolean[]> {
   const certificate = pkijs.Certificate.fromBER(certBuffer);
   const issuer = pkijs.Certificate.fromBER(issuerBuffer);
 
+  // Verify SCTs individually
+  for (let i = 0; i < 3; i++) {
+    await pkijs.verifySCTsForCertificate(certificate, issuer, rsaLogs, i);
+  }
+  // Verify all SCTs
   return pkijs.verifySCTsForCertificate(certificate, issuer, rsaLogs, -1);
 }
