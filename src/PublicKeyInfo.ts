@@ -68,7 +68,8 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
             }
           }
           break;
-        case "1.2.840.113549.1.1.1": // RSA
+        case "1.2.840.113549.1.1.1": // rsaEncryption
+        case "1.2.840.113549.1.1.10": // RSA-PSS
           {
             const publicKeyASN1 = asn1js.fromBER(this.subjectPublicKey.valueBlock.valueHexView);
             if (publicKeyASN1.offset !== -1) {
@@ -207,7 +208,8 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
       case "1.2.840.10045.2.1": // ECDSA
         jwk.kty = "EC";
         break;
-      case "1.2.840.113549.1.1.1": // RSA
+      case "1.2.840.113549.1.1.1": // rsaEncryption
+      case "1.2.840.113549.1.1.10": // RSA-PSS
         jwk.kty = "RSA";
         break;
       default:
