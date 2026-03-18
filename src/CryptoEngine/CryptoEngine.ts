@@ -175,6 +175,15 @@ export class CryptoEngine extends AbstractCryptoEngine {
           switch (alg.name.toUpperCase()) {
             case "RSA-PSS":
               {
+                keyUsages = ["verify"]; // Override existing keyUsages value since the key is a public key
+
+                jwk.kty = "RSA";
+                jwk.ext = extractable;
+                jwk.key_ops = keyUsages;
+
+                if (!["1.2.840.113549.1.1.1", "1.2.840.113549.1.1.10"].includes(publicKeyInfo.algorithm.algorithmId))
+                  throw new Error(`Incorrect public key algorithm: ${publicKeyInfo.algorithm.algorithmId}`);
+
                 //#region Get information about used hash function
                 if (!alg.hash) {
                   throw new ParameterError("hash", "algorithm.hash", "Incorrect hash algorithm: Hash algorithm is missed");
@@ -196,9 +205,13 @@ export class CryptoEngine extends AbstractCryptoEngine {
                     throw new Error(`Incorrect hash algorithm: ${alg.hash.name.toUpperCase()}`);
                 }
                 //#endregion
+
+                //#region Create RSA Public Key elements
+                const rsaPssPublicKeyJSON = publicKeyInfo.toJSON();
+                Object.assign(jwk, rsaPssPublicKeyJSON);
+                //#endregion
               }
-            // break omitted
-            // eslint-disable-next-line no-fallthrough
+              break;
             case "RSASSA-PKCS1-V1_5":
               {
                 keyUsages = ["verify"]; // Override existing keyUsages value since the key is a public key
@@ -211,32 +224,30 @@ export class CryptoEngine extends AbstractCryptoEngine {
                   throw new Error(`Incorrect public key algorithm: ${publicKeyInfo.algorithm.algorithmId}`);
 
                 //#region Get information about used hash function
-                if (!jwk.alg) {
-                  if (!alg.hash) {
-                    throw new ParameterError("hash", "algorithm.hash", "Incorrect hash algorithm: Hash algorithm is missed");
-                  }
-                  switch (alg.hash.name.toUpperCase()) {
-                    case "SHA-1":
-                      jwk.alg = "RS1";
-                      break;
-                    case "SHA-256":
-                      jwk.alg = "RS256";
-                      break;
-                    case "SHA-384":
-                      jwk.alg = "RS384";
-                      break;
-                    case "SHA-512":
-                      jwk.alg = "RS512";
-                      break;
-                    default:
-                      throw new Error(`Incorrect hash algorithm: ${alg.hash.name.toUpperCase()}`);
-                  }
+                if (!alg.hash) {
+                  throw new ParameterError("hash", "algorithm.hash", "Incorrect hash algorithm: Hash algorithm is missed");
+                }
+                switch (alg.hash.name.toUpperCase()) {
+                  case "SHA-1":
+                    jwk.alg = "RS1";
+                    break;
+                  case "SHA-256":
+                    jwk.alg = "RS256";
+                    break;
+                  case "SHA-384":
+                    jwk.alg = "RS384";
+                    break;
+                  case "SHA-512":
+                    jwk.alg = "RS512";
+                    break;
+                  default:
+                    throw new Error(`Incorrect hash algorithm: ${alg.hash.name.toUpperCase()}`);
                 }
                 //#endregion
 
                 //#region Create RSA Public Key elements
-                const publicKeyJSON = publicKeyInfo.toJSON();
-                Object.assign(jwk, publicKeyJSON);
+                const rsaPublicKeyJSON = publicKeyInfo.toJSON();
+                Object.assign(jwk, rsaPublicKeyJSON);
                 //#endregion
               }
               break;
@@ -2044,4 +2055,3 @@ export class CryptoEngine extends AbstractCryptoEngine {
   }
 
 }
-
