@@ -82,10 +82,15 @@
     "node": ">=16.0.0"
   },
   "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=24.5.0",
+      "onFail": "warn"
+    },
     "packageManager": {
       "name": "npm",
-      "version": ">=10",
-      "onFail": "error"
+      "version": "11.7.0",
+      "onFail": "warn"
     }
   }
 }
