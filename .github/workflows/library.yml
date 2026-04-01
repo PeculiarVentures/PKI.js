@@ -1,6 +1,11 @@
 name: Build and test library
 
-on: [push, pull_request]
+on:
+  pull_request:
+    branches: [main, master]
+    types: [opened, synchronize]
+  push:
+    branches: [main, master]
 
 jobs:
   build:
