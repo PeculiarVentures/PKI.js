@@ -7,6 +7,7 @@ import { RecipientInfo, RecipientInfoJson } from "./RecipientInfo";
 import { EncryptedContentInfo, EncryptedContentInfoJson, EncryptedContentInfoSchema, EncryptedContentInfoSplit } from "./EncryptedContentInfo";
 import { Attribute, AttributeJson } from "./Attribute";
 import { AlgorithmIdentifier, AlgorithmIdentifierParameters } from "./AlgorithmIdentifier";
+import { GCMParams } from "./GCMParams";
 import { RSAESOAEPParams } from "./RSAESOAEPParams";
 import { KeyTransRecipientInfo } from "./KeyTransRecipientInfo";
 import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
@@ -797,7 +798,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    */
   public async encrypt(contentEncryptionAlgorithm: Algorithm, contentToEncrypt: ArrayBuffer, crypto = common.getCrypto(true)): Promise<(void | { ecdhPrivateKey: CryptoKey; })[]> {
     //#region Initial variables
-    const ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
+    // AES-GCM uses a 12-byte nonce per NIST SP 800-38D §8.2.1 and RFC 5084
+    // recommendation. Other AES modes use a 16-byte IV.
+    const isAesGcm = contentEncryptionAlgorithm.name === "AES-GCM";
+    const ivBuffer = new ArrayBuffer(isAesGcm ? 12 : 16);
     const ivView = new Uint8Array(ivBuffer);
     crypto.getRandomValues(ivView);
 
@@ -830,7 +834,14 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       contentType: "1.2.840.113549.1.7.1", // "data"
       contentEncryptionAlgorithm: new AlgorithmIdentifier({
         algorithmId: contentEncryptionOID,
-        algorithmParams: new asn1js.OctetString({ valueHex: ivBuffer })
+        // RFC 5084 §3.2 requires AES-GCM AlgorithmIdentifier parameters to be
+        // a GCMParameters SEQUENCE (nonce + optional ICV length), not a bare
+        // OCTET STRING. WebCrypto AES-GCM emits a 128-bit / 16-byte ICV by
+        // default; advertise it explicitly rather than relying on the schema
+        // default of 12. Other ciphers keep the legacy OCTET-STRING IV.
+        algorithmParams: isAesGcm
+          ? new GCMParams({ nonce: ivBuffer, icvLen: 16 }).toSchema()
+          : new asn1js.OctetString({ valueHex: ivBuffer })
       }),
       encryptedContent: new asn1js.OctetString({ valueHex: encryptedContent })
     });
@@ -1545,7 +1556,28 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     //#endregion
 
     //#region Get "initialization vector" for content encryption algorithm
-    const ivBuffer = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
+    // AES-GCM parameters are a GCMParameters SEQUENCE per RFC 5084 §3.2.
+    // Older pkijs output emitted a bare OCTET STRING; fall back to that
+    // shape so previously-produced blobs remain decryptable.
+    const isAesGcm = (contentEncryptionAlgorithm as any).name === "AES-GCM";
+    let ivBuffer: ArrayBuffer;
+    let gcmTagLengthBits: number | undefined;
+    if (isAesGcm) {
+      try {
+        const gcmParams = new GCMParams({
+          schema: this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams
+        });
+        ivBuffer = gcmParams.nonce;
+        // RFC 5084 default is 12; WebCrypto default is 16.
+        gcmTagLengthBits = ((gcmParams.icvLen ?? 12) * 8);
+      } catch {
+        // Legacy fallback: params encoded as bare OCTET STRING.
+        // No explicit ICV length available; let WebCrypto use its default (128 bits).
+        ivBuffer = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
+      }
+    } else {
+      ivBuffer = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
+    }
     const ivView = new Uint8Array(ivBuffer);
     //#endregion
 
@@ -1556,13 +1588,14 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     const dataBuffer = this.encryptedContentInfo.getEncryptedContent();
     //#endregion
 
-    return crypto.decrypt(
-      {
-        name: (contentEncryptionAlgorithm as any).name,
-        iv: ivView
-      },
-      unwrappedKey,
-      dataBuffer);
+    const decryptAlgorithm: Algorithm & { iv: Uint8Array; tagLength?: number } = {
+      name: (contentEncryptionAlgorithm as any).name,
+      iv: ivView
+    };
+    if (isAesGcm && gcmTagLengthBits !== undefined) {
+      decryptAlgorithm.tagLength = gcmTagLengthBits;
+    }
+    return crypto.decrypt(decryptAlgorithm, unwrappedKey, dataBuffer);
     //#endregion
   }
 
