@@ -29,7 +29,7 @@
     "eslint": "^9.37.0",
     "mocha": "^11.7.4",
     "nyc": "^17.1.0",
-    "rollup": "^4.52.4",
+    "rollup": "^4.60.2",
     "rollup-plugin-dts": "^6.2.3",
     "rollup-plugin-typescript2": "^0.36.0",
     "ts-node": "^10.9.2",
