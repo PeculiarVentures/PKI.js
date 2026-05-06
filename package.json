@@ -36,7 +36,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@noble/hashes": "1.4.0",
+    "@noble/hashes": "^1.8.0",
     "asn1js": "^3.0.6",
     "bytestreamjs": "^2.0.1",
     "pvtsutils": "^1.3.6",
