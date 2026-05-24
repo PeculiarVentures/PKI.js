@@ -8,6 +8,7 @@ import { PublicKeyInfo } from "../PublicKeyInfo";
 import { PrivateKeyInfo } from "../PrivateKeyInfo";
 import { AlgorithmIdentifier } from "../AlgorithmIdentifier";
 import { EncryptedContentInfo } from "../EncryptedContentInfo";
+import { GCMParams } from "../GCMParams";
 import { IRSASSAPSSParams, RSASSAPSSParams } from "../RSASSAPSSParams";
 import { PBKDF2Params } from "../PBKDF2Params";
 import { PBES2Params } from "../PBES2Params";
@@ -1506,8 +1507,10 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     //#region Initial variables
 
-    // TODO Should we reuse iv from parameters.contentEncryptionAlgorithm or use it's length for ivBuffer?
-    const ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
+    // AES-GCM uses a 12-byte nonce per NIST SP 800-38D §8.2.1 / RFC 5084.
+    // Other AES modes use a 16-byte IV.
+    const isAesGcm = parameters.contentEncryptionAlgorithm.name === "AES-GCM";
+    const ivBuffer = new ArrayBuffer(isAesGcm ? 12 : 16);
     const ivView = new Uint8Array(ivBuffer);
     this.getRandomValues(ivView);
 
@@ -1572,7 +1575,14 @@ export class CryptoEngine extends AbstractCryptoEngine {
       }),
       encryptionScheme: new AlgorithmIdentifier({
         algorithmId: contentEncryptionOID,
-        algorithmParams: new asn1js.OctetString({ valueHex: ivBuffer })
+        // RFC 5084 §3.2 requires AES-GCM AlgorithmIdentifier parameters to be
+        // a GCMParameters SEQUENCE (nonce + optional ICV length), not a bare
+        // OCTET STRING. WebCrypto AES-GCM emits a 128-bit / 16-byte ICV by
+        // default; advertise it explicitly rather than relying on the schema
+        // default of 12. Other ciphers keep the legacy OCTET-STRING IV.
+        algorithmParams: isAesGcm
+          ? new GCMParams({ nonce: ivBuffer, icvLen: 16 }).toSchema()
+          : new asn1js.OctetString({ valueHex: ivBuffer })
       })
     });
 
@@ -1620,7 +1630,28 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     const contentEncryptionAlgorithm = this.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithmId, true);
 
-    const ivBuffer = pbes2Parameters.encryptionScheme.algorithmParams.valueBlock.valueHex;
+    // AES-GCM parameters are a GCMParameters SEQUENCE per RFC 5084 §3.2.
+    // Older pkijs output emitted a bare OCTET STRING; fall back to that
+    // shape so previously-produced blobs remain decryptable.
+    const isAesGcm = contentEncryptionAlgorithm.name === "AES-GCM";
+    let ivBuffer: ArrayBuffer;
+    let gcmTagLengthBits: number | undefined;
+    if (isAesGcm) {
+      try {
+        const gcmParams = new GCMParams({
+          schema: pbes2Parameters.encryptionScheme.algorithmParams
+        });
+        ivBuffer = gcmParams.nonce;
+        // RFC 5084 default is 12; WebCrypto default is 16.
+        gcmTagLengthBits = ((gcmParams.icvLen ?? 12) * 8);
+      } catch {
+        // Legacy fallback: params encoded as bare OCTET STRING.
+        // No explicit ICV length available; let WebCrypto use its default (128 bits).
+        ivBuffer = pbes2Parameters.encryptionScheme.algorithmParams.valueBlock.valueHex;
+      }
+    } else {
+      ivBuffer = pbes2Parameters.encryptionScheme.algorithmParams.valueBlock.valueHex;
+    }
     const ivView = new Uint8Array(ivBuffer);
 
     const saltBuffer = pbkdf2Params.salt.valueBlock.valueHex;
@@ -1665,12 +1696,14 @@ export class CryptoEngine extends AbstractCryptoEngine {
     const dataBuffer = parameters.encryptedContentInfo.getEncryptedContent();
     //#endregion
 
-    return this.decrypt({
+    const decryptParams: Algorithm & { iv: Uint8Array; tagLength?: number } = {
       name: contentEncryptionAlgorithm.name,
       iv: ivView
-    },
-      result,
-      dataBuffer);
+    };
+    if (isAesGcm && gcmTagLengthBits !== undefined) {
+      decryptParams.tagLength = gcmTagLengthBits;
+    }
+    return this.decrypt(decryptParams, result, dataBuffer);
     //#endregion
   }
 
