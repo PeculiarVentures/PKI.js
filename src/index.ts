@@ -41,6 +41,7 @@ export * from "./ExtKeyUsage";
 export * from "./Extension";
 export * from "./ExtensionValueFactory";
 export * from "./Extensions";
+export * from "./GCMParams";
 export * from "./GeneralName";
 export * from "./GeneralNames";
 export * from "./GeneralSubtree";
