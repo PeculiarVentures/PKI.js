@@ -147,7 +147,7 @@ export function getCrypto(safety = false): ICryptoEngine | null {
  * Initialize input Uint8Array by random values (with help from current "crypto engine")
  * @param view
  */
-export function getRandomValues(view: Uint8Array) {
+export function getRandomValues<T extends Exclude<BufferSource, ArrayBuffer>>(view: T): T {
   return getCrypto(true).getRandomValues(view);
 }
 
