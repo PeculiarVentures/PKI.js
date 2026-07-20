@@ -109,7 +109,7 @@ function parseCertificate() {
     const rsaPublicKey = pkijs.RSAPublicKey.fromBER(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
 
     const modulusView = rsaPublicKey.modulus.valueBlock.valueHexView;
-    let modulusBitLength = 0;
+    let modulusBitLength: number;
 
     if (modulusView[0] === 0x00)
       modulusBitLength = (rsaPublicKey.modulus.valueBlock.valueHexView.byteLength - 1) * 8;

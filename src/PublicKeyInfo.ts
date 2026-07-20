@@ -269,7 +269,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
       }
     } catch (e) {
       const message = e instanceof Error ? e.message : `${e}`;
-      throw new Error(`Error during exporting public key: ${message}`);
+      throw new Error(`Error during exporting public key: ${message}`, { cause: e });
     }
   }
 

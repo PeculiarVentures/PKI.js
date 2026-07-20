@@ -1739,7 +1739,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     //#endregion
 
     //#region Choose correct length for HMAC key
-    let length = 0;
+    let length: number;
 
     switch (parameters.hashAlgorithm.toLowerCase()) {
       case "sha-1":

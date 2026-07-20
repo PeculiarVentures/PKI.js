@@ -61,7 +61,7 @@ function parsePKCS10() {
   if (pkcs10.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1)) {
     const rsaPublicKeySimple = pkijs.RSAPublicKey.fromBER(pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
     const modulusView = rsaPublicKeySimple.modulus.valueBlock.valueHexView;
-    let modulusBitLength = 0;
+    let modulusBitLength: number;
 
     if (modulusView[0] === 0x00)
       modulusBitLength = (rsaPublicKeySimple.modulus.valueBlock.valueHexView.byteLength - 1) * 8;

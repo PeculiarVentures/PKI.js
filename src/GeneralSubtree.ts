@@ -168,7 +168,7 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
     outputArray.push(this.base.toSchema());
 
     if (this.minimum !== 0) {
-      let valueMinimum: number | asn1js.Integer = 0;
+      let valueMinimum: number | asn1js.Integer;
 
       if (this.minimum instanceof asn1js.Integer) {
         valueMinimum = this.minimum;
@@ -187,7 +187,7 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
     }
 
     if (MAXIMUM in this) {
-      let valueMaximum: number | asn1js.Integer = 0;
+      let valueMaximum: number | asn1js.Integer;
 
       if (this.maximum instanceof asn1js.Integer) {
         valueMaximum = this.maximum;
