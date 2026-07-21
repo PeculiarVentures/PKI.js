@@ -59,7 +59,7 @@ function fixImports(filePath) {
       }
       const newSpecifier = resolveImport(filePath, specifier);
       return `${prefix}${newSpecifier}${suffix}`;
-    }
+    },
   );
 
   if (content !== original) {
