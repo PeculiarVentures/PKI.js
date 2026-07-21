@@ -1,5 +1,5 @@
-import * as assert from "assert";
-import * as crypto from "crypto";
+import * as assert from "node:assert";
+import * as crypto from "node:crypto";
 import "./utils";
 import * as example from "./pkcs12SimpleExample";
 import { CryptoEngine } from "../src";

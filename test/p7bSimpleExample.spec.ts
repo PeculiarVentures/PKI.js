@@ -1,4 +1,4 @@
-import * as assert from "assert";
+import * as assert from "node:assert";
 import "./utils";
 import * as pkijs from "../src";
 import * as example from "./p7bSimpleExample";

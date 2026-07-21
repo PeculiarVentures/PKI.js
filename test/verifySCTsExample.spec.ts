@@ -1,4 +1,4 @@
-import * as assert from "assert";
+import * as assert from "node:assert";
 import { verifySCTs, verifySCTsWithRSA } from "./verifySCTsExample";
 
 describe("SCT Verification Example", () => {

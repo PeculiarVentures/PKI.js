@@ -1,6 +1,6 @@
-import { readdirSync, readFileSync, writeFileSync, existsSync } from "fs";
-import { resolve, join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { resolve, join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const buildDir = resolve(__dirname, "../build/mjs");

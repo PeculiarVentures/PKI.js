@@ -43,6 +43,7 @@
   "scripts": {
     "prebuild": "rm -rf build",
     "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && node scripts/fix-esm-imports.mjs && tsc -p tsconfig.types.json && echo '{\"type\":\"module\"}' > build/mjs/package.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
@@ -64,7 +65,6 @@
     "@peculiar/webcrypto": "^1.7.1",
     "@types/node": "^20.19.21",
     "@vitest/coverage-v8": "^4.0.16",
-    "assert": "^2.1.0",
     "emailjs-mime-builder": "^2.0.5",
     "emailjs-mime-parser": "^2.0.7",
     "oxfmt": "^0.59.0",

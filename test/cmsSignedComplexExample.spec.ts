@@ -1,4 +1,4 @@
-import * as assert from "assert";
+import * as assert from "node:assert";
 import * as pvtsutils from "pvtsutils";
 import * as pkijs from "../src";
 import * as example from "./cmsSignedComplexExample";

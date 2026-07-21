@@ -1,4 +1,4 @@
-import * as crypto from "crypto";
+import * as crypto from "node:crypto";
 
 export function getRandomValues(length: number): Uint8Array {
   return new Uint8Array(crypto.randomBytes(length));
