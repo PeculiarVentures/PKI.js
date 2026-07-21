@@ -9,9 +9,15 @@ let aesKeyLength = 16;
 
 async function createOpenSSLPrivateKey() {
   const privateKeyData = utils.fromPEM(common.getElement("pkijs_data", "textarea").value);
-  const passwordBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("password", "input").value);
+  const passwordBuffer = pvtsutils.Convert.FromUtf8String(
+    common.getElement("password", "input").value,
+  );
 
-  const encryptedKey = await example.createOpenSSLPrivateKey(aesKeyLength, passwordBuffer, privateKeyData);
+  const encryptedKey = await example.createOpenSSLPrivateKey(
+    aesKeyLength,
+    passwordBuffer,
+    privateKeyData,
+  );
   ivBuffer = encryptedKey.ivBuffer;
 
   const resultString: string[] = [
@@ -31,7 +37,9 @@ async function parseOpenSSLPrivateKey() {
 
   const headerExp = /([\x21-\x7e]+):\s*([\x21-\x7e\s^:]+)/;
 
-  const stringPEM = common.getElement("openssl_data", "textarea").value.replace(/(-+(BEGIN|END)( RSA)? PRIVATE KEY-+)/g, "");
+  const stringPEM = common
+    .getElement("openssl_data", "textarea")
+    .value.replace(/(-+(BEGIN|END)( RSA)? PRIVATE KEY-+)/g, "");
   const lines = stringPEM.split(/\r?\n/);
 
   let dekFound = false;
@@ -44,8 +52,7 @@ async function parseOpenSSLPrivateKey() {
 
         const values = lineMatch[2].split(",");
 
-        for (let j = 0; j < values.length; j++)
-          values[j] = values[j].trim();
+        for (let j = 0; j < values.length; j++) values[j] = values[j].trim();
 
         switch (values[0].toLocaleUpperCase()) {
           case "AES-128-CBC":
@@ -64,18 +71,23 @@ async function parseOpenSSLPrivateKey() {
         ivBuffer = pvtsutils.Convert.FromHex(values[1]);
       }
     } else {
-      if (dekFound)
-        base64 += lines[i];
+      if (dekFound) base64 += lines[i];
     }
   }
 
-  if (dekFound === false)
-    throw new Error("Can not find DEK-Info section!");
+  if (dekFound === false) throw new Error("Can not find DEK-Info section!");
 
   const privateKeyData = pvtsutils.Convert.FromBase64(base64.trim());
-  const passwordBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("password", "input").value);
+  const passwordBuffer = pvtsutils.Convert.FromUtf8String(
+    common.getElement("password", "input").value,
+  );
 
-  const decryptedKey = await example.parseOpenSSLPrivateKey(aesKeyLength, ivBuffer, passwordBuffer, privateKeyData);
+  const decryptedKey = await example.parseOpenSSLPrivateKey(
+    aesKeyLength,
+    ivBuffer,
+    passwordBuffer,
+    privateKeyData,
+  );
 
   // Just in order to check all was decoded correctly
   pkijs.RSAPrivateKey.fromBER(decryptedKey);
@@ -109,7 +121,10 @@ async function generateOpenSSLPrivateKey() {
   const { privateKey } = await crypto.subtle.generateKey(alg, true, ["sign", "verify"]);
   const pkcs8 = await crypto.subtle.exportKey("pkcs8", privateKey);
   const pki = pkijs.PrivateKeyInfo.fromBER(pkcs8);
-  common.getElement("pkijs_data", "textarea").innerHTML = utils.toPEM(pki.privateKey.valueBlock.valueHexView as BufferSource, "RSA PRIVATE KEY");
+  common.getElement("pkijs_data", "textarea").innerHTML = utils.toPEM(
+    pki.privateKey.valueBlock.valueHexView as BufferSource,
+    "RSA PRIVATE KEY",
+  );
 }
 
 common.getElement("open_ssl_encrypt").addEventListener("click", createOpenSSLPrivateKey);

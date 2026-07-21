@@ -50,8 +50,7 @@ function parseCMSSigned() {
     certificatesTable.deleteRow(certificatesTable.rows.length - 1);
 
   const crlsTable = common.getElement("cms-rev-lists", "table");
-  while (crlsTable.rows.length > 1)
-    crlsTable.deleteRow(crlsTable.rows.length - 1);
+  while (crlsTable.rows.length > 1) crlsTable.deleteRow(crlsTable.rows.length - 1);
   //#endregion
 
   //#region Decode existing CMS Signed Data
@@ -64,24 +63,24 @@ function parseCMSSigned() {
     "1.3.14.3.2.26": "SHA-1",
     "2.16.840.1.101.3.4.2.1": "SHA-256",
     "2.16.840.1.101.3.4.2.2": "SHA-384",
-    "2.16.840.1.101.3.4.2.3": "SHA-512"
+    "2.16.840.1.101.3.4.2.3": "SHA-512",
   };
 
   for (let i = 0; i < cmsSignedSimpl.digestAlgorithms.length; i++) {
     let typeval = dgstmap[cmsSignedSimpl.digestAlgorithms[i].algorithmId];
-    if (typeof typeval === "undefined")
-      typeval = cmsSignedSimpl.digestAlgorithms[i].algorithmId;
+    if (typeof typeval === "undefined") typeval = cmsSignedSimpl.digestAlgorithms[i].algorithmId;
 
     const ulrow = `<li><p><span>${typeval}</span></p></li>`;
 
-    common.getElement("cms-dgst-algos").innerHTML = common.getElement("cms-dgst-algos").innerHTML + ulrow;
+    common.getElement("cms-dgst-algos").innerHTML =
+      common.getElement("cms-dgst-algos").innerHTML + ulrow;
   }
   //#endregion
 
   //#region Put information about encapsulated content type
   const contypemap: Record<string, string> = {
     "1.3.6.1.4.1.311.2.1.4": "Authenticode signing information",
-    "1.2.840.113549.1.7.1": "Data content"
+    "1.2.840.113549.1.7.1": "Data content",
   };
 
   let eContentType = contypemap[cmsSignedSimpl.encapContentInfo.eContentType];
@@ -103,7 +102,7 @@ function parseCMSSigned() {
     "2.5.4.42": "GN",
     "2.5.4.43": "I",
     "2.5.4.4": "SN",
-    "1.2.840.113549.1.9.1": "E-mail"
+    "1.2.840.113549.1.9.1": "E-mail",
   };
 
   if (cmsSignedSimpl.certificates) {
@@ -116,8 +115,7 @@ function parseCMSSigned() {
 
       for (let i = 0; i < cert.issuer.typesAndValues.length; i++) {
         let typeval = rdnmap[cert.issuer.typesAndValues[i].type];
-        if (typeof typeval === "undefined")
-          typeval = cert.issuer.typesAndValues[i].type;
+        if (typeof typeval === "undefined") typeval = cert.issuer.typesAndValues[i].type;
 
         const subjval = cert.issuer.typesAndValues[i].value.valueBlock.value;
 
@@ -128,7 +126,9 @@ function parseCMSSigned() {
 
       const row = certificatesTable.insertRow(certificatesTable.rows.length);
       const cell0 = row.insertCell(0);
-      cell0.innerHTML = pvutils.bufferToHexCodes(cert.serialNumber.valueBlock.valueHexView.slice().buffer);
+      cell0.innerHTML = pvutils.bufferToHexCodes(
+        cert.serialNumber.valueBlock.valueHexView.slice().buffer,
+      );
       const cell1 = row.insertCell(1);
       cell1.innerHTML = ul;
     }
@@ -143,10 +143,13 @@ function parseCMSSigned() {
       let ul = "<ul>";
       const crl = cmsSignedSimpl.crls[j];
 
-      for (let i = 0; crl instanceof pkijs.CertificateRevocationList && i < crl.issuer.typesAndValues.length; i++) {
+      for (
+        let i = 0;
+        crl instanceof pkijs.CertificateRevocationList && i < crl.issuer.typesAndValues.length;
+        i++
+      ) {
         let typeval = rdnmap[crl.issuer.typesAndValues[i].type];
-        if (typeof typeval === "undefined")
-          typeval = crl.issuer.typesAndValues[i].type;
+        if (typeof typeval === "undefined") typeval = crl.issuer.typesAndValues[i].type;
 
         const subjval = crl.issuer.typesAndValues[i].value.valueBlock.value;
 
@@ -177,7 +180,13 @@ function parseCMSSigned() {
  */
 async function createCMSSigned() {
   try {
-    const cms = await example.createCMSSigned(hashAlg, signAlg, dataBuffer, detachedSignature, addExt);
+    const cms = await example.createCMSSigned(
+      hashAlg,
+      signAlg,
+      dataBuffer,
+      detachedSignature,
+      addExt,
+    );
 
     certificateBuffer = cms.certificate.toSchema().toBER();
     const certPem = utils.toPEM(certificateBuffer, "CERTIFICATE");
@@ -192,11 +201,7 @@ async function createCMSSigned() {
     cmsSignedBuffer = cms.cmsSignedData;
     const cmsPem = utils.toPEM(cmsSignedBuffer, "CMS");
 
-    common.getElement("new_signed_data").innerHTML = [
-      certPem,
-      pkcs8Pem,
-      cmsPem,
-    ].join("\n\n");
+    common.getElement("new_signed_data").innerHTML = [certPem, pkcs8Pem, cmsPem].join("\n\n");
 
     parseCMSSigned();
 
@@ -218,7 +223,11 @@ async function verifyCMSSigned() {
   //#endregion
 
   try {
-    const ok = await example.verifyCMSSigned(cmsSignedBuffer, trustedCertificates, detachedSignature ? dataBuffer : undefined);
+    const ok = await example.verifyCMSSigned(
+      cmsSignedBuffer,
+      trustedCertificates,
+      detachedSignature ? dataBuffer : undefined,
+    );
     alert(`Verification result: ${ok}`);
   } catch (e) {
     common.processError(e, "Error on CMS verifying");
@@ -228,7 +237,7 @@ async function verifyCMSSigned() {
 //#region Functions handling file selection
 
 function handleFileBrowse(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     dataBuffer = file;
 
     createCMSSigned();
@@ -236,7 +245,7 @@ function handleFileBrowse(evt: Event) {
 }
 
 function handleParsingFile(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     cmsSignedBuffer = file;
 
     parseCMSSigned();
@@ -244,7 +253,7 @@ function handleParsingFile(evt: Event) {
 }
 
 function handleCABundle(evt: any) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     parseCAbundle(file);
   });
 }
@@ -294,7 +303,9 @@ function handleDetachedSignatureOnChange() {
 //#endregion
 
 common.getElement("add_ext").addEventListener("change", handleAddExtOnChange, false);
-common.getElement("detached_signature").addEventListener("change", handleDetachedSignatureOnChange, false);
+common
+  .getElement("detached_signature")
+  .addEventListener("change", handleDetachedSignatureOnChange, false);
 common.getElement("hash_alg").addEventListener("change", handleHashAlgOnChange, false);
 common.getElement("sign_alg").addEventListener("change", handleSignAlgOnChange, false);
 common.getElement("input_file").addEventListener("change", handleFileBrowse, false);

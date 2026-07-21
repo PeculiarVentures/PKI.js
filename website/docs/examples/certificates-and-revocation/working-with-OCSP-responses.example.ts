@@ -1,5 +1,5 @@
-import * as pkijs from 'pkijs';
-import * as asn1js from 'asn1js';
+import * as pkijs from "pkijs";
+import * as asn1js from "asn1js";
 
 const ocspBasicResp = new pkijs.BasicOCSPResponse();
 
@@ -18,9 +18,9 @@ const response = new pkijs.SingleResponse({
 response.certStatus = new asn1js.Primitive({
   idBlock: {
     tagClass: 3, // CONTEXT-SPECIFIC
-    tagNumber: 0 // [0]
+    tagNumber: 0, // [0]
   },
-  lenBlockLength: 1 // The length contains one byte 0x00
+  lenBlockLength: 1, // The length contains one byte 0x00
 }); // status - success
 response.thisUpdate = new Date();
 

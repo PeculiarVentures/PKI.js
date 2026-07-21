@@ -3,22 +3,41 @@ import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson } from "./AlgorithmIdentifier";
-import { EncapsulatedContentInfo, EncapsulatedContentInfoJson, EncapsulatedContentInfoSchema } from "./EncapsulatedContentInfo";
+import {
+  EncapsulatedContentInfo,
+  EncapsulatedContentInfoJson,
+  EncapsulatedContentInfoSchema,
+} from "./EncapsulatedContentInfo";
 import { Certificate, checkCA } from "./Certificate";
-import { CertificateRevocationList, CertificateRevocationListJson } from "./CertificateRevocationList";
-import { OtherRevocationInfoFormat, OtherRevocationInfoFormatJson } from "./OtherRevocationInfoFormat";
+import {
+  CertificateRevocationList,
+  CertificateRevocationListJson,
+} from "./CertificateRevocationList";
+import {
+  OtherRevocationInfoFormat,
+  OtherRevocationInfoFormatJson,
+} from "./OtherRevocationInfoFormat";
 import { SignerInfo, SignerInfoJson } from "./SignerInfo";
 import { CertificateSet, CertificateSetItem, CertificateSetItemJson } from "./CertificateSet";
 import { RevocationInfoChoices, RevocationInfoChoicesSchema } from "./RevocationInfoChoices";
 import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
 import { TSTInfo } from "./TSTInfo";
-import { CertificateChainValidationEngine, CertificateChainValidationEngineParameters, FindIssuerCallback, FindOriginCallback } from "./CertificateChainValidationEngine";
+import {
+  CertificateChainValidationEngine,
+  CertificateChainValidationEngineParameters,
+  FindIssuerCallback,
+  FindOriginCallback,
+} from "./CertificateChainValidationEngine";
 import { BasicOCSPResponse, BasicOCSPResponseJson } from "./BasicOCSPResponse";
 import { OtherCertificateFormat } from "./OtherCertificateFormat";
 import { AttributeCertificateV1 } from "./AttributeCertificateV1";
 import { AttributeCertificateV2 } from "./AttributeCertificateV2";
 import * as Schema from "./Schema";
-import { id_ContentType_Data, id_eContentType_TSTInfo, id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
+import {
+  id_ContentType_Data,
+  id_eContentType_TSTInfo,
+  id_PKIX_OCSP_Basic,
+} from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
@@ -47,7 +66,7 @@ const CLEAR_PROPS = [
   SIGNED_DATA_ENCAP_CONTENT_INFO,
   SIGNED_DATA_CERTIFICATES,
   SIGNED_DATA_CRLS,
-  SIGNED_DATA_SIGNER_INFOS
+  SIGNED_DATA_SIGNER_INFOS,
 ];
 
 export interface ISignedData {
@@ -107,7 +126,6 @@ export interface SignedDataVerifyResult {
 }
 
 export class SignedDataVerifyError extends Error implements SignedDataVerifyResult {
-
   public date: Date;
   public code: number;
   public signatureVerified: boolean | null;
@@ -136,7 +154,6 @@ export class SignedDataVerifyError extends Error implements SignedDataVerifyResu
     this.signerCertificate = signerCertificate;
     this.signerCertificateVerified = signerCertificateVerified;
     this.certificatePath = certificatePath;
-
   }
 }
 
@@ -199,7 +216,6 @@ export class SignedDataVerifyError extends Error implements SignedDataVerifyResu
  * ```
  */
 export class SignedData extends PkiObject implements ISignedData {
-
   public static override CLASS_NAME = "SignedData";
 
   public static ID_DATA: typeof id_ContentType_Data = id_ContentType_Data;
@@ -219,11 +235,27 @@ export class SignedData extends PkiObject implements ISignedData {
   constructor(parameters: SignedDataParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, SignedData.defaultValues(VERSION));
-    this.digestAlgorithms = pvutils.getParametersValue(parameters, DIGEST_ALGORITHMS, SignedData.defaultValues(DIGEST_ALGORITHMS));
-    this.encapContentInfo = pvutils.getParametersValue(parameters, ENCAP_CONTENT_INFO, SignedData.defaultValues(ENCAP_CONTENT_INFO));
+    this.version = pvutils.getParametersValue(
+      parameters,
+      VERSION,
+      SignedData.defaultValues(VERSION),
+    );
+    this.digestAlgorithms = pvutils.getParametersValue(
+      parameters,
+      DIGEST_ALGORITHMS,
+      SignedData.defaultValues(DIGEST_ALGORITHMS),
+    );
+    this.encapContentInfo = pvutils.getParametersValue(
+      parameters,
+      ENCAP_CONTENT_INFO,
+      SignedData.defaultValues(ENCAP_CONTENT_INFO),
+    );
     if (CERTIFICATES in parameters) {
-      this.certificates = pvutils.getParametersValue(parameters, CERTIFICATES, SignedData.defaultValues(CERTIFICATES));
+      this.certificates = pvutils.getParametersValue(
+        parameters,
+        CERTIFICATES,
+        SignedData.defaultValues(CERTIFICATES),
+      );
     }
     if (CRLS in parameters) {
       this.crls = pvutils.getParametersValue(parameters, CRLS, SignedData.defaultValues(CRLS));
@@ -231,7 +263,11 @@ export class SignedData extends PkiObject implements ISignedData {
     if (OCSPS in parameters) {
       this.ocsps = pvutils.getParametersValue(parameters, OCSPS, SignedData.defaultValues(OCSPS));
     }
-    this.signerInfos = pvutils.getParametersValue(parameters, SIGNER_INFOS, SignedData.defaultValues(SIGNER_INFOS));
+    this.signerInfos = pvutils.getParametersValue(
+      parameters,
+      SIGNER_INFOS,
+      SignedData.defaultValues(SIGNER_INFOS),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -245,7 +281,9 @@ export class SignedData extends PkiObject implements ISignedData {
    */
   public static override defaultValues(memberName: typeof VERSION): number;
   public static override defaultValues(memberName: typeof DIGEST_ALGORITHMS): AlgorithmIdentifier[];
-  public static override defaultValues(memberName: typeof ENCAP_CONTENT_INFO): EncapsulatedContentInfo;
+  public static override defaultValues(
+    memberName: typeof ENCAP_CONTENT_INFO,
+  ): EncapsulatedContentInfo;
   public static override defaultValues(memberName: typeof CERTIFICATES): CertificateSetItem[];
   public static override defaultValues(memberName: typeof CRLS): SignedDataCRL[];
   public static override defaultValues(memberName: typeof OCSPS): BasicOCSPResponse[];
@@ -279,16 +317,18 @@ export class SignedData extends PkiObject implements ISignedData {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case VERSION:
-        return (memberValue === SignedData.defaultValues(VERSION));
+        return memberValue === SignedData.defaultValues(VERSION);
       case ENCAP_CONTENT_INFO:
-        return EncapsulatedContentInfo.compareWithDefault("eContentType", memberValue.eContentType) &&
-          EncapsulatedContentInfo.compareWithDefault("eContent", memberValue.eContent);
+        return (
+          EncapsulatedContentInfo.compareWithDefault("eContentType", memberValue.eContentType) &&
+          EncapsulatedContentInfo.compareWithDefault("eContent", memberValue.eContent)
+        );
       case DIGEST_ALGORITHMS:
       case CERTIFICATES:
       case CRLS:
       case OCSPS:
       case SIGNER_INFOS:
-        return (memberValue.length === 0);
+        return memberValue.length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -307,69 +347,79 @@ export class SignedData extends PkiObject implements ISignedData {
    *    signerInfos SignerInfos }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    version?: string;
-    digestAlgorithms?: string;
-    encapContentInfo?: EncapsulatedContentInfoSchema;
-    certificates?: string;
-    crls?: RevocationInfoChoicesSchema;
-    signerInfos?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      version?: string;
+      digestAlgorithms?: string;
+      encapContentInfo?: EncapsulatedContentInfoSchema;
+      certificates?: string;
+      crls?: RevocationInfoChoicesSchema;
+      signerInfos?: string;
+    }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
     if (names.optional === undefined) {
       names.optional = false;
     }
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || SIGNED_DATA),
+    return new asn1js.Sequence({
+      name: names.blockName || SIGNED_DATA,
       optional: names.optional,
       value: [
-        new asn1js.Integer({ name: (names.version || SIGNED_DATA_VERSION) }),
+        new asn1js.Integer({ name: names.version || SIGNED_DATA_VERSION }),
         new asn1js.Set({
           value: [
             new asn1js.Repeated({
-              name: (names.digestAlgorithms || SIGNED_DATA_DIGEST_ALGORITHMS),
-              value: AlgorithmIdentifier.schema()
-            })
-          ]
+              name: names.digestAlgorithms || SIGNED_DATA_DIGEST_ALGORITHMS,
+              value: AlgorithmIdentifier.schema(),
+            }),
+          ],
         }),
-        EncapsulatedContentInfo.schema(names.encapContentInfo || {
-          names: {
-            blockName: SIGNED_DATA_ENCAP_CONTENT_INFO
-          }
-        }),
+        EncapsulatedContentInfo.schema(
+          names.encapContentInfo || {
+            names: {
+              blockName: SIGNED_DATA_ENCAP_CONTENT_INFO,
+            },
+          },
+        ),
         new asn1js.Constructed({
-          name: (names.certificates || SIGNED_DATA_CERTIFICATES),
+          name: names.certificates || SIGNED_DATA_CERTIFICATES,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: CertificateSet.schema().valueBlock.value
+          value: CertificateSet.schema().valueBlock.value,
         }), // IMPLICIT CertificateSet
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: RevocationInfoChoices.schema(names.crls || {
-            names: {
-              crls: SIGNED_DATA_CRLS
-            }
-          }).valueBlock.value
+          value: RevocationInfoChoices.schema(
+            names.crls || {
+              names: {
+                crls: SIGNED_DATA_CRLS,
+              },
+            },
+          ).valueBlock.value,
         }), // IMPLICIT RevocationInfoChoices
         new asn1js.Set({
           value: [
             new asn1js.Repeated({
-              name: (names.signerInfos || SIGNED_DATA_SIGNER_INFOS),
-              value: SignerInfo.schema()
-            })
-          ]
-        })
-      ]
-    }));
+              name: names.signerInfos || SIGNED_DATA_SIGNER_INFOS,
+              value: SignerInfo.schema(),
+            }),
+          ],
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -377,34 +427,36 @@ export class SignedData extends PkiObject implements ISignedData {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     //#region Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
-      schema,
-      SignedData.schema()
-    );
+    const asn1 = asn1js.compareSchema(schema, schema, SignedData.schema());
     AsnError.assertSchema(asn1, this.className);
     //#endregion
 
     //#region Get internal properties from parsed schema
     this.version = asn1.result[SIGNED_DATA_VERSION].valueBlock.valueDec;
 
-    if (SIGNED_DATA_DIGEST_ALGORITHMS in asn1.result) // Could be empty SET of digest algorithms
-      this.digestAlgorithms = Array.from(asn1.result[SIGNED_DATA_DIGEST_ALGORITHMS], algorithm => new AlgorithmIdentifier({ schema: algorithm }));
+    if (SIGNED_DATA_DIGEST_ALGORITHMS in asn1.result)
+      // Could be empty SET of digest algorithms
+      this.digestAlgorithms = Array.from(
+        asn1.result[SIGNED_DATA_DIGEST_ALGORITHMS],
+        (algorithm) => new AlgorithmIdentifier({ schema: algorithm }),
+      );
 
-    this.encapContentInfo = new EncapsulatedContentInfo({ schema: asn1.result[SIGNED_DATA_ENCAP_CONTENT_INFO] });
+    this.encapContentInfo = new EncapsulatedContentInfo({
+      schema: asn1.result[SIGNED_DATA_ENCAP_CONTENT_INFO],
+    });
 
     if (SIGNED_DATA_CERTIFICATES in asn1.result) {
       const certificateSet = new CertificateSet({
         schema: new asn1js.Set({
-          value: asn1.result[SIGNED_DATA_CERTIFICATES].valueBlock.value
-        })
+          value: asn1.result[SIGNED_DATA_CERTIFICATES].valueBlock.value,
+        }),
       });
       this.certificates = certificateSet.certificates.slice(0); // Copy all just for making comfortable access
     }
 
     if (SIGNED_DATA_CRLS in asn1.result) {
       this.crls = Array.from(asn1.result[SIGNED_DATA_CRLS], (crl: Schema.SchemaType) => {
-        if (crl.idBlock.tagClass === 1)
-          return new CertificateRevocationList({ schema: crl });
+        if (crl.idBlock.tagClass === 1) return new CertificateRevocationList({ schema: crl });
 
         //#region Create SEQUENCE from [1]
         crl.idBlock.tagClass = 1; // UNIVERSAL
@@ -415,8 +467,12 @@ export class SignedData extends PkiObject implements ISignedData {
       });
     }
 
-    if (SIGNED_DATA_SIGNER_INFOS in asn1.result) // Could be empty SET SignerInfos
-      this.signerInfos = Array.from(asn1.result[SIGNED_DATA_SIGNER_INFOS], signerInfoSchema => new SignerInfo({ schema: signerInfoSchema }));
+    if (SIGNED_DATA_SIGNER_INFOS in asn1.result)
+      // Could be empty SET SignerInfos
+      this.signerInfos = Array.from(
+        asn1.result[SIGNED_DATA_SIGNER_INFOS],
+        (signerInfoSchema) => new SignerInfo({ schema: signerInfoSchema }),
+      );
     //#endregion
   }
 
@@ -440,14 +496,28 @@ export class SignedData extends PkiObject implements ISignedData {
     //      (encapContentInfo eContentType is other than id-data)
     //    THEN version MUST be 3
     //    ELSE version MUST be 1
-    if ((this.certificates && this.certificates.length && this.certificates.some(o => o instanceof OtherCertificateFormat))
-      || (this.crls && this.crls.length && this.crls.some(o => o instanceof OtherRevocationInfoFormat))) {
+    if (
+      (this.certificates &&
+        this.certificates.length &&
+        this.certificates.some((o) => o instanceof OtherCertificateFormat)) ||
+      (this.crls &&
+        this.crls.length &&
+        this.crls.some((o) => o instanceof OtherRevocationInfoFormat))
+    ) {
       this.version = 5;
-    } else if (this.certificates && this.certificates.length && this.certificates.some(o => o instanceof AttributeCertificateV2)) {
+    } else if (
+      this.certificates &&
+      this.certificates.length &&
+      this.certificates.some((o) => o instanceof AttributeCertificateV2)
+    ) {
       this.version = 4;
-    } else if ((this.certificates && this.certificates.length && this.certificates.some(o => o instanceof AttributeCertificateV1))
-      || this.signerInfos.some(o => o.version === 3)
-      || this.encapContentInfo.eContentType !== SignedData.ID_DATA) {
+    } else if (
+      (this.certificates &&
+        this.certificates.length &&
+        this.certificates.some((o) => o instanceof AttributeCertificateV1)) ||
+      this.signerInfos.some((o) => o.version === 3) ||
+      this.encapContentInfo.eContentType !== SignedData.ID_DATA
+    ) {
       this.version = 3;
     } else {
       this.version = 1;
@@ -456,9 +526,11 @@ export class SignedData extends PkiObject implements ISignedData {
     outputArray.push(new asn1js.Integer({ value: this.version }));
 
     //#region Create array of digest algorithms
-    outputArray.push(new asn1js.Set({
-      value: Array.from(this.digestAlgorithms, algorithm => algorithm.toSchema())
-    }));
+    outputArray.push(
+      new asn1js.Set({
+        value: Array.from(this.digestAlgorithms, (algorithm) => algorithm.toSchema()),
+      }),
+    );
     //#endregion
 
     outputArray.push(this.encapContentInfo.toSchema());
@@ -467,83 +539,97 @@ export class SignedData extends PkiObject implements ISignedData {
       const certificateSet = new CertificateSet({ certificates: this.certificates });
       const certificateSetSchema = certificateSet.toSchema();
 
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3,
-          tagNumber: 0
-        },
-        value: certificateSetSchema.valueBlock.value
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3,
+            tagNumber: 0,
+          },
+          value: certificateSetSchema.valueBlock.value,
+        }),
+      );
     }
 
     if (this.crls) {
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 1 // [1]
-        },
-        value: Array.from(this.crls, crl => {
-          if (crl instanceof OtherRevocationInfoFormat) {
-            const crlSchema = crl.toSchema();
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 1, // [1]
+          },
+          value: Array.from(this.crls, (crl) => {
+            if (crl instanceof OtherRevocationInfoFormat) {
+              const crlSchema = crl.toSchema();
 
-            crlSchema.idBlock.tagClass = 3;
-            crlSchema.idBlock.tagNumber = 1;
+              crlSchema.idBlock.tagClass = 3;
+              crlSchema.idBlock.tagNumber = 1;
 
-            return crlSchema;
-          }
+              return crlSchema;
+            }
 
-          return crl.toSchema(encodeFlag);
-        })
-      }));
+            return crl.toSchema(encodeFlag);
+          }),
+        }),
+      );
     }
 
     //#region Create array of signer infos
-    outputArray.push(new asn1js.Set({
-      value: Array.from(this.signerInfos, signerInfo => signerInfo.toSchema())
-    }));
+    outputArray.push(
+      new asn1js.Set({
+        value: Array.from(this.signerInfos, (signerInfo) => signerInfo.toSchema()),
+      }),
+    );
     //#endregion
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: outputArray
-    }));
+    return new asn1js.Sequence({
+      value: outputArray,
+    });
     //#endregion
   }
 
   public toJSON(): SignedDataJson {
     const res: SignedDataJson = {
       version: this.version,
-      digestAlgorithms: Array.from(this.digestAlgorithms, algorithm => algorithm.toJSON()),
+      digestAlgorithms: Array.from(this.digestAlgorithms, (algorithm) => algorithm.toJSON()),
       encapContentInfo: this.encapContentInfo.toJSON(),
-      signerInfos: Array.from(this.signerInfos, signerInfo => signerInfo.toJSON()),
+      signerInfos: Array.from(this.signerInfos, (signerInfo) => signerInfo.toJSON()),
     };
 
     if (this.certificates) {
-      res.certificates = Array.from(this.certificates, certificate => certificate.toJSON());
+      res.certificates = Array.from(this.certificates, (certificate) => certificate.toJSON());
     }
 
     if (this.crls) {
-      res.crls = Array.from(this.crls, crl => crl.toJSON());
+      res.crls = Array.from(this.crls, (crl) => crl.toJSON());
     }
-
 
     return res;
   }
 
-  public verify(params?: SignedDataVerifyParams & { extendedMode?: false; }, crypto?: ICryptoEngine): Promise<boolean>;
-  public verify(params: SignedDataVerifyParams & { extendedMode: true; }, crypto?: ICryptoEngine): Promise<SignedDataVerifyResult>;
-  public async verify({
-    signer = (-1),
-    data = (EMPTY_BUFFER),
-    trustedCerts = [],
-    checkDate = (new Date()),
-    checkChain = false,
-    passedWhenNotRevValues = false,
-    extendedMode = false,
-    findOrigin = null,
-    findIssuer = null
-  }: SignedDataVerifyParams = {}, crypto = common.getCrypto(true)): Promise<boolean | SignedDataVerifyResult> {
+  public verify(
+    params?: SignedDataVerifyParams & { extendedMode?: false },
+    crypto?: ICryptoEngine,
+  ): Promise<boolean>;
+  public verify(
+    params: SignedDataVerifyParams & { extendedMode: true },
+    crypto?: ICryptoEngine,
+  ): Promise<SignedDataVerifyResult>;
+  public async verify(
+    {
+      signer = -1,
+      data = EMPTY_BUFFER,
+      trustedCerts = [],
+      checkDate = new Date(),
+      checkChain = false,
+      passedWhenNotRevValues = false,
+      extendedMode = false,
+      findOrigin = null,
+      findIssuer = null,
+    }: SignedDataVerifyParams = {},
+    crypto = common.getCrypto(true),
+  ): Promise<boolean | SignedDataVerifyResult> {
     let signerCert: Certificate | null = null;
     let timestampSerial: ArrayBuffer | null = null;
     try {
@@ -578,16 +664,18 @@ export class SignedData extends PkiObject implements ISignedData {
 
       if (signerInfo.sid instanceof IssuerAndSerialNumber) {
         for (const certificate of this.certificates) {
-          if (!(certificate instanceof Certificate))
-            continue;
+          if (!(certificate instanceof Certificate)) continue;
 
-          if ((certificate.issuer.isEqual(signerInfo.sid.issuer)) &&
-            (certificate.serialNumber.isEqual(signerInfo.sid.serialNumber))) {
+          if (
+            certificate.issuer.isEqual(signerInfo.sid.issuer) &&
+            certificate.serialNumber.isEqual(signerInfo.sid.serialNumber)
+          ) {
             signerCert = certificate;
             break;
           }
         }
-      } else { // Find by SubjectKeyIdentifier
+      } else {
+        // Find by SubjectKeyIdentifier
         const sid = signerInfo.sid;
         const keyId = sid.idBlock.isConstructed
           ? sid.valueBlock.value[0].valueBlock.valueHex // EXPLICIT OCTET STRING
@@ -598,7 +686,11 @@ export class SignedData extends PkiObject implements ISignedData {
             continue;
           }
 
-          const digest = await crypto.digest({ name: "sha-1" }, certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
+          const digest = await crypto.digest(
+            { name: "sha-1" },
+            certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock
+              .valueHexView as BufferSource,
+          );
           if (pvutils.isEqualBuffer(digest, keyId)) {
             signerCert = certificate;
             break;
@@ -626,7 +718,7 @@ export class SignedData extends PkiObject implements ISignedData {
             signatureVerified: null,
             signerCertificate: signerCert,
             timestampSerial,
-            signerCertificateVerified: true
+            signerCertificateVerified: true,
           });
         }
         //#endregion
@@ -635,9 +727,10 @@ export class SignedData extends PkiObject implements ISignedData {
         let tstInfo: TSTInfo;
 
         try {
-          tstInfo = TSTInfo.fromBER(this.encapContentInfo.eContent.valueBlock.valueHexView as BufferSource);
-        }
-        catch {
+          tstInfo = TSTInfo.fromBER(
+            this.encapContentInfo.eContent.valueBlock.valueHexView as BufferSource,
+          );
+        } catch {
           throw new SignedDataVerifyError({
             date: checkDate,
             code: 15,
@@ -645,7 +738,7 @@ export class SignedData extends PkiObject implements ISignedData {
             signatureVerified: null,
             signerCertificate: signerCert,
             timestampSerial,
-            signerCertificateVerified: true
+            signerCertificateVerified: true,
           });
         }
         //#endregion
@@ -673,7 +766,7 @@ export class SignedData extends PkiObject implements ISignedData {
             signatureVerified: false,
             signerCertificate: signerCert,
             timestampSerial,
-            signerCertificateVerified: true
+            signerCertificateVerified: true,
           });
         }
       }
@@ -681,7 +774,9 @@ export class SignedData extends PkiObject implements ISignedData {
       //#endregion
 
       if (checkChain) {
-        const certs = this.certificates.filter(certificate => (certificate instanceof Certificate && !!checkCA(certificate, signerCert))) as Certificate[];
+        const certs = this.certificates.filter(
+          (certificate) => certificate instanceof Certificate && !!checkCA(certificate, signerCert),
+        ) as Certificate[];
         const chainParams: CertificateChainValidationEngineParameters = {
           checkDate,
           certs,
@@ -700,28 +795,29 @@ export class SignedData extends PkiObject implements ISignedData {
 
         if (this.crls) {
           for (const crl of this.crls) {
-            if ("thisUpdate" in crl)
-              chainEngine.crls.push(crl);
+            if ("thisUpdate" in crl) chainEngine.crls.push(crl);
             else // Assumed "revocation value" has "OtherRevocationInfoFormat"
             {
-              if (crl.otherRevInfoFormat === id_PKIX_OCSP_Basic) // Basic OCSP response
+              if (crl.otherRevInfoFormat === id_PKIX_OCSP_Basic)
+                // Basic OCSP response
                 chainEngine.ocsps.push(new BasicOCSPResponse({ schema: crl.otherRevInfo }));
             }
           }
         }
 
         if (this.ocsps) {
-          chainEngine.ocsps.push(...(this.ocsps));
+          chainEngine.ocsps.push(...this.ocsps);
         }
 
-        const verificationResult = await chainEngine.verify({ passedWhenNotRevValues }, crypto)
-          .catch(e => {
+        const verificationResult = await chainEngine
+          .verify({ passedWhenNotRevValues }, crypto)
+          .catch((e) => {
             throw new SignedDataVerifyError({
               date: checkDate,
               code: 5,
-              message: `Validation of signer's certificate failed with error: ${((e instanceof Object) ? e.resultMessage : e)}`,
+              message: `Validation of signer's certificate failed with error: ${e instanceof Object ? e.resultMessage : e}`,
               signerCertificate: signerCert,
-              signerCertificateVerified: false
+              signerCertificateVerified: false,
             });
           });
         if (verificationResult.certificatePath) {
@@ -734,21 +830,23 @@ export class SignedData extends PkiObject implements ISignedData {
             code: 5,
             message: `Validation of signer's certificate failed: ${verificationResult.resultMessage}`,
             signerCertificate: signerCert,
-            signerCertificateVerified: false
+            signerCertificateVerified: false,
           });
       }
       //#endregion
 
       //#region Find signer's hashing algorithm
 
-      const signerInfoHashAlgorithm = crypto.getAlgorithmByOID(signerInfo.digestAlgorithm.algorithmId);
+      const signerInfoHashAlgorithm = crypto.getAlgorithmByOID(
+        signerInfo.digestAlgorithm.algorithmId,
+      );
       if (!("name" in signerInfoHashAlgorithm)) {
         throw new SignedDataVerifyError({
           date: checkDate,
           code: 7,
           message: `Unsupported signature algorithm: ${signerInfo.digestAlgorithm.algorithmId}`,
           signerCertificate: signerCert,
-          signerCertificateVerified: true
+          signerCertificateVerified: true,
         });
       }
 
@@ -760,14 +858,10 @@ export class SignedData extends PkiObject implements ISignedData {
       const eContent = this.encapContentInfo.eContent;
       if (eContent) // Attached data
       {
-        if ((eContent.idBlock.tagClass === 1) &&
-          (eContent.idBlock.tagNumber === 4)) {
+        if (eContent.idBlock.tagClass === 1 && eContent.idBlock.tagNumber === 4) {
           data = eContent.getValue();
-        }
-        else
-          data = eContent.valueBlock.valueBeforeDecodeView.slice().buffer;
-      }
-      else // Detached data
+        } else data = eContent.valueBlock.valueBeforeDecodeView.slice().buffer;
+      } else // Detached data
       {
         if (data.byteLength === 0) // Check that "data" already provided by function parameter
         {
@@ -776,7 +870,7 @@ export class SignedData extends PkiObject implements ISignedData {
             code: 8,
             message: "Missed detached data input array",
             signerCertificate: signerCert,
-            signerCertificateVerified: true
+            signerCertificateVerified: true,
           });
         }
       }
@@ -788,8 +882,7 @@ export class SignedData extends PkiObject implements ISignedData {
 
         for (const attribute of signerInfo.signedAttrs.attributes) {
           //#region Check that "content-type" attribute exists
-          if (attribute.type === "1.2.840.113549.1.9.3")
-            foundContentType = true;
+          if (attribute.type === "1.2.840.113549.1.9.3") foundContentType = true;
           //#endregion
 
           //#region Check that "message-digest" attribute exists
@@ -800,8 +893,7 @@ export class SignedData extends PkiObject implements ISignedData {
           //#endregion
 
           //#region Speed-up searching
-          if (foundContentType && foundMessageDigest)
-            break;
+          if (foundContentType && foundMessageDigest) break;
           //#endregion
         }
 
@@ -809,9 +901,9 @@ export class SignedData extends PkiObject implements ISignedData {
           throw new SignedDataVerifyError({
             date: checkDate,
             code: 9,
-            message: "Attribute \"content-type\" is a mandatory attribute for \"signed attributes\"",
+            message: 'Attribute "content-type" is a mandatory attribute for "signed attributes"',
             signerCertificate: signerCert,
-            signerCertificateVerified: true
+            signerCertificateVerified: true,
           });
         }
 
@@ -819,10 +911,10 @@ export class SignedData extends PkiObject implements ISignedData {
           throw new SignedDataVerifyError({
             date: checkDate,
             code: 10,
-            message: "Attribute \"message-digest\" is a mandatory attribute for \"signed attributes\"",
+            message: 'Attribute "message-digest" is a mandatory attribute for "signed attributes"',
             signatureVerified: null,
             signerCertificate: signerCert,
-            signerCertificateVerified: true
+            signerCertificateVerified: true,
           });
         }
         //#endregion
@@ -840,7 +932,7 @@ export class SignedData extends PkiObject implements ISignedData {
             signatureVerified: null,
             signerCertificate: signerCert,
             timestampSerial,
-            signerCertificateVerified: true
+            signerCertificateVerified: true,
           });
         }
         data = signerInfo.signedAttrs.encodedValue;
@@ -849,9 +941,21 @@ export class SignedData extends PkiObject implements ISignedData {
 
       // This adjustment is specifically for cases where the signature algorithm is rsaEncryption.
       // In such cases, we rely on the hash mechanism defined in signerInfo.digestAlgorithm for verification.
-      const verifyResult = signerInfo.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.1"
-        ? await crypto.verifyWithPublicKey(data, signerInfo.signature, signerCert.subjectPublicKeyInfo, signerInfo.signatureAlgorithm, shaAlgorithm)
-        : await crypto.verifyWithPublicKey(data, signerInfo.signature, signerCert.subjectPublicKeyInfo, signerInfo.signatureAlgorithm);
+      const verifyResult =
+        signerInfo.signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.1"
+          ? await crypto.verifyWithPublicKey(
+              data,
+              signerInfo.signature,
+              signerCert.subjectPublicKeyInfo,
+              signerInfo.signatureAlgorithm,
+              shaAlgorithm,
+            )
+          : await crypto.verifyWithPublicKey(
+              data,
+              signerInfo.signature,
+              signerCert.subjectPublicKeyInfo,
+              signerInfo.signatureAlgorithm,
+            );
 
       //#region Make a final result
 
@@ -864,7 +968,7 @@ export class SignedData extends PkiObject implements ISignedData {
           signerCertificate: signerCert,
           timestampSerial,
           signerCertificateVerified: true,
-          certificatePath
+          certificatePath,
         };
       } else {
         return verifyResult;
@@ -880,7 +984,7 @@ export class SignedData extends PkiObject implements ISignedData {
         signatureVerified: null,
         signerCertificate: signerCert,
         timestampSerial,
-        signerCertificateVerified: true
+        signerCertificateVerified: true,
       });
     }
   }
@@ -893,10 +997,15 @@ export class SignedData extends PkiObject implements ISignedData {
    * @param data Detached data
    * @param crypto Crypto engine
    */
-  public async sign(privateKey: CryptoKey, signerIndex: number, hashAlgorithm = "SHA-1", data: BufferSource = (EMPTY_BUFFER), crypto = common.getCrypto(true)): Promise<void> {
+  public async sign(
+    privateKey: CryptoKey,
+    signerIndex: number,
+    hashAlgorithm = "SHA-1",
+    data: BufferSource = EMPTY_BUFFER,
+    crypto = common.getCrypto(true),
+  ): Promise<void> {
     //#region Initial checking
-    if (!privateKey)
-      throw new Error("Need to provide a private key for signing");
+    if (!privateKey) throw new Error("Need to provide a private key for signing");
 
     const signerInfo = this.signerInfos[signerIndex];
     if (!signerInfo) {
@@ -906,23 +1015,37 @@ export class SignedData extends PkiObject implements ISignedData {
     //#endregion
 
     //#region Adjust hashAlgorithm based on privateKey if signedAttrs are missing
-    if (!signerInfo.signedAttrs?.attributes.length && "hash" in privateKey.algorithm && "hash" in privateKey.algorithm && privateKey.algorithm.hash) {
+    if (
+      !signerInfo.signedAttrs?.attributes.length &&
+      "hash" in privateKey.algorithm &&
+      "hash" in privateKey.algorithm &&
+      privateKey.algorithm.hash
+    ) {
       hashAlgorithm = (privateKey.algorithm.hash as Algorithm).name;
     }
-    const hashAlgorithmOID = crypto.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
+    const hashAlgorithmOID = crypto.getOIDByAlgorithm(
+      { name: hashAlgorithm },
+      true,
+      "hashAlgorithm",
+    );
     //#endregion
 
     //#region Append information about hash algorithm
-    if ((this.digestAlgorithms.filter(algorithm => algorithm.algorithmId === hashAlgorithmOID)).length === 0) {
-      this.digestAlgorithms.push(new AlgorithmIdentifier({
-        algorithmId: hashAlgorithmOID,
-        algorithmParams: new asn1js.Null()
-      }));
+    if (
+      this.digestAlgorithms.filter((algorithm) => algorithm.algorithmId === hashAlgorithmOID)
+        .length === 0
+    ) {
+      this.digestAlgorithms.push(
+        new AlgorithmIdentifier({
+          algorithmId: hashAlgorithmOID,
+          algorithmParams: new asn1js.Null(),
+        }),
+      );
     }
 
     signerInfo.digestAlgorithm = new AlgorithmIdentifier({
       algorithmId: hashAlgorithmOID,
-      algorithmParams: new asn1js.Null()
+      algorithmParams: new asn1js.Null(),
     });
     //#endregion
 
@@ -944,21 +1067,17 @@ export class SignedData extends PkiObject implements ISignedData {
         view[0] = 0x31;
         //#endregion
       }
-    }
-    else {
+    } else {
       const eContent = this.encapContentInfo.eContent;
       if (eContent) // Attached data
       {
-        if ((eContent.idBlock.tagClass === 1) &&
-          (eContent.idBlock.tagNumber === 4)) {
+        if (eContent.idBlock.tagClass === 1 && eContent.idBlock.tagNumber === 4) {
           data = eContent.getValue();
-        }
-        else
-          data = eContent.valueBlock.valueBeforeDecodeView.slice().buffer;
-      }
-      else // Detached data
+        } else data = eContent.valueBlock.valueBeforeDecodeView.slice().buffer;
+      } else // Detached data
       {
-        if (data.byteLength === 0) // Check that "data" already provided by function parameter
+        if (data.byteLength === 0)
+          // Check that "data" already provided by function parameter
           throw new Error("Missed detached data input array");
       }
     }
@@ -969,7 +1088,4 @@ export class SignedData extends PkiObject implements ISignedData {
     signerInfo.signature = new asn1js.OctetString({ valueHex: signature });
     //#endregion
   }
-
 }
-
-

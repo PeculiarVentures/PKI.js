@@ -2,16 +2,22 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { IssuerAndSerialNumber, IssuerAndSerialNumberJson, IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
+import {
+  IssuerAndSerialNumber,
+  IssuerAndSerialNumberJson,
+  IssuerAndSerialNumberSchema,
+} from "./IssuerAndSerialNumber";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { RecipientKeyIdentifier, RecipientKeyIdentifierJson, RecipientKeyIdentifierSchema } from "./RecipientKeyIdentifier";
+import {
+  RecipientKeyIdentifier,
+  RecipientKeyIdentifierJson,
+  RecipientKeyIdentifierSchema,
+} from "./RecipientKeyIdentifier";
 import * as Schema from "./Schema";
 
 const VARIANT = "variant";
 const VALUE = "value";
-const CLEAR_PROPS = [
-  "blockName",
-];
+const CLEAR_PROPS = ["blockName"];
 
 export interface IKeyAgreeRecipientIdentifier {
   variant: number;
@@ -23,7 +29,8 @@ export interface KeyAgreeRecipientIdentifierJson {
   value?: IssuerAndSerialNumberJson | RecipientKeyIdentifierJson;
 }
 
-export type KeyAgreeRecipientIdentifierParameters = PkiObjectParameters & Partial<IKeyAgreeRecipientIdentifier>;
+export type KeyAgreeRecipientIdentifierParameters = PkiObjectParameters &
+  Partial<IKeyAgreeRecipientIdentifier>;
 
 export type KeyAgreeRecipientIdentifierSchema = Schema.SchemaParameters<{
   issuerAndSerialNumber?: IssuerAndSerialNumberSchema;
@@ -34,7 +41,6 @@ export type KeyAgreeRecipientIdentifierSchema = Schema.SchemaParameters<{
  * Represents the KeyAgreeRecipientIdentifier structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeRecipientIdentifier {
-
   public static override CLASS_NAME = "KeyAgreeRecipientIdentifier";
 
   public variant!: number;
@@ -47,8 +53,16 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
   constructor(parameters: KeyAgreeRecipientIdentifierParameters = {}) {
     super();
 
-    this.variant = pvutils.getParametersValue(parameters, VARIANT, KeyAgreeRecipientIdentifier.defaultValues(VARIANT));
-    this.value = pvutils.getParametersValue(parameters, VALUE, KeyAgreeRecipientIdentifier.defaultValues(VALUE));
+    this.variant = pvutils.getParametersValue(
+      parameters,
+      VARIANT,
+      KeyAgreeRecipientIdentifier.defaultValues(VARIANT),
+    );
+    this.value = pvutils.getParametersValue(
+      parameters,
+      VALUE,
+      KeyAgreeRecipientIdentifier.defaultValues(VALUE),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -65,7 +79,7 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VARIANT:
-        return (-1);
+        return -1;
       case VALUE:
         return {};
       default:
@@ -81,9 +95,9 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case VARIANT:
-        return (memberValue === (-1));
+        return memberValue === -1;
       case VALUE:
-        return (Object.keys(memberValue).length === 0);
+        return Object.keys(memberValue).length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -98,30 +112,40 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
    *    rKeyId [0] IMPLICIT RecipientKeyIdentifier }
    *```
    */
-  public static override schema(parameters: KeyAgreeRecipientIdentifierSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: KeyAgreeRecipientIdentifierSchema = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Choice({
+    return new asn1js.Choice({
       value: [
-        IssuerAndSerialNumber.schema(names.issuerAndSerialNumber || {
-          names: {
-            blockName: (names.blockName || EMPTY_STRING)
-          }
-        }),
+        IssuerAndSerialNumber.schema(
+          names.issuerAndSerialNumber || {
+            names: {
+              blockName: names.blockName || EMPTY_STRING,
+            },
+          },
+        ),
         new asn1js.Constructed({
-          name: (names.blockName || EMPTY_STRING),
+          name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: RecipientKeyIdentifier.schema(names.rKeyId || {
-            names: {
-              blockName: (names.blockName || EMPTY_STRING)
-            }
-          }).valueBlock.value
-        })
-      ]
-    }));
+          value: RecipientKeyIdentifier.schema(
+            names.rKeyId || {
+              names: {
+                blockName: names.blockName || EMPTY_STRING,
+              },
+            },
+          ).valueBlock.value,
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -129,13 +153,14 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       KeyAgreeRecipientIdentifier.schema({
         names: {
-          blockName: "blockName"
-        }
-      })
+          blockName: "blockName",
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -148,8 +173,8 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
 
       this.value = new RecipientKeyIdentifier({
         schema: new asn1js.Sequence({
-          value: asn1.result.blockName.valueBlock.value
-        })
+          value: asn1.result.blockName.valueBlock.value,
+        }),
       });
     }
   }
@@ -163,9 +188,9 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
         return new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: this.value.toSchema().valueBlock.value
+          value: this.value.toSchema().valueBlock.value,
         });
       default:
         return new asn1js.Any() as any;
@@ -178,11 +203,10 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
       variant: this.variant,
     };
 
-    if ((this.variant === 1) || (this.variant === 2)) {
+    if (this.variant === 1 || this.variant === 2) {
       res.value = this.value.toJSON();
     }
 
     return res;
   }
-
 }

@@ -1,5 +1,5 @@
-import * as pkijs from 'pkijs';
-import * as asn1js from 'asn1js';
+import * as pkijs from "pkijs";
+import * as asn1js from "asn1js";
 
 const nonce = pkijs.getRandomValues(new Uint8Array(10)).buffer;
 

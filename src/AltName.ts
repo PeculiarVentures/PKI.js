@@ -7,9 +7,7 @@ import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const ALT_NAMES = "altNames";
-const CLEAR_PROPS = [
-  ALT_NAMES
-];
+const CLEAR_PROPS = [ALT_NAMES];
 
 export interface IAltName {
   /**
@@ -28,7 +26,6 @@ export interface AltNameJson {
  * Represents the AltName structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class AltName extends PkiObject implements IAltName {
-
   public static override CLASS_NAME = "AltName";
 
   public altNames!: GeneralName[];
@@ -40,7 +37,11 @@ export class AltName extends PkiObject implements IAltName {
   constructor(parameters: AltNameParameters = {}) {
     super();
 
-    this.altNames = pvutils.getParametersValue(parameters, ALT_NAMES, AltName.defaultValues(ALT_NAMES));
+    this.altNames = pvutils.getParametersValue(
+      parameters,
+      ALT_NAMES,
+      AltName.defaultValues(ALT_NAMES),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -69,18 +70,24 @@ export class AltName extends PkiObject implements IAltName {
    * AltName ::= GeneralNames
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{ altNames?: string; }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{ altNames?: string }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
-          name: (names.altNames || EMPTY_STRING),
-          value: GeneralName.schema()
-        })
-      ]
-    }));
+          name: names.altNames || EMPTY_STRING,
+          value: GeneralName.schema(),
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -88,34 +95,37 @@ export class AltName extends PkiObject implements IAltName {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       AltName.schema({
         names: {
-          altNames: ALT_NAMES
-        }
-      })
+          altNames: ALT_NAMES,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     if (ALT_NAMES in asn1.result) {
-      this.altNames = Array.from(asn1.result.altNames, element => new GeneralName({ schema: element }));
+      this.altNames = Array.from(
+        asn1.result.altNames,
+        (element) => new GeneralName({ schema: element }),
+      );
     }
   }
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: Array.from(this.altNames, o => o.toSchema())
-    }));
+    return new asn1js.Sequence({
+      value: Array.from(this.altNames, (o) => o.toSchema()),
+    });
     //#endregion
   }
 
   public toJSON(): AltNameJson {
     return {
-      altNames: Array.from(this.altNames, o => o.toJSON())
+      altNames: Array.from(this.altNames, (o) => o.toJSON()),
     };
   }
-
 }

@@ -10,10 +10,7 @@ import * as Schema from "./Schema";
 
 const REQ_CERT = "reqCert";
 const SINGLE_REQUEST_EXTENSIONS = "singleRequestExtensions";
-const CLEAR_PROPS = [
-  REQ_CERT,
-  SINGLE_REQUEST_EXTENSIONS,
-];
+const CLEAR_PROPS = [REQ_CERT, SINGLE_REQUEST_EXTENSIONS];
 
 export interface IRequest {
   reqCert: CertID;
@@ -37,7 +34,6 @@ export type RequestSchema = Schema.SchemaParameters<{
  * Represents an Request described in [RFC6960](https://datatracker.ietf.org/doc/html/rfc6960)
  */
 export class Request extends PkiObject implements IRequest {
-
   public static override CLASS_NAME = "Request";
 
   public reqCert!: CertID;
@@ -50,9 +46,17 @@ export class Request extends PkiObject implements IRequest {
   constructor(parameters: RequestParameters = {}) {
     super();
 
-    this.reqCert = pvutils.getParametersValue(parameters, REQ_CERT, Request.defaultValues(REQ_CERT));
+    this.reqCert = pvutils.getParametersValue(
+      parameters,
+      REQ_CERT,
+      Request.defaultValues(REQ_CERT),
+    );
     if (SINGLE_REQUEST_EXTENSIONS in parameters) {
-      this.singleRequestExtensions = pvutils.getParametersValue(parameters, SINGLE_REQUEST_EXTENSIONS, Request.defaultValues(SINGLE_REQUEST_EXTENSIONS));
+      this.singleRequestExtensions = pvutils.getParametersValue(
+        parameters,
+        SINGLE_REQUEST_EXTENSIONS,
+        Request.defaultValues(SINGLE_REQUEST_EXTENSIONS),
+      );
     }
 
     if (parameters.schema) {
@@ -86,9 +90,9 @@ export class Request extends PkiObject implements IRequest {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case REQ_CERT:
-        return (memberValue.isEqual(Request.defaultValues(memberName)));
+        return memberValue.isEqual(Request.defaultValues(memberName));
       case SINGLE_REQUEST_EXTENSIONS:
-        return (memberValue.length === 0);
+        return memberValue.length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -104,26 +108,34 @@ export class Request extends PkiObject implements IRequest {
    *```
    */
   public static override schema(parameters: RequestSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         CertID.schema(names.reqCert || {}),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [Extensions.schema(names.extensions || {
-            names: {
-              blockName: (names.singleRequestExtensions || EMPTY_STRING)
-            }
-          })]
-        })
-      ]
-    }));
+          value: [
+            Extensions.schema(
+              names.extensions || {
+                names: {
+                  blockName: names.singleRequestExtensions || EMPTY_STRING,
+                },
+              },
+            ),
+          ],
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -131,29 +143,33 @@ export class Request extends PkiObject implements IRequest {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       Request.schema({
         names: {
           reqCert: {
             names: {
-              blockName: REQ_CERT
-            }
+              blockName: REQ_CERT,
+            },
           },
           extensions: {
             names: {
-              blockName: SINGLE_REQUEST_EXTENSIONS
-            }
-          }
-        }
-      })
+              blockName: SINGLE_REQUEST_EXTENSIONS,
+            },
+          },
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     this.reqCert = new CertID({ schema: asn1.result.reqCert });
     if (SINGLE_REQUEST_EXTENSIONS in asn1.result) {
-      this.singleRequestExtensions = Array.from(asn1.result.singleRequestExtensions.valueBlock.value, element => new Extension({ schema: element }));
+      this.singleRequestExtensions = Array.from(
+        asn1.result.singleRequestExtensions.valueBlock.value,
+        (element) => new Extension({ schema: element }),
+      );
     }
   }
 
@@ -164,39 +180,39 @@ export class Request extends PkiObject implements IRequest {
     outputArray.push(this.reqCert.toSchema());
 
     if (this.singleRequestExtensions) {
-      outputArray.push(new asn1js.Constructed({
-        optional: true,
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        value: [
-          new asn1js.Sequence({
-            value: Array.from(this.singleRequestExtensions, o => o.toSchema())
-          })
-        ]
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          optional: true,
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0, // [0]
+          },
+          value: [
+            new asn1js.Sequence({
+              value: Array.from(this.singleRequestExtensions, (o) => o.toSchema()),
+            }),
+          ],
+        }),
+      );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: outputArray
-    }));
+    return new asn1js.Sequence({
+      value: outputArray,
+    });
     //#endregion
   }
 
   public toJSON(): RequestJson {
     const res: RequestJson = {
-      reqCert: this.reqCert.toJSON()
+      reqCert: this.reqCert.toJSON(),
     };
 
     if (this.singleRequestExtensions) {
-      res.singleRequestExtensions = Array.from(this.singleRequestExtensions, o => o.toJSON());
+      res.singleRequestExtensions = Array.from(this.singleRequestExtensions, (o) => o.toJSON());
     }
 
     return res;
   }
-
 }
-

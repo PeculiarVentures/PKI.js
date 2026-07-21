@@ -11,11 +11,7 @@ import { EMPTY_STRING } from "../constants";
 const ISSUER_NAME = "issuerName";
 const BASE_CERTIFICATE_ID = "baseCertificateID";
 const OBJECT_DIGEST_INFO = "objectDigestInfo";
-const CLEAR_PROPS = [
-  ISSUER_NAME,
-  BASE_CERTIFICATE_ID,
-  OBJECT_DIGEST_INFO
-];
+const CLEAR_PROPS = [ISSUER_NAME, BASE_CERTIFICATE_ID, OBJECT_DIGEST_INFO];
 
 export interface IV2Form {
   issuerName?: GeneralNames;
@@ -35,7 +31,6 @@ export interface V2FormJson {
  * Represents the V2Form structure described in [RFC5755](https://datatracker.ietf.org/doc/html/rfc5755)
  */
 export class V2Form extends PkiObject implements IV2Form {
-
   public static override CLASS_NAME = "V2Form";
 
   public issuerName?: GeneralNames;
@@ -50,13 +45,25 @@ export class V2Form extends PkiObject implements IV2Form {
     super();
 
     if (ISSUER_NAME in parameters) {
-      this.issuerName = pvutils.getParametersValue(parameters, ISSUER_NAME, V2Form.defaultValues(ISSUER_NAME));
+      this.issuerName = pvutils.getParametersValue(
+        parameters,
+        ISSUER_NAME,
+        V2Form.defaultValues(ISSUER_NAME),
+      );
     }
     if (BASE_CERTIFICATE_ID in parameters) {
-      this.baseCertificateID = pvutils.getParametersValue(parameters, BASE_CERTIFICATE_ID, V2Form.defaultValues(BASE_CERTIFICATE_ID));
+      this.baseCertificateID = pvutils.getParametersValue(
+        parameters,
+        BASE_CERTIFICATE_ID,
+        V2Form.defaultValues(BASE_CERTIFICATE_ID),
+      );
     }
     if (OBJECT_DIGEST_INFO in parameters) {
-      this.objectDigestInfo = pvutils.getParametersValue(parameters, OBJECT_DIGEST_INFO, V2Form.defaultValues(OBJECT_DIGEST_INFO));
+      this.objectDigestInfo = pvutils.getParametersValue(
+        parameters,
+        OBJECT_DIGEST_INFO,
+        V2Form.defaultValues(OBJECT_DIGEST_INFO),
+      );
     }
 
     if (parameters.schema) {
@@ -99,41 +106,50 @@ export class V2Form extends PkiObject implements IV2Form {
    * }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    issuerName?: string;
-    baseCertificateID?: string;
-    objectDigestInfo?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      issuerName?: string;
+      baseCertificateID?: string;
+      objectDigestInfo?: string;
+    }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        GeneralNames.schema({
-          names: {
-            blockName: names.issuerName
-          }
-        }, true),
+        GeneralNames.schema(
+          {
+            names: {
+              blockName: names.issuerName,
+            },
+          },
+          true,
+        ),
         new asn1js.Constructed({
           optional: true,
-          name: (names.baseCertificateID || EMPTY_STRING),
+          name: names.baseCertificateID || EMPTY_STRING,
           idBlock: {
             tagClass: 3,
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: IssuerSerial.schema().valueBlock.value
+          value: IssuerSerial.schema().valueBlock.value,
         }),
         new asn1js.Constructed({
           optional: true,
-          name: (names.objectDigestInfo || EMPTY_STRING),
+          name: names.objectDigestInfo || EMPTY_STRING,
           idBlock: {
             tagClass: 3,
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: ObjectDigestInfo.schema().valueBlock.value
-        })
-      ]
-    }));
+          value: ObjectDigestInfo.schema().valueBlock.value,
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -141,15 +157,16 @@ export class V2Form extends PkiObject implements IV2Form {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       V2Form.schema({
         names: {
           issuerName: ISSUER_NAME,
           baseCertificateID: BASE_CERTIFICATE_ID,
-          objectDigestInfo: OBJECT_DIGEST_INFO
-        }
-      })
+          objectDigestInfo: OBJECT_DIGEST_INFO,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -160,16 +177,16 @@ export class V2Form extends PkiObject implements IV2Form {
     if (BASE_CERTIFICATE_ID in asn1.result) {
       this.baseCertificateID = new IssuerSerial({
         schema: new asn1js.Sequence({
-          value: asn1.result.baseCertificateID.valueBlock.value
-        })
+          value: asn1.result.baseCertificateID.valueBlock.value,
+        }),
       });
     }
 
     if (OBJECT_DIGEST_INFO in asn1.result) {
       this.objectDigestInfo = new ObjectDigestInfo({
         schema: new asn1js.Sequence({
-          value: asn1.result.objectDigestInfo.valueBlock.value
-        })
+          value: asn1.result.objectDigestInfo.valueBlock.value,
+        }),
       });
     }
     //#endregion
@@ -178,27 +195,30 @@ export class V2Form extends PkiObject implements IV2Form {
   public toSchema(): asn1js.Sequence {
     const result = new asn1js.Sequence();
 
-    if (this.issuerName)
-      result.valueBlock.value.push(this.issuerName.toSchema());
+    if (this.issuerName) result.valueBlock.value.push(this.issuerName.toSchema());
 
     if (this.baseCertificateID) {
-      result.valueBlock.value.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3,
-          tagNumber: 0 // [0]
-        },
-        value: this.baseCertificateID.toSchema().valueBlock.value
-      }));
+      result.valueBlock.value.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3,
+            tagNumber: 0, // [0]
+          },
+          value: this.baseCertificateID.toSchema().valueBlock.value,
+        }),
+      );
     }
 
     if (this.objectDigestInfo) {
-      result.valueBlock.value.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3,
-          tagNumber: 1 // [1]
-        },
-        value: this.objectDigestInfo.toSchema().valueBlock.value
-      }));
+      result.valueBlock.value.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3,
+            tagNumber: 1, // [1]
+          },
+          value: this.objectDigestInfo.toSchema().valueBlock.value,
+        }),
+      );
     }
 
     return result;
@@ -219,5 +239,4 @@ export class V2Form extends PkiObject implements IV2Form {
 
     return result;
   }
-
 }

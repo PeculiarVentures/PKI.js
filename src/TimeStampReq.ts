@@ -98,7 +98,6 @@ export type TimeStampReqParameters = PkiObjectParameters & Partial<ITimeStampReq
  * ```
  */
 export class TimeStampReq extends PkiObject implements ITimeStampReq {
-
   public static override CLASS_NAME = "TimeStampReq";
 
   public version!: number;
@@ -115,19 +114,39 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
   constructor(parameters: TimeStampReqParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, TimeStampReq.defaultValues(VERSION));
-    this.messageImprint = pvutils.getParametersValue(parameters, MESSAGE_IMPRINT, TimeStampReq.defaultValues(MESSAGE_IMPRINT));
+    this.version = pvutils.getParametersValue(
+      parameters,
+      VERSION,
+      TimeStampReq.defaultValues(VERSION),
+    );
+    this.messageImprint = pvutils.getParametersValue(
+      parameters,
+      MESSAGE_IMPRINT,
+      TimeStampReq.defaultValues(MESSAGE_IMPRINT),
+    );
     if (REQ_POLICY in parameters) {
-      this.reqPolicy = pvutils.getParametersValue(parameters, REQ_POLICY, TimeStampReq.defaultValues(REQ_POLICY));
+      this.reqPolicy = pvutils.getParametersValue(
+        parameters,
+        REQ_POLICY,
+        TimeStampReq.defaultValues(REQ_POLICY),
+      );
     }
     if (NONCE in parameters) {
       this.nonce = pvutils.getParametersValue(parameters, NONCE, TimeStampReq.defaultValues(NONCE));
     }
     if (CERT_REQ in parameters) {
-      this.certReq = pvutils.getParametersValue(parameters, CERT_REQ, TimeStampReq.defaultValues(CERT_REQ));
+      this.certReq = pvutils.getParametersValue(
+        parameters,
+        CERT_REQ,
+        TimeStampReq.defaultValues(CERT_REQ),
+      );
     }
     if (EXTENSIONS in parameters) {
-      this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, TimeStampReq.defaultValues(EXTENSIONS));
+      this.extensions = pvutils.getParametersValue(
+        parameters,
+        EXTENSIONS,
+        TimeStampReq.defaultValues(EXTENSIONS),
+      );
     }
 
     if (parameters.schema) {
@@ -175,14 +194,16 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
       case VERSION:
       case REQ_POLICY:
       case CERT_REQ:
-        return (memberValue === TimeStampReq.defaultValues(memberName as typeof CERT_REQ));
+        return memberValue === TimeStampReq.defaultValues(memberName as typeof CERT_REQ);
       case MESSAGE_IMPRINT:
-        return ((MessageImprint.compareWithDefault("hashAlgorithm", memberValue.hashAlgorithm)) &&
-          (MessageImprint.compareWithDefault("hashedMessage", memberValue.hashedMessage)));
+        return (
+          MessageImprint.compareWithDefault("hashAlgorithm", memberValue.hashAlgorithm) &&
+          MessageImprint.compareWithDefault("hashedMessage", memberValue.hashedMessage)
+        );
       case NONCE:
-        return (memberValue.isEqual(TimeStampReq.defaultValues(memberName)));
+        return memberValue.isEqual(TimeStampReq.defaultValues(memberName));
       case EXTENSIONS:
-        return (memberValue.length === 0);
+        return memberValue.length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -203,50 +224,60 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
    * TSAPolicyId ::= OBJECT IDENTIFIER
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    version?: string;
-    messageImprint?: MessageImprintSchema;
-    reqPolicy?: string;
-    nonce?: string;
-    certReq?: string;
-    extensions?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      version?: string;
+      messageImprint?: MessageImprintSchema;
+      reqPolicy?: string;
+      nonce?: string;
+      certReq?: string;
+      extensions?: string;
+    }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || TIME_STAMP_REQ),
+    return new asn1js.Sequence({
+      name: names.blockName || TIME_STAMP_REQ,
       value: [
-        new asn1js.Integer({ name: (names.version || TIME_STAMP_REQ_VERSION) }),
-        MessageImprint.schema(names.messageImprint || {
-          names: {
-            blockName: TIME_STAMP_REQ_MESSAGE_IMPRINT
-          }
-        }),
+        new asn1js.Integer({ name: names.version || TIME_STAMP_REQ_VERSION }),
+        MessageImprint.schema(
+          names.messageImprint || {
+            names: {
+              blockName: TIME_STAMP_REQ_MESSAGE_IMPRINT,
+            },
+          },
+        ),
         new asn1js.ObjectIdentifier({
-          name: (names.reqPolicy || TIME_STAMP_REQ_POLICY),
-          optional: true
+          name: names.reqPolicy || TIME_STAMP_REQ_POLICY,
+          optional: true,
         }),
         new asn1js.Integer({
-          name: (names.nonce || TIME_STAMP_REQ_NONCE),
-          optional: true
+          name: names.nonce || TIME_STAMP_REQ_NONCE,
+          optional: true,
         }),
         new asn1js.Boolean({
-          name: (names.certReq || TIME_STAMP_REQ_CERT_REQ),
-          optional: true
+          name: names.certReq || TIME_STAMP_REQ_CERT_REQ,
+          optional: true,
         }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [new asn1js.Repeated({
-            name: (names.extensions || TIME_STAMP_REQ_EXTENSIONS),
-            value: Extension.schema()
-          })]
-        }) // IMPLICIT SEQUENCE value
-      ]
-    }));
+          value: [
+            new asn1js.Repeated({
+              name: names.extensions || TIME_STAMP_REQ_EXTENSIONS,
+              value: Extension.schema(),
+            }),
+          ],
+        }), // IMPLICIT SEQUENCE value
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -254,24 +285,25 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
-      schema,
-      TimeStampReq.schema()
-    );
+    const asn1 = asn1js.compareSchema(schema, schema, TimeStampReq.schema());
 
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     this.version = asn1.result[TIME_STAMP_REQ_VERSION].valueBlock.valueDec;
-    this.messageImprint = new MessageImprint({ schema: asn1.result[TIME_STAMP_REQ_MESSAGE_IMPRINT] });
+    this.messageImprint = new MessageImprint({
+      schema: asn1.result[TIME_STAMP_REQ_MESSAGE_IMPRINT],
+    });
     if (TIME_STAMP_REQ_POLICY in asn1.result)
       this.reqPolicy = asn1.result[TIME_STAMP_REQ_POLICY].valueBlock.toString();
-    if (TIME_STAMP_REQ_NONCE in asn1.result)
-      this.nonce = asn1.result[TIME_STAMP_REQ_NONCE];
+    if (TIME_STAMP_REQ_NONCE in asn1.result) this.nonce = asn1.result[TIME_STAMP_REQ_NONCE];
     if (TIME_STAMP_REQ_CERT_REQ in asn1.result)
       this.certReq = asn1.result[TIME_STAMP_REQ_CERT_REQ].valueBlock.value;
     if (TIME_STAMP_REQ_EXTENSIONS in asn1.result)
-      this.extensions = Array.from(asn1.result[TIME_STAMP_REQ_EXTENSIONS], element => new Extension({ schema: element }));
+      this.extensions = Array.from(
+        asn1.result[TIME_STAMP_REQ_EXTENSIONS],
+        (element) => new Extension({ schema: element }),
+      );
   }
 
   public toSchema(): asn1js.Sequence {
@@ -280,53 +312,53 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
 
     outputArray.push(new asn1js.Integer({ value: this.version }));
     outputArray.push(this.messageImprint.toSchema());
-    if (this.reqPolicy)
-      outputArray.push(new asn1js.ObjectIdentifier({ value: this.reqPolicy }));
-    if (this.nonce)
-      outputArray.push(this.nonce);
-    if ((CERT_REQ in this) && (TimeStampReq.compareWithDefault(CERT_REQ, this.certReq) === false))
+    if (this.reqPolicy) outputArray.push(new asn1js.ObjectIdentifier({ value: this.reqPolicy }));
+    if (this.nonce) outputArray.push(this.nonce);
+    if (CERT_REQ in this && TimeStampReq.compareWithDefault(CERT_REQ, this.certReq) === false)
       outputArray.push(new asn1js.Boolean({ value: this.certReq }));
 
     //#region Create array of extensions
     if (this.extensions) {
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        value: Array.from(this.extensions, o => o.toSchema())
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0, // [0]
+          },
+          value: Array.from(this.extensions, (o) => o.toSchema()),
+        }),
+      );
     }
     //#endregion
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: outputArray
-    }));
+    return new asn1js.Sequence({
+      value: outputArray,
+    });
     //#endregion
   }
 
   public toJSON(): TimeStampReqJson {
     const res: TimeStampReqJson = {
       version: this.version,
-      messageImprint: this.messageImprint.toJSON()
+      messageImprint: this.messageImprint.toJSON(),
     };
 
-    if (this.reqPolicy !== undefined)
-      res.reqPolicy = this.reqPolicy;
+    if (this.reqPolicy !== undefined) res.reqPolicy = this.reqPolicy;
 
-    if (this.nonce !== undefined)
-      res.nonce = this.nonce.toJSON();
+    if (this.nonce !== undefined) res.nonce = this.nonce.toJSON();
 
-    if ((this.certReq !== undefined) && (TimeStampReq.compareWithDefault(CERT_REQ, this.certReq) === false))
+    if (
+      this.certReq !== undefined &&
+      TimeStampReq.compareWithDefault(CERT_REQ, this.certReq) === false
+    )
       res.certReq = this.certReq;
 
     if (this.extensions) {
-      res.extensions = Array.from(this.extensions, o => o.toJSON());
+      res.extensions = Array.from(this.extensions, (o) => o.toJSON());
     }
 
     return res;
   }
-
 }

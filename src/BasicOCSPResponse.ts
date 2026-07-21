@@ -3,7 +3,11 @@ import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { ResponseData, ResponseDataJson, ResponseDataSchema } from "./ResponseData";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema,
+} from "./AlgorithmIdentifier";
 import { Certificate, CertificateJson, CertificateSchema, checkCA } from "./Certificate";
 import { CertID } from "./CertID";
 import { ExtKeyUsage } from "./ExtKeyUsage";
@@ -27,7 +31,7 @@ const CLEAR_PROPS = [
   BASIC_OCSP_RESPONSE_TBS_RESPONSE_DATA,
   BASIC_OCSP_RESPONSE_SIGNATURE_ALGORITHM,
   BASIC_OCSP_RESPONSE_SIGNATURE,
-  BASIC_OCSP_RESPONSE_CERTS
+  BASIC_OCSP_RESPONSE_CERTS,
 ];
 
 /**
@@ -122,7 +126,6 @@ export interface BasicOCSPResponseJson {
  * Represents the BasicOCSPResponse structure described in [RFC6960](https://datatracker.ietf.org/doc/html/rfc6960)
  */
 export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
-
   public static override CLASS_NAME = "BasicOCSPResponse";
 
   public tbsResponseData!: ResponseData;
@@ -137,11 +140,27 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
   constructor(parameters: BasicOCSPResponseParameters = {}) {
     super();
 
-    this.tbsResponseData = pvutils.getParametersValue(parameters, TBS_RESPONSE_DATA, BasicOCSPResponse.defaultValues(TBS_RESPONSE_DATA));
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, BasicOCSPResponse.defaultValues(SIGNATURE_ALGORITHM));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, BasicOCSPResponse.defaultValues(SIGNATURE));
+    this.tbsResponseData = pvutils.getParametersValue(
+      parameters,
+      TBS_RESPONSE_DATA,
+      BasicOCSPResponse.defaultValues(TBS_RESPONSE_DATA),
+    );
+    this.signatureAlgorithm = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE_ALGORITHM,
+      BasicOCSPResponse.defaultValues(SIGNATURE_ALGORITHM),
+    );
+    this.signature = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE,
+      BasicOCSPResponse.defaultValues(SIGNATURE),
+    );
     if (CERTS in parameters) {
-      this.certs = pvutils.getParametersValue(parameters, CERTS, BasicOCSPResponse.defaultValues(CERTS));
+      this.certs = pvutils.getParametersValue(
+        parameters,
+        CERTS,
+        BasicOCSPResponse.defaultValues(CERTS),
+      );
     }
 
     if (parameters.schema) {
@@ -180,24 +199,28 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    */
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
-      case "type":
-        {
-          let comparisonResult = ((ResponseData.compareWithDefault("tbs", memberValue.tbs)) &&
-            (ResponseData.compareWithDefault("responderID", memberValue.responderID)) &&
-            (ResponseData.compareWithDefault("producedAt", memberValue.producedAt)) &&
-            (ResponseData.compareWithDefault("responses", memberValue.responses)));
+      case "type": {
+        let comparisonResult =
+          ResponseData.compareWithDefault("tbs", memberValue.tbs) &&
+          ResponseData.compareWithDefault("responderID", memberValue.responderID) &&
+          ResponseData.compareWithDefault("producedAt", memberValue.producedAt) &&
+          ResponseData.compareWithDefault("responses", memberValue.responses);
 
-          if ("responseExtensions" in memberValue)
-            comparisonResult = comparisonResult && (ResponseData.compareWithDefault("responseExtensions", memberValue.responseExtensions));
+        if ("responseExtensions" in memberValue)
+          comparisonResult =
+            comparisonResult &&
+            ResponseData.compareWithDefault("responseExtensions", memberValue.responseExtensions);
 
-          return comparisonResult;
-        }
+        return comparisonResult;
+      }
       case SIGNATURE_ALGORITHM:
-        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
+        return (
+          memberValue.algorithmId === EMPTY_STRING && "algorithmParams" in memberValue === false
+        );
       case SIGNATURE:
-        return (memberValue.isEqual(BasicOCSPResponse.defaultValues(memberName)));
+        return memberValue.isEqual(BasicOCSPResponse.defaultValues(memberName));
       case CERTS:
-        return (memberValue.length === 0);
+        return memberValue.length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -214,45 +237,57 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    *    certs            [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    tbsResponseData?: ResponseDataSchema;
-    signatureAlgorithm?: AlgorithmIdentifierSchema;
-    signature?: string;
-    certs?: CertificateSchema;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      tbsResponseData?: ResponseDataSchema;
+      signatureAlgorithm?: AlgorithmIdentifierSchema;
+      signature?: string;
+      certs?: CertificateSchema;
+    }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || BASIC_OCSP_RESPONSE),
+    return new asn1js.Sequence({
+      name: names.blockName || BASIC_OCSP_RESPONSE,
       value: [
-        ResponseData.schema(names.tbsResponseData || {
-          names: {
-            blockName: BASIC_OCSP_RESPONSE_TBS_RESPONSE_DATA
-          }
-        }),
-        AlgorithmIdentifier.schema(names.signatureAlgorithm || {
-          names: {
-            blockName: BASIC_OCSP_RESPONSE_SIGNATURE_ALGORITHM
-          }
-        }),
-        new asn1js.BitString({ name: (names.signature || BASIC_OCSP_RESPONSE_SIGNATURE) }),
+        ResponseData.schema(
+          names.tbsResponseData || {
+            names: {
+              blockName: BASIC_OCSP_RESPONSE_TBS_RESPONSE_DATA,
+            },
+          },
+        ),
+        AlgorithmIdentifier.schema(
+          names.signatureAlgorithm || {
+            names: {
+              blockName: BASIC_OCSP_RESPONSE_SIGNATURE_ALGORITHM,
+            },
+          },
+        ),
+        new asn1js.BitString({ name: names.signature || BASIC_OCSP_RESPONSE_SIGNATURE }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
           value: [
             new asn1js.Sequence({
-              value: [new asn1js.Repeated({
-                name: BASIC_OCSP_RESPONSE_CERTS,
-                value: Certificate.schema(names.certs || {})
-              })]
-            })
-          ]
-        })
-      ]
-    }));
+              value: [
+                new asn1js.Repeated({
+                  name: BASIC_OCSP_RESPONSE_CERTS,
+                  value: Certificate.schema(names.certs || {}),
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -261,19 +296,23 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     //#endregion
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
-      schema,
-      BasicOCSPResponse.schema()
-    );
+    const asn1 = asn1js.compareSchema(schema, schema, BasicOCSPResponse.schema());
     AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
-    this.tbsResponseData = new ResponseData({ schema: asn1.result[BASIC_OCSP_RESPONSE_TBS_RESPONSE_DATA] });
-    this.signatureAlgorithm = new AlgorithmIdentifier({ schema: asn1.result[BASIC_OCSP_RESPONSE_SIGNATURE_ALGORITHM] });
+    this.tbsResponseData = new ResponseData({
+      schema: asn1.result[BASIC_OCSP_RESPONSE_TBS_RESPONSE_DATA],
+    });
+    this.signatureAlgorithm = new AlgorithmIdentifier({
+      schema: asn1.result[BASIC_OCSP_RESPONSE_SIGNATURE_ALGORITHM],
+    });
     this.signature = asn1.result[BASIC_OCSP_RESPONSE_SIGNATURE];
 
     if (BASIC_OCSP_RESPONSE_CERTS in asn1.result) {
-      this.certs = Array.from(asn1.result[BASIC_OCSP_RESPONSE_CERTS], element => new Certificate({ schema: element }));
+      this.certs = Array.from(
+        asn1.result[BASIC_OCSP_RESPONSE_CERTS],
+        (element) => new Certificate({ schema: element }),
+      );
     }
     //#endregion
   }
@@ -288,25 +327,27 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
     //#region Create array of certificates
     if (this.certs) {
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        value: [
-          new asn1js.Sequence({
-            value: Array.from(this.certs, o => o.toSchema())
-          })
-        ]
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0, // [0]
+          },
+          value: [
+            new asn1js.Sequence({
+              value: Array.from(this.certs, (o) => o.toSchema()),
+            }),
+          ],
+        }),
+      );
     }
     //#endregion
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: outputArray
-    }));
+    return new asn1js.Sequence({
+      value: outputArray,
+    });
     //#endregion
   }
 
@@ -318,7 +359,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     };
 
     if (this.certs) {
-      res.certs = Array.from(this.certs, o => o.toJSON());
+      res.certs = Array.from(this.certs, (o) => o.toJSON());
     }
 
     return res;
@@ -337,11 +378,15 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    * @param issuerCertificate Certificate of issuer for certificate to be checked
    * @param crypto Crypto engine
    */
-  public async getCertificateStatus(certificate: Certificate, issuerCertificate: Certificate, crypto = common.getCrypto(true)): Promise<CertificateStatus> {
+  public async getCertificateStatus(
+    certificate: Certificate,
+    issuerCertificate: Certificate,
+    crypto = common.getCrypto(true),
+  ): Promise<CertificateStatus> {
     //#region Initial variables
     const result = {
       isForCertificate: false,
-      status: 2 // 0 = good, 1 = revoked, 2 = unknown
+      status: 2, // 0 = good, 1 = revoked, 2 = unknown
     };
 
     const hashesObject: Record<string, number> = {};
@@ -351,7 +396,11 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
     //#region Create all "certIDs" for input certificates
     for (const response of this.tbsResponseData.responses) {
-      const hashAlgorithm = crypto.getAlgorithmByOID(response.certID.hashAlgorithm.algorithmId, true, "CertID.hashAlgorithm");
+      const hashAlgorithm = crypto.getAlgorithmByOID(
+        response.certID.hashAlgorithm.algorithmId,
+        true,
+        "CertID.hashAlgorithm",
+      );
 
       if (!hashesObject[hashAlgorithm.name]) {
         hashesObject[hashAlgorithm.name] = 1;
@@ -359,10 +408,14 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
         const certID = new CertID();
 
         certIDs.push(certID);
-        await certID.createForCertificate(certificate, {
-          hashAlgorithm: hashAlgorithm.name,
-          issuerCertificate
-        }, crypto);
+        await certID.createForCertificate(
+          certificate,
+          {
+            hashAlgorithm: hashAlgorithm.name,
+            issuerCertificate,
+          },
+          crypto,
+        );
       }
     }
     //#endregion
@@ -376,8 +429,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
           try {
             switch (response.certStatus.idBlock.isConstructed) {
               case true:
-                if (response.certStatus.idBlock.tagNumber === 1)
-                  result.status = 1; // revoked
+                if (response.certStatus.idBlock.tagNumber === 1) result.status = 1; // revoked
 
                 break;
               case false:
@@ -394,8 +446,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
                 break;
               default:
             }
-          }
-          catch {
+          } catch {
             // nothing
           }
 
@@ -414,7 +465,11 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
    * @param crypto Crypto engine
    */
-  async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
+  async sign(
+    privateKey: CryptoKey,
+    hashAlgorithm = "SHA-1",
+    crypto = common.getCrypto(true),
+  ): Promise<void> {
     // Get a private key from function parameter
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
@@ -435,7 +490,11 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await crypto.signWithPrivateKey(this.tbsResponseData.tbsView as BufferSource, privateKey, { algorithm });
+    const signature = await crypto.signWithPrivateKey(
+      this.tbsResponseData.tbsView as BufferSource,
+      privateKey,
+      { algorithm },
+    );
     this.signature = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -487,7 +546,10 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    *          (missing certificates, chain validation failure, unauthorized
    *          responder, unsupported signature algorithm).
    */
-  public async verify(params: BasicOCSPResponseVerifyParams = {}, crypto = common.getCrypto(true)): Promise<boolean> {
+  public async verify(
+    params: BasicOCSPResponseVerifyParams = {},
+    crypto = common.getCrypto(true),
+  ): Promise<boolean> {
     //#region 0. Validate inputs
     if (!this.certs || this.certs.length === 0) {
       throw new Error("No certificates attached to the BasicOCSPResponse");
@@ -551,7 +613,8 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
       try {
         //#region 3. Chain validation (skipped for explicitly trusted responders)
-        const isTrustedResponder = trustedResponders.length > 0 &&
+        const isTrustedResponder =
+          trustedResponders.length > 0 &&
           BasicOCSPResponse.containsCertificateByDer(trustedResponders, signerCert);
 
         let validatedPathCerts: Certificate[] = [];
@@ -574,7 +637,12 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
         // `findIssuersForCertID()` and lets the authorization loop try
         // each alternative issuing path.
         const authIssuerCandidates: Certificate[] = [];
-        for (const cert of [...issuerCerts, ...embeddedCerts, ...trustedCerts, ...validatedPathCerts]) {
+        for (const cert of [
+          ...issuerCerts,
+          ...embeddedCerts,
+          ...trustedCerts,
+          ...validatedPathCerts,
+        ]) {
           if (!BasicOCSPResponse.containsCertificateByDer(authIssuerCandidates, cert)) {
             authIssuerCandidates.push(cert);
           }
@@ -616,17 +684,13 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       // At least one candidate had a cryptographically valid signature
       // but failed chain validation or authorization — surface those
       // higher-level reasons rather than a misleading crypto error.
-      throw new Error(
-        `OCSP responder verification failed. Reasons: ${errors.join("; ")}`
-      );
+      throw new Error(`OCSP responder verification failed. Reasons: ${errors.join("; ")}`);
     }
     if (firstCryptoError) {
       // Re-throw genuine signature errors rather than hiding them as `false`.
       throw firstCryptoError;
     }
-    throw new Error(
-      `OCSP responder verification failed. Reasons: ${errors.join("; ")}`
-    );
+    throw new Error(`OCSP responder verification failed. Reasons: ${errors.join("; ")}`);
   }
 
   //#region Issuer / certificate helpers
@@ -642,8 +706,8 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    */
   private static containsCertificateByDer(certs: Certificate[], cert: Certificate): boolean {
     const certDer = cert.toSchema(true).toBER(false);
-    return certs.some(c =>
-      pvtsutils.BufferSourceConverter.isEqual(c.toSchema(true).toBER(false), certDer)
+    return certs.some((c) =>
+      pvtsutils.BufferSourceConverter.isEqual(c.toSchema(true).toBER(false), certDer),
     );
   }
 
@@ -775,7 +839,9 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
     const result = await engine.verify({}, crypto);
     if (!result.result || !result.certificatePath) {
-      throw new Error(`Validation of signer's certificate chain failed${result.resultMessage ? `: ${result.resultMessage}` : ""}`);
+      throw new Error(
+        `Validation of signer's certificate chain failed${result.resultMessage ? `: ${result.resultMessage}` : ""}`,
+      );
     }
 
     // `certificatePath[0]` is the leaf (signer). Return the issuer portion.
@@ -827,10 +893,14 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     for (const candidate of uniqueByDer) {
       const candidateID = new CertID();
       try {
-        await candidateID.createForCertificate(candidate, {
-          hashAlgorithm: hashAlgName,
-          issuerCertificate: candidate,
-        }, crypto);
+        await candidateID.createForCertificate(
+          candidate,
+          {
+            hashAlgorithm: hashAlgName,
+            issuerCertificate: candidate,
+          },
+          crypto,
+        );
       } catch {
         continue;
       }
@@ -838,16 +908,20 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       if (candidateID.hashAlgorithm.algorithmId !== certID.hashAlgorithm.algorithmId) {
         continue;
       }
-      if (!pvtsutils.BufferSourceConverter.isEqual(
-        candidateID.issuerNameHash.valueBlock.valueHexView,
-        certID.issuerNameHash.valueBlock.valueHexView,
-      )) {
+      if (
+        !pvtsutils.BufferSourceConverter.isEqual(
+          candidateID.issuerNameHash.valueBlock.valueHexView,
+          certID.issuerNameHash.valueBlock.valueHexView,
+        )
+      ) {
         continue;
       }
-      if (!pvtsutils.BufferSourceConverter.isEqual(
-        candidateID.issuerKeyHash.valueBlock.valueHexView,
-        certID.issuerKeyHash.valueBlock.valueHexView,
-      )) {
+      if (
+        !pvtsutils.BufferSourceConverter.isEqual(
+          candidateID.issuerKeyHash.valueBlock.valueHexView,
+          certID.issuerKeyHash.valueBlock.valueHexView,
+        )
+      ) {
         continue;
       }
       matched.push(candidate);
@@ -881,10 +955,12 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
         { name: hashAlgName },
         certificate.subject.toSchema().toBER(false),
       );
-      if (!pvtsutils.BufferSourceConverter.isEqual(
-        new Uint8Array(nameHash),
-        certID.issuerNameHash.valueBlock.valueHexView,
-      )) {
+      if (
+        !pvtsutils.BufferSourceConverter.isEqual(
+          new Uint8Array(nameHash),
+          certID.issuerNameHash.valueBlock.valueHexView,
+        )
+      ) {
         return false;
       }
 
@@ -927,8 +1003,10 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     crypto = common.getCrypto(true),
   ): Promise<boolean> {
     //#region 3) Explicitly trusted responder (exact DER match)
-    if (trustedResponders.length > 0 &&
-      BasicOCSPResponse.containsCertificateByDer(trustedResponders, signerCert)) {
+    if (
+      trustedResponders.length > 0 &&
+      BasicOCSPResponse.containsCertificateByDer(trustedResponders, signerCert)
+    ) {
       return true;
     }
     //#endregion
@@ -976,7 +1054,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    * Usage extension. If the extension is absent the function returns `false`.
    */
   private static certHasOCSPSigningEKU(cert: Certificate): boolean {
-    const ext = cert.extensions?.find(e => e.extnID === ID_CE_EXT_KEY_USAGE);
+    const ext = cert.extensions?.find((e) => e.extnID === ID_CE_EXT_KEY_USAGE);
     if (!ext) {
       return false;
     }
@@ -1007,7 +1085,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    * (0x80) of the first content byte of the BIT STRING.
    */
   private static certKeyUsagePermitsDigitalSignature(cert: Certificate): boolean {
-    const ext = cert.extensions?.find(e => e.extnID === ID_CE_KEY_USAGE);
+    const ext = cert.extensions?.find((e) => e.extnID === ID_CE_KEY_USAGE);
     if (!ext) {
       return true; // no KeyUsage => unconstrained
     }
@@ -1024,5 +1102,4 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       return false;
     }
   }
-
 }

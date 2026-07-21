@@ -2,7 +2,13 @@ import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { MessageImprint, HASHED_MESSAGE, HASH_ALGORITHM, MessageImprintSchema, MessageImprintJson } from "./MessageImprint";
+import {
+  MessageImprint,
+  HASHED_MESSAGE,
+  HASH_ALGORITHM,
+  MessageImprintSchema,
+  MessageImprintJson,
+} from "./MessageImprint";
 import { Accuracy, AccuracyJson, AccuracySchema, MICROS, MILLIS, SECONDS } from "./Accuracy";
 import { GeneralName, GeneralNameJson, GeneralNameSchema, TYPE, VALUE } from "./GeneralName";
 import { Extension, ExtensionJson, ExtensionSchema } from "./Extension";
@@ -42,7 +48,7 @@ const CLEAR_PROPS = [
   TST_INFO_ORDERING,
   TST_INFO_NONCE,
   TST_INFO_TSA,
-  TST_INFO_EXTENSIONS
+  TST_INFO_EXTENSIONS,
 ];
 
 export interface ITSTInfo {
@@ -136,7 +142,6 @@ export interface TSTInfoVerifyParams {
  * Represents the TSTInfo structure described in [RFC3161](https://www.ietf.org/rfc/rfc3161.txt)
  */
 export class TSTInfo extends PkiObject implements ITSTInfo {
-
   public static override CLASS_NAME = "TSTInfo";
 
   public version!: number;
@@ -159,16 +164,36 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
 
     this.version = pvutils.getParametersValue(parameters, VERSION, TSTInfo.defaultValues(VERSION));
     this.policy = pvutils.getParametersValue(parameters, POLICY, TSTInfo.defaultValues(POLICY));
-    this.messageImprint = pvutils.getParametersValue(parameters, MESSAGE_IMPRINT, TSTInfo.defaultValues(MESSAGE_IMPRINT));
-    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, TSTInfo.defaultValues(SERIAL_NUMBER));
-    this.genTime = pvutils.getParametersValue(parameters, GEN_TIME, TSTInfo.defaultValues(GEN_TIME));
+    this.messageImprint = pvutils.getParametersValue(
+      parameters,
+      MESSAGE_IMPRINT,
+      TSTInfo.defaultValues(MESSAGE_IMPRINT),
+    );
+    this.serialNumber = pvutils.getParametersValue(
+      parameters,
+      SERIAL_NUMBER,
+      TSTInfo.defaultValues(SERIAL_NUMBER),
+    );
+    this.genTime = pvutils.getParametersValue(
+      parameters,
+      GEN_TIME,
+      TSTInfo.defaultValues(GEN_TIME),
+    );
 
     if (ACCURACY in parameters) {
-      this.accuracy = pvutils.getParametersValue(parameters, ACCURACY, TSTInfo.defaultValues(ACCURACY));
+      this.accuracy = pvutils.getParametersValue(
+        parameters,
+        ACCURACY,
+        TSTInfo.defaultValues(ACCURACY),
+      );
     }
 
     if (ORDERING in parameters) {
-      this.ordering = pvutils.getParametersValue(parameters, ORDERING, TSTInfo.defaultValues(ORDERING));
+      this.ordering = pvutils.getParametersValue(
+        parameters,
+        ORDERING,
+        TSTInfo.defaultValues(ORDERING),
+      );
     }
 
     if (NONCE in parameters) {
@@ -180,7 +205,11 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
     }
 
     if (EXTENSIONS in parameters) {
-      this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, TSTInfo.defaultValues(EXTENSIONS));
+      this.extensions = pvutils.getParametersValue(
+        parameters,
+        EXTENSIONS,
+        TSTInfo.defaultValues(EXTENSIONS),
+      );
     }
 
     if (parameters.schema) {
@@ -241,22 +270,28 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       case POLICY:
       case GEN_TIME:
       case ORDERING:
-        return (memberValue === TSTInfo.defaultValues(ORDERING));
+        return memberValue === TSTInfo.defaultValues(ORDERING);
       case MESSAGE_IMPRINT:
-        return ((MessageImprint.compareWithDefault(HASH_ALGORITHM, memberValue.hashAlgorithm)) &&
-          (MessageImprint.compareWithDefault(HASHED_MESSAGE, memberValue.hashedMessage)));
+        return (
+          MessageImprint.compareWithDefault(HASH_ALGORITHM, memberValue.hashAlgorithm) &&
+          MessageImprint.compareWithDefault(HASHED_MESSAGE, memberValue.hashedMessage)
+        );
       case SERIAL_NUMBER:
       case NONCE:
-        return (memberValue.isEqual(TSTInfo.defaultValues(NONCE)));
+        return memberValue.isEqual(TSTInfo.defaultValues(NONCE));
       case ACCURACY:
-        return ((Accuracy.compareWithDefault(SECONDS, memberValue.seconds)) &&
-          (Accuracy.compareWithDefault(MILLIS, memberValue.millis)) &&
-          (Accuracy.compareWithDefault(MICROS, memberValue.micros)));
+        return (
+          Accuracy.compareWithDefault(SECONDS, memberValue.seconds) &&
+          Accuracy.compareWithDefault(MILLIS, memberValue.millis) &&
+          Accuracy.compareWithDefault(MICROS, memberValue.micros)
+        );
       case TSA:
-        return ((GeneralName.compareWithDefault(TYPE, memberValue.type)) &&
-          (GeneralName.compareWithDefault(VALUE, memberValue.value)));
+        return (
+          GeneralName.compareWithDefault(TYPE, memberValue.type) &&
+          GeneralName.compareWithDefault(VALUE, memberValue.value)
+        );
       case EXTENSIONS:
-        return (memberValue.length === 0);
+        return memberValue.length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -279,73 +314,87 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
    *   extensions                   [1] IMPLICIT Extensions  OPTIONAL  }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    version?: string;
-    policy?: string;
-    messageImprint?: MessageImprintSchema;
-    serialNumber?: string;
-    genTime?: string;
-    accuracy?: AccuracySchema;
-    ordering?: string;
-    nonce?: string;
-    tsa?: GeneralNameSchema;
-    extensions?: string;
-    extension?: ExtensionSchema;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      version?: string;
+      policy?: string;
+      messageImprint?: MessageImprintSchema;
+      serialNumber?: string;
+      genTime?: string;
+      accuracy?: AccuracySchema;
+      ordering?: string;
+      nonce?: string;
+      tsa?: GeneralNameSchema;
+      extensions?: string;
+      extension?: ExtensionSchema;
+    }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || TST_INFO),
+    return new asn1js.Sequence({
+      name: names.blockName || TST_INFO,
       value: [
-        new asn1js.Integer({ name: (names.version || TST_INFO_VERSION) }),
-        new asn1js.ObjectIdentifier({ name: (names.policy || TST_INFO_POLICY) }),
-        MessageImprint.schema(names.messageImprint || {
-          names: {
-            blockName: TST_INFO_MESSAGE_IMPRINT
-          }
-        }),
-        new asn1js.Integer({ name: (names.serialNumber || TST_INFO_SERIAL_NUMBER) }),
-        new asn1js.GeneralizedTime({ name: (names.genTime || TST_INFO_GEN_TIME) }),
-        Accuracy.schema(names.accuracy || {
-          names: {
-            blockName: TST_INFO_ACCURACY
-          }
-        }),
+        new asn1js.Integer({ name: names.version || TST_INFO_VERSION }),
+        new asn1js.ObjectIdentifier({ name: names.policy || TST_INFO_POLICY }),
+        MessageImprint.schema(
+          names.messageImprint || {
+            names: {
+              blockName: TST_INFO_MESSAGE_IMPRINT,
+            },
+          },
+        ),
+        new asn1js.Integer({ name: names.serialNumber || TST_INFO_SERIAL_NUMBER }),
+        new asn1js.GeneralizedTime({ name: names.genTime || TST_INFO_GEN_TIME }),
+        Accuracy.schema(
+          names.accuracy || {
+            names: {
+              blockName: TST_INFO_ACCURACY,
+            },
+          },
+        ),
         new asn1js.Boolean({
-          name: (names.ordering || TST_INFO_ORDERING),
-          optional: true
+          name: names.ordering || TST_INFO_ORDERING,
+          optional: true,
         }),
         new asn1js.Integer({
-          name: (names.nonce || TST_INFO_NONCE),
-          optional: true
+          name: names.nonce || TST_INFO_NONCE,
+          optional: true,
         }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [GeneralName.schema(names.tsa || {
-            names: {
-              blockName: TST_INFO_TSA
-            }
-          })]
+          value: [
+            GeneralName.schema(
+              names.tsa || {
+                names: {
+                  blockName: TST_INFO_TSA,
+                },
+              },
+            ),
+          ],
         }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
           value: [
             new asn1js.Repeated({
-              name: (names.extensions || TST_INFO_EXTENSIONS),
-              value: Extension.schema(names.extension || {})
-            })
-          ]
-        }) // IMPLICIT Extensions
-      ]
-    }));
+              name: names.extensions || TST_INFO_EXTENSIONS,
+              value: Extension.schema(names.extension || {}),
+            }),
+          ],
+        }), // IMPLICIT Extensions
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -353,10 +402,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
-      schema,
-      TSTInfo.schema()
-    );
+    const asn1 = asn1js.compareSchema(schema, schema, TSTInfo.schema());
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
@@ -369,12 +415,14 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       this.accuracy = new Accuracy({ schema: asn1.result[TST_INFO_ACCURACY] });
     if (TST_INFO_ORDERING in asn1.result)
       this.ordering = asn1.result[TST_INFO_ORDERING].valueBlock.value;
-    if (TST_INFO_NONCE in asn1.result)
-      this.nonce = asn1.result[TST_INFO_NONCE];
+    if (TST_INFO_NONCE in asn1.result) this.nonce = asn1.result[TST_INFO_NONCE];
     if (TST_INFO_TSA in asn1.result)
       this.tsa = new GeneralName({ schema: asn1.result[TST_INFO_TSA] });
     if (TST_INFO_EXTENSIONS in asn1.result)
-      this.extensions = Array.from(asn1.result[TST_INFO_EXTENSIONS], element => new Extension({ schema: element }));
+      this.extensions = Array.from(
+        asn1.result[TST_INFO_EXTENSIONS],
+        (element) => new Extension({ schema: element }),
+      );
   }
 
   public toSchema(): asn1js.Sequence {
@@ -386,41 +434,42 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
     outputArray.push(this.messageImprint.toSchema());
     outputArray.push(this.serialNumber);
     outputArray.push(new asn1js.GeneralizedTime({ valueDate: this.genTime }));
-    if (this.accuracy)
-      outputArray.push(this.accuracy.toSchema());
-    if (this.ordering !== undefined)
-      outputArray.push(new asn1js.Boolean({ value: this.ordering }));
-    if (this.nonce)
-      outputArray.push(this.nonce);
+    if (this.accuracy) outputArray.push(this.accuracy.toSchema());
+    if (this.ordering !== undefined) outputArray.push(new asn1js.Boolean({ value: this.ordering }));
+    if (this.nonce) outputArray.push(this.nonce);
     if (this.tsa) {
-      outputArray.push(new asn1js.Constructed({
-        optional: true,
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        value: [this.tsa.toSchema()]
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          optional: true,
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0, // [0]
+          },
+          value: [this.tsa.toSchema()],
+        }),
+      );
     }
 
     //#region Create array of extensions
     if (this.extensions) {
-      outputArray.push(new asn1js.Constructed({
-        optional: true,
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 1 // [1]
-        },
-        value: Array.from(this.extensions, o => o.toSchema())
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          optional: true,
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 1, // [1]
+          },
+          value: Array.from(this.extensions, (o) => o.toSchema()),
+        }),
+      );
     }
     //#endregion
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: outputArray
-    }));
+    return new asn1js.Sequence({
+      value: outputArray,
+    });
     //#endregion
   }
 
@@ -430,23 +479,18 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       policy: this.policy,
       messageImprint: this.messageImprint.toJSON(),
       serialNumber: this.serialNumber.toJSON(),
-      genTime: this.genTime
+      genTime: this.genTime,
     };
 
-    if (this.accuracy)
-      res.accuracy = this.accuracy.toJSON();
+    if (this.accuracy) res.accuracy = this.accuracy.toJSON();
 
-    if (this.ordering !== undefined)
-      res.ordering = this.ordering;
+    if (this.ordering !== undefined) res.ordering = this.ordering;
 
-    if (this.nonce)
-      res.nonce = this.nonce.toJSON();
+    if (this.nonce) res.nonce = this.nonce.toJSON();
 
-    if (this.tsa)
-      res.tsa = this.tsa.toJSON();
+    if (this.tsa) res.tsa = this.tsa.toJSON();
 
-    if (this.extensions)
-      res.extensions = Array.from(this.extensions, o => o.toJSON());
+    if (this.extensions) res.extensions = Array.from(this.extensions, (o) => o.toJSON());
 
     return res;
   }
@@ -456,11 +500,13 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
    * @param params Input parameters
    * @param crypto Crypto engine
    */
-  public async verify(params: TSTInfoVerifyParams, crypto = common.getCrypto(true)): Promise<boolean> {
-
+  public async verify(
+    params: TSTInfoVerifyParams,
+    crypto = common.getCrypto(true),
+  ): Promise<boolean> {
     //#region Get initial parameters
     if (!params.data) {
-      throw new Error("\"data\" is a mandatory attribute for TST_INFO verification");
+      throw new Error('"data" is a mandatory attribute for TST_INFO verification');
     }
     const data = params.data;
     //#endregion
@@ -478,12 +524,17 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
     //#endregion
 
     // Find hashing algorithm
-    const shaAlgorithm = crypto.getAlgorithmByOID(this.messageImprint.hashAlgorithm.algorithmId, true, "MessageImprint.hashAlgorithm");
+    const shaAlgorithm = crypto.getAlgorithmByOID(
+      this.messageImprint.hashAlgorithm.algorithmId,
+      true,
+      "MessageImprint.hashAlgorithm",
+    );
 
     // Calculate message digest for input "data" buffer
     const hash = await crypto.digest(shaAlgorithm.name, new Uint8Array(data));
-    return pvtsutils.BufferSourceConverter.isEqual(hash, this.messageImprint.hashedMessage.valueBlock.valueHexView);
+    return pvtsutils.BufferSourceConverter.isEqual(
+      hash,
+      this.messageImprint.hashedMessage.valueBlock.valueHexView,
+    );
   }
-
 }
-

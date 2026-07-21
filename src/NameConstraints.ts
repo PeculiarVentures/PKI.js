@@ -8,10 +8,7 @@ import * as Schema from "./Schema";
 
 const PERMITTED_SUBTREES = "permittedSubtrees";
 const EXCLUDED_SUBTREES = "excludedSubtrees";
-const CLEAR_PROPS = [
-  PERMITTED_SUBTREES,
-  EXCLUDED_SUBTREES
-];
+const CLEAR_PROPS = [PERMITTED_SUBTREES, EXCLUDED_SUBTREES];
 
 export interface INameConstraints {
   permittedSubtrees?: GeneralSubtree[];
@@ -29,7 +26,6 @@ export type NameConstraintsParameters = PkiObjectParameters & Partial<INameConst
  * Represents the NameConstraints structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class NameConstraints extends PkiObject implements INameConstraints {
-
   public static override CLASS_NAME = "NameConstraints";
 
   public permittedSubtrees?: GeneralSubtree[];
@@ -43,10 +39,18 @@ export class NameConstraints extends PkiObject implements INameConstraints {
     super();
 
     if (PERMITTED_SUBTREES in parameters) {
-      this.permittedSubtrees = pvutils.getParametersValue(parameters, PERMITTED_SUBTREES, NameConstraints.defaultValues(PERMITTED_SUBTREES));
+      this.permittedSubtrees = pvutils.getParametersValue(
+        parameters,
+        PERMITTED_SUBTREES,
+        NameConstraints.defaultValues(PERMITTED_SUBTREES),
+      );
     }
     if (EXCLUDED_SUBTREES in parameters) {
-      this.excludedSubtrees = pvutils.getParametersValue(parameters, EXCLUDED_SUBTREES, NameConstraints.defaultValues(EXCLUDED_SUBTREES));
+      this.excludedSubtrees = pvutils.getParametersValue(
+        parameters,
+        EXCLUDED_SUBTREES,
+        NameConstraints.defaultValues(EXCLUDED_SUBTREES),
+      );
     }
 
     if (parameters.schema) {
@@ -80,43 +84,49 @@ export class NameConstraints extends PkiObject implements INameConstraints {
    *    excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    permittedSubtrees?: string;
-    excludedSubtrees?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      permittedSubtrees?: string;
+      excludedSubtrees?: string;
+    }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
           value: [
             new asn1js.Repeated({
-              name: (names.permittedSubtrees || EMPTY_STRING),
-              value: GeneralSubtree.schema()
-            })
-          ]
+              name: names.permittedSubtrees || EMPTY_STRING,
+              value: GeneralSubtree.schema(),
+            }),
+          ],
         }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
           value: [
             new asn1js.Repeated({
-              name: (names.excludedSubtrees || EMPTY_STRING),
-              value: GeneralSubtree.schema()
-            })
-          ]
-        })
-      ]
-    }));
+              name: names.excludedSubtrees || EMPTY_STRING,
+              value: GeneralSubtree.schema(),
+            }),
+          ],
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -124,22 +134,29 @@ export class NameConstraints extends PkiObject implements INameConstraints {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       NameConstraints.schema({
         names: {
           permittedSubtrees: PERMITTED_SUBTREES,
-          excludedSubtrees: EXCLUDED_SUBTREES
-        }
-      })
+          excludedSubtrees: EXCLUDED_SUBTREES,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     if (PERMITTED_SUBTREES in asn1.result)
-      this.permittedSubtrees = Array.from(asn1.result.permittedSubtrees, element => new GeneralSubtree({ schema: element }));
+      this.permittedSubtrees = Array.from(
+        asn1.result.permittedSubtrees,
+        (element) => new GeneralSubtree({ schema: element }),
+      );
     if (EXCLUDED_SUBTREES in asn1.result)
-      this.excludedSubtrees = Array.from(asn1.result.excludedSubtrees, element => new GeneralSubtree({ schema: element }));
+      this.excludedSubtrees = Array.from(
+        asn1.result.excludedSubtrees,
+        (element) => new GeneralSubtree({ schema: element }),
+      );
   }
 
   public toSchema(): asn1js.Sequence {
@@ -147,30 +164,34 @@ export class NameConstraints extends PkiObject implements INameConstraints {
     const outputArray = [];
 
     if (this.permittedSubtrees) {
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        value: Array.from(this.permittedSubtrees, o => o.toSchema())
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0, // [0]
+          },
+          value: Array.from(this.permittedSubtrees, (o) => o.toSchema()),
+        }),
+      );
     }
 
     if (this.excludedSubtrees) {
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 1 // [1]
-        },
-        value: Array.from(this.excludedSubtrees, o => o.toSchema())
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 1, // [1]
+          },
+          value: Array.from(this.excludedSubtrees, (o) => o.toSchema()),
+        }),
+      );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: outputArray
-    }));
+    return new asn1js.Sequence({
+      value: outputArray,
+    });
     //#endregion
   }
 
@@ -178,14 +199,13 @@ export class NameConstraints extends PkiObject implements INameConstraints {
     const object: NameConstraintsJson = {};
 
     if (this.permittedSubtrees) {
-      object.permittedSubtrees = Array.from(this.permittedSubtrees, o => o.toJSON());
+      object.permittedSubtrees = Array.from(this.permittedSubtrees, (o) => o.toJSON());
     }
 
     if (this.excludedSubtrees) {
-      object.excludedSubtrees = Array.from(this.excludedSubtrees, o => o.toJSON());
+      object.excludedSubtrees = Array.from(this.excludedSubtrees, (o) => o.toJSON());
     }
 
     return object;
   }
-
 }

@@ -7,10 +7,7 @@ import * as Schema from "./Schema";
 
 const KEY_ATTR_ID = "keyAttrId";
 const KEY_ATTR = "keyAttr";
-const CLEAR_PROPS = [
-  KEY_ATTR_ID,
-  KEY_ATTR,
-];
+const CLEAR_PROPS = [KEY_ATTR_ID, KEY_ATTR];
 
 export interface IOtherKeyAttribute {
   keyAttrId: string;
@@ -30,7 +27,6 @@ export type OtherKeyAttributeSchema = Schema.SchemaType;
  * Represents the OtherKeyAttribute structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
-
   public static override CLASS_NAME = "OtherKeyAttribute";
 
   public keyAttrId!: string;
@@ -43,9 +39,17 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
   constructor(parameters: OtherKeyAttributeParameters = {}) {
     super();
 
-    this.keyAttrId = pvutils.getParametersValue(parameters, KEY_ATTR_ID, OtherKeyAttribute.defaultValues(KEY_ATTR_ID));
+    this.keyAttrId = pvutils.getParametersValue(
+      parameters,
+      KEY_ATTR_ID,
+      OtherKeyAttribute.defaultValues(KEY_ATTR_ID),
+    );
     if (KEY_ATTR in parameters) {
-      this.keyAttr = pvutils.getParametersValue(parameters, KEY_ATTR, OtherKeyAttribute.defaultValues(KEY_ATTR));
+      this.keyAttr = pvutils.getParametersValue(
+        parameters,
+        KEY_ATTR,
+        OtherKeyAttribute.defaultValues(KEY_ATTR),
+      );
     }
 
     if (parameters.schema) {
@@ -76,12 +80,15 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
    * @param memberName String name for a class member
    * @param memberValue Value to compare with default value
    */
-  public static compareWithDefault<T extends object>(memberName: string, memberValue: T): memberValue is T {
+  public static compareWithDefault<T extends object>(
+    memberName: string,
+    memberValue: T,
+  ): memberValue is T {
     switch (memberName) {
       case KEY_ATTR_ID:
-        return (typeof memberValue === "string" && memberValue === EMPTY_STRING);
+        return typeof memberValue === "string" && memberValue === EMPTY_STRING;
       case KEY_ATTR:
-        return (Object.keys(memberValue).length === 0);
+        return Object.keys(memberValue).length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -97,19 +104,23 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
    *```
    */
   public static override schema(parameters: OtherKeyAttributeSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      optional: (names.optional || true),
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      optional: names.optional || true,
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.keyAttrId || EMPTY_STRING) }),
+        new asn1js.ObjectIdentifier({ name: names.keyAttrId || EMPTY_STRING }),
         new asn1js.Any({
           optional: true,
-          name: (names.keyAttr || EMPTY_STRING)
-        })
-      ]
-    }));
+          name: names.keyAttr || EMPTY_STRING,
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -117,14 +128,15 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       OtherKeyAttribute.schema({
         names: {
           keyAttrId: KEY_ATTR_ID,
-          keyAttr: KEY_ATTR
-        }
-      })
+          keyAttr: KEY_ATTR,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -147,15 +159,15 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray,
-    }));
+    });
     //#endregion
   }
 
   public toJSON(): OtherKeyAttributeJson {
     const res: OtherKeyAttributeJson = {
-      keyAttrId: this.keyAttrId
+      keyAttrId: this.keyAttrId,
     };
 
     if (KEY_ATTR in this) {
@@ -164,5 +176,4 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
 
     return res;
   }
-
 }

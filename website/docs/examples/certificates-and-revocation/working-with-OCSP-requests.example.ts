@@ -1,5 +1,5 @@
-import * as pkijs from 'pkijs';
-import * as asn1js from 'asn1js';
+import * as pkijs from "pkijs";
+import * as asn1js from "asn1js";
 
 // Create OCSP request
 const ocspReq = new pkijs.OCSPRequest();
@@ -19,7 +19,7 @@ ocspReq.tbsRequest.requestExtensions = [
   new pkijs.Extension({
     extnID: "1.3.6.1.5.5.7.48.1.2", // nonce
     extnValue: new asn1js.OctetString({ valueHex: nonce.buffer }).toBER(),
-  })
+  }),
 ];
 
 // Encode OCSP request

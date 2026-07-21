@@ -1,7 +1,15 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
-import { AttributeCertificateInfoV2, AttributeCertificateInfoV2Json, AttributeCertificateInfoV2Schema } from "./AttributeCertificateInfoV2";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema,
+} from "../AlgorithmIdentifier";
+import {
+  AttributeCertificateInfoV2,
+  AttributeCertificateInfoV2Json,
+  AttributeCertificateInfoV2Schema,
+} from "./AttributeCertificateInfoV2";
 import * as Schema from "../Schema";
 import { PkiObject, PkiObjectParameters } from "../PkiObject";
 import { AsnError } from "../errors";
@@ -10,11 +18,7 @@ import { EMPTY_STRING } from "../constants";
 const ACINFO = "acinfo";
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";
 const SIGNATURE_VALUE = "signatureValue";
-const CLEAR_PROPS = [
-  ACINFO,
-  SIGNATURE_ALGORITHM,
-  SIGNATURE_VALUE,
-];
+const CLEAR_PROPS = [ACINFO, SIGNATURE_ALGORITHM, SIGNATURE_VALUE];
 
 export interface IAttributeCertificateV2 {
   /**
@@ -31,7 +35,8 @@ export interface IAttributeCertificateV2 {
   signatureValue: asn1js.BitString;
 }
 
-export type AttributeCertificateV2Parameters = PkiObjectParameters & Partial<IAttributeCertificateV2>;
+export type AttributeCertificateV2Parameters = PkiObjectParameters &
+  Partial<IAttributeCertificateV2>;
 
 export interface AttributeCertificateV2Json {
   acinfo: AttributeCertificateInfoV2Json;
@@ -43,7 +48,6 @@ export interface AttributeCertificateV2Json {
  * Represents the AttributeCertificateV2 structure described in [RFC5755](https://datatracker.ietf.org/doc/html/rfc5755)
  */
 export class AttributeCertificateV2 extends PkiObject implements IAttributeCertificateV2 {
-
   public static override CLASS_NAME = "AttributeCertificateV2";
 
   public acinfo!: AttributeCertificateInfoV2;
@@ -57,9 +61,21 @@ export class AttributeCertificateV2 extends PkiObject implements IAttributeCerti
   constructor(parameters: AttributeCertificateV2Parameters = {}) {
     super();
 
-    this.acinfo = pvutils.getParametersValue(parameters, ACINFO, AttributeCertificateV2.defaultValues(ACINFO));
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, AttributeCertificateV2.defaultValues(SIGNATURE_ALGORITHM));
-    this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, AttributeCertificateV2.defaultValues(SIGNATURE_VALUE));
+    this.acinfo = pvutils.getParametersValue(
+      parameters,
+      ACINFO,
+      AttributeCertificateV2.defaultValues(ACINFO),
+    );
+    this.signatureAlgorithm = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE_ALGORITHM,
+      AttributeCertificateV2.defaultValues(SIGNATURE_ALGORITHM),
+    );
+    this.signatureValue = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE_VALUE,
+      AttributeCertificateV2.defaultValues(SIGNATURE_VALUE),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -98,21 +114,27 @@ export class AttributeCertificateV2 extends PkiObject implements IAttributeCerti
    * }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    acinfo?: AttributeCertificateInfoV2Schema;
-    signatureAlgorithm?: AlgorithmIdentifierSchema;
-    signatureValue?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      acinfo?: AttributeCertificateInfoV2Schema;
+      signatureAlgorithm?: AlgorithmIdentifierSchema;
+      signatureValue?: string;
+    }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         AttributeCertificateInfoV2.schema(names.acinfo || {}),
         AlgorithmIdentifier.schema(names.signatureAlgorithm || {}),
-        new asn1js.BitString({ name: (names.signatureValue || EMPTY_STRING) })
-      ]
-    }));
+        new asn1js.BitString({ name: names.signatureValue || EMPTY_STRING }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -120,23 +142,24 @@ export class AttributeCertificateV2 extends PkiObject implements IAttributeCerti
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     //#region Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       AttributeCertificateV2.schema({
         names: {
           acinfo: {
             names: {
-              blockName: ACINFO
-            }
+              blockName: ACINFO,
+            },
           },
           signatureAlgorithm: {
             names: {
-              blockName: SIGNATURE_ALGORITHM
-            }
+              blockName: SIGNATURE_ALGORITHM,
+            },
           },
-          signatureValue: SIGNATURE_VALUE
-        }
-      })
+          signatureValue: SIGNATURE_VALUE,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
     //#endregion
@@ -148,13 +171,9 @@ export class AttributeCertificateV2 extends PkiObject implements IAttributeCerti
   }
 
   public toSchema(): asn1js.Sequence {
-    return (new asn1js.Sequence({
-      value: [
-        this.acinfo.toSchema(),
-        this.signatureAlgorithm.toSchema(),
-        this.signatureValue
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [this.acinfo.toSchema(), this.signatureAlgorithm.toSchema(), this.signatureValue],
+    });
   }
 
   public toJSON(): AttributeCertificateV2Json {
@@ -164,6 +183,4 @@ export class AttributeCertificateV2 extends PkiObject implements IAttributeCerti
       signatureValue: this.signatureValue.toJSON(),
     };
   }
-
 }
-

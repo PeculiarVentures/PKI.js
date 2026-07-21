@@ -7,10 +7,7 @@ import * as Schema from "./Schema";
 
 const POLICY_QUALIFIER_ID = "policyQualifierId";
 const QUALIFIER = "qualifier";
-const CLEAR_PROPS = [
-  POLICY_QUALIFIER_ID,
-  QUALIFIER
-];
+const CLEAR_PROPS = [POLICY_QUALIFIER_ID, QUALIFIER];
 
 export interface IPolicyQualifierInfo {
   policyQualifierId: string;
@@ -28,7 +25,6 @@ export interface PolicyQualifierInfoJson {
  * Represents the PolicyQualifierInfo structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierInfo {
-
   public static override CLASS_NAME = "PolicyQualifierInfo";
 
   public policyQualifierId!: string;
@@ -41,8 +37,16 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
   constructor(parameters: PolicyQualifierInfoParameters = {}) {
     super();
 
-    this.policyQualifierId = pvutils.getParametersValue(parameters, POLICY_QUALIFIER_ID, PolicyQualifierInfo.defaultValues(POLICY_QUALIFIER_ID));
-    this.qualifier = pvutils.getParametersValue(parameters, QUALIFIER, PolicyQualifierInfo.defaultValues(QUALIFIER));
+    this.policyQualifierId = pvutils.getParametersValue(
+      parameters,
+      POLICY_QUALIFIER_ID,
+      PolicyQualifierInfo.defaultValues(POLICY_QUALIFIER_ID),
+    );
+    this.qualifier = pvutils.getParametersValue(
+      parameters,
+      QUALIFIER,
+      PolicyQualifierInfo.defaultValues(QUALIFIER),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -82,16 +86,22 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
    * PolicyQualifierId ::= OBJECT IDENTIFIER ( id-qt-cps | id-qt-unotice )
    *```
    */
-  static override schema(parameters: Schema.SchemaParameters<{ policyQualifierId?: string; qualifier?: string; }> = {}) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  static override schema(
+    parameters: Schema.SchemaParameters<{ policyQualifierId?: string; qualifier?: string }> = {},
+  ) {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.policyQualifierId || EMPTY_STRING) }),
-        new asn1js.Any({ name: (names.qualifier || EMPTY_STRING) })
-      ]
-    }));
+        new asn1js.ObjectIdentifier({ name: names.policyQualifierId || EMPTY_STRING }),
+        new asn1js.Any({ name: names.qualifier || EMPTY_STRING }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -99,14 +109,15 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       PolicyQualifierInfo.schema({
         names: {
           policyQualifierId: POLICY_QUALIFIER_ID,
-          qualifier: QUALIFIER
-        }
-      })
+          qualifier: QUALIFIER,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -116,19 +127,15 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
   }
 
   public toSchema(): asn1js.Sequence {
-    return (new asn1js.Sequence({
-      value: [
-        new asn1js.ObjectIdentifier({ value: this.policyQualifierId }),
-        this.qualifier
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [new asn1js.ObjectIdentifier({ value: this.policyQualifierId }), this.qualifier],
+    });
   }
 
   public toJSON(): PolicyQualifierInfoJson {
     return {
       policyQualifierId: this.policyQualifierId,
-      qualifier: this.qualifier.toJSON()
+      qualifier: this.qualifier.toJSON(),
     };
   }
-
 }

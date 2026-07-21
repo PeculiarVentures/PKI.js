@@ -3,15 +3,16 @@ import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { RelativeDistinguishedNames, RelativeDistinguishedNamesJson, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import {
+  RelativeDistinguishedNames,
+  RelativeDistinguishedNamesJson,
+  RelativeDistinguishedNamesSchema,
+} from "./RelativeDistinguishedNames";
 import * as Schema from "./Schema";
 
 const ISSUER = "issuer";
 const SERIAL_NUMBER = "serialNumber";
-const CLEAR_PROPS = [
-  ISSUER,
-  SERIAL_NUMBER,
-];
+const CLEAR_PROPS = [ISSUER, SERIAL_NUMBER];
 
 export interface IIssuerAndSerialNumber {
   /**
@@ -40,7 +41,6 @@ export type IssuerAndSerialNumberSchema = Schema.SchemaParameters<{
  * Represents the IssuerAndSerialNumber structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerialNumber {
-
   public static override CLASS_NAME = "IssuerAndSerialNumber";
 
   public issuer!: RelativeDistinguishedNames;
@@ -53,8 +53,16 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
   constructor(parameters: IssuerAndSerialNumberParameters = {}) {
     super();
 
-    this.issuer = pvutils.getParametersValue(parameters, ISSUER, IssuerAndSerialNumber.defaultValues(ISSUER));
-    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, IssuerAndSerialNumber.defaultValues(SERIAL_NUMBER));
+    this.issuer = pvutils.getParametersValue(
+      parameters,
+      ISSUER,
+      IssuerAndSerialNumber.defaultValues(ISSUER),
+    );
+    this.serialNumber = pvutils.getParametersValue(
+      parameters,
+      SERIAL_NUMBER,
+      IssuerAndSerialNumber.defaultValues(SERIAL_NUMBER),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -97,15 +105,19 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
      * @property {string} [issuer]
      * @property {string} [serialNumber]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         RelativeDistinguishedNames.schema(names.issuer || {}),
-        new asn1js.Integer({ name: (names.serialNumber || EMPTY_STRING) })
-      ]
-    }));
+        new asn1js.Integer({ name: names.serialNumber || EMPTY_STRING }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -113,18 +125,19 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       IssuerAndSerialNumber.schema({
         names: {
           issuer: {
             names: {
-              blockName: ISSUER
-            }
+              blockName: ISSUER,
+            },
           },
-          serialNumber: SERIAL_NUMBER
-        }
-      })
+          serialNumber: SERIAL_NUMBER,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -135,12 +148,9 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: [
-        this.issuer.toSchema(),
-        this.serialNumber
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [this.issuer.toSchema(), this.serialNumber],
+    });
   }
 
   public toJSON(): IssuerAndSerialNumberJson {
@@ -149,5 +159,4 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
       serialNumber: this.serialNumber.toJSON(),
     };
   }
-
 }

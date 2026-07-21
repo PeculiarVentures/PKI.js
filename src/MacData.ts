@@ -9,11 +9,7 @@ import * as Schema from "./Schema";
 const MAC = "mac";
 const MAC_SALT = "macSalt";
 const ITERATIONS = "iterations";
-const CLEAR_PROPS = [
-  MAC,
-  MAC_SALT,
-  ITERATIONS
-];
+const CLEAR_PROPS = [MAC, MAC_SALT, ITERATIONS];
 
 export interface IMacData {
   mac: DigestInfo;
@@ -39,7 +35,6 @@ export type MacDataSchema = Schema.SchemaParameters<{
  * Represents the MacData structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
 export class MacData extends PkiObject implements IMacData {
-
   public static override CLASS_NAME = "MacData";
 
   public mac!: DigestInfo;
@@ -54,9 +49,17 @@ export class MacData extends PkiObject implements IMacData {
     super();
 
     this.mac = pvutils.getParametersValue(parameters, MAC, MacData.defaultValues(MAC));
-    this.macSalt = pvutils.getParametersValue(parameters, MAC_SALT, MacData.defaultValues(MAC_SALT));
+    this.macSalt = pvutils.getParametersValue(
+      parameters,
+      MAC_SALT,
+      MacData.defaultValues(MAC_SALT),
+    );
     if (ITERATIONS in parameters) {
-      this.iterations = pvutils.getParametersValue(parameters, ITERATIONS, MacData.defaultValues(ITERATIONS));
+      this.iterations = pvutils.getParametersValue(
+        parameters,
+        ITERATIONS,
+        MacData.defaultValues(ITERATIONS),
+      );
     }
 
     if (parameters.schema) {
@@ -93,12 +96,14 @@ export class MacData extends PkiObject implements IMacData {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case MAC:
-        return ((DigestInfo.compareWithDefault("digestAlgorithm", memberValue.digestAlgorithm)) &&
-          (DigestInfo.compareWithDefault("digest", memberValue.digest)));
+        return (
+          DigestInfo.compareWithDefault("digestAlgorithm", memberValue.digestAlgorithm) &&
+          DigestInfo.compareWithDefault("digest", memberValue.digest)
+        );
       case MAC_SALT:
-        return (memberValue.isEqual(MacData.defaultValues(memberName)));
+        return memberValue.isEqual(MacData.defaultValues(memberName));
       case ITERATIONS:
-        return (memberValue === MacData.defaultValues(memberName));
+        return memberValue === MacData.defaultValues(memberName);
       default:
         return super.defaultValues(memberName);
     }
@@ -118,24 +123,30 @@ export class MacData extends PkiObject implements IMacData {
    *```
    */
   public static override schema(parameters: MacDataSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
-      optional: (names.optional || true),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
+      optional: names.optional || true,
       value: [
-        DigestInfo.schema(names.mac || {
-          names: {
-            blockName: MAC
-          }
-        }),
-        new asn1js.OctetString({ name: (names.macSalt || MAC_SALT) }),
+        DigestInfo.schema(
+          names.mac || {
+            names: {
+              blockName: MAC,
+            },
+          },
+        ),
+        new asn1js.OctetString({ name: names.macSalt || MAC_SALT }),
         new asn1js.Integer({
           optional: true,
-          name: (names.iterations || ITERATIONS)
-        })
-      ]
-    }));
+          name: names.iterations || ITERATIONS,
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -143,43 +154,40 @@ export class MacData extends PkiObject implements IMacData {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       MacData.schema({
         names: {
           mac: {
             names: {
-              blockName: MAC
-            }
+              blockName: MAC,
+            },
           },
           macSalt: MAC_SALT,
-          iterations: ITERATIONS
-        }
-      })
+          iterations: ITERATIONS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     this.mac = new DigestInfo({ schema: asn1.result.mac });
     this.macSalt = asn1.result.macSalt;
-    if (ITERATIONS in asn1.result)
-      this.iterations = asn1.result.iterations.valueBlock.valueDec;
+    if (ITERATIONS in asn1.result) this.iterations = asn1.result.iterations.valueBlock.valueDec;
   }
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
-    const outputArray: any[] = [
-      this.mac.toSchema(),
-      this.macSalt
-    ];
+    const outputArray: any[] = [this.mac.toSchema(), this.macSalt];
 
     if (this.iterations !== undefined) {
       outputArray.push(new asn1js.Integer({ value: this.iterations }));
     }
 
-    return (new asn1js.Sequence({
-      value: outputArray
-    }));
+    return new asn1js.Sequence({
+      value: outputArray,
+    });
     //#endregion
   }
 
@@ -195,5 +203,4 @@ export class MacData extends PkiObject implements IMacData {
 
     return res;
   }
-
 }

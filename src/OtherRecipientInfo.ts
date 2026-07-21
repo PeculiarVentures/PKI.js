@@ -7,10 +7,7 @@ import * as Schema from "./Schema";
 
 const ORI_TYPE = "oriType";
 const ORI_VALUE = "oriValue";
-const CLEAR_PROPS = [
-  ORI_TYPE,
-  ORI_VALUE
-];
+const CLEAR_PROPS = [ORI_TYPE, ORI_VALUE];
 
 export interface IOtherRecipientInfo {
   oriType: string;
@@ -28,7 +25,6 @@ export type OtherRecipientInfoParameters = PkiObjectParameters & Partial<IOtherR
  * Represents the OtherRecipientInfo structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo {
-
   public static override CLASS_NAME = "OtherRecipientInfo";
 
   public oriType!: string;
@@ -41,8 +37,16 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
   constructor(parameters: OtherRecipientInfoParameters = {}) {
     super();
 
-    this.oriType = pvutils.getParametersValue(parameters, ORI_TYPE, OtherRecipientInfo.defaultValues(ORI_TYPE));
-    this.oriValue = pvutils.getParametersValue(parameters, ORI_VALUE, OtherRecipientInfo.defaultValues(ORI_VALUE));
+    this.oriType = pvutils.getParametersValue(
+      parameters,
+      ORI_TYPE,
+      OtherRecipientInfo.defaultValues(ORI_TYPE),
+    );
+    this.oriValue = pvutils.getParametersValue(
+      parameters,
+      ORI_VALUE,
+      OtherRecipientInfo.defaultValues(ORI_VALUE),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -75,9 +79,9 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case ORI_TYPE:
-        return (memberValue === EMPTY_STRING);
+        return memberValue === EMPTY_STRING;
       case ORI_VALUE:
-        return (Object.keys(memberValue).length === 0);
+        return Object.keys(memberValue).length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -92,19 +96,25 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
    *    oriValue ANY DEFINED BY oriType }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    oriType?: string;
-    oriValue?: string;
-  }> = {}) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      oriType?: string;
+      oriValue?: string;
+    }> = {},
+  ) {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.oriType || EMPTY_STRING) }),
-        new asn1js.Any({ name: (names.oriValue || EMPTY_STRING) })
-      ]
-    }));
+        new asn1js.ObjectIdentifier({ name: names.oriType || EMPTY_STRING }),
+        new asn1js.Any({ name: names.oriValue || EMPTY_STRING }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -112,14 +122,15 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       OtherRecipientInfo.schema({
         names: {
           oriType: ORI_TYPE,
-          oriValue: ORI_VALUE
-        }
-      })
+          oriValue: ORI_VALUE,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -130,18 +141,15 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: [
-        new asn1js.ObjectIdentifier({ value: this.oriType }),
-        this.oriValue
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [new asn1js.ObjectIdentifier({ value: this.oriType }), this.oriValue],
+    });
     //#endregion
   }
 
   public toJSON(): OtherRecipientInfoJson {
     const res: OtherRecipientInfoJson = {
-      oriType: this.oriType
+      oriType: this.oriType,
     };
 
     if (!OtherRecipientInfo.compareWithDefault(ORI_VALUE, this.oriValue)) {
@@ -150,5 +158,4 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
 
     return res;
   }
-
 }

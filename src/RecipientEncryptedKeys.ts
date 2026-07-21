@@ -8,9 +8,7 @@ import * as Schema from "./Schema";
 
 const ENCRYPTED_KEYS = "encryptedKeys";
 const RECIPIENT_ENCRYPTED_KEYS = "RecipientEncryptedKeys";
-const CLEAR_PROPS = [
-  RECIPIENT_ENCRYPTED_KEYS,
-];
+const CLEAR_PROPS = [RECIPIENT_ENCRYPTED_KEYS];
 
 export interface IRecipientEncryptedKeys {
   encryptedKeys: RecipientEncryptedKey[];
@@ -20,7 +18,8 @@ export interface RecipientEncryptedKeysJson {
   encryptedKeys: RecipientEncryptedKeyJson[];
 }
 
-export type RecipientEncryptedKeysParameters = PkiObjectParameters & Partial<IRecipientEncryptedKeys>;
+export type RecipientEncryptedKeysParameters = PkiObjectParameters &
+  Partial<IRecipientEncryptedKeys>;
 
 export type RecipientEncryptedKeysSchema = Schema.SchemaParameters<{
   RecipientEncryptedKeys?: string;
@@ -30,7 +29,6 @@ export type RecipientEncryptedKeysSchema = Schema.SchemaParameters<{
  * Represents the RecipientEncryptedKeys structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class RecipientEncryptedKeys extends PkiObject implements IRecipientEncryptedKeys {
-
   public static override CLASS_NAME = "RecipientEncryptedKeys";
 
   public encryptedKeys!: RecipientEncryptedKey[];
@@ -42,7 +40,11 @@ export class RecipientEncryptedKeys extends PkiObject implements IRecipientEncry
   constructor(parameters: RecipientEncryptedKeysParameters = {}) {
     super();
 
-    this.encryptedKeys = pvutils.getParametersValue(parameters, ENCRYPTED_KEYS, RecipientEncryptedKeys.defaultValues(ENCRYPTED_KEYS));
+    this.encryptedKeys = pvutils.getParametersValue(
+      parameters,
+      ENCRYPTED_KEYS,
+      RecipientEncryptedKeys.defaultValues(ENCRYPTED_KEYS),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -72,7 +74,7 @@ export class RecipientEncryptedKeys extends PkiObject implements IRecipientEncry
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case ENCRYPTED_KEYS:
-        return (memberValue.length === 0);
+        return memberValue.length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -86,17 +88,21 @@ export class RecipientEncryptedKeys extends PkiObject implements IRecipientEncry
    *```
    */
   public static override schema(parameters: RecipientEncryptedKeysSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
-          name: (names.RecipientEncryptedKeys || EMPTY_STRING),
-          value: RecipientEncryptedKey.schema()
-        })
-      ]
-    }));
+          name: names.RecipientEncryptedKeys || EMPTY_STRING,
+          value: RecipientEncryptedKey.schema(),
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -104,31 +110,34 @@ export class RecipientEncryptedKeys extends PkiObject implements IRecipientEncry
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       RecipientEncryptedKeys.schema({
         names: {
-          RecipientEncryptedKeys: RECIPIENT_ENCRYPTED_KEYS
-        }
-      })
+          RecipientEncryptedKeys: RECIPIENT_ENCRYPTED_KEYS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.encryptedKeys = Array.from(asn1.result.RecipientEncryptedKeys, element => new RecipientEncryptedKey({ schema: element }));
+    this.encryptedKeys = Array.from(
+      asn1.result.RecipientEncryptedKeys,
+      (element) => new RecipientEncryptedKey({ schema: element }),
+    );
   }
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: Array.from(this.encryptedKeys, o => o.toSchema())
-    }));
+    return new asn1js.Sequence({
+      value: Array.from(this.encryptedKeys, (o) => o.toSchema()),
+    });
   }
 
   public toJSON(): RecipientEncryptedKeysJson {
     return {
-      encryptedKeys: Array.from(this.encryptedKeys, o => o.toJSON())
+      encryptedKeys: Array.from(this.encryptedKeys, (o) => o.toJSON()),
     };
   }
-
 }

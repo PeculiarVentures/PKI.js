@@ -22,7 +22,6 @@ export type InfoAccessParameters = PkiObjectParameters & Partial<IInfoAccess>;
  * Represents the InfoAccess structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class InfoAccess extends PkiObject implements IInfoAccess {
-
   public static override CLASS_NAME = "InfoAccess";
 
   public accessDescriptions!: AccessDescription[];
@@ -34,7 +33,11 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
   constructor(parameters: InfoAccessParameters = {}) {
     super();
 
-    this.accessDescriptions = pvutils.getParametersValue(parameters, ACCESS_DESCRIPTIONS, InfoAccess.defaultValues(ACCESS_DESCRIPTIONS));
+    this.accessDescriptions = pvutils.getParametersValue(
+      parameters,
+      ACCESS_DESCRIPTIONS,
+      InfoAccess.defaultValues(ACCESS_DESCRIPTIONS),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -64,55 +67,61 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
    * SEQUENCE SIZE (1..MAX) OF AccessDescription
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    accessDescriptions?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      accessDescriptions?: string;
+    }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
-          name: (names.accessDescriptions || EMPTY_STRING),
-          value: AccessDescription.schema()
-        })
-      ]
-    }));
+          name: names.accessDescriptions || EMPTY_STRING,
+          value: AccessDescription.schema(),
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [
-      ACCESS_DESCRIPTIONS
-    ]);
+    pvutils.clearProps(schema, [ACCESS_DESCRIPTIONS]);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       InfoAccess.schema({
         names: {
-          accessDescriptions: ACCESS_DESCRIPTIONS
-        }
-      })
+          accessDescriptions: ACCESS_DESCRIPTIONS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.accessDescriptions = Array.from(asn1.result.accessDescriptions, element => new AccessDescription({ schema: element }));
+    this.accessDescriptions = Array.from(
+      asn1.result.accessDescriptions,
+      (element) => new AccessDescription({ schema: element }),
+    );
   }
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: Array.from(this.accessDescriptions, o => o.toSchema())
-    }));
+    return new asn1js.Sequence({
+      value: Array.from(this.accessDescriptions, (o) => o.toSchema()),
+    });
   }
 
   public toJSON(): InfoAccessJson {
     return {
-      accessDescriptions: Array.from(this.accessDescriptions, o => o.toJSON())
+      accessDescriptions: Array.from(this.accessDescriptions, (o) => o.toJSON()),
     };
   }
-
 }
-

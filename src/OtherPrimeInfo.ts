@@ -9,11 +9,7 @@ import * as Schema from "./Schema";
 const PRIME = "prime";
 const EXPONENT = "exponent";
 const COEFFICIENT = "coefficient";
-const CLEAR_PROPS = [
-  PRIME,
-  EXPONENT,
-  COEFFICIENT,
-];
+const CLEAR_PROPS = [PRIME, EXPONENT, COEFFICIENT];
 
 export interface IOtherPrimeInfo {
   prime: asn1js.Integer;
@@ -21,7 +17,8 @@ export interface IOtherPrimeInfo {
   coefficient: asn1js.Integer;
 }
 
-export type OtherPrimeInfoParameters = PkiObjectParameters & Partial<IOtherPrimeInfo> & { json?: OtherPrimeInfoJson; };
+export type OtherPrimeInfoParameters = PkiObjectParameters &
+  Partial<IOtherPrimeInfo> & { json?: OtherPrimeInfoJson };
 
 export interface OtherPrimeInfoJson {
   r: string;
@@ -39,7 +36,6 @@ export type OtherPrimeInfoSchema = Schema.SchemaParameters<{
  * Represents the OtherPrimeInfo structure described in [RFC3447](https://datatracker.ietf.org/doc/html/rfc3447)
  */
 export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
-
   public static override CLASS_NAME = "OtherPrimeInfo";
 
   public prime!: asn1js.Integer;
@@ -54,8 +50,16 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
     super();
 
     this.prime = pvutils.getParametersValue(parameters, PRIME, OtherPrimeInfo.defaultValues(PRIME));
-    this.exponent = pvutils.getParametersValue(parameters, EXPONENT, OtherPrimeInfo.defaultValues(EXPONENT));
-    this.coefficient = pvutils.getParametersValue(parameters, COEFFICIENT, OtherPrimeInfo.defaultValues(COEFFICIENT));
+    this.exponent = pvutils.getParametersValue(
+      parameters,
+      EXPONENT,
+      OtherPrimeInfo.defaultValues(EXPONENT),
+    );
+    this.coefficient = pvutils.getParametersValue(
+      parameters,
+      COEFFICIENT,
+      OtherPrimeInfo.defaultValues(COEFFICIENT),
+    );
 
     if (parameters.json) {
       this.fromJSON(parameters.json);
@@ -71,7 +75,9 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
    * @param memberName String name for a class member
    * @returns Default value
    */
-  public static override defaultValues(memberName: typeof PRIME | typeof EXPONENT | typeof COEFFICIENT): asn1js.Integer;
+  public static override defaultValues(
+    memberName: typeof PRIME | typeof EXPONENT | typeof COEFFICIENT,
+  ): asn1js.Integer;
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case PRIME:
@@ -97,16 +103,20 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
    *```
    */
   public static override schema(parameters: OtherPrimeInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.Integer({ name: (names.prime || EMPTY_STRING) }),
-        new asn1js.Integer({ name: (names.exponent || EMPTY_STRING) }),
-        new asn1js.Integer({ name: (names.coefficient || EMPTY_STRING) })
-      ]
-    }));
+        new asn1js.Integer({ name: names.prime || EMPTY_STRING }),
+        new asn1js.Integer({ name: names.exponent || EMPTY_STRING }),
+        new asn1js.Integer({ name: names.coefficient || EMPTY_STRING }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -114,15 +124,16 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       OtherPrimeInfo.schema({
         names: {
           prime: PRIME,
           exponent: EXPONENT,
-          coefficient: COEFFICIENT
-        }
-      })
+          coefficient: COEFFICIENT,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -134,13 +145,13 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
   }
 
   public toSchema(): asn1js.Sequence {
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: [
         this.prime.convertToDER(),
         this.exponent.convertToDER(),
-        this.coefficient.convertToDER()
-      ]
-    }));
+        this.coefficient.convertToDER(),
+      ],
+    });
   }
 
   public toJSON(): OtherPrimeInfoJson {
@@ -162,5 +173,4 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
     this.exponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.d) });
     this.coefficient = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.t) });
   }
-
 }

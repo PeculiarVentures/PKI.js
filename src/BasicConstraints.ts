@@ -24,7 +24,6 @@ export interface BasicConstraintsJson {
  * Represents the BasicConstraints structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class BasicConstraints extends PkiObject implements IBasicConstraints {
-
   public static override CLASS_NAME = "BasicConstraints";
 
   public cA!: boolean;
@@ -71,40 +70,44 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
    *    pathLenConstraint       INTEGER (0..MAX) OPTIONAL }
    *```
    */
-  static override schema(parameters: Schema.SchemaParameters<{ cA?: string; pathLenConstraint?: string; }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  static override schema(
+    parameters: Schema.SchemaParameters<{ cA?: string; pathLenConstraint?: string }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Boolean({
           optional: true,
-          name: (names.cA || EMPTY_STRING)
+          name: names.cA || EMPTY_STRING,
         }),
         new asn1js.Integer({
           optional: true,
-          name: (names.pathLenConstraint || EMPTY_STRING)
-        })
-      ]
-    }));
+          name: names.pathLenConstraint || EMPTY_STRING,
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [
-      CA,
-      PATH_LENGTH_CONSTRAINT
-    ]);
+    pvutils.clearProps(schema, [CA, PATH_LENGTH_CONSTRAINT]);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       BasicConstraints.schema({
         names: {
           cA: CA,
-          pathLenConstraint: PATH_LENGTH_CONSTRAINT
-        }
-      })
+          pathLenConstraint: PATH_LENGTH_CONSTRAINT,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -140,9 +143,9 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: outputArray
-    }));
+    return new asn1js.Sequence({
+      value: outputArray,
+    });
     //#endregion
   }
 
@@ -167,6 +170,4 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
 
     return object;
   }
-
 }
-

@@ -5,7 +5,6 @@ import { PrivateKeyInfo } from "./PrivateKeyInfo";
  */
 // TODO looks odd
 export class KeyBag extends PrivateKeyInfo {
-
   /**
    * Constructor for Attribute class
    * @param parameters
@@ -13,6 +12,4 @@ export class KeyBag extends PrivateKeyInfo {
   constructor(parameters = {}) {
     super(parameters);
   }
-
 }
-

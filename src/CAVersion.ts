@@ -22,7 +22,6 @@ export interface CAVersionJson {
  * Represents an CAVersion described in [Certification Authority Renewal](https://docs.microsoft.com/en-us/windows/desktop/seccrypto/certification-authority-renewal)
  */
 export class CAVersion extends PkiObject implements ICAVersion {
-
   public static override CLASS_NAME = "CAVersion";
 
   public certificateIndex!: number;
@@ -35,8 +34,16 @@ export class CAVersion extends PkiObject implements ICAVersion {
   constructor(parameters: CAVersionParameters = {}) {
     super();
 
-    this.certificateIndex = pvutils.getParametersValue(parameters, CERTIFICATE_INDEX, CAVersion.defaultValues(CERTIFICATE_INDEX));
-    this.keyIndex = pvutils.getParametersValue(parameters, KEY_INDEX, CAVersion.defaultValues(KEY_INDEX));
+    this.certificateIndex = pvutils.getParametersValue(
+      parameters,
+      CERTIFICATE_INDEX,
+      CAVersion.defaultValues(CERTIFICATE_INDEX),
+    );
+    this.keyIndex = pvutils.getParametersValue(
+      parameters,
+      KEY_INDEX,
+      CAVersion.defaultValues(KEY_INDEX),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -68,7 +75,7 @@ export class CAVersion extends PkiObject implements ICAVersion {
    *```
    */
   public static override schema(): Schema.SchemaType {
-    return (new asn1js.Integer());
+    return new asn1js.Integer();
   }
 
   public fromSchema(schema: Schema.SchemaType) {
@@ -83,7 +90,7 @@ export class CAVersion extends PkiObject implements ICAVersion {
     const valueView = new Uint8Array(value);
 
     switch (true) {
-      case (value.byteLength < 4):
+      case value.byteLength < 4:
         {
           const tempValue = new ArrayBuffer(4);
           const tempValueView = new Uint8Array(tempValue);
@@ -93,7 +100,7 @@ export class CAVersion extends PkiObject implements ICAVersion {
           value = tempValue.slice(0);
         }
         break;
-      case (value.byteLength > 4):
+      case value.byteLength > 4:
         {
           const tempValue = new ArrayBuffer(4);
           const tempValueView = new Uint8Array(tempValue);
@@ -154,17 +161,16 @@ export class CAVersion extends PkiObject implements ICAVersion {
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Integer({
-      valueHex: pvutils.utilConcatBuf(keyIndexBuffer, certificateIndexBuffer)
-    }));
+    return new asn1js.Integer({
+      valueHex: pvutils.utilConcatBuf(keyIndexBuffer, certificateIndexBuffer),
+    });
     //#endregion
   }
 
   public toJSON(): CAVersionJson {
     return {
       certificateIndex: this.certificateIndex,
-      keyIndex: this.keyIndex
+      keyIndex: this.keyIndex,
     };
   }
-
 }

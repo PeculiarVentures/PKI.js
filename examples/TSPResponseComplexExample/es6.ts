@@ -62,20 +62,16 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
   $respExt.style.display = "none";
 
   const imprTable = $respImprint;
-  while (imprTable.rows.length > 1)
-    imprTable.deleteRow(imprTable.rows.length - 1);
+  while (imprTable.rows.length > 1) imprTable.deleteRow(imprTable.rows.length - 1);
 
   const accurTable = $respAccuracy;
-  while (accurTable.rows.length > 1)
-    accurTable.deleteRow(accurTable.rows.length - 1);
+  while (accurTable.rows.length > 1) accurTable.deleteRow(accurTable.rows.length - 1);
 
   const tsTable = $respTsa;
-  while (tsTable.rows.length > 1)
-    tsTable.deleteRow(tsTable.rows.length - 1);
+  while (tsTable.rows.length > 1) tsTable.deleteRow(tsTable.rows.length - 1);
 
   const extTable = $respExtensions;
-  while (extTable.rows.length > 1)
-    extTable.deleteRow(extTable.rows.length - 1);
+  while (extTable.rows.length > 1) extTable.deleteRow(extTable.rows.length - 1);
   //#endregion
 
   //#region Decode existing TSP response
@@ -99,7 +95,9 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
   if (!signedSimpl.encapContentInfo.eContent) {
     throw new Error("'signedSimpl.encapContentInfo.eContent' is empty");
   }
-  const tstInfoSimpl = pkijs.TSTInfo.fromBER(signedSimpl.encapContentInfo.eContent.valueBlock.valueHexView as BufferSource);
+  const tstInfoSimpl = pkijs.TSTInfo.fromBER(
+    signedSimpl.encapContentInfo.eContent.valueBlock.valueHexView as BufferSource,
+  );
   //#endregion
 
   //#region Put information about policy
@@ -111,7 +109,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
     "1.3.14.3.2.26": "SHA-1",
     "2.16.840.1.101.3.4.2.1": "SHA-256",
     "2.16.840.1.101.3.4.2.2": "SHA-384",
-    "2.16.840.1.101.3.4.2.3": "SHA-512"
+    "2.16.840.1.101.3.4.2.3": "SHA-512",
   };
 
   let hashAlgorithm = dgstmap[tstInfoSimpl.messageImprint.hashAlgorithm.algorithmId];
@@ -124,7 +122,9 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
   const cell0 = row.insertCell(0);
   cell0.innerHTML = hashAlgorithm;
   const cell1 = row.insertCell(1);
-  cell1.innerHTML = Convert.ToHex(tstInfoSimpl.messageImprint.hashedMessage.valueBlock.valueHexView);
+  cell1.innerHTML = Convert.ToHex(
+    tstInfoSimpl.messageImprint.hashedMessage.valueBlock.valueHexView,
+  );
   //#endregion
 
   //#region Put information about TST info serial number
@@ -182,7 +182,8 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
         break;
       case 3: // x400Address
       case 5: // ediPartyName
-        $respTsSimpl.innerHTML = (tstInfoSimpl.tsa.type === 3) ? "<type \"x400Address\">" : "<type \"ediPartyName\">";
+        $respTsSimpl.innerHTML =
+          tstInfoSimpl.tsa.type === 3 ? '<type "x400Address">' : '<type "ediPartyName">';
         $respTsSimpl.style.display = "block";
         break;
       case 4: // directoryName
@@ -198,7 +199,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
             "2.5.4.42": "GN",
             "2.5.4.43": "I",
             "2.5.4.4": "SN",
-            "1.2.840.113549.1.9.1": "E-mail"
+            "1.2.840.113549.1.9.1": "E-mail",
           };
 
           for (let i = 0; i < tstInfoSimpl.tsa.value.typesAndValues.length; i++) {

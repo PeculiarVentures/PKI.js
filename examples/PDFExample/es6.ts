@@ -15,17 +15,15 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
     pdf.parse();
 
     const acroForm = pdf.xref.root.get("AcroForm");
-    if (typeof acroForm === "undefined")
-      throw new Error("The PDF has no signature!");
+    if (typeof acroForm === "undefined") throw new Error("The PDF has no signature!");
 
     const fields = acroForm.get("Fields");
-    if (isRef(fields[0]) === false)
-      throw new Error("Wrong structure of PDF!");
+    if (isRef(fields[0]) === false) throw new Error("Wrong structure of PDF!");
 
     const sigField = pdf.xref.fetch(fields[0]);
 
     const sigFieldType = sigField.get("FT");
-    if ((typeof sigFieldType === "undefined") || (sigFieldType.name !== "Sig"))
+    if (typeof sigFieldType === "undefined" || sigFieldType.name !== "Sig")
       throw new Error("Wrong structure of PDF!");
 
     const v = sigField.get("V");
@@ -36,8 +34,7 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
     const contentBuffer = new ArrayBuffer(contentLength);
     const contentView = new Uint8Array(contentBuffer);
 
-    for (let i = 0; i < contentLength; i++)
-      contentView[i] = contents.charCodeAt(i);
+    for (let i = 0; i < contentLength; i++) contentView[i] = contents.charCodeAt(i);
 
     const cmsContentSimp = pkijs.ContentInfo.fromBER(contentBuffer);
     const cmsSignedSimp = new pkijs.SignedData({ schema: cmsContentSimp.content });
@@ -46,16 +43,16 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
     const signedDataView = new Uint8Array(signedDataBuffer);
 
     let count = 0;
-    for (let i = byteRange[0]; i < (byteRange[0] + byteRange[1]); i++, count++)
+    for (let i = byteRange[0]; i < byteRange[0] + byteRange[1]; i++, count++)
       signedDataView[count] = view[i];
 
-    for (let j = byteRange[2]; j < (byteRange[2] + byteRange[3]); j++, count++)
+    for (let j = byteRange[2]; j < byteRange[2] + byteRange[3]; j++, count++)
       signedDataView[count] = view[j];
 
     const verifyResult = await cmsSignedSimp.verify({
       signer: 0,
       data: signedDataBuffer,
-      trustedCerts: trustedCertificates
+      trustedCerts: trustedCertificates,
     });
 
     if ("signedAttrs" in cmsSignedSimp.signerInfos[0]) {
@@ -79,8 +76,7 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
           throw new Error("Unknown hashing algorithm");
       }
 
-      if (verifyResult === false)
-        throw new Error("Signature verification failed");
+      if (verifyResult === false) throw new Error("Signature verification failed");
 
       const digest = await crypto.digest({ name: shaAlgorithm }, new Uint8Array(signedDataBuffer));
 
@@ -94,18 +90,15 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
         }
       }
 
-      if (messageDigest.byteLength === 0)
-        throw new Error("No signed attribute 'MessageDigest'");
+      if (messageDigest.byteLength === 0) throw new Error("No signed attribute 'MessageDigest'");
 
       const view1 = new Uint8Array(messageDigest);
       const view2 = new Uint8Array(digest);
 
-      if (view1.length !== view2.length)
-        throw new Error("Hash is not correct");
+      if (view1.length !== view2.length) throw new Error("Hash is not correct");
 
       for (let i = 0; i < view1.length; i++) {
-        if (view1[i] !== view2[i])
-          throw new Error("Hash is not correct");
+        if (view1[i] !== view2[i]) throw new Error("Hash is not correct");
       }
     }
 
@@ -121,13 +114,13 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
 }
 
 function handleFileBrowse(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     verifyPDFSignature(file);
   });
 }
 
 function handleCABundle(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     trustedCertificates.push(...common.parseCertificate(file));
   });
 }

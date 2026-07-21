@@ -34,16 +34,13 @@ function parseOCSPReq(source: ArrayBuffer) {
   common.getElement("ocsp-req-extn-div").style.display = "none";
 
   const requestsTable = common.getElement("ocsp-req-requests", "table");
-  while (requestsTable.rows.length > 1)
-    requestsTable.deleteRow(requestsTable.rows.length - 1);
+  while (requestsTable.rows.length > 1) requestsTable.deleteRow(requestsTable.rows.length - 1);
 
   const extensionTable = common.getElement("ocsp-req-extn-table", "table");
-  while (extensionTable.rows.length > 1)
-    extensionTable.deleteRow(extensionTable.rows.length - 1);
+  while (extensionTable.rows.length > 1) extensionTable.deleteRow(extensionTable.rows.length - 1);
 
   const requestorTable = common.getElement("ocsp-req-name", "table");
-  while (requestorTable.rows.length > 1)
-    requestorTable.deleteRow(requestorTable.rows.length - 1);
+  while (requestorTable.rows.length > 1) requestorTable.deleteRow(requestorTable.rows.length - 1);
   //#endregion
   //#region Decode existing OCSP request
   const ocspReqSimpl = pkijs.OCSPRequest.fromBER(source);
@@ -54,20 +51,27 @@ function parseOCSPReq(source: ArrayBuffer) {
       case 1: // rfc822Name
       case 2: // dNSName
       case 6: // uniformResourceIdentifier
-        common.getElement("ocsp-req-name-simpl").innerHTML = ocspReqSimpl.tbsRequest.requestorName.value.valueBlock.value;
+        common.getElement("ocsp-req-name-simpl").innerHTML =
+          ocspReqSimpl.tbsRequest.requestorName.value.valueBlock.value;
         common.getElement("ocsp-req-nm-simpl").style.display = "block";
         break;
       case 7: // iPAddress
         {
-          const view = new Uint8Array(ocspReqSimpl.tbsRequest.requestorName.value.valueBlock.valueHex);
+          const view = new Uint8Array(
+            ocspReqSimpl.tbsRequest.requestorName.value.valueBlock.valueHex,
+          );
 
-          common.getElement("ocsp-req-name-simpl").innerHTML = `${view[0].toString()}.${view[1].toString()}.${view[2].toString()}.${view[3].toString()}`;
+          common.getElement("ocsp-req-name-simpl").innerHTML =
+            `${view[0].toString()}.${view[1].toString()}.${view[2].toString()}.${view[3].toString()}`;
           common.getElement("ocsp-req-nm-simpl").style.display = "block";
         }
         break;
       case 3: // x400Address
       case 5: // ediPartyName
-        common.getElement("ocsp-req-name-simpl").innerHTML = (ocspReqSimpl.tbsRequest.requestorName.type === 3) ? "<type \"x400Address\">" : "<type \"ediPartyName\">";
+        common.getElement("ocsp-req-name-simpl").innerHTML =
+          ocspReqSimpl.tbsRequest.requestorName.type === 3
+            ? '<type "x400Address">'
+            : '<type "ediPartyName">';
         common.getElement("ocsp-req-nm-simpl").style.display = "block";
         break;
       case 4: // directoryName
@@ -83,15 +87,21 @@ function parseOCSPReq(source: ArrayBuffer) {
             "2.5.4.42": "GN",
             "2.5.4.43": "I",
             "2.5.4.4": "SN",
-            "1.2.840.113549.1.9.1": "E-mail"
+            "1.2.840.113549.1.9.1": "E-mail",
           };
 
-          for (let i = 0; i < ocspReqSimpl.tbsRequest.requestorName.value.typesAndValues.length; i++) {
-            let typeval = rdnmap[ocspReqSimpl.tbsRequest.requestorName.value.typesAndValues[i].type];
+          for (
+            let i = 0;
+            i < ocspReqSimpl.tbsRequest.requestorName.value.typesAndValues.length;
+            i++
+          ) {
+            let typeval =
+              rdnmap[ocspReqSimpl.tbsRequest.requestorName.value.typesAndValues[i].type];
             if (typeof typeval === "undefined")
               typeval = ocspReqSimpl.tbsRequest.requestorName.value.typesAndValues[i].type;
 
-            const subjval = ocspReqSimpl.tbsRequest.requestorName.value.typesAndValues[i].value.valueBlock.value;
+            const subjval =
+              ocspReqSimpl.tbsRequest.requestorName.value.typesAndValues[i].value.valueBlock.value;
 
             const row = requestorTable.insertRow(requestorTable.rows.length);
             const cell0 = row.insertCell(0);
@@ -111,7 +121,9 @@ function parseOCSPReq(source: ArrayBuffer) {
   for (let i = 0; i < ocspReqSimpl.tbsRequest.requestList.length; i++) {
     const row = requestsTable.insertRow(requestsTable.rows.length);
     const cell0 = row.insertCell(0);
-    cell0.innerHTML = pvtsutils.Convert.ToHex(ocspReqSimpl.tbsRequest.requestList[i].reqCert.serialNumber.valueBlock.valueHexView);
+    cell0.innerHTML = pvtsutils.Convert.ToHex(
+      ocspReqSimpl.tbsRequest.requestList[i].reqCert.serialNumber.valueBlock.valueHexView,
+    );
   }
   //#endregion
   //#region Put information about request extensions

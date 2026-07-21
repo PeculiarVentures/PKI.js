@@ -88,7 +88,6 @@ export type OCSPResponseParameters = PkiObjectParameters & Partial<IOCSPResponse
  * ```
  */
 export class OCSPResponse extends PkiObject implements IOCSPResponse {
-
   public static override CLASS_NAME = "OCSPResponse";
 
   public responseStatus!: asn1js.Enumerated;
@@ -101,9 +100,17 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
   constructor(parameters: OCSPResponseParameters = {}) {
     super();
 
-    this.responseStatus = pvutils.getParametersValue(parameters, RESPONSE_STATUS, OCSPResponse.defaultValues(RESPONSE_STATUS));
+    this.responseStatus = pvutils.getParametersValue(
+      parameters,
+      RESPONSE_STATUS,
+      OCSPResponse.defaultValues(RESPONSE_STATUS),
+    );
     if (RESPONSE_BYTES in parameters) {
-      this.responseBytes = pvutils.getParametersValue(parameters, RESPONSE_BYTES, OCSPResponse.defaultValues(RESPONSE_BYTES));
+      this.responseBytes = pvutils.getParametersValue(
+        parameters,
+        RESPONSE_BYTES,
+        OCSPResponse.defaultValues(RESPONSE_BYTES),
+      );
     }
 
     if (parameters.schema) {
@@ -137,10 +144,12 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case RESPONSE_STATUS:
-        return (memberValue.isEqual(OCSPResponse.defaultValues(memberName)));
+        return memberValue.isEqual(OCSPResponse.defaultValues(memberName));
       case RESPONSE_BYTES:
-        return ((ResponseBytes.compareWithDefault("responseType", memberValue.responseType)) &&
-          (ResponseBytes.compareWithDefault("response", memberValue.response)));
+        return (
+          ResponseBytes.compareWithDefault("responseType", memberValue.responseType) &&
+          ResponseBytes.compareWithDefault("response", memberValue.response)
+        );
       default:
         return super.defaultValues(memberName);
     }
@@ -165,46 +174,48 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
    * }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    responseStatus?: string;
-    responseBytes?: ResponseBytesSchema;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      responseStatus?: string;
+      responseBytes?: ResponseBytesSchema;
+    }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || "OCSPResponse"),
+    return new asn1js.Sequence({
+      name: names.blockName || "OCSPResponse",
       value: [
-        new asn1js.Enumerated({ name: (names.responseStatus || RESPONSE_STATUS) }),
+        new asn1js.Enumerated({ name: names.responseStatus || RESPONSE_STATUS }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
           value: [
-            ResponseBytes.schema(names.responseBytes || {
-              names: {
-                blockName: RESPONSE_BYTES
-              }
-            })
-          ]
-        })
-      ]
-    }));
+            ResponseBytes.schema(
+              names.responseBytes || {
+                names: {
+                  blockName: RESPONSE_BYTES,
+                },
+              },
+            ),
+          ],
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [
-      RESPONSE_STATUS,
-      RESPONSE_BYTES
-    ]);
+    pvutils.clearProps(schema, [RESPONSE_STATUS, RESPONSE_BYTES]);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
-      schema,
-      OCSPResponse.schema()
-    );
+    const asn1 = asn1js.compareSchema(schema, schema, OCSPResponse.schema());
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
@@ -219,26 +230,28 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
 
     outputArray.push(this.responseStatus);
     if (this.responseBytes) {
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        value: [this.responseBytes.toSchema()]
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0, // [0]
+          },
+          value: [this.responseBytes.toSchema()],
+        }),
+      );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: outputArray
-    }));
+    return new asn1js.Sequence({
+      value: outputArray,
+    });
     //#endregion
   }
 
   public toJSON(): OCSPResponseJson {
     const res: OCSPResponseJson = {
-      responseStatus: this.responseStatus.toJSON()
+      responseStatus: this.responseStatus.toJSON(),
     };
 
     if (this.responseBytes) {
@@ -254,29 +267,32 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
    * @param issuerCertificate
    * @param crypto Crypto engine
    */
-  public async getCertificateStatus(certificate: Certificate, issuerCertificate: Certificate, crypto = common.getCrypto(true)) {
+  public async getCertificateStatus(
+    certificate: Certificate,
+    issuerCertificate: Certificate,
+    crypto = common.getCrypto(true),
+  ) {
     //#region Initial variables
     let basicResponse;
 
     const result = {
       isForCertificate: false,
-      status: 2 // 0 = good, 1 = revoked, 2 = unknown
+      status: 2, // 0 = good, 1 = revoked, 2 = unknown
     };
     //#endregion
 
     //#region Check that RESPONSE_BYTES contain "OCSP_BASIC_RESPONSE"
-    if (!this.responseBytes)
-      return result;
+    if (!this.responseBytes) return result;
 
-    if (this.responseBytes.responseType !== id_PKIX_OCSP_Basic) // id-pkix-ocsp-basic
+    if (this.responseBytes.responseType !== id_PKIX_OCSP_Basic)
+      // id-pkix-ocsp-basic
       return result;
 
     try {
       const asn1Basic = asn1js.fromBER(this.responseBytes.response.valueBlock.valueHexView);
       AsnError.assert(asn1Basic, "Basic OCSP response");
       basicResponse = new BasicOCSPResponse({ schema: asn1Basic.result });
-    }
-    catch {
+    } catch {
       return result;
     }
     //#endregion
@@ -289,10 +305,16 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
    * @param privateKey Private key for "subjectPublicKeyInfo" structure
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
    */
-  public async sign(privateKey: CryptoKey, hashAlgorithm?: string, crypto = common.getCrypto(true)) {
+  public async sign(
+    privateKey: CryptoKey,
+    hashAlgorithm?: string,
+    crypto = common.getCrypto(true),
+  ) {
     //#region Check that ResponseData has type BasicOCSPResponse and sign it
     if (this.responseBytes && this.responseBytes.responseType === id_PKIX_OCSP_Basic) {
-      const basicResponse = BasicOCSPResponse.fromBER(this.responseBytes.response.valueBlock.valueHexView as BufferSource);
+      const basicResponse = BasicOCSPResponse.fromBER(
+        this.responseBytes.response.valueBlock.valueHexView as BufferSource,
+      );
 
       return basicResponse.sign(privateKey, hashAlgorithm, crypto);
     }
@@ -306,15 +328,19 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
    * @param issuerCertificate In order to decrease size of resp issuer cert could be omitted. In such case you need manually provide it.
    * @param crypto Crypto engine
    */
-  public async verify(issuerCertificate: Certificate | null = null, crypto = common.getCrypto(true)): Promise<boolean> {
+  public async verify(
+    issuerCertificate: Certificate | null = null,
+    crypto = common.getCrypto(true),
+  ): Promise<boolean> {
     //#region Check that ResponseBytes exists in the object
-    if ((RESPONSE_BYTES in this) === false)
-      throw new Error("Empty ResponseBytes field");
+    if (RESPONSE_BYTES in this === false) throw new Error("Empty ResponseBytes field");
     //#endregion
 
     //#region Check that ResponseData has type BasicOCSPResponse and verify it
     if (this.responseBytes && this.responseBytes.responseType === id_PKIX_OCSP_Basic) {
-      const basicResponse = BasicOCSPResponse.fromBER(this.responseBytes.response.valueBlock.valueHexView as BufferSource);
+      const basicResponse = BasicOCSPResponse.fromBER(
+        this.responseBytes.response.valueBlock.valueHexView as BufferSource,
+      );
 
       if (issuerCertificate !== null) {
         if (!basicResponse.certs) {
@@ -330,6 +356,4 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
     throw new Error(`Unknown ResponseBytes type: ${this.responseBytes?.responseType || "Unknown"}`);
     //#endregion
   }
-
 }
-

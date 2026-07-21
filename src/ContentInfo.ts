@@ -2,7 +2,12 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData, id_ContentType_SignedData } from "./ObjectIdentifiers";
+import {
+  id_ContentType_Data,
+  id_ContentType_EncryptedData,
+  id_ContentType_EnvelopedData,
+  id_ContentType_SignedData,
+} from "./ObjectIdentifiers";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
@@ -31,7 +36,6 @@ export interface ContentInfoJson {
  * Represents the ContentInfo structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class ContentInfo extends PkiObject implements IContentInfo {
-
   public static override CLASS_NAME = "ContentInfo";
   public static readonly DATA = id_ContentType_Data;
   public static readonly SIGNED_DATA = id_ContentType_SignedData;
@@ -48,8 +52,16 @@ export class ContentInfo extends PkiObject implements IContentInfo {
   constructor(parameters: ContentInfoParameters = {}) {
     super();
 
-    this.contentType = pvutils.getParametersValue(parameters, CONTENT_TYPE, ContentInfo.defaultValues(CONTENT_TYPE));
-    this.content = pvutils.getParametersValue(parameters, CONTENT, ContentInfo.defaultValues(CONTENT));
+    this.contentType = pvutils.getParametersValue(
+      parameters,
+      CONTENT_TYPE,
+      ContentInfo.defaultValues(CONTENT_TYPE),
+    );
+    this.content = pvutils.getParametersValue(
+      parameters,
+      CONTENT,
+      ContentInfo.defaultValues(CONTENT),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -82,10 +94,9 @@ export class ContentInfo extends PkiObject implements IContentInfo {
   static compareWithDefault<T>(memberName: string, memberValue: T): memberValue is T {
     switch (memberName) {
       case CONTENT_TYPE:
-        return (typeof memberValue === "string" &&
-          memberValue === this.defaultValues(CONTENT_TYPE));
+        return typeof memberValue === "string" && memberValue === this.defaultValues(CONTENT_TYPE);
       case CONTENT:
-        return (memberValue instanceof asn1js.Any);
+        return memberValue instanceof asn1js.Any;
       default:
         return super.defaultValues(memberName);
     }
@@ -101,26 +112,30 @@ export class ContentInfo extends PkiObject implements IContentInfo {
    *```
    */
   public static override schema(parameters: ContentInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    if (("optional" in names) === false) {
+    if ("optional" in names === false) {
       names.optional = false;
     }
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || "ContentInfo"),
+    return new asn1js.Sequence({
+      name: names.blockName || "ContentInfo",
       optional: names.optional,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.contentType || CONTENT_TYPE) }),
+        new asn1js.ObjectIdentifier({ name: names.contentType || CONTENT_TYPE }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [new asn1js.Any({ name: (names.content || CONTENT) })] // EXPLICIT ANY value
-        })
-      ]
-    }));
+          value: [new asn1js.Any({ name: names.content || CONTENT })], // EXPLICIT ANY value
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -128,10 +143,7 @@ export class ContentInfo extends PkiObject implements IContentInfo {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
-      schema,
-      ContentInfo.schema()
-    );
+    const asn1 = asn1js.compareSchema(schema, schema, ContentInfo.schema());
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
@@ -141,24 +153,24 @@ export class ContentInfo extends PkiObject implements IContentInfo {
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: [
         new asn1js.ObjectIdentifier({ value: this.contentType }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [this.content] // EXPLICIT ANY value
-        })
-      ]
-    }));
+          value: [this.content], // EXPLICIT ANY value
+        }),
+      ],
+    });
     //#endregion
   }
 
   public toJSON(): ContentInfoJson {
     const object: ContentInfoJson = {
-      contentType: this.contentType
+      contentType: this.contentType,
     };
 
     if (!(this.content instanceof asn1js.Any)) {
@@ -167,5 +179,4 @@ export class ContentInfo extends PkiObject implements IContentInfo {
 
     return object;
   }
-
 }

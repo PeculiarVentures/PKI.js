@@ -1,5 +1,5 @@
-import * as pkijs from 'pkijs';
-import * as asn1js from 'asn1js';
+import * as pkijs from "pkijs";
+import * as asn1js from "asn1js";
 
 // Generate random serial number
 const serialNumber = pkijs.getRandomValues(new Uint8Array(10)).buffer;
@@ -15,7 +15,7 @@ const tstInfo = new pkijs.TSTInfo({
   accuracy: new pkijs.Accuracy({
     seconds: 1,
     millis: 1,
-    micros: 10
+    micros: 10,
   }),
   nonce: tspReq.nonce,
 });
@@ -32,11 +32,11 @@ const cmsSigned = new pkijs.SignedData({
       version: 1,
       sid: new pkijs.IssuerAndSerialNumber({
         issuer: cert.issuer,
-        serialNumber: cert.serialNumber
-      })
-    })
+        serialNumber: cert.serialNumber,
+      }),
+    }),
   ],
-  certificates: [cert]
+  certificates: [cert],
 });
 
 await cmsSigned.sign(keys.privateKey, 0, "SHA-256");
@@ -44,13 +44,13 @@ await cmsSigned.sign(keys.privateKey, 0, "SHA-256");
 // Create CMS Content Info
 const cmsContent = new pkijs.ContentInfo({
   contentType: pkijs.ContentInfo.SIGNED_DATA,
-  content: cmsSigned.toSchema(true)
+  content: cmsSigned.toSchema(true),
 });
 
 // Finally create completed TSP response structure
 const tspResp = new pkijs.TimeStampResp({
   status: new pkijs.PKIStatusInfo({ status: pkijs.PKIStatus.granted }),
-  timeStampToken: new pkijs.ContentInfo({ schema: cmsContent.toSchema() })
+  timeStampToken: new pkijs.ContentInfo({ schema: cmsContent.toSchema() }),
 });
 
 const tspRespRaw = tspResp.toSchema().toBER();

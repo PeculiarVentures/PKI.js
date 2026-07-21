@@ -7,10 +7,7 @@ import * as Schema from "./Schema";
 
 const OTHER_CERT_FORMAT = "otherCertFormat";
 const OTHER_CERT = "otherCert";
-const CLEAR_PROPS = [
-  OTHER_CERT_FORMAT,
-  OTHER_CERT
-];
+const CLEAR_PROPS = [OTHER_CERT_FORMAT, OTHER_CERT];
 
 export interface IOtherCertificateFormat {
   otherCertFormat: string;
@@ -22,13 +19,13 @@ export interface OtherCertificateFormatJson {
   otherCert?: any;
 }
 
-export type OtherCertificateFormatParameters = PkiObjectParameters & Partial<IOtherCertificateFormat>;
+export type OtherCertificateFormatParameters = PkiObjectParameters &
+  Partial<IOtherCertificateFormat>;
 
 /**
  * Represents the OtherCertificateFormat structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class OtherCertificateFormat extends PkiObject implements IOtherCertificateFormat {
-
   public otherCertFormat!: string;
   public otherCert: any;
 
@@ -39,8 +36,16 @@ export class OtherCertificateFormat extends PkiObject implements IOtherCertifica
   constructor(parameters: OtherCertificateFormatParameters = {}) {
     super();
 
-    this.otherCertFormat = pvutils.getParametersValue(parameters, OTHER_CERT_FORMAT, OtherCertificateFormat.defaultValues(OTHER_CERT_FORMAT));
-    this.otherCert = pvutils.getParametersValue(parameters, OTHER_CERT, OtherCertificateFormat.defaultValues(OTHER_CERT));
+    this.otherCertFormat = pvutils.getParametersValue(
+      parameters,
+      OTHER_CERT_FORMAT,
+      OtherCertificateFormat.defaultValues(OTHER_CERT_FORMAT),
+    );
+    this.otherCert = pvutils.getParametersValue(
+      parameters,
+      OTHER_CERT,
+      OtherCertificateFormat.defaultValues(OTHER_CERT),
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -74,19 +79,25 @@ export class OtherCertificateFormat extends PkiObject implements IOtherCertifica
    *    otherCert ANY DEFINED BY otherCertFormat }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    otherCertFormat?: string;
-    otherCert?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      otherCertFormat?: string;
+      otherCert?: string;
+    }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.otherCertFormat || OTHER_CERT_FORMAT) }),
-        new asn1js.Any({ name: (names.otherCert || OTHER_CERT) })
-      ]
-    }));
+        new asn1js.ObjectIdentifier({ name: names.otherCertFormat || OTHER_CERT_FORMAT }),
+        new asn1js.Any({ name: names.otherCert || OTHER_CERT }),
+      ],
+    });
   }
 
   public fromSchema(schema: any): void {
@@ -94,10 +105,7 @@ export class OtherCertificateFormat extends PkiObject implements IOtherCertifica
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
-      schema,
-      OtherCertificateFormat.schema()
-    );
+    const asn1 = asn1js.compareSchema(schema, schema, OtherCertificateFormat.schema());
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
@@ -107,17 +115,14 @@ export class OtherCertificateFormat extends PkiObject implements IOtherCertifica
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: [
-        new asn1js.ObjectIdentifier({ value: this.otherCertFormat }),
-        this.otherCert
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [new asn1js.ObjectIdentifier({ value: this.otherCertFormat }), this.otherCert],
+    });
   }
 
   public toJSON(): OtherCertificateFormatJson {
     const res: OtherCertificateFormatJson = {
-      otherCertFormat: this.otherCertFormat
+      otherCertFormat: this.otherCertFormat,
     };
 
     if (!(this.otherCert instanceof asn1js.Any)) {
@@ -126,5 +131,4 @@ export class OtherCertificateFormat extends PkiObject implements IOtherCertifica
 
     return res;
   }
-
 }

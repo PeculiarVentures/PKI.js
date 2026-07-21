@@ -7,10 +7,7 @@ import * as Schema from "./Schema";
 
 const NOT_BEFORE = "notBefore";
 const NOT_AFTER = "notAfter";
-const CLEAR_PROPS = [
-  NOT_BEFORE,
-  NOT_AFTER
-];
+const CLEAR_PROPS = [NOT_BEFORE, NOT_AFTER];
 
 export interface IPrivateKeyUsagePeriod {
   notBefore?: Date;
@@ -28,7 +25,6 @@ export type PrivateKeyUsagePeriodParameters = PkiObjectParameters & Partial<IPri
  * Represents the PrivateKeyUsagePeriod structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsagePeriod {
-
   public static override CLASS_NAME = "PrivateKeyUsagePeriod";
 
   public notBefore?: Date;
@@ -42,11 +38,19 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
     super();
 
     if (NOT_BEFORE in parameters) {
-      this.notBefore = pvutils.getParametersValue(parameters, NOT_BEFORE, PrivateKeyUsagePeriod.defaultValues(NOT_BEFORE));
+      this.notBefore = pvutils.getParametersValue(
+        parameters,
+        NOT_BEFORE,
+        PrivateKeyUsagePeriod.defaultValues(NOT_BEFORE),
+      );
     }
 
     if (NOT_AFTER in parameters) {
-      this.notAfter = pvutils.getParametersValue(parameters, NOT_AFTER, PrivateKeyUsagePeriod.defaultValues(NOT_AFTER));
+      this.notAfter = pvutils.getParametersValue(
+        parameters,
+        NOT_AFTER,
+        PrivateKeyUsagePeriod.defaultValues(NOT_AFTER),
+      );
     }
 
     if (parameters.schema) {
@@ -84,33 +88,39 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
    * -- either notBefore or notAfter MUST be present
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    notBefore?: string;
-    notAfter?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      notBefore?: string;
+      notAfter?: string;
+    }> = {},
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {},
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Primitive({
-          name: (names.notBefore || EMPTY_STRING),
+          name: names.notBefore || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
-          }
+            tagNumber: 0, // [0]
+          },
         }),
         new asn1js.Primitive({
-          name: (names.notAfter || EMPTY_STRING),
+          name: names.notAfter || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
-          }
-        })
-      ]
-    }));
+            tagNumber: 1, // [1]
+          },
+        }),
+      ],
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -118,14 +128,15 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       PrivateKeyUsagePeriod.schema({
         names: {
           notBefore: NOT_BEFORE,
-          notAfter: NOT_AFTER
-        }
-      })
+          notAfter: NOT_AFTER,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -136,7 +147,9 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
       this.notBefore = localNotBefore.toDate();
     }
     if (NOT_AFTER in asn1.result) {
-      const localNotAfter = new asn1js.GeneralizedTime({ valueHex: asn1.result.notAfter.valueBlock.valueHex });
+      const localNotAfter = new asn1js.GeneralizedTime({
+        valueHex: asn1.result.notAfter.valueBlock.valueHex,
+      });
       localNotAfter.fromBuffer(asn1.result.notAfter.valueBlock.valueHex);
       this.notAfter = localNotAfter.toDate();
     }
@@ -147,30 +160,36 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
     const outputArray = [];
 
     if (NOT_BEFORE in this) {
-      outputArray.push(new asn1js.Primitive({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        valueHex: (new asn1js.GeneralizedTime({ valueDate: this.notBefore })).valueBlock.valueHexView
-      }));
+      outputArray.push(
+        new asn1js.Primitive({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0, // [0]
+          },
+          valueHex: new asn1js.GeneralizedTime({ valueDate: this.notBefore }).valueBlock
+            .valueHexView,
+        }),
+      );
     }
 
     if (NOT_AFTER in this) {
-      outputArray.push(new asn1js.Primitive({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 1 // [1]
-        },
-        valueHex: (new asn1js.GeneralizedTime({ valueDate: this.notAfter })).valueBlock.valueHexView
-      }));
+      outputArray.push(
+        new asn1js.Primitive({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 1, // [1]
+          },
+          valueHex: new asn1js.GeneralizedTime({ valueDate: this.notAfter }).valueBlock
+            .valueHexView,
+        }),
+      );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: outputArray
-    }));
+    return new asn1js.Sequence({
+      value: outputArray,
+    });
     //#endregion
   }
 
@@ -187,5 +206,4 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
 
     return res;
   }
-
 }
