@@ -2,7 +2,7 @@ import * as assert from "assert";
 import * as pkijs from "../src";
 import * as example from "./crlComplexExample";
 
-context("CRL Complex Example", () => {
+describe("CRL Complex Example", () => {
   //#region Initial variables
   const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
   const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
@@ -21,19 +21,23 @@ context("CRL Complex Example", () => {
     ["SHA-1 + RSA-PSS", "1.2.840.113549.1.1.10"],
     ["SHA-256 + RSA-PSS", "1.2.840.113549.1.1.10"],
     ["SHA-384 + RSA-PSS", "1.2.840.113549.1.1.10"],
-    ["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"]
+    ["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"],
   ]);
   //#endregion
 
-  signAlgs.forEach(signAlg => {
-    hashAlgs.forEach(hashAlg => {
+  signAlgs.forEach((signAlg) => {
+    hashAlgs.forEach((hashAlg) => {
       const testName = `${hashAlg} + ${signAlg}`;
 
       it(testName, async () => {
         const crlWithKey = await example.createCRL(hashAlg, signAlg);
         const crl = pkijs.CertificateRevocationList.fromBER(crlWithKey.crlBuffer);
 
-        assert.equal(crl.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);
+        assert.equal(
+          crl.signatureAlgorithm.algorithmId,
+          algorithmsMap.get(testName),
+          `Signature algorithm must be ${testName}`,
+        );
 
         const result = await example.verifyCRL(crlWithKey.crlBuffer, crlWithKey.publicKeyBuffer);
         assert.equal(result, true, "CRL must be verified successfully");

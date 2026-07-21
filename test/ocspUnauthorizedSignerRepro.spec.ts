@@ -34,8 +34,8 @@ const ID_EXT_KEY_USAGE = "2.5.29.37";
 // Certificates use 2020–2040; OCSP thisUpdate/nextUpdate use a wide window.
 const CERT_NOT_BEFORE = new Date("2020-01-01T00:00:00Z");
 const CERT_NOT_AFTER = new Date("2040-01-01T00:00:00Z");
-const FIXED_DATE = new Date("2026-01-01T00:00:00Z");       // OCSP producedAt / thisUpdate
-const FIXED_NEXT = new Date("2035-01-01T00:00:00Z");       // OCSP nextUpdate
+const FIXED_DATE = new Date("2026-01-01T00:00:00Z"); // OCSP producedAt / thisUpdate
+const FIXED_NEXT = new Date("2035-01-01T00:00:00Z"); // OCSP nextUpdate
 
 //#region Local PKI builder helpers
 
@@ -140,38 +140,46 @@ async function buildEndEntityCertificate(opts: {
     const keyUsageBits = new ArrayBuffer(1);
     const kuView = new Uint8Array(keyUsageBits);
     kuView[0] = 0x04 | 0x02;
-    exts.push(new pkijs.Extension({
-      extnID: ID_BASIC_CONSTRAINTS,
-      critical: true,
-      extnValue: basicConstr.toSchema().toBER(false),
-      parsedValue: basicConstr,
-    }));
-    exts.push(new pkijs.Extension({
-      extnID: ID_KEY_USAGE,
-      critical: true,
-      extnValue: new asn1js.BitString({ valueHex: keyUsageBits }).toBER(false),
-    }));
-  } else {
-    // KeyUsage — only added when not explicitly suppressed (null).
-    if (opts.keyUsageBits !== null) {
-      const kuValue = opts.keyUsageBits ?? (0x80 | 0x20); // digitalSignature + keyEncipherment
-      const keyUsageBits = new ArrayBuffer(1);
-      const kuView = new Uint8Array(keyUsageBits);
-      kuView[0] = kuValue;
-      exts.push(new pkijs.Extension({
+    exts.push(
+      new pkijs.Extension({
+        extnID: ID_BASIC_CONSTRAINTS,
+        critical: true,
+        extnValue: basicConstr.toSchema().toBER(false),
+        parsedValue: basicConstr,
+      }),
+    );
+    exts.push(
+      new pkijs.Extension({
         extnID: ID_KEY_USAGE,
         critical: true,
         extnValue: new asn1js.BitString({ valueHex: keyUsageBits }).toBER(false),
-      }));
+      }),
+    );
+  } else {
+    // KeyUsage — only added when not explicitly suppressed (null).
+    if (opts.keyUsageBits !== null) {
+      const kuValue = opts.keyUsageBits ?? 0x80 | 0x20; // digitalSignature + keyEncipherment
+      const keyUsageBits = new ArrayBuffer(1);
+      const kuView = new Uint8Array(keyUsageBits);
+      kuView[0] = kuValue;
+      exts.push(
+        new pkijs.Extension({
+          extnID: ID_KEY_USAGE,
+          critical: true,
+          extnValue: new asn1js.BitString({ valueHex: keyUsageBits }).toBER(false),
+        }),
+      );
     }
 
     const eku = new pkijs.ExtKeyUsage({ keyPurposes: opts.extKeyUsages });
-    exts.push(new pkijs.Extension({
-      extnID: ID_EXT_KEY_USAGE,
-      critical: false,
-      extnValue: eku.toSchema().toBER(false),
-      parsedValue: eku,
-    }));
+    exts.push(
+      new pkijs.Extension({
+        extnID: ID_EXT_KEY_USAGE,
+        critical: false,
+        extnValue: eku.toSchema().toBER(false),
+        parsedValue: eku,
+      }),
+    );
   }
 
   certificate.extensions = exts;
@@ -199,7 +207,11 @@ async function buildBasicOcspResponse(params: {
   const hashAlg = params.hashAlg ?? "SHA-1";
 
   const rtCertID = new pkijs.CertID();
-  await rtCertID.createForCertificate(params.leaf, { hashAlgorithm: hashAlg, issuerCertificate: params.issuer }, crypto);
+  await rtCertID.createForCertificate(
+    params.leaf,
+    { hashAlgorithm: hashAlg, issuerCertificate: params.issuer },
+    crypto,
+  );
 
   let certStatus: asn1js.Primitive | asn1js.Constructed;
   if (params.status === 1) {
@@ -220,7 +232,8 @@ async function buildBasicOcspResponse(params: {
 
   const basic = new pkijs.BasicOCSPResponse();
   if (params.useByKey) {
-    const spkBytes = params.signerCert.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource;
+    const spkBytes = params.signerCert.subjectPublicKeyInfo.subjectPublicKey.valueBlock
+      .valueHexView as BufferSource;
     const keyHash = await crypto.digest({ name: "SHA-1" }, spkBytes);
     basic.tbsResponseData.responderID = new asn1js.OctetString({ valueHex: keyHash });
   } else {
@@ -241,9 +254,7 @@ function redecode(basic: pkijs.BasicOCSPResponse): pkijs.BasicOCSPResponse {
 
 //#region Test suites
 
-context("OCSP BasicOCSPResponse unauthorized signer authorization", function () {
-  this.timeout(60000);
-
+describe("OCSP BasicOCSPResponse unauthorized signer authorization", function () {
   const HASH = "SHA-256";
   const SIGN = "RSASSA-PKCS1-V1_5";
 
@@ -258,8 +269,8 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
   let delegatedBasic!: pkijs.BasicOCSPResponse;
   let issuerSignedBasic!: pkijs.BasicOCSPResponse;
 
-  before(async () => {
-    await new Promise(r => setTimeout(r, 100));
+  beforeAll(async () => {
+    await new Promise((r) => setTimeout(r, 100));
     pkijs.getCrypto(true);
 
     //#region Victim branch
@@ -312,35 +323,41 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
     });
 
     //#region Malicious OCSP response
-    maliciousBasic = redecode(await buildBasicOcspResponse({
-      leaf: victimLeaf.certificate,
-      issuer: victimIssuer.certificate,
-      signerCert: attackerTls.certificate,
-      signerKey: attackerTls.privateKey,
-      certs: [attackerTls.certificate, attackerRoot.certificate],
-      status: 0,
-      hashAlg: "SHA-1",
-    }));
+    maliciousBasic = redecode(
+      await buildBasicOcspResponse({
+        leaf: victimLeaf.certificate,
+        issuer: victimIssuer.certificate,
+        signerCert: attackerTls.certificate,
+        signerKey: attackerTls.privateKey,
+        certs: [attackerTls.certificate, attackerRoot.certificate],
+        status: 0,
+        hashAlg: "SHA-1",
+      }),
+    );
 
     //#region Control responses
-    delegatedBasic = redecode(await buildBasicOcspResponse({
-      leaf: victimLeaf.certificate,
-      issuer: victimIssuer.certificate,
-      signerCert: delegatedResponder.certificate,
-      signerKey: delegatedResponder.privateKey,
-      certs: [delegatedResponder.certificate, victimIssuer.certificate, victimRoot.certificate],
-      status: 0,
-      hashAlg: "SHA-1",
-    }));
-    issuerSignedBasic = redecode(await buildBasicOcspResponse({
-      leaf: victimLeaf.certificate,
-      issuer: victimIssuer.certificate,
-      signerCert: victimIssuer.certificate,
-      signerKey: victimIssuer.privateKey,
-      certs: [victimIssuer.certificate, victimRoot.certificate],
-      status: 0,
-      hashAlg: "SHA-1",
-    }));
+    delegatedBasic = redecode(
+      await buildBasicOcspResponse({
+        leaf: victimLeaf.certificate,
+        issuer: victimIssuer.certificate,
+        signerCert: delegatedResponder.certificate,
+        signerKey: delegatedResponder.privateKey,
+        certs: [delegatedResponder.certificate, victimIssuer.certificate, victimRoot.certificate],
+        status: 0,
+        hashAlg: "SHA-1",
+      }),
+    );
+    issuerSignedBasic = redecode(
+      await buildBasicOcspResponse({
+        leaf: victimLeaf.certificate,
+        issuer: victimIssuer.certificate,
+        signerCert: victimIssuer.certificate,
+        signerKey: victimIssuer.privateKey,
+        certs: [victimIssuer.certificate, victimRoot.certificate],
+        status: 0,
+        hashAlg: "SHA-1",
+      }),
+    );
   });
 
   //#region 1. SECURITY REGRESSION TESTS
@@ -359,9 +376,10 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
       }
       assert.ok(threw, `verify() must throw for unauthorized signer. message='${errorMessage}'`);
       assert.ok(
-        errorMessage.toLowerCase().includes("authoriz") || errorMessage.toLowerCase().includes("authoris") ||
-        errorMessage.toLowerCase().includes("responder"),
-        `Error must mention authorization/responder. Got: ${errorMessage}`
+        errorMessage.toLowerCase().includes("authoriz") ||
+          errorMessage.toLowerCase().includes("authoris") ||
+          errorMessage.toLowerCase().includes("responder"),
+        `Error must mention authorization/responder. Got: ${errorMessage}`,
       );
     });
 
@@ -398,15 +416,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         signAlg: SIGN,
         extKeyUsages: [KP_CLIENT_AUTH],
       });
-      const clientMalicious = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: clientAuthAttacker.certificate,
-        signerKey: clientAuthAttacker.privateKey,
-        certs: [clientAuthAttacker.certificate, attackerRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const clientMalicious = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: clientAuthAttacker.certificate,
+          signerKey: clientAuthAttacker.privateKey,
+          certs: [clientAuthAttacker.certificate, attackerRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       let threw = false;
       let msg = "";
       try {
@@ -464,15 +484,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         signAlg: SIGN,
         extKeyUsages: [KP_SERVER_AUTH], // no OCSP EKU
       });
-      const explicitResp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: explicitResponder.certificate,
-        signerKey: explicitResponder.privateKey,
-        certs: [explicitResponder.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const explicitResp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: explicitResponder.certificate,
+          signerKey: explicitResponder.privateKey,
+          certs: [explicitResponder.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       const verified = await explicitResp.verify({
         trustedCerts: [attackerRoot.certificate],
         trustedResponders: [explicitResponder.certificate],
@@ -492,21 +514,22 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         signAlg: SIGN,
         extKeyUsages: [KP_SERVER_AUTH], // no OCSP EKU
       });
-      const explicitResp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: explicitResponder.certificate,
-        signerKey: explicitResponder.privateKey,
-        certs: [explicitResponder.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const explicitResp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: explicitResponder.certificate,
+          signerKey: explicitResponder.privateKey,
+          certs: [explicitResponder.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       const verified = await explicitResp.verify({
         // No trustedCerts at all — pinning is sufficient.
         trustedResponders: [explicitResponder.certificate],
       });
-      assert.equal(verified, true,
-        "explicitly trusted responder must verify without trustedCerts");
+      assert.equal(verified, true, "explicitly trusted responder must verify without trustedCerts");
     });
 
     it("rejects a re-issued copy of a trusted responder (exact-DER semantics)", async () => {
@@ -534,7 +557,9 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         new pkijs.Extension({
           extnID: ID_KEY_USAGE,
           critical: true,
-          extnValue: new asn1js.BitString({ valueHex: new Uint8Array([0x80 | 0x20]).buffer }).toBER(false),
+          extnValue: new asn1js.BitString({ valueHex: new Uint8Array([0x80 | 0x20]).buffer }).toBER(
+            false,
+          ),
         }),
         new pkijs.Extension({
           extnID: ID_EXT_KEY_USAGE,
@@ -548,15 +573,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
 
       // OCSP response signed by responder B. Only responder A is in
       // trustedResponders — responder B must be rejected.
-      const resp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: certB,
-        signerKey: responderA.privateKey,
-        certs: [certB],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const resp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: certB,
+          signerKey: responderA.privateKey,
+          certs: [certB],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       let threw = false;
       let msg = "";
       try {
@@ -567,10 +594,12 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         threw = true;
         msg = (e as Error).message;
       }
-      assert.ok(threw,
-        `must reject re-issued copy of a pinned responder. msg='${msg}'`);
-      assert.match(msg, /responder|authoriz/i,
-        `Error must mention responder/authorization. Got: ${msg}`);
+      assert.ok(threw, `must reject re-issued copy of a pinned responder. msg='${msg}'`);
+      assert.match(
+        msg,
+        /responder|authoriz/i,
+        `Error must mention responder/authorization. Got: ${msg}`,
+      );
     });
 
     it("rejects untrusted chain when attacker root not trusted", async () => {
@@ -582,24 +611,29 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         threw = true;
         msg = (e as Error).message;
       }
-      assert.ok(threw, `verify() must throw when the signer chain has no trusted anchor. msg='${msg}'`);
+      assert.ok(
+        threw,
+        `verify() must throw when the signer chain has no trusted anchor. msg='${msg}'`,
+      );
       assert.ok(
         msg.toLowerCase().includes("chain") || msg.toLowerCase().includes("validation"),
-        `Error must mention chain/validation. Got: ${msg}`
+        `Error must mention chain/validation. Got: ${msg}`,
       );
     });
 
     it("returns false for cryptographically invalid signature", async () => {
       const bogusKeypair = await generateKeyPair(SIGN, HASH);
-      const tampered = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: attackerTls.certificate,
-        signerKey: bogusKeypair.privateKey,
-        certs: [attackerTls.certificate, attackerRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const tampered = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: attackerTls.certificate,
+          signerKey: bogusKeypair.privateKey,
+          certs: [attackerTls.certificate, attackerRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       const verified = await tampered.verify({
         trustedCerts: [attackerRoot.certificate, victimRoot.certificate],
       });
@@ -636,9 +670,8 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         extKeyUsages: [],
       });
       // Remove the EKU extension (present but with empty keyPurposes).
-      noEku.certificate.extensions = noEku.certificate.extensions?.filter(
-        e => e.extnID !== ID_EXT_KEY_USAGE
-      ) ?? undefined;
+      noEku.certificate.extensions =
+        noEku.certificate.extensions?.filter((e) => e.extnID !== ID_EXT_KEY_USAGE) ?? undefined;
       // Re-sign so the certificate signature matches the new tbsCertificate.
       await noEku.certificate.sign(victimIssuer.privateKey, HASH);
       assert.equal(
@@ -646,15 +679,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         true,
         "fixture certificate must remain correctly signed after extension removal",
       );
-      const noEkuResp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: noEku.certificate,
-        signerKey: noEku.privateKey,
-        certs: [noEku.certificate, victimIssuer.certificate, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const noEkuResp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: noEku.certificate,
+          signerKey: noEku.privateKey,
+          certs: [noEku.certificate, victimIssuer.certificate, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       let threw = false;
       let msg = "";
       try {
@@ -678,15 +713,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         signAlg: SIGN,
         extKeyUsages: [KP_SERVER_AUTH],
       });
-      const wrongEkuResp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: wrongEku.certificate,
-        signerKey: wrongEku.privateKey,
-        certs: [wrongEku.certificate, victimIssuer.certificate, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const wrongEkuResp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: wrongEku.certificate,
+          signerKey: wrongEku.privateKey,
+          certs: [wrongEku.certificate, victimIssuer.certificate, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       let threw = false;
       let msg = "";
       try {
@@ -711,15 +748,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         extKeyUsages: [KP_OCSP_SIGNING],
         keyUsageBits: 0x20, // keyEncipherment only, no digitalSignature
       });
-      const noDsResp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: noDs.certificate,
-        signerKey: noDs.privateKey,
-        certs: [noDs.certificate, victimIssuer.certificate, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const noDsResp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: noDs.certificate,
+          signerKey: noDs.privateKey,
+          certs: [noDs.certificate, victimIssuer.certificate, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       let threw = false;
       let msg = "";
       try {
@@ -746,7 +785,7 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         extKeyUsages: [KP_OCSP_SIGNING],
       });
       // Replace the EKU extension value with a malformed ASN.1 blob, then re-sign.
-      const ekuExt = malformed.certificate.extensions?.find(e => e.extnID === ID_EXT_KEY_USAGE);
+      const ekuExt = malformed.certificate.extensions?.find((e) => e.extnID === ID_EXT_KEY_USAGE);
       assert.ok(ekuExt, "fixture must have an EKU extension to corrupt");
       ekuExt!.parsedValue = undefined;
       ekuExt!.extnValue = new asn1js.OctetString({
@@ -759,15 +798,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         "fixture certificate must remain correctly signed after EKU corruption",
       );
 
-      const response = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: malformed.certificate,
-        signerKey: malformed.privateKey,
-        certs: [malformed.certificate, victimIssuer.certificate, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const response = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: malformed.certificate,
+          signerKey: malformed.privateKey,
+          certs: [malformed.certificate, victimIssuer.certificate, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       let verified = false;
       let message = "";
       try {
@@ -794,7 +835,7 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         extKeyUsages: [KP_OCSP_SIGNING],
       });
       // Replace the KeyUsage extension value with a malformed ASN.1 blob, then re-sign.
-      const kuExt = malformed.certificate.extensions?.find(e => e.extnID === ID_KEY_USAGE);
+      const kuExt = malformed.certificate.extensions?.find((e) => e.extnID === ID_KEY_USAGE);
       assert.ok(kuExt, "fixture must have a KeyUsage extension to corrupt");
       kuExt!.parsedValue = undefined;
       kuExt!.extnValue = new asn1js.OctetString({
@@ -807,15 +848,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         "fixture certificate must remain correctly signed after KeyUsage corruption",
       );
 
-      const response = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: malformed.certificate,
-        signerKey: malformed.privateKey,
-        certs: [malformed.certificate, victimIssuer.certificate, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const response = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: malformed.certificate,
+          signerKey: malformed.privateKey,
+          certs: [malformed.certificate, victimIssuer.certificate, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       let verified = false;
       let message = "";
       try {
@@ -827,7 +870,11 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         message = (error as Error).message;
       }
       assert.equal(verified, false, "malformed KeyUsage responder must be rejected");
-      assert.match(message, /responder|authoriz/i, "malformed KeyUsage rejection must be diagnosable");
+      assert.match(
+        message,
+        /responder|authoriz/i,
+        "malformed KeyUsage rejection must be diagnosable",
+      );
     });
 
     it("accepts delegated responder with OCSP EKU and digitalSignature", async () => {
@@ -849,21 +896,26 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         extKeyUsages: [KP_OCSP_SIGNING],
         keyUsageBits: null, // suppress KeyUsage extension entirely
       });
-      const noKuResp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: noKu.certificate,
-        signerKey: noKu.privateKey,
-        certs: [noKu.certificate, victimIssuer.certificate, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const noKuResp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: noKu.certificate,
+          signerKey: noKu.privateKey,
+          certs: [noKu.certificate, victimIssuer.certificate, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       const verified = await noKuResp.verify({
         trustedCerts: [victimRoot.certificate],
         issuerCerts: [victimIssuer.certificate],
       });
-      assert.equal(verified, true,
-        "delegated responder without KeyUsage must be accepted (unconstrained per RFC 5280)");
+      assert.equal(
+        verified,
+        true,
+        "delegated responder without KeyUsage must be accepted (unconstrained per RFC 5280)",
+      );
     });
   });
 
@@ -879,16 +931,18 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
     });
 
     it("verifies a response with byKey ResponderID", async () => {
-      const byKeyResp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: victimIssuer.certificate,
-        signerKey: victimIssuer.privateKey,
-        certs: [victimIssuer.certificate, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-        useByKey: true,
-      }));
+      const byKeyResp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: victimIssuer.certificate,
+          signerKey: victimIssuer.privateKey,
+          certs: [victimIssuer.certificate, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+          useByKey: true,
+        }),
+      );
       const verified = await byKeyResp.verify({
         trustedCerts: [victimRoot.certificate],
         issuerCerts: [victimIssuer.certificate],
@@ -913,18 +967,20 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         signAlg: SIGN,
       });
 
-      const resp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: victimIssuer.certificate,
-        signerKey: victimIssuer.privateKey,
-        // Put the bad (different-key) candidate FIRST — this proves the
-        // verifier iterates past a mismatched signature and accepts the
-        // next valid candidate.
-        certs: [sameNameDiffKey.certificate, victimIssuer.certificate, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const resp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: victimIssuer.certificate,
+          signerKey: victimIssuer.privateKey,
+          // Put the bad (different-key) candidate FIRST — this proves the
+          // verifier iterates past a mismatched signature and accepts the
+          // next valid candidate.
+          certs: [sameNameDiffKey.certificate, victimIssuer.certificate, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
 
       // Two certs match byName: victimIssuer (valid sig) and sameNameDiffKey
       // (invalid sig — different key). Only one passes signature verification.
@@ -932,8 +988,7 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         trustedCerts: [victimRoot.certificate],
         issuerCerts: [victimIssuer.certificate],
       });
-      assert.equal(verified, true,
-        "must accept when exactly one candidate passes all steps");
+      assert.equal(verified, true, "must accept when exactly one candidate passes all steps");
     });
 
     it("accepts when two responder certs share the same identity (re-issued)", async () => {
@@ -978,22 +1033,23 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
       // Both certificates are tried independently.
       // The first fully valid candidate is sufficient — the response
       // must verify (no "ambiguous responder" error).
-      const resp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: victimIssuer.certificate,
-        signerKey: victimIssuer.privateKey,
-        certs: [victimIssuer.certificate, reissued, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const resp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: victimIssuer.certificate,
+          signerKey: victimIssuer.privateKey,
+          certs: [victimIssuer.certificate, reissued, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
 
       const verified = await resp.verify({
         trustedCerts: [victimRoot.certificate],
         issuerCerts: [victimIssuer.certificate],
       });
-      assert.equal(verified, true,
-        "identity-deduped re-issued responder must be accepted");
+      assert.equal(verified, true, "identity-deduped re-issued responder must be accepted");
     });
   });
 
@@ -1036,15 +1092,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
       // is still computed from the ORIGINAL victimIssuer; the reissued copy
       // must match because issuerNameHash/issuerKeyHash depend only on subject
       // and public key contents, not on serial number or DER encoding.
-      const resp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: reissued,
-        signerKey: victimIssuer.privateKey, // same key pair
-        certs: [reissued, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const resp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: reissued,
+          signerKey: victimIssuer.privateKey, // same key pair
+          certs: [reissued, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
 
       const verified = await resp.verify({
         trustedCerts: [victimRoot.certificate],
@@ -1069,9 +1127,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
 
       const crypto = pkijs.getCrypto(true);
       const certID1 = new pkijs.CertID();
-      await certID1.createForCertificate(victimLeaf.certificate, { hashAlgorithm: "SHA-1", issuerCertificate: victimIssuer.certificate }, crypto);
+      await certID1.createForCertificate(
+        victimLeaf.certificate,
+        { hashAlgorithm: "SHA-1", issuerCertificate: victimIssuer.certificate },
+        crypto,
+      );
       const certID2 = new pkijs.CertID();
-      await certID2.createForCertificate(leaf2.certificate, { hashAlgorithm: "SHA-1", issuerCertificate: victimIssuer.certificate }, crypto);
+      await certID2.createForCertificate(
+        leaf2.certificate,
+        { hashAlgorithm: "SHA-1", issuerCertificate: victimIssuer.certificate },
+        crypto,
+      );
 
       const single1 = new pkijs.SingleResponse();
       single1.certID = certID1;
@@ -1147,7 +1213,11 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
       basic.tbsResponseData.responderID = delegatedResponder.certificate.subject;
       basic.tbsResponseData.producedAt = new Date(FIXED_DATE);
       basic.tbsResponseData.responses = [singleVictim, singleAttacker];
-      basic.certs = [delegatedResponder.certificate, victimIssuer.certificate, victimRoot.certificate];
+      basic.certs = [
+        delegatedResponder.certificate,
+        victimIssuer.certificate,
+        victimRoot.certificate,
+      ];
       await basic.sign(delegatedResponder.privateKey, "SHA-1");
 
       const resp = redecode(basic);
@@ -1162,10 +1232,15 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         threw = true;
         msg = (e as Error).message;
       }
-      assert.ok(threw,
-        `must reject when responder is not authorized for every SingleResponse. msg='${msg}'`);
-      assert.match(msg, /responder|authoriz/i,
-        `Error must mention responder/authorization. Got: ${msg}`);
+      assert.ok(
+        threw,
+        `must reject when responder is not authorized for every SingleResponse. msg='${msg}'`,
+      );
+      assert.match(
+        msg,
+        /responder|authoriz/i,
+        `Error must mention responder/authorization. Got: ${msg}`,
+      );
     });
   });
 
@@ -1176,8 +1251,11 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
       const verified = await issuerSignedBasic.verify({
         trustedCerts: [victimRoot.certificate],
       });
-      assert.equal(verified, true,
-        "Old API verify({trustedCerts}) must work when issuer is in embedded certs");
+      assert.equal(
+        verified,
+        true,
+        "Old API verify({trustedCerts}) must work when issuer is in embedded certs",
+      );
     });
 
     it("accepts delegated responder response without issuerCerts (issuer found via embedded certs)", async () => {
@@ -1186,8 +1264,11 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
       const verified = await delegatedBasic.verify({
         trustedCerts: [victimRoot.certificate],
       });
-      assert.equal(verified, true,
-        "Old API must work when delegated responder's issuer is in embedded certs");
+      assert.equal(
+        verified,
+        true,
+        "Old API must work when delegated responder's issuer is in embedded certs",
+      );
     });
 
     it("accepts delegated responder when issuer is found via trustedCerts", async () => {
@@ -1195,22 +1276,27 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
       // The issuer is provided via `trustedCerts` only — this verifies the
       // documented promise that issuer candidates are also searched among
       // trustedCerts.
-      const standaloneDelegated = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: delegatedResponder.certificate,
-        signerKey: delegatedResponder.privateKey,
-        certs: [delegatedResponder.certificate], // no victimIssuer in certs!
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const standaloneDelegated = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: delegatedResponder.certificate,
+          signerKey: delegatedResponder.privateKey,
+          certs: [delegatedResponder.certificate], // no victimIssuer in certs!
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       const verified = await standaloneDelegated.verify({
         trustedCerts: [victimRoot.certificate, victimIssuer.certificate],
         // victimIssuer is needed for chain-building AND as an issuer
         // candidate — both roles are satisfied by trustedCerts here.
       });
-      assert.equal(verified, true,
-        "issuer found via trustedCerts must authorize a delegated responder");
+      assert.equal(
+        verified,
+        true,
+        "issuer found via trustedCerts must authorize a delegated responder",
+      );
     });
   });
 
@@ -1218,14 +1304,19 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
 
   describe("Attacker certificate sanity", () => {
     it("attackerTlsCert is a non-CA serverAuth end entity without id-kp-OCSPSigning", () => {
-      const ekuExt = attackerTls.certificate.extensions?.find(e => e.extnID === ID_EXT_KEY_USAGE);
+      const ekuExt = attackerTls.certificate.extensions?.find((e) => e.extnID === ID_EXT_KEY_USAGE);
       assert.ok(ekuExt, "attacker cert has EKU extension");
       const eku = ekuExt!.parsedValue as pkijs.ExtKeyUsage;
       assert.ok(eku.keyPurposes.includes(KP_SERVER_AUTH), "EKU includes serverAuth");
-      assert.ok(!eku.keyPurposes.includes(KP_OCSP_SIGNING), "EKU must NOT include id-kp-OCSPSigning");
+      assert.ok(
+        !eku.keyPurposes.includes(KP_OCSP_SIGNING),
+        "EKU must NOT include id-kp-OCSPSigning",
+      );
 
-      const bc = attackerTls.certificate.extensions?.find(e => e.extnID === ID_BASIC_CONSTRAINTS);
-      const isCa = bc?.parsedValue instanceof pkijs.BasicConstraints && (bc.parsedValue as pkijs.BasicConstraints).cA === true;
+      const bc = attackerTls.certificate.extensions?.find((e) => e.extnID === ID_BASIC_CONSTRAINTS);
+      const isCa =
+        bc?.parsedValue instanceof pkijs.BasicConstraints &&
+        (bc.parsedValue as pkijs.BasicConstraints).cA === true;
       assert.ok(!isCa, "attacker cert must NOT be a CA");
 
       assert.ok(
@@ -1265,15 +1356,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
       // Use a fully unrelated keypair to sign the same tbsResponseData.
       // No algorithm error — just a wrong signature — must yield false.
       const bogusKeypair = await generateKeyPair(SIGN, HASH);
-      const tampered = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: delegatedResponder.certificate,
-        signerKey: bogusKeypair.privateKey,
-        certs: [delegatedResponder.certificate, victimIssuer.certificate, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const tampered = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: delegatedResponder.certificate,
+          signerKey: bogusKeypair.privateKey,
+          certs: [delegatedResponder.certificate, victimIssuer.certificate, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       const result = await tampered.verify({
         trustedCerts: [victimRoot.certificate],
         issuerCerts: [victimIssuer.certificate],
@@ -1298,15 +1391,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
         signAlg: SIGN,
         extKeyUsages: [KP_OCSP_SIGNING],
       });
-      const resp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: delegatedResponder2.certificate,
-        signerKey: delegatedResponder2.privateKey,
-        certs: [delegatedResponder2.certificate, attackerRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const resp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: delegatedResponder2.certificate,
+          signerKey: delegatedResponder2.privateKey,
+          certs: [delegatedResponder2.certificate, attackerRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       let threw = false;
       let msg = "";
       try {
@@ -1352,21 +1447,31 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
       await reissued.subjectPublicKeyInfo.importKey(victimIssuer.publicKey);
       await reissued.sign(victimRoot.privateKey, HASH);
 
-      const resp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: delegatedResponder.certificate,
-        signerKey: delegatedResponder.privateKey,
-        certs: [delegatedResponder.certificate, victimIssuer.certificate, reissued, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const resp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: delegatedResponder.certificate,
+          signerKey: delegatedResponder.privateKey,
+          certs: [
+            delegatedResponder.certificate,
+            victimIssuer.certificate,
+            reissued,
+            victimRoot.certificate,
+          ],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       const verified = await resp.verify({
         trustedCerts: [victimRoot.certificate],
         issuerCerts: [victimIssuer.certificate],
       });
-      assert.equal(verified, true,
-        "delegated responder must verify when multiple CA certs match the CertID");
+      assert.equal(
+        verified,
+        true,
+        "delegated responder must verify when multiple CA certs match the CertID",
+      );
     });
   });
 
@@ -1406,21 +1511,26 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
       await reissuedIssuer.subjectPublicKeyInfo.importKey(victimIssuer.publicKey);
       await reissuedIssuer.sign(victimRoot.privateKey, HASH);
 
-      const resp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: victimIssuer.certificate,
-        signerKey: victimIssuer.privateKey,
-        certs: [reissuedIssuer, victimIssuer.certificate, victimRoot.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const resp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: victimIssuer.certificate,
+          signerKey: victimIssuer.privateKey,
+          certs: [reissuedIssuer, victimIssuer.certificate, victimRoot.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
       const verified = await resp.verify({
         trustedCerts: [victimRoot.certificate],
         issuerCerts: [victimIssuer.certificate],
       });
-      assert.equal(verified, true,
-        "two responder certs sharing the signing key must both be accepted");
+      assert.equal(
+        verified,
+        true,
+        "two responder certs sharing the signing key must both be accepted",
+      );
     });
   });
 
@@ -1490,15 +1600,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
 
       // OCSP response signed by the delegated responder. Only the signer
       // is embedded; the cross-signed issuer is supplied via `issuerCerts`.
-      const resp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: victimIssuer.certificate,
-        signerCert: delegatedResponder.certificate,
-        signerKey: delegatedResponder.privateKey,
-        certs: [delegatedResponder.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const resp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: victimIssuer.certificate,
+          signerCert: delegatedResponder.certificate,
+          signerKey: delegatedResponder.privateKey,
+          certs: [delegatedResponder.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
 
       const verified = await resp.verify({
         trustedCerts: [altRoot.certificate],
@@ -1571,15 +1683,17 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
       const issuerV2 = await makeIssuer(0x6103);
 
       // Embed BOTH re-issued copies and trust the single shared root.
-      const resp = redecode(await buildBasicOcspResponse({
-        leaf: victimLeaf.certificate,
-        issuer: issuerV1.certificate,
-        signerCert: delegatedResponder.certificate,
-        signerKey: delegatedResponder.privateKey,
-        certs: [delegatedResponder.certificate, issuerV1.certificate, issuerV2.certificate],
-        status: 0,
-        hashAlg: "SHA-1",
-      }));
+      const resp = redecode(
+        await buildBasicOcspResponse({
+          leaf: victimLeaf.certificate,
+          issuer: issuerV1.certificate,
+          signerCert: delegatedResponder.certificate,
+          signerKey: delegatedResponder.privateKey,
+          certs: [delegatedResponder.certificate, issuerV1.certificate, issuerV2.certificate],
+          status: 0,
+          hashAlg: "SHA-1",
+        }),
+      );
 
       const verified = await resp.verify({
         trustedCerts: [dualRoot.certificate],

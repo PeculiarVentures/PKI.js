@@ -5,7 +5,12 @@ import * as pkijs from "../src";
  * @param encryptionVariant
  * @param preDefinedDataBuffer
  */
-export async function envelopedEncrypt(encryptionVariant: number, preDefinedDataBuffer: ArrayBuffer, encryptionAlgorithm: Algorithm, valueBuffer: ArrayBuffer): Promise<ArrayBuffer> {
+export async function envelopedEncrypt(
+  encryptionVariant: number,
+  preDefinedDataBuffer: ArrayBuffer,
+  encryptionAlgorithm: Algorithm,
+  valueBuffer: ArrayBuffer,
+): Promise<ArrayBuffer> {
   //#region Get input pre-defined data
   /*
    This is an example only and we consider that key encryption algorithm
@@ -18,8 +23,7 @@ export async function envelopedEncrypt(encryptionVariant: number, preDefinedData
 
       const preDefinedDataView = new Uint8Array(preDefinedDataBuffer);
 
-      for (let i = 0; i < 32; i++)
-        newPreDefinedDataView[i] = preDefinedDataView[i];
+      for (let i = 0; i < 32; i++) newPreDefinedDataView[i] = preDefinedDataView[i];
 
       preDefinedDataBuffer = newPreDefinedDataBuffer;
     }
@@ -58,7 +62,11 @@ export async function envelopedEncrypt(encryptionVariant: number, preDefinedData
  * @param cmsEnvelopedBuffer
  * @returns
  */
-export async function envelopedDecrypt(encryptionVariant: number, preDefinedDataBuffer: ArrayBuffer, cmsEnvelopedBuffer: ArrayBuffer): Promise<ArrayBuffer> {
+export async function envelopedDecrypt(
+  encryptionVariant: number,
+  preDefinedDataBuffer: ArrayBuffer,
+  cmsEnvelopedBuffer: ArrayBuffer,
+): Promise<ArrayBuffer> {
   //#region Get input pre-defined data
   /*
    This is an example only and we consider that key encryption algorithm
@@ -71,8 +79,7 @@ export async function envelopedDecrypt(encryptionVariant: number, preDefinedData
 
       const preDefinedDataView = new Uint8Array(preDefinedDataBuffer);
 
-      for (let i = 0; i < 32; i++)
-        newPreDefinedDataView[i] = preDefinedDataView[i];
+      for (let i = 0; i < 32; i++) newPreDefinedDataView[i] = preDefinedDataView[i];
 
       preDefinedDataBuffer = newPreDefinedDataBuffer;
     }
@@ -96,8 +103,7 @@ export async function envelopedDecrypt(encryptionVariant: number, preDefinedData
   const cmsEnvelopedSimp = new pkijs.EnvelopedData({ schema: cmsContentSimpl.content });
   //#endregion
 
-  return cmsEnvelopedSimp.decrypt(0,
-    {
-      preDefinedData: preDefinedDataBuffer
-    });
+  return cmsEnvelopedSimp.decrypt(0, {
+    preDefinedData: preDefinedDataBuffer,
+  });
 }

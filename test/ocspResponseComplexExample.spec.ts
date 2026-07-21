@@ -2,14 +2,14 @@ import * as assert from "assert";
 import * as pkijs from "../src";
 import * as example from "./ocspResponseComplexExample";
 
-context("OCSP Response Complex Example", () => {
+describe("OCSP Response Complex Example", () => {
   //#region Initial variables
   const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
   const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
   //#endregion
 
-  signAlgs.forEach(sigAlg => {
-    hashAlgs.forEach(hashAlg => {
+  signAlgs.forEach((sigAlg) => {
+    hashAlgs.forEach((hashAlg) => {
       const testName = `${hashAlg} + ${sigAlg}`;
 
       it(testName, async () => {
@@ -23,4 +23,3 @@ context("OCSP Response Complex Example", () => {
     });
   });
 });
-

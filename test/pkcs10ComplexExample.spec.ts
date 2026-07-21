@@ -3,7 +3,7 @@ import * as pkijs from "../src";
 import * as example from "./pkcs10ComplexExample";
 import "./utils";
 
-context("PKCS#10 Complex Example", () => {
+describe("PKCS#10 Complex Example", () => {
   //#region Initial variables
   const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
   const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
@@ -22,19 +22,23 @@ context("PKCS#10 Complex Example", () => {
     ["SHA-1 + RSA-PSS", "1.2.840.113549.1.1.10"],
     ["SHA-256 + RSA-PSS", "1.2.840.113549.1.1.10"],
     ["SHA-384 + RSA-PSS", "1.2.840.113549.1.1.10"],
-    ["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"]
+    ["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"],
   ]);
   //#endregion
 
-  signAlgs.forEach(signAlg => {
-    hashAlgs.forEach(hashAlg => {
+  signAlgs.forEach((signAlg) => {
+    hashAlgs.forEach((hashAlg) => {
       const testName = `${hashAlg} + ${signAlg}`;
 
       it(testName, async () => {
         const pkcs10Buffer = await example.createPKCS10Internal(hashAlg, signAlg);
         const pkcs10 = pkijs.CertificationRequest.fromBER(pkcs10Buffer);
 
-        assert.equal(pkcs10.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);
+        assert.equal(
+          pkcs10.signatureAlgorithm.algorithmId,
+          algorithmsMap.get(testName),
+          `Signature algorithm must be ${testName}`,
+        );
 
         const result = await example.verifyPKCS10Internal(pkcs10Buffer);
         assert.equal(result, true, "PKCS#10 must be verified successfully");
