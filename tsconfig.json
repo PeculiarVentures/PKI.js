@@ -1,20 +1,10 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2019",
-    "module": "CommonJS",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "importHelpers": true,
-    "noImplicitOverride": true,
-    "noErrorTruncation": true,
-    "experimentalDecorators": true,
-    "types": [
-      "node",
-      "mocha"
-    ]
+    "rootDir": ".",
+    "noEmit": true,
+    "types": ["node", "vitest/globals"]
   },
-  "exclude": [
-    "website",
-    "build/*.ts"
-  ]
+  "include": ["src", "test", "examples"],
+  "exclude": ["website", "build"]
 }

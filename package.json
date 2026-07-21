@@ -1,9 +1,27 @@
 {
-  "author": {
-    "email": "yury@strozhevsky.com",
-    "name": "Yury Strozhevsky"
-  },
+  "name": "pkijs",
+  "version": "3.4.0",
   "description": "Public Key Infrastructure (PKI) is the basis of how identity and key management is performed on the web today. PKIjs is a pure JavaScript library implementing the formats that are used in PKI applications. It is built on WebCrypto and aspires to make it possible to build native web applications that utilize X.509 and the related formats on the web without plug-ins",
+  "keywords": [
+    "ES2015",
+    "ES6",
+    "OCSP",
+    "PKCS",
+    "Web Cryptography API",
+    "WebCrypto",
+    "X.509",
+    "certificate",
+    "cms",
+    "crl",
+    "encrypted",
+    "enveloped",
+    "timestamp"
+  ],
+  "license": "BSD-3-Clause",
+  "author": {
+    "name": "Yury Strozhevsky",
+    "email": "yury@strozhevsky.com"
+  },
   "contributors": [
     {
       "email": "rmh@unmitigatedrisk.com",
@@ -14,28 +32,25 @@
     "type": "git",
     "url": "git://github.com/PeculiarVentures/PKI.js.git"
   },
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@peculiar/webcrypto": "^1.7.1",
-    "@rollup/plugin-alias": "^6.0.0",
-    "@rollup/plugin-commonjs": "^29.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "^20.19.21",
-    "@typescript-eslint/eslint-plugin": "^8.64.0",
-    "@typescript-eslint/parser": "^8.64.0",
-    "assert": "^2.1.0",
-    "emailjs-mime-builder": "^2.0.5",
-    "emailjs-mime-parser": "^2.0.7",
-    "eslint": "^10.7.0",
-    "globals": "^17.7.0",
-    "mocha": "^11.7.6",
-    "nyc": "^18.0.0",
-    "rollup": "^4.62.2",
-    "rollup-plugin-dts": "^6.4.1",
-    "rollup-plugin-typescript2": "^0.37.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^6.0.3"
+  "files": [
+    "build",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./build/cjs/index.js",
+  "module": "./build/mjs/index.js",
+  "types": "./build/types/index.d.ts",
+  "scripts": {
+    "prebuild": "rm -rf build",
+    "build": "tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && node scripts/fix-esm-imports.mjs && tsc -p tsconfig.types.json && echo '{\"type\":\"module\"}' > build/mjs/package.json",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "coverage": "vitest run --coverage",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@noble/hashes": "1.8.0",
@@ -45,54 +60,31 @@
     "pvutils": "^1.1.5",
     "tslib": "^2.8.1"
   },
-  "scripts": {
-    "build": "rollup -c",
-    "build:examples": "rollup -c examples/rollup.config.js",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint --fix . --ext .ts",
-    "coverage": "nyc npm test",
-    "test": "mocha",
-    "prepublishOnly": "npm run build"
-  },
-  "keywords": [
-    "ES6",
-    "ES2015",
-    "WebCrypto",
-    "Web Cryptography API",
-    "X.509",
-    "certificate",
-    "crl",
-    "cms",
-    "encrypted",
-    "enveloped",
-    "OCSP",
-    "timestamp",
-    "PKCS"
-  ],
-  "files": [
-    "build",
-    "README.md",
-    "LICENSE"
-  ],
-  "module": "build/index.es.js",
-  "main": "./build/index.js",
-  "types": "./build/index.d.ts",
-  "name": "pkijs",
-  "version": "3.4.0",
-  "license": "BSD-3-Clause",
-  "engines": {
-    "node": ">=16.0.0"
+  "devDependencies": {
+    "@peculiar/webcrypto": "^1.7.1",
+    "@types/node": "^20.19.21",
+    "@vitest/coverage-v8": "^4.0.16",
+    "assert": "^2.1.0",
+    "emailjs-mime-builder": "^2.0.5",
+    "emailjs-mime-parser": "^2.0.7",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.0.16"
   },
   "devEngines": {
-    "runtime": {
-      "name": "node",
-      "version": ">=24.5.0",
-      "onFail": "warn"
-    },
     "packageManager": {
       "name": "npm",
       "version": ">=11.7.0",
       "onFail": "warn"
+    },
+    "runtime": {
+      "name": "node",
+      "version": ">=24.5.0",
+      "onFail": "warn"
     }
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

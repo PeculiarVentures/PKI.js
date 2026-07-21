@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "importHelpers": true,
+    "noImplicitOverride": true,
+    "noErrorTruncation": true,
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "skipLibCheck": true,
+    "rootDir": "./src",
+    "types": ["node"]
+  }
+}
