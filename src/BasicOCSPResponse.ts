@@ -85,28 +85,15 @@ export interface BasicOCSPResponseVerifyParams {
    */
   issuerCerts?: Certificate[];
   /**
-   * Certificates the caller explicitly authorizes to sign OCSP responses,
-   * independent of CA delegation. A certificate is considered a trusted
-   * responder only if it matches one of the entries here (by exact DER of the
-   * full certificate) — chaining to one of these certificates does NOT inherit
-   * that permission.
+   * Certificates explicitly authorized to sign OCSP responses, independent
+   * of CA delegation. Matching is by exact DER of the full certificate;
+   * chaining to one of these certificates does NOT inherit this permission.
    *
-   * **Semantics (Variant A — direct pinning):** an exact-DER match means
-   * "this exact certificate is trusted as an OCSP responder, regardless of
-   * its chain or validity period". Chain validation, expiry, and
-   * `id-kp-OCSPSigning` are all skipped for that certificate. Two checks
-   * are NEVER bypassed:
-   *
-   *   1. the OCSP response signature MUST still verify against the pinned
-   *      certificate's public key;
-   *   2. the pinned certificate is trusted to respond for **every**
-   *      `SingleResponse` in this response (the per-`CertID` authorization
-   *      still short-circuits to `true` for the pinned cert).
-   *
-   * This is intended for locally trusted OCSP responders that are not the
-   * issuing CA and are not formally delegated via `id-kp-OCSPSigning`. For
-   * responders whose validity should still be enforced, leave this list
-   * empty and use `trustedCerts`/`issuerCerts` + a delegated responder.
+   * For a matched certificate, chain validation, expiry, and
+   * `id-kp-OCSPSigning` are skipped. The OCSP signature MUST still verify
+   * against the pinned certificate's public key. Use this for locally
+   * trusted responders that are not the issuing CA and are not formally
+   * delegated. For normal delegated responders, leave this list empty.
    */
   trustedResponders?: Certificate[];
 }
@@ -441,51 +428,18 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
   }
 
   /**
-   * Verify existing OCSP Basic Response.
+   * Verify the OCSP Basic Response (RFC 6960).
    *
-   * Verification is performed in this order for **every** candidate that
-   * matches the `ResponderID` (byName or byKey):
+   * For every candidate matching the `ResponderID`, three checks are
+   * performed in order:
+   *  1. Cryptographic signature verification against the candidate's public key.
+   *  2. Chain validation against `trustedCerts` (skipped for `trustedResponders`).
+   *  3. Authorization per RFC 6960 §4.2.2.2: direct issuer, delegated responder
+   *     with `id-kp-OCSPSigning`, or explicit `trustedResponders` entry.
    *
-   *  1. **OCSP signature verification** — the cryptographic signature on
-   *     `tbsResponseData` is verified against the candidate's public key.
-   *     A *cryptographic* mismatch causes `verify()` to return `false`.
-   *     Hard errors (unsupported algorithm, malformed AlgorithmIdentifier,
-   *     CryptoEngine failure…) are re-thrown rather than silently mapped
-   *     to `false` — they are surfaced as the first such error encountered
-   *     across all candidates. The response is accepted as soon as a
-   *     candidate passes steps 2-3.
-   *
-   *  2. **Chain validation** — the candidate's certificate path is built
-   *     from embedded `certs` + `issuerCerts` and validated against
-   *     `trustedCerts`. Candidates whose chain fails are discarded.
-   *     **Exception:** explicitly trusted responders (matched via
-   *     `trustedResponders`) skip chain validation — their explicit
-   *     authorisation is sufficient.
-   *
-   *  3. **Authorization** — for every `SingleResponse`, the candidate is
-   *     checked to be one of:
-   *       * the issuer identified by the `CertID` (direct-issuer responder,
-   *         verified by recomputing `issuerNameHash`/`issuerKeyHash` against
-   *         the signer's own subject + public key);
-   *       * a delegated responder whose certificate is verifiably issued by
-   *         an issuer matching the `CertID`, and that carries the
-   *         `id-kp-OCSPSigning` EKU plus a compatible KeyUsage;
-   *       * a certificate explicitly listed in `trustedResponders`.
-   *
-   * All responder candidates that share a public key (e.g. re-issued
-   * responder certificates) are accepted as equivalent — there is no
-   * uniqueness requirement, since any certificate with the matching key
-   * verifies the same OCSP signature. Issuer candidates for authorization
-   * are assembled from `issuerCerts`, embedded `certs`, `trustedCerts`, and
-   * the validated signer path. `trustedResponders` are NOT added to issuer
-   * candidates.
-   *
-   * @param params Additional parameters
-   * @param crypto Crypto engine
-   * @returns `true` if the response is fully verified. Returns `false` when
-   *          the cryptographic signature is invalid. Throws on hard errors
-   *          (missing certificates, chain validation failure, unauthorized
-   *          responder, unsupported signature algorithm).
+   * @returns `true` if a candidate passes all checks. Returns `false` on
+   *          cryptographic signature mismatch. Throws on hard errors
+   *          (chain failure, unauthorized responder, unsupported algorithm).
    */
   public async verify(params: BasicOCSPResponseVerifyParams = {}, crypto = common.getCrypto(true)): Promise<boolean> {
     //#region 0. Validate inputs
@@ -693,11 +647,8 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
   /**
    * Verify the OCSP response signature against `candidateCert`'s public key.
-   *
-   * Returns `true` on valid signature, `false` on a cryptographic mismatch.
-   * Anything else (unsupported algorithm, malformed AlgorithmIdentifier,
-   * CryptoEngine failure, malformed ASN.1) is thrown; the caller decides
-   * whether to surface it or try the next candidate.
+   * Returns `true` on valid signature, `false` on mismatch. Hard errors
+   * (unsupported algorithm, malformed data) are thrown.
    */
   private async verifyResponseSignature(
     candidateCert: Certificate,
@@ -735,18 +686,9 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     trustedCerts: Certificate[],
     crypto = common.getCrypto(true),
   ): Promise<Certificate[]> {
-    // Build the local cert list. We collect CA candidates that could issue
-    // the signer (and each other), then append the signer last. The engine
-    // always treats `certs[certs.length - 1]` as the leaf per the upstream
-    // path-builder convention, so appending last fixes a previous bug where
-    // `unshift(signerCert)` left a stray CA in the leaf slot.
-    //
-    // We deduplicate candidates by EXACT DER, not by subject+SPKI identity:
-    // cross-signed intermediates share subject+public key but are issued by
-    // different roots, so collapsing them by identity would silently drop
-    // the alternative path to a trusted root that the caller actually
-    // supplied. Exact-DER dedup keeps all distinct cross-signed copies so
-    // the engine can pick whichever anchors against `trustedCerts`.
+    // Collect CA candidates, append the signer as leaf (last entry), and
+    // deduplicate by exact DER so cross-signed copies with different issuers
+    // are all retained for path building.
     const additionalCerts: Certificate[] = [];
 
     const addIfCa = (cert: Certificate): void => {
