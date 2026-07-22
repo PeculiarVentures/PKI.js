@@ -48,6 +48,7 @@ export default [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+      "preserve-caught-error": "off"
     },
     ignores: [
       "build/**/*.ts",
