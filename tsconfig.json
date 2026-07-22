@@ -2,16 +2,12 @@
   "compilerOptions": {
     "target": "ES2019",
     "module": "CommonJS",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "strict": true,
     "importHelpers": true,
     "noImplicitOverride": true,
     "noErrorTruncation": true,
-    "experimentalDecorators": true,
-    "types": [
-      "node",
-      "mocha"
-    ]
+    "experimentalDecorators": true
   },
   "exclude": [
     "website",

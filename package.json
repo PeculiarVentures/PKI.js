@@ -35,7 +35,7 @@
     "rollup-plugin-dts": "^6.4.1",
     "rollup-plugin-typescript2": "^0.37.0",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.3"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@noble/hashes": "1.8.0",
