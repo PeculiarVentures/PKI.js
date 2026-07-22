@@ -1,4 +1,4 @@
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 import * as example from "./ocspRequestComplexExample";
 
 context("OCSP Request Complex Example", () => {

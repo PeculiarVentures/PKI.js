@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 import { CertificateChainValidationEngineVerifyParams } from "../src/CertificateChainValidationEngine";
 import "./utils";
 

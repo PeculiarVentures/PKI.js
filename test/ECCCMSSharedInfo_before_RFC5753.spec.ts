@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as asn1js from "asn1js";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 import "./utils";
 import * as pvtsutils from "pvtsutils";
 

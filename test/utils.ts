@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 
 export function toPEM(buffer: BufferSource, tag: string): string {
   return [

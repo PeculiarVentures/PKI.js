@@ -1,6 +1,6 @@
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 
 function md5(data: BufferSource, offset: number): ArrayBuffer {
   //#region Initial variables

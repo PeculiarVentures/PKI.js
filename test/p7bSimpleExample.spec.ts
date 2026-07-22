@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import "./utils";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 import * as example from "./p7bSimpleExample";
 
 context("P7B Simple Example", () => {

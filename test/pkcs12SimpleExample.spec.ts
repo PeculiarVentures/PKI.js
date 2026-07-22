@@ -2,7 +2,7 @@ import * as assert from "assert";
 import * as crypto from "crypto";
 import "./utils";
 import * as example from "./pkcs12SimpleExample";
-import { CryptoEngine } from "../src";
+import { CryptoEngine } from "../src/index";
 import { Convert } from "pvtsutils";
 
 context("PKCS#12 Simple Example", () => {

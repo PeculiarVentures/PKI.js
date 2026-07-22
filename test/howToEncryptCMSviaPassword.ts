@@ -1,4 +1,4 @@
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 
 /**
  * Encrypt input data

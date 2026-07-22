@@ -2,7 +2,7 @@ import * as assert from "assert";
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import { Crypto } from "@peculiar/webcrypto";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 import { createCertificate } from "./certificateComplexExample";
 
 context("PKIjs functional testing", () => {
