@@ -1,3 +1,4 @@
+import { describe, it, beforeAll, afterAll } from "vitest";
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
@@ -222,12 +223,12 @@ async function parsePKCS12(buffer: ArrayBuffer, password: string) {
   return pkcs12;
 }
 
-context("Node.js PKCS#12 Example", () => {
+describe("Node.js PKCS#12 Example", () => {
 
   let name: string;
   let crypto: pkijs.ICryptoEngine | null;
 
-  before(() => {
+  beforeAll(() => {
     const prevEngine = pkijs.getEngine();
     name = prevEngine.name;
     crypto = prevEngine.crypto;
@@ -236,7 +237,7 @@ context("Node.js PKCS#12 Example", () => {
     pkijs.setEngine(nodeEngine.name, nodeEngine);
   });
 
-  after(() => {
+  afterAll(() => {
     if (crypto) {
       pkijs.setEngine(name, crypto);
     }
@@ -246,7 +247,7 @@ context("Node.js PKCS#12 Example", () => {
   const password = "Demo";
   //#endregion
 
-  context("Parse Windows-like PKCS#12 data", () => {
+  describe("Parse Windows-like PKCS#12 data", () => {
     it.skip("Windows RC2", async () => { // RC2 is not supported by Node.js since v18
       const windowsP12 = "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";
       await parsePKCS12(pvutils.stringToArrayBuffer(pvutils.fromBase64(windowsP12)), "12");
@@ -257,11 +258,11 @@ context("Node.js PKCS#12 Example", () => {
     });
   });
 
-  context("X.509 Certificate", () => {
+  describe("X.509 Certificate", () => {
     let pkcs8Simpl: pkijs.PrivateKeyInfo;
     let certSimpl: pkijs.Certificate;
 
-    before(() => {
+    beforeAll(() => {
       const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(x509CertificateBASE64));
       certSimpl = pkijs.Certificate.fromBER(certRaw);
 
@@ -274,7 +275,7 @@ context("Node.js PKCS#12 Example", () => {
       await parsePKCS12(pkcs12Raw, password);
     });
 
-    context("DES-EDE3-CBC algorithm", () => {
+    describe("DES-EDE3-CBC algorithm", () => {
       ["SHA-1", "SHA-256", "SHA-384", "SHA-512"].forEach(hashAlg => {
         it(hashAlg, async () => {
           const pkcs12Raw = await openSSLLike(pkcs8Simpl, certSimpl, password, "DES-EDE3-CBC", hashAlg);
@@ -289,11 +290,11 @@ context("Node.js PKCS#12 Example", () => {
     });
   });
 
-  context("Attribute Certificate", () => {
+  describe("Attribute Certificate", () => {
     let pkcs8Simpl: pkijs.PrivateKeyInfo;
     let attrCertSimpl: pkijs.AttributeCertificateV2;
 
-    before(() => {
+    beforeAll(() => {
       const attrCertRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(attributeCertificateBASE64));
       attrCertSimpl = pkijs.AttributeCertificateV2.fromBER(attrCertRaw);
 

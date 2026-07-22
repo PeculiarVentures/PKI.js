@@ -1,8 +1,8 @@
-import * as assert from "assert";
+import { describe, it, assert } from "vitest";
 import { Crypto } from "@peculiar/webcrypto";
 import * as pkijs from "../src/index";
 
-context("RSA-PSS public key import", () => {
+describe("RSA-PSS public key import", () => {
   it("imports SPKI values with rsaPSS algorithm identifiers", async () => {
     const webcrypto = new Crypto();
     const engine = new pkijs.CryptoEngine({

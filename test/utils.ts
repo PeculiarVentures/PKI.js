@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pkijs from "../src/index";
+import { Crypto as NodeCrypto } from "@peculiar/webcrypto";
 
 export function toPEM(buffer: BufferSource, tag: string): string {
   return [
@@ -50,11 +51,9 @@ export function isNode() {
 }
 
 if (isNode()) {
-  import("@peculiar/webcrypto").then(peculiarCrypto => {
-    const webcrypto = new peculiarCrypto.Crypto();
-    const name = "newEngine";
-    pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: webcrypto }));
-  });
+  const webcrypto = new NodeCrypto();
+  const name = "newEngine";
+  pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: webcrypto }));
 }
 
 export interface CertificateWithPrivateKey {

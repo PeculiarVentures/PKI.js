@@ -1,8 +1,8 @@
-import * as assert from "assert";
+import { describe, it, assert } from "vitest";
 import * as pvutils from "pvutils";
 import * as example from "./howToEncryptCMSviaPassword";
 
-context("How To Encrypt CMS via Password", () => {
+describe("How To Encrypt CMS via Password", () => {
   //#region Initial variables
   const encryptionVariants = [1, 2];
   const encAlgs = ["AES-CBC", "AES-GCM"];

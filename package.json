@@ -19,21 +19,19 @@
     "@rollup/plugin-alias": "^5.1.1",
     "@rollup/plugin-commonjs": "^28.0.7",
     "@rollup/plugin-node-resolve": "^16.0.3",
-    "@types/mocha": "^10.0.10",
     "@types/node": "^20.19.21",
     "@typescript-eslint/eslint-plugin": "^8.46.1",
     "@typescript-eslint/parser": "^8.46.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "assert": "^2.1.0",
     "emailjs-mime-builder": "^2.0.5",
     "emailjs-mime-parser": "^2.0.7",
     "eslint": "^9.37.0",
-    "mocha": "^11.7.4",
-    "nyc": "^17.1.0",
     "rollup": "^4.60.2",
     "rollup-plugin-dts": "^6.2.3",
     "rollup-plugin-typescript2": "^0.36.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "@noble/hashes": "1.4.0",
@@ -48,8 +46,8 @@
     "build:examples": "rollup -c examples/rollup.config.js",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint --fix . --ext .ts",
-    "coverage": "nyc npm test",
-    "test": "mocha",
+    "coverage": "vitest run --coverage",
+    "test": "vitest",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
