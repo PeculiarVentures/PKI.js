@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 
 export async function createCRL(hashAlg: string, signAlg: string) {
   // Get a "crypto" extension

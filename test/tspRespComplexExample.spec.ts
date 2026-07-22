@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 import { createTSPResp, verifyTSPResp } from "./tspRespComplexExample";
 
 context("TSP Response Complex Example", () => {

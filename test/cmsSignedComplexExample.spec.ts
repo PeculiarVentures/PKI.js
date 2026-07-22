@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as pvtsutils from "pvtsutils";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 import * as example from "./cmsSignedComplexExample";
 
 context("CMS Signed Complex Example", () => {

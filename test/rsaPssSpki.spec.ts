@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import { Crypto } from "@peculiar/webcrypto";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 
 context("RSA-PSS public key import", () => {
   it("imports SPKI values with rsaPSS algorithm identifiers", async () => {

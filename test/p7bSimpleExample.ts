@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 
 //#region Create P7B Data
 export async function createP7B(hashAlg: string, signAlg: string): Promise<ArrayBuffer> {

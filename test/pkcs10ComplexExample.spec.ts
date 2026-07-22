@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 import * as example from "./pkcs10ComplexExample";
 import "./utils";
 
