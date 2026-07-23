@@ -8,4 +8,3 @@ describe("OCSP Request Complex Example", () => {
     pkijs.OCSPRequest.fromBER(ocspReqRaw);
   });
 });
-

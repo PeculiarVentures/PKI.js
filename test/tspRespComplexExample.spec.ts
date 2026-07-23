@@ -11,7 +11,6 @@ describe("TSP Response Complex Example", () => {
       const testName = `${hashAlg} + ${signAlg}`;
 
       it(testName, async () => {
-
         const tsp = await createTSPResp(hashAlg, signAlg);
         assert.doesNotThrow(() => {
           pkijs.TimeStampResp.fromBER(tsp.tspResponse.toSchema().toBER());
@@ -23,4 +22,3 @@ describe("TSP Response Complex Example", () => {
     });
   });
 });
-

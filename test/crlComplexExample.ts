@@ -10,18 +10,22 @@ export async function createCRL(hashAlg: string, signAlg: string) {
 
   crlSimpl.version = 1;
 
-  crlSimpl.issuer.typesAndValues.push(new pkijs.AttributeTypeAndValue({
-    type: "2.5.4.6", // Country name
-    value: new asn1js.PrintableString({
-      value: "RU"
+  crlSimpl.issuer.typesAndValues.push(
+    new pkijs.AttributeTypeAndValue({
+      type: "2.5.4.6", // Country name
+      value: new asn1js.PrintableString({
+        value: "RU"
+      })
     })
-  }));
-  crlSimpl.issuer.typesAndValues.push(new pkijs.AttributeTypeAndValue({
-    type: "2.5.4.3", // Common name
-    value: new asn1js.BmpString({
-      value: "Test"
+  );
+  crlSimpl.issuer.typesAndValues.push(
+    new pkijs.AttributeTypeAndValue({
+      type: "2.5.4.3", // Common name
+      value: new asn1js.BmpString({
+        value: "Test"
+      })
     })
-  }));
+  );
 
   crlSimpl.thisUpdate = new pkijs.Time({
     type: 0,
@@ -36,34 +40,41 @@ export async function createCRL(hashAlg: string, signAlg: string) {
       value: new Date()
     }),
     crlEntryExtensions: new pkijs.Extensions({
-      extensions: [new pkijs.Extension({
-        extnID: "2.5.29.21", // cRLReason
-        extnValue: (new asn1js.Enumerated({
-          value: 1
-        })).toBER(false)
-      })]
+      extensions: [
+        new pkijs.Extension({
+          extnID: "2.5.29.21", // cRLReason
+          extnValue: new asn1js.Enumerated({
+            value: 1
+          }).toBER(false)
+        })
+      ]
     })
   });
 
   crlSimpl.revokedCertificates = [];
   crlSimpl.revokedCertificates.push(revokedCertificate);
   crlSimpl.crlExtensions = new pkijs.Extensions({
-    extensions: [new pkijs.Extension({
-      extnID: "2.5.29.20", // cRLNumber
-      extnValue: (new asn1js.Integer({
-        value: 2
-      })).toBER(false)
-    })]
+    extensions: [
+      new pkijs.Extension({
+        extnID: "2.5.29.20", // cRLNumber
+        extnValue: new asn1js.Integer({
+          value: 2
+        }).toBER(false)
+      })
+    ]
   });
 
   // Create a new key pair
   //#region Get default algorithm parameters for key generation
   const algorithm = pkijs.getAlgorithmParameters(signAlg, "generateKey") as any;
-  if ("hash" in algorithm.algorithm)
-    algorithm.algorithm.hash.name = hashAlg;
+  if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = hashAlg;
   //#endregion
 
-  const { privateKey, publicKey } = await crypto.generateKey(algorithm.algorithm, true, algorithm.usages) as Required<CryptoKeyPair>;
+  const { privateKey, publicKey } = (await crypto.generateKey(
+    algorithm.algorithm,
+    true,
+    algorithm.usages
+  )) as Required<CryptoKeyPair>;
 
   // Store new key in an interim variables
   const issuerPublicKey = new pkijs.PublicKeyInfo();
@@ -80,17 +91,15 @@ export async function createCRL(hashAlg: string, signAlg: string) {
 
   return {
     crlBuffer,
-    publicKeyBuffer,
+    publicKeyBuffer
   };
 }
 
 export async function verifyCRL(crlBuffer: ArrayBuffer, issuer: pkijs.Certificate | ArrayBuffer) {
   //#region Initial check
-  if (crlBuffer.byteLength === 0)
-    throw new Error("Nothing to verify");
+  if (crlBuffer.byteLength === 0) throw new Error("Nothing to verify");
 
-  if (!issuer)
-    throw new Error("Load CRL's issuer certificate or public key");
+  if (!issuer) throw new Error("Load CRL's issuer certificate or public key");
   //#endregion
 
   //#region Decode existing CRL
@@ -106,14 +115,14 @@ export async function verifyCRL(crlBuffer: ArrayBuffer, issuer: pkijs.Certificat
 
   if (issuer instanceof pkijs.Certificate) {
     verifyParams = {
-      issuerCertificate: issuer,
+      issuerCertificate: issuer
     };
   } else {
     const asn = asn1js.fromBER(issuer);
     pkijs.AsnError.assert(asn1, "PublicKeyInfo");
     const publicKeyInfo = new pkijs.PublicKeyInfo({ schema: asn.result });
     verifyParams = {
-      publicKeyInfo: publicKeyInfo,
+      publicKeyInfo: publicKeyInfo
     };
   }
 

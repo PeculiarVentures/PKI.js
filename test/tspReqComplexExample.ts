@@ -11,7 +11,7 @@ export async function createTSPReq(): Promise<pkijs.TimeStampReq> {
   //#region Put static variables
   const fictionBuffer = new ArrayBuffer(4);
   const fictionView = new Uint8Array(fictionBuffer);
-  fictionView[0] = 0x7F;
+  fictionView[0] = 0x7f;
   fictionView[1] = 0x01;
   fictionView[2] = 0x02;
   fictionView[3] = 0x03;

@@ -34,7 +34,11 @@ describe("PKCS#10 Complex Example", () => {
         const pkcs10Buffer = await example.createPKCS10Internal(hashAlg, signAlg);
         const pkcs10 = pkijs.CertificationRequest.fromBER(pkcs10Buffer);
 
-        assert.equal(pkcs10.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);
+        assert.equal(
+          pkcs10.signatureAlgorithm.algorithmId,
+          algorithmsMap.get(testName),
+          `Signature algorithm must be ${testName}`
+        );
 
         const result = await example.verifyPKCS10Internal(pkcs10Buffer);
         assert.equal(result, true, "PKCS#10 must be verified successfully");

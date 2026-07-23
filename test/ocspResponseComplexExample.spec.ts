@@ -23,4 +23,3 @@ describe("OCSP Response Complex Example", () => {
     });
   });
 });
-

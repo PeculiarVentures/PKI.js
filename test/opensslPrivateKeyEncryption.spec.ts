@@ -14,10 +14,18 @@ describe("OpenSSL Encrypted Private Key", () => {
     const aesKeyLength = encLen >> 3;
 
     it(testName, async () => {
-      const encryptedKey = await example.createOpenSSLPrivateKey(aesKeyLength, passwordBuffer, new ArrayBuffer(10));
-      const decryptedKey = await example.parseOpenSSLPrivateKey(aesKeyLength, encryptedKey.ivBuffer, passwordBuffer, encryptedKey.encryptedKeyBuffer);
+      const encryptedKey = await example.createOpenSSLPrivateKey(
+        aesKeyLength,
+        passwordBuffer,
+        new ArrayBuffer(10)
+      );
+      const decryptedKey = await example.parseOpenSSLPrivateKey(
+        aesKeyLength,
+        encryptedKey.ivBuffer,
+        passwordBuffer,
+        encryptedKey.encryptedKeyBuffer
+      );
       assert.strictEqual(decryptedKey.byteLength, 10);
     });
   });
 });
-

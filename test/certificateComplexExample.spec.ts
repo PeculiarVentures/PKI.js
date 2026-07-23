@@ -33,9 +33,18 @@ describe("Certificate Complex Example", () => {
         const cert = await example.createCertificate(hashAlg, signAlg);
 
         const certificate = pkijs.Certificate.fromBER(cert.certificateBuffer);
-        assert.equal(certificate.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);
+        assert.equal(
+          certificate.signatureAlgorithm.algorithmId,
+          algorithmsMap.get(testName),
+          `Signature algorithm must be ${testName}`
+        );
 
-        const result = await example.verifyCertificate(cert.certificateBuffer, [], [cert.certificate], []);
+        const result = await example.verifyCertificate(
+          cert.certificateBuffer,
+          [],
+          [cert.certificate],
+          []
+        );
         assert.equal(result.result, true, "Certificate must be verified successfully");
       });
     });

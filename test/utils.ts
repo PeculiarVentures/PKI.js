@@ -7,14 +7,12 @@ export function toPEM(buffer: BufferSource, tag: string): string {
     `-----BEGIN ${tag}-----`,
     formatPEM(pvtsutils.Convert.ToBase64(buffer)),
     `-----END ${tag}-----`,
-    "",
+    ""
   ].join("\n");
 }
 
 export function fromPEM(pem: string): ArrayBuffer {
-  const base64 = pem
-    .replace(/-{5}(BEGIN|END) .*-{5}/gm, "")
-    .replace(/\s/gm, "");
+  const base64 = pem.replace(/-{5}(BEGIN|END) .*-{5}/gm, "").replace(/\s/gm, "");
   return pvtsutils.Convert.FromBase64(base64);
 }
 
@@ -24,11 +22,13 @@ export function fromPEM(pem: string): ArrayBuffer {
  * @returns Formatted string
  */
 export function formatPEM(pemString: string): string {
-  const PEM_STRING_LENGTH = pemString.length, LINE_LENGTH = 64;
+  const PEM_STRING_LENGTH = pemString.length,
+    LINE_LENGTH = 64;
   const wrapNeeded = PEM_STRING_LENGTH > LINE_LENGTH;
 
   if (wrapNeeded) {
-    let formattedString = "", wrapIndex = 0;
+    let formattedString = "",
+      wrapIndex = 0;
 
     for (let i = LINE_LENGTH; i < PEM_STRING_LENGTH; i += LINE_LENGTH) {
       formattedString += pemString.substring(wrapIndex, i) + "\r\n";
@@ -37,8 +37,7 @@ export function formatPEM(pemString: string): string {
 
     formattedString += pemString.substring(wrapIndex, PEM_STRING_LENGTH);
     return formattedString;
-  }
-  else {
+  } else {
     return pemString;
   }
 }
@@ -52,29 +51,40 @@ export interface CertificateWithPrivateKey {
   pem: string;
 }
 
-export async function createSelfSignedCertificate(hashAlg: string, signAlg: string): Promise<CertificateWithPrivateKey> {
+export async function createSelfSignedCertificate(
+  hashAlg: string,
+  signAlg: string
+): Promise<CertificateWithPrivateKey> {
   const crypto = pkijs.getCrypto(true);
 
   //#region Create certificate
   const certificate = new pkijs.Certificate();
   certificate.version = 2;
   certificate.serialNumber = new asn1js.Integer({ value: 1 });
-  certificate.issuer.typesAndValues.push(new pkijs.AttributeTypeAndValue({
-    type: "2.5.4.6", // Country name
-    value: new asn1js.PrintableString({ value: "RU" })
-  }));
-  certificate.issuer.typesAndValues.push(new pkijs.AttributeTypeAndValue({
-    type: "2.5.4.3", // Common name
-    value: new asn1js.BmpString({ value: "Test" })
-  }));
-  certificate.subject.typesAndValues.push(new pkijs.AttributeTypeAndValue({
-    type: "2.5.4.6", // Country name
-    value: new asn1js.PrintableString({ value: "RU" })
-  }));
-  certificate.subject.typesAndValues.push(new pkijs.AttributeTypeAndValue({
-    type: "2.5.4.3", // Common name
-    value: new asn1js.BmpString({ value: "Test" })
-  }));
+  certificate.issuer.typesAndValues.push(
+    new pkijs.AttributeTypeAndValue({
+      type: "2.5.4.6", // Country name
+      value: new asn1js.PrintableString({ value: "RU" })
+    })
+  );
+  certificate.issuer.typesAndValues.push(
+    new pkijs.AttributeTypeAndValue({
+      type: "2.5.4.3", // Common name
+      value: new asn1js.BmpString({ value: "Test" })
+    })
+  );
+  certificate.subject.typesAndValues.push(
+    new pkijs.AttributeTypeAndValue({
+      type: "2.5.4.6", // Country name
+      value: new asn1js.PrintableString({ value: "RU" })
+    })
+  );
+  certificate.subject.typesAndValues.push(
+    new pkijs.AttributeTypeAndValue({
+      type: "2.5.4.3", // Common name
+      value: new asn1js.BmpString({ value: "Test" })
+    })
+  );
 
   certificate.notBefore.value = new Date();
   const notAfter = new Date();
@@ -89,12 +99,14 @@ export async function createSelfSignedCertificate(hashAlg: string, signAlg: stri
     pathLenConstraint: 3
   });
 
-  certificate.extensions.push(new pkijs.Extension({
-    extnID: "2.5.29.19",
-    critical: false,
-    extnValue: basicConstr.toSchema().toBER(false),
-    parsedValue: basicConstr // Parsed value for well-known extensions
-  }));
+  certificate.extensions.push(
+    new pkijs.Extension({
+      extnID: "2.5.29.19",
+      critical: false,
+      extnValue: basicConstr.toSchema().toBER(false),
+      parsedValue: basicConstr // Parsed value for well-known extensions
+    })
+  );
   //#endregion
 
   //#region "KeyUsage" extension
@@ -106,12 +118,14 @@ export async function createSelfSignedCertificate(hashAlg: string, signAlg: stri
 
   const keyUsage = new asn1js.BitString({ valueHex: bitArray });
 
-  certificate.extensions.push(new pkijs.Extension({
-    extnID: "2.5.29.15",
-    critical: false,
-    extnValue: keyUsage.toBER(false),
-    parsedValue: keyUsage // Parsed value for well-known extensions
-  }));
+  certificate.extensions.push(
+    new pkijs.Extension({
+      extnID: "2.5.29.15",
+      critical: false,
+      extnValue: keyUsage.toBER(false),
+      parsedValue: keyUsage // Parsed value for well-known extensions
+    })
+  );
   //#endregion
   //#endregion
 
@@ -120,7 +134,11 @@ export async function createSelfSignedCertificate(hashAlg: string, signAlg: stri
     algorithm.algorithm.hash.name = hashAlg;
   }
 
-  const { privateKey, publicKey } = await crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
+  const { privateKey, publicKey } = await crypto.generateKey(
+    algorithm.algorithm,
+    true,
+    algorithm.usages
+  );
 
   // Exporting public key into "subjectPublicKeyInfo" value of certificate
   await certificate.subjectPublicKeyInfo.importKey(publicKey);
@@ -138,6 +156,6 @@ export async function createSelfSignedCertificate(hashAlg: string, signAlg: stri
     publicKey,
     pkcs8,
     spki,
-    pem: toPEM(certificate.toSchema().toBER(), "CERTIFICATE"),
+    pem: toPEM(certificate.toSchema().toBER(), "CERTIFICATE")
   };
 }

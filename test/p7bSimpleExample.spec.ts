@@ -17,7 +17,11 @@ describe("P7B Simple Example", () => {
         const cmsSignedBuffer = await example.createP7B(hashAlg, signAlg);
         const contentInfo = pkijs.ContentInfo.fromBER(cmsSignedBuffer);
 
-        assert.equal(contentInfo.contentType, "1.2.840.113549.1.7.2", "Content Type ID must be '1.2.840.113549.1.7.2'");
+        assert.equal(
+          contentInfo.contentType,
+          "1.2.840.113549.1.7.2",
+          "Content Type ID must be '1.2.840.113549.1.7.2'"
+        );
 
         const signedData = new pkijs.SignedData({ schema: contentInfo.content });
 
