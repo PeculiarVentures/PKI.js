@@ -53,7 +53,7 @@ function decodePEM(pem: string, tag = "[A-Z0-9 ]+"): ArrayBuffer[] {
   const pattern = new RegExp(`-{5}BEGIN ${tag}-{5}([a-zA-Z0-9=+\\/\\n\\r]+)-{5}END ${tag}-{5}`, "g");
 
   const res: ArrayBuffer[] = [];
-  let matches: RegExpExecArray | null;
+  let matches: RegExpExecArray | null = null;
   // eslint-disable-next-line no-cond-assign
   while (matches = pattern.exec(pem)) {
     const base64 = matches[1]

@@ -63,7 +63,7 @@ function parseOCSPResp(source: ArrayBuffer) {
   //#endregion
 
   //#region Put information about overall response status
-  let status: string;
+  let status = "";
 
   switch (ocspRespSimpl.responseStatus.valueBlock.valueDec) {
     case 0:

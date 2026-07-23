@@ -62,11 +62,10 @@ export abstract class AbstractCryptoEngine implements type.ICryptoEngine {
     return (this.subtle.digest as any)(...args);
   }
 
-  generateKey(algorithm: "Ed25519" | { name: "Ed25519" }, extractable: boolean, keyUsages: ReadonlyArray<"sign" | "verify">): Promise<CryptoKeyPair>;
-  generateKey(algorithm: "X25519" | { name: "X25519" }, extractable: boolean, keyUsages: ReadonlyArray<"deriveBits" | "deriveKey">): Promise<CryptoKeyPair>;
-  generateKey(algorithm: RsaHashedKeyGenParams | EcKeyGenParams, extractable: boolean, keyUsages: ReadonlyArray<KeyUsage>): Promise<CryptoKeyPair>;
-  generateKey(algorithm: AesKeyGenParams | HmacKeyGenParams | Pbkdf2Params, extractable: boolean, keyUsages: ReadonlyArray<KeyUsage>): Promise<CryptoKey>;
-  generateKey(algorithm: globalThis.AlgorithmIdentifier, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair | CryptoKey>;
+  public generateKey(algorithm: "Ed25519", extractable: boolean, keyUsages: ReadonlyArray<"sign" | "verify">): Promise<CryptoKeyPair>;
+  public generateKey(algorithm: RsaHashedKeyGenParams | EcKeyGenParams, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair>;
+  public generateKey(algorithm: AesKeyGenParams | HmacKeyGenParams | Pbkdf2Params, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey>;
+  public generateKey(algorithm: globalThis.AlgorithmIdentifier, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKeyPair | CryptoKey>;
   public async generateKey(...args: any[]): Promise<CryptoKey | CryptoKeyPair> {
     return (this.subtle.generateKey as any)(...args);
   }
@@ -106,7 +105,7 @@ export abstract class AbstractCryptoEngine implements type.ICryptoEngine {
     return (this.subtle.importKey as any)(...args);
   }
 
-  public getRandomValues<T extends Exclude<BufferSource, ArrayBuffer>>(array: T): T {
+  public getRandomValues<T extends ArrayBufferView | null>(array: T): T {
     if (array === null) {
       throw new Error("Argument \"array\" must not be null");
     }

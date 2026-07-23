@@ -57,7 +57,7 @@ function md5(data: BufferSource, offset: number): ArrayBuffer {
   padded[i++] = (length >>> 29) & 0xFF;
   padded[i++] = 0;
   padded[i++] = 0;
-  padded[i] = 0;
+  padded[i++] = 0;
 
   for (i = 0; i < paddedLength;) {
     let a = h0;

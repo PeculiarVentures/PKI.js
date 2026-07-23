@@ -79,7 +79,7 @@ export interface ICryptoEngine extends SubtleCrypto {
   crypto: Crypto;
   subtle: SubtleCrypto;
 
-  getRandomValues<T extends Exclude<BufferSource, ArrayBuffer>>(array: T): T;
+  getRandomValues<T extends ArrayBufferView | null>(array: T): T;
 
   /**
    * Get OID for each specific algorithm
