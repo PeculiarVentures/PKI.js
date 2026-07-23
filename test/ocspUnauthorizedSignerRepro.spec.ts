@@ -16,7 +16,7 @@
  *     victimLeaf (revoked)
  */
 
-import * as assert from "assert";
+import { assert, beforeAll, describe, it } from "vitest";
 import * as asn1js from "asn1js";
 import * as pkijs from "../src";
 import "./utils";
@@ -241,8 +241,7 @@ function redecode(basic: pkijs.BasicOCSPResponse): pkijs.BasicOCSPResponse {
 
 //#region Test suites
 
-context("OCSP BasicOCSPResponse unauthorized signer authorization", function () {
-  this.timeout(60000);
+describe("OCSP BasicOCSPResponse unauthorized signer authorization", () => {
 
   const HASH = "SHA-256";
   const SIGN = "RSASSA-PKCS1-V1_5";
@@ -258,7 +257,7 @@ context("OCSP BasicOCSPResponse unauthorized signer authorization", function () 
   let delegatedBasic!: pkijs.BasicOCSPResponse;
   let issuerSignedBasic!: pkijs.BasicOCSPResponse;
 
-  before(async () => {
+  beforeAll(async () => {
     await new Promise(r => setTimeout(r, 100));
     pkijs.getCrypto(true);
 
