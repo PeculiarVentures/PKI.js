@@ -30,6 +30,9 @@ jobs:
       - name: Run linter
         run: npm run lint
 
+      - name: Run format check
+        run: npm run format:check
+
       - name: Run test with coverage
         run: npm run coverage
 
