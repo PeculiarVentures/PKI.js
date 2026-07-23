@@ -23,7 +23,6 @@
     "@typescript-eslint/eslint-plugin": "^8.46.1",
     "@typescript-eslint/parser": "^8.46.1",
     "@vitest/coverage-v8": "^4.1.10",
-    "assert": "^2.1.0",
     "emailjs-mime-builder": "^2.0.5",
     "emailjs-mime-parser": "^2.0.7",
     "eslint": "^9.37.0",
