@@ -43,20 +43,6 @@ export function formatPEM(pemString: string): string {
   }
 }
 
-export function isNode() {
-  return typeof process !== "undefined" &&
-    process.versions != null &&
-    process.versions.node != null;
-}
-
-if (isNode()) {
-  import("@peculiar/webcrypto").then(peculiarCrypto => {
-    const webcrypto = new peculiarCrypto.Crypto();
-    const name = "newEngine";
-    pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: webcrypto }));
-  });
-}
-
 export interface CertificateWithPrivateKey {
   certificate: pkijs.Certificate;
   privateKey: CryptoKey;

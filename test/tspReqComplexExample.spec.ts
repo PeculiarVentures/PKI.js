@@ -1,11 +1,11 @@
-import * as assert from "assert";
+import { describe, it, assert } from "vitest";
 import * as pkijs from "../src/index";
 import "./utils";
 import { createTSPReq } from "./tspReqComplexExample";
 
 //#endregion
 
-context("TSP Request Complex Example", () => {
+describe("TSP Request Complex Example", () => {
   it("Create And Parse TSP Request", async () => {
     const tspReq = await createTSPReq();
     assert.doesNotThrow(() => {
