@@ -46,7 +46,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint --fix . --ext .ts",
     "coverage": "vitest run --coverage",
-    "test": "vitest",
+    "test": "vitest run",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
