@@ -1,8 +1,8 @@
-import * as assert from "assert";
+import { describe, it, assert } from "vitest";
 import * as pkijs from "../src/index";
 import * as example from "./crlComplexExample";
 
-context("CRL Complex Example", () => {
+describe("CRL Complex Example", () => {
   //#region Initial variables
   const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
   const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
