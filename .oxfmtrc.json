@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "arrowParens": "avoid",
+  "trailingComma": "none",
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "website/**",
+    "build/**",
+    "**/*.js",
+    "**/*.md",
+    "**/*.MD",
+    "**/*.html",
+    ".github/**"
+  ]
+}
