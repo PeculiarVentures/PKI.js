@@ -7,9 +7,7 @@ import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const EXTENSIONS = "extensions";
-const CLEAR_PROPS = [
-  EXTENSIONS,
-];
+const CLEAR_PROPS = [EXTENSIONS];
 
 export interface IExtensions {
   /**
@@ -33,7 +31,6 @@ export interface ExtensionsJson {
  * Represents the Extensions structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class Extensions extends PkiObject implements IExtensions {
-
   public static override CLASS_NAME = "Extensions";
 
   public extensions!: Extension[];
@@ -45,7 +42,11 @@ export class Extensions extends PkiObject implements IExtensions {
   constructor(parameters: ExtensionsParameters = {}) {
     super();
 
-    this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, Extensions.defaultValues(EXTENSIONS));
+    this.extensions = pvutils.getParametersValue(
+      parameters,
+      EXTENSIONS,
+      Extensions.defaultValues(EXTENSIONS)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -79,18 +80,22 @@ export class Extensions extends PkiObject implements IExtensions {
    * @returns ASN.1 schema object
    */
   public static override schema(parameters: ExtensionsSchema = {}, optional = false) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       optional,
-      name: (names.blockName || EMPTY_STRING),
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
-          name: (names.extensions || EMPTY_STRING),
+          name: names.extensions || EMPTY_STRING,
           value: Extension.schema(names.extension || {})
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -98,7 +103,8 @@ export class Extensions extends PkiObject implements IExtensions {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       Extensions.schema({
         names: {
@@ -109,14 +115,17 @@ export class Extensions extends PkiObject implements IExtensions {
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.extensions = Array.from(asn1.result.extensions, element => new Extension({ schema: element }));
+    this.extensions = Array.from(
+      asn1.result.extensions,
+      element => new Extension({ schema: element })
+    );
   }
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: Array.from(this.extensions, o => o.toSchema())
-    }));
+    });
     //#endregion
   }
 
@@ -125,5 +134,4 @@ export class Extensions extends PkiObject implements IExtensions {
       extensions: this.extensions.map(o => o.toJSON())
     };
   }
-
 }

@@ -7,10 +7,7 @@ import * as Schema from "../Schema";
 
 const NOT_BEFORE_TIME = "notBeforeTime";
 const NOT_AFTER_TIME = "notAfterTime";
-const CLEAR_PROPS = [
-  NOT_BEFORE_TIME,
-  NOT_AFTER_TIME,
-];
+const CLEAR_PROPS = [NOT_BEFORE_TIME, NOT_AFTER_TIME];
 
 export interface IAttCertValidityPeriod {
   notBeforeTime: Date;
@@ -33,7 +30,6 @@ export interface AttCertValidityPeriodJson {
  * Represents the AttCertValidityPeriod structure described in [RFC5755 Section 4.1](https://datatracker.ietf.org/doc/html/rfc5755#section-4.1)
  */
 export class AttCertValidityPeriod extends PkiObject implements IAttCertValidityPeriod {
-
   public static override CLASS_NAME = "AttCertValidityPeriod";
 
   public notBeforeTime!: Date;
@@ -46,8 +42,16 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
   constructor(parameters: AttCertValidityPeriodParameters = {}) {
     super();
 
-    this.notBeforeTime = pvutils.getParametersValue(parameters, NOT_BEFORE_TIME, AttCertValidityPeriod.defaultValues(NOT_BEFORE_TIME));
-    this.notAfterTime = pvutils.getParametersValue(parameters, NOT_AFTER_TIME, AttCertValidityPeriod.defaultValues(NOT_AFTER_TIME));
+    this.notBeforeTime = pvutils.getParametersValue(
+      parameters,
+      NOT_BEFORE_TIME,
+      AttCertValidityPeriod.defaultValues(NOT_BEFORE_TIME)
+    );
+    this.notAfterTime = pvutils.getParametersValue(
+      parameters,
+      NOT_AFTER_TIME,
+      AttCertValidityPeriod.defaultValues(NOT_AFTER_TIME)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -82,15 +86,19 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
    *```
    */
   public static override schema(parameters: AttCertValidityPeriodSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.GeneralizedTime({ name: (names.notBeforeTime || EMPTY_STRING) }),
-        new asn1js.GeneralizedTime({ name: (names.notAfterTime || EMPTY_STRING) })
+        new asn1js.GeneralizedTime({ name: names.notBeforeTime || EMPTY_STRING }),
+        new asn1js.GeneralizedTime({ name: names.notAfterTime || EMPTY_STRING })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -98,7 +106,8 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       AttCertValidityPeriod.schema({
         names: {
@@ -116,12 +125,12 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: [
         new asn1js.GeneralizedTime({ valueDate: this.notBeforeTime }),
-        new asn1js.GeneralizedTime({ valueDate: this.notAfterTime }),
+        new asn1js.GeneralizedTime({ valueDate: this.notAfterTime })
       ]
-    }));
+    });
   }
 
   public toJSON(): AttCertValidityPeriodJson {
@@ -130,5 +139,4 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
       notAfterTime: this.notAfterTime
     };
   }
-
 }

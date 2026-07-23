@@ -19,9 +19,12 @@ async function verifySMIME() {
   const parser = parse(common.getElement("smime_message", "textarea").value);
   //#endregion
 
-  if (("childNodes" in parser) || (parser.childNodes.length !== 2)) {
+  if ("childNodes" in parser || parser.childNodes.length !== 2) {
     const lastNode = parser.childNodes[1];
-    if ((lastNode.contentType.value === "application/x-pkcs7-signature") || (lastNode.contentType.value === "application/pkcs7-signature")) {
+    if (
+      lastNode.contentType.value === "application/x-pkcs7-signature" ||
+      lastNode.contentType.value === "application/pkcs7-signature"
+    ) {
       // Parse into pkijs types
       let cmsContentSimpl;
       let cmsSignedSimpl;
@@ -29,28 +32,30 @@ async function verifySMIME() {
       try {
         cmsContentSimpl = pkijs.ContentInfo.fromBER(lastNode.content.buffer);
         cmsSignedSimpl = new pkijs.SignedData({ schema: cmsContentSimpl.content });
-      }
-      catch {
+      } catch {
         alert("Incorrect message format!");
         return;
       }
 
       // Get signed data buffer
-      const signedDataBuffer = pvutils.stringToArrayBuffer(parser.childNodes[0].raw.replace(/\n/g, "\r\n"));
+      const signedDataBuffer = pvutils.stringToArrayBuffer(
+        parser.childNodes[0].raw.replace(/\n/g, "\r\n")
+      );
 
       // Verify the signed data
       try {
-        const result = await cmsSignedSimpl.verify({ signer: 0, data: signedDataBuffer, trustedCerts: trustedCertificates });
-        alert(`S/MIME message ${(!result) ? "verification failed" : "successfully verified"}!`);
+        const result = await cmsSignedSimpl.verify({
+          signer: 0,
+          data: signedDataBuffer,
+          trustedCerts: trustedCertificates
+        });
+        alert(`S/MIME message ${!result ? "verification failed" : "successfully verified"}!`);
       } catch (e) {
         console.error(e);
         alert("Error during verification. Please see developer console for more details");
       }
-
     }
-  }
-  else
-    alert("No child nodes!");
+  } else alert("No child nodes!");
 }
 
 // Functions handling file selection

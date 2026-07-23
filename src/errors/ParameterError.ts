@@ -2,7 +2,6 @@ import { EMPTY_STRING } from "../constants";
 import { ArgumentError } from "./ArgumentError";
 
 export class ParameterError extends TypeError {
-
   public static readonly NAME = "ParameterError";
 
   public static assert(target: string, params: any, ...fields: string[]): void;
@@ -53,5 +52,4 @@ export class ParameterError extends TypeError {
       this.message = `Absent mandatory parameter '${field}' ${target ? ` in '${target}'` : EMPTY_STRING}`;
     }
   }
-
 }

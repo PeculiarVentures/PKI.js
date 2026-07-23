@@ -50,7 +50,10 @@ async function smimeEncrypt() {
   cmsEnveloped.addRecipientByCertificate(certSimpl, { oaepHashAlgorithm: oaepHashAlg });
 
   try {
-    await cmsEnveloped.encrypt(encAlg, pvutils.stringToArrayBuffer(common.getElement("content", "textarea").value));
+    await cmsEnveloped.encrypt(
+      encAlg,
+      pvutils.stringToArrayBuffer(common.getElement("content", "textarea").value)
+    );
   } catch (e) {
     console.error(e);
     alert("Error during encryption process. See developer console for more details");
@@ -64,7 +67,9 @@ async function smimeEncrypt() {
   const ber = schema.toBER(false);
 
   // Insert enveloped data into new Mime message
-  const mimeBuilder = new MimeNode("application/pkcs7-mime; name=smime.p7m; smime-type=enveloped-data; charset=binary")
+  const mimeBuilder = new MimeNode(
+    "application/pkcs7-mime; name=smime.p7m; smime-type=enveloped-data; charset=binary"
+  )
     .setHeader("content-description", "Enveloped Data")
     .setHeader("content-disposition", "attachment; filename=smime.p7m")
     .setHeader("content-transfer-encoding", "base64")
@@ -99,11 +104,10 @@ async function smimeDecrypt() {
 
   let result: ArrayBuffer;
   try {
-    result = await cmsEnvelopedSimp.decrypt(0,
-      {
-        recipientCertificate: certSimpl,
-        recipientPrivateKey: privateKeyBuffer
-      });
+    result = await cmsEnvelopedSimp.decrypt(0, {
+      recipientCertificate: certSimpl,
+      recipientPrivateKey: privateKeyBuffer
+    });
 
     common.getElement("decrypted_content").innerHTML = pvutils.arrayBufferToString(result);
   } catch (e) {

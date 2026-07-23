@@ -2,18 +2,18 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { OtherKeyAttribute, OtherKeyAttributeJson, OtherKeyAttributeSchema } from "./OtherKeyAttribute";
+import {
+  OtherKeyAttribute,
+  OtherKeyAttributeJson,
+  OtherKeyAttributeSchema
+} from "./OtherKeyAttribute";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const SUBJECT_KEY_IDENTIFIER = "subjectKeyIdentifier";
 const DATE = "date";
 const OTHER = "other";
-const CLEAR_PROPS = [
-  SUBJECT_KEY_IDENTIFIER,
-  DATE,
-  OTHER,
-];
+const CLEAR_PROPS = [SUBJECT_KEY_IDENTIFIER, DATE, OTHER];
 
 export interface IRecipientKeyIdentifier {
   subjectKeyIdentifier: asn1js.OctetString;
@@ -27,7 +27,8 @@ export interface RecipientKeyIdentifierJson {
   other?: OtherKeyAttributeJson;
 }
 
-export type RecipientKeyIdentifierParameters = PkiObjectParameters & Partial<IRecipientKeyIdentifier>;
+export type RecipientKeyIdentifierParameters = PkiObjectParameters &
+  Partial<IRecipientKeyIdentifier>;
 
 export type RecipientKeyIdentifierSchema = Schema.SchemaParameters<{
   subjectKeyIdentifier?: string;
@@ -39,7 +40,6 @@ export type RecipientKeyIdentifierSchema = Schema.SchemaParameters<{
  * Represents the RecipientKeyIdentifier structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyIdentifier {
-
   public static override CLASS_NAME = "RecipientKeyIdentifier";
 
   public subjectKeyIdentifier!: asn1js.OctetString;
@@ -53,12 +53,24 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
   constructor(parameters: RecipientKeyIdentifierParameters = {}) {
     super();
 
-    this.subjectKeyIdentifier = pvutils.getParametersValue(parameters, SUBJECT_KEY_IDENTIFIER, RecipientKeyIdentifier.defaultValues(SUBJECT_KEY_IDENTIFIER));
+    this.subjectKeyIdentifier = pvutils.getParametersValue(
+      parameters,
+      SUBJECT_KEY_IDENTIFIER,
+      RecipientKeyIdentifier.defaultValues(SUBJECT_KEY_IDENTIFIER)
+    );
     if (DATE in parameters) {
-      this.date = pvutils.getParametersValue(parameters, DATE, RecipientKeyIdentifier.defaultValues(DATE));
+      this.date = pvutils.getParametersValue(
+        parameters,
+        DATE,
+        RecipientKeyIdentifier.defaultValues(DATE)
+      );
     }
     if (OTHER in parameters) {
-      this.other = pvutils.getParametersValue(parameters, OTHER, RecipientKeyIdentifier.defaultValues(OTHER));
+      this.other = pvutils.getParametersValue(
+        parameters,
+        OTHER,
+        RecipientKeyIdentifier.defaultValues(OTHER)
+      );
     }
 
     if (parameters.schema) {
@@ -71,7 +83,9 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
    * @param memberName String name for a class member
    * @returns Default value
    */
-  public static override defaultValues(memberName: typeof SUBJECT_KEY_IDENTIFIER): asn1js.OctetString;
+  public static override defaultValues(
+    memberName: typeof SUBJECT_KEY_IDENTIFIER
+  ): asn1js.OctetString;
   public static override defaultValues(memberName: typeof DATE): asn1js.GeneralizedTime;
   public static override defaultValues(memberName: typeof OTHER): OtherKeyAttribute;
   public static override defaultValues(memberName: string): any {
@@ -95,17 +109,19 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case SUBJECT_KEY_IDENTIFIER:
-        return (memberValue.isEqual(RecipientKeyIdentifier.defaultValues(SUBJECT_KEY_IDENTIFIER)));
+        return memberValue.isEqual(RecipientKeyIdentifier.defaultValues(SUBJECT_KEY_IDENTIFIER));
       case DATE:
-        return ((memberValue.year === 0) &&
-          (memberValue.month === 0) &&
-          (memberValue.day === 0) &&
-          (memberValue.hour === 0) &&
-          (memberValue.minute === 0) &&
-          (memberValue.second === 0) &&
-          (memberValue.millisecond === 0));
+        return (
+          memberValue.year === 0 &&
+          memberValue.month === 0 &&
+          memberValue.day === 0 &&
+          memberValue.hour === 0 &&
+          memberValue.minute === 0 &&
+          memberValue.second === 0 &&
+          memberValue.millisecond === 0
+        );
       case OTHER:
-        return ((memberValue.keyAttrId === EMPTY_STRING) && (("keyAttr" in memberValue) === false));
+        return memberValue.keyAttrId === EMPTY_STRING && "keyAttr" in memberValue === false;
       default:
         return super.defaultValues(memberName);
     }
@@ -122,19 +138,23 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
    *```
    */
   public static override schema(parameters: RecipientKeyIdentifierSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.OctetString({ name: (names.subjectKeyIdentifier || EMPTY_STRING) }),
+        new asn1js.OctetString({ name: names.subjectKeyIdentifier || EMPTY_STRING }),
         new asn1js.GeneralizedTime({
           optional: true,
-          name: (names.date || EMPTY_STRING)
+          name: names.date || EMPTY_STRING
         }),
         OtherKeyAttribute.schema(names.other || {})
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -142,7 +162,8 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       RecipientKeyIdentifier.schema({
         names: {
@@ -161,11 +182,9 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
     // Get internal properties from parsed schema
     this.subjectKeyIdentifier = asn1.result.subjectKeyIdentifier;
 
-    if (DATE in asn1.result)
-      this.date = asn1.result.date;
+    if (DATE in asn1.result) this.date = asn1.result.date;
 
-    if (OTHER in asn1.result)
-      this.other = new OtherKeyAttribute({ schema: asn1.result.other });
+    if (OTHER in asn1.result) this.other = new OtherKeyAttribute({ schema: asn1.result.other });
   }
 
   public toSchema(): asn1js.Sequence {
@@ -183,9 +202,9 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
     }
 
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
   }
 
   public toJSON(): RecipientKeyIdentifierJson {
@@ -203,5 +222,4 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
 
     return res;
   }
-
 }

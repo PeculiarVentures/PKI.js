@@ -20,7 +20,6 @@ export interface SafeContentsJson {
  * Represents the SafeContents structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
 export class SafeContents extends PkiObject implements ISafeContents {
-
   public static override CLASS_NAME = "SafeContents";
 
   public safeBags!: SafeBag[];
@@ -32,7 +31,11 @@ export class SafeContents extends PkiObject implements ISafeContents {
   constructor(parameters: SafeContentsParameters = {}) {
     super();
 
-    this.safeBags = pvutils.getParametersValue(parameters, SAFE_BUGS, SafeContents.defaultValues(SAFE_BUGS));
+    this.safeBags = pvutils.getParametersValue(
+      parameters,
+      SAFE_BUGS,
+      SafeContents.defaultValues(SAFE_BUGS)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -62,7 +65,7 @@ export class SafeContents extends PkiObject implements ISafeContents {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case SAFE_BUGS:
-        return (memberValue.length === 0);
+        return memberValue.length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -75,30 +78,35 @@ export class SafeContents extends PkiObject implements ISafeContents {
    * SafeContents ::= SEQUENCE OF SafeBag
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    safeBags?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      safeBags?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
-          name: (names.safeBags || EMPTY_STRING),
+          name: names.safeBags || EMPTY_STRING,
           value: SafeBag.schema()
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [
-      SAFE_BUGS
-    ]);
+    pvutils.clearProps(schema, [SAFE_BUGS]);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       SafeContents.schema({
         names: {
@@ -114,9 +122,9 @@ export class SafeContents extends PkiObject implements ISafeContents {
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: Array.from(this.safeBags, o => o.toSchema())
-    }));
+    });
     //#endregion
   }
 
@@ -125,8 +133,7 @@ export class SafeContents extends PkiObject implements ISafeContents {
       safeBags: Array.from(this.safeBags, o => o.toJSON())
     };
   }
-
 }
 
-import { SafeBag, SafeBagJson } from "./SafeBag";import { EMPTY_STRING } from "./constants";
-
+import { SafeBag, SafeBagJson } from "./SafeBag";
+import { EMPTY_STRING } from "./constants";

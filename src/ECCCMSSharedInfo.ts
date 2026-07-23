@@ -1,6 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema
+} from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -9,11 +13,7 @@ import * as Schema from "./Schema";
 const KEY_INFO = "keyInfo";
 const ENTITY_U_INFO = "entityUInfo";
 const SUPP_PUB_INFO = "suppPubInfo";
-const CLEAR_PROPS = [
-  KEY_INFO,
-  ENTITY_U_INFO,
-  SUPP_PUB_INFO
-];
+const CLEAR_PROPS = [KEY_INFO, ENTITY_U_INFO, SUPP_PUB_INFO];
 
 export interface IECCCMSSharedInfo {
   keyInfo: AlgorithmIdentifier;
@@ -33,7 +33,6 @@ export type ECCCMSSharedInfoParameters = PkiObjectParameters & Partial<IECCCMSSh
  * Represents the ECCCMSSharedInfo structure described in [RFC6318](https://datatracker.ietf.org/doc/html/rfc6318)
  */
 export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
-
   public static override CLASS_NAME = "ECCCMSSharedInfo";
 
   public keyInfo!: AlgorithmIdentifier;
@@ -47,11 +46,23 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
   constructor(parameters: ECCCMSSharedInfoParameters = {}) {
     super();
 
-    this.keyInfo = pvutils.getParametersValue(parameters, KEY_INFO, ECCCMSSharedInfo.defaultValues(KEY_INFO));
+    this.keyInfo = pvutils.getParametersValue(
+      parameters,
+      KEY_INFO,
+      ECCCMSSharedInfo.defaultValues(KEY_INFO)
+    );
     if (ENTITY_U_INFO in parameters) {
-      this.entityUInfo = pvutils.getParametersValue(parameters, ENTITY_U_INFO, ECCCMSSharedInfo.defaultValues(ENTITY_U_INFO));
+      this.entityUInfo = pvutils.getParametersValue(
+        parameters,
+        ENTITY_U_INFO,
+        ECCCMSSharedInfo.defaultValues(ENTITY_U_INFO)
+      );
     }
-    this.suppPubInfo = pvutils.getParametersValue(parameters, SUPP_PUB_INFO, ECCCMSSharedInfo.defaultValues(SUPP_PUB_INFO));
+    this.suppPubInfo = pvutils.getParametersValue(
+      parameters,
+      SUPP_PUB_INFO,
+      ECCCMSSharedInfo.defaultValues(SUPP_PUB_INFO)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -89,7 +100,9 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
       case KEY_INFO:
       case ENTITY_U_INFO:
       case SUPP_PUB_INFO:
-        return (memberValue.isEqual(ECCCMSSharedInfo.defaultValues(memberName as typeof SUPP_PUB_INFO)));
+        return memberValue.isEqual(
+          ECCCMSSharedInfo.defaultValues(memberName as typeof SUPP_PUB_INFO)
+        );
       default:
         return super.defaultValues(memberName);
     }
@@ -105,19 +118,25 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
    *    suppPubInfo  [2] EXPLICIT OCTET STRING }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    keyInfo?: AlgorithmIdentifierSchema;
-    entityUInfo?: string;
-    suppPubInfo?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      keyInfo?: AlgorithmIdentifierSchema;
+      entityUInfo?: string;
+      suppPubInfo?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         AlgorithmIdentifier.schema(names.keyInfo || {}),
         new asn1js.Constructed({
-          name: (names.entityUInfo || EMPTY_STRING),
+          name: names.entityUInfo || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
@@ -126,7 +145,7 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
           value: [new asn1js.OctetString()]
         }),
         new asn1js.Constructed({
-          name: (names.suppPubInfo || EMPTY_STRING),
+          name: names.suppPubInfo || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 2 // [2]
@@ -134,7 +153,7 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
           value: [new asn1js.OctetString()]
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -142,7 +161,8 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       ECCCMSSharedInfo.schema({
         names: {
@@ -172,22 +192,26 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
     outputArray.push(this.keyInfo.toSchema());
 
     if (this.entityUInfo) {
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        value: [this.entityUInfo]
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0 // [0]
+          },
+          value: [this.entityUInfo]
+        })
+      );
     }
 
-    outputArray.push(new asn1js.Constructed({
-      idBlock: {
-        tagClass: 3, // CONTEXT-SPECIFIC
-        tagNumber: 2 // [2]
-      },
-      value: [this.suppPubInfo]
-    }));
+    outputArray.push(
+      new asn1js.Constructed({
+        idBlock: {
+          tagClass: 3, // CONTEXT-SPECIFIC
+          tagNumber: 2 // [2]
+        },
+        value: [this.suppPubInfo]
+      })
+    );
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
@@ -200,7 +224,7 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
   public toJSON(): ECCCMSSharedInfoJson {
     const res: ECCCMSSharedInfoJson = {
       keyInfo: this.keyInfo.toJSON(),
-      suppPubInfo: this.suppPubInfo.toJSON(),
+      suppPubInfo: this.suppPubInfo.toJSON()
     };
 
     if (this.entityUInfo) {
@@ -209,5 +233,4 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
 
     return res;
   }
-
 }

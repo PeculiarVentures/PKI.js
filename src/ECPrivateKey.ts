@@ -12,12 +12,7 @@ const VERSION = "version";
 const PRIVATE_KEY = "privateKey";
 const NAMED_CURVE = "namedCurve";
 const PUBLIC_KEY = "publicKey";
-const CLEAR_PROPS = [
-  VERSION,
-  PRIVATE_KEY,
-  NAMED_CURVE,
-  PUBLIC_KEY
-];
+const CLEAR_PROPS = [VERSION, PRIVATE_KEY, NAMED_CURVE, PUBLIC_KEY];
 
 export interface IECPrivateKey {
   version: number;
@@ -26,7 +21,8 @@ export interface IECPrivateKey {
   publicKey?: ECPublicKey;
 }
 
-export type ECPrivateKeyParameters = PkiObjectParameters & Partial<IECPrivateKey> & { json?: ECPrivateKeyJson; };
+export type ECPrivateKeyParameters = PkiObjectParameters &
+  Partial<IECPrivateKey> & { json?: ECPrivateKeyJson };
 
 export interface ECPrivateKeyJson {
   crv: string;
@@ -39,7 +35,6 @@ export interface ECPrivateKeyJson {
  * Represents the PrivateKeyInfo structure described in [RFC5915](https://datatracker.ietf.org/doc/html/rfc5915)
  */
 export class ECPrivateKey extends PkiObject implements IECPrivateKey {
-
   public static override CLASS_NAME = "ECPrivateKey";
 
   public version!: number;
@@ -54,13 +49,29 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
   constructor(parameters: ECPrivateKeyParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, ECPrivateKey.defaultValues(VERSION));
-    this.privateKey = pvutils.getParametersValue(parameters, PRIVATE_KEY, ECPrivateKey.defaultValues(PRIVATE_KEY));
+    this.version = pvutils.getParametersValue(
+      parameters,
+      VERSION,
+      ECPrivateKey.defaultValues(VERSION)
+    );
+    this.privateKey = pvutils.getParametersValue(
+      parameters,
+      PRIVATE_KEY,
+      ECPrivateKey.defaultValues(PRIVATE_KEY)
+    );
     if (NAMED_CURVE in parameters) {
-      this.namedCurve = pvutils.getParametersValue(parameters, NAMED_CURVE, ECPrivateKey.defaultValues(NAMED_CURVE));
+      this.namedCurve = pvutils.getParametersValue(
+        parameters,
+        NAMED_CURVE,
+        ECPrivateKey.defaultValues(NAMED_CURVE)
+      );
     }
     if (PUBLIC_KEY in parameters) {
-      this.publicKey = pvutils.getParametersValue(parameters, PUBLIC_KEY, ECPrivateKey.defaultValues(PUBLIC_KEY));
+      this.publicKey = pvutils.getParametersValue(
+        parameters,
+        PUBLIC_KEY,
+        ECPrivateKey.defaultValues(PUBLIC_KEY)
+      );
     }
 
     if (parameters.json) {
@@ -104,15 +115,17 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case VERSION:
-        return (memberValue === ECPrivateKey.defaultValues(memberName));
+        return memberValue === ECPrivateKey.defaultValues(memberName);
       case PRIVATE_KEY:
-        return (memberValue.isEqual(ECPrivateKey.defaultValues(memberName)));
+        return memberValue.isEqual(ECPrivateKey.defaultValues(memberName));
       case NAMED_CURVE:
-        return (memberValue === EMPTY_STRING);
+        return memberValue === EMPTY_STRING;
       case PUBLIC_KEY:
-        return ((ECPublicKey.compareWithDefault(NAMED_CURVE, memberValue.namedCurve)) &&
-          (ECPublicKey.compareWithDefault("x", memberValue.x)) &&
-          (ECPublicKey.compareWithDefault("y", memberValue.y)));
+        return (
+          ECPublicKey.compareWithDefault(NAMED_CURVE, memberValue.namedCurve) &&
+          ECPublicKey.compareWithDefault("x", memberValue.x) &&
+          ECPublicKey.compareWithDefault("y", memberValue.y)
+        );
       default:
         return super.defaultValues(memberName);
     }
@@ -130,28 +143,32 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
    * }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    version?: string;
-    privateKey?: string;
-    namedCurve?: string;
-    publicKey?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      version?: string;
+      privateKey?: string;
+      namedCurve?: string;
+      publicKey?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
-        new asn1js.OctetString({ name: (names.privateKey || EMPTY_STRING) }),
+        new asn1js.Integer({ name: names.version || EMPTY_STRING }),
+        new asn1js.OctetString({ name: names.privateKey || EMPTY_STRING }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          value: [
-            new asn1js.ObjectIdentifier({ name: (names.namedCurve || EMPTY_STRING) })
-          ]
+          value: [new asn1js.ObjectIdentifier({ name: names.namedCurve || EMPTY_STRING })]
         }),
         new asn1js.Constructed({
           optional: true,
@@ -159,12 +176,10 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 1 // [1]
           },
-          value: [
-            new asn1js.BitString({ name: (names.publicKey || EMPTY_STRING) })
-          ]
+          value: [new asn1js.BitString({ name: names.publicKey || EMPTY_STRING })]
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -172,7 +187,8 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       ECPrivateKey.schema({
         names: {
@@ -194,7 +210,9 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
     }
 
     if (PUBLIC_KEY in asn1.result) {
-      const publicKeyData: ECPublicKeyParameters = { schema: asn1.result.publicKey.valueBlock.valueHex };
+      const publicKeyData: ECPublicKeyParameters = {
+        schema: asn1.result.publicKey.valueBlock.valueHex
+      };
       if (NAMED_CURVE in this) {
         publicKeyData.namedCurve = this.namedCurve;
       }
@@ -205,33 +223,30 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
   }
 
   public toSchema(): asn1js.Sequence {
-    const outputArray: any = [
-      new asn1js.Integer({ value: this.version }),
-      this.privateKey
-    ];
+    const outputArray: any = [new asn1js.Integer({ value: this.version }), this.privateKey];
 
     if (this.namedCurve) {
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        value: [
-          new asn1js.ObjectIdentifier({ value: this.namedCurve })
-        ]
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0 // [0]
+          },
+          value: [new asn1js.ObjectIdentifier({ value: this.namedCurve })]
+        })
+      );
     }
 
     if (this.publicKey) {
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 1 // [1]
-        },
-        value: [
-          new asn1js.BitString({ valueHex: this.publicKey.toSchema().toBER(false) })
-        ]
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 1 // [1]
+          },
+          value: [new asn1js.BitString({ valueHex: this.publicKey.toSchema().toBER(false) })]
+        })
+      );
     }
 
     return new asn1js.Sequence({
@@ -241,14 +256,14 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
 
   public toJSON(): ECPrivateKeyJson {
     if (!this.namedCurve || ECPrivateKey.compareWithDefault(NAMED_CURVE, this.namedCurve)) {
-      throw new Error("Not enough information for making JSON: absent \"namedCurve\" value");
+      throw new Error('Not enough information for making JSON: absent "namedCurve" value');
     }
 
     const curve = ECNamedCurves.find(this.namedCurve);
 
     const privateKeyJSON: ECPrivateKeyJson = {
       crv: curve ? curve.name : this.namedCurve,
-      d: pvtsutils.Convert.ToBase64Url(this.privateKey.valueBlock.valueHexView),
+      d: pvtsutils.Convert.ToBase64Url(this.privateKey.valueBlock.valueHexView)
     };
 
     if (this.publicKey) {
@@ -286,12 +301,13 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
 
       this.privateKey = new asn1js.OctetString({ valueHex: buffer });
     } else {
-      this.privateKey = new asn1js.OctetString({ valueHex: convertBuffer.slice(0, coordinateLength) });
+      this.privateKey = new asn1js.OctetString({
+        valueHex: convertBuffer.slice(0, coordinateLength)
+      });
     }
 
     if (json.x && json.y) {
       this.publicKey = new ECPublicKey({ json });
     }
   }
-
 }

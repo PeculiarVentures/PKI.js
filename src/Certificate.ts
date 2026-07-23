@@ -2,8 +2,16 @@ import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { RelativeDistinguishedNames, RelativeDistinguishedNamesJson, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema
+} from "./AlgorithmIdentifier";
+import {
+  RelativeDistinguishedNames,
+  RelativeDistinguishedNamesJson,
+  RelativeDistinguishedNamesSchema
+} from "./RelativeDistinguishedNames";
 import { Time, TimeJson, TimeSchema } from "./Time";
 import { PublicKeyInfo, PublicKeyInfoJson, PublicKeyInfoSchema } from "./PublicKeyInfo";
 import { Extension, ExtensionJson } from "./Extension";
@@ -91,10 +99,14 @@ function tbsCertificate(parameters: TBSCertificateSchema = {}): Schema.SchemaTyp
   //    -- If present, version MUST be v3
   //}
 
-  const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+    parameters,
+    "names",
+    {}
+  );
 
-  return (new asn1js.Sequence({
-    name: (names.blockName || TBS_CERTIFICATE),
+  return new asn1js.Sequence({
+    name: names.blockName || TBS_CERTIFICATE,
     value: [
       new asn1js.Constructed({
         optional: true,
@@ -103,49 +115,63 @@ function tbsCertificate(parameters: TBSCertificateSchema = {}): Schema.SchemaTyp
           tagNumber: 0 // [0]
         },
         value: [
-          new asn1js.Integer({ name: (names.tbsCertificateVersion || TBS_CERTIFICATE_VERSION) }) // EXPLICIT integer value
+          new asn1js.Integer({ name: names.tbsCertificateVersion || TBS_CERTIFICATE_VERSION }) // EXPLICIT integer value
         ]
       }),
-      new asn1js.Integer({ name: (names.tbsCertificateSerialNumber || TBS_CERTIFICATE_SERIAL_NUMBER) }),
-      AlgorithmIdentifier.schema(names.signature || {
-        names: {
-          blockName: TBS_CERTIFICATE_SIGNATURE
-        }
+      new asn1js.Integer({
+        name: names.tbsCertificateSerialNumber || TBS_CERTIFICATE_SERIAL_NUMBER
       }),
-      RelativeDistinguishedNames.schema(names.issuer || {
-        names: {
-          blockName: TBS_CERTIFICATE_ISSUER
+      AlgorithmIdentifier.schema(
+        names.signature || {
+          names: {
+            blockName: TBS_CERTIFICATE_SIGNATURE
+          }
         }
-      }),
+      ),
+      RelativeDistinguishedNames.schema(
+        names.issuer || {
+          names: {
+            blockName: TBS_CERTIFICATE_ISSUER
+          }
+        }
+      ),
       new asn1js.Sequence({
-        name: (names.tbsCertificateValidity || "tbsCertificate.validity"),
+        name: names.tbsCertificateValidity || "tbsCertificate.validity",
         value: [
-          Time.schema(names.notBefore || {
-            names: {
-              utcTimeName: TBS_CERTIFICATE_NOT_BEFORE,
-              generalTimeName: TBS_CERTIFICATE_NOT_BEFORE
+          Time.schema(
+            names.notBefore || {
+              names: {
+                utcTimeName: TBS_CERTIFICATE_NOT_BEFORE,
+                generalTimeName: TBS_CERTIFICATE_NOT_BEFORE
+              }
             }
-          }),
-          Time.schema(names.notAfter || {
-            names: {
-              utcTimeName: TBS_CERTIFICATE_NOT_AFTER,
-              generalTimeName: TBS_CERTIFICATE_NOT_AFTER
+          ),
+          Time.schema(
+            names.notAfter || {
+              names: {
+                utcTimeName: TBS_CERTIFICATE_NOT_AFTER,
+                generalTimeName: TBS_CERTIFICATE_NOT_AFTER
+              }
             }
-          })
+          )
         ]
       }),
-      RelativeDistinguishedNames.schema(names.subject || {
-        names: {
-          blockName: TBS_CERTIFICATE_SUBJECT
+      RelativeDistinguishedNames.schema(
+        names.subject || {
+          names: {
+            blockName: TBS_CERTIFICATE_SUBJECT
+          }
         }
-      }),
-      PublicKeyInfo.schema(names.subjectPublicKeyInfo || {
-        names: {
-          blockName: TBS_CERTIFICATE_SUBJECT_PUBLIC_KEY
+      ),
+      PublicKeyInfo.schema(
+        names.subjectPublicKeyInfo || {
+          names: {
+            blockName: TBS_CERTIFICATE_SUBJECT_PUBLIC_KEY
+          }
         }
-      }),
+      ),
       new asn1js.Primitive({
-        name: (names.tbsCertificateIssuerUniqueID || TBS_CERTIFICATE_ISSUER_UNIQUE_ID),
+        name: names.tbsCertificateIssuerUniqueID || TBS_CERTIFICATE_ISSUER_UNIQUE_ID,
         optional: true,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
@@ -153,7 +179,7 @@ function tbsCertificate(parameters: TBSCertificateSchema = {}): Schema.SchemaTyp
         }
       }), // IMPLICIT BIT_STRING value
       new asn1js.Primitive({
-        name: (names.tbsCertificateSubjectUniqueID || TBS_CERTIFICATE_SUBJECT_UNIQUE_ID),
+        name: names.tbsCertificateSubjectUniqueID || TBS_CERTIFICATE_SUBJECT_UNIQUE_ID,
         optional: true,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
@@ -166,14 +192,18 @@ function tbsCertificate(parameters: TBSCertificateSchema = {}): Schema.SchemaTyp
           tagClass: 3, // CONTEXT-SPECIFIC
           tagNumber: 3 // [3]
         },
-        value: [Extensions.schema(names.extensions || {
-          names: {
-            blockName: TBS_CERTIFICATE_EXTENSIONS
-          }
-        })]
+        value: [
+          Extensions.schema(
+            names.extensions || {
+              names: {
+                blockName: TBS_CERTIFICATE_EXTENSIONS
+              }
+            }
+          )
+        ]
       }) // EXPLICIT SEQUENCE value
     ]
-  }));
+  });
 }
 
 export interface ICertificate {
@@ -345,7 +375,6 @@ export interface CertificateJson {
  * ```
  */
 export class Certificate extends PkiObject implements ICertificate {
-
   public static override CLASS_NAME = "Certificate";
 
   public tbsView!: Uint8Array;
@@ -384,26 +413,76 @@ export class Certificate extends PkiObject implements ICertificate {
   constructor(parameters: CertificateParameters = {}) {
     super();
 
-    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, Certificate.defaultValues(TBS)));
-    this.version = pvutils.getParametersValue(parameters, VERSION, Certificate.defaultValues(VERSION));
-    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, Certificate.defaultValues(SERIAL_NUMBER));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, Certificate.defaultValues(SIGNATURE));
+    this.tbsView = new Uint8Array(
+      pvutils.getParametersValue(parameters, TBS, Certificate.defaultValues(TBS))
+    );
+    this.version = pvutils.getParametersValue(
+      parameters,
+      VERSION,
+      Certificate.defaultValues(VERSION)
+    );
+    this.serialNumber = pvutils.getParametersValue(
+      parameters,
+      SERIAL_NUMBER,
+      Certificate.defaultValues(SERIAL_NUMBER)
+    );
+    this.signature = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE,
+      Certificate.defaultValues(SIGNATURE)
+    );
     this.issuer = pvutils.getParametersValue(parameters, ISSUER, Certificate.defaultValues(ISSUER));
-    this.notBefore = pvutils.getParametersValue(parameters, NOT_BEFORE, Certificate.defaultValues(NOT_BEFORE));
-    this.notAfter = pvutils.getParametersValue(parameters, NOT_AFTER, Certificate.defaultValues(NOT_AFTER));
-    this.subject = pvutils.getParametersValue(parameters, SUBJECT, Certificate.defaultValues(SUBJECT));
-    this.subjectPublicKeyInfo = pvutils.getParametersValue(parameters, SUBJECT_PUBLIC_KEY_INFO, Certificate.defaultValues(SUBJECT_PUBLIC_KEY_INFO));
+    this.notBefore = pvutils.getParametersValue(
+      parameters,
+      NOT_BEFORE,
+      Certificate.defaultValues(NOT_BEFORE)
+    );
+    this.notAfter = pvutils.getParametersValue(
+      parameters,
+      NOT_AFTER,
+      Certificate.defaultValues(NOT_AFTER)
+    );
+    this.subject = pvutils.getParametersValue(
+      parameters,
+      SUBJECT,
+      Certificate.defaultValues(SUBJECT)
+    );
+    this.subjectPublicKeyInfo = pvutils.getParametersValue(
+      parameters,
+      SUBJECT_PUBLIC_KEY_INFO,
+      Certificate.defaultValues(SUBJECT_PUBLIC_KEY_INFO)
+    );
     if (ISSUER_UNIQUE_ID in parameters) {
-      this.issuerUniqueID = pvutils.getParametersValue(parameters, ISSUER_UNIQUE_ID, Certificate.defaultValues(ISSUER_UNIQUE_ID));
+      this.issuerUniqueID = pvutils.getParametersValue(
+        parameters,
+        ISSUER_UNIQUE_ID,
+        Certificate.defaultValues(ISSUER_UNIQUE_ID)
+      );
     }
     if (SUBJECT_UNIQUE_ID in parameters) {
-      this.subjectUniqueID = pvutils.getParametersValue(parameters, SUBJECT_UNIQUE_ID, Certificate.defaultValues(SUBJECT_UNIQUE_ID));
+      this.subjectUniqueID = pvutils.getParametersValue(
+        parameters,
+        SUBJECT_UNIQUE_ID,
+        Certificate.defaultValues(SUBJECT_UNIQUE_ID)
+      );
     }
     if (EXTENSIONS in parameters) {
-      this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, Certificate.defaultValues(EXTENSIONS));
+      this.extensions = pvutils.getParametersValue(
+        parameters,
+        EXTENSIONS,
+        Certificate.defaultValues(EXTENSIONS)
+      );
     }
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, Certificate.defaultValues(SIGNATURE_ALGORITHM));
-    this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, Certificate.defaultValues(SIGNATURE_VALUE));
+    this.signatureAlgorithm = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE_ALGORITHM,
+      Certificate.defaultValues(SIGNATURE_ALGORITHM)
+    );
+    this.signatureValue = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE_VALUE,
+      Certificate.defaultValues(SIGNATURE_VALUE)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -520,20 +599,26 @@ export class Certificate extends PkiObject implements ICertificate {
    *```
    */
   public static override schema(parameters: CertificateSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         tbsCertificate(names.tbsCertificate),
-        AlgorithmIdentifier.schema(names.signatureAlgorithm || {
-          names: {
-            blockName: SIGNATURE_ALGORITHM
+        AlgorithmIdentifier.schema(
+          names.signatureAlgorithm || {
+            names: {
+              blockName: SIGNATURE_ALGORITHM
+            }
           }
-        }),
-        new asn1js.BitString({ name: (names.signatureValue || SIGNATURE_VALUE) })
+        ),
+        new asn1js.BitString({ name: names.signatureValue || SIGNATURE_VALUE })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -541,7 +626,8 @@ export class Certificate extends PkiObject implements ICertificate {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     //#region Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       Certificate.schema({
         names: {
@@ -571,13 +657,18 @@ export class Certificate extends PkiObject implements ICertificate {
     this.notBefore = new Time({ schema: asn1.result[TBS_CERTIFICATE_NOT_BEFORE] });
     this.notAfter = new Time({ schema: asn1.result[TBS_CERTIFICATE_NOT_AFTER] });
     this.subject = new RelativeDistinguishedNames({ schema: asn1.result[TBS_CERTIFICATE_SUBJECT] });
-    this.subjectPublicKeyInfo = new PublicKeyInfo({ schema: asn1.result[TBS_CERTIFICATE_SUBJECT_PUBLIC_KEY] });
+    this.subjectPublicKeyInfo = new PublicKeyInfo({
+      schema: asn1.result[TBS_CERTIFICATE_SUBJECT_PUBLIC_KEY]
+    });
     if (TBS_CERTIFICATE_ISSUER_UNIQUE_ID in asn1.result)
       this.issuerUniqueID = asn1.result[TBS_CERTIFICATE_ISSUER_UNIQUE_ID].valueBlock.valueHex;
     if (TBS_CERTIFICATE_SUBJECT_UNIQUE_ID in asn1.result)
       this.subjectUniqueID = asn1.result[TBS_CERTIFICATE_SUBJECT_UNIQUE_ID].valueBlock.valueHex;
     if (TBS_CERTIFICATE_EXTENSIONS in asn1.result)
-      this.extensions = Array.from(asn1.result[TBS_CERTIFICATE_EXTENSIONS], element => new Extension({ schema: element }));
+      this.extensions = Array.from(
+        asn1.result[TBS_CERTIFICATE_EXTENSIONS],
+        element => new Extension({ schema: element })
+      );
 
     this.signatureAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.signatureAlgorithm });
     this.signatureValue = asn1.result.signatureValue;
@@ -592,72 +683,81 @@ export class Certificate extends PkiObject implements ICertificate {
     //#region Create array for output sequence
     const outputArray = [];
 
-    if ((VERSION in this) && (this.version !== Certificate.defaultValues(VERSION))) {
-      outputArray.push(new asn1js.Constructed({
-        optional: true,
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        value: [
-          new asn1js.Integer({ value: this.version }) // EXPLICIT integer value
-        ]
-      }));
+    if (VERSION in this && this.version !== Certificate.defaultValues(VERSION)) {
+      outputArray.push(
+        new asn1js.Constructed({
+          optional: true,
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0 // [0]
+          },
+          value: [
+            new asn1js.Integer({ value: this.version }) // EXPLICIT integer value
+          ]
+        })
+      );
     }
 
     outputArray.push(this.serialNumber);
     outputArray.push(this.signature.toSchema());
     outputArray.push(this.issuer.toSchema());
 
-    outputArray.push(new asn1js.Sequence({
-      value: [
-        this.notBefore.toSchema(),
-        this.notAfter.toSchema()
-      ]
-    }));
+    outputArray.push(
+      new asn1js.Sequence({
+        value: [this.notBefore.toSchema(), this.notAfter.toSchema()]
+      })
+    );
 
     outputArray.push(this.subject.toSchema());
     outputArray.push(this.subjectPublicKeyInfo.toSchema());
 
     if (this.issuerUniqueID) {
-      outputArray.push(new asn1js.Primitive({
-        optional: true,
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 1 // [1]
-        },
-        valueHex: this.issuerUniqueID
-      }));
+      outputArray.push(
+        new asn1js.Primitive({
+          optional: true,
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 1 // [1]
+          },
+          valueHex: this.issuerUniqueID
+        })
+      );
     }
     if (this.subjectUniqueID) {
-      outputArray.push(new asn1js.Primitive({
-        optional: true,
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 2 // [2]
-        },
-        valueHex: this.subjectUniqueID
-      }));
+      outputArray.push(
+        new asn1js.Primitive({
+          optional: true,
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 2 // [2]
+          },
+          valueHex: this.subjectUniqueID
+        })
+      );
     }
 
     if (this.extensions) {
-      outputArray.push(new asn1js.Constructed({
-        optional: true,
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 3 // [3]
-        },
-        value: [new asn1js.Sequence({
-          value: Array.from(this.extensions, o => o.toSchema())
-        })]
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          optional: true,
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 3 // [3]
+          },
+          value: [
+            new asn1js.Sequence({
+              value: Array.from(this.extensions, o => o.toSchema())
+            })
+          ]
+        })
+      );
     }
     //#endregion
 
     //#region Create and return output sequence
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
     //#endregion
   }
 
@@ -666,7 +766,8 @@ export class Certificate extends PkiObject implements ICertificate {
 
     // Decode stored TBS value
     if (encodeFlag === false) {
-      if (!this.tbsView.byteLength) { // No stored certificate TBS part
+      if (!this.tbsView.byteLength) {
+        // No stored certificate TBS part
         return Certificate.schema().value[0];
       }
 
@@ -680,13 +781,9 @@ export class Certificate extends PkiObject implements ICertificate {
     }
 
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: [
-        tbsSchema,
-        this.signatureAlgorithm.toSchema(),
-        this.signatureValue
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [tbsSchema, this.signatureAlgorithm.toSchema(), this.signatureValue]
+    });
   }
 
   public toJSON(): CertificateJson {
@@ -701,10 +798,10 @@ export class Certificate extends PkiObject implements ICertificate {
       subject: this.subject.toJSON(),
       subjectPublicKeyInfo: this.subjectPublicKeyInfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON(),
+      signatureValue: this.signatureValue.toJSON()
     };
 
-    if ((VERSION in this) && (this.version !== Certificate.defaultValues(VERSION))) {
+    if (VERSION in this && this.version !== Certificate.defaultValues(VERSION)) {
       res.version = this.version;
     }
 
@@ -729,7 +826,10 @@ export class Certificate extends PkiObject implements ICertificate {
    * @param crypto Crypto engine
    * @returns WebCrypto public key
    */
-  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams, crypto = common.getCrypto(true)): Promise<CryptoKey> {
+  public async getPublicKey(
+    parameters?: CryptoEnginePublicKeyParams,
+    crypto = common.getCrypto(true)
+  ): Promise<CryptoKey> {
     return crypto.getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
   }
 
@@ -739,8 +839,14 @@ export class Certificate extends PkiObject implements ICertificate {
    * @param crypto Crypto engine
    * @returns Computed hash value from `Certificate.tbsCertificate.subjectPublicKeyInfo.subjectPublicKey`
    */
-  public async getKeyHash(hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<ArrayBuffer> {
-    return crypto.digest({ name: hashAlgorithm }, this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
+  public async getKeyHash(
+    hashAlgorithm = "SHA-1",
+    crypto = common.getCrypto(true)
+  ): Promise<ArrayBuffer> {
+    return crypto.digest(
+      { name: hashAlgorithm },
+      this.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource
+    );
   }
 
   /**
@@ -749,7 +855,11 @@ export class Certificate extends PkiObject implements ICertificate {
    * @param hashAlgorithm Hashing algorithm
    * @param crypto Crypto engine
    */
-  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
+  public async sign(
+    privateKey: CryptoKey,
+    hashAlgorithm = "SHA-1",
+    crypto = common.getCrypto(true)
+  ): Promise<void> {
     // Initial checking
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
@@ -766,7 +876,11 @@ export class Certificate extends PkiObject implements ICertificate {
 
     // Signing TBS data on provided private key
     // TODO remove any
-    const signature = await crypto.signWithPrivateKey(this.tbsView as BufferSource, privateKey, parameters as any);
+    const signature = await crypto.signWithPrivateKey(
+      this.tbsView as BufferSource,
+      privateKey,
+      parameters as any
+    );
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
   }
 
@@ -775,7 +889,10 @@ export class Certificate extends PkiObject implements ICertificate {
    * @param issuerCertificate
    * @param crypto Crypto engine
    */
-  public async verify(issuerCertificate?: Certificate, crypto = common.getCrypto(true)): Promise<boolean> {
+  public async verify(
+    issuerCertificate?: Certificate,
+    crypto = common.getCrypto(true)
+  ): Promise<boolean> {
     let subjectPublicKeyInfo: PublicKeyInfo | undefined;
 
     // Set correct SUBJECT_PUBLIC_KEY_INFO value
@@ -790,9 +907,13 @@ export class Certificate extends PkiObject implements ICertificate {
       throw new Error("Please provide issuer certificate as a parameter");
     }
 
-    return crypto.verifyWithPublicKey(this.tbsView as BufferSource, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
+    return crypto.verifyWithPublicKey(
+      this.tbsView as BufferSource,
+      this.signatureValue,
+      subjectPublicKeyInfo,
+      this.signatureAlgorithm
+    );
   }
-
 }
 
 /**
@@ -800,9 +921,16 @@ export class Certificate extends PkiObject implements ICertificate {
  * @param cert Certificate to find CA flag for
  * @returns Returns {@link Certificate} if `cert` is CA certificate otherwise return `null`
  */
-export function checkCA(cert: Certificate, signerCert: Certificate | null = null): Certificate | null {
+export function checkCA(
+  cert: Certificate,
+  signerCert: Certificate | null = null
+): Certificate | null {
   //#region Do not include signer's certificate
-  if (signerCert && cert.issuer.isEqual(signerCert.issuer) && cert.serialNumber.isEqual(signerCert.serialNumber)) {
+  if (
+    signerCert &&
+    cert.issuer.isEqual(signerCert.issuer) &&
+    cert.serialNumber.isEqual(signerCert.serialNumber)
+  ) {
     return null;
   }
   //#endregion
@@ -811,7 +939,10 @@ export function checkCA(cert: Certificate, signerCert: Certificate | null = null
 
   if (cert.extensions) {
     for (const extension of cert.extensions) {
-      if (extension.extnID === id_BasicConstraints && extension.parsedValue instanceof BasicConstraints) {
+      if (
+        extension.extnID === id_BasicConstraints &&
+        extension.parsedValue instanceof BasicConstraints
+      ) {
         if (extension.parsedValue.cA) {
           isCA = true;
           break;

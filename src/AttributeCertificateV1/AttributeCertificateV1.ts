@@ -1,7 +1,15 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
-import { AttributeCertificateInfoV1, AttributeCertificateInfoV1Json, AttributeCertificateInfoV1Schema } from "./AttributeCertificateInfoV1";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema
+} from "../AlgorithmIdentifier";
+import {
+  AttributeCertificateInfoV1,
+  AttributeCertificateInfoV1Json,
+  AttributeCertificateInfoV1Schema
+} from "./AttributeCertificateInfoV1";
 import * as Schema from "../Schema";
 import { PkiObject, PkiObjectParameters } from "../PkiObject";
 import { AsnError } from "../errors";
@@ -10,11 +18,7 @@ import { EMPTY_STRING } from "../constants";
 const ACINFO = "acinfo";
 const SIGNATURE_ALGORITHM = "signatureAlgorithm";
 const SIGNATURE_VALUE = "signatureValue";
-const CLEAR_PROPS = [
-  ACINFO,
-  SIGNATURE_VALUE,
-  SIGNATURE_ALGORITHM
-];
+const CLEAR_PROPS = [ACINFO, SIGNATURE_VALUE, SIGNATURE_ALGORITHM];
 
 export interface IAttributeCertificateV1 {
   /**
@@ -37,13 +41,13 @@ export interface AttributeCertificateV1Json {
   signatureValue: asn1js.BitStringJson;
 }
 
-export type AttributeCertificateV1Parameters = PkiObjectParameters & Partial<IAttributeCertificateV1>;
+export type AttributeCertificateV1Parameters = PkiObjectParameters &
+  Partial<IAttributeCertificateV1>;
 
 /**
  * Class from X.509:1997
  */
 export class AttributeCertificateV1 extends PkiObject implements IAttributeCertificateV1 {
-
   public static override CLASS_NAME = "AttributeCertificateV1";
 
   public acinfo!: AttributeCertificateInfoV1;
@@ -57,9 +61,21 @@ export class AttributeCertificateV1 extends PkiObject implements IAttributeCerti
   constructor(parameters: AttributeCertificateV1Parameters = {}) {
     super();
 
-    this.acinfo = pvutils.getParametersValue(parameters, ACINFO, AttributeCertificateV1.defaultValues(ACINFO));
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, AttributeCertificateV1.defaultValues(SIGNATURE_ALGORITHM));
-    this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, AttributeCertificateV1.defaultValues(SIGNATURE_VALUE));
+    this.acinfo = pvutils.getParametersValue(
+      parameters,
+      ACINFO,
+      AttributeCertificateV1.defaultValues(ACINFO)
+    );
+    this.signatureAlgorithm = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE_ALGORITHM,
+      AttributeCertificateV1.defaultValues(SIGNATURE_ALGORITHM)
+    );
+    this.signatureValue = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE_VALUE,
+      AttributeCertificateV1.defaultValues(SIGNATURE_VALUE)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -98,21 +114,27 @@ export class AttributeCertificateV1 extends PkiObject implements IAttributeCerti
    * }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    acinfo?: AttributeCertificateInfoV1Schema;
-    signatureAlgorithm?: AlgorithmIdentifierSchema;
-    signatureValue?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      acinfo?: AttributeCertificateInfoV1Schema;
+      signatureAlgorithm?: AlgorithmIdentifierSchema;
+      signatureValue?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         AttributeCertificateInfoV1.schema(names.acinfo || {}),
         AlgorithmIdentifier.schema(names.signatureAlgorithm || {}),
-        new asn1js.BitString({ name: (names.signatureValue || EMPTY_STRING) })
+        new asn1js.BitString({ name: names.signatureValue || EMPTY_STRING })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -120,7 +142,8 @@ export class AttributeCertificateV1 extends PkiObject implements IAttributeCerti
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     //#region Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       AttributeCertificateV1.schema({
         names: {
@@ -149,21 +172,16 @@ export class AttributeCertificateV1 extends PkiObject implements IAttributeCerti
   }
 
   public toSchema(): asn1js.Sequence {
-    return (new asn1js.Sequence({
-      value: [
-        this.acinfo.toSchema(),
-        this.signatureAlgorithm.toSchema(),
-        this.signatureValue
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [this.acinfo.toSchema(), this.signatureAlgorithm.toSchema(), this.signatureValue]
+    });
   }
 
   public toJSON(): AttributeCertificateV1Json {
     return {
       acinfo: this.acinfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON(),
+      signatureValue: this.signatureValue.toJSON()
     };
   }
-
 }

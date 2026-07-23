@@ -1,7 +1,11 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema
+} from "./AlgorithmIdentifier";
 import { ECPublicKey } from "./ECPublicKey";
 import { RSAPublicKey } from "./RSAPublicKey";
 import * as Schema from "./Schema";
@@ -27,7 +31,8 @@ export interface IPublicKeyInfo {
    */
   parsedKey?: ECPublicKey | RSAPublicKey | undefined;
 }
-export type PublicKeyInfoParameters = PkiObjectParameters & Partial<IPublicKeyInfo> & { json?: JsonWebKey; };
+export type PublicKeyInfoParameters = PkiObjectParameters &
+  Partial<IPublicKeyInfo> & { json?: JsonWebKey };
 
 export interface PublicKeyInfoJson {
   algorithm: AlgorithmIdentifierJson;
@@ -43,7 +48,6 @@ export type PublicKeyInfoSchema = Schema.SchemaParameters<{
  * Represents the PublicKeyInfo structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
-
   public static override CLASS_NAME = "PublicKeyInfo";
 
   public algorithm!: AlgorithmIdentifier;
@@ -55,14 +59,16 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
         // TODO Use fabric
         case "1.2.840.10045.2.1": // ECDSA
           if ("algorithmParams" in this.algorithm) {
-            if (this.algorithm.algorithmParams.constructor.blockName() === asn1js.ObjectIdentifier.blockName()) {
+            if (
+              this.algorithm.algorithmParams.constructor.blockName() ===
+              asn1js.ObjectIdentifier.blockName()
+            ) {
               try {
                 this._parsedKey = new ECPublicKey({
                   namedCurve: this.algorithm.algorithmParams.valueBlock.toString(),
                   schema: this.subjectPublicKey.valueBlock.valueHexView
                 });
-              }
-              catch {
+              } catch {
                 // nothing
               } // Could be a problems during recognition of internal public key data here. Let's ignore them.
             }
@@ -75,8 +81,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
             if (publicKeyASN1.offset !== -1) {
               try {
                 this._parsedKey = new RSAPublicKey({ schema: publicKeyASN1.result });
-              }
-              catch {
+              } catch {
                 // nothing
               } // Could be a problems during recognition of internal public key data here. Let's ignore them.
             }
@@ -101,8 +106,16 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
   constructor(parameters: PublicKeyInfoParameters = {}) {
     super();
 
-    this.algorithm = pvutils.getParametersValue(parameters, ALGORITHM, PublicKeyInfo.defaultValues(ALGORITHM));
-    this.subjectPublicKey = pvutils.getParametersValue(parameters, SUBJECT_PUBLIC_KEY, PublicKeyInfo.defaultValues(SUBJECT_PUBLIC_KEY));
+    this.algorithm = pvutils.getParametersValue(
+      parameters,
+      ALGORITHM,
+      PublicKeyInfo.defaultValues(ALGORITHM)
+    );
+    this.subjectPublicKey = pvutils.getParametersValue(
+      parameters,
+      SUBJECT_PUBLIC_KEY,
+      PublicKeyInfo.defaultValues(SUBJECT_PUBLIC_KEY)
+    );
     const parsedKey = pvutils.getParametersValue(parameters, "parsedKey", null);
     if (parsedKey) {
       this.parsedKey = parsedKey;
@@ -145,15 +158,19 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
    *```
    */
   public static override schema(parameters: PublicKeyInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         AlgorithmIdentifier.schema(names.algorithm || {}),
-        new asn1js.BitString({ name: (names.subjectPublicKey || EMPTY_STRING) })
+        new asn1js.BitString({ name: names.subjectPublicKey || EMPTY_STRING })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -161,7 +178,8 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       PublicKeyInfo.schema({
         names: {
@@ -183,12 +201,9 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
   }
 
   public toSchema(): asn1js.Sequence {
-    return (new asn1js.Sequence({
-      value: [
-        this.algorithm.toSchema(),
-        this.subjectPublicKey
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [this.algorithm.toSchema(), this.subjectPublicKey]
+    });
   }
 
   public toJSON(): PublicKeyInfoJson | JsonWebKey {
@@ -196,7 +211,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
     if (!this.parsedKey) {
       return {
         algorithm: this.algorithm.toJSON(),
-        subjectPublicKey: this.subjectPublicKey.toJSON(),
+        subjectPublicKey: this.subjectPublicKey.toJSON()
       };
     }
     //#endregion
@@ -249,7 +264,9 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
           throw new Error(`Invalid value for "kty" parameter: ${json.kty}`);
       }
 
-      this.subjectPublicKey = new asn1js.BitString({ valueHex: this.parsedKey.toSchema().toBER(false) });
+      this.subjectPublicKey = new asn1js.BitString({
+        valueHex: this.parsedKey.toSchema().toBER(false)
+      });
     }
   }
 
@@ -263,8 +280,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
       const asn1 = asn1js.fromBER(exportedKey);
       try {
         this.fromSchema(asn1.result);
-      }
-      catch {
+      } catch {
         throw new Error("Error during initializing object from schema");
       }
     } catch (e) {
@@ -272,5 +288,4 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
       throw new Error(`Error during exporting public key: ${message}`);
     }
   }
-
 }

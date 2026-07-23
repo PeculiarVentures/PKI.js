@@ -35,12 +35,10 @@ function parseTSPReq() {
   common.getElement("tsp-req-extn-div").style.display = "none";
 
   const imprintTable = common.getElement("tsp-req-imprint") as HTMLTableElement;
-  while (imprintTable.rows.length > 1)
-    imprintTable.deleteRow(imprintTable.rows.length - 1);
+  while (imprintTable.rows.length > 1) imprintTable.deleteRow(imprintTable.rows.length - 1);
 
   const extensionTable = common.getElement("tsp-req-extn-table") as HTMLTableElement;
-  while (extensionTable.rows.length > 1)
-    extensionTable.deleteRow(extensionTable.rows.length - 1);
+  while (extensionTable.rows.length > 1) extensionTable.deleteRow(extensionTable.rows.length - 1);
   //#endregion
 
   //#region Decode existing TSP request
@@ -75,14 +73,16 @@ function parseTSPReq() {
 
   //#region Put information about nonce
   if (tspReqSimpl.nonce) {
-    common.getElement("tsp-req-nonce").innerHTML = Convert.ToHex(tspReqSimpl.nonce.valueBlock.valueHexView);
+    common.getElement("tsp-req-nonce").innerHTML = Convert.ToHex(
+      tspReqSimpl.nonce.valueBlock.valueHexView
+    );
     common.getElement("tsp-req-non").style.display = "block";
   }
   //#endregion
 
   //#region Put information about existence of "certReq" flag
   if ("certReq" in tspReqSimpl) {
-    common.getElement("tsp-req-cert-req").innerHTML = (tspReqSimpl.certReq) ? "true" : "false";
+    common.getElement("tsp-req-cert-req").innerHTML = tspReqSimpl.certReq ? "true" : "false";
     common.getElement("tsp-req-cert").style.display = "block";
   }
   //#endregion

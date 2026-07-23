@@ -34,15 +34,14 @@ export function handleFileBrowse(evt: Event, cb: (file: ArrayBuffer) => void) {
   Assert.ok(currentFiles);
 
   const tempReader = new FileReader();
-  tempReader.onload =
-    (event) => {
-      Assert.ok(event.target);
-      const file = event.target.result;
-      if (!(file instanceof ArrayBuffer)) {
-        throw new Error("incorrect type of the file. Must be ArrayBuffer");
-      }
-      cb(file);
-    };
+  tempReader.onload = event => {
+    Assert.ok(event.target);
+    const file = event.target.result;
+    if (!(file instanceof ArrayBuffer)) {
+      throw new Error("incorrect type of the file. Must be ArrayBuffer");
+    }
+    cb(file);
+  };
 
   if (currentFiles.length) {
     tempReader.readAsArrayBuffer(currentFiles[0]);
@@ -50,15 +49,16 @@ export function handleFileBrowse(evt: Event, cb: (file: ArrayBuffer) => void) {
 }
 
 function decodePEM(pem: string, tag = "[A-Z0-9 ]+"): ArrayBuffer[] {
-  const pattern = new RegExp(`-{5}BEGIN ${tag}-{5}([a-zA-Z0-9=+\\/\\n\\r]+)-{5}END ${tag}-{5}`, "g");
+  const pattern = new RegExp(
+    `-{5}BEGIN ${tag}-{5}([a-zA-Z0-9=+\\/\\n\\r]+)-{5}END ${tag}-{5}`,
+    "g"
+  );
 
   const res: ArrayBuffer[] = [];
   let matches: RegExpExecArray | null = null;
-  // eslint-disable-next-line no-cond-assign
-  while (matches = pattern.exec(pem)) {
-    const base64 = matches[1]
-      .replace(/\r/g, "")
-      .replace(/\n/g, "");
+  // oxlint-disable-next-line no-cond-assign
+  while ((matches = pattern.exec(pem))) {
+    const base64 = matches[1].replace(/\r/g, "").replace(/\n/g, "");
     res.push(pvtsutils.Convert.FromBase64(base64));
   }
 

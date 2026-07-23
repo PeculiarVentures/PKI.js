@@ -7,10 +7,7 @@ import * as Schema from "./Schema";
 
 const SECRET_TYPE_ID = "secretTypeId";
 const SECRET_VALUE = "secretValue";
-const CLEAR_PROPS = [
-  SECRET_TYPE_ID,
-  SECRET_VALUE,
-];
+const CLEAR_PROPS = [SECRET_TYPE_ID, SECRET_VALUE];
 
 export interface ISecretBag {
   secretTypeId: string;
@@ -28,7 +25,6 @@ export type SecretBagParameters = PkiObjectParameters & Partial<ISecretBag>;
  * Represents the SecretBag structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
 export class SecretBag extends PkiObject implements ISecretBag {
-
   public static override CLASS_NAME = "SecretBag";
 
   public secretTypeId!: string;
@@ -41,8 +37,16 @@ export class SecretBag extends PkiObject implements ISecretBag {
   constructor(parameters: SecretBagParameters = {}) {
     super();
 
-    this.secretTypeId = pvutils.getParametersValue(parameters, SECRET_TYPE_ID, SecretBag.defaultValues(SECRET_TYPE_ID));
-    this.secretValue = pvutils.getParametersValue(parameters, SECRET_VALUE, SecretBag.defaultValues(SECRET_VALUE));
+    this.secretTypeId = pvutils.getParametersValue(
+      parameters,
+      SECRET_TYPE_ID,
+      SecretBag.defaultValues(SECRET_TYPE_ID)
+    );
+    this.secretValue = pvutils.getParametersValue(
+      parameters,
+      SECRET_VALUE,
+      SecretBag.defaultValues(SECRET_VALUE)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -61,7 +65,7 @@ export class SecretBag extends PkiObject implements ISecretBag {
       case SECRET_TYPE_ID:
         return EMPTY_STRING;
       case SECRET_VALUE:
-        return (new asn1js.Any());
+        return new asn1js.Any();
       default:
         return super.defaultValues(memberName);
     }
@@ -75,9 +79,9 @@ export class SecretBag extends PkiObject implements ISecretBag {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case SECRET_TYPE_ID:
-        return (memberValue === EMPTY_STRING);
+        return memberValue === EMPTY_STRING;
       case SECRET_VALUE:
-        return (memberValue instanceof asn1js.Any);
+        return memberValue instanceof asn1js.Any;
       default:
         return super.defaultValues(memberName);
     }
@@ -93,25 +97,31 @@ export class SecretBag extends PkiObject implements ISecretBag {
    * }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    id?: string;
-    value?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      id?: string;
+      value?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.id || "id") }),
+        new asn1js.ObjectIdentifier({ name: names.id || "id" }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          value: [new asn1js.Any({ name: (names.value || "value") })] // EXPLICIT ANY value
+          value: [new asn1js.Any({ name: names.value || "value" })] // EXPLICIT ANY value
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -119,7 +129,8 @@ export class SecretBag extends PkiObject implements ISecretBag {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       SecretBag.schema({
         names: {
@@ -137,7 +148,7 @@ export class SecretBag extends PkiObject implements ISecretBag {
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: [
         new asn1js.ObjectIdentifier({ value: this.secretTypeId }),
         new asn1js.Constructed({
@@ -148,7 +159,7 @@ export class SecretBag extends PkiObject implements ISecretBag {
           value: [this.secretValue.toSchema()]
         })
       ]
-    }));
+    });
   }
 
   public toJSON(): SecretBagJson {
@@ -157,5 +168,4 @@ export class SecretBag extends PkiObject implements ISecretBag {
       secretValue: this.secretValue.toJSON()
     };
   }
-
 }

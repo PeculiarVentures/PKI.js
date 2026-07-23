@@ -1,10 +1,16 @@
 import * as crypto from "crypto";
 
 export function getRandomValues(length: number): Uint8Array {
-  return (new Uint8Array(crypto.randomBytes(length)));
+  return new Uint8Array(crypto.randomBytes(length));
 }
 
-function pbkdf1(password: Buffer, salt: Buffer, iterationCount: number, keyLength: number, hashAlgorithm: string): Buffer {
+function pbkdf1(
+  password: Buffer,
+  salt: Buffer,
+  iterationCount: number,
+  keyLength: number,
+  hashAlgorithm: string
+): Buffer {
   let key: Buffer = Buffer.concat([password, salt]);
 
   for (let i = 0; i < iterationCount; i++)
@@ -32,7 +38,7 @@ export function encryptUsingPBKDF2Password(
   iterationCount: number,
   hashAlgorithm: string,
   iv: ArrayBuffer,
-  messageToEncrypt: ArrayBuffer,
+  messageToEncrypt: ArrayBuffer
 ): ArrayBuffer {
   //#region Initial variables
   let cipher: crypto.Cipher;
@@ -43,17 +49,23 @@ export function encryptUsingPBKDF2Password(
   //#endregion
 
   //#region Derive key using PBKDF2 algorithm
-  const key = crypto.pbkdf2Sync(Buffer.from(password), Buffer.from(salt), iterationCount, keyLength, hashAlgorithm);
+  const key = crypto.pbkdf2Sync(
+    Buffer.from(password),
+    Buffer.from(salt),
+    iterationCount,
+    keyLength,
+    hashAlgorithm
+  );
   //#endregion
 
   //#region Initialize cipher object
-  if (iv.byteLength)
-    cipher = crypto.createCipheriv(algorithm, key, Buffer.from(iv));
-  else
-    cipher = crypto.createCipher(algorithm, key);
+  if (iv.byteLength) cipher = crypto.createCipheriv(algorithm, key, Buffer.from(iv));
+  else cipher = crypto.createCipher(algorithm, key);
   //#endregion
 
-  return (new Uint8Array(Buffer.concat([cipher.update(Buffer.from(messageToEncrypt)), cipher.final()]))).buffer;
+  return new Uint8Array(
+    Buffer.concat([cipher.update(Buffer.from(messageToEncrypt)), cipher.final()])
+  ).buffer;
 }
 
 /**
@@ -75,7 +87,7 @@ export function decryptUsingPBKDF2Password(
   iterationCount: number,
   hashAlgorithm: string,
   iv: ArrayBuffer,
-  messageToDecrypt: ArrayBuffer,
+  messageToDecrypt: ArrayBuffer
 ): ArrayBuffer {
   //#region Initial variables
   let cipher: crypto.Cipher;
@@ -86,17 +98,23 @@ export function decryptUsingPBKDF2Password(
   //#endregion
 
   //#region Derive key using PBKDF2 algorithm
-  const key = crypto.pbkdf2Sync(Buffer.from(password), Buffer.from(salt), iterationCount, keyLength, hashAlgorithm);
+  const key = crypto.pbkdf2Sync(
+    Buffer.from(password),
+    Buffer.from(salt),
+    iterationCount,
+    keyLength,
+    hashAlgorithm
+  );
   //#endregion
 
   //#region Initialize cipher object
-  if (iv.byteLength)
-    cipher = crypto.createDecipheriv(algorithm, key, Buffer.from(iv));
-  else
-    cipher = crypto.createDecipher(algorithm, key);
+  if (iv.byteLength) cipher = crypto.createDecipheriv(algorithm, key, Buffer.from(iv));
+  else cipher = crypto.createDecipher(algorithm, key);
   //#endregion
 
-  return (new Uint8Array(Buffer.concat([cipher.update(Buffer.from(messageToDecrypt)), cipher.final()]))).buffer;
+  return new Uint8Array(
+    Buffer.concat([cipher.update(Buffer.from(messageToDecrypt)), cipher.final()])
+  ).buffer;
 }
 
 function makePKCS12B2Key(
@@ -105,7 +123,7 @@ function makePKCS12B2Key(
   password: ArrayBuffer,
   salt: ArrayBuffer,
   iterationCount: number,
-  id = 3,
+  id = 3
 ) {
   //#region Initial variables
   let u: number;
@@ -162,8 +180,7 @@ function makePKCS12B2Key(
   const D = new ArrayBuffer(v);
   const dView = new Uint8Array(D);
 
-  for (let i = 0; i < D.byteLength; i++)
-    dView[i] = id; // The ID value equal to "3" for MACing (see B.3 of standard)
+  for (let i = 0; i < D.byteLength; i++) dView[i] = id; // The ID value equal to "3" for MACing (see B.3 of standard)
   //#endregion
 
   //#region Concatenate copies of the salt together to create a string S of length v * ceil(s / v) bytes (the final copy of the salt may be trunacted to create S)
@@ -175,8 +192,7 @@ function makePKCS12B2Key(
 
   const saltView = new Uint8Array(salt);
 
-  for (let i = 0; i < sLen; i++)
-    sView[i] = saltView[i % saltLength];
+  for (let i = 0; i < sLen; i++) sView[i] = saltView[i % saltLength];
   //#endregion
 
   //#region Concatenate copies of the password together to create a string P of length v * ceil(p / v) bytes (the final copy of the password may be truncated to create P)
@@ -188,8 +204,7 @@ function makePKCS12B2Key(
 
   const passwordView = new Uint8Array(password);
 
-  for (let i = 0; i < pLen; i++)
-    pView[i] = passwordView[i % passwordLength];
+  for (let i = 0; i < pLen; i++) pView[i] = passwordView[i % passwordLength];
   //#endregion
 
   //#region Set I=S||P to be the concatenation of S and P
@@ -230,8 +245,7 @@ function makePKCS12B2Key(
     const B = new ArrayBuffer(v);
     const bView = new Uint8Array(B);
 
-    for (let j = 0; j < B.byteLength; j++)
-      bView[j] = roundBuffer[j % roundBuffer.length];
+    for (let j = 0; j < B.byteLength; j++) bView[j] = roundBuffer[j % roundBuffer.length];
     //#endregion
 
     //#region Make new I value
@@ -244,15 +258,14 @@ function makePKCS12B2Key(
     for (let j = 0; j < k; j++) {
       const chunk = Array.from(new Uint8Array(I.slice(sliceStart, sliceStart + sliceLength)));
       sliceStart += v;
-      if ((sliceStart + v) > I.byteLength)
-        sliceLength = I.byteLength - sliceStart;
+      if (sliceStart + v > I.byteLength) sliceLength = I.byteLength - sliceStart;
 
       let x = 0x1ff;
 
-      for (let l = (B.byteLength - 1); l >= 0; l--) {
+      for (let l = B.byteLength - 1; l >= 0; l--) {
         x = x >> 8;
         x += bView[l] + chunk[l];
-        chunk[l] = (x & 0xff);
+        chunk[l] = x & 0xff;
       }
 
       iRound.push(...chunk);
@@ -272,7 +285,7 @@ function makePKCS12B2Key(
   const resultBuffer = new ArrayBuffer(keyLength >> 3);
   const resultView = new Uint8Array(resultBuffer);
 
-  resultView.set((new Uint8Array(result)).slice(0, keyLength >> 3));
+  resultView.set(new Uint8Array(result).slice(0, keyLength >> 3));
   //#endregion
   //#endregion
 
@@ -298,7 +311,7 @@ export function encryptUsingPBKDF1Password(
   salt: ArrayBuffer,
   iterationCount: number,
   messageToEncrypt: ArrayBuffer,
-  method = "pkcs12",
+  method = "pkcs12"
 ): ArrayBuffer {
   //#region Initial variables
   let key: Buffer;
@@ -314,13 +327,18 @@ export function encryptUsingPBKDF1Password(
       break;
     //#endregion
     //#region PKCS#5 key derivation function
-    default:
-      {
-        const pbkdf1Result = pbkdf1(Buffer.from(password), Buffer.from(salt), iterationCount, 16, "SHA1");
+    default: {
+      const pbkdf1Result = pbkdf1(
+        Buffer.from(password),
+        Buffer.from(salt),
+        iterationCount,
+        16,
+        "SHA1"
+      );
 
-        key = pbkdf1Result.slice(0, 8);
-        iv = pbkdf1Result.slice(8);
-      }
+      key = pbkdf1Result.slice(0, 8);
+      iv = pbkdf1Result.slice(8);
+    }
     //#endregion
   }
   //#endregion
@@ -329,7 +347,9 @@ export function encryptUsingPBKDF1Password(
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   //#endregion
 
-  return (new Uint8Array(Buffer.concat([cipher.update(Buffer.from(messageToEncrypt)), cipher.final()]))).buffer;
+  return new Uint8Array(
+    Buffer.concat([cipher.update(Buffer.from(messageToEncrypt)), cipher.final()])
+  ).buffer;
 }
 
 /**
@@ -351,7 +371,7 @@ export function decryptUsingPBKDF1Password(
   salt: ArrayBuffer,
   iterationCount: number,
   messageToDecrypt: ArrayBuffer,
-  method: "pkcs12" | "pkcs5" = "pkcs12",
+  method: "pkcs12" | "pkcs5" = "pkcs12"
 ): ArrayBuffer {
   //#region Initial variables
   let key: Buffer;
@@ -367,13 +387,18 @@ export function decryptUsingPBKDF1Password(
       break;
     //#endregion
     //#region PKCS#5 key derivation function
-    default:
-      {
-        const pbkdf1Result = pbkdf1(Buffer.from(password), Buffer.from(salt), iterationCount, 16, "SHA1");
+    default: {
+      const pbkdf1Result = pbkdf1(
+        Buffer.from(password),
+        Buffer.from(salt),
+        iterationCount,
+        16,
+        "SHA1"
+      );
 
-        key = pbkdf1Result.slice(0, 8);
-        iv = pbkdf1Result.slice(8);
-      }
+      key = pbkdf1Result.slice(0, 8);
+      iv = pbkdf1Result.slice(8);
+    }
     //#endregion
   }
   //#endregion
@@ -382,7 +407,9 @@ export function decryptUsingPBKDF1Password(
   const cipher = crypto.createDecipheriv(algorithm, key, iv);
   //#endregion
 
-  return (new Uint8Array(Buffer.concat([cipher.update(Buffer.from(messageToDecrypt)), cipher.final()]))).buffer;
+  return new Uint8Array(
+    Buffer.concat([cipher.update(Buffer.from(messageToDecrypt)), cipher.final()])
+  ).buffer;
 }
 
 /**
@@ -403,15 +430,14 @@ export function stampDataWithPassword(
   salt: ArrayBuffer,
   iterationCount: number,
   stampingData: ArrayBuffer,
-  method: "pbkdf2" | "pkcs12" = "pkcs12",
+  method: "pbkdf2" | "pkcs12" = "pkcs12"
 ): ArrayBuffer {
   //#region Initial variables
   let key;
   //#endregion
 
   //#region Check input "method" value
-  if ((typeof method === "undefined"))
-    method = "pkcs12";
+  if (typeof method === "undefined") method = "pkcs12";
   //#endregion
 
   //#region Make hash algorithm name to be Node-friendly
@@ -421,7 +447,13 @@ export function stampDataWithPassword(
   //#region Derive key using PKCS#12 algorithm from B.2 item of standard
   switch (method.toLowerCase()) {
     case "pbkdf2":
-      key = crypto.pbkdf2Sync(Buffer.from(password), Buffer.from(salt), iterationCount, keyLength, hashAlgorithm);
+      key = crypto.pbkdf2Sync(
+        Buffer.from(password),
+        Buffer.from(salt),
+        iterationCount,
+        keyLength,
+        hashAlgorithm
+      );
       break;
     case "pkcs12":
     default:
@@ -434,7 +466,7 @@ export function stampDataWithPassword(
   hmac.update(Buffer.from(stampingData));
   //#endregion
 
-  return (new Uint8Array(hmac.digest())).buffer;
+  return new Uint8Array(hmac.digest()).buffer;
 }
 
 export function verifyDataStampedWithPassword(
@@ -445,7 +477,8 @@ export function verifyDataStampedWithPassword(
   iterationCount: number,
   stampedData: ArrayBuffer,
   signatureToVerify: ArrayBuffer,
-  method: "pbkdf2" | "pkcs12" = "pkcs12"): boolean {
+  method: "pbkdf2" | "pkcs12" = "pkcs12"
+): boolean {
   //#region Initial variables
   let key: Buffer;
   //#endregion
@@ -457,7 +490,13 @@ export function verifyDataStampedWithPassword(
   //#region Derive key using PKCS#12 algorithm from B.2 item of standard
   switch (method.toLowerCase()) {
     case "pbkdf2":
-      key = crypto.pbkdf2Sync(Buffer.from(password), Buffer.from(salt), iterationCount, keyLength, hashAlgorithm);
+      key = crypto.pbkdf2Sync(
+        Buffer.from(password),
+        Buffer.from(salt),
+        iterationCount,
+        keyLength,
+        hashAlgorithm
+      );
       break;
     case "pkcs12":
     default:
@@ -474,8 +513,7 @@ export function verifyDataStampedWithPassword(
   //#region Compare HMAC digest with signature to verify
   const dataView = new Uint8Array(signatureToVerify);
 
-  if (hmacValue.length !== dataView.length)
-    return false;
+  if (hmacValue.length !== dataView.length) return false;
 
   let result = true;
 

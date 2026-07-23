@@ -7,9 +7,7 @@ import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const DISTRIBUTION_POINTS = "distributionPoints";
-const CLEAR_PROPS = [
-  DISTRIBUTION_POINTS
-];
+const CLEAR_PROPS = [DISTRIBUTION_POINTS];
 
 export interface ICRLDistributionPoints {
   distributionPoints: DistributionPoint[];
@@ -25,7 +23,6 @@ export type CRLDistributionPointsParameters = PkiObjectParameters & Partial<ICRL
  * Represents the CRLDistributionPoints structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class CRLDistributionPoints extends PkiObject implements ICRLDistributionPoints {
-
   public static override CLASS_NAME = "CRLDistributionPoints";
 
   public distributionPoints!: DistributionPoint[];
@@ -37,7 +34,11 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
   constructor(parameters: CRLDistributionPointsParameters = {}) {
     super();
 
-    this.distributionPoints = pvutils.getParametersValue(parameters, DISTRIBUTION_POINTS, CRLDistributionPoints.defaultValues(DISTRIBUTION_POINTS));
+    this.distributionPoints = pvutils.getParametersValue(
+      parameters,
+      DISTRIBUTION_POINTS,
+      CRLDistributionPoints.defaultValues(DISTRIBUTION_POINTS)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -66,25 +67,31 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
    * CRLDistributionPoints ::= SEQUENCE SIZE (1..MAX) OF DistributionPoint
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    distributionPoints?: string;
-  }> = {}): Schema.SchemaType {
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      distributionPoints?: string;
+    }> = {}
+  ): Schema.SchemaType {
     /**
      * @type {Object}
      * @property {string} [blockName]
      * @property {string} [distributionPoints]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
-          name: (names.distributionPoints || EMPTY_STRING),
+          name: names.distributionPoints || EMPTY_STRING,
           value: DistributionPoint.schema()
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -92,7 +99,8 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       CRLDistributionPoints.schema({
         names: {
@@ -103,14 +111,17 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.distributionPoints = Array.from(asn1.result.distributionPoints, element => new DistributionPoint({ schema: element }));
+    this.distributionPoints = Array.from(
+      asn1.result.distributionPoints,
+      element => new DistributionPoint({ schema: element })
+    );
   }
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: Array.from(this.distributionPoints, o => o.toSchema())
-    }));
+    });
   }
 
   public toJSON(): CRLDistributionPointsJson {
@@ -118,5 +129,4 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
       distributionPoints: Array.from(this.distributionPoints, o => o.toJSON())
     };
   }
-
 }

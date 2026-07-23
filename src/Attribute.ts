@@ -7,10 +7,7 @@ import * as Schema from "./Schema";
 
 const TYPE = "type";
 const VALUES = "values";
-const CLEAR_PROPS = [
-  TYPE,
-  VALUES
-];
+const CLEAR_PROPS = [TYPE, VALUES];
 
 export interface IAttribute {
   /**
@@ -40,7 +37,6 @@ export interface AttributeJson {
  * Represents the Attribute structure described in [RFC2986](https://datatracker.ietf.org/doc/html/rfc2986)
  */
 export class Attribute extends PkiObject implements IAttribute {
-
   public static override CLASS_NAME = "Attribute";
 
   public type!: string;
@@ -87,9 +83,9 @@ export class Attribute extends PkiObject implements IAttribute {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case TYPE:
-        return (memberValue === EMPTY_STRING);
+        return memberValue === EMPTY_STRING;
       case VALUES:
-        return (memberValue.length === 0);
+        return memberValue.length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -106,23 +102,27 @@ export class Attribute extends PkiObject implements IAttribute {
    *```
    */
   public static override schema(parameters: AttributeSchema = {}) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.type || EMPTY_STRING) }),
+        new asn1js.ObjectIdentifier({ name: names.type || EMPTY_STRING }),
         new asn1js.Set({
-          name: (names.setName || EMPTY_STRING),
+          name: names.setName || EMPTY_STRING,
           value: [
             new asn1js.Repeated({
-              name: (names.values || EMPTY_STRING),
+              name: names.values || EMPTY_STRING,
               value: new asn1js.Any()
             })
           ]
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -130,7 +130,8 @@ export class Attribute extends PkiObject implements IAttribute {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       Attribute.schema({
         names: {
@@ -148,14 +149,14 @@ export class Attribute extends PkiObject implements IAttribute {
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: [
         new asn1js.ObjectIdentifier({ value: this.type }),
         new asn1js.Set({
           value: this.values
         })
       ]
-    }));
+    });
     //#endregion
   }
 
@@ -165,6 +166,4 @@ export class Attribute extends PkiObject implements IAttribute {
       values: Array.from(this.values, o => o.toJSON())
     };
   }
-
 }
-

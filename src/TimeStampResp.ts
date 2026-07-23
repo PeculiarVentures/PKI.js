@@ -16,10 +16,7 @@ const TIME_STAMP_TOKEN = "timeStampToken";
 const TIME_STAMP_RESP = "TimeStampResp";
 const TIME_STAMP_RESP_STATUS = `${TIME_STAMP_RESP}.${STATUS}`;
 const TIME_STAMP_RESP_TOKEN = `${TIME_STAMP_RESP}.${TIME_STAMP_TOKEN}`;
-const CLEAR_PROPS = [
-  TIME_STAMP_RESP_STATUS,
-  TIME_STAMP_RESP_TOKEN
-];
+const CLEAR_PROPS = [TIME_STAMP_RESP_STATUS, TIME_STAMP_RESP_TOKEN];
 
 export interface ITimeStampResp {
   /**
@@ -106,7 +103,6 @@ export type TimeStampRespParameters = PkiObjectParameters & Partial<ITimeStampRe
  * ```
  */
 export class TimeStampResp extends PkiObject implements ITimeStampResp {
-
   public static override CLASS_NAME = "TimeStampResp";
 
   public status!: PKIStatusInfo;
@@ -119,9 +115,17 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
   constructor(parameters: TimeStampRespParameters = {}) {
     super();
 
-    this.status = pvutils.getParametersValue(parameters, STATUS, TimeStampResp.defaultValues(STATUS));
+    this.status = pvutils.getParametersValue(
+      parameters,
+      STATUS,
+      TimeStampResp.defaultValues(STATUS)
+    );
     if (TIME_STAMP_TOKEN in parameters) {
-      this.timeStampToken = pvutils.getParametersValue(parameters, TIME_STAMP_TOKEN, TimeStampResp.defaultValues(TIME_STAMP_TOKEN));
+      this.timeStampToken = pvutils.getParametersValue(
+        parameters,
+        TIME_STAMP_TOKEN,
+        TimeStampResp.defaultValues(TIME_STAMP_TOKEN)
+      );
     }
 
     if (parameters.schema) {
@@ -155,12 +159,15 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case STATUS:
-        return ((PKIStatusInfo.compareWithDefault(STATUS, memberValue.status)) &&
-          (("statusStrings" in memberValue) === false) &&
-          (("failInfo" in memberValue) === false));
+        return (
+          PKIStatusInfo.compareWithDefault(STATUS, memberValue.status) &&
+          "statusStrings" in memberValue === false &&
+          "failInfo" in memberValue === false
+        );
       case TIME_STAMP_TOKEN:
-        return ((memberValue.contentType === EMPTY_STRING) &&
-          (memberValue.content instanceof asn1js.Any));
+        return (
+          memberValue.contentType === EMPTY_STRING && memberValue.content instanceof asn1js.Any
+        );
       default:
         return super.defaultValues(memberName);
     }
@@ -175,28 +182,38 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
    *    timeStampToken          TimeStampToken     OPTIONAL  }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    status?: PKIStatusInfoSchema,
-    timeStampToken?: ContentInfoSchema,
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      status?: PKIStatusInfoSchema;
+      timeStampToken?: ContentInfoSchema;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || TIME_STAMP_RESP),
+    return new asn1js.Sequence({
+      name: names.blockName || TIME_STAMP_RESP,
       value: [
-        PKIStatusInfo.schema(names.status || {
-          names: {
-            blockName: TIME_STAMP_RESP_STATUS
+        PKIStatusInfo.schema(
+          names.status || {
+            names: {
+              blockName: TIME_STAMP_RESP_STATUS
+            }
           }
-        }),
-        ContentInfo.schema(names.timeStampToken || {
-          names: {
-            blockName: TIME_STAMP_RESP_TOKEN,
-            optional: true
+        ),
+        ContentInfo.schema(
+          names.timeStampToken || {
+            names: {
+              blockName: TIME_STAMP_RESP_TOKEN,
+              optional: true
+            }
           }
-        })
+        )
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -204,10 +221,7 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
-      schema,
-      TimeStampResp.schema()
-    );
+    const asn1 = asn1js.compareSchema(schema, schema, TimeStampResp.schema());
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
@@ -227,9 +241,9 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
     //#endregion
   }
 
@@ -251,7 +265,11 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
    * @param crypto Crypto engine
    */
-  public async sign(privateKey: CryptoKey, hashAlgorithm?: string, crypto = common.getCrypto(true)) {
+  public async sign(
+    privateKey: CryptoKey,
+    hashAlgorithm?: string,
+    crypto = common.getCrypto(true)
+  ) {
     this.assertContentType();
 
     // Sign internal signed data value
@@ -265,7 +283,14 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
    * @param verificationParameters Input parameters for verification
    * @param crypto Crypto engine
    */
-  public async verify(verificationParameters: TimeStampRespVerifyParams = { signer: 0, trustedCerts: [], data: EMPTY_BUFFER }, crypto = common.getCrypto(true)): Promise<boolean> {
+  public async verify(
+    verificationParameters: TimeStampRespVerifyParams = {
+      signer: 0,
+      trustedCerts: [],
+      data: EMPTY_BUFFER
+    },
+    crypto = common.getCrypto(true)
+  ): Promise<boolean> {
     this.assertContentType();
 
     // Verify internal signed data value
@@ -274,13 +299,13 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
     return signed.verify(verificationParameters, crypto);
   }
 
-  private assertContentType(): asserts this is { timeStampToken: ContentInfo; } {
+  private assertContentType(): asserts this is { timeStampToken: ContentInfo } {
     if (!this.timeStampToken) {
       throw new Error("timeStampToken is absent in TSP response");
     }
-    if (this.timeStampToken.contentType !== id_ContentType_SignedData) { // Must be a CMS signed data
+    if (this.timeStampToken.contentType !== id_ContentType_SignedData) {
+      // Must be a CMS signed data
       throw new Error(`Wrong format of timeStampToken: ${this.timeStampToken.contentType}`);
     }
   }
 }
-

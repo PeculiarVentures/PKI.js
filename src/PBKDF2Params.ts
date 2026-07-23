@@ -1,6 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema
+} from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -10,12 +14,7 @@ const SALT = "salt";
 const ITERATION_COUNT = "iterationCount";
 const KEY_LENGTH = "keyLength";
 const PRF = "prf";
-const CLEAR_PROPS = [
-  SALT,
-  ITERATION_COUNT,
-  KEY_LENGTH,
-  PRF
-];
+const CLEAR_PROPS = [SALT, ITERATION_COUNT, KEY_LENGTH, PRF];
 
 export interface IPBKDF2Params {
   salt: any;
@@ -37,7 +36,6 @@ export type PBKDF2ParamsParameters = PkiObjectParameters & Partial<IPBKDF2Params
  * Represents the PBKDF2Params structure described in [RFC2898](https://www.ietf.org/rfc/rfc2898.txt)
  */
 export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
-
   public static override CLASS_NAME = "PBKDF2Params";
 
   public salt: any;
@@ -53,9 +51,17 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
     super();
 
     this.salt = pvutils.getParametersValue(parameters, SALT, PBKDF2Params.defaultValues(SALT));
-    this.iterationCount = pvutils.getParametersValue(parameters, ITERATION_COUNT, PBKDF2Params.defaultValues(ITERATION_COUNT));
+    this.iterationCount = pvutils.getParametersValue(
+      parameters,
+      ITERATION_COUNT,
+      PBKDF2Params.defaultValues(ITERATION_COUNT)
+    );
     if (KEY_LENGTH in parameters) {
-      this.keyLength = pvutils.getParametersValue(parameters, KEY_LENGTH, PBKDF2Params.defaultValues(KEY_LENGTH));
+      this.keyLength = pvutils.getParametersValue(
+        parameters,
+        KEY_LENGTH,
+        PBKDF2Params.defaultValues(KEY_LENGTH)
+      );
     }
     if (PRF in parameters) {
       this.prf = pvutils.getParametersValue(parameters, PRF, PBKDF2Params.defaultValues(PRF));
@@ -80,7 +86,7 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
       case SALT:
         return {};
       case ITERATION_COUNT:
-        return (-1);
+        return -1;
       case KEY_LENGTH:
         return 0;
       case PRF:
@@ -107,36 +113,44 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
    *    DEFAULT { algorithm hMAC-SHA1, parameters NULL } }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    saltPrimitive?: string;
-    saltConstructed?: AlgorithmIdentifierSchema;
-    iterationCount?: string;
-    keyLength?: string;
-    prf?: AlgorithmIdentifierSchema;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      saltPrimitive?: string;
+      saltConstructed?: AlgorithmIdentifierSchema;
+      iterationCount?: string;
+      keyLength?: string;
+      prf?: AlgorithmIdentifierSchema;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Choice({
           value: [
-            new asn1js.OctetString({ name: (names.saltPrimitive || EMPTY_STRING) }),
+            new asn1js.OctetString({ name: names.saltPrimitive || EMPTY_STRING }),
             AlgorithmIdentifier.schema(names.saltConstructed || {})
           ]
         }),
-        new asn1js.Integer({ name: (names.iterationCount || EMPTY_STRING) }),
+        new asn1js.Integer({ name: names.iterationCount || EMPTY_STRING }),
         new asn1js.Integer({
-          name: (names.keyLength || EMPTY_STRING),
+          name: names.keyLength || EMPTY_STRING,
           optional: true
         }),
-        AlgorithmIdentifier.schema(names.prf || {
-          names: {
-            optional: true
+        AlgorithmIdentifier.schema(
+          names.prf || {
+            names: {
+              optional: true
+            }
           }
-        })
+        )
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -144,7 +158,8 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       PBKDF2Params.schema({
         names: {
@@ -170,10 +185,8 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
     // Get internal properties from parsed schema
     this.salt = asn1.result.salt;
     this.iterationCount = asn1.result.iterationCount.valueBlock.valueDec;
-    if (KEY_LENGTH in asn1.result)
-      this.keyLength = asn1.result.keyLength.valueBlock.valueDec;
-    if (PRF in asn1.result)
-      this.prf = new AlgorithmIdentifier({ schema: asn1.result.prf });
+    if (KEY_LENGTH in asn1.result) this.keyLength = asn1.result.keyLength.valueBlock.valueDec;
+    if (PRF in asn1.result) this.prf = new AlgorithmIdentifier({ schema: asn1.result.prf });
   }
 
   public toSchema(): asn1js.Sequence {
@@ -195,9 +208,9 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
     //#endregion
   }
 
@@ -208,16 +221,13 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
     };
 
     if (KEY_LENGTH in this) {
-      if (PBKDF2Params.defaultValues(KEY_LENGTH) !== this.keyLength)
-        res.keyLength = this.keyLength;
+      if (PBKDF2Params.defaultValues(KEY_LENGTH) !== this.keyLength) res.keyLength = this.keyLength;
     }
 
     if (this.prf) {
-      if (PBKDF2Params.defaultValues(PRF).isEqual(this.prf) === false)
-        res.prf = this.prf.toJSON();
+      if (PBKDF2Params.defaultValues(PRF).isEqual(this.prf) === false) res.prf = this.prf.toJSON();
     }
 
     return res;
   }
-
 }

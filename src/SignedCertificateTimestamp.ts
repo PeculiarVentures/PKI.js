@@ -51,7 +51,8 @@ export interface SignedCertificateTimestampJson {
   signature: string;
 }
 
-export type SignedCertificateTimestampParameters = PkiObjectParameters & Partial<ISignedCertificateTimestamp> & { stream?: bs.SeqStream; };
+export type SignedCertificateTimestampParameters = PkiObjectParameters &
+  Partial<ISignedCertificateTimestamp> & { stream?: bs.SeqStream };
 
 export interface Log {
   /**
@@ -65,7 +66,6 @@ export interface Log {
 }
 
 export class SignedCertificateTimestamp extends PkiObject implements ISignedCertificateTimestamp {
-
   public static override CLASS_NAME = "SignedCertificateTimestamp";
 
   public version!: number;
@@ -83,13 +83,41 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   constructor(parameters: SignedCertificateTimestampParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, SignedCertificateTimestamp.defaultValues(VERSION));
-    this.logID = pvutils.getParametersValue(parameters, LOG_ID, SignedCertificateTimestamp.defaultValues(LOG_ID));
-    this.timestamp = pvutils.getParametersValue(parameters, TIMESTAMP, SignedCertificateTimestamp.defaultValues(TIMESTAMP));
-    this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, SignedCertificateTimestamp.defaultValues(EXTENSIONS));
-    this.hashAlgorithm = pvutils.getParametersValue(parameters, HASH_ALGORITHM, SignedCertificateTimestamp.defaultValues(HASH_ALGORITHM));
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, SignedCertificateTimestamp.defaultValues(SIGNATURE_ALGORITHM));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, SignedCertificateTimestamp.defaultValues(SIGNATURE));
+    this.version = pvutils.getParametersValue(
+      parameters,
+      VERSION,
+      SignedCertificateTimestamp.defaultValues(VERSION)
+    );
+    this.logID = pvutils.getParametersValue(
+      parameters,
+      LOG_ID,
+      SignedCertificateTimestamp.defaultValues(LOG_ID)
+    );
+    this.timestamp = pvutils.getParametersValue(
+      parameters,
+      TIMESTAMP,
+      SignedCertificateTimestamp.defaultValues(TIMESTAMP)
+    );
+    this.extensions = pvutils.getParametersValue(
+      parameters,
+      EXTENSIONS,
+      SignedCertificateTimestamp.defaultValues(EXTENSIONS)
+    );
+    this.hashAlgorithm = pvutils.getParametersValue(
+      parameters,
+      HASH_ALGORITHM,
+      SignedCertificateTimestamp.defaultValues(HASH_ALGORITHM)
+    );
+    this.signatureAlgorithm = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE_ALGORITHM,
+      SignedCertificateTimestamp.defaultValues(SIGNATURE_ALGORITHM)
+    );
+    this.signature = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE,
+      SignedCertificateTimestamp.defaultValues(SIGNATURE)
+    );
 
     if ("stream" in parameters && parameters.stream) {
       this.fromStream(parameters.stream);
@@ -132,8 +160,10 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
-    if ((schema instanceof asn1js.RawData) === false)
-      throw new Error("Object's schema was not verified against input data for SignedCertificateTimestamp");
+    if (schema instanceof asn1js.RawData === false)
+      throw new Error(
+        "Object's schema was not verified against input data for SignedCertificateTimestamp"
+      );
 
     const seqStream = new bs.SeqStream({
       stream: new bs.ByteStream({
@@ -151,19 +181,19 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   public fromStream(stream: bs.SeqStream): void {
     const blockLength = stream.getUint16();
 
-    this.version = (stream.getBlock(1))[0];
+    this.version = stream.getBlock(1)[0];
 
     if (this.version === 0) {
-      this.logID = (new Uint8Array(stream.getBlock(32))).buffer.slice(0);
+      this.logID = new Uint8Array(stream.getBlock(32)).buffer.slice(0);
       this.timestamp = new Date(pvutils.utilFromBase(new Uint8Array(stream.getBlock(8)), 8));
 
       //#region Extensions
       const extensionsLength = stream.getUint16();
-      this.extensions = (new Uint8Array(stream.getBlock(extensionsLength))).buffer.slice(0);
+      this.extensions = new Uint8Array(stream.getBlock(extensionsLength)).buffer.slice(0);
       //#endregion
 
       //#region Hash algorithm
-      switch ((stream.getBlock(1))[0]) {
+      switch (stream.getBlock(1)[0]) {
         case 0:
           this.hashAlgorithm = NONE;
           break;
@@ -191,7 +221,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
       //#endregion
 
       //#region Signature algorithm
-      switch ((stream.getBlock(1))[0]) {
+      switch (stream.getBlock(1)[0]) {
         case 0:
           this.signatureAlgorithm = ANONYMOUS;
           break;
@@ -214,7 +244,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
       this.signature = new Uint8Array(stream.getBlock(signatureLength)).buffer.slice(0);
       //#endregion
 
-      if (blockLength !== (47 + extensionsLength + signatureLength)) {
+      if (blockLength !== 47 + extensionsLength + signatureLength) {
         throw new Error("Object's stream was not correct for SignedCertificateTimestamp");
       }
     }
@@ -246,8 +276,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
     stream.appendView(timeView);
     stream.appendUint16(this.extensions.byteLength);
 
-    if (this.extensions.byteLength)
-      stream.appendView(new Uint8Array(this.extensions));
+    if (this.extensions.byteLength) stream.appendView(new Uint8Array(this.extensions));
 
     let _hashAlgorithm;
 
@@ -314,7 +343,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
       extensions: pvutils.bufferToHexCodes(this.extensions),
       hashAlgorithm: this.hashAlgorithm,
       signatureAlgorithm: this.signatureAlgorithm,
-      signature: pvutils.bufferToHexCodes(this.signature),
+      signature: pvutils.bufferToHexCodes(this.signature)
     };
   }
 
@@ -325,7 +354,12 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
    * @param dataType Type = 0 (data is encoded Certificate), type = 1 (data is encoded PreCert)
    * @param crypto Crypto engine
    */
-  async verify(logs: Log[], data: ArrayBuffer, dataType = 0, crypto = common.getCrypto(true)): Promise<boolean> {
+  async verify(
+    logs: Log[],
+    data: ArrayBuffer,
+    dataType = 0,
+    crypto = common.getCrypto(true)
+  ): Promise<boolean> {
     //#region Initial variables
     const logId = pvutils.toBase64(pvutils.arrayBufferToString(this.logID));
 
@@ -364,15 +398,13 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
 
     stream.appendUint16(dataType);
 
-    if (dataType === 0)
-      stream.appendUint24(data.byteLength);
+    if (dataType === 0) stream.appendUint24(data.byteLength);
 
     stream.appendView(new Uint8Array(data));
 
     stream.appendUint16(this.extensions.byteLength);
 
-    if (this.extensions.byteLength !== 0)
-      stream.appendView(new Uint8Array(this.extensions));
+    if (this.extensions.byteLength !== 0) stream.appendView(new Uint8Array(this.extensions));
     //#endregion
 
     //#region Perform verification
@@ -385,7 +417,6 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
     );
     //#endregion
   }
-
 }
 
 export interface Log {
@@ -408,14 +439,20 @@ export interface Log {
  * @param crypto Crypto engine
  * @return Array of verification results
  */
-export async function verifySCTsForCertificate(certificate: Certificate, issuerCertificate: Certificate, logs: Log[], index = (-1), crypto = common.getCrypto(true)) {
+export async function verifySCTsForCertificate(
+  certificate: Certificate,
+  issuerCertificate: Certificate,
+  logs: Log[],
+  index = -1,
+  crypto = common.getCrypto(true)
+) {
   let parsedValue: SignedCertificateTimestampList | null = null;
 
   const stream = new bs.SeqStream();
 
   //#region Remove certificate extension
   if (certificate.extensions) {
-    for (let i = certificate.extensions.length - 1; i >=0; i--) {
+    for (let i = certificate.extensions.length - 1; i >= 0; i--) {
       switch (certificate.extensions[i].extnID) {
         case id_SignedCertificateTimestampList:
           {
@@ -443,7 +480,10 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
   //#endregion
 
   //#region Initialize "issuer_key_hash" value
-  const issuerId = await crypto.digest({ name: "SHA-256" }, new Uint8Array(issuerCertificate.subjectPublicKeyInfo.toSchema().toBER(false)));
+  const issuerId = await crypto.digest(
+    { name: "SHA-256" },
+    new Uint8Array(issuerCertificate.subjectPublicKeyInfo.toSchema().toBER(false))
+  );
   //#endregion
 
   //#region Make final "PreCert" value
@@ -455,7 +495,7 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
   //#endregion
 
   //#region Call verification function for specified index
-  if (index === (-1)) {
+  if (index === -1) {
     const verifyArray = [];
 
     for (const timestamp of parsedValue.timestamps) {
@@ -466,10 +506,8 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
     return verifyArray;
   }
 
-  if (index >= parsedValue.timestamps.length)
-    index = (parsedValue.timestamps.length - 1);
+  if (index >= parsedValue.timestamps.length) index = parsedValue.timestamps.length - 1;
 
   return [await parsedValue.timestamps[index].verify(logs, preCert.buffer, 1, crypto)];
   //#endregion
 }
-

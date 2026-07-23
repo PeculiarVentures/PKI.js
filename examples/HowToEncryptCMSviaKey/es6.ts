@@ -40,7 +40,9 @@ async function createKeyPair() {
 async function envelopedEncrypt() {
   keys.spki = utils.fromPEM(common.getElement("pkcs8_key_pub", "textarea").value);
 
-  keys.keyPairIdBuffer = pvtsutils.Convert.FromBase64(common.getElement("pkcs8_key_id", "textarea").value);
+  keys.keyPairIdBuffer = pvtsutils.Convert.FromBase64(
+    common.getElement("pkcs8_key_id", "textarea").value
+  );
 
   valueBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("content", "textarea").value);
   cmsEnvelopedBuffer = await example.envelopedEncrypt(
@@ -48,9 +50,10 @@ async function envelopedEncrypt() {
     {
       ...encAlg,
       kdfHash: kdfHashAlg,
-      namedCurve: curveName,
+      namedCurve: curveName
     },
-    valueBuffer);
+    valueBuffer
+  );
 
   common.getElement("encrypted_content").innerHTML = utils.toPEM(cmsEnvelopedBuffer, "CMS");
 
@@ -82,7 +85,8 @@ function handleKeyAgreeAlgorithmOnChange() {
 }
 
 function handleEncAlgOnChange() {
-  const encryptionAlgorithmSelect = (common.getElement("content_enc_alg") as HTMLInputElement).value;
+  const encryptionAlgorithmSelect = (common.getElement("content_enc_alg") as HTMLInputElement)
+    .value;
   switch (encryptionAlgorithmSelect) {
     case "alg_CBC":
       encAlg.name = "AES-CBC";
@@ -95,7 +99,9 @@ function handleEncAlgOnChange() {
 }
 
 function handleEncLenOnChange() {
-  const encryptionAlgorithmLengthSelect = (common.getElement("content_enc_alg_len") as HTMLInputElement).value;
+  const encryptionAlgorithmLengthSelect = (
+    common.getElement("content_enc_alg_len") as HTMLInputElement
+  ).value;
   switch (encryptionAlgorithmLengthSelect) {
     case "len_128":
       encAlg.length = 128;

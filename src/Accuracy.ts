@@ -45,7 +45,6 @@ export interface AccuracyJson {
  * Represents the time deviation around the UTC time contained in GeneralizedTime. Described in [RFC3161](https://www.ietf.org/rfc/rfc3161.txt)
  */
 export class Accuracy extends PkiObject implements IAccuracy {
-
   public static override CLASS_NAME = "Accuracy";
 
   public seconds?: number;
@@ -60,7 +59,11 @@ export class Accuracy extends PkiObject implements IAccuracy {
     super();
 
     if (SECONDS in parameters) {
-      this.seconds = pvutils.getParametersValue(parameters, SECONDS, Accuracy.defaultValues(SECONDS));
+      this.seconds = pvutils.getParametersValue(
+        parameters,
+        SECONDS,
+        Accuracy.defaultValues(SECONDS)
+      );
     }
     if (MILLIS in parameters) {
       this.millis = pvutils.getParametersValue(parameters, MILLIS, Accuracy.defaultValues(MILLIS));
@@ -99,14 +102,17 @@ export class Accuracy extends PkiObject implements IAccuracy {
    * @param memberName String name for a class member
    * @param memberValue Value to compare with default value
    */
-  public static compareWithDefault(memberName: typeof SECONDS | typeof MILLIS | typeof MICROS, memberValue: number): boolean;
+  public static compareWithDefault(
+    memberName: typeof SECONDS | typeof MILLIS | typeof MICROS,
+    memberValue: number
+  ): boolean;
   public static compareWithDefault(memberName: string, memberValue: any): boolean;
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case SECONDS:
       case MILLIS:
       case MICROS:
-        return (memberValue === Accuracy.defaultValues(memberName));
+        return memberValue === Accuracy.defaultValues(memberName);
       default:
         return super.defaultValues(memberName);
     }
@@ -123,18 +129,22 @@ export class Accuracy extends PkiObject implements IAccuracy {
    *```
    */
   public static override schema(parameters: AccuracySchema = {}): any {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       optional: true,
       value: [
         new asn1js.Integer({
           optional: true,
-          name: (names.seconds || EMPTY_STRING)
+          name: names.seconds || EMPTY_STRING
         }),
         new asn1js.Primitive({
-          name: (names.millis || EMPTY_STRING),
+          name: names.millis || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -142,7 +152,7 @@ export class Accuracy extends PkiObject implements IAccuracy {
           }
         }),
         new asn1js.Primitive({
-          name: (names.micros || EMPTY_STRING),
+          name: names.micros || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -150,25 +160,22 @@ export class Accuracy extends PkiObject implements IAccuracy {
           }
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [
-      SECONDS,
-      MILLIS,
-      MICROS,
-    ]);
+    pvutils.clearProps(schema, [SECONDS, MILLIS, MICROS]);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       Accuracy.schema({
         names: {
           seconds: SECONDS,
           millis: MILLIS,
-          micros: MICROS,
+          micros: MICROS
         }
       })
     );
@@ -192,52 +199,50 @@ export class Accuracy extends PkiObject implements IAccuracy {
     //#region Create array of output sequence
     const outputArray = [];
 
-    if (this.seconds !== undefined)
-      outputArray.push(new asn1js.Integer({ value: this.seconds }));
+    if (this.seconds !== undefined) outputArray.push(new asn1js.Integer({ value: this.seconds }));
 
     if (this.millis !== undefined) {
       const intMillis = new asn1js.Integer({ value: this.millis });
 
-      outputArray.push(new asn1js.Primitive({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        valueHex: intMillis.valueBlock.valueHexView
-      }));
+      outputArray.push(
+        new asn1js.Primitive({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0 // [0]
+          },
+          valueHex: intMillis.valueBlock.valueHexView
+        })
+      );
     }
 
     if (this.micros !== undefined) {
       const intMicros = new asn1js.Integer({ value: this.micros });
 
-      outputArray.push(new asn1js.Primitive({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 1 // [1]
-        },
-        valueHex: intMicros.valueBlock.valueHexView
-      }));
+      outputArray.push(
+        new asn1js.Primitive({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 1 // [1]
+          },
+          valueHex: intMicros.valueBlock.valueHexView
+        })
+      );
     }
     //#endregion
 
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
   }
   public toJSON(): AccuracyJson {
     const _object: AccuracyJson = {};
 
-    if (this.seconds !== undefined)
-      _object.seconds = this.seconds;
+    if (this.seconds !== undefined) _object.seconds = this.seconds;
 
-    if (this.millis !== undefined)
-      _object.millis = this.millis;
+    if (this.millis !== undefined) _object.millis = this.millis;
 
-    if (this.micros !== undefined)
-      _object.micros = this.micros;
+    if (this.micros !== undefined) _object.micros = this.micros;
 
     return _object;
   }
-
 }
-

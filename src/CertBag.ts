@@ -3,7 +3,11 @@ import * as pvutils from "pvutils";
 import { Certificate } from "./Certificate";
 import { AttributeCertificateV2 } from "./AttributeCertificateV2";
 import * as Schema from "./Schema";
-import { id_CertBag_AttributeCertificate, id_CertBag_SDSICertificate, id_CertBag_X509Certificate } from "./ObjectIdentifiers";
+import {
+  id_CertBag_AttributeCertificate,
+  id_CertBag_SDSICertificate,
+  id_CertBag_X509Certificate
+} from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { EMPTY_STRING } from "./constants";
@@ -11,10 +15,7 @@ import { EMPTY_STRING } from "./constants";
 const CERT_ID = "certId";
 const CERT_VALUE = "certValue";
 const PARSED_VALUE = "parsedValue";
-const CLEAR_PROPS = [
-  CERT_ID,
-  CERT_VALUE
-];
+const CLEAR_PROPS = [CERT_ID, CERT_VALUE];
 
 export interface ICertBag {
   certId: string;
@@ -33,7 +34,6 @@ export interface CertBagJson {
  * Represents the CertBag structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
 export class CertBag extends PkiObject implements ICertBag {
-
   public static override CLASS_NAME = "CertBag";
 
   public certId!: string;
@@ -48,9 +48,17 @@ export class CertBag extends PkiObject implements ICertBag {
     super();
 
     this.certId = pvutils.getParametersValue(parameters, CERT_ID, CertBag.defaultValues(CERT_ID));
-    this.certValue = pvutils.getParametersValue(parameters, CERT_VALUE, CertBag.defaultValues(CERT_VALUE));
+    this.certValue = pvutils.getParametersValue(
+      parameters,
+      CERT_VALUE,
+      CertBag.defaultValues(CERT_VALUE)
+    );
     if (PARSED_VALUE in parameters) {
-      this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, CertBag.defaultValues(PARSED_VALUE));
+      this.parsedValue = pvutils.getParametersValue(
+        parameters,
+        PARSED_VALUE,
+        CertBag.defaultValues(PARSED_VALUE)
+      );
     }
 
     if (parameters.schema) {
@@ -71,7 +79,7 @@ export class CertBag extends PkiObject implements ICertBag {
       case CERT_ID:
         return EMPTY_STRING;
       case CERT_VALUE:
-        return (new asn1js.Any());
+        return new asn1js.Any();
       case PARSED_VALUE:
         return {};
       default:
@@ -87,11 +95,11 @@ export class CertBag extends PkiObject implements ICertBag {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case CERT_ID:
-        return (memberValue === EMPTY_STRING);
+        return memberValue === EMPTY_STRING;
       case CERT_VALUE:
-        return (memberValue instanceof asn1js.Any);
+        return memberValue instanceof asn1js.Any;
       case PARSED_VALUE:
-        return ((memberValue instanceof Object) && (Object.keys(memberValue).length === 0));
+        return memberValue instanceof Object && Object.keys(memberValue).length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -107,25 +115,31 @@ export class CertBag extends PkiObject implements ICertBag {
    * }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    id?: string;
-    value?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      id?: string;
+      value?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.id || "id") }),
+        new asn1js.ObjectIdentifier({ name: names.id || "id" }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          value: [new asn1js.Any({ name: (names.value || "value") })] // EXPLICIT ANY value
+          value: [new asn1js.Any({ name: names.value || "value" })] // EXPLICIT ANY value
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -133,7 +147,8 @@ export class CertBag extends PkiObject implements ICertBag {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       CertBag.schema({
         names: {
@@ -154,9 +169,8 @@ export class CertBag extends PkiObject implements ICertBag {
         {
           try {
             this.parsedValue = Certificate.fromBER(certValueHex as BufferSource);
-          }
-          catch // In some realizations the same OID used for attribute certificates
-          {
+          } catch {
+            // In some realizations the same OID used for attribute certificates
             AttributeCertificateV2.fromBER(certValueHex as BufferSource);
           }
         }
@@ -176,16 +190,20 @@ export class CertBag extends PkiObject implements ICertBag {
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     if (PARSED_VALUE in this) {
-      if ("acinfo" in this.parsedValue) {// attributeCertificate
+      if ("acinfo" in this.parsedValue) {
+        // attributeCertificate
         this.certId = id_CertBag_AttributeCertificate;
-      } else {// x509Certificate
+      } else {
+        // x509Certificate
         this.certId = id_CertBag_X509Certificate;
       }
 
-      this.certValue = new asn1js.OctetString({ valueHex: this.parsedValue.toSchema().toBER(false) });
+      this.certValue = new asn1js.OctetString({
+        valueHex: this.parsedValue.toSchema().toBER(false)
+      });
     }
 
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: [
         new asn1js.ObjectIdentifier({ value: this.certId }),
         new asn1js.Constructed({
@@ -193,10 +211,10 @@ export class CertBag extends PkiObject implements ICertBag {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          value: [(("toSchema" in this.certValue) ? this.certValue.toSchema() : this.certValue)]
+          value: ["toSchema" in this.certValue ? this.certValue.toSchema() : this.certValue]
         })
       ]
-    }));
+    });
     //#endregion
   }
 
@@ -206,5 +224,4 @@ export class CertBag extends PkiObject implements ICertBag {
       certValue: this.certValue.toJSON()
     };
   }
-
 }

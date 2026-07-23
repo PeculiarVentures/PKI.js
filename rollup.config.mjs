@@ -7,16 +7,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(fs.readFileSync("./package.json", "utf8"));
 
 const LICENSE = fs.readFileSync("LICENSE", { encoding: "utf-8" });
-const banner = [
-  "/*!",
-  ...LICENSE.split("\n").map(o => ` * ${o}`),
-  " */",
-  "",
-].join("\n");
+const banner = ["/*!", ...LICENSE.split("\n").map(o => ` * ${o}`), " */", ""].join("\n");
 const input = "src/index.ts";
 const external = Object.keys(pkg.dependencies || {});
-external.push('@noble/hashes/sha1');
-external.push('@noble/hashes/sha2');
+external.push("@noble/hashes/sha1");
+external.push("@noble/hashes/sha2");
 
 export default [
   {
@@ -28,24 +23,24 @@ export default [
         tsconfigOverride: {
           compilerOptions: {
             module: "ES2020",
-            removeComments: true,
+            removeComments: true
           }
         }
-      }),
+      })
     ],
     external: [...external],
     output: [
       {
         banner,
         file: pkg.main,
-        format: "cjs",
+        format: "cjs"
       },
       {
         banner,
         file: pkg.module,
-        format: "es",
-      },
-    ],
+        format: "es"
+      }
+    ]
   },
   {
     input,
@@ -58,8 +53,8 @@ export default [
     output: [
       {
         banner,
-        file: pkg.types,
+        file: pkg.types
       }
     ]
-  },
+  }
 ];

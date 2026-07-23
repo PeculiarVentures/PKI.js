@@ -1,6 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema
+} from "./AlgorithmIdentifier";
 import { Certificate } from "./Certificate";
 import { RecipientIdentifier, RecipientIdentifierSchema } from "./RecipientIdentifier";
 import { IssuerAndSerialNumber, IssuerAndSerialNumberJson } from "./IssuerAndSerialNumber";
@@ -14,12 +18,7 @@ const RID = "rid";
 const KEY_ENCRYPTION_ALGORITHM = "keyEncryptionAlgorithm";
 const ENCRYPTED_KEY = "encryptedKey";
 const RECIPIENT_CERTIFICATE = "recipientCertificate";
-const CLEAR_PROPS = [
-  VERSION,
-  RID,
-  KEY_ENCRYPTION_ALGORITHM,
-  ENCRYPTED_KEY,
-];
+const CLEAR_PROPS = [VERSION, RID, KEY_ENCRYPTION_ALGORITHM, ENCRYPTED_KEY];
 
 export interface IKeyTransRecipientInfo {
   version: number;
@@ -45,7 +44,6 @@ export type KeyTransRecipientInfoParameters = PkiObjectParameters & Partial<IKey
  * Represents the KeyTransRecipientInfo structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipientInfo {
-
   public static override CLASS_NAME = "KeyTransRecipientInfo";
 
   public version!: number;
@@ -61,11 +59,31 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
   constructor(parameters: KeyTransRecipientInfoParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, KeyTransRecipientInfo.defaultValues(VERSION));
-    this.rid = pvutils.getParametersValue(parameters, RID, KeyTransRecipientInfo.defaultValues(RID));
-    this.keyEncryptionAlgorithm = pvutils.getParametersValue(parameters, KEY_ENCRYPTION_ALGORITHM, KeyTransRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM));
-    this.encryptedKey = pvutils.getParametersValue(parameters, ENCRYPTED_KEY, KeyTransRecipientInfo.defaultValues(ENCRYPTED_KEY));
-    this.recipientCertificate = pvutils.getParametersValue(parameters, RECIPIENT_CERTIFICATE, KeyTransRecipientInfo.defaultValues(RECIPIENT_CERTIFICATE));
+    this.version = pvutils.getParametersValue(
+      parameters,
+      VERSION,
+      KeyTransRecipientInfo.defaultValues(VERSION)
+    );
+    this.rid = pvutils.getParametersValue(
+      parameters,
+      RID,
+      KeyTransRecipientInfo.defaultValues(RID)
+    );
+    this.keyEncryptionAlgorithm = pvutils.getParametersValue(
+      parameters,
+      KEY_ENCRYPTION_ALGORITHM,
+      KeyTransRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM)
+    );
+    this.encryptedKey = pvutils.getParametersValue(
+      parameters,
+      ENCRYPTED_KEY,
+      KeyTransRecipientInfo.defaultValues(ENCRYPTED_KEY)
+    );
+    this.recipientCertificate = pvutils.getParametersValue(
+      parameters,
+      RECIPIENT_CERTIFICATE,
+      KeyTransRecipientInfo.defaultValues(RECIPIENT_CERTIFICATE)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -79,13 +97,15 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
    */
   public static override defaultValues(memberName: typeof VERSION): number;
   public static override defaultValues(memberName: typeof RID): RecipientIdentifierType;
-  public static override defaultValues(memberName: typeof KEY_ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(
+    memberName: typeof KEY_ENCRYPTION_ALGORITHM
+  ): AlgorithmIdentifier;
   public static override defaultValues(memberName: typeof ENCRYPTED_KEY): asn1js.OctetString;
   public static override defaultValues(memberName: typeof RECIPIENT_CERTIFICATE): Certificate;
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
-        return (-1);
+        return -1;
       case RID:
         return {};
       case KEY_ENCRYPTION_ALGORITHM:
@@ -107,12 +127,14 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case VERSION:
-        return (memberValue === KeyTransRecipientInfo.defaultValues(VERSION));
+        return memberValue === KeyTransRecipientInfo.defaultValues(VERSION);
       case RID:
-        return (Object.keys(memberValue).length === 0);
+        return Object.keys(memberValue).length === 0;
       case KEY_ENCRYPTION_ALGORITHM:
       case ENCRYPTED_KEY:
-        return memberValue.isEqual(KeyTransRecipientInfo.defaultValues(memberName as typeof ENCRYPTED_KEY));
+        return memberValue.isEqual(
+          KeyTransRecipientInfo.defaultValues(memberName as typeof ENCRYPTED_KEY)
+        );
       case RECIPIENT_CERTIFICATE:
         return false; // For now we do not need to compare any values with the RECIPIENT_CERTIFICATE
       default:
@@ -131,23 +153,29 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
    *    encryptedKey EncryptedKey }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    version?: string;
-    rid?: RecipientIdentifierSchema;
-    keyEncryptionAlgorithm?: AlgorithmIdentifierSchema;
-    encryptedKey?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      version?: string;
+      rid?: RecipientIdentifierSchema;
+      keyEncryptionAlgorithm?: AlgorithmIdentifierSchema;
+      encryptedKey?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
+        new asn1js.Integer({ name: names.version || EMPTY_STRING }),
         RecipientIdentifier.schema(names.rid || {}),
         AlgorithmIdentifier.schema(names.keyEncryptionAlgorithm || {}),
-        new asn1js.OctetString({ name: (names.encryptedKey || EMPTY_STRING) })
+        new asn1js.OctetString({ name: names.encryptedKey || EMPTY_STRING })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -155,7 +183,8 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       KeyTransRecipientInfo.schema({
         names: {
@@ -183,7 +212,9 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
     } else {
       this.rid = new IssuerAndSerialNumber({ schema: asn1.result.rid });
     }
-    this.keyEncryptionAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.keyEncryptionAlgorithm });
+    this.keyEncryptionAlgorithm = new AlgorithmIdentifier({
+      schema: asn1.result.keyEncryptionAlgorithm
+    });
     this.encryptedKey = asn1.result.encryptedKey;
   }
 
@@ -196,18 +227,19 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
 
       outputArray.push(new asn1js.Integer({ value: this.version }));
       outputArray.push(this.rid.toSchema());
-    }
-    else {
+    } else {
       this.version = 2;
 
       outputArray.push(new asn1js.Integer({ value: this.version }));
-      outputArray.push(new asn1js.Primitive({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        valueHex: this.rid.valueBlock.valueHexView
-      }));
+      outputArray.push(
+        new asn1js.Primitive({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0 // [0]
+          },
+          valueHex: this.rid.valueBlock.valueHexView
+        })
+      );
     }
 
     outputArray.push(this.keyEncryptionAlgorithm.toSchema());
@@ -215,9 +247,9 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
     //#endregion
   }
 
@@ -226,8 +258,7 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
       version: this.version,
       rid: this.rid.toJSON(),
       keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
-      encryptedKey: this.encryptedKey.toJSON(),
+      encryptedKey: this.encryptedKey.toJSON()
     };
   }
-
 }

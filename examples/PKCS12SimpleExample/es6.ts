@@ -61,13 +61,19 @@ async function parsePKCS12(buffer: ArrayBuffer) {
   if (!(pkcs12.parsedValue && pkcs12.parsedValue.authenticatedSafe)) {
     throw new Error("pkcs12.parsedValue.authenticatedSafe is empty");
   }
-  const certificateBuffer = pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.parsedValue.toSchema().toBER(false);
+  const certificateBuffer =
+    pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.parsedValue
+      .toSchema()
+      .toBER(false);
 
   result.push(utils.toPEM(certificateBuffer, "CERTIFICATE"));
   //#endregion
 
   //#endregion Store PKCS#8 (private key) value
-  const pkcs8Buffer = pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.parsedValue.toSchema().toBER(false);
+  const pkcs8Buffer =
+    pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.parsedValue
+      .toSchema()
+      .toBER(false);
   result.push(utils.toPEM(pkcs8Buffer, "PRIVATE KEY"));
   //#endregion
 
@@ -76,18 +82,20 @@ async function parsePKCS12(buffer: ArrayBuffer) {
 
 function handlePKCS12(evt: any) {
   common.handleFileBrowse(evt, file => {
-    parsePKCS12(file)
-      .catch(e => {
-        console.error(e);
-        alert("Error on PKCS#12 parsing. See developer console for more details");
-      });
+    parsePKCS12(file).catch(e => {
+      console.error(e);
+      alert("Error on PKCS#12 parsing. See developer console for more details");
+    });
   });
-
 }
 
 common.getElement("open_ssl_like").addEventListener("click", openSSLLike);
-common.getElement("password_based_integrity").addEventListener("click", () => passwordBasedIntegrity());
-common.getElement("certificate_based_integrity").addEventListener("click", certificateBasedIntegrity);
+common
+  .getElement("password_based_integrity")
+  .addEventListener("click", () => passwordBasedIntegrity());
+common
+  .getElement("certificate_based_integrity")
+  .addEventListener("click", certificateBasedIntegrity);
 common.getElement("no_privacy").addEventListener("click", noPrivacy);
 common.getElement("password_privacy").addEventListener("click", passwordPrivacy);
 common.getElement("certificate_privacy").addEventListener("click", certificatePrivacy);

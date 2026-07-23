@@ -17,8 +17,7 @@ export function stringPrep(inputString: string): string {
   //#region Change all sequence of SPACE down to SPACE char
   for (let i = 0; i < result.length; i++) {
     if (result.charCodeAt(i) === 32) {
-      if (isSpace === false)
-        isSpace = true;
+      if (isSpace === false) isSpace = true;
     } else {
       if (isSpace) {
         cutResult += " ";

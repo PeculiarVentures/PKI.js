@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* oxlint-disable no-unused-vars */
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import { AsnError } from "./errors";
@@ -9,12 +9,11 @@ export interface PkiObjectParameters {
 }
 
 interface PkiObjectConstructor<T extends PkiObject = PkiObject> {
-  new(params: PkiObjectParameters): T;
+  new (params: PkiObjectParameters): T;
   CLASS_NAME: string;
 }
 
 export abstract class PkiObject {
-
   /**
    * Name of the class
    */
@@ -63,7 +62,7 @@ export abstract class PkiObject {
   }
 
   public get className(): string {
-    return (this.constructor as unknown as { CLASS_NAME: string; }).CLASS_NAME;
+    return (this.constructor as unknown as { CLASS_NAME: string }).CLASS_NAME;
   }
 
   /**
@@ -96,5 +95,4 @@ export abstract class PkiObject {
 
     return pvtsutils.Convert.ToString(schema.toBER(), encoding);
   }
-
 }

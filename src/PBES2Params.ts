@@ -1,6 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema
+} from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -8,10 +12,7 @@ import * as Schema from "./Schema";
 
 const KEY_DERIVATION_FUNC = "keyDerivationFunc";
 const ENCRYPTION_SCHEME = "encryptionScheme";
-const CLEAR_PROPS = [
-  KEY_DERIVATION_FUNC,
-  ENCRYPTION_SCHEME
-];
+const CLEAR_PROPS = [KEY_DERIVATION_FUNC, ENCRYPTION_SCHEME];
 
 export interface IPBES2Params {
   keyDerivationFunc: AlgorithmIdentifier;
@@ -29,7 +30,6 @@ export type PBES2ParamsParameters = PkiObjectParameters & Partial<IPBES2Params>;
  * Represents the PBES2Params structure described in [RFC2898](https://www.ietf.org/rfc/rfc2898.txt)
  */
 export class PBES2Params extends PkiObject implements IPBES2Params {
-
   public static override CLASS_NAME = "PBES2Params";
 
   public keyDerivationFunc!: AlgorithmIdentifier;
@@ -42,8 +42,16 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
   constructor(parameters: PBES2ParamsParameters = {}) {
     super();
 
-    this.keyDerivationFunc = pvutils.getParametersValue(parameters, KEY_DERIVATION_FUNC, PBES2Params.defaultValues(KEY_DERIVATION_FUNC));
-    this.encryptionScheme = pvutils.getParametersValue(parameters, ENCRYPTION_SCHEME, PBES2Params.defaultValues(ENCRYPTION_SCHEME));
+    this.keyDerivationFunc = pvutils.getParametersValue(
+      parameters,
+      KEY_DERIVATION_FUNC,
+      PBES2Params.defaultValues(KEY_DERIVATION_FUNC)
+    );
+    this.encryptionScheme = pvutils.getParametersValue(
+      parameters,
+      ENCRYPTION_SCHEME,
+      PBES2Params.defaultValues(ENCRYPTION_SCHEME)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -77,19 +85,25 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
    *    encryptionScheme AlgorithmIdentifier {{PBES2-Encs}} }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    keyDerivationFunc?: AlgorithmIdentifierSchema;
-    encryptionScheme?: AlgorithmIdentifierSchema;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      keyDerivationFunc?: AlgorithmIdentifierSchema;
+      encryptionScheme?: AlgorithmIdentifierSchema;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         AlgorithmIdentifier.schema(names.keyDerivationFunc || {}),
         AlgorithmIdentifier.schema(names.encryptionScheme || {})
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -97,7 +111,8 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       PBES2Params.schema({
         names: {
@@ -123,12 +138,9 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: [
-        this.keyDerivationFunc.toSchema(),
-        this.encryptionScheme.toSchema()
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [this.keyDerivationFunc.toSchema(), this.encryptionScheme.toSchema()]
+    });
   }
 
   public toJSON(): PBES2ParamsJson {
@@ -137,5 +149,4 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
       encryptionScheme: this.encryptionScheme.toJSON()
     };
   }
-
 }

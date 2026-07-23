@@ -12,9 +12,7 @@ import { EMPTY_STRING } from "./constants";
 
 const VARIANT = "variant";
 const VALUE = "value";
-const CLEAR_PROPS = [
-  "blockName"
-];
+const CLEAR_PROPS = ["blockName"];
 
 export interface IRecipientInfo {
   variant: number;
@@ -26,8 +24,18 @@ export interface RecipientInfoJson {
   value?: RecipientInfoValueJson;
 }
 
-export type RecipientInfoValue = KeyTransRecipientInfo | KeyAgreeRecipientInfo | KEKRecipientInfo | PasswordRecipientinfo | OtherRecipientInfo;
-export type RecipientInfoValueJson = KeyTransRecipientInfoJson | KeyAgreeRecipientInfoJson | KEKRecipientInfoJson | PasswordRecipientInfoJson | OtherRecipientInfoJson;
+export type RecipientInfoValue =
+  | KeyTransRecipientInfo
+  | KeyAgreeRecipientInfo
+  | KEKRecipientInfo
+  | PasswordRecipientinfo
+  | OtherRecipientInfo;
+export type RecipientInfoValueJson =
+  | KeyTransRecipientInfoJson
+  | KeyAgreeRecipientInfoJson
+  | KEKRecipientInfoJson
+  | PasswordRecipientInfoJson
+  | OtherRecipientInfoJson;
 
 export type RecipientInfoParameters = PkiObjectParameters & Partial<IRecipientInfo>;
 
@@ -35,7 +43,6 @@ export type RecipientInfoParameters = PkiObjectParameters & Partial<IRecipientIn
  * Represents the RecipientInfo structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class RecipientInfo extends PkiObject implements IRecipientInfo {
-
   public static override CLASS_NAME = "RecipientInfo";
 
   public variant!: number;
@@ -48,9 +55,17 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
   constructor(parameters: RecipientInfoParameters = {}) {
     super();
 
-    this.variant = pvutils.getParametersValue(parameters, VARIANT, RecipientInfo.defaultValues(VARIANT));
+    this.variant = pvutils.getParametersValue(
+      parameters,
+      VARIANT,
+      RecipientInfo.defaultValues(VARIANT)
+    );
     if (VALUE in parameters) {
-      this.value = pvutils.getParametersValue(parameters, VALUE, RecipientInfo.defaultValues(VALUE));
+      this.value = pvutils.getParametersValue(
+        parameters,
+        VALUE,
+        RecipientInfo.defaultValues(VALUE)
+      );
     }
 
     if (parameters.schema) {
@@ -68,7 +83,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VARIANT:
-        return (-1);
+        return -1;
       case VALUE:
         return {};
       default:
@@ -84,9 +99,9 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case VARIANT:
-        return (memberValue === RecipientInfo.defaultValues(memberName));
+        return memberValue === RecipientInfo.defaultValues(memberName);
       case VALUE:
-        return (Object.keys(memberValue).length === 0);
+        return Object.keys(memberValue).length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -105,17 +120,21 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
    *```
    */
   public static override schema(parameters: Schema.SchemaParameters = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Choice({
+    return new asn1js.Choice({
       value: [
         KeyTransRecipientInfo.schema({
           names: {
-            blockName: (names.blockName || EMPTY_STRING)
+            blockName: names.blockName || EMPTY_STRING
           }
         }),
         new asn1js.Constructed({
-          name: (names.blockName || EMPTY_STRING),
+          name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 1 // [1]
@@ -123,7 +142,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
           value: KeyAgreeRecipientInfo.schema().valueBlock.value
         }),
         new asn1js.Constructed({
-          name: (names.blockName || EMPTY_STRING),
+          name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 2 // [2]
@@ -131,7 +150,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
           value: KEKRecipientInfo.schema().valueBlock.value
         }),
         new asn1js.Constructed({
-          name: (names.blockName || EMPTY_STRING),
+          name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 3 // [3]
@@ -139,7 +158,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
           value: PasswordRecipientinfo.schema().valueBlock.value
         }),
         new asn1js.Constructed({
-          name: (names.blockName || EMPTY_STRING),
+          name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 4 // [4]
@@ -147,7 +166,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
           value: OtherRecipientInfo.schema().valueBlock.value
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -155,7 +174,8 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       RecipientInfo.schema({
         names: {
@@ -211,7 +231,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
       case 4:
         // Create "ASN1_CONSTRUCTED" from "SEQUENCE"
         _schema.idBlock.tagClass = 3; // CONTEXT-SPECIFIC
-        _schema.idBlock.tagNumber = (this.variant - 1);
+        _schema.idBlock.tagNumber = this.variant - 1;
 
         return _schema;
       default:
@@ -224,11 +244,10 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
       variant: this.variant
     };
 
-    if (this.value && (this.variant >= 1) && (this.variant <= 4)) {
+    if (this.value && this.variant >= 1 && this.variant <= 4) {
       res.value = this.value.toJSON();
     }
 
     return res;
   }
-
 }

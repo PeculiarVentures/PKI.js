@@ -2,18 +2,18 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { OtherKeyAttribute, OtherKeyAttributeJson, OtherKeyAttributeSchema } from "./OtherKeyAttribute";
+import {
+  OtherKeyAttribute,
+  OtherKeyAttributeJson,
+  OtherKeyAttributeSchema
+} from "./OtherKeyAttribute";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
 const KEY_IDENTIFIER = "keyIdentifier";
 const DATE = "date";
 const OTHER = "other";
-const CLEAR_PROPS = [
-  KEY_IDENTIFIER,
-  DATE,
-  OTHER,
-];
+const CLEAR_PROPS = [KEY_IDENTIFIER, DATE, OTHER];
 
 export interface IKEKIdentifier {
   keyIdentifier: asn1js.OctetString;
@@ -39,7 +39,6 @@ export type KEKIdentifierSchema = Schema.SchemaParameters<{
  * Represents the KEKIdentifier structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
-
   public static override CLASS_NAME = "KEKIdentifier";
 
   public keyIdentifier!: asn1js.OctetString;
@@ -53,12 +52,20 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
   constructor(parameters: KEKIdentifierParameters = {}) {
     super();
 
-    this.keyIdentifier = pvutils.getParametersValue(parameters, KEY_IDENTIFIER, KEKIdentifier.defaultValues(KEY_IDENTIFIER));
+    this.keyIdentifier = pvutils.getParametersValue(
+      parameters,
+      KEY_IDENTIFIER,
+      KEKIdentifier.defaultValues(KEY_IDENTIFIER)
+    );
     if (DATE in parameters) {
       this.date = pvutils.getParametersValue(parameters, DATE, KEKIdentifier.defaultValues(DATE));
     }
     if (OTHER in parameters) {
-      this.other = pvutils.getParametersValue(parameters, OTHER, KEKIdentifier.defaultValues(OTHER));
+      this.other = pvutils.getParametersValue(
+        parameters,
+        OTHER,
+        KEKIdentifier.defaultValues(OTHER)
+      );
     }
 
     if (parameters.schema) {
@@ -95,18 +102,22 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case KEY_IDENTIFIER:
-        return (memberValue.isEqual(KEKIdentifier.defaultValues(KEY_IDENTIFIER)));
+        return memberValue.isEqual(KEKIdentifier.defaultValues(KEY_IDENTIFIER));
       case DATE:
-        return ((memberValue.year === 0) &&
-          (memberValue.month === 0) &&
-          (memberValue.day === 0) &&
-          (memberValue.hour === 0) &&
-          (memberValue.minute === 0) &&
-          (memberValue.second === 0) &&
-          (memberValue.millisecond === 0));
+        return (
+          memberValue.year === 0 &&
+          memberValue.month === 0 &&
+          memberValue.day === 0 &&
+          memberValue.hour === 0 &&
+          memberValue.minute === 0 &&
+          memberValue.second === 0 &&
+          memberValue.millisecond === 0
+        );
       case OTHER:
-        return ((memberValue.compareWithDefault("keyAttrId", memberValue.keyAttrId)) &&
-          (("keyAttr" in memberValue) === false));
+        return (
+          memberValue.compareWithDefault("keyAttrId", memberValue.keyAttrId) &&
+          "keyAttr" in memberValue === false
+        );
       default:
         return super.defaultValues(memberName);
     }
@@ -123,19 +134,23 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
    *```
    */
   public static override schema(parameters: KEKIdentifierSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.OctetString({ name: (names.keyIdentifier || EMPTY_STRING) }),
+        new asn1js.OctetString({ name: names.keyIdentifier || EMPTY_STRING }),
         new asn1js.GeneralizedTime({
           optional: true,
-          name: (names.date || EMPTY_STRING)
+          name: names.date || EMPTY_STRING
         }),
         OtherKeyAttribute.schema(names.other || {})
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -143,7 +158,8 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       KEKIdentifier.schema({
         names: {
@@ -161,10 +177,8 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
 
     // Get internal properties from parsed schema
     this.keyIdentifier = asn1.result.keyIdentifier;
-    if (DATE in asn1.result)
-      this.date = asn1.result.date;
-    if (OTHER in asn1.result)
-      this.other = new OtherKeyAttribute({ schema: asn1.result.other });
+    if (DATE in asn1.result) this.date = asn1.result.date;
+    if (OTHER in asn1.result) this.other = new OtherKeyAttribute({ schema: asn1.result.other });
   }
 
   public toSchema(): asn1js.Sequence {
@@ -182,9 +196,9 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
     //#endregion
   }
 
@@ -203,5 +217,4 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
 
     return res;
   }
-
 }

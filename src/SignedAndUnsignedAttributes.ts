@@ -10,9 +10,7 @@ import * as Schema from "./Schema";
 const TYPE = "type";
 const ATTRIBUTES = "attributes";
 const ENCODED_VALUE = "encodedValue";
-const CLEAR_PROPS = [
-  ATTRIBUTES
-];
+const CLEAR_PROPS = [ATTRIBUTES];
 
 export interface ISignedAndUnsignedAttributes {
   type: number;
@@ -28,7 +26,8 @@ export interface SignedAndUnsignedAttributesJson {
   attributes: AttributeJson[];
 }
 
-export type SignedAndUnsignedAttributesParameters = PkiObjectParameters & Partial<ISignedAndUnsignedAttributes>;
+export type SignedAndUnsignedAttributesParameters = PkiObjectParameters &
+  Partial<ISignedAndUnsignedAttributes>;
 
 export type SignedAndUnsignedAttributesSchema = Schema.SchemaParameters<{
   tagNumber?: number;
@@ -39,7 +38,6 @@ export type SignedAndUnsignedAttributesSchema = Schema.SchemaParameters<{
  * Represents the SignedAndUnsignedAttributes structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
  */
 export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAndUnsignedAttributes {
-
   public static override CLASS_NAME = "SignedAndUnsignedAttributes";
 
   public type!: number;
@@ -53,9 +51,21 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
   constructor(parameters: SignedAndUnsignedAttributesParameters = {}) {
     super();
 
-    this.type = pvutils.getParametersValue(parameters, TYPE, SignedAndUnsignedAttributes.defaultValues(TYPE));
-    this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, SignedAndUnsignedAttributes.defaultValues(ATTRIBUTES));
-    this.encodedValue = pvutils.getParametersValue(parameters, ENCODED_VALUE, SignedAndUnsignedAttributes.defaultValues(ENCODED_VALUE));
+    this.type = pvutils.getParametersValue(
+      parameters,
+      TYPE,
+      SignedAndUnsignedAttributes.defaultValues(TYPE)
+    );
+    this.attributes = pvutils.getParametersValue(
+      parameters,
+      ATTRIBUTES,
+      SignedAndUnsignedAttributes.defaultValues(ATTRIBUTES)
+    );
+    this.encodedValue = pvutils.getParametersValue(
+      parameters,
+      ENCODED_VALUE,
+      SignedAndUnsignedAttributes.defaultValues(ENCODED_VALUE)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -73,7 +83,7 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case TYPE:
-        return (-1);
+        return -1;
       case ATTRIBUTES:
         return [];
       case ENCODED_VALUE:
@@ -91,11 +101,11 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case TYPE:
-        return (memberValue === SignedAndUnsignedAttributes.defaultValues(TYPE));
+        return memberValue === SignedAndUnsignedAttributes.defaultValues(TYPE);
       case ATTRIBUTES:
-        return (memberValue.length === 0);
+        return memberValue.length === 0;
       case ENCODED_VALUE:
-        return (memberValue.byteLength === 0);
+        return memberValue.byteLength === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -110,11 +120,17 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
    * UnsignedAttributes ::= SET SIZE (1..MAX) OF Attribute
    *```
    */
-  public static override schema(parameters: SignedAndUnsignedAttributesSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: SignedAndUnsignedAttributesSchema = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Constructed({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Constructed({
+      name: names.blockName || EMPTY_STRING,
       optional: true,
       idBlock: {
         tagClass: 3, // CONTEXT-SPECIFIC
@@ -122,11 +138,11 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
       },
       value: [
         new asn1js.Repeated({
-          name: (names.attributes || EMPTY_STRING),
+          name: names.attributes || EMPTY_STRING,
           value: Attribute.schema()
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -134,7 +150,8 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       SignedAndUnsignedAttributes.schema({
         names: {
@@ -147,48 +164,56 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
 
     // Get internal properties from parsed schema
     this.type = asn1.result.idBlock.tagNumber;
-    this.encodedValue = pvtsutils.BufferSourceConverter.toArrayBuffer(asn1.result.valueBeforeDecodeView);
+    this.encodedValue = pvtsutils.BufferSourceConverter.toArrayBuffer(
+      asn1.result.valueBeforeDecodeView
+    );
 
     //#region Change type from "[0]" to "SET" accordingly to standard
     const encodedView = new Uint8Array(this.encodedValue);
     encodedView[0] = 0x31;
     //#endregion
 
-    if ((ATTRIBUTES in asn1.result) === false) {
-      if (this.type === 0)
-        throw new Error("Wrong structure of SignedUnsignedAttributes");
-      else
-        return; // Not so important in case of "UnsignedAttributes"
+    if (ATTRIBUTES in asn1.result === false) {
+      if (this.type === 0) throw new Error("Wrong structure of SignedUnsignedAttributes");
+      else return; // Not so important in case of "UnsignedAttributes"
     }
 
-    this.attributes = Array.from(asn1.result.attributes, element => new Attribute({ schema: element }));
+    this.attributes = Array.from(
+      asn1.result.attributes,
+      element => new Attribute({ schema: element })
+    );
     //#endregion
   }
 
   public toSchema(): asn1js.Sequence {
-    if (SignedAndUnsignedAttributes.compareWithDefault(TYPE, this.type) || SignedAndUnsignedAttributes.compareWithDefault(ATTRIBUTES, this.attributes))
-      throw new Error("Incorrectly initialized \"SignedAndUnsignedAttributes\" class");
+    if (
+      SignedAndUnsignedAttributes.compareWithDefault(TYPE, this.type) ||
+      SignedAndUnsignedAttributes.compareWithDefault(ATTRIBUTES, this.attributes)
+    )
+      throw new Error('Incorrectly initialized "SignedAndUnsignedAttributes" class');
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Constructed({
+    return new asn1js.Constructed({
       optional: true,
       idBlock: {
         tagClass: 3, // CONTEXT-SPECIFIC
         tagNumber: this.type // "SignedAttributes" = 0, "UnsignedAttributes" = 1
       },
       value: Array.from(this.attributes, o => o.toSchema())
-    }));
+    });
     //#endregion
   }
 
   public toJSON(): SignedAndUnsignedAttributesJson {
-    if (SignedAndUnsignedAttributes.compareWithDefault(TYPE, this.type) || SignedAndUnsignedAttributes.compareWithDefault(ATTRIBUTES, this.attributes))
-      throw new Error("Incorrectly initialized \"SignedAndUnsignedAttributes\" class");
+    if (
+      SignedAndUnsignedAttributes.compareWithDefault(TYPE, this.type) ||
+      SignedAndUnsignedAttributes.compareWithDefault(ATTRIBUTES, this.attributes)
+    )
+      throw new Error('Incorrectly initialized "SignedAndUnsignedAttributes" class');
 
     return {
       type: this.type,
       attributes: Array.from(this.attributes, o => o.toJSON())
     };
   }
-
 }
