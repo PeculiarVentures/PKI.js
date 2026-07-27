@@ -103,7 +103,7 @@ export async function verifyOCSPResp(
   // responder, so it is intentionally omitted.
   return ocspBasicResp.verify({
     trustedCerts: trustedCertificates,
-    trustedResponders: trustedCertificates,
+    trustedResponders: trustedCertificates
   });
   //#endregion
 }

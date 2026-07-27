@@ -518,7 +518,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     const candidateIndices = await BasicOCSPResponse.collectResponderCandidates(
       embeddedCerts,
       this.tbsResponseData.responderID,
-      crypto,
+      crypto
     );
 
     if (candidateIndices.length === 0) {
@@ -567,7 +567,8 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
       try {
         //#region 3. Chain validation (skipped for explicitly trusted responders)
-        const isTrustedResponder = trustedResponders.length > 0 &&
+        const isTrustedResponder =
+          trustedResponders.length > 0 &&
           BasicOCSPResponse.containsCertificateByDer(trustedResponders, signerCert);
 
         let validatedPathCerts: Certificate[] = [];
@@ -577,7 +578,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
             embeddedCerts,
             issuerCerts,
             trustedCerts,
-            crypto,
+            crypto
           );
         }
 
@@ -590,7 +591,12 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
         // `findIssuersForCertID()` and lets the authorization loop try
         // each alternative issuing path.
         const authIssuerCandidates: Certificate[] = [];
-        for (const cert of [...issuerCerts, ...embeddedCerts, ...trustedCerts, ...validatedPathCerts]) {
+        for (const cert of [
+          ...issuerCerts,
+          ...embeddedCerts,
+          ...trustedCerts,
+          ...validatedPathCerts
+        ]) {
           if (!BasicOCSPResponse.containsCertificateByDer(authIssuerCandidates, cert)) {
             authIssuerCandidates.push(cert);
           }
@@ -603,7 +609,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
             singleResponse.certID,
             authIssuerCandidates,
             trustedResponders,
-            crypto,
+            crypto
           );
           if (!authorized) {
             allAuthorized = false;
@@ -632,17 +638,13 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       // At least one candidate had a cryptographically valid signature
       // but failed chain validation or authorization — surface those
       // higher-level reasons rather than a misleading crypto error.
-      throw new Error(
-        `OCSP responder verification failed. Reasons: ${errors.join("; ")}`
-      );
+      throw new Error(`OCSP responder verification failed. Reasons: ${errors.join("; ")}`);
     }
     if (firstCryptoError) {
       // Re-throw genuine signature errors rather than hiding them as `false`.
       throw firstCryptoError;
     }
-    throw new Error(
-      `OCSP responder verification failed. Reasons: ${errors.join("; ")}`
-    );
+    throw new Error(`OCSP responder verification failed. Reasons: ${errors.join("; ")}`);
   }
 
   //#region Issuer / certificate helpers
@@ -672,7 +674,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
   private static async collectResponderCandidates(
     certs: Certificate[],
     responderID: RelativeDistinguishedNames | asn1js.OctetString,
-    crypto = common.getCrypto(true),
+    crypto = common.getCrypto(true)
   ): Promise<number[]> {
     const indices: number[] = [];
 
@@ -692,7 +694,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
         }
         const hash = await crypto.digest(
           { name: "sha-1" },
-          spk.valueBlock.valueHexView as BufferSource,
+          spk.valueBlock.valueHexView as BufferSource
         );
         if (pvutils.isEqualBuffer(hash, responderID.valueBlock.valueHex)) {
           indices.push(index);
@@ -714,13 +716,13 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    */
   private async verifyResponseSignature(
     candidateCert: Certificate,
-    crypto = common.getCrypto(true),
+    crypto = common.getCrypto(true)
   ): Promise<boolean> {
     return crypto.verifyWithPublicKey(
       this.tbsResponseData.tbsView as BufferSource,
       this.signature,
       candidateCert.subjectPublicKeyInfo,
-      this.signatureAlgorithm,
+      this.signatureAlgorithm
     );
   }
 
@@ -746,7 +748,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     embeddedCerts: Certificate[],
     issuerCerts: Certificate[],
     trustedCerts: Certificate[],
-    crypto = common.getCrypto(true),
+    crypto = common.getCrypto(true)
   ): Promise<Certificate[]> {
     // Collect CA candidates, append the signer as leaf (last entry), and
     // deduplicate by exact DER so cross-signed copies with different issuers
@@ -779,7 +781,9 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
     const result = await engine.verify({}, crypto);
     if (!result.result || !result.certificatePath) {
-      throw new Error(`Validation of signer's certificate chain failed${result.resultMessage ? `: ${result.resultMessage}` : ""}`);
+      throw new Error(
+        `Validation of signer's certificate chain failed${result.resultMessage ? `: ${result.resultMessage}` : ""}`
+      );
     }
 
     // `certificatePath[0]` is the leaf (signer). Return the issuer portion.
@@ -809,7 +813,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
   private static async findIssuersForCertID(
     certID: CertID,
     issuerCandidates: Certificate[],
-    crypto = common.getCrypto(true),
+    crypto = common.getCrypto(true)
   ): Promise<Certificate[]> {
     const responseHashAlg = crypto.getAlgorithmByOID(certID.hashAlgorithm.algorithmId, false);
     if (!responseHashAlg || !("name" in responseHashAlg)) {
@@ -831,10 +835,14 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     for (const candidate of uniqueByDer) {
       const candidateID = new CertID();
       try {
-        await candidateID.createForCertificate(candidate, {
-          hashAlgorithm: hashAlgName,
-          issuerCertificate: candidate,
-        }, crypto);
+        await candidateID.createForCertificate(
+          candidate,
+          {
+            hashAlgorithm: hashAlgName,
+            issuerCertificate: candidate
+          },
+          crypto
+        );
       } catch {
         continue;
       }
@@ -842,16 +850,20 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       if (candidateID.hashAlgorithm.algorithmId !== certID.hashAlgorithm.algorithmId) {
         continue;
       }
-      if (!pvtsutils.BufferSourceConverter.isEqual(
-        candidateID.issuerNameHash.valueBlock.valueHexView,
-        certID.issuerNameHash.valueBlock.valueHexView,
-      )) {
+      if (
+        !pvtsutils.BufferSourceConverter.isEqual(
+          candidateID.issuerNameHash.valueBlock.valueHexView,
+          certID.issuerNameHash.valueBlock.valueHexView
+        )
+      ) {
         continue;
       }
-      if (!pvtsutils.BufferSourceConverter.isEqual(
-        candidateID.issuerKeyHash.valueBlock.valueHexView,
-        certID.issuerKeyHash.valueBlock.valueHexView,
-      )) {
+      if (
+        !pvtsutils.BufferSourceConverter.isEqual(
+          candidateID.issuerKeyHash.valueBlock.valueHexView,
+          certID.issuerKeyHash.valueBlock.valueHexView
+        )
+      ) {
         continue;
       }
       matched.push(candidate);
@@ -872,7 +884,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
   private static async certificateMatchesIssuerID(
     certificate: Certificate,
     certID: CertID,
-    crypto = common.getCrypto(true),
+    crypto = common.getCrypto(true)
   ): Promise<boolean> {
     const responseHashAlg = crypto.getAlgorithmByOID(certID.hashAlgorithm.algorithmId, false);
     if (!responseHashAlg || !("name" in responseHashAlg)) {
@@ -883,12 +895,14 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     try {
       const nameHash = await crypto.digest(
         { name: hashAlgName },
-        certificate.subject.toSchema().toBER(false),
+        certificate.subject.toSchema().toBER(false)
       );
-      if (!pvtsutils.BufferSourceConverter.isEqual(
-        new Uint8Array(nameHash),
-        certID.issuerNameHash.valueBlock.valueHexView,
-      )) {
+      if (
+        !pvtsutils.BufferSourceConverter.isEqual(
+          new Uint8Array(nameHash),
+          certID.issuerNameHash.valueBlock.valueHexView
+        )
+      ) {
         return false;
       }
 
@@ -896,7 +910,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       const keyHash = await crypto.digest({ name: hashAlgName }, keyBytes as BufferSource);
       return pvtsutils.BufferSourceConverter.isEqual(
         new Uint8Array(keyHash),
-        certID.issuerKeyHash.valueBlock.valueHexView,
+        certID.issuerKeyHash.valueBlock.valueHexView
       );
     } catch {
       return false;
@@ -928,11 +942,13 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     certID: CertID,
     issuerCandidates: Certificate[],
     trustedResponders: Certificate[],
-    crypto = common.getCrypto(true),
+    crypto = common.getCrypto(true)
   ): Promise<boolean> {
     //#region 3) Explicitly trusted responder (exact DER match)
-    if (trustedResponders.length > 0 &&
-      BasicOCSPResponse.containsCertificateByDer(trustedResponders, signerCert)) {
+    if (
+      trustedResponders.length > 0 &&
+      BasicOCSPResponse.containsCertificateByDer(trustedResponders, signerCert)
+    ) {
       return true;
     }
     //#endregion
