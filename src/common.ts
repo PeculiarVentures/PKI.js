@@ -320,7 +320,7 @@ async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer, Counte
  */
 export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen: number, SharedInfo: ArrayBuffer, crypto = getCrypto(true)) {
   //#region Initial variables
-  let hashLength = 0;
+  let hashLength: number;
   let maxCounter = 1;
   //#endregion
 
