@@ -357,7 +357,7 @@ export async function kdf(
   crypto = getCrypto(true)
 ) {
   //#region Initial variables
-  let hashLength = 0;
+  let hashLength: number;
   let maxCounter = 1;
   //#endregion
 

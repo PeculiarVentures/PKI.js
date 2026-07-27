@@ -215,7 +215,7 @@ function parseOCSPResp(source: ArrayBuffer) {
     const typeval = pvtsutils.Convert.ToHex(
       ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHexView
     );
-    let subjval = "";
+    let subjval: string;
 
     switch (ocspBasicResp.tbsResponseData.responses[i].certStatus.idBlock.tagNumber) {
       case 0:

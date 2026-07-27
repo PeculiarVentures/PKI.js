@@ -4,6 +4,7 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "strict": true,
+    "skipLibCheck": true,
     "importHelpers": true,
     "noImplicitOverride": true,
     "noErrorTruncation": true,
