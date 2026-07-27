@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.10.0">
 <title data-rh="true">BasicOCSPResponse | pki.js</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://pkijs.org/img/card.png"><meta data-rh="true" name="twitter:image" content="https://pkijs.org/img/card.png"><meta data-rh="true" property="og:url" content="https://pkijs.org/docs/api/classes/BasicOCSPResponse"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="BasicOCSPResponse | pki.js"><meta data-rh="true" name="description" content="Represents the BasicOCSPResponse structure described in RFC6960"><meta data-rh="true" property="og:description" content="Represents the BasicOCSPResponse structure described in RFC6960"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://pkijs.org/docs/api/classes/BasicOCSPResponse"><link data-rh="true" rel="alternate" href="https://pkijs.org/docs/api/classes/BasicOCSPResponse" hreflang="en"><link data-rh="true" rel="alternate" href="https://pkijs.org/docs/api/classes/BasicOCSPResponse" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"BasicOCSPResponse","item":"https://pkijs.org/docs/api/classes/BasicOCSPResponse"}]}</script><link rel="stylesheet" href="/assets/css/styles.84457aae.css">
-<script src="/assets/js/runtime~main.1397c229.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.266c6733.js" defer="defer"></script>
 <script src="/assets/js/main.4ffa1d47.js" defer="defer"></script>
 </head>
 <body>
@@ -100,7 +100,12 @@
 <blockquote>
 <p><strong>getCertificateStatus</strong>(<code>certificate</code>, <code>issuerCertificate</code>, <code>crypto</code>): <code>Promise</code>&lt;<a class="" href="/docs/api/interfaces/CertificateStatus"><code>CertificateStatus</code></a>&gt;</p>
 </blockquote>
-<p>Get OCSP response status for specific certificate</p>
+<p>Get OCSP response status for specific certificate.</p>
+<p><strong>Important:</strong> this method only inspects the <code>SingleResponse</code> entries in
+the response — it does <strong>not</strong> authenticate the responder. A successful
+call MUST NOT be relied upon unless <code>verify()</code> has already returned
+<code>true</code> for this response (under suitable trust parameters). Without
+verification, an attacker-supplied response can claim any status.</p>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="parameters-3">Parameters<a href="#parameters-3" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_Vzrq" id="certificate">certificate<a href="#certificate" class="hash-link" aria-label="Direct link to certificate" title="Direct link to certificate" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/classes/Certificate"><code>Certificate</code></a></p>
@@ -170,16 +175,25 @@
 <blockquote>
 <p><strong>verify</strong>(<code>params</code>, <code>crypto</code>): <code>Promise</code>&lt;<code>boolean</code>&gt;</p>
 </blockquote>
-<p>Verify existing OCSP Basic Response</p>
+<p>Verify the OCSP Basic Response (RFC 6960).</p>
+<p>For every candidate matching the <code>ResponderID</code>, three checks are
+performed in order:</p>
+<ol>
+<li class="">Cryptographic signature verification against the candidate&#x27;s public key.</li>
+<li class="">Chain validation against <code>trustedCerts</code> (skipped for <code>trustedResponders</code>).</li>
+<li class="">Authorization per RFC 6960 §4.2.2.2: direct issuer, delegated responder
+with <code>id-kp-OCSPSigning</code>, or explicit <code>trustedResponders</code> entry.</li>
+</ol>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="parameters-6">Parameters<a href="#parameters-6" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_Vzrq" id="params">params<a href="#params" class="hash-link" aria-label="Direct link to params" title="Direct link to params" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/BasicOCSPResponseVerifyParams"><code>BasicOCSPResponseVerifyParams</code></a> = <code>{}</code></p>
-<p>Additional parameters</p>
 <h5 class="anchor anchorTargetStickyNavbar_Vzrq" id="crypto-2">crypto<a href="#crypto-2" class="hash-link" aria-label="Direct link to crypto" title="Direct link to crypto" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a> = <code>...</code></p>
-<p>Crypto engine</p>
 <h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="returns-8">Returns<a href="#returns-8" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>Promise</code>&lt;<code>boolean</code>&gt;</p>
+<p><code>true</code> if a candidate passes all checks. Returns <code>false</code> on
+cryptographic signature mismatch. Throws on hard errors
+(chain failure, unauthorized responder, unsupported algorithm).</p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="blockname">blockName()<a href="#blockname" class="hash-link" aria-label="Direct link to blockName()" title="Direct link to blockName()" translate="no">​</a></h3>
 <blockquote>
