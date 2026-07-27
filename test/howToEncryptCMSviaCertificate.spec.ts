@@ -1,9 +1,9 @@
-import * as assert from "assert";
+import { describe, it, assert } from "vitest";
 import * as pvutils from "pvutils";
 import * as example from "./howToEncryptCMSviaCertificate";
 import * as utils from "./utils";
 
-context("How To Encrypt CMS via Certificate", () => {
+describe("How To Encrypt CMS via Certificate", () => {
   //#region Initial variables
   const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
   const oaepHashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];

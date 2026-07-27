@@ -1,9 +1,9 @@
-import * as assert from "assert";
+import { describe, it, assert } from "vitest";
 import "./utils";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 import * as example from "./p7bSimpleExample";
 
-context("P7B Simple Example", () => {
+describe("P7B Simple Example", () => {
   //#region Initial variables
   const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
   const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as utils from "./utils";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 
 interface CreateOcspRespResult extends utils.CertificateWithPrivateKey {
   ocspResp: pkijs.OCSPResponse;
@@ -87,7 +87,15 @@ export async function verifyOCSPResp(ocspResponseBuffer: ArrayBuffer, trustedCer
   //#endregion
 
   //#region Verify OCSP response
-  return ocspBasicResp.verify({ trustedCerts: trustedCertificates });
+  // This example uses fictional CertID issuer hashes and therefore cannot
+  // resolve a real issuer for authorization. The certificate is explicitly
+  // trusted as an OCSP responder to keep this serialization/signature fixture
+  // independent from issuer authorization semantics. `trustedResponders` is
+  // sufficient for that — `issuerCerts` contributes nothing for a pinned
+  // responder, so it is intentionally omitted.
+  return ocspBasicResp.verify({
+    trustedCerts: trustedCertificates,
+    trustedResponders: trustedCertificates,
+  });
   //#endregion
 }
-

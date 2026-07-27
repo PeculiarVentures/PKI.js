@@ -1,4 +1,4 @@
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 import * as utils from "./utils";
 
 // Certificate w/ 3 SCTs to be verified

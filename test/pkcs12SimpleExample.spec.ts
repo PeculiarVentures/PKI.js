@@ -1,11 +1,11 @@
-import * as assert from "assert";
+import { describe, it, assert, expect } from "vitest";
 import * as crypto from "crypto";
 import "./utils";
 import * as example from "./pkcs12SimpleExample";
-import { CryptoEngine } from "../src";
+import { CryptoEngine } from "../src/index";
 import { Convert } from "pvtsutils";
 
-context("PKCS#12 Simple Example", () => {
+describe("PKCS#12 Simple Example", () => {
   const password = "12345567890";
 
   it("Password-based Integrity, SHA-1", async () => {
@@ -25,9 +25,7 @@ context("PKCS#12 Simple Example", () => {
   });
 
   it("Password-based Integrity, incorrect algorithm", async () => {
-    assert.rejects(async () => {
-      await example.passwordBasedIntegrity(password, "SHA-5122");
-    });
+    await expect(example.passwordBasedIntegrity(password, "SHA-5122")).rejects.toThrow();
   });
 
   it("Certificate-based Integrity", async () => {
@@ -46,7 +44,7 @@ context("PKCS#12 Simple Example", () => {
     await example.certificatePrivacy(password);
   });
 
-  context("Making OpenSSL-like PKCS#12 Data", () => {
+  describe("Making OpenSSL-like PKCS#12 Data", () => {
     it("ASCII", async () => {
       const pfx = await example.openSSLLike(password);
       await example.parsePKCS12(pfx, password);

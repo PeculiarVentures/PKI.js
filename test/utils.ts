@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 
 export function toPEM(buffer: BufferSource, tag: string): string {
   return [
@@ -41,20 +41,6 @@ export function formatPEM(pemString: string): string {
   else {
     return pemString;
   }
-}
-
-export function isNode() {
-  return typeof process !== "undefined" &&
-    process.versions != null &&
-    process.versions.node != null;
-}
-
-if (isNode()) {
-  import("@peculiar/webcrypto").then(peculiarCrypto => {
-    const webcrypto = new peculiarCrypto.Crypto();
-    const name = "newEngine";
-    pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: webcrypto }));
-  });
 }
 
 export interface CertificateWithPrivateKey {

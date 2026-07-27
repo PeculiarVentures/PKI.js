@@ -212,7 +212,7 @@ function parseOCSPResp(source: ArrayBuffer) {
   //#region Put information about OCSP responses
   for (let i = 0; i < ocspBasicResp.tbsResponseData.responses.length; i++) {
     const typeval = pvtsutils.Convert.ToHex(ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHexView);
-    let subjval = "";
+    let subjval: string;
 
     switch (ocspBasicResp.tbsResponseData.responses[i].certStatus.idBlock.tagNumber) {
       case 0:

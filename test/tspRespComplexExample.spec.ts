@@ -1,8 +1,8 @@
-import * as assert from "assert";
-import * as pkijs from "../src";
+import { describe, it, assert } from "vitest";
+import * as pkijs from "../src/index";
 import { createTSPResp, verifyTSPResp } from "./tspRespComplexExample";
 
-context("TSP Response Complex Example", () => {
+describe("TSP Response Complex Example", () => {
   const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
   const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
 

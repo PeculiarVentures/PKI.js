@@ -1,7 +1,7 @@
-import * as assert from "assert";
+import { describe, it, assert } from "vitest";
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import * as pkijs from "../src";
+import * as pkijs from "../src/index";
 import { CertificateChainValidationEngineVerifyParams } from "../src/CertificateChainValidationEngine";
 import "./utils";
 
@@ -954,7 +954,7 @@ function pkitsToArrayBuffer(pkitsValue: string) {
 
 //#region Context for PKITS's certificates parsing test
 
-context("PKITS's certificates parsing test", () => {
+describe("PKITS's certificates parsing test", () => {
   function parsingCheck(buffer: ArrayBuffer) {
     pkijs.Certificate.fromBER(buffer);
   }
@@ -978,7 +978,7 @@ context("PKITS's certificates parsing test", () => {
 
 //#region Context for PKITS's CRL parsing test
 
-context("PKITS's CRL parsing test", () => {
+describe("PKITS's CRL parsing test", () => {
   function parsingCheck(buffer: ArrayBuffer) {
     pkijs.CertificateRevocationList.fromBER(buffer);
   }
@@ -1002,7 +1002,7 @@ context("PKITS's CRL parsing test", () => {
 
 //#region Context for PKITS's certificate pairs parsing test
 
-context("PKITS's certificate pairs parsing test", () => {
+describe("PKITS's certificate pairs parsing test", () => {
   function parsingCheck(buffer: BufferSource) {
     pkijs.Certificate.fromBER(buffer);
   }
@@ -1115,9 +1115,9 @@ function simpleVerification(params: {
   };
 }
 
-context("NIST PKITS tests", () => {
+describe("NIST PKITS tests", () => {
   //#region 4.1 Signature Verification
-  context("4.1 Signature Verification", () => {
+  describe("4.1 Signature Verification", () => {
     it("4.1.1 Valid Signatures Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"
@@ -1241,7 +1241,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.2 Validity Periods
-  context("4.2 Validity Periods", () => {
+  describe("4.2 Validity Periods", () => {
     it("4.2.1 Invalid CA notBefore Date Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"
@@ -1365,7 +1365,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.3 Verifying Name Chaining
-  context("4.3 Verifying Name Chaining", () => {
+  describe("4.3 Verifying Name Chaining", () => {
     it("4.3.1 Invalid Name Chaining EE Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"
@@ -1535,7 +1535,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.4 Basic Certificate Revocation Tests
-  context("4.4 Basic Certificate Revocation Tests", () => {
+  describe("4.4 Basic Certificate Revocation Tests", () => {
     it("4.4.1 Missing CRL Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"
@@ -1862,7 +1862,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.5 Verifying Paths with Self-Issued Certificates
-  context("4.5 Verifying Paths with Self-Issued Certificates", () => {
+  describe("4.5 Verifying Paths with Self-Issued Certificates", () => {
     it("4.5.1 Valid Basic Self-Issued Old With New Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"
@@ -2003,7 +2003,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.6 Verifying Basic Constraints
-  context("4.6 Verifying Basic Constraints", () => {
+  describe("4.6 Verifying Basic Constraints", () => {
     it("4.6.1 Invalid Missing basicConstraints Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"
@@ -2313,7 +2313,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.7 Key Usage
-  context("4.7 Key Usage", () => {
+  describe("4.7 Key Usage", () => {
     it("4.7.1 Invalid keyUsage Critical keyCertSign False Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"
@@ -2392,7 +2392,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.8 Certificate Policies
-  context("4.8 Certificate Policies", () => {
+  describe("4.8 Certificate Policies", () => {
     //#region Policies list
 
     //2.16.840.1.101.3.2.1.48.1                NIST test-policy-1
@@ -2404,7 +2404,7 @@ context("NIST PKITS tests", () => {
 
     //#endregion
 
-    context("4.8.1 All Certificates Same Policy Test1", () => {
+    describe("4.8.1 All Certificates Same Policy Test1", () => {
       it("with initial-explicit-policy set", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2488,7 +2488,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.2 All Certificates No Policies Test2", () => {
+    describe("4.8.2 All Certificates No Policies Test2", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2523,7 +2523,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.3 Different Policies Test3", () => {
+    describe("4.8.3 Different Policies Test3", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2586,7 +2586,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.4 Different Policies Test4", () => {
+    describe("4.8.4 Different Policies Test4", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2605,7 +2605,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.5 Different Policies Test5", () => {
+    describe("4.8.5 Different Policies Test5", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2627,7 +2627,7 @@ context("NIST PKITS tests", () => {
     // The problem in this test is that "OverlappingPoliciesTest6EE.crt"
     // has "BasicConstraints.cA = true". Thus we can not consider the certificate
     // as "end entity" and rise an error.
-    context("4.8.6 Overlapping Policies Test6", () => {
+    describe("4.8.6 Overlapping Policies Test6", () => {
       it.skip("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2696,7 +2696,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.7 Different Policies Test7", () => {
+    describe("4.8.7 Different Policies Test7", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2717,7 +2717,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.8 Different Policies Test8", () => {
+    describe("4.8.8 Different Policies Test8", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2738,7 +2738,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.9 Different Policies Test9", () => {
+    describe("4.8.9 Different Policies Test9", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2761,7 +2761,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.10 All Certificates Same Policies Test10", () => {
+    describe("4.8.10 All Certificates Same Policies Test10", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2821,7 +2821,7 @@ context("NIST PKITS tests", () => {
     // I do not agree with the test because the test in fact has the same
     // initial values with "4.8.2 All Certificates No Policies Test2", but
     // expects another results.
-    context("4.8.11 All Certificates AnyPolicy Test11", () => {
+    describe("4.8.11 All Certificates AnyPolicy Test11", () => {
       it.skip("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2858,7 +2858,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.12 Different Policies Test12", () => {
+    describe("4.8.12 Different Policies Test12", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2875,7 +2875,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.13 All Certificates Same Policies Test13", () => {
+    describe("4.8.13 All Certificates Same Policies Test13", () => {
       it("with initial-policy-set = {NIST-test-policy-1}", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2937,7 +2937,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.14 AnyPolicy Test14", () => {
+    describe("4.8.14 AnyPolicy Test14", () => {
       it("with initial-policy-set = {NIST-test-policy-1}", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2980,7 +2980,7 @@ context("NIST PKITS tests", () => {
     });
 
     // TODO: Return "user notice" in a successfull result
-    context("4.8.15 User Notice Qualifier Test15", () => {
+    describe("4.8.15 User Notice Qualifier Test15", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -2995,7 +2995,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.16 User Notice Qualifier Test16", () => {
+    describe("4.8.16 User Notice Qualifier Test16", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3012,7 +3012,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.17 User Notice Qualifier Test17", () => {
+    describe("4.8.17 User Notice Qualifier Test17", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3029,7 +3029,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.18 User Notice Qualifier Test18", () => {
+    describe("4.8.18 User Notice Qualifier Test18", () => {
       it("with initial-policy-set = {NIST-test-policy-1}", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3076,7 +3076,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.19 User Notice Qualifier Test19", () => {
+    describe("4.8.19 User Notice Qualifier Test19", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3091,7 +3091,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.8.20 CPS Pointer Qualifier Test20", () => {
+    describe("4.8.20 CPS Pointer Qualifier Test20", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3129,7 +3129,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.9 Require Explicit Policy
-  context("4.9 Require Explicit Policy", () => {
+  describe("4.9 Require Explicit Policy", () => {
     it("4.9.1 Valid RequireExplicitPolicy Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"
@@ -3295,8 +3295,8 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.10 Policy Mappings
-  context("4.10 Policy Mappings", () => {
-    context("4.10.1 Valid Policy Mapping Test1", () => {
+  describe("4.10 Policy Mappings", () => {
+    describe("4.10.1 Valid Policy Mapping Test1", () => {
       it("with initial-policy-set = {NIST-test-policy-1}", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3338,7 +3338,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.2 Invalid Policy Mapping Test2", () => {
+    describe("4.10.2 Invalid Policy Mapping Test2", () => {
       it("with default parameters", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3373,7 +3373,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.3 Valid Policy Mapping Test3", () => {
+    describe("4.10.3 Valid Policy Mapping Test3", () => {
       it("with initial-policy-set = {NIST-test-policy-1}", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3423,7 +3423,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.4 Invalid Policy Mapping Test4", () => {
+    describe("4.10.4 Invalid Policy Mapping Test4", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3444,7 +3444,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.5 Valid Policy Mapping Test5", () => {
+    describe("4.10.5 Valid Policy Mapping Test5", () => {
       it("with initial-policy-set = {NIST-test-policy-1}", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3490,7 +3490,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.6 Valid Policy Mapping Test6", () => {
+    describe("4.10.6 Valid Policy Mapping Test6", () => {
       it("with initial-policy-set = {NIST-test-policy-1}", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3536,7 +3536,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.7 Invalid Mapping From anyPolicy Test7", () => {
+    describe("4.10.7 Invalid Mapping From anyPolicy Test7", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3553,7 +3553,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.8 Invalid Mapping To anyPolicy Test8", () => {
+    describe("4.10.8 Invalid Mapping To anyPolicy Test8", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3570,7 +3570,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.9 Valid Policy Mapping Test9", () => {
+    describe("4.10.9 Valid Policy Mapping Test9", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3587,7 +3587,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.10 Invalid Policy Mapping Test10", () => {
+    describe("4.10.10 Invalid Policy Mapping Test10", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3606,7 +3606,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.11 Valid Policy Mapping Test11", () => {
+    describe("4.10.11 Valid Policy Mapping Test11", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3625,7 +3625,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.12 Valid Policy Mapping Test12", () => {
+    describe("4.10.12 Valid Policy Mapping Test12", () => {
       it("with initial-policy-set = {NIST-test-policy-1}", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3670,7 +3670,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.13 Valid Policy Mapping Test13", () => {
+    describe("4.10.13 Valid Policy Mapping Test13", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3687,7 +3687,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.10.14 Valid Policy Mapping Test14", () => {
+    describe("4.10.14 Valid Policy Mapping Test14", () => {
       // I do not agree with the test because after mapping "NIST test-policy-1" to "NIST test-policy-2"
       // the end entity certificate in fact does not have a valid policy included.
       // Thus even if intermediate certificate asserts "anyPolicy" there is
@@ -3711,7 +3711,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.11 Inhibit Policy Mapping
-  context("4.11 Inhibit Policy Mapping", () => {
+  describe("4.11 Inhibit Policy Mapping", () => {
     it("4.11.1 Invalid inhibitPolicyMapping Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"
@@ -3926,8 +3926,8 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.12 Inhibit Any Policy
-  context("4.12 Inhibit Any Policy", () => {
-    context("4.12.1 Invalid inhibitAnyPolicy Test1", () => {
+  describe("4.12 Inhibit Any Policy", () => {
+    describe("4.12.1 Invalid inhibitAnyPolicy Test1", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -3944,7 +3944,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.12.2 Valid inhibitAnyPolicy Test2", () => {
+    describe("4.12.2 Valid inhibitAnyPolicy Test2", () => {
       // TODO: Fix later
       it.skip("with default settings", simpleVerification({
         trustedCertificates: [
@@ -3962,7 +3962,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.12.3 inhibitAnyPolicy Test3", () => {
+    describe("4.12.3 inhibitAnyPolicy Test3", () => {
       // TODO: Fix later
       it.skip("with default settings", simpleVerification({
         trustedCertificates: [
@@ -4002,7 +4002,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.12.4 Invalid inhibitAnyPolicy Test4", () => {
+    describe("4.12.4 Invalid inhibitAnyPolicy Test4", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -4021,7 +4021,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.12.5 Invalid inhibitAnyPolicy Test5", () => {
+    describe("4.12.5 Invalid inhibitAnyPolicy Test5", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -4042,7 +4042,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.12.6 Invalid inhibitAnyPolicy Test6", () => {
+    describe("4.12.6 Invalid inhibitAnyPolicy Test6", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -4061,7 +4061,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.12.7 Valid Self-Issued inhibitAnyPolicy Test7", () => {
+    describe("4.12.7 Valid Self-Issued inhibitAnyPolicy Test7", () => {
       // TODO: Fix later
       it.skip("with default settings", simpleVerification({
         trustedCertificates: [
@@ -4082,7 +4082,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.12.8 Invalid Self-Issued inhibitAnyPolicy Test8", () => {
+    describe("4.12.8 Invalid Self-Issued inhibitAnyPolicy Test8", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -4104,7 +4104,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.12.9 Valid Self-Issued inhibitAnyPolicy Test9", () => {
+    describe("4.12.9 Valid Self-Issued inhibitAnyPolicy Test9", () => {
       // TODO: Fix later
       it.skip("with default settings", simpleVerification({
         trustedCertificates: [
@@ -4126,7 +4126,7 @@ context("NIST PKITS tests", () => {
       }));
     });
 
-    context("4.12.10 Invalid Self-Issued inhibitAnyPolicy Test10", () => {
+    describe("4.12.10 Invalid Self-Issued inhibitAnyPolicy Test10", () => {
       it("with default settings", simpleVerification({
         trustedCertificates: [
           "TrustAnchorRootCertificate.crt"
@@ -4149,7 +4149,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.13 Name Constraints
-  context("4.13 Name Constraints", () => {
+  describe("4.13 Name Constraints", () => {
     it("4.13.1 Valid DN nameConstraints Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"
@@ -4748,7 +4748,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.14 Distribution Points
-  context("4.14 Distribution Points", () => {
+  describe("4.14 Distribution Points", () => {
     it("4.14.1 Valid distributionPoint Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"
@@ -5314,7 +5314,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.15 Delta-CRLs
-  context("4.15 Delta-CRLs", () => {
+  describe("4.15 Delta-CRLs", () => {
     // TODO: Fix later
     it.skip("4.15.1 Invalid deltaCRLIndicator No Base Test1", simpleVerification({
       trustedCertificates: [
@@ -5481,7 +5481,7 @@ context("NIST PKITS tests", () => {
   //#endregion
 
   //#region 4.16 Private Certificate Extensions
-  context("4.16 Private Certificate Extensions", () => {
+  describe("4.16 Private Certificate Extensions", () => {
     it("4.16.1 Valid Unknown Not Critical Certificate Extension Test1", simpleVerification({
       trustedCertificates: [
         "TrustAnchorRootCertificate.crt"

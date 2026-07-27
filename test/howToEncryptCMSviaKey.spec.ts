@@ -1,8 +1,8 @@
-import * as assert from "assert";
+import { describe, it, assert } from "vitest";
 import * as pvutils from "pvutils";
 import * as example from "./howToEncryptCMSviaKey";
 
-context("How To Encrypt CMS via Key Identifier", () => {
+describe("How To Encrypt CMS via Key Identifier", () => {
   //#region Initial variables
   const kdfHashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
   const curveNames = ["P-256", "P-384", "P-521"];
