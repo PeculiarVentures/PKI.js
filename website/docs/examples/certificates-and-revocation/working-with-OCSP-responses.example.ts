@@ -1,5 +1,5 @@
-import * as pkijs from 'pkijs';
-import * as asn1js from 'asn1js';
+import * as pkijs from "pkijs";
+import * as asn1js from "asn1js";
 
 const ocspBasicResp = new pkijs.BasicOCSPResponse();
 
@@ -10,10 +10,10 @@ ocspBasicResp.tbsResponseData.producedAt = new Date();
 const certID = new pkijs.CertID();
 await certID.createForCertificate(cert, {
   hashAlgorithm: "SHA-256",
-  issuerCertificate: issuerCert,
+  issuerCertificate: issuerCert
 });
 const response = new pkijs.SingleResponse({
-  certID,
+  certID
 });
 response.certStatus = new asn1js.Primitive({
   idBlock: {
@@ -38,8 +38,8 @@ const ocspResp = new pkijs.OCSPResponse({
   responseStatus: new asn1js.Enumerated({ value: 0 }), // success
   responseBytes: new pkijs.ResponseBytes({
     responseType: pkijs.id_PKIX_OCSP_Basic,
-    response: new asn1js.OctetString({ valueHex: ocspBasicRespRaw }),
-  }),
+    response: new asn1js.OctetString({ valueHex: ocspBasicRespRaw })
+  })
 });
 
 const ocspRespRaw = ocspResp.toSchema().toBER();

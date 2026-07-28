@@ -3,13 +3,5 @@
   "arrowParens": "avoid",
   "trailingComma": "none",
   "sortPackageJson": false,
-  "ignorePatterns": [
-    "website/**",
-    "build/**",
-    "**/*.js",
-    "**/*.md",
-    "**/*.MD",
-    "**/*.html",
-    ".github/**"
-  ]
+  "ignorePatterns": ["build/**", "**/*.js", "**/*.md", "**/*.MD", "**/*.html", ".github/**"]
 }
