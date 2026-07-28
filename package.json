@@ -90,5 +90,8 @@
       "version": "11.7.0",
       "onFail": "warn"
     }
-  }
+  },
+  "workspaces": [
+    "website"
+  ]
 }

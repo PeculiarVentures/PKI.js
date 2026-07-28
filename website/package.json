@@ -27,8 +27,7 @@
     "raw-loader": "^4.0.2",
     "sass": "^1.93.2",
     "typedoc": "^0.28.14",
-    "typedoc-plugin-markdown": "^4.4.2",
-    "typescript": "~5.5.4"
+    "typedoc-plugin-markdown": "^4.4.2"
   },
   "browserslist": {
     "production": [

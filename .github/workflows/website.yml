@@ -8,18 +8,15 @@ on:
 jobs:
   pages:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./website
 
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
-      - run: npm run build
+      - run: npm run build -w website
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

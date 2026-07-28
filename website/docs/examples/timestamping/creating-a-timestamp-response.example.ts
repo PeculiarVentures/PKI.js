@@ -1,5 +1,5 @@
-import * as pkijs from 'pkijs';
-import * as asn1js from 'asn1js';
+import * as pkijs from "pkijs";
+import * as asn1js from "asn1js";
 
 // Generate random serial number
 const serialNumber = pkijs.getRandomValues(new Uint8Array(10)).buffer;
@@ -17,7 +17,7 @@ const tstInfo = new pkijs.TSTInfo({
     millis: 1,
     micros: 10
   }),
-  nonce: tspReq.nonce,
+  nonce: tspReq.nonce
 });
 
 // Create and sign CMS Signed Data with TSTInfo
@@ -25,7 +25,7 @@ const cmsSigned = new pkijs.SignedData({
   version: 3,
   encapContentInfo: new pkijs.EncapsulatedContentInfo({
     eContentType: "1.2.840.113549.1.9.16.1.4", // "tSTInfo" content type
-    eContent: new asn1js.OctetString({ valueHex: tstInfo.toSchema().toBER() }),
+    eContent: new asn1js.OctetString({ valueHex: tstInfo.toSchema().toBER() })
   }),
   signerInfos: [
     new pkijs.SignerInfo({
