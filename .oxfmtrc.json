@@ -3,5 +3,5 @@
   "arrowParens": "avoid",
   "trailingComma": "none",
   "sortPackageJson": false,
-  "ignorePatterns": ["**/*.js", ".github/**"]
+  "ignorePatterns": []
 }

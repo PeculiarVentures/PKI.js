@@ -6,12 +6,7 @@ import typescript from "rollup-plugin-typescript2";
 import pkg from "../package.json";
 
 const LICENSE = fs.readFileSync("LICENSE", { encoding: "utf-8" });
-const banner = [
-  "/*!",
-  ...LICENSE.split("\n").map(o => ` * ${o}`),
-  " */",
-  "",
-].join("\n");
+const banner = ["/*!", ...LICENSE.split("\n").map(o => ` * ${o}`), " */", ""].join("\n");
 const input = "src/index.ts";
 
 const pkijsName = "pkijs.es.js";
@@ -22,9 +17,7 @@ export default [
     input,
     plugins: [
       alias({
-        entries: [
-          { find: /^([^.].*)$/, replacement: "https://unpkg.com/$1@latest?module" },
-        ],
+        entries: [{ find: /^([^.].*)$/, replacement: "https://unpkg.com/$1@latest?module" }]
       }),
       typescript({
         check: true,
@@ -32,19 +25,19 @@ export default [
         tsconfigOverride: {
           compilerOptions: {
             module: "ES2015",
-            removeComments: true,
+            removeComments: true
           }
         }
-      }),
+      })
     ],
     external: [/^https:\/\/unpkg\.com/],
     output: [
       {
         banner,
         file: `examples/${pkijsName}`,
-        format: "es",
-      },
-    ],
+        format: "es"
+      }
+    ]
   },
   // examples
   ...[
@@ -64,26 +57,23 @@ export default [
     "SMIMEEncryptionExample",
     "SMIMEVerificationExample",
     "TSPRequestComplexExample",
-    "TSPResponseComplexExample",
+    "TSPResponseComplexExample"
   ].map(o => {
-    const dir = `examples/${o}`
-    const input = `${dir}/es6.ts`
-    const output = `${dir}/bundle.js`
+    const dir = `examples/${o}`;
+    const input = `${dir}/es6.ts`;
+    const output = `${dir}/bundle.js`;
 
     return {
       input,
       plugins: [
         alias({
           entries: [
-            ...[
-              "punycode",
-              ...Object.keys(pkg.dependencies || {})
-            ].map(o => {
+            ...["punycode", ...Object.keys(pkg.dependencies || {})].map(o => {
               return { find: o, replacement: `https://unpkg.com/${o}@latest?module` };
             }),
             { find: "../src", replacement: `../examples/${pkijsName}` },
-            { find: "../../src", replacement: `../${pkijsName}` },
-          ],
+            { find: "../../src", replacement: `../${pkijsName}` }
+          ]
         }),
         commonjs(),
         nodeResolve(),
@@ -92,18 +82,18 @@ export default [
           clean: true,
           tsconfigOverride: {
             compilerOptions: {
-              module: "ES2020",
+              module: "ES2020"
             }
           }
-        }),
+        })
       ],
       external: ["crypto", "@peculiar/webcrypto", /^https:\/\/unpkg\.com/, /pkijs\.es\.js$/],
       output: [
         {
           file: output,
-          format: "es",
-        },
-      ],
+          format: "es"
+        }
+      ]
     };
-  }),
+  })
 ];
