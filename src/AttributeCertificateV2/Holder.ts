@@ -11,11 +11,7 @@ import { EMPTY_STRING } from "../constants";
 const BASE_CERTIFICATE_ID = "baseCertificateID";
 const ENTITY_NAME = "entityName";
 const OBJECT_DIGEST_INFO = "objectDigestInfo";
-const CLEAR_PROPS = [
-  BASE_CERTIFICATE_ID,
-  ENTITY_NAME,
-  OBJECT_DIGEST_INFO
-];
+const CLEAR_PROPS = [BASE_CERTIFICATE_ID, ENTITY_NAME, OBJECT_DIGEST_INFO];
 
 export interface IHolder {
   baseCertificateID?: IssuerSerial;
@@ -41,7 +37,6 @@ export interface HolderJson {
  * Represents the Holder structure described in [RFC5755](https://datatracker.ietf.org/doc/html/rfc5755)
  */
 export class Holder extends PkiObject implements IHolder {
-
   public static override CLASS_NAME = "Holder";
 
   public baseCertificateID?: IssuerSerial;
@@ -56,13 +51,25 @@ export class Holder extends PkiObject implements IHolder {
     super();
 
     if (BASE_CERTIFICATE_ID in parameters) {
-      this.baseCertificateID = pvutils.getParametersValue(parameters, BASE_CERTIFICATE_ID, Holder.defaultValues(BASE_CERTIFICATE_ID));
+      this.baseCertificateID = pvutils.getParametersValue(
+        parameters,
+        BASE_CERTIFICATE_ID,
+        Holder.defaultValues(BASE_CERTIFICATE_ID)
+      );
     }
     if (ENTITY_NAME in parameters) {
-      this.entityName = pvutils.getParametersValue(parameters, ENTITY_NAME, Holder.defaultValues(ENTITY_NAME));
+      this.entityName = pvutils.getParametersValue(
+        parameters,
+        ENTITY_NAME,
+        Holder.defaultValues(ENTITY_NAME)
+      );
     }
     if (OBJECT_DIGEST_INFO in parameters) {
-      this.objectDigestInfo = pvutils.getParametersValue(parameters, OBJECT_DIGEST_INFO, Holder.defaultValues(OBJECT_DIGEST_INFO));
+      this.objectDigestInfo = pvutils.getParametersValue(
+        parameters,
+        OBJECT_DIGEST_INFO,
+        Holder.defaultValues(OBJECT_DIGEST_INFO)
+      );
     }
 
     if (parameters.schema) {
@@ -108,14 +115,18 @@ export class Holder extends PkiObject implements IHolder {
    *```
    */
   public static override schema(parameters: HolderSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Constructed({
           optional: true,
-          name: (names.baseCertificateID || EMPTY_STRING),
+          name: names.baseCertificateID || EMPTY_STRING,
           idBlock: {
             tagClass: 3,
             tagNumber: 0 // [0]
@@ -124,7 +135,7 @@ export class Holder extends PkiObject implements IHolder {
         }),
         new asn1js.Constructed({
           optional: true,
-          name: (names.entityName || EMPTY_STRING),
+          name: names.entityName || EMPTY_STRING,
           idBlock: {
             tagClass: 3,
             tagNumber: 1 // [2]
@@ -133,7 +144,7 @@ export class Holder extends PkiObject implements IHolder {
         }),
         new asn1js.Constructed({
           optional: true,
-          name: (names.objectDigestInfo || EMPTY_STRING),
+          name: names.objectDigestInfo || EMPTY_STRING,
           idBlock: {
             tagClass: 3,
             tagNumber: 2 // [2]
@@ -141,7 +152,7 @@ export class Holder extends PkiObject implements IHolder {
           value: ObjectDigestInfo.schema().valueBlock.value
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -149,7 +160,8 @@ export class Holder extends PkiObject implements IHolder {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       Holder.schema({
         names: {
@@ -189,33 +201,39 @@ export class Holder extends PkiObject implements IHolder {
     const result = new asn1js.Sequence();
 
     if (this.baseCertificateID) {
-      result.valueBlock.value.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3,
-          tagNumber: 0 // [0]
-        },
-        value: this.baseCertificateID.toSchema().valueBlock.value
-      }));
+      result.valueBlock.value.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3,
+            tagNumber: 0 // [0]
+          },
+          value: this.baseCertificateID.toSchema().valueBlock.value
+        })
+      );
     }
 
     if (this.entityName) {
-      result.valueBlock.value.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3,
-          tagNumber: 1 // [1]
-        },
-        value: this.entityName.toSchema().valueBlock.value
-      }));
+      result.valueBlock.value.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3,
+            tagNumber: 1 // [1]
+          },
+          value: this.entityName.toSchema().valueBlock.value
+        })
+      );
     }
 
     if (this.objectDigestInfo) {
-      result.valueBlock.value.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3,
-          tagNumber: 2 // [2]
-        },
-        value: this.objectDigestInfo.toSchema().valueBlock.value
-      }));
+      result.valueBlock.value.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3,
+            tagNumber: 2 // [2]
+          },
+          value: this.objectDigestInfo.toSchema().valueBlock.value
+        })
+      );
     }
 
     return result;
@@ -238,5 +256,4 @@ export class Holder extends PkiObject implements IHolder {
 
     return result;
   }
-
 }

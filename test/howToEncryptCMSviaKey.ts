@@ -1,6 +1,9 @@
 import * as pkijs from "../src/index";
 
-function getKeyAgreeAlgorithmParams(operation: pkijs.CryptoEngineAlgorithmOperation, curveName: string) {
+function getKeyAgreeAlgorithmParams(
+  operation: pkijs.CryptoEngineAlgorithmOperation,
+  curveName: string
+) {
   const algorithm = pkijs.getAlgorithmParameters("ECDH", operation) as any;
   algorithm.algorithm.namedCurve = curveName;
   return algorithm;
@@ -20,7 +23,11 @@ export async function createKeyPair(curveName: string): Promise<CreateKeyPairRes
 
   // Create a new key pair
   const algorithm = getKeyAgreeAlgorithmParams("generateKey", curveName);
-  const { privateKey, publicKey } = await crypto.generateKey(algorithm.algorithm, true, algorithm.usages) as Required<CryptoKeyPair>;
+  const { privateKey, publicKey } = (await crypto.generateKey(
+    algorithm.algorithm,
+    true,
+    algorithm.usages
+  )) as Required<CryptoKeyPair>;
 
   // Exporting private key
   const pkcs8 = await crypto.exportKey("pkcs8", privateKey);
@@ -35,14 +42,18 @@ export async function createKeyPair(curveName: string): Promise<CreateKeyPairRes
   return {
     pkcs8,
     spki,
-    keyPairIdBuffer,
+    keyPairIdBuffer
   };
 }
 
 /**
  * Encrypt input data
  */
-export async function envelopedEncrypt(keys: CreateKeyPairResult, alg: EcKeyAlgorithm & { kdfHash: string; }, valueBuffer: ArrayBuffer): Promise<ArrayBuffer> {
+export async function envelopedEncrypt(
+  keys: CreateKeyPairResult,
+  alg: EcKeyAlgorithm & { kdfHash: string },
+  valueBuffer: ArrayBuffer
+): Promise<ArrayBuffer> {
   const crypto = pkijs.getCrypto(true);
 
   const cmsEnveloped = new pkijs.EnvelopedData();
@@ -52,7 +63,9 @@ export async function envelopedEncrypt(keys: CreateKeyPairResult, alg: EcKeyAlgo
   const publicKey = await crypto.importKey("spki", keys.spki, algorithm.algorithm, true, []);
   //#endregion
 
-  cmsEnveloped.addRecipientByKeyIdentifier(publicKey, keys.keyPairIdBuffer, { kdfAlgorithm: alg.kdfHash });
+  cmsEnveloped.addRecipientByKeyIdentifier(publicKey, keys.keyPairIdBuffer, {
+    kdfAlgorithm: alg.kdfHash
+  });
   await cmsEnveloped.encrypt(alg, valueBuffer);
 
   const cmsContentSimpl = new pkijs.ContentInfo();
@@ -71,8 +84,7 @@ export async function envelopedDecrypt(pkcs8: ArrayBuffer, cmsEnvelopedBuffer: A
   const cmsEnvelopedSimp = new pkijs.EnvelopedData({ schema: cmsContentSimpl.content });
   //#endregion
 
-  return cmsEnvelopedSimp.decrypt(0,
-    {
-      recipientPrivateKey: pkcs8
-    });
+  return cmsEnvelopedSimp.decrypt(0, {
+    recipientPrivateKey: pkcs8
+  });
 }

@@ -7,7 +7,7 @@ describe("RSA-PSS public key import", () => {
     const webcrypto = new Crypto();
     const engine = new pkijs.CryptoEngine({
       name: "test",
-      crypto: webcrypto,
+      crypto: webcrypto
     });
 
     // Prepare RSA-PSS key pair
@@ -16,16 +16,16 @@ describe("RSA-PSS public key import", () => {
         name: "RSA-PSS",
         hash: "SHA-256",
         modulusLength: 2048,
-        publicExponent: new Uint8Array([1, 0, 1]),
+        publicExponent: new Uint8Array([1, 0, 1])
       },
       true,
-      ["sign", "verify"],
+      ["sign", "verify"]
     )) as CryptoKeyPair;
 
     const publicKeyInfo = new pkijs.PublicKeyInfo();
     await publicKeyInfo.importKey(keyPair.publicKey, engine);
     publicKeyInfo.algorithm = new pkijs.AlgorithmIdentifier({
-      algorithmId: "1.2.840.113549.1.1.10",
+      algorithmId: "1.2.840.113549.1.1.10"
     });
     const spki = publicKeyInfo.toSchema().toBER(false);
 
@@ -35,7 +35,7 @@ describe("RSA-PSS public key import", () => {
       spki,
       { name: "RSA-PSS", hash: { name: "SHA-256" } } as RsaHashedImportParams,
       true,
-      ["verify"],
+      ["verify"]
     );
     const keyAlgorithm = key.algorithm as RsaHashedKeyAlgorithm;
 

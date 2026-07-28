@@ -10,10 +10,7 @@ import * as Schema from "./Schema";
 const CRL_ID = "crlId";
 const CRL_VALUE = "crlValue";
 const PARSED_VALUE = "parsedValue";
-const CLEAR_PROPS = [
-  CRL_ID,
-  CRL_VALUE,
-];
+const CLEAR_PROPS = [CRL_ID, CRL_VALUE];
 
 export interface ICRLBag {
   crlId: string;
@@ -33,7 +30,6 @@ export type CRLBagParameters = PkiObjectParameters & Partial<ICRLBag>;
  * Represents the CRLBag structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
 export class CRLBag extends PkiObject implements ICRLBag {
-
   public static override CLASS_NAME = "CRLBag";
 
   public crlId!: string;
@@ -49,9 +45,17 @@ export class CRLBag extends PkiObject implements ICRLBag {
     super();
 
     this.crlId = pvutils.getParametersValue(parameters, CRL_ID, CRLBag.defaultValues(CRL_ID));
-    this.crlValue = pvutils.getParametersValue(parameters, CRL_VALUE, CRLBag.defaultValues(CRL_VALUE));
+    this.crlValue = pvutils.getParametersValue(
+      parameters,
+      CRL_VALUE,
+      CRLBag.defaultValues(CRL_VALUE)
+    );
     if (PARSED_VALUE in parameters) {
-      this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, CRLBag.defaultValues(PARSED_VALUE));
+      this.parsedValue = pvutils.getParametersValue(
+        parameters,
+        PARSED_VALUE,
+        CRLBag.defaultValues(PARSED_VALUE)
+      );
     }
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -71,7 +75,7 @@ export class CRLBag extends PkiObject implements ICRLBag {
       case CRL_ID:
         return EMPTY_STRING;
       case CRL_VALUE:
-        return (new asn1js.Any());
+        return new asn1js.Any();
       case PARSED_VALUE:
         return {};
       default:
@@ -87,11 +91,11 @@ export class CRLBag extends PkiObject implements ICRLBag {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case CRL_ID:
-        return (memberValue === EMPTY_STRING);
+        return memberValue === EMPTY_STRING;
       case CRL_VALUE:
-        return (memberValue instanceof asn1js.Any);
+        return memberValue instanceof asn1js.Any;
       case PARSED_VALUE:
-        return ((memberValue instanceof Object) && (Object.keys(memberValue).length === 0));
+        return memberValue instanceof Object && Object.keys(memberValue).length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -107,25 +111,31 @@ export class CRLBag extends PkiObject implements ICRLBag {
    *}
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    id?: string;
-    value?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      id?: string;
+      value?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.id || "id") }),
+        new asn1js.ObjectIdentifier({ name: names.id || "id" }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          value: [new asn1js.Any({ name: (names.value || "value") })] // EXPLICIT ANY value
+          value: [new asn1js.Any({ name: names.value || "value" })] // EXPLICIT ANY value
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -133,7 +143,8 @@ export class CRLBag extends PkiObject implements ICRLBag {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       CRLBag.schema({
         names: {
@@ -163,10 +174,12 @@ export class CRLBag extends PkiObject implements ICRLBag {
     // Construct and return new ASN.1 schema for this object
     if (this.parsedValue) {
       this.crlId = id_CRLBag_X509CRL;
-      this.crlValue = new asn1js.OctetString({ valueHex: this.parsedValue.toSchema().toBER(false) });
+      this.crlValue = new asn1js.OctetString({
+        valueHex: this.parsedValue.toSchema().toBER(false)
+      });
     }
 
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: [
         new asn1js.ObjectIdentifier({ value: this.crlId }),
         new asn1js.Constructed({
@@ -177,7 +190,7 @@ export class CRLBag extends PkiObject implements ICRLBag {
           value: [this.crlValue.toSchema()]
         })
       ]
-    }));
+    });
   }
 
   public toJSON(): CRLBagJson {
@@ -186,5 +199,4 @@ export class CRLBag extends PkiObject implements ICRLBag {
       crlValue: this.crlValue.toJSON()
     };
   }
-
 }

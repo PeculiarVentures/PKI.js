@@ -14,7 +14,6 @@ export interface ECNamedCurve {
 }
 
 export class ECNamedCurves {
-
   public static readonly namedCurves: Record<string, ECNamedCurve> = {};
 
   /**
@@ -28,10 +27,10 @@ export class ECNamedCurves {
   }
 
   /**
-  * Returns an ECC named curve object
-  * @param nameOrId Name or identifier of the named curve
-  * @returns
-  */
+   * Returns an ECC named curve object
+   * @param nameOrId Name or identifier of the named curve
+   * @returns
+   */
   static find(nameOrId: string): ECNamedCurve | null {
     return this.namedCurves[nameOrId.toLowerCase()] || null;
   }
@@ -49,5 +48,4 @@ export class ECNamedCurves {
     this.register("brainpoolP384r1", "1.3.36.3.3.2.8.1.1.11", 48);
     this.register("brainpoolP512r1", "1.3.36.3.3.2.8.1.1.13", 64);
   }
-
 }

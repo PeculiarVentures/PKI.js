@@ -9,11 +9,7 @@ import * as Schema from "../Schema";
 const ISSUER = "issuer";
 const SERIAL_NUMBER = "serialNumber";
 const ISSUER_UID = "issuerUID";
-const CLEAR_PROPS = [
-  ISSUER,
-  SERIAL_NUMBER,
-  ISSUER_UID,
-];
+const CLEAR_PROPS = [ISSUER, SERIAL_NUMBER, ISSUER_UID];
 
 export interface IIssuerSerial {
   /**
@@ -42,7 +38,6 @@ export interface IssuerSerialJson {
  * Represents the IssuerSerial structure described in [RFC5755](https://datatracker.ietf.org/doc/html/rfc5755)
  */
 export class IssuerSerial extends PkiObject implements IIssuerSerial {
-
   public static override CLASS_NAME = "IssuerSerial";
 
   public issuer!: GeneralNames;
@@ -56,10 +51,22 @@ export class IssuerSerial extends PkiObject implements IIssuerSerial {
   constructor(parameters: IssuerSerialParameters = {}) {
     super();
 
-    this.issuer = pvutils.getParametersValue(parameters, ISSUER, IssuerSerial.defaultValues(ISSUER));
-    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, IssuerSerial.defaultValues(SERIAL_NUMBER));
+    this.issuer = pvutils.getParametersValue(
+      parameters,
+      ISSUER,
+      IssuerSerial.defaultValues(ISSUER)
+    );
+    this.serialNumber = pvutils.getParametersValue(
+      parameters,
+      SERIAL_NUMBER,
+      IssuerSerial.defaultValues(SERIAL_NUMBER)
+    );
     if (ISSUER_UID in parameters) {
-      this.issuerUID = pvutils.getParametersValue(parameters, ISSUER_UID, IssuerSerial.defaultValues(ISSUER_UID));
+      this.issuerUID = pvutils.getParametersValue(
+        parameters,
+        ISSUER_UID,
+        IssuerSerial.defaultValues(ISSUER_UID)
+      );
     }
 
     if (parameters.schema) {
@@ -102,31 +109,38 @@ export class IssuerSerial extends PkiObject implements IIssuerSerial {
    * UniqueIdentifier ::= BIT STRING
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    issuer?: GeneralNamesSchema;
-    serialNumber?: string;
-    issuerUID?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      issuer?: GeneralNamesSchema;
+      serialNumber?: string;
+      issuerUID?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         GeneralNames.schema(names.issuer || {}),
-        new asn1js.Integer({ name: (names.serialNumber || EMPTY_STRING) }),
+        new asn1js.Integer({ name: names.serialNumber || EMPTY_STRING }),
         new asn1js.BitString({
           optional: true,
-          name: (names.issuerUID || EMPTY_STRING)
+          name: names.issuerUID || EMPTY_STRING
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
     pvutils.clearProps(schema, CLEAR_PROPS);
     //#region Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       IssuerSerial.schema({
         names: {
@@ -147,17 +161,13 @@ export class IssuerSerial extends PkiObject implements IIssuerSerial {
     this.issuer = new GeneralNames({ schema: asn1.result.issuer });
     this.serialNumber = asn1.result.serialNumber;
 
-    if (ISSUER_UID in asn1.result)
-      this.issuerUID = asn1.result.issuerUID;
+    if (ISSUER_UID in asn1.result) this.issuerUID = asn1.result.issuerUID;
     //#endregion
   }
 
   public toSchema(): asn1js.Sequence {
     const result = new asn1js.Sequence({
-      value: [
-        this.issuer.toSchema(),
-        this.serialNumber
-      ]
+      value: [this.issuer.toSchema(), this.serialNumber]
     });
 
     if (this.issuerUID) {
@@ -179,5 +189,4 @@ export class IssuerSerial extends PkiObject implements IIssuerSerial {
 
     return result;
   }
-
 }

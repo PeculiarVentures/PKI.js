@@ -1,6 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema
+} from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -8,10 +12,7 @@ import * as Schema from "./Schema";
 
 const DIGEST_ALGORITHM = "digestAlgorithm";
 const DIGEST = "digest";
-const CLEAR_PROPS = [
-  DIGEST_ALGORITHM,
-  DIGEST
-];
+const CLEAR_PROPS = [DIGEST_ALGORITHM, DIGEST];
 
 export interface IDigestInfo {
   digestAlgorithm: AlgorithmIdentifier;
@@ -34,7 +35,6 @@ export type DigestInfoSchema = Schema.SchemaParameters<{
  * Represents the DigestInfo structure described in [RFC3447](https://datatracker.ietf.org/doc/html/rfc3447)
  */
 export class DigestInfo extends PkiObject implements IDigestInfo {
-
   public static override CLASS_NAME = "DigestInfo";
 
   public digestAlgorithm!: AlgorithmIdentifier;
@@ -47,7 +47,11 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
   constructor(parameters: DigestInfoParameters = {}) {
     super();
 
-    this.digestAlgorithm = pvutils.getParametersValue(parameters, DIGEST_ALGORITHM, DigestInfo.defaultValues(DIGEST_ALGORITHM));
+    this.digestAlgorithm = pvutils.getParametersValue(
+      parameters,
+      DIGEST_ALGORITHM,
+      DigestInfo.defaultValues(DIGEST_ALGORITHM)
+    );
     this.digest = pvutils.getParametersValue(parameters, DIGEST, DigestInfo.defaultValues(DIGEST));
 
     if (parameters.schema) {
@@ -81,10 +85,12 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case DIGEST_ALGORITHM:
-        return ((AlgorithmIdentifier.compareWithDefault("algorithmId", memberValue.algorithmId)) &&
-          (("algorithmParams" in memberValue) === false));
+        return (
+          AlgorithmIdentifier.compareWithDefault("algorithmId", memberValue.algorithmId) &&
+          "algorithmParams" in memberValue === false
+        );
       case DIGEST:
-        return (memberValue.isEqual(DigestInfo.defaultValues(memberName)));
+        return memberValue.isEqual(DigestInfo.defaultValues(memberName));
       default:
         return super.defaultValues(memberName);
     }
@@ -102,19 +108,25 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
    *```
    */
   public static override schema(parameters: DigestInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        AlgorithmIdentifier.schema(names.digestAlgorithm || {
-          names: {
-            blockName: DIGEST_ALGORITHM
+        AlgorithmIdentifier.schema(
+          names.digestAlgorithm || {
+            names: {
+              blockName: DIGEST_ALGORITHM
+            }
           }
-        }),
-        new asn1js.OctetString({ name: (names.digest || DIGEST) })
+        ),
+        new asn1js.OctetString({ name: names.digest || DIGEST })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -122,7 +134,8 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       DigestInfo.schema({
         names: {
@@ -144,19 +157,15 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: [
-        this.digestAlgorithm.toSchema(),
-        this.digest
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [this.digestAlgorithm.toSchema(), this.digest]
+    });
   }
 
   public toJSON(): DigestInfoJson {
     return {
       digestAlgorithm: this.digestAlgorithm.toJSON(),
-      digest: this.digest.toJSON(),
+      digest: this.digest.toJSON()
     };
   }
-
 }

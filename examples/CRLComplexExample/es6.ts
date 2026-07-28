@@ -35,16 +35,13 @@ function parseCRL(crlBuffer: ArrayBuffer) {
   common.getElement("crl-extn-div").style.display = "none";
 
   const revokedTable = common.getElement("crl-rev-certs", "table");
-  while (revokedTable.rows.length > 1)
-    revokedTable.deleteRow(revokedTable.rows.length - 1);
+  while (revokedTable.rows.length > 1) revokedTable.deleteRow(revokedTable.rows.length - 1);
 
   const extensionTable = common.getElement("crl-extn-table", "table");
-  while (extensionTable.rows.length > 1)
-    extensionTable.deleteRow(extensionTable.rows.length - 1);
+  while (extensionTable.rows.length > 1) extensionTable.deleteRow(extensionTable.rows.length - 1);
 
   const issuerTable = common.getElement("crl-issuer-table", "table");
-  while (issuerTable.rows.length > 1)
-    issuerTable.deleteRow(issuerTable.rows.length - 1);
+  while (issuerTable.rows.length > 1) issuerTable.deleteRow(issuerTable.rows.length - 1);
 
   //#region Decode existing CRL
   const crlSimpl = pkijs.CertificateRevocationList.fromBER(crlBuffer);
@@ -109,13 +106,12 @@ function parseCRL(crlBuffer: ArrayBuffer) {
     "1.2.840.113549.1.1.12": "SHA384 with RSA",
     "2.16.840.1.101.3.4.2.3": "SHA512",
     "1.2.840.113549.1.1.13": "SHA512 with RSA"
-  };       // array mapping of common algorithm OIDs and corresponding types
+  }; // array mapping of common algorithm OIDs and corresponding types
 
   let signatureAlgorithm = algomap[crlSimpl.signature.algorithmId];
   if (typeof signatureAlgorithm === "undefined")
     signatureAlgorithm = crlSimpl.signature.algorithmId;
-  else
-    signatureAlgorithm = `${signatureAlgorithm} (${crlSimpl.signature.algorithmId})`;
+  else signatureAlgorithm = `${signatureAlgorithm} (${crlSimpl.signature.algorithmId})`;
 
   common.getElement("crl-sign-algo").innerHTML = signatureAlgorithm;
   //#endregion
@@ -125,7 +121,9 @@ function parseCRL(crlBuffer: ArrayBuffer) {
     for (let i = 0; i < crlSimpl.revokedCertificates.length; i++) {
       const row = revokedTable.insertRow(revokedTable.rows.length);
       const cell0 = row.insertCell(0);
-      cell0.innerHTML = pvtsutils.Convert.ToHex(crlSimpl.revokedCertificates[i].userCertificate.valueBlock.valueHexView);
+      cell0.innerHTML = pvtsutils.Convert.ToHex(
+        crlSimpl.revokedCertificates[i].userCertificate.valueBlock.valueHexView
+      );
       const cell1 = row.insertCell(1);
       cell1.innerHTML = crlSimpl.revokedCertificates[i].revocationDate.value.toString();
     }
@@ -174,7 +172,7 @@ function handleIssuerCert(evt: Event) {
       const asn1 = asn1js.fromBER(file);
       pkijs.AsnError.assert(asn1, "Certificate");
       const cert = new pkijs.Certificate({
-        schema: asn1.result,
+        schema: asn1.result
       });
       issuerPublicKey = cert.subjectPublicKeyInfo.toSchema().toBER();
     } catch (e) {

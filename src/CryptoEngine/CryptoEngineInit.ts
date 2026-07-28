@@ -17,5 +17,4 @@ export function initCryptoEngine() {
     const nodeCrypto = (crypto as any).webcrypto as Crypto;
     common.setEngine(name, new CryptoEngine({ name, crypto: nodeCrypto }));
   }
-
 }

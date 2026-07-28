@@ -9,7 +9,7 @@ describe("How To Encrypt CMS via Key Identifier", () => {
   const encAlgs = ["AES-CBC", "AES-GCM"];
   const encLens = [128, 192, 256];
 
-  const valueBuffer = (new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09])).buffer;
+  const valueBuffer = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09]).buffer;
   //#endregion
 
   encAlgs.forEach(encAlg => {
@@ -19,7 +19,6 @@ describe("How To Encrypt CMS via Key Identifier", () => {
           const testName = `${encAlg} with ${encLen} + ${curveName}, OAEP hash: ${kdfHashAlg}`;
 
           it(testName, async () => {
-
             const encryptionAlgorithm = {
               name: encAlg,
               length: encLen,
@@ -28,13 +27,20 @@ describe("How To Encrypt CMS via Key Identifier", () => {
             };
 
             const keys = await example.createKeyPair(curveName);
-            const cmsEnvelopedBuffer = await example.envelopedEncrypt(keys, encryptionAlgorithm, valueBuffer);
+            const cmsEnvelopedBuffer = await example.envelopedEncrypt(
+              keys,
+              encryptionAlgorithm,
+              valueBuffer
+            );
             const result = await example.envelopedDecrypt(keys.pkcs8, cmsEnvelopedBuffer);
-            assert.equal(pvutils.isEqualBuffer(result, valueBuffer), true, "Decrypted value must be equal with initially encrypted value");
+            assert.equal(
+              pvutils.isEqualBuffer(result, valueBuffer),
+              true,
+              "Decrypted value must be equal with initially encrypted value"
+            );
           });
         });
       });
     });
   });
 });
-

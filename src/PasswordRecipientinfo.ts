@@ -1,6 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema
+} from "./AlgorithmIdentifier";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -11,12 +15,7 @@ const KEY_DERIVATION_ALGORITHM = "keyDerivationAlgorithm";
 const KEY_ENCRYPTION_ALGORITHM = "keyEncryptionAlgorithm";
 const ENCRYPTED_KEY = "encryptedKey";
 const PASSWORD = "password";
-const CLEAR_PROPS = [
-  VERSION,
-  KEY_DERIVATION_ALGORITHM,
-  KEY_ENCRYPTION_ALGORITHM,
-  ENCRYPTED_KEY
-];
+const CLEAR_PROPS = [VERSION, KEY_DERIVATION_ALGORITHM, KEY_ENCRYPTION_ALGORITHM, ENCRYPTED_KEY];
 
 export interface IPasswordRecipientInfo {
   version: number;
@@ -40,7 +39,6 @@ export type PasswordRecipientinfoParameters = PkiObjectParameters & Partial<IPas
  */
 // TODO rename to PasswordRecipientInfo
 export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipientInfo {
-
   public static override CLASS_NAME = "PasswordRecipientInfo";
 
   public version!: number;
@@ -56,13 +54,33 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
   constructor(parameters: PasswordRecipientinfoParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, PasswordRecipientinfo.defaultValues(VERSION));
+    this.version = pvutils.getParametersValue(
+      parameters,
+      VERSION,
+      PasswordRecipientinfo.defaultValues(VERSION)
+    );
     if (KEY_DERIVATION_ALGORITHM in parameters) {
-      this.keyDerivationAlgorithm = pvutils.getParametersValue(parameters, KEY_DERIVATION_ALGORITHM, PasswordRecipientinfo.defaultValues(KEY_DERIVATION_ALGORITHM));
+      this.keyDerivationAlgorithm = pvutils.getParametersValue(
+        parameters,
+        KEY_DERIVATION_ALGORITHM,
+        PasswordRecipientinfo.defaultValues(KEY_DERIVATION_ALGORITHM)
+      );
     }
-    this.keyEncryptionAlgorithm = pvutils.getParametersValue(parameters, KEY_ENCRYPTION_ALGORITHM, PasswordRecipientinfo.defaultValues(KEY_ENCRYPTION_ALGORITHM));
-    this.encryptedKey = pvutils.getParametersValue(parameters, ENCRYPTED_KEY, PasswordRecipientinfo.defaultValues(ENCRYPTED_KEY));
-    this.password = pvutils.getParametersValue(parameters, PASSWORD, PasswordRecipientinfo.defaultValues(PASSWORD));
+    this.keyEncryptionAlgorithm = pvutils.getParametersValue(
+      parameters,
+      KEY_ENCRYPTION_ALGORITHM,
+      PasswordRecipientinfo.defaultValues(KEY_ENCRYPTION_ALGORITHM)
+    );
+    this.encryptedKey = pvutils.getParametersValue(
+      parameters,
+      ENCRYPTED_KEY,
+      PasswordRecipientinfo.defaultValues(ENCRYPTED_KEY)
+    );
+    this.password = pvutils.getParametersValue(
+      parameters,
+      PASSWORD,
+      PasswordRecipientinfo.defaultValues(PASSWORD)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -75,14 +93,18 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
    * @returns Default value
    */
   public static override defaultValues(memberName: typeof VERSION): number;
-  public static override defaultValues(memberName: typeof KEY_DERIVATION_ALGORITHM): AlgorithmIdentifier;
-  public static override defaultValues(memberName: typeof KEY_ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(
+    memberName: typeof KEY_DERIVATION_ALGORITHM
+  ): AlgorithmIdentifier;
+  public static override defaultValues(
+    memberName: typeof KEY_ENCRYPTION_ALGORITHM
+  ): AlgorithmIdentifier;
   public static override defaultValues(memberName: typeof ENCRYPTED_KEY): asn1js.OctetString;
   public static override defaultValues(memberName: typeof PASSWORD): ArrayBuffer;
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case VERSION:
-        return (-1);
+        return -1;
       case KEY_DERIVATION_ALGORITHM:
         return new AlgorithmIdentifier();
       case KEY_ENCRYPTION_ALGORITHM:
@@ -104,14 +126,16 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case VERSION:
-        return (memberValue === (-1));
+        return memberValue === -1;
       case KEY_DERIVATION_ALGORITHM:
       case KEY_ENCRYPTION_ALGORITHM:
-        return ((memberValue.algorithmId === EMPTY_STRING) && (("algorithmParams" in memberValue) === false));
+        return (
+          memberValue.algorithmId === EMPTY_STRING && "algorithmParams" in memberValue === false
+        );
       case ENCRYPTED_KEY:
-        return (memberValue.isEqual(PasswordRecipientinfo.defaultValues(ENCRYPTED_KEY)));
+        return memberValue.isEqual(PasswordRecipientinfo.defaultValues(ENCRYPTED_KEY));
       case PASSWORD:
-        return (memberValue.byteLength === 0);
+        return memberValue.byteLength === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -128,20 +152,26 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
    *    encryptedKey EncryptedKey }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    version?: string;
-    keyDerivationAlgorithm?: string;
-    keyEncryptionAlgorithm?: AlgorithmIdentifierSchema;
-    encryptedKey?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      version?: string;
+      keyDerivationAlgorithm?: string;
+      keyEncryptionAlgorithm?: AlgorithmIdentifierSchema;
+      encryptedKey?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
+        new asn1js.Integer({ name: names.version || EMPTY_STRING }),
         new asn1js.Constructed({
-          name: (names.keyDerivationAlgorithm || EMPTY_STRING),
+          name: names.keyDerivationAlgorithm || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -150,9 +180,9 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
           value: AlgorithmIdentifier.schema().valueBlock.value
         }),
         AlgorithmIdentifier.schema(names.keyEncryptionAlgorithm || {}),
-        new asn1js.OctetString({ name: (names.encryptedKey || EMPTY_STRING) })
+        new asn1js.OctetString({ name: names.encryptedKey || EMPTY_STRING })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -160,7 +190,8 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       PasswordRecipientinfo.schema({
         names: {
@@ -187,7 +218,9 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
         })
       });
     }
-    this.keyEncryptionAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.keyEncryptionAlgorithm });
+    this.keyEncryptionAlgorithm = new AlgorithmIdentifier({
+      schema: asn1.result.keyEncryptionAlgorithm
+    });
     this.encryptedKey = asn1.result.encryptedKey;
   }
 
@@ -198,13 +231,15 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
     outputArray.push(new asn1js.Integer({ value: this.version }));
 
     if (this.keyDerivationAlgorithm) {
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        value: this.keyDerivationAlgorithm.toSchema().valueBlock.value
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0 // [0]
+          },
+          value: this.keyDerivationAlgorithm.toSchema().valueBlock.value
+        })
+      );
     }
 
     outputArray.push(this.keyEncryptionAlgorithm.toSchema());
@@ -212,9 +247,9 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
     //#endregion
   }
 
@@ -222,7 +257,7 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
     const res: PasswordRecipientInfoJson = {
       version: this.version,
       keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
-      encryptedKey: this.encryptedKey.toJSON(),
+      encryptedKey: this.encryptedKey.toJSON()
     };
 
     if (this.keyDerivationAlgorithm) {
@@ -231,5 +266,4 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
 
     return res;
   }
-
 }

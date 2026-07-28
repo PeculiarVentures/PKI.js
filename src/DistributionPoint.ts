@@ -18,7 +18,7 @@ const CLEAR_PROPS = [
   DISTRIBUTION_POINT_NAMES,
   REASONS,
   CRL_ISSUER,
-  CRL_ISSUER_NAMES,
+  CRL_ISSUER_NAMES
 ];
 
 export interface IDistributionPoint {
@@ -39,7 +39,6 @@ export type DistributionPointParameters = PkiObjectParameters & Partial<IDistrib
  * Represents the DistributionPoint structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class DistributionPoint extends PkiObject implements IDistributionPoint {
-
   public static override CLASS_NAME = "DistributionPoint";
 
   public distributionPoint?: DistributionPointName;
@@ -54,13 +53,25 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
     super();
 
     if (DISTRIBUTION_POINT in parameters) {
-      this.distributionPoint = pvutils.getParametersValue(parameters, DISTRIBUTION_POINT, DistributionPoint.defaultValues(DISTRIBUTION_POINT));
+      this.distributionPoint = pvutils.getParametersValue(
+        parameters,
+        DISTRIBUTION_POINT,
+        DistributionPoint.defaultValues(DISTRIBUTION_POINT)
+      );
     }
     if (REASONS in parameters) {
-      this.reasons = pvutils.getParametersValue(parameters, REASONS, DistributionPoint.defaultValues(REASONS));
+      this.reasons = pvutils.getParametersValue(
+        parameters,
+        REASONS,
+        DistributionPoint.defaultValues(REASONS)
+      );
     }
     if (CRL_ISSUER in parameters) {
-      this.cRLIssuer = pvutils.getParametersValue(parameters, CRL_ISSUER, DistributionPoint.defaultValues(CRL_ISSUER));
+      this.cRLIssuer = pvutils.getParametersValue(
+        parameters,
+        CRL_ISSUER,
+        DistributionPoint.defaultValues(CRL_ISSUER)
+      );
     }
 
     if (parameters.schema) {
@@ -73,7 +84,9 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
    * @param memberName String name for a class member
    * @returns Default value
    */
-  public static override defaultValues(memberName: typeof DISTRIBUTION_POINT): DistributionPointName;
+  public static override defaultValues(
+    memberName: typeof DISTRIBUTION_POINT
+  ): DistributionPointName;
   public static override defaultValues(memberName: typeof REASONS): asn1js.BitString;
   public static override defaultValues(memberName: typeof CRL_ISSUER): GeneralName[];
   public static override defaultValues(memberName: string): any {
@@ -114,13 +127,15 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
    *    aACompromise            (8) }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    distributionPoint?: string;
-    distributionPointNames?: string;
-    reasons?: string;
-    cRLIssuer?: string;
-    cRLIssuerNames?: string;
-  }> = {}): Schema.SchemaType {
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      distributionPoint?: string;
+      distributionPointNames?: string;
+      reasons?: string;
+      cRLIssuer?: string;
+      cRLIssuerNames?: string;
+    }> = {}
+  ): Schema.SchemaType {
     /**
      * @type {Object}
      * @property {string} [blockName]
@@ -130,10 +145,14 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
      * @property {string} [cRLIssuer]
      * @property {string} [cRLIssuerNames]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Constructed({
           optional: true,
@@ -145,7 +164,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
             new asn1js.Choice({
               value: [
                 new asn1js.Constructed({
-                  name: (names.distributionPoint || EMPTY_STRING),
+                  name: names.distributionPoint || EMPTY_STRING,
                   optional: true,
                   idBlock: {
                     tagClass: 3, // CONTEXT-SPECIFIC
@@ -153,13 +172,13 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
                   },
                   value: [
                     new asn1js.Repeated({
-                      name: (names.distributionPointNames || EMPTY_STRING),
+                      name: names.distributionPointNames || EMPTY_STRING,
                       value: GeneralName.schema()
                     })
                   ]
                 }),
                 new asn1js.Constructed({
-                  name: (names.distributionPoint || EMPTY_STRING),
+                  name: names.distributionPoint || EMPTY_STRING,
                   optional: true,
                   idBlock: {
                     tagClass: 3, // CONTEXT-SPECIFIC
@@ -172,7 +191,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
           ]
         }),
         new asn1js.Primitive({
-          name: (names.reasons || EMPTY_STRING),
+          name: names.reasons || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -180,7 +199,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
           }
         }), // IMPLICIT BitString value
         new asn1js.Constructed({
-          name: (names.cRLIssuer || EMPTY_STRING),
+          name: names.cRLIssuer || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -188,13 +207,13 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
           },
           value: [
             new asn1js.Repeated({
-              name: (names.cRLIssuerNames || EMPTY_STRING),
+              name: names.cRLIssuerNames || EMPTY_STRING,
               value: GeneralName.schema()
             })
           ]
         }) // IMPLICIT BitString value
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -202,7 +221,8 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       DistributionPoint.schema({
         names: {
@@ -218,11 +238,16 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
 
     //#region Get internal properties from parsed schema
     if (DISTRIBUTION_POINT in asn1.result) {
-      if (asn1.result.distributionPoint.idBlock.tagNumber === 0) { // GENERAL_NAMES variant
-        this.distributionPoint = Array.from(asn1.result.distributionPointNames, element => new GeneralName({ schema: element }));
+      if (asn1.result.distributionPoint.idBlock.tagNumber === 0) {
+        // GENERAL_NAMES variant
+        this.distributionPoint = Array.from(
+          asn1.result.distributionPointNames,
+          element => new GeneralName({ schema: element })
+        );
       }
 
-      if (asn1.result.distributionPoint.idBlock.tagNumber === 1) {// RDN variant
+      if (asn1.result.distributionPoint.idBlock.tagNumber === 1) {
+        // RDN variant
         this.distributionPoint = new RelativeDistinguishedNames({
           schema: new asn1js.Sequence({
             value: asn1.result.distributionPoint.valueBlock.value
@@ -236,7 +261,10 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
     }
 
     if (CRL_ISSUER in asn1.result) {
-      this.cRLIssuer = Array.from(asn1.result.cRLIssuerNames, element => new GeneralName({ schema: element }));
+      this.cRLIssuer = Array.from(
+        asn1.result.cRLIssuerNames,
+        element => new GeneralName({ schema: element })
+      );
     }
     //#endregion
   }
@@ -266,40 +294,46 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
         });
       }
 
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
-        },
-        value: [internalValue]
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0 // [0]
+          },
+          value: [internalValue]
+        })
+      );
     }
 
     if (this.reasons) {
-      outputArray.push(new asn1js.Primitive({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 1 // [1]
-        },
-        valueHex: this.reasons.valueBlock.valueHexView
-      }));
+      outputArray.push(
+        new asn1js.Primitive({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 1 // [1]
+          },
+          valueHex: this.reasons.valueBlock.valueHexView
+        })
+      );
     }
 
     if (this.cRLIssuer) {
-      outputArray.push(new asn1js.Constructed({
-        idBlock: {
-          tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 2 // [2]
-        },
-        value: Array.from(this.cRLIssuer, o => o.toSchema())
-      }));
+      outputArray.push(
+        new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 2 // [2]
+          },
+          value: Array.from(this.cRLIssuer, o => o.toSchema())
+        })
+      );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
     //#endregion
   }
 
@@ -324,5 +358,4 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
 
     return object;
   }
-
 }

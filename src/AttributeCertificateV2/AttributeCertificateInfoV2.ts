@@ -1,10 +1,18 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { GeneralNames, GeneralNamesJson } from "../GeneralNames";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema
+} from "../AlgorithmIdentifier";
 import { Attribute, AttributeJson } from "../Attribute";
 import { Extensions, ExtensionsJson, ExtensionsSchema } from "../Extensions";
-import { AttCertValidityPeriod, AttCertValidityPeriodJson, AttCertValidityPeriodSchema } from "../AttributeCertificateV1";
+import {
+  AttCertValidityPeriod,
+  AttCertValidityPeriodJson,
+  AttCertValidityPeriodSchema
+} from "../AttributeCertificateV1";
 import { V2Form, V2FormJson } from "./V2Form";
 import { Holder, HolderJson, HolderSchema } from "./Holder";
 import * as Schema from "../Schema";
@@ -45,7 +53,8 @@ export interface IAttributeCertificateInfoV2 {
   extensions?: Extensions;
 }
 
-export type AttributeCertificateInfoV2Parameters = PkiObjectParameters & Partial<AttributeCertificateInfoV2>;
+export type AttributeCertificateInfoV2Parameters = PkiObjectParameters &
+  Partial<AttributeCertificateInfoV2>;
 
 export type AttributeCertificateInfoV2Schema = Schema.SchemaParameters<{
   version?: string;
@@ -75,7 +84,6 @@ export interface AttributeCertificateInfoV2Json {
  * Represents the AttributeCertificateInfoV2 structure described in [RFC5755](https://datatracker.ietf.org/doc/html/rfc5755)
  */
 export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeCertificateInfoV2 {
-
   public static override CLASS_NAME = "AttributeCertificateInfoV2";
 
   public version!: number;
@@ -95,18 +103,54 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
   constructor(parameters: AttributeCertificateInfoV2Parameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, AttributeCertificateInfoV2.defaultValues(VERSION));
-    this.holder = pvutils.getParametersValue(parameters, HOLDER, AttributeCertificateInfoV2.defaultValues(HOLDER));
-    this.issuer = pvutils.getParametersValue(parameters, ISSUER, AttributeCertificateInfoV2.defaultValues(ISSUER));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, AttributeCertificateInfoV2.defaultValues(SIGNATURE));
-    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, AttributeCertificateInfoV2.defaultValues(SERIAL_NUMBER));
-    this.attrCertValidityPeriod = pvutils.getParametersValue(parameters, ATTR_CERT_VALIDITY_PERIOD, AttributeCertificateInfoV2.defaultValues(ATTR_CERT_VALIDITY_PERIOD));
-    this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, AttributeCertificateInfoV2.defaultValues(ATTRIBUTES));
+    this.version = pvutils.getParametersValue(
+      parameters,
+      VERSION,
+      AttributeCertificateInfoV2.defaultValues(VERSION)
+    );
+    this.holder = pvutils.getParametersValue(
+      parameters,
+      HOLDER,
+      AttributeCertificateInfoV2.defaultValues(HOLDER)
+    );
+    this.issuer = pvutils.getParametersValue(
+      parameters,
+      ISSUER,
+      AttributeCertificateInfoV2.defaultValues(ISSUER)
+    );
+    this.signature = pvutils.getParametersValue(
+      parameters,
+      SIGNATURE,
+      AttributeCertificateInfoV2.defaultValues(SIGNATURE)
+    );
+    this.serialNumber = pvutils.getParametersValue(
+      parameters,
+      SERIAL_NUMBER,
+      AttributeCertificateInfoV2.defaultValues(SERIAL_NUMBER)
+    );
+    this.attrCertValidityPeriod = pvutils.getParametersValue(
+      parameters,
+      ATTR_CERT_VALIDITY_PERIOD,
+      AttributeCertificateInfoV2.defaultValues(ATTR_CERT_VALIDITY_PERIOD)
+    );
+    this.attributes = pvutils.getParametersValue(
+      parameters,
+      ATTRIBUTES,
+      AttributeCertificateInfoV2.defaultValues(ATTRIBUTES)
+    );
     if (ISSUER_UNIQUE_ID in parameters) {
-      this.issuerUniqueID = pvutils.getParametersValue(parameters, ISSUER_UNIQUE_ID, AttributeCertificateInfoV2.defaultValues(ISSUER_UNIQUE_ID));
+      this.issuerUniqueID = pvutils.getParametersValue(
+        parameters,
+        ISSUER_UNIQUE_ID,
+        AttributeCertificateInfoV2.defaultValues(ISSUER_UNIQUE_ID)
+      );
     }
     if (EXTENSIONS in parameters) {
-      this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, AttributeCertificateInfoV2.defaultValues(EXTENSIONS));
+      this.extensions = pvutils.getParametersValue(
+        parameters,
+        EXTENSIONS,
+        AttributeCertificateInfoV2.defaultValues(EXTENSIONS)
+      );
     }
 
     if (parameters.schema) {
@@ -124,7 +168,9 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
   public static override defaultValues(memberName: typeof ISSUER): GeneralNames | V2Form;
   public static override defaultValues(memberName: typeof SIGNATURE): AlgorithmIdentifier;
   public static override defaultValues(memberName: typeof SERIAL_NUMBER): asn1js.Integer;
-  public static override defaultValues(memberName: typeof ATTR_CERT_VALIDITY_PERIOD): AttCertValidityPeriod;
+  public static override defaultValues(
+    memberName: typeof ATTR_CERT_VALIDITY_PERIOD
+  ): AttCertValidityPeriod;
   public static override defaultValues(memberName: typeof ATTRIBUTES): Attribute[];
   public static override defaultValues(memberName: typeof ISSUER_UNIQUE_ID): asn1js.BitString;
   public static override defaultValues(memberName: typeof EXTENSIONS): Extensions;
@@ -170,23 +216,29 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
    * }
    *```
    */
-  public static override schema(parameters: AttributeCertificateInfoV2Schema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: AttributeCertificateInfoV2Schema = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
+        new asn1js.Integer({ name: names.version || EMPTY_STRING }),
         Holder.schema(names.holder || {}),
         new asn1js.Choice({
           value: [
             GeneralNames.schema({
               names: {
-                blockName: (names.issuer || EMPTY_STRING)
+                blockName: names.issuer || EMPTY_STRING
               }
             }),
             new asn1js.Constructed({
-              name: (names.issuer || EMPTY_STRING),
+              name: names.issuer || EMPTY_STRING,
               idBlock: {
                 tagClass: 3,
                 tagNumber: 0 // [0]
@@ -196,10 +248,10 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
           ]
         }),
         AlgorithmIdentifier.schema(names.signature || {}),
-        new asn1js.Integer({ name: (names.serialNumber || EMPTY_STRING) }),
+        new asn1js.Integer({ name: names.serialNumber || EMPTY_STRING }),
         AttCertValidityPeriod.schema(names.attrCertValidityPeriod || {}),
         new asn1js.Sequence({
-          name: (names.attributes || EMPTY_STRING),
+          name: names.attributes || EMPTY_STRING,
           value: [
             new asn1js.Repeated({
               value: Attribute.schema()
@@ -208,11 +260,11 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
         }),
         new asn1js.BitString({
           optional: true,
-          name: (names.issuerUniqueID || EMPTY_STRING)
+          name: names.issuerUniqueID || EMPTY_STRING
         }),
         Extensions.schema(names.extensions || {}, true)
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -220,7 +272,8 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       AttributeCertificateInfoV2.schema({
         names: {
@@ -273,8 +326,13 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
 
     this.signature = new AlgorithmIdentifier({ schema: asn1.result.signature });
     this.serialNumber = asn1.result.serialNumber;
-    this.attrCertValidityPeriod = new AttCertValidityPeriod({ schema: asn1.result.attrCertValidityPeriod });
-    this.attributes = Array.from(asn1.result.attributes.valueBlock.value, element => new Attribute({ schema: element }));
+    this.attrCertValidityPeriod = new AttCertValidityPeriod({
+      schema: asn1.result.attrCertValidityPeriod
+    });
+    this.attributes = Array.from(
+      asn1.result.attributes.valueBlock.value,
+      element => new Attribute({ schema: element })
+    );
 
     if (ISSUER_UNIQUE_ID in asn1.result) {
       this.issuerUniqueID = asn1.result.issuerUniqueID;
@@ -337,5 +395,4 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
 
     return result;
   }
-
 }

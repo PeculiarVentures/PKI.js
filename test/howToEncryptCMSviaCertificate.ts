@@ -5,7 +5,11 @@ export interface EnvelopedWithCertificateParams extends Algorithm {
   oaepHashAlg: string;
 }
 
-export async function envelopedEncrypt(certificateBuffer: ArrayBuffer, encAlg: EnvelopedWithCertificateParams, valueBuffer: ArrayBuffer) {
+export async function envelopedEncrypt(
+  certificateBuffer: ArrayBuffer,
+  encAlg: EnvelopedWithCertificateParams,
+  valueBuffer: ArrayBuffer
+) {
   // Decode input certificate
   const certSimpl = pkijs.Certificate.fromBER(certificateBuffer);
 
@@ -28,7 +32,11 @@ export async function envelopedEncrypt(certificateBuffer: ArrayBuffer, encAlg: E
   return cmsContentSimpl.toSchema().toBER(false);
 }
 
-export async function envelopedDecrypt(certificateBuffer: ArrayBuffer, privateKeyBuffer: ArrayBuffer, cmsEnvelopedBuffer: ArrayBuffer) {
+export async function envelopedDecrypt(
+  certificateBuffer: ArrayBuffer,
+  privateKeyBuffer: ArrayBuffer,
+  cmsEnvelopedBuffer: ArrayBuffer
+) {
   //#region Decode input certificate
   const certSimpl = pkijs.Certificate.fromBER(certificateBuffer);
   //#endregion
@@ -38,9 +46,8 @@ export async function envelopedDecrypt(certificateBuffer: ArrayBuffer, privateKe
   const cmsEnvelopedSimp = new pkijs.EnvelopedData({ schema: cmsContentSimpl.content });
   //#endregion
 
-  return cmsEnvelopedSimp.decrypt(0,
-    {
-      recipientCertificate: certSimpl,
-      recipientPrivateKey: privateKeyBuffer
-    });
+  return cmsEnvelopedSimp.decrypt(0, {
+    recipientCertificate: certSimpl,
+    recipientPrivateKey: privateKeyBuffer
+  });
 }

@@ -14,9 +14,16 @@ let valueBuffer = new ArrayBuffer(0);
 let cmsEnvelopedBuffer = new ArrayBuffer(0);
 
 async function envelopedEncrypt() {
-  preDefinedDataBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("password", "textarea").value);
+  preDefinedDataBuffer = pvtsutils.Convert.FromUtf8String(
+    common.getElement("password", "textarea").value
+  );
   valueBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("content", "textarea").value);
-  cmsEnvelopedBuffer = await example.envelopedEncrypt(encryptionVariant, preDefinedDataBuffer, encryptionAlgorithm, valueBuffer);
+  cmsEnvelopedBuffer = await example.envelopedEncrypt(
+    encryptionVariant,
+    preDefinedDataBuffer,
+    encryptionAlgorithm,
+    valueBuffer
+  );
 
   common.getElement("encrypted_content").innerHTML = utils.toPEM(cmsEnvelopedBuffer, "CMS");
 
@@ -24,10 +31,16 @@ async function envelopedEncrypt() {
 }
 
 async function envelopedDecrypt() {
-  preDefinedDataBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("password", "textarea").value);
+  preDefinedDataBuffer = pvtsutils.Convert.FromUtf8String(
+    common.getElement("password", "textarea").value
+  );
 
   cmsEnvelopedBuffer = utils.fromPEM(common.getElement("encrypted_content").innerHTML);
-  const result = await example.envelopedDecrypt(encryptionVariant, preDefinedDataBuffer, cmsEnvelopedBuffer);
+  const result = await example.envelopedDecrypt(
+    encryptionVariant,
+    preDefinedDataBuffer,
+    cmsEnvelopedBuffer
+  );
   common.getElement("decrypted_content").innerHTML = pvtsutils.Convert.ToBinary(result);
 }
 

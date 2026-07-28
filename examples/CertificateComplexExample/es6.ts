@@ -24,16 +24,13 @@ function parseCertificate() {
   common.getElement("cert-extn-div").style.display = "none";
 
   const issuerTable = common.getElement("cert-issuer-table", "table");
-  while (issuerTable.rows.length > 1)
-    issuerTable.deleteRow(issuerTable.rows.length - 1);
+  while (issuerTable.rows.length > 1) issuerTable.deleteRow(issuerTable.rows.length - 1);
 
   const subjectTable = common.getElement("cert-subject-table", "table");
-  while (subjectTable.rows.length > 1)
-    subjectTable.deleteRow(subjectTable.rows.length - 1);
+  while (subjectTable.rows.length > 1) subjectTable.deleteRow(subjectTable.rows.length - 1);
 
   const extensionTable = common.getElement("cert-extn-table", "table");
-  while (extensionTable.rows.length > 1)
-    extensionTable.deleteRow(extensionTable.rows.length - 1);
+  while (extensionTable.rows.length > 1) extensionTable.deleteRow(extensionTable.rows.length - 1);
   //#endregion
 
   //#region Decode existing X.509 certificate
@@ -61,8 +58,7 @@ function parseCertificate() {
 
   for (const typeAndValue of certificate.issuer.typesAndValues) {
     let typeval = rdnmap[typeAndValue.type];
-    if (typeof typeval === "undefined")
-      typeval = typeAndValue.type;
+    if (typeof typeval === "undefined") typeval = typeAndValue.type;
 
     const subjval = typeAndValue.value.valueBlock.value;
 
@@ -77,8 +73,7 @@ function parseCertificate() {
   //#region Put information about X.509 certificate subject
   for (const typeAndValue of certificate.subject.typesAndValues) {
     let typeval = rdnmap[typeAndValue.type];
-    if (typeof typeval === "undefined")
-      typeval = typeAndValue.type;
+    if (typeof typeval === "undefined") typeval = typeAndValue.type;
 
     const subjval = typeAndValue.value.valueBlock.value;
 
@@ -91,7 +86,9 @@ function parseCertificate() {
   //#endregion
 
   //#region Put information about X.509 certificate serial number
-  common.getElement("cert-serial-number").innerHTML = pvtsutils.Convert.ToHex(certificate.serialNumber.valueBlock.valueHexView);
+  common.getElement("cert-serial-number").innerHTML = pvtsutils.Convert.ToHex(
+    certificate.serialNumber.valueBlock.valueHexView
+  );
   //#endregion
 
   //#region Put information about issuance date
@@ -105,16 +102,17 @@ function parseCertificate() {
   //#region Put information about subject public key size
   let publicKeySize = "< unknown >";
 
-  if (certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1)) {
-    const rsaPublicKey = pkijs.RSAPublicKey.fromBER(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
+  if (certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== -1) {
+    const rsaPublicKey = pkijs.RSAPublicKey.fromBER(
+      certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource
+    );
 
     const modulusView = rsaPublicKey.modulus.valueBlock.valueHexView;
     let modulusBitLength = 0;
 
     if (modulusView[0] === 0x00)
       modulusBitLength = (rsaPublicKey.modulus.valueBlock.valueHexView.byteLength - 1) * 8;
-    else
-      modulusBitLength = rsaPublicKey.modulus.valueBlock.valueHexView.byteLength * 8;
+    else modulusBitLength = rsaPublicKey.modulus.valueBlock.valueHexView.byteLength * 8;
 
     publicKeySize = modulusBitLength.toString();
   }
@@ -137,13 +135,12 @@ function parseCertificate() {
     "1.2.840.113549.1.1.11": "SHA256 with RSA",
     "1.2.840.113549.1.1.12": "SHA384 with RSA",
     "1.2.840.113549.1.1.13": "SHA512 with RSA"
-  };       // array mapping of common algorithm OIDs and corresponding types
+  }; // array mapping of common algorithm OIDs and corresponding types
 
   let signatureAlgorithm = algomap[certificate.signatureAlgorithm.algorithmId];
   if (typeof signatureAlgorithm === "undefined")
     signatureAlgorithm = certificate.signatureAlgorithm.algorithmId;
-  else
-    signatureAlgorithm = `${signatureAlgorithm} (${certificate.signatureAlgorithm.algorithmId})`;
+  else signatureAlgorithm = `${signatureAlgorithm} (${certificate.signatureAlgorithm.algorithmId})`;
 
   common.getElement("cert-sign-algo").innerHTML = signatureAlgorithm;
   //#endregion
@@ -175,7 +172,7 @@ async function createCertificate() {
 
     common.getElement("new_signed_data").innerHTML = [
       utils.toPEM(cert.certificateBuffer, "CERTIFICATE"),
-      utils.toPEM(cert.privateKeyBuffer, "PRIVATE KEY"),
+      utils.toPEM(cert.privateKeyBuffer, "PRIVATE KEY")
     ].join("\n\n");
 
     alert("Certificate created successfully!");
@@ -186,7 +183,12 @@ async function createCertificate() {
 
 async function verifyCertificate() {
   try {
-    const chainStatus = await example.verifyCertificate(certificateBuffer, intermediateCertificates, trustedCertificates, crls);
+    const chainStatus = await example.verifyCertificate(
+      certificateBuffer,
+      intermediateCertificates,
+      trustedCertificates,
+      crls
+    );
     alert(`Verification result: ${chainStatus.result}`);
   } catch (e) {
     common.processError(e, "Error on Certificate verifying");
@@ -198,11 +200,10 @@ function handleFileBrowse(evt: any) {
 
   const currentFiles = evt.target.files;
 
-  tempReader.onload =
-    (event: any) => {
-      certificateBuffer = event.target.result;
-      parseCertificate();
-    };
+  tempReader.onload = (event: any) => {
+    certificateBuffer = event.target.result;
+    parseCertificate();
+  };
 
   tempReader.readAsArrayBuffer(currentFiles[0]);
 }

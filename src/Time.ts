@@ -14,7 +14,7 @@ const CLEAR_PROPS = [UTC_TIME_NAME, GENERAL_TIME_NAME];
 export enum TimeType {
   UTCTime,
   GeneralizedTime,
-  empty,
+  empty
 }
 
 export interface ITime {
@@ -44,7 +44,6 @@ export interface TimeJson {
  * Represents the Time structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class Time extends PkiObject implements ITime {
-
   public static override CLASS_NAME = "Time";
 
   public type!: TimeType;
@@ -88,8 +87,8 @@ export class Time extends PkiObject implements ITime {
    * @asn ASN.1 schema
    * ```asn
    * Time ::= CHOICE {
-     *   utcTime        UTCTime,
-     *   generalTime    GeneralizedTime }
+   *   utcTime        UTCTime,
+   *   generalTime    GeneralizedTime }
    * ```
    *
    * @param parameters Input parameters for the schema
@@ -97,15 +96,19 @@ export class Time extends PkiObject implements ITime {
    * @returns ASN.1 schema object
    */
   static override schema(parameters: TimeSchema = {}, optional = false): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Choice({
+    return new asn1js.Choice({
       optional,
       value: [
-        new asn1js.UTCTime({ name: (names.utcTimeName || EMPTY_STRING) }),
-        new asn1js.GeneralizedTime({ name: (names.generalTimeName || EMPTY_STRING) })
+        new asn1js.UTCTime({ name: names.utcTimeName || EMPTY_STRING }),
+        new asn1js.GeneralizedTime({ name: names.generalTimeName || EMPTY_STRING })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -113,12 +116,16 @@ export class Time extends PkiObject implements ITime {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema, schema, Time.schema({
-      names: {
-        utcTimeName: UTC_TIME_NAME,
-        generalTimeName: GENERAL_TIME_NAME
-      }
-    }));
+    const asn1 = asn1js.compareSchema(
+      schema,
+      schema,
+      Time.schema({
+        names: {
+          utcTimeName: UTC_TIME_NAME,
+          generalTimeName: GENERAL_TIME_NAME
+        }
+      })
+    );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
@@ -148,5 +155,4 @@ export class Time extends PkiObject implements ITime {
       value: this.value
     };
   }
-
 }

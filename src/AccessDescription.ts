@@ -8,10 +8,7 @@ import * as Schema from "./Schema";
 
 const ACCESS_METHOD = "accessMethod";
 const ACCESS_LOCATION = "accessLocation";
-const CLEAR_PROPS = [
-  ACCESS_METHOD,
-  ACCESS_LOCATION,
-];
+const CLEAR_PROPS = [ACCESS_METHOD, ACCESS_LOCATION];
 
 export interface IAccessDescription {
   /**
@@ -45,7 +42,6 @@ export interface AccessDescriptionJson {
  * extension as non-critical.
  */
 export class AccessDescription extends PkiObject implements IAccessDescription {
-
   public static override CLASS_NAME = "AccessDescription";
 
   public accessMethod!: string;
@@ -58,8 +54,16 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
   constructor(parameters: AccessDescriptionParameters = {}) {
     super();
 
-    this.accessMethod = pvutils.getParametersValue(parameters, ACCESS_METHOD, AccessDescription.defaultValues(ACCESS_METHOD));
-    this.accessLocation = pvutils.getParametersValue(parameters, ACCESS_LOCATION, AccessDescription.defaultValues(ACCESS_LOCATION));
+    this.accessMethod = pvutils.getParametersValue(
+      parameters,
+      ACCESS_METHOD,
+      AccessDescription.defaultValues(ACCESS_METHOD)
+    );
+    this.accessLocation = pvutils.getParametersValue(
+      parameters,
+      ACCESS_LOCATION,
+      AccessDescription.defaultValues(ACCESS_LOCATION)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -93,16 +97,25 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
    *    accessLocation        GeneralName  }
    *```
    */
-  static override schema(parameters: Schema.SchemaParameters<{ accessMethod?: string; accessLocation?: GeneralNameSchema; }> = {}) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  static override schema(
+    parameters: Schema.SchemaParameters<{
+      accessMethod?: string;
+      accessLocation?: GeneralNameSchema;
+    }> = {}
+  ) {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.accessMethod || EMPTY_STRING) }),
+        new asn1js.ObjectIdentifier({ name: names.accessMethod || EMPTY_STRING }),
         GeneralName.schema(names.accessLocation || {})
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -110,7 +123,8 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       AccessDescription.schema({
         names: {
@@ -132,12 +146,12 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: [
         new asn1js.ObjectIdentifier({ value: this.accessMethod }),
         this.accessLocation.toSchema()
       ]
-    }));
+    });
     //#endregion
   }
 
@@ -147,5 +161,4 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
       accessLocation: this.accessLocation.toJSON()
     };
   }
-
 }

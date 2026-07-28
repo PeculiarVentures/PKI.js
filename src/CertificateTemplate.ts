@@ -8,11 +8,7 @@ import * as Schema from "./Schema";
 const TEMPLATE_ID = "templateID";
 const TEMPLATE_MAJOR_VERSION = "templateMajorVersion";
 const TEMPLATE_MINOR_VERSION = "templateMinorVersion";
-const CLEAR_PROPS = [
-  TEMPLATE_ID,
-  TEMPLATE_MAJOR_VERSION,
-  TEMPLATE_MINOR_VERSION
-];
+const CLEAR_PROPS = [TEMPLATE_ID, TEMPLATE_MAJOR_VERSION, TEMPLATE_MINOR_VERSION];
 
 export interface ICertificateTemplate {
   templateID: string;
@@ -32,7 +28,6 @@ export type CertificateTemplateParameters = PkiObjectParameters & Partial<ICerti
  * Class from "[MS-WCCE]: Windows Client Certificate Enrollment Protocol"
  */
 export class CertificateTemplate extends PkiObject implements ICertificateTemplate {
-
   public templateID!: string;
   public templateMajorVersion?: number;
   public templateMinorVersion?: number;
@@ -44,12 +39,24 @@ export class CertificateTemplate extends PkiObject implements ICertificateTempla
   constructor(parameters: CertificateTemplateParameters = {}) {
     super();
 
-    this.templateID = pvutils.getParametersValue(parameters, TEMPLATE_ID, CertificateTemplate.defaultValues(TEMPLATE_ID));
+    this.templateID = pvutils.getParametersValue(
+      parameters,
+      TEMPLATE_ID,
+      CertificateTemplate.defaultValues(TEMPLATE_ID)
+    );
     if (TEMPLATE_MAJOR_VERSION in parameters) {
-      this.templateMajorVersion = pvutils.getParametersValue(parameters, TEMPLATE_MAJOR_VERSION, CertificateTemplate.defaultValues(TEMPLATE_MAJOR_VERSION));
+      this.templateMajorVersion = pvutils.getParametersValue(
+        parameters,
+        TEMPLATE_MAJOR_VERSION,
+        CertificateTemplate.defaultValues(TEMPLATE_MAJOR_VERSION)
+      );
     }
     if (TEMPLATE_MINOR_VERSION in parameters) {
-      this.templateMinorVersion = pvutils.getParametersValue(parameters, TEMPLATE_MINOR_VERSION, CertificateTemplate.defaultValues(TEMPLATE_MINOR_VERSION));
+      this.templateMinorVersion = pvutils.getParametersValue(
+        parameters,
+        TEMPLATE_MINOR_VERSION,
+        CertificateTemplate.defaultValues(TEMPLATE_MINOR_VERSION)
+      );
     }
 
     if (parameters.schema) {
@@ -88,27 +95,33 @@ export class CertificateTemplate extends PkiObject implements ICertificateTempla
    * }
    *```
    */
-  static override schema(parameters: Schema.SchemaParameters<{
-    templateID?: string,
-    templateMajorVersion?: string,
-    templateMinorVersion?: string,
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  static override schema(
+    parameters: Schema.SchemaParameters<{
+      templateID?: string;
+      templateMajorVersion?: string;
+      templateMinorVersion?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.templateID || EMPTY_STRING) }),
+        new asn1js.ObjectIdentifier({ name: names.templateID || EMPTY_STRING }),
         new asn1js.Integer({
-          name: (names.templateMajorVersion || EMPTY_STRING),
+          name: names.templateMajorVersion || EMPTY_STRING,
           optional: true
         }),
         new asn1js.Integer({
-          name: (names.templateMinorVersion || EMPTY_STRING),
+          name: names.templateMinorVersion || EMPTY_STRING,
           optional: true
-        }),
+        })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -116,7 +129,8 @@ export class CertificateTemplate extends PkiObject implements ICertificateTempla
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       CertificateTemplate.schema({
         names: {
@@ -150,9 +164,9 @@ export class CertificateTemplate extends PkiObject implements ICertificateTempla
     }
 
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
   }
 
   public toJSON(): CertificateTemplateJson {
@@ -160,13 +174,10 @@ export class CertificateTemplate extends PkiObject implements ICertificateTempla
       templateID: this.templateID
     };
 
-    if (TEMPLATE_MAJOR_VERSION in this)
-      res.templateMajorVersion = this.templateMajorVersion;
+    if (TEMPLATE_MAJOR_VERSION in this) res.templateMajorVersion = this.templateMajorVersion;
 
-    if (TEMPLATE_MINOR_VERSION in this)
-      res.templateMinorVersion = this.templateMinorVersion;
+    if (TEMPLATE_MINOR_VERSION in this) res.templateMinorVersion = this.templateMinorVersion;
 
     return res;
   }
-
 }

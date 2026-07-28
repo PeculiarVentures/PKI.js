@@ -13,7 +13,10 @@ export interface CreateTSPResponseResult extends utils.CertificateWithPrivateKey
  * @param signAlg Signing algorithm
  * @returns
  */
-export async function createTSPResp(hashAlgorithm: string, signAlg: string): Promise<CreateTSPResponseResult> {
+export async function createTSPResp(
+  hashAlgorithm: string,
+  signAlg: string
+): Promise<CreateTSPResponseResult> {
   const crypto = pkijs.getCrypto(true);
 
   const certWithKey = await utils.createSelfSignedCertificate(hashAlgorithm, signAlg);
@@ -24,7 +27,7 @@ export async function createTSPResp(hashAlgorithm: string, signAlg: string): Pro
   //#region Create specific TST info structure to sign
   const hashedBuffer = new ArrayBuffer(4);
   const hashedView = new Uint8Array(hashedBuffer);
-  hashedView[0] = 0x7F;
+  hashedView[0] = 0x7f;
   hashedView[1] = 0x02;
   hashedView[2] = 0x03;
   hashedView[3] = 0x04;
@@ -33,7 +36,9 @@ export async function createTSPResp(hashAlgorithm: string, signAlg: string): Pro
     version: 1,
     policy: "1.1.1",
     messageImprint: new pkijs.MessageImprint({
-      hashAlgorithm: new pkijs.AlgorithmIdentifier({ algorithmId: pkijs.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm") }),
+      hashAlgorithm: new pkijs.AlgorithmIdentifier({
+        algorithmId: pkijs.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm")
+      }),
       hashedMessage: new asn1js.OctetString({ valueHex: hashedMessage })
     }),
     serialNumber: new asn1js.Integer({ valueHex: hashedBuffer }),
@@ -91,7 +96,7 @@ export async function createTSPResp(hashAlgorithm: string, signAlg: string): Pro
   return {
     ...certWithKey,
     trustedCertificates: [certWithKey.certificate],
-    tspResponse,
+    tspResponse
   };
 }
 /**
@@ -101,5 +106,9 @@ export async function createTSPResp(hashAlgorithm: string, signAlg: string): Pro
  */
 export async function verifyTSPResp(params: CreateTSPResponseResult): Promise<boolean> {
   // Verify TSP response
-  return params.tspResponse.verify({ signer: 0, trustedCerts: params.trustedCertificates, data: testData.buffer });
+  return params.tspResponse.verify({
+    signer: 0,
+    trustedCerts: params.trustedCertificates,
+    data: testData.buffer
+  });
 }

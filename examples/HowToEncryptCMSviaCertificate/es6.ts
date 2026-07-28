@@ -45,15 +45,18 @@ async function createCertificate() {
  */
 async function envelopedEncrypt() {
   certificateBuffer = utils.fromPEM(common.getElement("cert", "textarea").value);
-  valueBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("encrypted_content", "textarea").value);
+  valueBuffer = pvtsutils.Convert.FromUtf8String(
+    common.getElement("encrypted_content", "textarea").value
+  );
 
   cmsEnvelopedBuffer = await example.envelopedEncrypt(
     certificateBuffer,
     {
       ...encAlg,
-      oaepHashAlg,
+      oaepHashAlg
     },
-    valueBuffer);
+    valueBuffer
+  );
 
   common.getElement("encrypted_content").innerHTML = utils.toPEM(cmsEnvelopedBuffer, "CMS");
 
@@ -68,7 +71,11 @@ async function envelopedDecrypt() {
   privateKeyBuffer = utils.fromPEM(common.getElement("pkcs8_key", "textarea").value);
   cmsEnvelopedBuffer = utils.fromPEM(common.getElement("encrypted_content", "textarea").value);
 
-  const result = await example.envelopedDecrypt(certificateBuffer, privateKeyBuffer, cmsEnvelopedBuffer);
+  const result = await example.envelopedDecrypt(
+    certificateBuffer,
+    privateKeyBuffer,
+    cmsEnvelopedBuffer
+  );
   common.getElement("decrypted_content").innerHTML = pvtsutils.Convert.ToUtf8String(result);
 }
 

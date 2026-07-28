@@ -20,10 +20,16 @@ import { ECNamedCurves } from "../ECNamedCurves";
 /**
  * Making MAC key using algorithm described in B.2 of PKCS#12 standard.
  */
-async function makePKCS12B2Key(hashAlgorithm: string, keyLength: number, password: ArrayBuffer, salt: ArrayBuffer, iterationCount: number) {
-  let u: number;  // Output length of the hash function
-  let v: number;  // Block size of the hash function
-  let md: (input: Uint8Array) => Uint8Array;  // Hash function
+async function makePKCS12B2Key(
+  hashAlgorithm: string,
+  keyLength: number,
+  password: ArrayBuffer,
+  salt: ArrayBuffer,
+  iterationCount: number
+) {
+  let u: number; // Output length of the hash function
+  let v: number; // Block size of the hash function
+  let md: (input: Uint8Array) => Uint8Array; // Hash function
 
   // Determine the hash algorithm parameters
   switch (hashAlgorithm.toUpperCase()) {
@@ -72,10 +78,14 @@ async function makePKCS12B2Key(hashAlgorithm: string, keyLength: number, passwor
 
   // Repeat the salt to fill the block size
   const saltView = new Uint8Array(salt);
-  const S = new Uint8Array(v * Math.ceil(saltView.length / v)).map((_, i) => saltView[i % saltView.length]);
+  const S = new Uint8Array(v * Math.ceil(saltView.length / v)).map(
+    (_, i) => saltView[i % saltView.length]
+  );
 
   // Repeat the password to fill the block size
-  const P = new Uint8Array(v * Math.ceil(passwordTransformed.length / v)).map((_, i) => passwordTransformed[i % passwordTransformed.length]);
+  const P = new Uint8Array(v * Math.ceil(passwordTransformed.length / v)).map(
+    (_, i) => passwordTransformed[i % passwordTransformed.length]
+  );
 
   // Concatenate S and P to form I
   let I = new Uint8Array(S.length + P.length);
@@ -129,10 +139,10 @@ async function makePKCS12B2Key(hashAlgorithm: string, keyLength: number, passwor
   return new Uint8Array(result.slice(0, keyLength >> 3)).buffer;
 }
 
-function prepareAlgorithm(data: globalThis.AlgorithmIdentifier | EcdsaParams): Algorithm & { hash?: Algorithm; } {
-  const res = typeof data === "string"
-    ? { name: data }
-    : data;
+function prepareAlgorithm(
+  data: globalThis.AlgorithmIdentifier | EcdsaParams
+): Algorithm & { hash?: Algorithm } {
+  const res = typeof data === "string" ? { name: data } : data;
 
   // TODO fix type casting `as EcdsaParams`
   if ("hash" in (res as EcdsaParams)) {
@@ -149,8 +159,13 @@ function prepareAlgorithm(data: globalThis.AlgorithmIdentifier | EcdsaParams): A
  * Default cryptographic engine for Web Cryptography API
  */
 export class CryptoEngine extends AbstractCryptoEngine {
-
-  public override async importKey(format: KeyFormat, keyData: BufferSource | JsonWebKey, algorithm: globalThis.AlgorithmIdentifier, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey> {
+  public override async importKey(
+    format: KeyFormat,
+    keyData: BufferSource | JsonWebKey,
+    algorithm: globalThis.AlgorithmIdentifier,
+    extractable: boolean,
+    keyUsages: KeyUsage[]
+  ): Promise<CryptoKey> {
     //#region Initial variables
     let jwk: JsonWebKey = {};
     //#endregion
@@ -159,10 +174,18 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
     switch (format.toLowerCase()) {
       case "raw":
-        return this.subtle.importKey("raw", keyData as BufferSource, algorithm, extractable, keyUsages);
+        return this.subtle.importKey(
+          "raw",
+          keyData as BufferSource,
+          algorithm,
+          extractable,
+          keyUsages
+        );
       case "spki":
         {
-          const asn1 = asn1js.fromBER(pvtsutils.BufferSourceConverter.toArrayBuffer(keyData as BufferSource));
+          const asn1 = asn1js.fromBER(
+            pvtsutils.BufferSourceConverter.toArrayBuffer(keyData as BufferSource)
+          );
           AsnError.assert(asn1, "keyData");
 
           const publicKeyInfo = new PublicKeyInfo();
@@ -181,12 +204,22 @@ export class CryptoEngine extends AbstractCryptoEngine {
                 jwk.ext = extractable;
                 jwk.key_ops = keyUsages;
 
-                if (!["1.2.840.113549.1.1.1", "1.2.840.113549.1.1.10"].includes(publicKeyInfo.algorithm.algorithmId))
-                  throw new Error(`Incorrect public key algorithm: ${publicKeyInfo.algorithm.algorithmId}`);
+                if (
+                  !["1.2.840.113549.1.1.1", "1.2.840.113549.1.1.10"].includes(
+                    publicKeyInfo.algorithm.algorithmId
+                  )
+                )
+                  throw new Error(
+                    `Incorrect public key algorithm: ${publicKeyInfo.algorithm.algorithmId}`
+                  );
 
                 //#region Get information about used hash function
                 if (!alg.hash) {
-                  throw new ParameterError("hash", "algorithm.hash", "Incorrect hash algorithm: Hash algorithm is missed");
+                  throw new ParameterError(
+                    "hash",
+                    "algorithm.hash",
+                    "Incorrect hash algorithm: Hash algorithm is missed"
+                  );
                 }
                 switch (alg.hash.name.toUpperCase()) {
                   case "SHA-1":
@@ -221,11 +254,17 @@ export class CryptoEngine extends AbstractCryptoEngine {
                 jwk.key_ops = keyUsages;
 
                 if (publicKeyInfo.algorithm.algorithmId !== "1.2.840.113549.1.1.1")
-                  throw new Error(`Incorrect public key algorithm: ${publicKeyInfo.algorithm.algorithmId}`);
+                  throw new Error(
+                    `Incorrect public key algorithm: ${publicKeyInfo.algorithm.algorithmId}`
+                  );
 
                 //#region Get information about used hash function
                 if (!alg.hash) {
-                  throw new ParameterError("hash", "algorithm.hash", "Incorrect hash algorithm: Hash algorithm is missed");
+                  throw new ParameterError(
+                    "hash",
+                    "algorithm.hash",
+                    "Incorrect hash algorithm: Hash algorithm is missed"
+                  );
                 }
                 switch (alg.hash.name.toUpperCase()) {
                   case "SHA-1":
@@ -254,7 +293,6 @@ export class CryptoEngine extends AbstractCryptoEngine {
             case "ECDSA":
               keyUsages = ["verify"]; // Override existing keyUsages value since the key is a public key
             // break omitted
-            // eslint-disable-next-line no-fallthrough
             case "ECDH":
               {
                 //#region Initial variables
@@ -267,7 +305,9 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
                 //#region Get information about algorithm
                 if (publicKeyInfo.algorithm.algorithmId !== "1.2.840.10045.2.1") {
-                  throw new Error(`Incorrect public key algorithm: ${publicKeyInfo.algorithm.algorithmId}`);
+                  throw new Error(
+                    `Incorrect public key algorithm: ${publicKeyInfo.algorithm.algorithmId}`
+                  );
                 }
                 //#endregion
 
@@ -283,11 +323,14 @@ export class CryptoEngine extends AbstractCryptoEngine {
                 jwk.ext = extractable;
                 jwk.key_ops = keyUsages;
 
-                if (this.name.toLowerCase() === "safari")
-                  jwk.alg = "RSA-OAEP";
+                if (this.name.toLowerCase() === "safari") jwk.alg = "RSA-OAEP";
                 else {
                   if (!alg.hash) {
-                    throw new ParameterError("hash", "algorithm.hash", "Incorrect hash algorithm: Hash algorithm is missed");
+                    throw new ParameterError(
+                      "hash",
+                      "algorithm.hash",
+                      "Incorrect hash algorithm: Hash algorithm is missed"
+                    );
                   }
                   switch (alg.hash.name.toUpperCase()) {
                     case "SHA-1":
@@ -334,44 +377,42 @@ export class CryptoEngine extends AbstractCryptoEngine {
           const privateKeyInfo = new PrivateKeyInfo();
 
           //#region Parse "PrivateKeyInfo" object
-          const asn1 = asn1js.fromBER(pvtsutils.BufferSourceConverter.toArrayBuffer(keyData as BufferSource));
+          const asn1 = asn1js.fromBER(
+            pvtsutils.BufferSourceConverter.toArrayBuffer(keyData as BufferSource)
+          );
           AsnError.assert(asn1, "keyData");
 
           try {
             privateKeyInfo.fromSchema(asn1.result);
-          }
-          catch {
+          } catch {
             throw new Error("Incorrect keyData");
           }
 
-          if (!privateKeyInfo.parsedKey)
-            throw new Error("Incorrect keyData");
+          if (!privateKeyInfo.parsedKey) throw new Error("Incorrect keyData");
           //#endregion
 
           switch (alg.name.toUpperCase()) {
-            case "RSA-PSS":
-              {
-                //#region Get information about used hash function
-                switch (alg.hash?.name.toUpperCase()) {
-                  case "SHA-1":
-                    jwk.alg = "PS1";
-                    break;
-                  case "SHA-256":
-                    jwk.alg = "PS256";
-                    break;
-                  case "SHA-384":
-                    jwk.alg = "PS384";
-                    break;
-                  case "SHA-512":
-                    jwk.alg = "PS512";
-                    break;
-                  default:
-                    throw new Error(`Incorrect hash algorithm: ${alg.hash?.name.toUpperCase()}`);
-                }
-                //#endregion
+            case "RSA-PSS": {
+              //#region Get information about used hash function
+              switch (alg.hash?.name.toUpperCase()) {
+                case "SHA-1":
+                  jwk.alg = "PS1";
+                  break;
+                case "SHA-256":
+                  jwk.alg = "PS256";
+                  break;
+                case "SHA-384":
+                  jwk.alg = "PS384";
+                  break;
+                case "SHA-512":
+                  jwk.alg = "PS512";
+                  break;
+                default:
+                  throw new Error(`Incorrect hash algorithm: ${alg.hash?.name.toUpperCase()}`);
               }
+              //#endregion
+            }
             // break omitted
-            // eslint-disable-next-line no-fallthrough
             case "RSASSA-PKCS1-V1_5":
               {
                 keyUsages = ["sign"]; // Override existing keyUsages value since the key is a private key
@@ -382,11 +423,13 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
                 //#region Get information about used hash function
                 if (privateKeyInfo.privateKeyAlgorithm.algorithmId !== "1.2.840.113549.1.1.1")
-                  throw new Error(`Incorrect private key algorithm: ${privateKeyInfo.privateKeyAlgorithm.algorithmId}`);
+                  throw new Error(
+                    `Incorrect private key algorithm: ${privateKeyInfo.privateKeyAlgorithm.algorithmId}`
+                  );
                 //#endregion
 
                 //#region Get information about used hash function
-                if (("alg" in jwk) === false) {
+                if ("alg" in jwk === false) {
                   switch (alg.hash?.name.toUpperCase()) {
                     case "SHA-1":
                       jwk.alg = "RS1";
@@ -415,7 +458,6 @@ export class CryptoEngine extends AbstractCryptoEngine {
             case "ECDSA":
               keyUsages = ["sign"]; // Override existing keyUsages value since the key is a private key
             // break omitted
-            // eslint-disable-next-line no-fallthrough
             case "ECDH":
               {
                 //#region Initial variables
@@ -428,7 +470,9 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
                 //#region Get information about used hash function
                 if (privateKeyInfo.privateKeyAlgorithm.algorithmId !== "1.2.840.10045.2.1")
-                  throw new Error(`Incorrect algorithm: ${privateKeyInfo.privateKeyAlgorithm.algorithmId}`);
+                  throw new Error(
+                    `Incorrect algorithm: ${privateKeyInfo.privateKeyAlgorithm.algorithmId}`
+                  );
                 //#endregion
 
                 //#region Create ECDSA Private Key elements
@@ -444,8 +488,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
                 jwk.key_ops = keyUsages;
 
                 //#region Get information about used hash function
-                if (this.name.toLowerCase() === "safari")
-                  jwk.alg = "RSA-OAEP";
+                if (this.name.toLowerCase() === "safari") jwk.alg = "RSA-OAEP";
                 else {
                   switch (alg.hash?.name.toUpperCase()) {
                     case "SHA-1":
@@ -503,7 +546,13 @@ export class CryptoEngine extends AbstractCryptoEngine {
     if (this.name.toLowerCase() === "safari") {
       // Try to use both ways - import using ArrayBuffer and pure JWK (for Safari Technology Preview)
       try {
-        return this.subtle.importKey("jwk", pvutils.stringToArrayBuffer(JSON.stringify(jwk)) as any, algorithm, extractable, keyUsages);
+        return this.subtle.importKey(
+          "jwk",
+          pvutils.stringToArrayBuffer(JSON.stringify(jwk)) as any,
+          algorithm,
+          extractable,
+          keyUsages
+        );
       } catch {
         return this.subtle.importKey("jwk", jwk, algorithm, extractable, keyUsages);
       }
@@ -519,9 +568,15 @@ export class CryptoEngine extends AbstractCryptoEngine {
    * @param key
    */
   public override exportKey(format: "jwk", key: CryptoKey): Promise<JsonWebKey>;
-  public override exportKey(format: Exclude<KeyFormat, "jwk">, key: CryptoKey): Promise<ArrayBuffer>;
+  public override exportKey(
+    format: Exclude<KeyFormat, "jwk">,
+    key: CryptoKey
+  ): Promise<ArrayBuffer>;
   public override exportKey(format: string, key: CryptoKey): Promise<ArrayBuffer | JsonWebKey>;
-  public override async exportKey(format: KeyFormat, key: CryptoKey): Promise<ArrayBuffer | JsonWebKey> {
+  public override async exportKey(
+    format: KeyFormat,
+    key: CryptoKey
+  ): Promise<ArrayBuffer | JsonWebKey> {
     let jwk = await this.subtle.exportKey("jwk", key);
 
     //#region Currently Safari returns ArrayBuffer as JWK thus we need an additional transformation
@@ -541,8 +596,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
         try {
           publicKeyInfo.fromJSON(jwk);
-        }
-        catch {
+        } catch {
           throw new Error("Incorrect key data");
         }
 
@@ -553,8 +607,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
         try {
           privateKeyInfo.fromJSON(jwk);
-        }
-        catch {
+        } catch {
           throw new Error("Incorrect key data");
         }
 
@@ -576,7 +629,14 @@ export class CryptoEngine extends AbstractCryptoEngine {
    * @param  extractable
    * @param  keyUsages
    */
-  public async convert(inputFormat: KeyFormat, outputFormat: KeyFormat, keyData: ArrayBuffer | JsonWebKey, algorithm: Algorithm, extractable: boolean, keyUsages: KeyUsage[]) {
+  public async convert(
+    inputFormat: KeyFormat,
+    outputFormat: KeyFormat,
+    keyData: ArrayBuffer | JsonWebKey,
+    algorithm: Algorithm,
+    extractable: boolean,
+    keyUsages: KeyUsage[]
+  ) {
     if (inputFormat.toLowerCase() === outputFormat.toLowerCase()) {
       return keyData;
     }
@@ -592,7 +652,11 @@ export class CryptoEngine extends AbstractCryptoEngine {
    * @param target name of the target
    * @returns Returns WebCrypto algorithm or an empty object
    */
-  public getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety?: boolean, target?: string): T | object;
+  public getAlgorithmByOID<T extends Algorithm = Algorithm>(
+    oid: string,
+    safety?: boolean,
+    target?: string
+  ): T | object;
   /**
    * Gets WebCrypto algorithm by wel-known OID
    * @param oid algorithm identifier
@@ -601,7 +665,11 @@ export class CryptoEngine extends AbstractCryptoEngine {
    * @returns Returns WebCrypto algorithm
    * @throws Throws {@link Error} exception if unknown algorithm identifier
    */
-  public getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety: true, target?: string): T;
+  public getAlgorithmByOID<T extends Algorithm = Algorithm>(
+    oid: string,
+    safety: true,
+    target?: string
+  ): T;
   public getAlgorithmByOID(oid: string, safety = false, target?: string): any {
     switch (oid) {
       case "1.2.840.113549.1.1.1":
@@ -823,7 +891,9 @@ export class CryptoEngine extends AbstractCryptoEngine {
     }
 
     if (safety) {
-      throw new Error(`Unsupported algorithm identifier ${target ? `for ${target} ` : EMPTY_STRING}: ${oid}`);
+      throw new Error(
+        `Unsupported algorithm identifier ${target ? `for ${target} ` : EMPTY_STRING}: ${oid}`
+      );
     }
 
     return {};
@@ -877,8 +947,9 @@ export class CryptoEngine extends AbstractCryptoEngine {
         }
         break;
       case "ECDH":
-        switch ((algorithm as any).kdf.toUpperCase()) // Non-standard addition - hash algorithm of KDF function
-        {
+        switch (
+          (algorithm as any).kdf.toUpperCase() // Non-standard addition - hash algorithm of KDF function
+        ) {
           case "SHA-1":
             result = "1.3.133.16.840.63.0.2"; // dhSinglePass-stdDH-sha1kdf-scheme
             break;
@@ -1008,13 +1079,18 @@ export class CryptoEngine extends AbstractCryptoEngine {
     }
 
     if (!result && safety) {
-      throw new Error(`Unsupported algorithm ${target ? `for ${target} ` : EMPTY_STRING}: ${algorithm.name}`);
+      throw new Error(
+        `Unsupported algorithm ${target ? `for ${target} ` : EMPTY_STRING}: ${algorithm.name}`
+      );
     }
 
     return result;
   }
 
-  public getAlgorithmParameters(algorithmName: string, operation: type.CryptoEngineAlgorithmOperation): type.CryptoEngineAlgorithmParams {
+  public getAlgorithmParameters(
+    algorithmName: string,
+    operation: type.CryptoEngineAlgorithmOperation
+  ): type.CryptoEngineAlgorithmParams {
     let result: type.CryptoEngineAlgorithmParams = {
       algorithm: {},
       usages: []
@@ -1466,15 +1542,11 @@ export class CryptoEngine extends AbstractCryptoEngine {
               const algorithm = this.getAlgorithmByOID(params.hashAlgorithm.algorithmId);
               if ("name" in algorithm) {
                 result = algorithm.name;
-              }
-              else {
+              } else {
                 return EMPTY_STRING;
               }
-            }
-            else
-              result = "SHA-1";
-          }
-          catch {
+            } else result = "SHA-1";
+          } catch {
             // nothing
           }
         }
@@ -1485,23 +1557,44 @@ export class CryptoEngine extends AbstractCryptoEngine {
     return result;
   }
 
-  public async encryptEncryptedContentInfo(parameters: type.CryptoEngineEncryptParams): Promise<EncryptedContentInfo> {
+  public async encryptEncryptedContentInfo(
+    parameters: type.CryptoEngineEncryptParams
+  ): Promise<EncryptedContentInfo> {
     //#region Check for input parameters
-    ParameterError.assert(parameters,
-      "password", "contentEncryptionAlgorithm", "hmacHashAlgorithm",
-      "iterationCount", "contentToEncrypt", "contentToEncrypt", "contentType");
+    ParameterError.assert(
+      parameters,
+      "password",
+      "contentEncryptionAlgorithm",
+      "hmacHashAlgorithm",
+      "iterationCount",
+      "contentToEncrypt",
+      "contentToEncrypt",
+      "contentType"
+    );
 
-    const contentEncryptionOID = this.getOIDByAlgorithm(parameters.contentEncryptionAlgorithm, true, "contentEncryptionAlgorithm");
+    const contentEncryptionOID = this.getOIDByAlgorithm(
+      parameters.contentEncryptionAlgorithm,
+      true,
+      "contentEncryptionAlgorithm"
+    );
 
-    const pbkdf2OID = this.getOIDByAlgorithm({
-      name: "PBKDF2"
-    }, true, "PBKDF2");
-    const hmacOID = this.getOIDByAlgorithm({
-      name: "HMAC",
-      hash: {
-        name: parameters.hmacHashAlgorithm
-      }
-    } as Algorithm, true, "hmacHashAlgorithm");
+    const pbkdf2OID = this.getOIDByAlgorithm(
+      {
+        name: "PBKDF2"
+      },
+      true,
+      "PBKDF2"
+    );
+    const hmacOID = this.getOIDByAlgorithm(
+      {
+        name: "HMAC",
+        hash: {
+          name: parameters.hmacHashAlgorithm
+        }
+      } as Algorithm,
+      true,
+      "hmacHashAlgorithm"
+    );
     //#endregion
 
     //#region Initial variables
@@ -1530,27 +1623,25 @@ export class CryptoEngine extends AbstractCryptoEngine {
     //#region Derive PBKDF2 key from "password" buffer
     const passwordView = new Uint8Array(parameters.password);
 
-    const pbkdfKey = await this.importKey("raw",
-      passwordView,
-      "PBKDF2",
-      false,
-      ["deriveKey"]);
+    const pbkdfKey = await this.importKey("raw", passwordView, "PBKDF2", false, ["deriveKey"]);
 
     //#endregion
 
     //#region Derive key for "contentEncryptionAlgorithm"
-    const derivedKey = await this.deriveKey({
-      name: "PBKDF2",
-      hash: {
-        name: parameters.hmacHashAlgorithm
+    const derivedKey = await this.deriveKey(
+      {
+        name: "PBKDF2",
+        hash: {
+          name: parameters.hmacHashAlgorithm
+        },
+        salt: saltView,
+        iterations: parameters.iterationCount
       },
-      salt: saltView,
-      iterations: parameters.iterationCount
-    },
       pbkdfKey,
       parameters.contentEncryptionAlgorithm,
       false,
-      ["encrypt"]);
+      ["encrypt"]
+    );
     //#endregion
 
     //#region Encrypt content
@@ -1561,7 +1652,8 @@ export class CryptoEngine extends AbstractCryptoEngine {
         iv: ivView
       },
       derivedKey,
-      contentView);
+      contentView
+    );
     //#endregion
 
     //#region Store all parameters in EncryptedData object
@@ -1591,34 +1683,47 @@ export class CryptoEngine extends AbstractCryptoEngine {
    * Decrypt data stored in "EncryptedContentInfo" object using parameters
    * @param parameters
    */
-  public async decryptEncryptedContentInfo(parameters: type.CryptoEngineDecryptParams): Promise<ArrayBuffer> {
+  public async decryptEncryptedContentInfo(
+    parameters: type.CryptoEngineDecryptParams
+  ): Promise<ArrayBuffer> {
     //#region Check for input parameters
     ParameterError.assert(parameters, "password", "encryptedContentInfo");
 
-    if (parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId !== "1.2.840.113549.1.5.13") // pkcs5PBES2
-      throw new Error(`Unknown "contentEncryptionAlgorithm": ${parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
+    if (
+      parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId !==
+      "1.2.840.113549.1.5.13"
+    )
+      // pkcs5PBES2
+      throw new Error(
+        `Unknown "contentEncryptionAlgorithm": ${parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`
+      );
     //#endregion
 
     //#region Initial variables
     let pbes2Parameters: PBES2Params;
 
     try {
-      pbes2Parameters = new PBES2Params({ schema: parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams });
-    }
-    catch {
-      throw new Error("Incorrectly encoded \"pbes2Parameters\"");
+      pbes2Parameters = new PBES2Params({
+        schema: parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams
+      });
+    } catch {
+      throw new Error('Incorrectly encoded "pbes2Parameters"');
     }
 
     let pbkdf2Params;
 
     try {
-      pbkdf2Params = new PBKDF2Params({ schema: pbes2Parameters.keyDerivationFunc.algorithmParams });
-    }
-    catch {
-      throw new Error("Incorrectly encoded \"pbkdf2Params\"");
+      pbkdf2Params = new PBKDF2Params({
+        schema: pbes2Parameters.keyDerivationFunc.algorithmParams
+      });
+    } catch {
+      throw new Error('Incorrectly encoded "pbkdf2Params"');
     }
 
-    const contentEncryptionAlgorithm = this.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithmId, true);
+    const contentEncryptionAlgorithm = this.getAlgorithmByOID(
+      pbes2Parameters.encryptionScheme.algorithmId,
+      true
+    );
 
     const ivBuffer = pbes2Parameters.encryptionScheme.algorithmParams.valueBlock.valueHex;
     const ivView = new Uint8Array(ivBuffer);
@@ -1637,11 +1742,9 @@ export class CryptoEngine extends AbstractCryptoEngine {
     //#endregion
 
     //#region Derive PBKDF2 key from "password" buffer
-    const pbkdfKey = await this.importKey("raw",
-      parameters.password,
-      "PBKDF2",
-      false,
-      ["deriveKey"]);
+    const pbkdfKey = await this.importKey("raw", parameters.password, "PBKDF2", false, [
+      "deriveKey"
+    ]);
     //#endregion
 
     //#region Derive key for "contentEncryptionAlgorithm"
@@ -1657,7 +1760,8 @@ export class CryptoEngine extends AbstractCryptoEngine {
       pbkdfKey,
       contentEncryptionAlgorithm as any,
       false,
-      ["decrypt"]);
+      ["decrypt"]
+    );
     //#endregion
 
     //#region Decrypt internal content using derived key
@@ -1665,21 +1769,32 @@ export class CryptoEngine extends AbstractCryptoEngine {
     const dataBuffer = parameters.encryptedContentInfo.getEncryptedContent();
     //#endregion
 
-    return this.decrypt({
-      name: contentEncryptionAlgorithm.name,
-      iv: ivView
-    },
+    return this.decrypt(
+      {
+        name: contentEncryptionAlgorithm.name,
+        iv: ivView
+      },
       result,
-      dataBuffer);
+      dataBuffer
+    );
     //#endregion
   }
 
-  public async stampDataWithPassword(parameters: type.CryptoEngineStampDataWithPasswordParams): Promise<ArrayBuffer> {
+  public async stampDataWithPassword(
+    parameters: type.CryptoEngineStampDataWithPasswordParams
+  ): Promise<ArrayBuffer> {
     //#region Check for input parameters
-    if ((parameters instanceof Object) === false)
-      throw new Error("Parameters must have type \"Object\"");
+    if (parameters instanceof Object === false)
+      throw new Error('Parameters must have type "Object"');
 
-    ParameterError.assert(parameters, "password", "hashAlgorithm", "iterationCount", "salt", "contentToStamp");
+    ParameterError.assert(
+      parameters,
+      "password",
+      "hashAlgorithm",
+      "iterationCount",
+      "salt",
+      "contentToStamp"
+    );
     //#endregion
 
     //#region Choose correct length for HMAC key
@@ -1699,7 +1814,9 @@ export class CryptoEngine extends AbstractCryptoEngine {
         length = 512;
         break;
       default:
-        throw new Error(`Incorrect "parameters.hashAlgorithm" parameter: ${parameters.hashAlgorithm}`);
+        throw new Error(
+          `Incorrect "parameters.hashAlgorithm" parameter: ${parameters.hashAlgorithm}`
+        );
     }
     //#endregion
 
@@ -1714,16 +1831,20 @@ export class CryptoEngine extends AbstractCryptoEngine {
     //#endregion
 
     //#region Create PKCS#12 key for integrity checking
-    const pkcsKey = await makePKCS12B2Key(parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount);
+    const pkcsKey = await makePKCS12B2Key(
+      parameters.hashAlgorithm,
+      length,
+      parameters.password,
+      parameters.salt,
+      parameters.iterationCount
+    );
     //#endregion
 
     //#region Import HMAC key
 
-    const hmacKey = await this.importKey("raw",
-      new Uint8Array(pkcsKey),
-      hmacAlgorithm,
-      false,
-      ["sign"]);
+    const hmacKey = await this.importKey("raw", new Uint8Array(pkcsKey), hmacAlgorithm, false, [
+      "sign"
+    ]);
     //#endregion
 
     //#region Make signed HMAC value
@@ -1731,11 +1852,19 @@ export class CryptoEngine extends AbstractCryptoEngine {
     //#endregion
   }
 
-  public async verifyDataStampedWithPassword(parameters: type.CryptoEngineVerifyDataStampedWithPasswordParams): Promise<boolean> {
+  public async verifyDataStampedWithPassword(
+    parameters: type.CryptoEngineVerifyDataStampedWithPasswordParams
+  ): Promise<boolean> {
     //#region Check for input parameters
-    ParameterError.assert(parameters,
-      "password", "hashAlgorithm", "salt",
-      "iterationCount", "contentToVerify", "signatureToVerify");
+    ParameterError.assert(
+      parameters,
+      "password",
+      "hashAlgorithm",
+      "salt",
+      "iterationCount",
+      "contentToVerify",
+      "signatureToVerify"
+    );
     //#endregion
 
     //#region Choose correct length for HMAC key
@@ -1755,7 +1884,9 @@ export class CryptoEngine extends AbstractCryptoEngine {
         length = 512;
         break;
       default:
-        throw new Error(`Incorrect "parameters.hashAlgorithm" parameter: ${parameters.hashAlgorithm}`);
+        throw new Error(
+          `Incorrect "parameters.hashAlgorithm" parameter: ${parameters.hashAlgorithm}`
+        );
     }
     //#endregion
 
@@ -1770,23 +1901,35 @@ export class CryptoEngine extends AbstractCryptoEngine {
     //#endregion
 
     //#region Create PKCS#12 key for integrity checking
-    const pkcsKey = await makePKCS12B2Key(parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount);
+    const pkcsKey = await makePKCS12B2Key(
+      parameters.hashAlgorithm,
+      length,
+      parameters.password,
+      parameters.salt,
+      parameters.iterationCount
+    );
     //#endregion
 
     //#region Import HMAC key
-    const hmacKey = await this.importKey("raw",
-      new Uint8Array(pkcsKey),
-      hmacAlgorithm,
-      false,
-      ["verify"]);
+    const hmacKey = await this.importKey("raw", new Uint8Array(pkcsKey), hmacAlgorithm, false, [
+      "verify"
+    ]);
     //#endregion
 
     //#region Make signed HMAC value
-    return this.verify(hmacAlgorithm, hmacKey, new Uint8Array(parameters.signatureToVerify), new Uint8Array(parameters.contentToVerify));
+    return this.verify(
+      hmacAlgorithm,
+      hmacKey,
+      new Uint8Array(parameters.signatureToVerify),
+      new Uint8Array(parameters.contentToVerify)
+    );
     //#endregion
   }
 
-  public async getSignatureParameters(privateKey: CryptoKey, hashAlgorithm = "SHA-1"): Promise<type.CryptoEngineSignatureParams> {
+  public async getSignatureParameters(
+    privateKey: CryptoKey,
+    hashAlgorithm = "SHA-1"
+  ): Promise<type.CryptoEngineSignatureParams> {
     // Check hashing algorithm
     this.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm");
 
@@ -1800,7 +1943,11 @@ export class CryptoEngine extends AbstractCryptoEngine {
     }
     // Use the hash from the privateKey.algorithm.hash.name for keys with hash algorithms (like RSA)
     const algorithm = parameters.algorithm as any; // TODO remove `as any`
-    if ("hash" in privateKey.algorithm && privateKey.algorithm.hash && (privateKey.algorithm.hash as Algorithm).name) {
+    if (
+      "hash" in privateKey.algorithm &&
+      privateKey.algorithm.hash &&
+      (privateKey.algorithm.hash as Algorithm).name
+    ) {
       algorithm.hash.name = (privateKey.algorithm.hash as Algorithm).name;
     } else {
       algorithm.hash.name = hashAlgorithm;
@@ -1834,7 +1981,11 @@ export class CryptoEngine extends AbstractCryptoEngine {
           const paramsObject: Partial<IRSASSAPSSParams> = {};
 
           if (algorithm.hash.name.toUpperCase() !== "SHA-1") {
-            const hashAlgorithmOID = this.getOIDByAlgorithm({ name: algorithm.hash.name }, true, "hashAlgorithm");
+            const hashAlgorithmOID = this.getOIDByAlgorithm(
+              { name: algorithm.hash.name },
+              true,
+              "hashAlgorithm"
+            );
 
             paramsObject.hashAlgorithm = new AlgorithmIdentifier({
               algorithmId: hashAlgorithmOID,
@@ -1847,8 +1998,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
             });
           }
 
-          if (algorithm.saltLength !== 20)
-            paramsObject.saltLength = algorithm.saltLength;
+          if (algorithm.saltLength !== 20) paramsObject.saltLength = algorithm.saltLength;
 
           const pssParameters = new RSASSAPSSParams(paramsObject);
           //#endregion
@@ -1870,10 +2020,12 @@ export class CryptoEngine extends AbstractCryptoEngine {
     };
   }
 
-  public async signWithPrivateKey(data: BufferSource, privateKey: CryptoKey, parameters: type.CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer> {
-    const signature = await this.sign(parameters.algorithm,
-      privateKey,
-      data);
+  public async signWithPrivateKey(
+    data: BufferSource,
+    privateKey: CryptoKey,
+    parameters: type.CryptoEngineSignWithPrivateKeyParams
+  ): Promise<ArrayBuffer> {
+    const signature = await this.sign(parameters.algorithm, privateKey, data);
 
     //#region Special case for ECDSA algorithm
     if (parameters.algorithm.name === "ECDSA") {
@@ -1884,7 +2036,10 @@ export class CryptoEngine extends AbstractCryptoEngine {
     return signature;
   }
 
-  public fillPublicKeyParameters(publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier): type.CryptoEnginePublicKeyParams {
+  public fillPublicKeyParameters(
+    publicKeyInfo: PublicKeyInfo,
+    signatureAlgorithm: AlgorithmIdentifier
+  ): type.CryptoEnginePublicKeyParams {
     const parameters = {} as any;
 
     //#region Find signer's hashing algorithm
@@ -1897,8 +2052,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     let algorithmId: string;
     if (signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
       algorithmId = signatureAlgorithm.algorithmId;
-    else
-      algorithmId = publicKeyInfo.algorithm.algorithmId;
+    else algorithmId = publicKeyInfo.algorithm.algorithmId;
 
     const algorithmObject = this.getAlgorithmByOID(algorithmId, true);
 
@@ -1915,12 +2069,20 @@ export class CryptoEngine extends AbstractCryptoEngine {
       }
       const publicKeyAlgorithmParams = publicKeyAlgorithm.algorithmParams;
       if ("idBlock" in publicKeyAlgorithm.algorithmParams) {
-        if (!((publicKeyAlgorithmParams.idBlock.tagClass === 1) && (publicKeyAlgorithmParams.idBlock.tagNumber === 6))) {
+        if (
+          !(
+            publicKeyAlgorithmParams.idBlock.tagClass === 1 &&
+            publicKeyAlgorithmParams.idBlock.tagNumber === 6
+          )
+        ) {
           throw new Error("Incorrect type for ECDSA public key parameters");
         }
       }
 
-      const curveObject = this.getAlgorithmByOID(publicKeyAlgorithmParams.valueBlock.toString(), true);
+      const curveObject = this.getAlgorithmByOID(
+        publicKeyAlgorithmParams.valueBlock.toString(),
+        true
+      );
       //#endregion
 
       parameters.algorithm.algorithm.namedCurve = curveObject.name;
@@ -1931,14 +2093,19 @@ export class CryptoEngine extends AbstractCryptoEngine {
     return parameters;
   }
 
-  public async getPublicKey(publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, parameters?: type.CryptoEnginePublicKeyParams): Promise<CryptoKey> {
+  public async getPublicKey(
+    publicKeyInfo: PublicKeyInfo,
+    signatureAlgorithm: AlgorithmIdentifier,
+    parameters?: type.CryptoEnginePublicKeyParams
+  ): Promise<CryptoKey> {
     if (!parameters) {
       parameters = this.fillPublicKeyParameters(publicKeyInfo, signatureAlgorithm);
     }
 
     const publicKeyInfoBuffer = publicKeyInfo.toSchema().toBER(false);
 
-    return this.importKey("spki",
+    return this.importKey(
+      "spki",
       publicKeyInfoBuffer,
       parameters.algorithm.algorithm as Algorithm,
       true,
@@ -1946,7 +2113,13 @@ export class CryptoEngine extends AbstractCryptoEngine {
     );
   }
 
-  public async verifyWithPublicKey(data: BufferSource, signature: asn1js.BitString | asn1js.OctetString, publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, shaAlgorithm?: string): Promise<boolean> {
+  public async verifyWithPublicKey(
+    data: BufferSource,
+    signature: asn1js.BitString | asn1js.OctetString,
+    publicKeyInfo: PublicKeyInfo,
+    signatureAlgorithm: AlgorithmIdentifier,
+    shaAlgorithm?: string
+  ): Promise<boolean> {
     //#region Find signer's hashing algorithm
     let publicKey: CryptoKey;
     if (!shaAlgorithm) {
@@ -1964,8 +2137,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
       let algorithmId;
       if (signatureAlgorithm.algorithmId === "1.2.840.113549.1.1.10")
         algorithmId = signatureAlgorithm.algorithmId;
-      else
-        algorithmId = publicKeyInfo.algorithm.algorithmId;
+      else algorithmId = publicKeyInfo.algorithm.algorithmId;
 
       const algorithmObject = this.getAlgorithmByOID(algorithmId, true);
 
@@ -1978,9 +2150,12 @@ export class CryptoEngine extends AbstractCryptoEngine {
         //#region Get information about named curve
         let algorithmParamsChecked = false;
 
-        if (("algorithmParams" in publicKeyInfo.algorithm) === true) {
+        if ("algorithmParams" in publicKeyInfo.algorithm === true) {
           if ("idBlock" in publicKeyInfo.algorithm.algorithmParams) {
-            if ((publicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1) && (publicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6))
+            if (
+              publicKeyInfo.algorithm.algorithmParams.idBlock.tagClass === 1 &&
+              publicKeyInfo.algorithm.algorithmParams.idBlock.tagNumber === 6
+            )
               algorithmParamsChecked = true;
           }
         }
@@ -1989,7 +2164,10 @@ export class CryptoEngine extends AbstractCryptoEngine {
           throw new Error("Incorrect type for ECDSA public key parameters");
         }
 
-        const curveObject = this.getAlgorithmByOID(publicKeyInfo.algorithm.algorithmParams.valueBlock.toString(), true);
+        const curveObject = this.getAlgorithmByOID(
+          publicKeyInfo.algorithm.algorithmParams.valueBlock.toString(),
+          true
+        );
         //#endregion
 
         (parameters.algorithm.algorithm as any).namedCurve = curveObject.name;
@@ -2007,8 +2185,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     //#region Verify signature
     //#region Get default algorithm parameters for verification
     const algorithm = this.getAlgorithmParameters(publicKey.algorithm.name, "verify");
-    if ("hash" in algorithm.algorithm)
-      (algorithm.algorithm as any).hash.name = shaAlgorithm;
+    if ("hash" in algorithm.algorithm) (algorithm.algorithm as any).hash.name = shaAlgorithm;
     //#endregion
 
     //#region Special case for ECDSA signatures
@@ -2031,8 +2208,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
 
       if ("saltLength" in pssParameters)
         (algorithm.algorithm as any).saltLength = pssParameters.saltLength;
-      else
-        (algorithm.algorithm as any).saltLength = 20;
+      else (algorithm.algorithm as any).saltLength = 20;
 
       let hashAlgo = "SHA-1";
 
@@ -2046,12 +2222,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     }
     //#endregion
 
-    return this.verify((algorithm.algorithm as any),
-      publicKey,
-      signatureValue as BufferSource,
-      data,
-    );
+    return this.verify(algorithm.algorithm as any, publicKey, signatureValue as BufferSource, data);
     //#endregion
   }
-
 }

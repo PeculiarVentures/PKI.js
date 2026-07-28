@@ -1,6 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import {
+  AlgorithmIdentifier,
+  AlgorithmIdentifierJson,
+  AlgorithmIdentifierSchema
+} from "../AlgorithmIdentifier";
 import { EMPTY_STRING } from "../constants";
 import { AsnError } from "../errors";
 import { PkiObject, PkiObjectParameters } from "../PkiObject";
@@ -10,12 +14,7 @@ const DIGESTED_OBJECT_TYPE = "digestedObjectType";
 const OTHER_OBJECT_TYPE_ID = "otherObjectTypeID";
 const DIGEST_ALGORITHM = "digestAlgorithm";
 const OBJECT_DIGEST = "objectDigest";
-const CLEAR_PROPS = [
-  DIGESTED_OBJECT_TYPE,
-  OTHER_OBJECT_TYPE_ID,
-  DIGEST_ALGORITHM,
-  OBJECT_DIGEST,
-];
+const CLEAR_PROPS = [DIGESTED_OBJECT_TYPE, OTHER_OBJECT_TYPE_ID, DIGEST_ALGORITHM, OBJECT_DIGEST];
 
 export interface IObjectDigestInfo {
   digestedObjectType: asn1js.Enumerated;
@@ -37,7 +36,6 @@ export interface ObjectDigestInfoJson {
  * Represents the ObjectDigestInfo structure described in [RFC5755](https://datatracker.ietf.org/doc/html/rfc5755)
  */
 export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
-
   public static override CLASS_NAME = "ObjectDigestInfo";
 
   public digestedObjectType!: asn1js.Enumerated;
@@ -52,12 +50,28 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
   constructor(parameters: ObjectDigestInfoParameters = {}) {
     super();
 
-    this.digestedObjectType = pvutils.getParametersValue(parameters, DIGESTED_OBJECT_TYPE, ObjectDigestInfo.defaultValues(DIGESTED_OBJECT_TYPE));
+    this.digestedObjectType = pvutils.getParametersValue(
+      parameters,
+      DIGESTED_OBJECT_TYPE,
+      ObjectDigestInfo.defaultValues(DIGESTED_OBJECT_TYPE)
+    );
     if (OTHER_OBJECT_TYPE_ID in parameters) {
-      this.otherObjectTypeID = pvutils.getParametersValue(parameters, OTHER_OBJECT_TYPE_ID, ObjectDigestInfo.defaultValues(OTHER_OBJECT_TYPE_ID));
+      this.otherObjectTypeID = pvutils.getParametersValue(
+        parameters,
+        OTHER_OBJECT_TYPE_ID,
+        ObjectDigestInfo.defaultValues(OTHER_OBJECT_TYPE_ID)
+      );
     }
-    this.digestAlgorithm = pvutils.getParametersValue(parameters, DIGEST_ALGORITHM, ObjectDigestInfo.defaultValues(DIGEST_ALGORITHM));
-    this.objectDigest = pvutils.getParametersValue(parameters, OBJECT_DIGEST, ObjectDigestInfo.defaultValues(OBJECT_DIGEST));
+    this.digestAlgorithm = pvutils.getParametersValue(
+      parameters,
+      DIGEST_ALGORITHM,
+      ObjectDigestInfo.defaultValues(DIGEST_ALGORITHM)
+    );
+    this.objectDigest = pvutils.getParametersValue(
+      parameters,
+      OBJECT_DIGEST,
+      ObjectDigestInfo.defaultValues(OBJECT_DIGEST)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -70,7 +84,9 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
    * @returns Default value
    */
   public static override defaultValues(memberName: typeof DIGESTED_OBJECT_TYPE): asn1js.Enumerated;
-  public static override defaultValues(memberName: typeof OTHER_OBJECT_TYPE_ID): asn1js.ObjectIdentifier;
+  public static override defaultValues(
+    memberName: typeof OTHER_OBJECT_TYPE_ID
+  ): asn1js.ObjectIdentifier;
   public static override defaultValues(memberName: typeof DIGEST_ALGORITHM): AlgorithmIdentifier;
   public static override defaultValues(memberName: typeof OBJECT_DIGEST): asn1js.BitString;
   public static override defaultValues(memberName: string): any {
@@ -105,26 +121,32 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
    * }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    digestedObjectType?: string;
-    otherObjectTypeID?: string;
-    digestAlgorithm?: AlgorithmIdentifierSchema;
-    objectDigest?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      digestedObjectType?: string;
+      otherObjectTypeID?: string;
+      digestAlgorithm?: AlgorithmIdentifierSchema;
+      objectDigest?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.Enumerated({ name: (names.digestedObjectType || EMPTY_STRING) }),
+        new asn1js.Enumerated({ name: names.digestedObjectType || EMPTY_STRING }),
         new asn1js.ObjectIdentifier({
           optional: true,
-          name: (names.otherObjectTypeID || EMPTY_STRING)
+          name: names.otherObjectTypeID || EMPTY_STRING
         }),
         AlgorithmIdentifier.schema(names.digestAlgorithm || {}),
-        new asn1js.BitString({ name: (names.objectDigest || EMPTY_STRING) }),
+        new asn1js.BitString({ name: names.objectDigest || EMPTY_STRING })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -132,7 +154,8 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       ObjectDigestInfo.schema({
         names: {
@@ -180,7 +203,7 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
     const result: ObjectDigestInfoJson = {
       digestedObjectType: this.digestedObjectType.toJSON(),
       digestAlgorithm: this.digestAlgorithm.toJSON(),
-      objectDigest: this.objectDigest.toJSON(),
+      objectDigest: this.objectDigest.toJSON()
     };
 
     if (this.otherObjectTypeID) {
@@ -189,5 +212,4 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
 
     return result;
   }
-
 }

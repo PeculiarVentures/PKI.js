@@ -23,11 +23,7 @@ const VERSION = "version";
 const AUTH_SAFE = "authSafe";
 const MAC_DATA = "macData";
 const PARSED_VALUE = "parsedValue";
-const CLERA_PROPS = [
-  VERSION,
-  AUTH_SAFE,
-  MAC_DATA
-];
+const CLERA_PROPS = [VERSION, AUTH_SAFE, MAC_DATA];
 
 export interface IPFX {
   version: number;
@@ -50,26 +46,23 @@ export interface PFXParsedValue {
 }
 
 export type MakeInternalValuesParams =
-  object
-  |
-  {
-    iterations: number;
-    pbkdf2HashAlgorithm: Algorithm;
-    hmacHashAlgorithm: string;
-    password: ArrayBuffer;
-  }
-  |
-  {
-    signingCertificate: Certificate;
-    privateKey: CryptoKey;
-    hashAlgorithm: string;
-  };
+  | object
+  | {
+      iterations: number;
+      pbkdf2HashAlgorithm: Algorithm;
+      hmacHashAlgorithm: string;
+      password: ArrayBuffer;
+    }
+  | {
+      signingCertificate: Certificate;
+      privateKey: CryptoKey;
+      hashAlgorithm: string;
+    };
 
 /**
  * Represents the PFX structure described in [RFC7292](https://datatracker.ietf.org/doc/html/rfc7292)
  */
 export class PFX extends PkiObject implements IPFX {
-
   public static override CLASS_NAME = "PFX";
 
   public version!: number;
@@ -90,7 +83,11 @@ export class PFX extends PkiObject implements IPFX {
       this.macData = pvutils.getParametersValue(parameters, MAC_DATA, PFX.defaultValues(MAC_DATA));
     }
     if (PARSED_VALUE in parameters) {
-      this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, PFX.defaultValues(PARSED_VALUE));
+      this.parsedValue = pvutils.getParametersValue(
+        parameters,
+        PARSED_VALUE,
+        PFX.defaultValues(PARSED_VALUE)
+      );
     }
 
     if (parameters.schema) {
@@ -112,9 +109,9 @@ export class PFX extends PkiObject implements IPFX {
       case VERSION:
         return 3;
       case AUTH_SAFE:
-        return (new ContentInfo());
+        return new ContentInfo();
       case MAC_DATA:
-        return (new MacData());
+        return new MacData();
       case PARSED_VALUE:
         return {};
       default:
@@ -130,16 +127,20 @@ export class PFX extends PkiObject implements IPFX {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case VERSION:
-        return (memberValue === PFX.defaultValues(memberName));
+        return memberValue === PFX.defaultValues(memberName);
       case AUTH_SAFE:
-        return ((ContentInfo.compareWithDefault("contentType", memberValue.contentType)) &&
-          (ContentInfo.compareWithDefault("content", memberValue.content)));
+        return (
+          ContentInfo.compareWithDefault("contentType", memberValue.contentType) &&
+          ContentInfo.compareWithDefault("content", memberValue.content)
+        );
       case MAC_DATA:
-        return ((MacData.compareWithDefault("mac", memberValue.mac)) &&
-          (MacData.compareWithDefault("macSalt", memberValue.macSalt)) &&
-          (MacData.compareWithDefault("iterations", memberValue.iterations)));
+        return (
+          MacData.compareWithDefault("mac", memberValue.mac) &&
+          MacData.compareWithDefault("macSalt", memberValue.macSalt) &&
+          MacData.compareWithDefault("iterations", memberValue.iterations)
+        );
       case PARSED_VALUE:
-        return ((memberValue instanceof Object) && (Object.keys(memberValue).length === 0));
+        return memberValue instanceof Object && Object.keys(memberValue).length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -156,30 +157,40 @@ export class PFX extends PkiObject implements IPFX {
    * }
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    version?: string;
-    authSafe?: ContentInfoSchema;
-    macData?: MacDataSchema;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      version?: string;
+      authSafe?: ContentInfoSchema;
+      macData?: MacDataSchema;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.Integer({ name: (names.version || VERSION) }),
-        ContentInfo.schema(names.authSafe || {
-          names: {
-            blockName: AUTH_SAFE
+        new asn1js.Integer({ name: names.version || VERSION }),
+        ContentInfo.schema(
+          names.authSafe || {
+            names: {
+              blockName: AUTH_SAFE
+            }
           }
-        }),
-        MacData.schema(names.macData || {
-          names: {
-            blockName: MAC_DATA,
-            optional: true
+        ),
+        MacData.schema(
+          names.macData || {
+            names: {
+              blockName: MAC_DATA,
+              optional: true
+            }
           }
-        })
+        )
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -187,7 +198,8 @@ export class PFX extends PkiObject implements IPFX {
     pvutils.clearProps(schema, CLERA_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       PFX.schema({
         names: {
@@ -210,24 +222,20 @@ export class PFX extends PkiObject implements IPFX {
     // Get internal properties from parsed schema
     this.version = asn1.result.version.valueBlock.valueDec;
     this.authSafe = new ContentInfo({ schema: asn1.result.authSafe });
-    if (MAC_DATA in asn1.result)
-      this.macData = new MacData({ schema: asn1.result.macData });
+    if (MAC_DATA in asn1.result) this.macData = new MacData({ schema: asn1.result.macData });
   }
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
-    const outputArray = [
-      new asn1js.Integer({ value: this.version }),
-      this.authSafe.toSchema()
-    ];
+    const outputArray = [new asn1js.Integer({ value: this.version }), this.authSafe.toSchema()];
 
     if (this.macData) {
       outputArray.push(this.macData.toSchema());
     }
 
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
     //#endregion
   }
 
@@ -249,14 +257,23 @@ export class PFX extends PkiObject implements IPFX {
    * @param parameters Parameters, specific to each "integrity mode"
    * @param crypto Crypto engine
    */
-  public async makeInternalValues(parameters: MakeInternalValuesParams = {}, crypto = common.getCrypto(true)) {
+  public async makeInternalValues(
+    parameters: MakeInternalValuesParams = {},
+    crypto = common.getCrypto(true)
+  ) {
     //#region Check mandatory parameter
     ArgumentError.assert(parameters, "parameters", "object");
     if (!this.parsedValue) {
-      throw new Error("Please call \"parseValues\" function first in order to make \"parsedValue\" data");
+      throw new Error(
+        'Please call "parseValues" function first in order to make "parsedValue" data'
+      );
     }
     ParameterError.assertEmpty(this.parsedValue.integrityMode, "integrityMode", "parsedValue");
-    ParameterError.assertEmpty(this.parsedValue.authenticatedSafe, "authenticatedSafe", "parsedValue");
+    ParameterError.assertEmpty(
+      this.parsedValue.authenticatedSafe,
+      "authenticatedSafe",
+      "parsedValue"
+    );
     //#endregion
 
     //#region Makes values for each particular integrity mode
@@ -265,8 +282,7 @@ export class PFX extends PkiObject implements IPFX {
       case 0:
         {
           //#region Check additional mandatory parameters
-          if (!("iterations" in parameters))
-            throw new ParameterError("iterations");
+          if (!("iterations" in parameters)) throw new ParameterError("iterations");
           ParameterError.assertEmpty(parameters.pbkdf2HashAlgorithm, "pbkdf2HashAlgorithm");
           ParameterError.assertEmpty(parameters.hmacHashAlgorithm, "hmacHashAlgorithm");
           ParameterError.assertEmpty(parameters.password, "password");
@@ -300,7 +316,11 @@ export class PFX extends PkiObject implements IPFX {
           this.macData = new MacData({
             mac: new DigestInfo({
               digestAlgorithm: new AlgorithmIdentifier({
-                algorithmId: crypto.getOIDByAlgorithm({ name: parameters.hmacHashAlgorithm }, true, "hmacHashAlgorithm"),
+                algorithmId: crypto.getOIDByAlgorithm(
+                  { name: parameters.hmacHashAlgorithm },
+                  true,
+                  "hmacHashAlgorithm"
+                )
               }),
               digest: new asn1js.OctetString({ valueHex: result })
             }),
@@ -344,7 +364,10 @@ export class PFX extends PkiObject implements IPFX {
 
           //#region Making additional attributes for CMS Signed Data
           //#region Create a message digest
-          const result = await crypto.digest({ name: parameters.hashAlgorithm }, new Uint8Array(toBeSigned));
+          const result = await crypto.digest(
+            { name: parameters.hashAlgorithm },
+            new Uint8Array(toBeSigned)
+          );
           //#endregion
 
           //#region Combine all signed extensions
@@ -353,48 +376,56 @@ export class PFX extends PkiObject implements IPFX {
           //#endregion
 
           //#region contentType
-          signedAttr.push(new Attribute({
-            type: "1.2.840.113549.1.9.3",
-            values: [
-              new asn1js.ObjectIdentifier({ value: "1.2.840.113549.1.7.1" })
-            ]
-          }));
+          signedAttr.push(
+            new Attribute({
+              type: "1.2.840.113549.1.9.3",
+              values: [new asn1js.ObjectIdentifier({ value: "1.2.840.113549.1.7.1" })]
+            })
+          );
           //#endregion
           //#region signingTime
-          signedAttr.push(new Attribute({
-            type: "1.2.840.113549.1.9.5",
-            values: [
-              new asn1js.UTCTime({ valueDate: new Date() })
-            ]
-          }));
+          signedAttr.push(
+            new Attribute({
+              type: "1.2.840.113549.1.9.5",
+              values: [new asn1js.UTCTime({ valueDate: new Date() })]
+            })
+          );
           //#endregion
           //#region messageDigest
-          signedAttr.push(new Attribute({
-            type: "1.2.840.113549.1.9.4",
-            values: [
-              new asn1js.OctetString({ valueHex: result })
-            ]
-          }));
+          signedAttr.push(
+            new Attribute({
+              type: "1.2.840.113549.1.9.4",
+              values: [new asn1js.OctetString({ valueHex: result })]
+            })
+          );
           //#endregion
 
           //#region Making final value for "SignerInfo" type
-          cmsSigned.signerInfos.push(new SignerInfo({
-            version: 1,
-            sid: new IssuerAndSerialNumber({
-              issuer: parameters.signingCertificate.issuer,
-              serialNumber: parameters.signingCertificate.serialNumber
-            }),
-            signedAttrs: new SignedAndUnsignedAttributes({
-              type: 0,
-              attributes: signedAttr
+          cmsSigned.signerInfos.push(
+            new SignerInfo({
+              version: 1,
+              sid: new IssuerAndSerialNumber({
+                issuer: parameters.signingCertificate.issuer,
+                serialNumber: parameters.signingCertificate.serialNumber
+              }),
+              signedAttrs: new SignedAndUnsignedAttributes({
+                type: 0,
+                attributes: signedAttr
+              })
             })
-          }));
+          );
           //#endregion
           //#endregion
           //#endregion
 
           //#region Signing CMS Signed Data
-          await cmsSigned.sign(parameters.privateKey, 0, parameters.hashAlgorithm, undefined, crypto);
+          await cmsSigned.sign(
+            parameters.privateKey,
+            0,
+            parameters.hashAlgorithm,
+            undefined,
+            crypto
+          );
           //#endregion
 
           //#region Making final CMS_CONTENT_INFO type
@@ -408,16 +439,21 @@ export class PFX extends PkiObject implements IPFX {
       //#endregion
       //#region default
       default:
-        throw new Error(`Parameter "integrityMode" has unknown value: ${this.parsedValue.integrityMode}`);
+        throw new Error(
+          `Parameter "integrityMode" has unknown value: ${this.parsedValue.integrityMode}`
+        );
       //#endregion
     }
     //#endregion
   }
 
-  public async parseInternalValues(parameters: {
-    checkIntegrity?: boolean;
-    password?: ArrayBuffer;
-  }, crypto = common.getCrypto(true)) {
+  public async parseInternalValues(
+    parameters: {
+      checkIntegrity?: boolean;
+      password?: ArrayBuffer;
+    },
+    crypto = common.getCrypto(true)
+  ) {
     //#region Check input data from "parameters"
     ArgumentError.assert(parameters, "parameters", "object");
 
@@ -457,22 +493,30 @@ export class PFX extends PkiObject implements IPFX {
           if (parameters.checkIntegrity) {
             //#region Check that MAC_DATA exists
             if (!this.macData) {
-              throw new Error("Absent \"macData\" value, can not check PKCS#12 data integrity");
+              throw new Error('Absent "macData" value, can not check PKCS#12 data integrity');
             }
             //#endregion
 
             //#region Initial variables
-            const hashAlgorithm = crypto.getAlgorithmByOID(this.macData.mac.digestAlgorithm.algorithmId, true, "digestAlgorithm");
+            const hashAlgorithm = crypto.getAlgorithmByOID(
+              this.macData.mac.digestAlgorithm.algorithmId,
+              true,
+              "digestAlgorithm"
+            );
             //#endregion
 
             //#region Call current crypto engine for verifying HMAC-based data stamp
             const result = await crypto.verifyDataStampedWithPassword({
               password: parameters.password,
               hashAlgorithm: hashAlgorithm.name,
-              salt: BufferSourceConverter.toArrayBuffer(this.macData.macSalt.valueBlock.valueHexView),
+              salt: BufferSourceConverter.toArrayBuffer(
+                this.macData.macSalt.valueBlock.valueHexView
+              ),
               iterationCount: this.macData.iterations || 1,
               contentToVerify: authSafeContent,
-              signatureToVerify: BufferSourceConverter.toArrayBuffer(this.macData.mac.digest.valueBlock.valueHexView),
+              signatureToVerify: BufferSourceConverter.toArrayBuffer(
+                this.macData.mac.digest.valueBlock.valueHexView
+              )
             });
             //#endregion
 
@@ -522,10 +566,11 @@ export class PFX extends PkiObject implements IPFX {
       //#endregion
       //#region default
       default:
-        throw new Error(`Incorrect value for "this.authSafe.contentType": ${this.authSafe.contentType}`);
+        throw new Error(
+          `Incorrect value for "this.authSafe.contentType": ${this.authSafe.contentType}`
+        );
       //#endregion
     }
     //#endregion
   }
-
 }

@@ -33,7 +33,11 @@ describe("CRL Complex Example", () => {
         const crlWithKey = await example.createCRL(hashAlg, signAlg);
         const crl = pkijs.CertificateRevocationList.fromBER(crlWithKey.crlBuffer);
 
-        assert.equal(crl.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);
+        assert.equal(
+          crl.signatureAlgorithm.algorithmId,
+          algorithmsMap.get(testName),
+          `Signature algorithm must be ${testName}`
+        );
 
         const result = await example.verifyCRL(crlWithKey.crlBuffer, crlWithKey.publicKeyBuffer);
         assert.equal(result, true, "CRL must be verified successfully");

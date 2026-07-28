@@ -7,10 +7,7 @@ import * as Schema from "./Schema";
 
 const RESPONSE_TYPE = "responseType";
 const RESPONSE = "response";
-const CLEAR_PROPS = [
-  RESPONSE_TYPE,
-  RESPONSE
-];
+const CLEAR_PROPS = [RESPONSE_TYPE, RESPONSE];
 
 export interface IResponseBytes {
   responseType: string;
@@ -33,7 +30,6 @@ export type ResponseBytesSchema = Schema.SchemaParameters<{
  * Class from RFC6960
  */
 export class ResponseBytes extends PkiObject implements IResponseBytes {
-
   public static override CLASS_NAME = "ResponseBytes";
 
   public responseType!: string;
@@ -46,8 +42,16 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
   constructor(parameters: ResponseBytesParameters = {}) {
     super();
 
-    this.responseType = pvutils.getParametersValue(parameters, RESPONSE_TYPE, ResponseBytes.defaultValues(RESPONSE_TYPE));
-    this.response = pvutils.getParametersValue(parameters, RESPONSE, ResponseBytes.defaultValues(RESPONSE));
+    this.responseType = pvutils.getParametersValue(
+      parameters,
+      RESPONSE_TYPE,
+      ResponseBytes.defaultValues(RESPONSE_TYPE)
+    );
+    this.response = pvutils.getParametersValue(
+      parameters,
+      RESPONSE,
+      ResponseBytes.defaultValues(RESPONSE)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -80,9 +84,9 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case RESPONSE_TYPE:
-        return (memberValue === EMPTY_STRING);
+        return memberValue === EMPTY_STRING;
       case RESPONSE:
-        return (memberValue.isEqual(ResponseBytes.defaultValues(memberName)));
+        return memberValue.isEqual(ResponseBytes.defaultValues(memberName));
       default:
         return super.defaultValues(memberName);
     }
@@ -98,15 +102,19 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
    *```
    */
   public static override schema(parameters: ResponseBytesSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.responseType || EMPTY_STRING) }),
-        new asn1js.OctetString({ name: (names.response || EMPTY_STRING) })
+        new asn1js.ObjectIdentifier({ name: names.responseType || EMPTY_STRING }),
+        new asn1js.OctetString({ name: names.response || EMPTY_STRING })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -114,7 +122,8 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       ResponseBytes.schema({
         names: {
@@ -132,19 +141,15 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: [
-        new asn1js.ObjectIdentifier({ value: this.responseType }),
-        this.response
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [new asn1js.ObjectIdentifier({ value: this.responseType }), this.response]
+    });
   }
 
   public toJSON(): ResponseBytesJson {
     return {
       responseType: this.responseType,
-      response: this.response.toJSON(),
+      response: this.response.toJSON()
     };
   }
-
 }

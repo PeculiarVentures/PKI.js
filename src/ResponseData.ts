@@ -1,7 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
-import { RelativeDistinguishedNames, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import {
+  RelativeDistinguishedNames,
+  RelativeDistinguishedNamesSchema
+} from "./RelativeDistinguishedNames";
 import { SingleResponse, SingleResponseJson, SingleResponseSchema } from "./SingleResponse";
 import { Extension, ExtensionJson } from "./Extension";
 import { Extensions, ExtensionsSchema } from "./Extensions";
@@ -65,7 +68,6 @@ export interface ResponseDataJson {
  * Represents an ResponseData described in [RFC6960](https://datatracker.ietf.org/doc/html/rfc6960)
  */
 export class ResponseData extends PkiObject implements IResponseData {
-
   public static override CLASS_NAME = "ResponseData";
 
   public version?: number;
@@ -95,15 +97,37 @@ export class ResponseData extends PkiObject implements IResponseData {
   constructor(parameters: ResponseDataParameters = {}) {
     super();
 
-    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, ResponseData.defaultValues(TBS)));
+    this.tbsView = new Uint8Array(
+      pvutils.getParametersValue(parameters, TBS, ResponseData.defaultValues(TBS))
+    );
     if (VERSION in parameters) {
-      this.version = pvutils.getParametersValue(parameters, VERSION, ResponseData.defaultValues(VERSION));
+      this.version = pvutils.getParametersValue(
+        parameters,
+        VERSION,
+        ResponseData.defaultValues(VERSION)
+      );
     }
-    this.responderID = pvutils.getParametersValue(parameters, RESPONDER_ID, ResponseData.defaultValues(RESPONDER_ID));
-    this.producedAt = pvutils.getParametersValue(parameters, PRODUCED_AT, ResponseData.defaultValues(PRODUCED_AT));
-    this.responses = pvutils.getParametersValue(parameters, RESPONSES, ResponseData.defaultValues(RESPONSES));
+    this.responderID = pvutils.getParametersValue(
+      parameters,
+      RESPONDER_ID,
+      ResponseData.defaultValues(RESPONDER_ID)
+    );
+    this.producedAt = pvutils.getParametersValue(
+      parameters,
+      PRODUCED_AT,
+      ResponseData.defaultValues(PRODUCED_AT)
+    );
+    this.responses = pvutils.getParametersValue(
+      parameters,
+      RESPONSES,
+      ResponseData.defaultValues(RESPONSES)
+    );
     if (RESPONSE_EXTENSIONS in parameters) {
-      this.responseExtensions = pvutils.getParametersValue(parameters, RESPONSE_EXTENSIONS, ResponseData.defaultValues(RESPONSE_EXTENSIONS));
+      this.responseExtensions = pvutils.getParametersValue(
+        parameters,
+        RESPONSE_EXTENSIONS,
+        ResponseData.defaultValues(RESPONSE_EXTENSIONS)
+      );
     }
 
     if (parameters.schema) {
@@ -149,14 +173,14 @@ export class ResponseData extends PkiObject implements IResponseData {
     switch (memberName) {
       // TODO version?
       case TBS:
-        return (memberValue.byteLength === 0);
+        return memberValue.byteLength === 0;
       case RESPONDER_ID:
-        return (Object.keys(memberValue).length === 0);
+        return Object.keys(memberValue).length === 0;
       case PRODUCED_AT:
-        return (memberValue === ResponseData.defaultValues(memberName));
+        return memberValue === ResponseData.defaultValues(memberName);
       case RESPONSES:
       case RESPONSE_EXTENSIONS:
-        return (memberValue.length === 0);
+        return memberValue.length === 0;
       default:
         return super.defaultValues(memberName);
     }
@@ -175,10 +199,14 @@ export class ResponseData extends PkiObject implements IResponseData {
    *```
    */
   public static override schema(parameters: ResponseDataSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || RESPONSE_DATA),
+    return new asn1js.Sequence({
+      name: names.blockName || RESPONSE_DATA,
       value: [
         new asn1js.Constructed({
           optional: true,
@@ -186,33 +214,39 @@ export class ResponseData extends PkiObject implements IResponseData {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 0 // [0]
           },
-          value: [new asn1js.Integer({ name: (names.version || RESPONSE_DATA_VERSION) })]
+          value: [new asn1js.Integer({ name: names.version || RESPONSE_DATA_VERSION })]
         }),
         new asn1js.Choice({
           value: [
             new asn1js.Constructed({
-              name: (names.responderID || RESPONSE_DATA_RESPONDER_ID),
+              name: names.responderID || RESPONSE_DATA_RESPONDER_ID,
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
                 tagNumber: 1 // [1]
               },
-              value: [RelativeDistinguishedNames.schema(names.ResponseDataByName || {
-                names: {
-                  blockName: "ResponseData.byName"
-                }
-              })]
+              value: [
+                RelativeDistinguishedNames.schema(
+                  names.ResponseDataByName || {
+                    names: {
+                      blockName: "ResponseData.byName"
+                    }
+                  }
+                )
+              ]
             }),
             new asn1js.Constructed({
-              name: (names.responderID || RESPONSE_DATA_RESPONDER_ID),
+              name: names.responderID || RESPONSE_DATA_RESPONDER_ID,
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
                 tagNumber: 2 // [2]
               },
-              value: [new asn1js.OctetString({ name: (names.ResponseDataByKey || "ResponseData.byKey") })]
+              value: [
+                new asn1js.OctetString({ name: names.ResponseDataByKey || "ResponseData.byKey" })
+              ]
             })
           ]
         }),
-        new asn1js.GeneralizedTime({ name: (names.producedAt || RESPONSE_DATA_PRODUCED_AT) }),
+        new asn1js.GeneralizedTime({ name: names.producedAt || RESPONSE_DATA_PRODUCED_AT }),
         new asn1js.Sequence({
           value: [
             new asn1js.Repeated({
@@ -227,14 +261,18 @@ export class ResponseData extends PkiObject implements IResponseData {
             tagClass: 3, // CONTEXT-SPECIFIC
             tagNumber: 1 // [1]
           },
-          value: [Extensions.schema(names.extensions || {
-            names: {
-              blockName: RESPONSE_DATA_RESPONSE_EXTENSIONS
-            }
-          })]
+          value: [
+            Extensions.schema(
+              names.extensions || {
+                names: {
+                  blockName: RESPONSE_DATA_RESPONSE_EXTENSIONS
+                }
+              }
+            )
+          ]
         }) // EXPLICIT SEQUENCE value
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -242,10 +280,7 @@ export class ResponseData extends PkiObject implements IResponseData {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     //#region Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
-      schema,
-      ResponseData.schema()
-    );
+    const asn1 = asn1js.compareSchema(schema, schema, ResponseData.schema());
 
     AsnError.assertSchema(asn1, this.className);
     //#endregion
@@ -257,15 +292,22 @@ export class ResponseData extends PkiObject implements IResponseData {
       this.version = asn1.result[RESPONSE_DATA_VERSION].valueBlock.valueDec;
 
     if (asn1.result[RESPONSE_DATA_RESPONDER_ID].idBlock.tagNumber === 1)
-      this.responderID = new RelativeDistinguishedNames({ schema: asn1.result[RESPONSE_DATA_RESPONDER_ID].valueBlock.value[0] });
-    else
-      this.responderID = asn1.result[RESPONSE_DATA_RESPONDER_ID].valueBlock.value[0]; // OCTET_STRING
+      this.responderID = new RelativeDistinguishedNames({
+        schema: asn1.result[RESPONSE_DATA_RESPONDER_ID].valueBlock.value[0]
+      });
+    else this.responderID = asn1.result[RESPONSE_DATA_RESPONDER_ID].valueBlock.value[0]; // OCTET_STRING
 
     this.producedAt = asn1.result[RESPONSE_DATA_PRODUCED_AT].toDate();
-    this.responses = Array.from(asn1.result[RESPONSE_DATA_RESPONSES], element => new SingleResponse({ schema: element }));
+    this.responses = Array.from(
+      asn1.result[RESPONSE_DATA_RESPONSES],
+      element => new SingleResponse({ schema: element })
+    );
 
     if (RESPONSE_DATA_RESPONSE_EXTENSIONS in asn1.result)
-      this.responseExtensions = Array.from(asn1.result[RESPONSE_DATA_RESPONSE_EXTENSIONS].valueBlock.value, element => new Extension({ schema: element }));
+      this.responseExtensions = Array.from(
+        asn1.result[RESPONSE_DATA_RESPONSE_EXTENSIONS].valueBlock.value,
+        element => new Extension({ schema: element })
+      );
     //#endregion
   }
 
@@ -274,7 +316,8 @@ export class ResponseData extends PkiObject implements IResponseData {
     let tbsSchema;
 
     if (encodeFlag === false) {
-      if (!this.tbsView.byteLength) {// No stored certificate TBS part
+      if (!this.tbsView.byteLength) {
+        // No stored certificate TBS part
         return ResponseData.schema();
       }
 
@@ -288,49 +331,61 @@ export class ResponseData extends PkiObject implements IResponseData {
       const outputArray = [];
 
       if (VERSION in this) {
-        outputArray.push(new asn1js.Constructed({
-          idBlock: {
-            tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
-          },
-          value: [new asn1js.Integer({ value: this.version })]
-        }));
+        outputArray.push(
+          new asn1js.Constructed({
+            idBlock: {
+              tagClass: 3, // CONTEXT-SPECIFIC
+              tagNumber: 0 // [0]
+            },
+            value: [new asn1js.Integer({ value: this.version })]
+          })
+        );
       }
 
       if (this.responderID instanceof RelativeDistinguishedNames) {
-        outputArray.push(new asn1js.Constructed({
-          idBlock: {
-            tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
-          },
-          value: [this.responderID.toSchema()]
-        }));
+        outputArray.push(
+          new asn1js.Constructed({
+            idBlock: {
+              tagClass: 3, // CONTEXT-SPECIFIC
+              tagNumber: 1 // [1]
+            },
+            value: [this.responderID.toSchema()]
+          })
+        );
       } else {
-        outputArray.push(new asn1js.Constructed({
-          idBlock: {
-            tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 2 // [2]
-          },
-          value: [this.responderID]
-        }));
+        outputArray.push(
+          new asn1js.Constructed({
+            idBlock: {
+              tagClass: 3, // CONTEXT-SPECIFIC
+              tagNumber: 2 // [2]
+            },
+            value: [this.responderID]
+          })
+        );
       }
 
       outputArray.push(new asn1js.GeneralizedTime({ valueDate: this.producedAt }));
 
-      outputArray.push(new asn1js.Sequence({
-        value: Array.from(this.responses, o => o.toSchema())
-      }));
+      outputArray.push(
+        new asn1js.Sequence({
+          value: Array.from(this.responses, o => o.toSchema())
+        })
+      );
 
       if (this.responseExtensions) {
-        outputArray.push(new asn1js.Constructed({
-          idBlock: {
-            tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
-          },
-          value: [new asn1js.Sequence({
-            value: Array.from(this.responseExtensions, o => o.toSchema())
-          })]
-        }));
+        outputArray.push(
+          new asn1js.Constructed({
+            idBlock: {
+              tagClass: 3, // CONTEXT-SPECIFIC
+              tagNumber: 1 // [1]
+            },
+            value: [
+              new asn1js.Sequence({
+                value: Array.from(this.responseExtensions, o => o.toSchema())
+              })
+            ]
+          })
+        );
       }
 
       tbsSchema = new asn1js.Sequence({
@@ -369,5 +424,4 @@ export class ResponseData extends PkiObject implements IResponseData {
 
     return res;
   }
-
 }

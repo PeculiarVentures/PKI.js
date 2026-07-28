@@ -20,7 +20,7 @@ async function createOCSPResp() {
   const resultString = [
     utils.toPEM(ocsp.certificate.toSchema().toBER(), "CERTIFICATE"),
     utils.toPEM(ocsp.pkcs8, "PRIVATE KEY"),
-    utils.toPEM(ocspResponseBuffer, "OCSP RESPONSE"),
+    utils.toPEM(ocspResponseBuffer, "OCSP RESPONSE")
   ];
 
   console.info("Certificate created successfully!");
@@ -46,16 +46,13 @@ function parseOCSPResp(source: ArrayBuffer) {
   common.getElement("ocsp-resp-rspid-simpl").style.display = "none";
 
   const respIDTable = common.getElement("ocsp-resp-respid-rdn", "table");
-  while (respIDTable.rows.length > 1)
-    respIDTable.deleteRow(respIDTable.rows.length - 1);
+  while (respIDTable.rows.length > 1) respIDTable.deleteRow(respIDTable.rows.length - 1);
 
   const extensionTable = common.getElement("ocsp-resp-extensions-table", "table");
-  while (extensionTable.rows.length > 1)
-    extensionTable.deleteRow(extensionTable.rows.length - 1);
+  while (extensionTable.rows.length > 1) extensionTable.deleteRow(extensionTable.rows.length - 1);
 
   const responsesTable = common.getElement("ocsp-resp-attr-table", "table");
-  while (extensionTable.rows.length > 1)
-    extensionTable.deleteRow(extensionTable.rows.length - 1);
+  while (extensionTable.rows.length > 1) extensionTable.deleteRow(extensionTable.rows.length - 1);
   //#endregion
 
   //#region Decode existing OCSP response
@@ -97,10 +94,10 @@ function parseOCSPResp(source: ArrayBuffer) {
 
   //#region Check that we do have "responseBytes"
   if (ocspRespSimpl.responseBytes) {
-    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHexView as BufferSource);
-  }
-  else
-    return; // Nothing else to display - only status information exists
+    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(
+      ocspRespSimpl.responseBytes.response.valueBlock.valueHexView as BufferSource
+    );
+  } else return; // Nothing else to display - only status information exists
   //#endregion
 
   //#region Put information about signature algorithm
@@ -153,7 +150,8 @@ function parseOCSPResp(source: ArrayBuffer) {
       if (typeof typeval === "undefined")
         typeval = ocspBasicResp.tbsResponseData.responderID.typesAndValues[i].type;
 
-      const subjval = ocspBasicResp.tbsResponseData.responderID.typesAndValues[i].value.valueBlock.value;
+      const subjval =
+        ocspBasicResp.tbsResponseData.responderID.typesAndValues[i].value.valueBlock.value;
 
       const row = respIDTable.insertRow(respIDTable.rows.length);
       const cell0 = row.insertCell(0);
@@ -163,13 +161,16 @@ function parseOCSPResp(source: ArrayBuffer) {
     }
 
     common.getElement("ocsp-resp-rspid-rdn").style.display = "block";
-  }
-  else {
+  } else {
     if (ocspBasicResp.tbsResponseData.responderID instanceof asn1js.OctetString) {
-      common.getElement("ocsp-resp-respid-simpl").innerHTML = pvtsutils.Convert.ToHex(ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.subarray(0, ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.byteLength));
+      common.getElement("ocsp-resp-respid-simpl").innerHTML = pvtsutils.Convert.ToHex(
+        ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.subarray(
+          0,
+          ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.byteLength
+        )
+      );
       common.getElement("ocsp-resp-rspid-simpl").style.display = "block";
-    }
-    else {
+    } else {
       alert("Wrong OCSP response responderID");
       return;
     }
@@ -211,7 +212,9 @@ function parseOCSPResp(source: ArrayBuffer) {
 
   //#region Put information about OCSP responses
   for (let i = 0; i < ocspBasicResp.tbsResponseData.responses.length; i++) {
-    const typeval = pvtsutils.Convert.ToHex(ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHexView);
+    const typeval = pvtsutils.Convert.ToHex(
+      ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHexView
+    );
     let subjval: string;
 
     switch (ocspBasicResp.tbsResponseData.responses[i].certStatus.idBlock.tagNumber) {

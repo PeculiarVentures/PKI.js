@@ -5,7 +5,14 @@ import * as pkijs from "../src/index";
 /**
  * Create CMS_Signed
  */
-export async function createCMSSigned(hashAlg: string, signAlg: string, dataBuffer: ArrayBuffer, detachedSignature = false, addExt = false, signHashAlg?: string) {
+export async function createCMSSigned(
+  hashAlg: string,
+  signAlg: string,
+  dataBuffer: ArrayBuffer,
+  detachedSignature = false,
+  addExt = false,
+  signHashAlg?: string
+) {
   // Get a "crypto" extension
   const crypto = pkijs.getCrypto(true);
 
@@ -37,26 +44,26 @@ export async function createCMSSigned(hashAlg: string, signAlg: string, dataBuff
     //#region Combine all signed extensions
     const signedAttr = [];
 
-    signedAttr.push(new pkijs.Attribute({
-      type: "1.2.840.113549.1.9.3",
-      values: [
-        new asn1js.ObjectIdentifier({ value: "1.2.840.113549.1.7.1" })
-      ]
-    })); // contentType
+    signedAttr.push(
+      new pkijs.Attribute({
+        type: "1.2.840.113549.1.9.3",
+        values: [new asn1js.ObjectIdentifier({ value: "1.2.840.113549.1.7.1" })]
+      })
+    ); // contentType
 
-    signedAttr.push(new pkijs.Attribute({
-      type: "1.2.840.113549.1.9.5",
-      values: [
-        new asn1js.UTCTime({ valueDate: new Date() })
-      ]
-    })); // signingTime
+    signedAttr.push(
+      new pkijs.Attribute({
+        type: "1.2.840.113549.1.9.5",
+        values: [new asn1js.UTCTime({ valueDate: new Date() })]
+      })
+    ); // signingTime
 
-    signedAttr.push(new pkijs.Attribute({
-      type: "1.2.840.113549.1.9.4",
-      values: [
-        new asn1js.OctetString({ valueHex: digest })
-      ]
-    })); // messageDigest
+    signedAttr.push(
+      new pkijs.Attribute({
+        type: "1.2.840.113549.1.9.4",
+        values: [new asn1js.OctetString({ valueHex: digest })]
+      })
+    ); // messageDigest
     //#endregion
 
     cmsSignedSimpl.signerInfos[0].signedAttrs = new pkijs.SignedAndUnsignedAttributes({
@@ -103,13 +110,15 @@ export async function createCMSSigned(hashAlg: string, signAlg: string, dataBuff
     const block3 = block2.valueBlock.value[2] as asn1js.Constructed;
     block3.lenBlock.isIndefiniteForm = true;
     block3.valueBlock.value[1].lenBlock.isIndefiniteForm = true;
-    ((block3.valueBlock.value[1] as asn1js.Constructed).valueBlock.value[0] as asn1js.Constructed).lenBlock.isIndefiniteForm = true;
+    (
+      (block3.valueBlock.value[1] as asn1js.Constructed).valueBlock.value[0] as asn1js.Constructed
+    ).lenBlock.isIndefiniteForm = true;
   }
   //#endregion
 
   return {
     ...certWithKey,
-    cmsSignedData: _cmsSignedSchema.toBER(false),
+    cmsSignedData: _cmsSignedSchema.toBER(false)
   };
   //#endregion
 }
@@ -117,10 +126,13 @@ export async function createCMSSigned(hashAlg: string, signAlg: string, dataBuff
 /**
  * Verify existing CMS_Signed
  */
-export async function verifyCMSSigned(cmsSignedBuffer: ArrayBuffer, trustedCertificates: pkijs.Certificate[] = [], dataBuffer?: ArrayBuffer) {
+export async function verifyCMSSigned(
+  cmsSignedBuffer: ArrayBuffer,
+  trustedCertificates: pkijs.Certificate[] = [],
+  dataBuffer?: ArrayBuffer
+) {
   //#region Initial check
-  if (cmsSignedBuffer.byteLength === 0)
-    throw new Error("Nothing to verify!");
+  if (cmsSignedBuffer.byteLength === 0) throw new Error("Nothing to verify!");
   //#endregion
 
   //#region Decode existing CMS_Signed

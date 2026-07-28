@@ -17,7 +17,8 @@ export interface IAttributeTypeAndValue {
 
 export type AttributeTypeAndValueParameters = PkiObjectParameters & Partial<IAttributeTypeAndValue>;
 
-export type AttributeValueType = asn1js.Utf8String
+export type AttributeValueType =
+  | asn1js.Utf8String
   | asn1js.BmpString
   | asn1js.UniversalString
   | asn1js.NumericString
@@ -39,7 +40,6 @@ export interface AttributeTypeAndValueJson {
  * Represents the AttributeTypeAndValue structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAndValue {
-
   public static override CLASS_NAME = "AttributeTypeAndValue";
 
   public type!: string;
@@ -52,8 +52,16 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
   constructor(parameters: AttributeTypeAndValueParameters = {}) {
     super();
 
-    this.type = pvutils.getParametersValue(parameters, TYPE, AttributeTypeAndValue.defaultValues(TYPE));
-    this.value = pvutils.getParametersValue(parameters, VALUE, AttributeTypeAndValue.defaultValues(VALUE));
+    this.type = pvutils.getParametersValue(
+      parameters,
+      TYPE,
+      AttributeTypeAndValue.defaultValues(TYPE)
+    );
+    this.value = pvutils.getParametersValue(
+      parameters,
+      VALUE,
+      AttributeTypeAndValue.defaultValues(VALUE)
+    );
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -91,28 +99,32 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
    * AttributeValue ::= ANY -- DEFINED BY AttributeType
    *```
    */
-  static override schema(parameters: Schema.SchemaParameters<{ type?: string, value?: string; }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  static override schema(
+    parameters: Schema.SchemaParameters<{ type?: string; value?: string }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.type || EMPTY_STRING) }),
-        new asn1js.Any({ name: (names.value || EMPTY_STRING) })
+        new asn1js.ObjectIdentifier({ name: names.type || EMPTY_STRING }),
+        new asn1js.Any({ name: names.value || EMPTY_STRING })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType) {
     //#region Clear input data first
-    pvutils.clearProps(schema, [
-      TYPE,
-      "typeValue"
-    ]);
+    pvutils.clearProps(schema, [TYPE, "typeValue"]);
     //#endregion
 
     //#region Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       AttributeTypeAndValue.schema({
         names: {
@@ -133,12 +145,9 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
-      value: [
-        new asn1js.ObjectIdentifier({ value: this.type }),
-        this.value
-      ]
-    }));
+    return new asn1js.Sequence({
+      value: [new asn1js.ObjectIdentifier({ value: this.type }), this.value]
+    });
     //#endregion
   }
 
@@ -148,7 +157,7 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
     } as AttributeTypeAndValueJson;
 
     if (Object.keys(this.value).length !== 0) {
-      _object.value = (this.value).toJSON();
+      _object.value = this.value.toJSON();
     } else {
       _object.value = this.value;
     }
@@ -180,9 +189,11 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
       return pvtsutils.BufferSourceConverter.isEqual(this.value.valueBeforeDecodeView, compareTo);
     }
 
-    if ((compareTo.constructor as typeof AttributeTypeAndValue).blockName() === AttributeTypeAndValue.blockName()) {
-      if (this.type !== compareTo.type)
-        return false;
+    if (
+      (compareTo.constructor as typeof AttributeTypeAndValue).blockName() ===
+      AttributeTypeAndValue.blockName()
+    ) {
+      if (this.type !== compareTo.type) return false;
 
       //#region Check we do have both strings
       const isStringPair = [false, false];
@@ -200,19 +211,22 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
         return false;
       }
 
-      const isString = (isStringPair[0] && isStringPair[1]);
+      const isString = isStringPair[0] && isStringPair[1];
       //#endregion
 
       if (isString) {
         const value1 = stringPrep(this.value.valueBlock.value);
         const value2 = stringPrep(compareTo.value.valueBlock.value);
 
-        if (value1.localeCompare(value2) !== 0)
-          return false;
-      }
-      else // Comparing as two ArrayBuffers
+        if (value1.localeCompare(value2) !== 0) return false;
+      } else // Comparing as two ArrayBuffers
       {
-        if (!pvtsutils.BufferSourceConverter.isEqual(this.value.valueBeforeDecodeView, compareTo.value.valueBeforeDecodeView))
+        if (
+          !pvtsutils.BufferSourceConverter.isEqual(
+            this.value.valueBeforeDecodeView,
+            compareTo.value.valueBeforeDecodeView
+          )
+        )
           return false;
       }
 
@@ -221,5 +235,4 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
 
     return false;
   }
-
 }

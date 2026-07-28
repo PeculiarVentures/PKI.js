@@ -7,10 +7,7 @@ import * as Schema from "./Schema";
 
 const REQUIRE_EXPLICIT_POLICY = "requireExplicitPolicy";
 const INHIBIT_POLICY_MAPPING = "inhibitPolicyMapping";
-const CLEAR_PROPS = [
-  REQUIRE_EXPLICIT_POLICY,
-  INHIBIT_POLICY_MAPPING,
-];
+const CLEAR_PROPS = [REQUIRE_EXPLICIT_POLICY, INHIBIT_POLICY_MAPPING];
 
 export interface IPolicyConstraints {
   requireExplicitPolicy?: number;
@@ -28,7 +25,6 @@ export type PolicyConstraintsParameters = PkiObjectParameters & Partial<IPolicyC
  * Represents the PolicyConstraints structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
-
   public static override CLASS_NAME = "PolicyConstraints";
 
   public requireExplicitPolicy?: number;
@@ -42,10 +38,18 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
     super();
 
     if (REQUIRE_EXPLICIT_POLICY in parameters) {
-      this.requireExplicitPolicy = pvutils.getParametersValue(parameters, REQUIRE_EXPLICIT_POLICY, PolicyConstraints.defaultValues(REQUIRE_EXPLICIT_POLICY));
+      this.requireExplicitPolicy = pvutils.getParametersValue(
+        parameters,
+        REQUIRE_EXPLICIT_POLICY,
+        PolicyConstraints.defaultValues(REQUIRE_EXPLICIT_POLICY)
+      );
     }
     if (INHIBIT_POLICY_MAPPING in parameters) {
-      this.inhibitPolicyMapping = pvutils.getParametersValue(parameters, INHIBIT_POLICY_MAPPING, PolicyConstraints.defaultValues(INHIBIT_POLICY_MAPPING));
+      this.inhibitPolicyMapping = pvutils.getParametersValue(
+        parameters,
+        INHIBIT_POLICY_MAPPING,
+        PolicyConstraints.defaultValues(INHIBIT_POLICY_MAPPING)
+      );
     }
 
     if (parameters.schema) {
@@ -82,17 +86,23 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
    * SkipCerts ::= INTEGER (0..MAX)
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    requireExplicitPolicy?: string;
-    inhibitPolicyMapping?: string;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      requireExplicitPolicy?: string;
+      inhibitPolicyMapping?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Primitive({
-          name: (names.requireExplicitPolicy || EMPTY_STRING),
+          name: names.requireExplicitPolicy || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -100,7 +110,7 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
           }
         }), // IMPLICIT integer value
         new asn1js.Primitive({
-          name: (names.inhibitPolicyMapping || EMPTY_STRING),
+          name: names.inhibitPolicyMapping || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
@@ -108,7 +118,7 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
           }
         }) // IMPLICIT integer value
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -116,7 +126,8 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       PolicyConstraints.schema({
         names: {
@@ -180,9 +191,9 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
     //#endregion
   }
 
@@ -199,5 +210,4 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
 
     return res;
   }
-
 }

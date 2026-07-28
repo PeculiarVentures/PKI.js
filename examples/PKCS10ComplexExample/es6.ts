@@ -10,7 +10,10 @@ export let signAlg = "RSASSA-PKCS1-V1_5";
 
 async function createPKCS10() {
   pkcs10Buffer = await example.createPKCS10Internal(hashAlg, signAlg);
-  common.getElement("pem-text-block", "textarea").value = utils.toPEM(pkcs10Buffer, "CERTIFICATE REQUEST");
+  common.getElement("pem-text-block", "textarea").value = utils.toPEM(
+    pkcs10Buffer,
+    "CERTIFICATE REQUEST"
+  );
   parsePKCS10();
 }
 
@@ -42,13 +45,13 @@ function parsePKCS10() {
 
   for (let i = 0; i < pkcs10.subject.typesAndValues.length; i++) {
     let typeval = typemap[pkcs10.subject.typesAndValues[i].type];
-    if (typeof typeval === "undefined")
-      typeval = pkcs10.subject.typesAndValues[i].type;
+    if (typeof typeval === "undefined") typeval = pkcs10.subject.typesAndValues[i].type;
 
     const subjval = pkcs10.subject.typesAndValues[i].value.valueBlock.value;
     const ulrow = `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
 
-    common.getElement("pkcs10-subject").innerHTML = common.getElement("pkcs10-subject").innerHTML + ulrow;
+    common.getElement("pkcs10-subject").innerHTML =
+      common.getElement("pkcs10-subject").innerHTML + ulrow;
     if (typeval === "CN") {
       common.getElement("pkcs10-subject-cn").innerHTML = subjval;
     }
@@ -58,15 +61,16 @@ function parsePKCS10() {
   //#region Put information about public key size
   let publicKeySize = "< unknown >";
 
-  if (pkcs10.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== (-1)) {
-    const rsaPublicKeySimple = pkijs.RSAPublicKey.fromBER(pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
+  if (pkcs10.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== -1) {
+    const rsaPublicKeySimple = pkijs.RSAPublicKey.fromBER(
+      pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource
+    );
     const modulusView = rsaPublicKeySimple.modulus.valueBlock.valueHexView;
     let modulusBitLength = 0;
 
     if (modulusView[0] === 0x00)
       modulusBitLength = (rsaPublicKeySimple.modulus.valueBlock.valueHexView.byteLength - 1) * 8;
-    else
-      modulusBitLength = rsaPublicKeySimple.modulus.valueBlock.valueHexView.byteLength * 8;
+    else modulusBitLength = rsaPublicKeySimple.modulus.valueBlock.valueHexView.byteLength * 8;
 
     publicKeySize = modulusBitLength.toString();
   }
@@ -93,8 +97,7 @@ function parsePKCS10() {
   let signatureAlgorithm = algomap[pkcs10.signatureAlgorithm.algorithmId];
   if (typeof signatureAlgorithm === "undefined")
     signatureAlgorithm = pkcs10.signatureAlgorithm.algorithmId;
-  else
-    signatureAlgorithm = `${signatureAlgorithm} (${pkcs10.signatureAlgorithm.algorithmId})`;
+  else signatureAlgorithm = `${signatureAlgorithm} (${pkcs10.signatureAlgorithm.algorithmId})`;
 
   common.getElement("sig-algo").innerHTML = signatureAlgorithm;
   //#endregion
@@ -106,26 +109,34 @@ function parsePKCS10() {
       let subjval = "";
 
       for (let j = 0; j < pkcs10.attributes[i].values.length; j++) {
-        if ((pkcs10.attributes[i].values[j] instanceof asn1js.Utf8String) ||
-          (pkcs10.attributes[i].values[j] instanceof asn1js.BmpString) ||
-          (pkcs10.attributes[i].values[j] instanceof asn1js.UniversalString) ||
-          (pkcs10.attributes[i].values[j] instanceof asn1js.NumericString) ||
-          (pkcs10.attributes[i].values[j] instanceof asn1js.PrintableString) ||
-          (pkcs10.attributes[i].values[j] instanceof asn1js.TeletexString) ||
-          (pkcs10.attributes[i].values[j] instanceof asn1js.VideotexString) ||
-          (pkcs10.attributes[i].values[j] instanceof asn1js.IA5String) ||
-          (pkcs10.attributes[i].values[j] instanceof asn1js.GraphicString) ||
-          (pkcs10.attributes[i].values[j] instanceof asn1js.VisibleString) ||
-          (pkcs10.attributes[i].values[j] instanceof asn1js.GeneralString) ||
-          (pkcs10.attributes[i].values[j] instanceof asn1js.CharacterString)) {
-          subjval = subjval + ((subjval.length === 0) ? "" : ";") + pkcs10.attributes[i].values[j].valueBlock.value;
-        }
-        else
-          subjval = subjval + ((subjval.length === 0) ? "" : ";") + pkcs10.attributes[i].values[j].constructor.blockName();
+        if (
+          pkcs10.attributes[i].values[j] instanceof asn1js.Utf8String ||
+          pkcs10.attributes[i].values[j] instanceof asn1js.BmpString ||
+          pkcs10.attributes[i].values[j] instanceof asn1js.UniversalString ||
+          pkcs10.attributes[i].values[j] instanceof asn1js.NumericString ||
+          pkcs10.attributes[i].values[j] instanceof asn1js.PrintableString ||
+          pkcs10.attributes[i].values[j] instanceof asn1js.TeletexString ||
+          pkcs10.attributes[i].values[j] instanceof asn1js.VideotexString ||
+          pkcs10.attributes[i].values[j] instanceof asn1js.IA5String ||
+          pkcs10.attributes[i].values[j] instanceof asn1js.GraphicString ||
+          pkcs10.attributes[i].values[j] instanceof asn1js.VisibleString ||
+          pkcs10.attributes[i].values[j] instanceof asn1js.GeneralString ||
+          pkcs10.attributes[i].values[j] instanceof asn1js.CharacterString
+        ) {
+          subjval =
+            subjval +
+            (subjval.length === 0 ? "" : ";") +
+            pkcs10.attributes[i].values[j].valueBlock.value;
+        } else
+          subjval =
+            subjval +
+            (subjval.length === 0 ? "" : ";") +
+            pkcs10.attributes[i].values[j].constructor.blockName();
       }
 
       const ulrow = `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
-      common.getElement("pkcs10-exten").innerHTML = common.getElement("pkcs10-exten").innerHTML + ulrow;
+      common.getElement("pkcs10-exten").innerHTML =
+        common.getElement("pkcs10-exten").innerHTML + ulrow;
     }
 
     common.getElement("pkcs10-attributes").style.display = "block";

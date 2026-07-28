@@ -43,7 +43,8 @@ export interface IRSAPrivateKey {
   otherPrimeInfos?: OtherPrimeInfo[];
 }
 
-export type RSAPrivateKeyParameters = PkiObjectParameters & Partial<IRSAPrivateKey> & { json?: RSAPrivateKeyJson; };
+export type RSAPrivateKeyParameters = PkiObjectParameters &
+  Partial<IRSAPrivateKey> & { json?: RSAPrivateKeyJson };
 
 export interface RSAPrivateKeyJson {
   n: string;
@@ -61,7 +62,6 @@ export interface RSAPrivateKeyJson {
  * Represents the PrivateKeyInfo structure described in [RFC3447](https://datatracker.ietf.org/doc/html/rfc3447)
  */
 export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
-
   public static override CLASS_NAME = "RSAPrivateKey";
 
   public version!: number;
@@ -82,17 +82,57 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
   constructor(parameters: RSAPrivateKeyParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, RSAPrivateKey.defaultValues(VERSION));
-    this.modulus = pvutils.getParametersValue(parameters, MODULUS, RSAPrivateKey.defaultValues(MODULUS));
-    this.publicExponent = pvutils.getParametersValue(parameters, PUBLIC_EXPONENT, RSAPrivateKey.defaultValues(PUBLIC_EXPONENT));
-    this.privateExponent = pvutils.getParametersValue(parameters, PRIVATE_EXPONENT, RSAPrivateKey.defaultValues(PRIVATE_EXPONENT));
-    this.prime1 = pvutils.getParametersValue(parameters, PRIME1, RSAPrivateKey.defaultValues(PRIME1));
-    this.prime2 = pvutils.getParametersValue(parameters, PRIME2, RSAPrivateKey.defaultValues(PRIME2));
-    this.exponent1 = pvutils.getParametersValue(parameters, EXPONENT1, RSAPrivateKey.defaultValues(EXPONENT1));
-    this.exponent2 = pvutils.getParametersValue(parameters, EXPONENT2, RSAPrivateKey.defaultValues(EXPONENT2));
-    this.coefficient = pvutils.getParametersValue(parameters, COEFFICIENT, RSAPrivateKey.defaultValues(COEFFICIENT));
+    this.version = pvutils.getParametersValue(
+      parameters,
+      VERSION,
+      RSAPrivateKey.defaultValues(VERSION)
+    );
+    this.modulus = pvutils.getParametersValue(
+      parameters,
+      MODULUS,
+      RSAPrivateKey.defaultValues(MODULUS)
+    );
+    this.publicExponent = pvutils.getParametersValue(
+      parameters,
+      PUBLIC_EXPONENT,
+      RSAPrivateKey.defaultValues(PUBLIC_EXPONENT)
+    );
+    this.privateExponent = pvutils.getParametersValue(
+      parameters,
+      PRIVATE_EXPONENT,
+      RSAPrivateKey.defaultValues(PRIVATE_EXPONENT)
+    );
+    this.prime1 = pvutils.getParametersValue(
+      parameters,
+      PRIME1,
+      RSAPrivateKey.defaultValues(PRIME1)
+    );
+    this.prime2 = pvutils.getParametersValue(
+      parameters,
+      PRIME2,
+      RSAPrivateKey.defaultValues(PRIME2)
+    );
+    this.exponent1 = pvutils.getParametersValue(
+      parameters,
+      EXPONENT1,
+      RSAPrivateKey.defaultValues(EXPONENT1)
+    );
+    this.exponent2 = pvutils.getParametersValue(
+      parameters,
+      EXPONENT2,
+      RSAPrivateKey.defaultValues(EXPONENT2)
+    );
+    this.coefficient = pvutils.getParametersValue(
+      parameters,
+      COEFFICIENT,
+      RSAPrivateKey.defaultValues(COEFFICIENT)
+    );
     if (OTHER_PRIME_INFOS in parameters) {
-      this.otherPrimeInfos = pvutils.getParametersValue(parameters, OTHER_PRIME_INFOS, RSAPrivateKey.defaultValues(OTHER_PRIME_INFOS));
+      this.otherPrimeInfos = pvutils.getParametersValue(
+        parameters,
+        OTHER_PRIME_INFOS,
+        RSAPrivateKey.defaultValues(OTHER_PRIME_INFOS)
+      );
     }
 
     if (parameters.json) {
@@ -166,44 +206,50 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
    * OtherPrimeInfos ::= Sequence SIZE(1..MAX) OF OtherPrimeInfo
    * ```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{
-    version?: string;
-    modulus?: string;
-    publicExponent?: string;
-    privateExponent?: string;
-    prime1?: string;
-    prime2?: string;
-    exponent1?: string;
-    exponent2?: string;
-    coefficient?: string;
-    otherPrimeInfosName?: string;
-    otherPrimeInfo?: OtherPrimeInfoSchema;
-  }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      version?: string;
+      modulus?: string;
+      publicExponent?: string;
+      privateExponent?: string;
+      prime1?: string;
+      prime2?: string;
+      exponent1?: string;
+      exponent2?: string;
+      coefficient?: string;
+      otherPrimeInfosName?: string;
+      otherPrimeInfo?: OtherPrimeInfoSchema;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.Integer({ name: (names.version || EMPTY_STRING) }),
-        new asn1js.Integer({ name: (names.modulus || EMPTY_STRING) }),
-        new asn1js.Integer({ name: (names.publicExponent || EMPTY_STRING) }),
-        new asn1js.Integer({ name: (names.privateExponent || EMPTY_STRING) }),
-        new asn1js.Integer({ name: (names.prime1 || EMPTY_STRING) }),
-        new asn1js.Integer({ name: (names.prime2 || EMPTY_STRING) }),
-        new asn1js.Integer({ name: (names.exponent1 || EMPTY_STRING) }),
-        new asn1js.Integer({ name: (names.exponent2 || EMPTY_STRING) }),
-        new asn1js.Integer({ name: (names.coefficient || EMPTY_STRING) }),
+        new asn1js.Integer({ name: names.version || EMPTY_STRING }),
+        new asn1js.Integer({ name: names.modulus || EMPTY_STRING }),
+        new asn1js.Integer({ name: names.publicExponent || EMPTY_STRING }),
+        new asn1js.Integer({ name: names.privateExponent || EMPTY_STRING }),
+        new asn1js.Integer({ name: names.prime1 || EMPTY_STRING }),
+        new asn1js.Integer({ name: names.prime2 || EMPTY_STRING }),
+        new asn1js.Integer({ name: names.exponent1 || EMPTY_STRING }),
+        new asn1js.Integer({ name: names.exponent2 || EMPTY_STRING }),
+        new asn1js.Integer({ name: names.coefficient || EMPTY_STRING }),
         new asn1js.Sequence({
           optional: true,
           value: [
             new asn1js.Repeated({
-              name: (names.otherPrimeInfosName || EMPTY_STRING),
+              name: names.otherPrimeInfosName || EMPTY_STRING,
               value: OtherPrimeInfo.schema(names.otherPrimeInfo || {})
             })
           ]
         })
       ]
-    }));
+    });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
@@ -211,7 +257,8 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       RSAPrivateKey.schema({
         names: {
@@ -246,7 +293,10 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
     this.coefficient = asn1.result.coefficient.convertFromDER(128);
 
     if (OTHER_PRIME_INFOS in asn1.result)
-      this.otherPrimeInfos = Array.from(asn1.result.otherPrimeInfos, element => new OtherPrimeInfo({ schema: element }));
+      this.otherPrimeInfos = Array.from(
+        asn1.result.otherPrimeInfos,
+        element => new OtherPrimeInfo({ schema: element })
+      );
     //#endregion
   }
 
@@ -265,16 +315,18 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
     outputArray.push(this.coefficient.convertToDER());
 
     if (this.otherPrimeInfos) {
-      outputArray.push(new asn1js.Sequence({
-        value: Array.from(this.otherPrimeInfos, o => o.toSchema())
-      }));
+      outputArray.push(
+        new asn1js.Sequence({
+          value: Array.from(this.otherPrimeInfos, o => o.toSchema())
+        })
+      );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
     //#endregion
   }
 
@@ -287,7 +339,7 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
       q: pvtsutils.Convert.ToBase64Url(this.prime2.valueBlock.valueHexView),
       dp: pvtsutils.Convert.ToBase64Url(this.exponent1.valueBlock.valueHexView),
       dq: pvtsutils.Convert.ToBase64Url(this.exponent2.valueBlock.valueHexView),
-      qi: pvtsutils.Convert.ToBase64Url(this.coefficient.valueBlock.valueHexView),
+      qi: pvtsutils.Convert.ToBase64Url(this.coefficient.valueBlock.valueHexView)
     };
     if (this.otherPrimeInfos) {
       jwk.oth = Array.from(this.otherPrimeInfos, o => o.toJSON());
@@ -305,15 +357,19 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
 
     this.modulus = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.n) });
     this.publicExponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.e) });
-    this.privateExponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.d) });
+    this.privateExponent = new asn1js.Integer({
+      valueHex: pvtsutils.Convert.FromBase64Url(json.d)
+    });
     this.prime1 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.p) });
     this.prime2 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.q) });
     this.exponent1 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.dp) });
     this.exponent2 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.dq) });
     this.coefficient = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.qi) });
     if (json.oth) {
-      this.otherPrimeInfos = Array.from(json.oth, (element: any) => new OtherPrimeInfo({ json: element }));
+      this.otherPrimeInfos = Array.from(
+        json.oth,
+        (element: any) => new OtherPrimeInfo({ json: element })
+      );
     }
   }
-
 }

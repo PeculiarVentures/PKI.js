@@ -8,10 +8,7 @@ import * as Schema from "./Schema";
 
 export const POLICY_IDENTIFIER = "policyIdentifier";
 export const POLICY_QUALIFIERS = "policyQualifiers";
-const CLEAR_PROPS = [
-  POLICY_IDENTIFIER,
-  POLICY_QUALIFIERS
-];
+const CLEAR_PROPS = [POLICY_IDENTIFIER, POLICY_QUALIFIERS];
 
 export interface IPolicyInformation {
   policyIdentifier: string;
@@ -29,7 +26,6 @@ export interface PolicyInformationJson {
  * Represents the PolicyInformation structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
  */
 export class PolicyInformation extends PkiObject implements IPolicyInformation {
-
   public static override CLASS_NAME = "PolicyInformation";
 
   public policyIdentifier!: string;
@@ -42,9 +38,17 @@ export class PolicyInformation extends PkiObject implements IPolicyInformation {
   constructor(parameters: PolicyInformationParameters = {}) {
     super();
 
-    this.policyIdentifier = pvutils.getParametersValue(parameters, POLICY_IDENTIFIER, PolicyInformation.defaultValues(POLICY_IDENTIFIER));
+    this.policyIdentifier = pvutils.getParametersValue(
+      parameters,
+      POLICY_IDENTIFIER,
+      PolicyInformation.defaultValues(POLICY_IDENTIFIER)
+    );
     if (POLICY_QUALIFIERS in parameters) {
-      this.policyQualifiers = pvutils.getParametersValue(parameters, POLICY_QUALIFIERS, PolicyInformation.defaultValues(POLICY_QUALIFIERS));
+      this.policyQualifiers = pvutils.getParametersValue(
+        parameters,
+        POLICY_QUALIFIERS,
+        PolicyInformation.defaultValues(POLICY_QUALIFIERS)
+      );
     }
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -81,24 +85,33 @@ export class PolicyInformation extends PkiObject implements IPolicyInformation {
    * CertPolicyId ::= OBJECT IDENTIFIER
    *```
    */
-  public static override schema(parameters: Schema.SchemaParameters<{ policyIdentifier?: string; policyQualifiers?: string; }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  public static override schema(
+    parameters: Schema.SchemaParameters<{
+      policyIdentifier?: string;
+      policyQualifiers?: string;
+    }> = {}
+  ): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
+      parameters,
+      "names",
+      {}
+    );
 
-    return (new asn1js.Sequence({
-      name: (names.blockName || EMPTY_STRING),
+    return new asn1js.Sequence({
+      name: names.blockName || EMPTY_STRING,
       value: [
-        new asn1js.ObjectIdentifier({ name: (names.policyIdentifier || EMPTY_STRING) }),
+        new asn1js.ObjectIdentifier({ name: names.policyIdentifier || EMPTY_STRING }),
         new asn1js.Sequence({
           optional: true,
           value: [
             new asn1js.Repeated({
-              name: (names.policyQualifiers || EMPTY_STRING),
+              name: names.policyQualifiers || EMPTY_STRING,
               value: PolicyQualifierInfo.schema()
             })
           ]
         })
       ]
-    }));
+    });
   }
 
   /**
@@ -110,7 +123,8 @@ export class PolicyInformation extends PkiObject implements IPolicyInformation {
     pvutils.clearProps(schema, CLEAR_PROPS);
 
     // Check the schema is valid
-    const asn1 = asn1js.compareSchema(schema,
+    const asn1 = asn1js.compareSchema(
+      schema,
       schema,
       PolicyInformation.schema({
         names: {
@@ -124,7 +138,10 @@ export class PolicyInformation extends PkiObject implements IPolicyInformation {
     // Get internal properties from parsed schema
     this.policyIdentifier = asn1.result.policyIdentifier.valueBlock.toString();
     if (POLICY_QUALIFIERS in asn1.result) {
-      this.policyQualifiers = Array.from(asn1.result.policyQualifiers, element => new PolicyQualifierInfo({ schema: element }));
+      this.policyQualifiers = Array.from(
+        asn1.result.policyQualifiers,
+        element => new PolicyQualifierInfo({ schema: element })
+      );
     }
   }
 
@@ -135,15 +152,17 @@ export class PolicyInformation extends PkiObject implements IPolicyInformation {
     outputArray.push(new asn1js.ObjectIdentifier({ value: this.policyIdentifier }));
 
     if (this.policyQualifiers) {
-      outputArray.push(new asn1js.Sequence({
-        value: Array.from(this.policyQualifiers, o => o.toSchema())
-      }));
+      outputArray.push(
+        new asn1js.Sequence({
+          value: Array.from(this.policyQualifiers, o => o.toSchema())
+        })
+      );
     }
 
     // Construct and return new ASN.1 schema for this object
-    return (new asn1js.Sequence({
+    return new asn1js.Sequence({
       value: outputArray
-    }));
+    });
   }
 
   public toJSON(): PolicyInformationJson {
@@ -156,5 +175,4 @@ export class PolicyInformation extends PkiObject implements IPolicyInformation {
 
     return res;
   }
-
 }
