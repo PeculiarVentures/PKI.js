@@ -22,7 +22,7 @@
     "typescript/triple-slash-reference": "off",
     "unicorn/no-new-array": "off"
   },
-  "ignorePatterns": ["build/**", "**/*.js"],
+  "ignorePatterns": ["examples/**/*.js"],
   "overrides": [
     {
       "files": ["website/docs/examples/**/*.example.ts"],
