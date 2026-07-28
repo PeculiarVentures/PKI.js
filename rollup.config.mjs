@@ -20,6 +20,8 @@ export default [
       typescript({
         check: true,
         clean: true,
+        // Default "*.ts+(|x)" no longer matches .ts with current @rollup/pluginutils
+        include: ["*.ts", "**/*.ts"],
         tsconfigOverride: {
           compilerOptions: {
             module: "ES2020",
