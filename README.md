@@ -21,9 +21,10 @@ PKIjs provides a Typescript implementation of the most common formats and algori
 - Cryptographic Message Syntax (RFC 5652) is the most commonly used data structure for signing data in X.509 applications. CMS makes it easy to both sign and represent all of the data needed to verify a signature.
 - Cryptographic Message Syntax (RFC 5652) is also the most commonly used data structure for encrypting data in X.509 applications. CMS makes it easy to provide interoperable data encryption.
 - Time-Stamp Protocol (RFC 3161) is the most commonly used protocol for proving that data
-existed before a particular time. It is commonly used in signing applications to ensure signatures are verifiable long into the future.
+  existed before a particular time. It is commonly used in signing applications to ensure signatures are verifiable long into the future.
 
 ## Objectives
+
 - Typescript and object-oriented implementation
 - Contains no cryptographic implementations and instead leverages Web Crypto API
 - Work uniformly both in browser and in [Node](https://nodejs.org/)/[Deno](https://deno.com/)
@@ -37,7 +38,6 @@ npm install --save pkijs
 ```
 
 This assumes you are using [npm](https://www.npmjs.com/) as your package manager.
-
 
 ## Examples
 
@@ -57,20 +57,25 @@ This assumes you are using [npm](https://www.npmjs.com/) as your package manager
 - [Working with PKCS#7 Certificate bags (P7B)](https://pkijs.org/docs/examples/signing-and-encryption-with-CMS/working-with-PKCS-7-certificate-bags-P7B)
 
 ### Timestamping
+
 - [Creating a Timestamp request](https://pkijs.org/docs/examples/timestamping/creating-a-timestamp-request)
 - [Creating a Timestamp response](https://pkijs.org/docs/examples/timestamping/creating-a-timestamp-response)
 
 ### Other
+
 - [How to verify a signature in a PDF file](https://pkijs.org/docs/examples/other/how-to-verify-a-signature-in-a-PDF-file)
 - [S/MIME signature verification](https://pkijs.org/docs/examples/other/S-MIME-signature-verification)
 - [S/MIME signature encryption](https://pkijs.org/docs/examples/other/S-MIME-signature-encryption)
 - [Working with PKCS#12 files](https://pkijs.org/docs/examples/other/working-with-PKCS-12-files)
 
 ## Documentation
+
 You can find the PKI.js documentation [on the website](https://pkijs.org/docs/installation).
 
 ## Want to help?
+
 Want to file a bug, contribute some code, or improve documentation? Excellent! Read up on our guidelines for [contribution](https://github.com/PeculiarVentures/PKI.js/blob/master/CONTRIBUTING.md).
 
 ## Core Contributors
+
 [Stepan Miroshin](https://github.com/microshine)
