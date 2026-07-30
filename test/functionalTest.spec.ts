@@ -329,7 +329,7 @@ describe("PKIjs functional testing", () => {
       const crypto = new Crypto();
 
       for (const t of tests) {
-        it(t.name, async () => {
+        it(`${t.name}`, async () => {
           const data = new Uint8Array(10).buffer;
           const certData = await createCertificate("SHA-256", "RSASSA-PKCS1-v1_5");
 
@@ -768,7 +768,7 @@ describe("PKIjs functional testing", () => {
     });
 
     for (const t of tests) {
-      it(t.name, () => {
+      it(`${t.name}`, () => {
         if (t.browser) {
           (global as any).self = (global as any).window = { crypto };
         }

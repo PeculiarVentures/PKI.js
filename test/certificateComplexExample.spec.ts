@@ -27,9 +27,8 @@ describe("Certificate Complex Example", () => {
 
   signAlgs.forEach(signAlg => {
     hashAlgs.forEach(hashAlg => {
-      const testName = `${hashAlg} + ${signAlg}`;
-
-      it(testName, async () => {
+      it(`${hashAlg} + ${signAlg}`, async () => {
+        const testName = `${hashAlg} + ${signAlg}`;
         const cert = await example.createCertificate(hashAlg, signAlg);
 
         const certificate = pkijs.Certificate.fromBER(cert.certificateBuffer);

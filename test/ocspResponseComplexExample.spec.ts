@@ -10,9 +10,7 @@ describe("OCSP Response Complex Example", () => {
 
   signAlgs.forEach(sigAlg => {
     hashAlgs.forEach(hashAlg => {
-      const testName = `${hashAlg} + ${sigAlg}`;
-
-      it(testName, async () => {
+      it(`${hashAlg} + ${sigAlg}`, async () => {
         const ocspResp = await example.createOCSPResp(hashAlg, sigAlg);
         const ocspRespRaw = ocspResp.ocspResp.toSchema().toBER();
         pkijs.OCSPResponse.fromBER(ocspRespRaw);

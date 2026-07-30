@@ -28,9 +28,8 @@ describe("PKCS#10 Complex Example", () => {
 
   signAlgs.forEach(signAlg => {
     hashAlgs.forEach(hashAlg => {
-      const testName = `${hashAlg} + ${signAlg}`;
-
-      it(testName, async () => {
+      it(`${hashAlg} + ${signAlg}`, async () => {
+        const testName = `${hashAlg} + ${signAlg}`;
         const pkcs10Buffer = await example.createPKCS10Internal(hashAlg, signAlg);
         const pkcs10 = pkijs.CertificationRequest.fromBER(pkcs10Buffer);
 

@@ -17,9 +17,7 @@ describe("CMS Signed Complex Example", () => {
     hashAlgs.forEach(hashAlg => {
       addExts.forEach(addExt => {
         detachedSignatures.forEach(detachedSignature => {
-          const testName = `${hashAlg} + ${signAlg}, add ext: ${addExt}, detached signature: ${detachedSignature}`;
-
-          it(testName, async () => {
+          it(`${hashAlg} + ${signAlg}, add ext: ${addExt}, detached signature: ${detachedSignature}`, async () => {
             const cms = await example.createCMSSigned(
               hashAlg,
               signAlg,
