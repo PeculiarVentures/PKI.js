@@ -3,12 +3,14 @@
     "target": "ES2019",
     "module": "CommonJS",
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "strict": true,
     "skipLibCheck": true,
     "importHelpers": true,
     "noImplicitOverride": true,
     "noErrorTruncation": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "types": ["node"]
   },
   "exclude": ["website", "build/*.ts"]
 }
