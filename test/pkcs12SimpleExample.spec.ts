@@ -2,64 +2,72 @@ import { describe, it, assert, expect } from "vitest";
 import * as crypto from "crypto";
 import "./utils";
 import * as example from "./pkcs12SimpleExample";
-import { CryptoEngine } from "../src/index";
+import { CryptoEngine, PFX } from "../src/index";
 import { Convert } from "pvtsutils";
 
 describe("PKCS#12 Simple Example", () => {
   const password = "12345567890";
 
   it("Password-based Integrity, SHA-1", async () => {
-    await example.passwordBasedIntegrity(password, "SHA-1");
+    await expect(example.passwordBasedIntegrity(password, "SHA-1")).resolves.toBeInstanceOf(
+      ArrayBuffer
+    );
   });
 
   it("Password-based Integrity, SHA-256", async () => {
-    await example.passwordBasedIntegrity(password, "SHA-256");
+    await expect(example.passwordBasedIntegrity(password, "SHA-256")).resolves.toBeInstanceOf(
+      ArrayBuffer
+    );
   });
 
   it("Password-based Integrity, SHA-384", async () => {
-    await example.passwordBasedIntegrity(password, "SHA-384");
+    await expect(example.passwordBasedIntegrity(password, "SHA-384")).resolves.toBeInstanceOf(
+      ArrayBuffer
+    );
   });
 
   it("Password-based Integrity, SHA-512", async () => {
-    await example.passwordBasedIntegrity(password, "SHA-512");
+    await expect(example.passwordBasedIntegrity(password, "SHA-512")).resolves.toBeInstanceOf(
+      ArrayBuffer
+    );
   });
 
   it("Password-based Integrity, incorrect algorithm", async () => {
-    await expect(example.passwordBasedIntegrity(password, "SHA-5122")).rejects.toThrow();
+    await expect(example.passwordBasedIntegrity(password, "SHA-5122")).rejects.toThrow(Error);
   });
 
   it("Certificate-based Integrity", async () => {
-    await example.certificateBasedIntegrity();
+    await expect(example.certificateBasedIntegrity()).resolves.toBeInstanceOf(ArrayBuffer);
   });
 
   it("No-Privacy Test", async () => {
-    await example.noPrivacy(password);
+    await expect(example.noPrivacy(password)).resolves.toBeInstanceOf(ArrayBuffer);
   });
 
   it("Password Privacy", async () => {
-    await example.passwordPrivacy(password);
+    await expect(example.passwordPrivacy(password)).resolves.toBeInstanceOf(ArrayBuffer);
   });
 
   it("Certificate Privacy", async () => {
-    await example.certificatePrivacy(password);
+    await expect(example.certificatePrivacy(password)).resolves.toBeInstanceOf(ArrayBuffer);
   });
 
   describe("Making OpenSSL-like PKCS#12 Data", () => {
     it("ASCII", async () => {
       const pfx = await example.openSSLLike(password);
-      await example.parsePKCS12(pfx, password);
+      await expect(example.parsePKCS12(pfx, password)).resolves.toBeInstanceOf(PFX);
     });
 
     it("UTF-8", async () => {
       const password = "пароль";
       const pfx = await example.openSSLLike(password);
-      await example.parsePKCS12(pfx, password);
+      await expect(example.parsePKCS12(pfx, password)).resolves.toBeInstanceOf(PFX);
     });
 
     it("Binary", async () => {
       const password = "\x04\xff\x20\x21"; // decode/encode -> [ 4, 239, 191, 189, 32, 33 ]
       const pfx = await example.openSSLLike(password);
-      await example.parsePKCS12(pfx, password);
+      await expect(example.parsePKCS12(pfx, password)).resolves.toBeInstanceOf(PFX);
     });
   });
 
