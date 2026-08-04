@@ -19,9 +19,7 @@ describe("How To Encrypt CMS via Certificate", () => {
       signAlgs.forEach(signAlg => {
         hashAlgs.forEach(hashAlg => {
           oaepHashAlgs.forEach(oaepHashAlg => {
-            const testName = `${encAlg} with ${encLen}, ${hashAlg} + ${signAlg}, OAEP hash: ${oaepHashAlg}`;
-
-            it(testName, async () => {
+            it(`${encAlg} with ${encLen}, ${hashAlg} + ${signAlg}, OAEP hash: ${oaepHashAlg}`, async () => {
               const certWithKey = await utils.createSelfSignedCertificate(hashAlg, signAlg);
               const certRaw = certWithKey.certificate.toSchema().toBER();
               const cmsEnvelopedBuffer = await example.envelopedEncrypt(

@@ -1895,7 +1895,7 @@ describe("PKITS's certificates parsing test", () => {
       };
     };
 
-    it(keys[i], runningFunction(pkitsToArrayBuffer(PKITS.certs[keys[i]]), parsingCheck));
+    it(`${keys[i]}`, runningFunction(pkitsToArrayBuffer(PKITS.certs[keys[i]]), parsingCheck));
   }
 });
 
@@ -1923,7 +1923,7 @@ describe("PKITS's CRL parsing test", () => {
       };
     };
 
-    it(keys[i], runningFunction(pkitsToArrayBuffer(PKITS.crls[keys[i]]), parsingCheck));
+    it(`${keys[i]}`, runningFunction(pkitsToArrayBuffer(PKITS.crls[keys[i]]), parsingCheck));
   }
 });
 
@@ -1972,7 +1972,7 @@ describe("PKITS's certificate pairs parsing test", () => {
       };
     };
 
-    it(keys[i], runningFunction(pkitsToArrayBuffer(PKITS.certpairs[keys[i]]), parsingCheck));
+    it(`${keys[i]}`, runningFunction(pkitsToArrayBuffer(PKITS.certpairs[keys[i]]), parsingCheck));
   }
 });
 

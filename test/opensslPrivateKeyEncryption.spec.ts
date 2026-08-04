@@ -10,10 +10,9 @@ describe("OpenSSL Encrypted Private Key", () => {
   //#endregion
 
   encLens.forEach(encLen => {
-    const testName = `Create And Parse OpenSSL Encrypted Private Key for AES-${encLen}-CBC`;
     const aesKeyLength = encLen >> 3;
 
-    it(testName, async () => {
+    it(`Create And Parse OpenSSL Encrypted Private Key for AES-${encLen}-CBC`, async () => {
       const encryptedKey = await example.createOpenSSLPrivateKey(
         aesKeyLength,
         passwordBuffer,

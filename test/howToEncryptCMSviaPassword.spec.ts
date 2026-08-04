@@ -17,9 +17,7 @@ describe("How To Encrypt CMS via Password", () => {
   encAlgs.forEach(encAlg => {
     encLens.forEach(encLen => {
       encryptionVariants.forEach(encryptionVariant => {
-        const testName = `${encAlg} with ${encLen}, ${encryptionVariant === 2 ? "Password-based encryption" : "Pre-defined KEK"}`;
-
-        it(testName, async () => {
+        it(`${encAlg} with ${encLen}, ${encryptionVariant === 2 ? "Password-based encryption" : "Pre-defined KEK"}`, async () => {
           const encryptionAlgorithm = {
             name: encAlg,
             length: encLen

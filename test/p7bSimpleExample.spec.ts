@@ -11,9 +11,7 @@ describe("P7B Simple Example", () => {
 
   signAlgs.forEach(signAlg => {
     hashAlgs.forEach(hashAlg => {
-      const testName = `${hashAlg} + ${signAlg}`;
-
-      it(testName, async () => {
+      it(`${hashAlg} + ${signAlg}`, async () => {
         const cmsSignedBuffer = await example.createP7B(hashAlg, signAlg);
         const contentInfo = pkijs.ContentInfo.fromBER(cmsSignedBuffer);
 
