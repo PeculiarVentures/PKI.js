@@ -8,9 +8,7 @@ describe("TSP Response Complex Example", () => {
 
   signAlgs.forEach(signAlg => {
     hashAlgs.forEach(hashAlg => {
-      const testName = `${hashAlg} + ${signAlg}`;
-
-      it(testName, async () => {
+      it(`${hashAlg} + ${signAlg}`, async () => {
         const tsp = await createTSPResp(hashAlg, signAlg);
         assert.doesNotThrow(() => {
           pkijs.TimeStampResp.fromBER(tsp.tspResponse.toSchema().toBER());

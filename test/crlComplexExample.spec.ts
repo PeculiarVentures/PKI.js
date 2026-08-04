@@ -27,9 +27,8 @@ describe("CRL Complex Example", () => {
 
   signAlgs.forEach(signAlg => {
     hashAlgs.forEach(hashAlg => {
-      const testName = `${hashAlg} + ${signAlg}`;
-
-      it(testName, async () => {
+      it(`${hashAlg} + ${signAlg}`, async () => {
+        const testName = `${hashAlg} + ${signAlg}`;
         const crlWithKey = await example.createCRL(hashAlg, signAlg);
         const crl = pkijs.CertificateRevocationList.fromBER(crlWithKey.crlBuffer);
 

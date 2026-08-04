@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "oxc"],
+  "plugins": ["typescript", "unicorn", "oxc", "import", "vitest"],
   "categories": {
     "correctness": "error"
   },
@@ -29,6 +29,18 @@
       "rules": {
         "no-unused-vars": "off",
         "unicorn/no-empty-file": "off"
+      }
+    },
+    {
+      "files": ["test/NISTPKITS.spec.ts", "test/functionalTest.spec.ts"],
+      "rules": {
+        "vitest/expect-expect": "off"
+      }
+    },
+    {
+      "files": ["test/NISTPKITS.spec.ts", "test/nodePKCS12Example.spec.ts"],
+      "rules": {
+        "vitest/no-disabled-tests": "off"
       }
     }
   ],

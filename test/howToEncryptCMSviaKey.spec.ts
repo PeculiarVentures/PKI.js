@@ -16,9 +16,7 @@ describe("How To Encrypt CMS via Key Identifier", () => {
     encLens.forEach(encLen => {
       curveNames.forEach(curveName => {
         kdfHashAlgs.forEach(kdfHashAlg => {
-          const testName = `${encAlg} with ${encLen} + ${curveName}, OAEP hash: ${kdfHashAlg}`;
-
-          it(testName, async () => {
+          it(`${encAlg} with ${encLen} + ${curveName}, OAEP hash: ${kdfHashAlg}`, async () => {
             const encryptionAlgorithm = {
               name: encAlg,
               length: encLen,
