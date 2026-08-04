@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.10.2">
 <title data-rh="true">AbstractCryptoEngine | pki.js</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://pkijs.org/img/card.png"><meta data-rh="true" name="twitter:image" content="https://pkijs.org/img/card.png"><meta data-rh="true" property="og:url" content="https://pkijs.org/docs/api/classes/AbstractCryptoEngine"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="AbstractCryptoEngine | pki.js"><meta data-rh="true" name="description" content="Extended by"><meta data-rh="true" property="og:description" content="Extended by"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://pkijs.org/docs/api/classes/AbstractCryptoEngine"><link data-rh="true" rel="alternate" href="https://pkijs.org/docs/api/classes/AbstractCryptoEngine" hreflang="en"><link data-rh="true" rel="alternate" href="https://pkijs.org/docs/api/classes/AbstractCryptoEngine" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AbstractCryptoEngine","item":"https://pkijs.org/docs/api/classes/AbstractCryptoEngine"}]}</script><link rel="stylesheet" href="/assets/css/styles.d58052e3.css">
-<script src="/assets/js/runtime~main.cf209c62.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.87e6ab60.js" defer="defer"></script>
 <script src="/assets/js/main.0614ac1a.js" defer="defer"></script>
 </head>
 <body>
@@ -57,7 +57,7 @@
 <blockquote>
 <p><strong>decrypt</strong>(<code>algorithm</code>, <code>key</code>, <code>data</code>): <code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
 </blockquote>
-<p>The <strong><code>decrypt()</code></strong> method of the SubtleCrypto interface decrypts some encrypted data.</p>
+<p>The <strong><code>decrypt()</code></strong> method of the SubtleCrypto interface decrypts some encrypted data. It takes as arguments a key to decrypt with, some optional extra parameters, and the data to decrypt (also known as &quot;ciphertext&quot;). It returns a Promise which will be fulfilled with the decrypted data (also known as &quot;plaintext&quot;).</p>
 <p><a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/decrypt" target="_blank" rel="noopener noreferrer" class="">MDN Reference</a></p>
 <h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-2">Parameters<a href="#parameters-2" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm">algorithm<a href="#algorithm" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h5>
@@ -88,7 +88,7 @@
 <blockquote>
 <p><strong>deriveBits</strong>(<code>algorithm</code>, <code>baseKey</code>, <code>length</code>): <code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
 </blockquote>
-<p>The <strong><code>deriveBits()</code></strong> method of the key.</p>
+<p>The <strong><code>deriveBits()</code></strong> method of the SubtleCrypto interface can be used to derive an array of bits from a base key.</p>
 <p><a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/deriveBits" target="_blank" rel="noopener noreferrer" class="">MDN Reference</a></p>
 <h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-5">Parameters<a href="#parameters-5" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-1">algorithm<a href="#algorithm-1" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h5>
@@ -150,7 +150,7 @@
 <blockquote>
 <p><strong>digest</strong>(<code>algorithm</code>, <code>data</code>): <code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
 </blockquote>
-<p>The <strong><code>digest()</code></strong> method of the SubtleCrypto interface generates a <em>digest</em> of the given data, using the specified hash function.</p>
+<p>The <strong><code>digest()</code></strong> method of the SubtleCrypto interface generates a digest of the given data, using the specified hash function. A digest is a short fixed-length value derived from some variable-length input. Cryptographic digests should exhibit collision-resistance, meaning that it&#x27;s hard to come up with two different inputs that have the same digest value.</p>
 <p><a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/digest" target="_blank" rel="noopener noreferrer" class="">MDN Reference</a></p>
 <h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-8">Parameters<a href="#parameters-8" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-4">algorithm<a href="#algorithm-4" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h5>
@@ -220,7 +220,7 @@
 <p><code>CryptoKey</code></p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-10">Returns<a href="#returns-10" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
 <p><code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-12">Implementation of<a href="#implementation-of-12" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-12">Implementation of<a href="#implementation-of-12" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">  ​</a></h5>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#exportkey"><code>exportKey</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="generatekey">generateKey()<a href="#generatekey" class="hash-link" aria-label="Direct link to generateKey()" title="Direct link to generateKey()" translate="no">​</a></h3>
@@ -247,48 +247,63 @@
 </blockquote>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-15">Parameters<a href="#parameters-15" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-7">algorithm<a href="#algorithm-7" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h6>
-<p><code>RsaHashedKeyGenParams</code> | <code>EcKeyGenParams</code></p>
+<p><code>&quot;X25519&quot;</code> | { <code>name</code>: <code>&quot;X25519&quot;</code>; }</p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-3">extractable<a href="#extractable-3" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
 <p><code>boolean</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="keyusages-3">keyUsages<a href="#keyusages-3" class="hash-link" aria-label="Direct link to keyUsages" title="Direct link to keyUsages" translate="no">​</a></h6>
-<p><code>KeyUsage</code>[]</p>
+<p>readonly (<code>&quot;deriveBits&quot;</code> | <code>&quot;deriveKey&quot;</code>)[]</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-12">Returns<a href="#returns-12" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
 <p><code>Promise</code>&lt;<code>CryptoKeyPair</code>&gt;</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-14">Implementation of<a href="#implementation-of-14" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#generatekey"><code>generateKey</code></a></p>
 <h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-6">Call Signature<a href="#call-signature-6" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
 <blockquote>
-<p><strong>generateKey</strong>(<code>algorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
+<p><strong>generateKey</strong>(<code>algorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKeyPair</code>&gt;</p>
 </blockquote>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-16">Parameters<a href="#parameters-16" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-8">algorithm<a href="#algorithm-8" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h6>
-<p><code>AesKeyGenParams</code> | <code>HmacKeyGenParams</code> | <code>Pbkdf2Params</code></p>
+<p><code>RsaHashedKeyGenParams</code> | <code>EcKeyGenParams</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-4">extractable<a href="#extractable-4" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
 <p><code>boolean</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="keyusages-4">keyUsages<a href="#keyusages-4" class="hash-link" aria-label="Direct link to keyUsages" title="Direct link to keyUsages" translate="no">​</a></h6>
 <p><code>KeyUsage</code>[]</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-13">Returns<a href="#returns-13" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
-<p><code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
+<p><code>Promise</code>&lt;<code>CryptoKeyPair</code>&gt;</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-15">Implementation of<a href="#implementation-of-15" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#generatekey"><code>generateKey</code></a></p>
 <h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-7">Call Signature<a href="#call-signature-7" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
 <blockquote>
-<p><strong>generateKey</strong>(<code>algorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKey</code> | <code>CryptoKeyPair</code>&gt;</p>
+<p><strong>generateKey</strong>(<code>algorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
 </blockquote>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-17">Parameters<a href="#parameters-17" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-9">algorithm<a href="#algorithm-9" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h6>
-<p><code>AlgorithmIdentifier</code></p>
+<p><code>AesKeyGenParams</code> | <code>HmacKeyGenParams</code> | <code>Pbkdf2Params</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-5">extractable<a href="#extractable-5" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
 <p><code>boolean</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="keyusages-5">keyUsages<a href="#keyusages-5" class="hash-link" aria-label="Direct link to keyUsages" title="Direct link to keyUsages" translate="no">​</a></h6>
 <p><code>KeyUsage</code>[]</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-14">Returns<a href="#returns-14" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
-<p><code>Promise</code>&lt;<code>CryptoKey</code> | <code>CryptoKeyPair</code>&gt;</p>
+<p><code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-16">Implementation of<a href="#implementation-of-16" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
+<p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#generatekey"><code>generateKey</code></a></p>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-8">Call Signature<a href="#call-signature-8" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
+<blockquote>
+<p><strong>generateKey</strong>(<code>algorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKey</code> | <code>CryptoKeyPair</code>&gt;</p>
+</blockquote>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-18">Parameters<a href="#parameters-18" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-10">algorithm<a href="#algorithm-10" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h6>
+<p><code>AlgorithmIdentifier</code></p>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-6">extractable<a href="#extractable-6" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
+<p><code>boolean</code></p>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keyusages-6">keyUsages<a href="#keyusages-6" class="hash-link" aria-label="Direct link to keyUsages" title="Direct link to keyUsages" translate="no">​</a></h6>
+<p><code>KeyUsage</code>[]</p>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-15">Returns<a href="#returns-15" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
+<p><code>Promise</code>&lt;<code>CryptoKey</code> | <code>CryptoKeyPair</code>&gt;</p>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-17">Implementation of<a href="#implementation-of-17" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#generatekey"><code>generateKey</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="getalgorithmbyoid">getAlgorithmByOID()<a href="#getalgorithmbyoid" class="hash-link" aria-label="Direct link to getAlgorithmByOID()" title="Direct link to getAlgorithmByOID()" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-8">Call Signature<a href="#call-signature-8" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-9">Call Signature<a href="#call-signature-9" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
 <blockquote>
 <p><code>abstract</code> <strong>getAlgorithmByOID</strong>&lt;<code>T</code>&gt;(<code>oid</code>, <code>safety?</code>, <code>target?</code>): <code>object</code> | <code>T</code></p>
 </blockquote>
@@ -296,7 +311,7 @@
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="type-parameters">Type Parameters<a href="#type-parameters" class="hash-link" aria-label="Direct link to Type Parameters" title="Direct link to Type Parameters" translate="no">​</a></h5>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="t">T<a href="#t" class="hash-link" aria-label="Direct link to T" title="Direct link to T" translate="no">​</a></h6>
 <p><code>T</code> <em>extends</em> <code>Algorithm</code> = <code>Algorithm</code></p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-18">Parameters<a href="#parameters-18" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-19">Parameters<a href="#parameters-19" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="oid">oid<a href="#oid" class="hash-link" aria-label="Direct link to oid" title="Direct link to oid" translate="no">​</a></h6>
 <p><code>string</code></p>
 <p>algorithm identifier</p>
@@ -306,12 +321,12 @@
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="target">target?<a href="#target" class="hash-link" aria-label="Direct link to target?" title="Direct link to target?" translate="no">​</a></h6>
 <p><code>string</code></p>
 <p>name of the target</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-15">Returns<a href="#returns-15" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-16">Returns<a href="#returns-16" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
 <p><code>object</code> | <code>T</code></p>
 <p>Returns WebCrypto algorithm or an empty object</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-17">Implementation of<a href="#implementation-of-17" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-18">Implementation of<a href="#implementation-of-18" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#getalgorithmbyoid"><code>getAlgorithmByOID</code></a></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-9">Call Signature<a href="#call-signature-9" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-10">Call Signature<a href="#call-signature-10" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
 <blockquote>
 <p><code>abstract</code> <strong>getAlgorithmByOID</strong>&lt;<code>T</code>&gt;(<code>oid</code>, <code>safety</code>, <code>target?</code>): <code>T</code></p>
 </blockquote>
@@ -319,7 +334,7 @@
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="type-parameters-1">Type Parameters<a href="#type-parameters-1" class="hash-link" aria-label="Direct link to Type Parameters" title="Direct link to Type Parameters" translate="no">​</a></h5>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="t-1">T<a href="#t-1" class="hash-link" aria-label="Direct link to T" title="Direct link to T" translate="no">​</a></h6>
 <p><code>T</code> <em>extends</em> <code>Algorithm</code> = <code>Algorithm</code></p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-19">Parameters<a href="#parameters-19" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-20">Parameters<a href="#parameters-20" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="oid-1">oid<a href="#oid-1" class="hash-link" aria-label="Direct link to oid" title="Direct link to oid" translate="no">​</a></h6>
 <p><code>string</code></p>
 <p>algorithm identifier</p>
@@ -329,27 +344,27 @@
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="target-1">target?<a href="#target-1" class="hash-link" aria-label="Direct link to target?" title="Direct link to target?" translate="no">​</a></h6>
 <p><code>string</code></p>
 <p>name of the target</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-16">Returns<a href="#returns-16" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-17">Returns<a href="#returns-17" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
 <p><code>T</code></p>
 <p>Returns WebCrypto algorithm</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="throws">Throws<a href="#throws" class="hash-link" aria-label="Direct link to Throws" title="Direct link to Throws" translate="no">​</a></h5>
 <p>Throws Error exception if unknown algorithm identifier</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-18">Implementation of<a href="#implementation-of-18" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-19">Implementation of<a href="#implementation-of-19" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#getalgorithmbyoid"><code>getAlgorithmByOID</code></a></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-10">Call Signature<a href="#call-signature-10" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-11">Call Signature<a href="#call-signature-11" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
 <blockquote>
 <p><code>abstract</code> <strong>getAlgorithmByOID</strong>(<code>oid</code>, <code>safety?</code>, <code>target?</code>): <code>object</code></p>
 </blockquote>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-20">Parameters<a href="#parameters-20" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-21">Parameters<a href="#parameters-21" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="oid-2">oid<a href="#oid-2" class="hash-link" aria-label="Direct link to oid" title="Direct link to oid" translate="no">​</a></h6>
 <p><code>any</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="safety-2">safety?<a href="#safety-2" class="hash-link" aria-label="Direct link to safety?" title="Direct link to safety?" translate="no">​</a></h6>
 <p><code>any</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="target-2">target?<a href="#target-2" class="hash-link" aria-label="Direct link to target?" title="Direct link to target?" translate="no">​</a></h6>
 <p><code>any</code></p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-17">Returns<a href="#returns-17" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-18">Returns<a href="#returns-18" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
 <p><code>object</code></p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-19">Implementation of<a href="#implementation-of-19" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-20">Implementation of<a href="#implementation-of-20" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
 <p><code>type.ICryptoEngine.getAlgorithmByOID</code></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="getalgorithmparameters">getAlgorithmParameters()<a href="#getalgorithmparameters" class="hash-link" aria-label="Direct link to getAlgorithmParameters()" title="Direct link to getAlgorithmParameters()" translate="no">​</a></h3>
@@ -357,16 +372,16 @@
 <p><code>abstract</code> <strong>getAlgorithmParameters</strong>(<code>algorithmName</code>, <code>operation</code>): <a class="" href="/docs/api/interfaces/CryptoEngineAlgorithmParams"><code>CryptoEngineAlgorithmParams</code></a></p>
 </blockquote>
 <p>Get default algorithm parameters for each kind of operation</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-21">Parameters<a href="#parameters-21" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-22">Parameters<a href="#parameters-22" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="algorithmname">algorithmName<a href="#algorithmname" class="hash-link" aria-label="Direct link to algorithmName" title="Direct link to algorithmName" translate="no">​</a></h5>
 <p><code>string</code></p>
 <p>Algorithm name to get common parameters for</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="operation">operation<a href="#operation" class="hash-link" aria-label="Direct link to operation" title="Direct link to operation" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/globals#cryptoenginealgorithmoperation"><code>CryptoEngineAlgorithmOperation</code></a></p>
 <p>Kind of operation: &quot;sign&quot;, &quot;encrypt&quot;, &quot;generateKey&quot;, &quot;importKey&quot;, &quot;exportKey&quot;, &quot;verify&quot;</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-18">Returns<a href="#returns-18" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-19">Returns<a href="#returns-19" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/CryptoEngineAlgorithmParams"><code>CryptoEngineAlgorithmParams</code></a></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-20">Implementation of<a href="#implementation-of-20" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-21">Implementation of<a href="#implementation-of-21" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#getalgorithmparameters"><code>getAlgorithmParameters</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="gethashalgorithm">getHashAlgorithm()<a href="#gethashalgorithm" class="hash-link" aria-label="Direct link to getHashAlgorithm()" title="Direct link to getHashAlgorithm()" translate="no">​</a></h3>
@@ -374,13 +389,13 @@
 <p><code>abstract</code> <strong>getHashAlgorithm</strong>(<code>signatureAlgorithm</code>): <code>string</code></p>
 </blockquote>
 <p>Getting hash algorithm by signature algorithm</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-22">Parameters<a href="#parameters-22" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-23">Parameters<a href="#parameters-23" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="signaturealgorithm">signatureAlgorithm<a href="#signaturealgorithm" class="hash-link" aria-label="Direct link to signatureAlgorithm" title="Direct link to signatureAlgorithm" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/classes/AlgorithmIdentifier"><code>AlgorithmIdentifier</code></a></p>
 <p>Signature algorithm</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-19">Returns<a href="#returns-19" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-20">Returns<a href="#returns-20" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>string</code></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-21">Implementation of<a href="#implementation-of-21" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-22">Implementation of<a href="#implementation-of-22" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#gethashalgorithm"><code>getHashAlgorithm</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="getoidbyalgorithm">getOIDByAlgorithm()<a href="#getoidbyalgorithm" class="hash-link" aria-label="Direct link to getOIDByAlgorithm()" title="Direct link to getOIDByAlgorithm()" translate="no">​</a></h3>
@@ -388,8 +403,8 @@
 <p><code>abstract</code> <strong>getOIDByAlgorithm</strong>(<code>algorithm</code>, <code>safety?</code>, <code>target?</code>): <code>string</code></p>
 </blockquote>
 <p>Get OID for each specific algorithm</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-23">Parameters<a href="#parameters-23" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-10">algorithm<a href="#algorithm-10" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h5>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-24">Parameters<a href="#parameters-24" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-11">algorithm<a href="#algorithm-11" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h5>
 <p><code>Algorithm</code></p>
 <p>WebCrypto Algorithm</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="safety-3">safety?<a href="#safety-3" class="hash-link" aria-label="Direct link to safety?" title="Direct link to safety?" translate="no">​</a></h5>
@@ -398,27 +413,27 @@
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="target-3">target?<a href="#target-3" class="hash-link" aria-label="Direct link to target?" title="Direct link to target?" translate="no">​</a></h5>
 <p><code>string</code></p>
 <p>Name of the target</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-20">Returns<a href="#returns-20" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-21">Returns<a href="#returns-21" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>string</code></p>
 <h4 class="anchor anchorTargetStickyNavbar_tleR" id="throws-1">Throws<a href="#throws-1" class="hash-link" aria-label="Direct link to Throws" title="Direct link to Throws" translate="no">​</a></h4>
 <p>Throws Error exception if unknown WebCrypto algorithm</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-22">Implementation of<a href="#implementation-of-22" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-23">Implementation of<a href="#implementation-of-23" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#getoidbyalgorithm"><code>getOIDByAlgorithm</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="getpublickey">getPublicKey()<a href="#getpublickey" class="hash-link" aria-label="Direct link to getPublicKey()" title="Direct link to getPublicKey()" translate="no">​</a></h3>
 <blockquote>
 <p><code>abstract</code> <strong>getPublicKey</strong>(<code>publicKeyInfo</code>, <code>signatureAlgorithm</code>, <code>parameters?</code>): <code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
 </blockquote>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-24">Parameters<a href="#parameters-24" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-25">Parameters<a href="#parameters-25" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="publickeyinfo">publicKeyInfo<a href="#publickeyinfo" class="hash-link" aria-label="Direct link to publicKeyInfo" title="Direct link to publicKeyInfo" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/classes/PublicKeyInfo"><code>PublicKeyInfo</code></a></p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="signaturealgorithm-1">signatureAlgorithm<a href="#signaturealgorithm-1" class="hash-link" aria-label="Direct link to signatureAlgorithm" title="Direct link to signatureAlgorithm" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/classes/AlgorithmIdentifier"><code>AlgorithmIdentifier</code></a></p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-25">parameters?<a href="#parameters-25" class="hash-link" aria-label="Direct link to parameters?" title="Direct link to parameters?" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-26">parameters?<a href="#parameters-26" class="hash-link" aria-label="Direct link to parameters?" title="Direct link to parameters?" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/CryptoEnginePublicKeyParams"><code>CryptoEnginePublicKeyParams</code></a></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-21">Returns<a href="#returns-21" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-22">Returns<a href="#returns-22" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-23">Implementation of<a href="#implementation-of-23" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-24">Implementation of<a href="#implementation-of-24" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#getpublickey"><code>getPublicKey</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="getrandomvalues">getRandomValues()<a href="#getrandomvalues" class="hash-link" aria-label="Direct link to getRandomValues()" title="Direct link to getRandomValues()" translate="no">​</a></h3>
@@ -428,12 +443,12 @@
 <h4 class="anchor anchorTargetStickyNavbar_tleR" id="type-parameters-2">Type Parameters<a href="#type-parameters-2" class="hash-link" aria-label="Direct link to Type Parameters" title="Direct link to Type Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="t-2">T<a href="#t-2" class="hash-link" aria-label="Direct link to T" title="Direct link to T" translate="no">​</a></h5>
 <p><code>T</code> <em>extends</em> <code>ArrayBufferView</code>&lt;<code>ArrayBufferLike</code>&gt; | <code>null</code></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-26">Parameters<a href="#parameters-26" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-27">Parameters<a href="#parameters-27" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="array">array<a href="#array" class="hash-link" aria-label="Direct link to array" title="Direct link to array" translate="no">​</a></h5>
 <p><code>T</code></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-22">Returns<a href="#returns-22" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-23">Returns<a href="#returns-23" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>T</code></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-24">Implementation of<a href="#implementation-of-24" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-25">Implementation of<a href="#implementation-of-25" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#getrandomvalues"><code>getRandomValues</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="getsignatureparameters">getSignatureParameters()<a href="#getsignatureparameters" class="hash-link" aria-label="Direct link to getSignatureParameters()" title="Direct link to getSignatureParameters()" translate="no">​</a></h3>
@@ -441,49 +456,30 @@
 <p><code>abstract</code> <strong>getSignatureParameters</strong>(<code>privateKey</code>, <code>hashAlgorithm?</code>): <code>Promise</code>&lt;<a class="" href="/docs/api/interfaces/CryptoEngineSignatureParams"><code>CryptoEngineSignatureParams</code></a>&gt;</p>
 </blockquote>
 <p>Get signature parameters by analyzing private key algorithm</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-27">Parameters<a href="#parameters-27" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-28">Parameters<a href="#parameters-28" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="privatekey">privateKey<a href="#privatekey" class="hash-link" aria-label="Direct link to privateKey" title="Direct link to privateKey" translate="no">​</a></h5>
 <p><code>CryptoKey</code></p>
 <p>The private key user would like to use</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="hashalgorithm">hashAlgorithm?<a href="#hashalgorithm" class="hash-link" aria-label="Direct link to hashAlgorithm?" title="Direct link to hashAlgorithm?" translate="no">​</a></h5>
 <p><code>string</code></p>
 <p>Hash algorithm user would like to use. Default is SHA-1</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-23">Returns<a href="#returns-23" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-24">Returns<a href="#returns-24" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>Promise</code>&lt;<a class="" href="/docs/api/interfaces/CryptoEngineSignatureParams"><code>CryptoEngineSignatureParams</code></a>&gt;</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-25">Implementation of<a href="#implementation-of-25" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-26">Implementation of<a href="#implementation-of-26" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#getsignatureparameters"><code>getSignatureParameters</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="importkey">importKey()<a href="#importkey" class="hash-link" aria-label="Direct link to importKey()" title="Direct link to importKey()" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-11">Call Signature<a href="#call-signature-11" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-12">Call Signature<a href="#call-signature-12" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
 <blockquote>
 <p><strong>importKey</strong>(<code>format</code>, <code>keyData</code>, <code>algorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
 </blockquote>
 <p>The <strong><code>importKey()</code></strong> method of the SubtleCrypto interface imports a key: that is, it takes as input a key in an external, portable format and gives you a CryptoKey object that you can use in the Web Crypto API.</p>
 <p><a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/importKey" target="_blank" rel="noopener noreferrer" class="">MDN Reference</a></p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-28">Parameters<a href="#parameters-28" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-29">Parameters<a href="#parameters-29" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="format-2">format<a href="#format-2" class="hash-link" aria-label="Direct link to format" title="Direct link to format" translate="no">​</a></h6>
 <p><code>&quot;jwk&quot;</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="keydata">keyData<a href="#keydata" class="hash-link" aria-label="Direct link to keyData" title="Direct link to keyData" translate="no">​</a></h6>
 <p><code>JsonWebKey</code></p>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-11">algorithm<a href="#algorithm-11" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h6>
-<p><code>AlgorithmIdentifier</code> | <code>HmacImportParams</code> | <code>RsaHashedImportParams</code> | <code>EcKeyImportParams</code> | <code>AesKeyAlgorithm</code></p>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-6">extractable<a href="#extractable-6" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
-<p><code>boolean</code></p>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keyusages-6">keyUsages<a href="#keyusages-6" class="hash-link" aria-label="Direct link to keyUsages" title="Direct link to keyUsages" translate="no">​</a></h6>
-<p><code>KeyUsage</code>[]</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-24">Returns<a href="#returns-24" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
-<p><code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-26">Implementation of<a href="#implementation-of-26" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
-<p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#importkey"><code>importKey</code></a></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-12">Call Signature<a href="#call-signature-12" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
-<blockquote>
-<p><strong>importKey</strong>(<code>format</code>, <code>keyData</code>, <code>algorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
-</blockquote>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-29">Parameters<a href="#parameters-29" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="format-3">format<a href="#format-3" class="hash-link" aria-label="Direct link to format" title="Direct link to format" translate="no">​</a></h6>
-<p><code>&quot;pkcs8&quot;</code> | <code>&quot;raw&quot;</code> | <code>&quot;spki&quot;</code></p>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keydata-1">keyData<a href="#keydata-1" class="hash-link" aria-label="Direct link to keyData" title="Direct link to keyData" translate="no">​</a></h6>
-<p><code>BufferSource</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-12">algorithm<a href="#algorithm-12" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h6>
 <p><code>AlgorithmIdentifier</code> | <code>HmacImportParams</code> | <code>RsaHashedImportParams</code> | <code>EcKeyImportParams</code> | <code>AesKeyAlgorithm</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-7">extractable<a href="#extractable-7" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
@@ -498,13 +494,11 @@
 <blockquote>
 <p><strong>importKey</strong>(<code>format</code>, <code>keyData</code>, <code>algorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
 </blockquote>
-<p>The <strong><code>importKey()</code></strong> method of the SubtleCrypto interface imports a key: that is, it takes as input a key in an external, portable format and gives you a CryptoKey object that you can use in the Web Crypto API.</p>
-<p><a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/importKey" target="_blank" rel="noopener noreferrer" class="">MDN Reference</a></p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-30">Parameters<a href="#parameters-30" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="format-4">format<a href="#format-4" class="hash-link" aria-label="Direct link to format" title="Direct link to format" translate="no">​</a></h6>
-<p><code>&quot;jwk&quot;</code></p>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keydata-2">keyData<a href="#keydata-2" class="hash-link" aria-label="Direct link to keyData" title="Direct link to keyData" translate="no">​</a></h6>
-<p><code>JsonWebKey</code></p>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="format-3">format<a href="#format-3" class="hash-link" aria-label="Direct link to format" title="Direct link to format" translate="no">​</a></h6>
+<p><code>&quot;pkcs8&quot;</code> | <code>&quot;raw&quot;</code> | <code>&quot;spki&quot;</code></p>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keydata-1">keyData<a href="#keydata-1" class="hash-link" aria-label="Direct link to keyData" title="Direct link to keyData" translate="no">​</a></h6>
+<p><code>BufferSource</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-13">algorithm<a href="#algorithm-13" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h6>
 <p><code>AlgorithmIdentifier</code> | <code>HmacImportParams</code> | <code>RsaHashedImportParams</code> | <code>EcKeyImportParams</code> | <code>AesKeyAlgorithm</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-8">extractable<a href="#extractable-8" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
@@ -519,20 +513,41 @@
 <blockquote>
 <p><strong>importKey</strong>(<code>format</code>, <code>keyData</code>, <code>algorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
 </blockquote>
+<p>The <strong><code>importKey()</code></strong> method of the SubtleCrypto interface imports a key: that is, it takes as input a key in an external, portable format and gives you a CryptoKey object that you can use in the Web Crypto API.</p>
+<p><a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/importKey" target="_blank" rel="noopener noreferrer" class="">MDN Reference</a></p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-31">Parameters<a href="#parameters-31" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="format-5">format<a href="#format-5" class="hash-link" aria-label="Direct link to format" title="Direct link to format" translate="no">​</a></h6>
-<p><code>&quot;pkcs8&quot;</code> | <code>&quot;raw&quot;</code> | <code>&quot;spki&quot;</code></p>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keydata-3">keyData<a href="#keydata-3" class="hash-link" aria-label="Direct link to keyData" title="Direct link to keyData" translate="no">​</a></h6>
-<p><code>BufferSource</code></p>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="format-4">format<a href="#format-4" class="hash-link" aria-label="Direct link to format" title="Direct link to format" translate="no">​</a></h6>
+<p><code>&quot;jwk&quot;</code></p>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keydata-2">keyData<a href="#keydata-2" class="hash-link" aria-label="Direct link to keyData" title="Direct link to keyData" translate="no">​</a></h6>
+<p><code>JsonWebKey</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-14">algorithm<a href="#algorithm-14" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h6>
 <p><code>AlgorithmIdentifier</code> | <code>HmacImportParams</code> | <code>RsaHashedImportParams</code> | <code>EcKeyImportParams</code> | <code>AesKeyAlgorithm</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-9">extractable<a href="#extractable-9" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
 <p><code>boolean</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="keyusages-9">keyUsages<a href="#keyusages-9" class="hash-link" aria-label="Direct link to keyUsages" title="Direct link to keyUsages" translate="no">​</a></h6>
-<p><code>Iterable</code>&lt;<code>KeyUsage</code>&gt;</p>
+<p><code>KeyUsage</code>[]</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-27">Returns<a href="#returns-27" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
 <p><code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-29">Implementation of<a href="#implementation-of-29" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
+<p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#importkey"><code>importKey</code></a></p>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-15">Call Signature<a href="#call-signature-15" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
+<blockquote>
+<p><strong>importKey</strong>(<code>format</code>, <code>keyData</code>, <code>algorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
+</blockquote>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-32">Parameters<a href="#parameters-32" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="format-5">format<a href="#format-5" class="hash-link" aria-label="Direct link to format" title="Direct link to format" translate="no">​</a></h6>
+<p><code>&quot;pkcs8&quot;</code> | <code>&quot;raw&quot;</code> | <code>&quot;spki&quot;</code></p>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keydata-3">keyData<a href="#keydata-3" class="hash-link" aria-label="Direct link to keyData" title="Direct link to keyData" translate="no">​</a></h6>
+<p><code>BufferSource</code></p>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-15">algorithm<a href="#algorithm-15" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h6>
+<p><code>AlgorithmIdentifier</code> | <code>HmacImportParams</code> | <code>RsaHashedImportParams</code> | <code>EcKeyImportParams</code> | <code>AesKeyAlgorithm</code></p>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-10">extractable<a href="#extractable-10" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
+<p><code>boolean</code></p>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keyusages-10">keyUsages<a href="#keyusages-10" class="hash-link" aria-label="Direct link to keyUsages" title="Direct link to keyUsages" translate="no">​</a></h6>
+<p><code>Iterable</code>&lt;<code>KeyUsage</code>&gt;</p>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-28">Returns<a href="#returns-28" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
+<p><code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-30">Implementation of<a href="#implementation-of-30" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#importkey"><code>importKey</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="sign">sign()<a href="#sign" class="hash-link" aria-label="Direct link to sign()" title="Direct link to sign()" translate="no">​</a></h3>
@@ -541,16 +556,16 @@
 </blockquote>
 <p>The <strong><code>sign()</code></strong> method of the SubtleCrypto interface generates a digital signature.</p>
 <p><a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/sign" target="_blank" rel="noopener noreferrer" class="">MDN Reference</a></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-32">Parameters<a href="#parameters-32" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-15">algorithm<a href="#algorithm-15" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h5>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-33">Parameters<a href="#parameters-33" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-16">algorithm<a href="#algorithm-16" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h5>
 <p><code>AlgorithmIdentifier</code> | <code>RsaPssParams</code> | <code>EcdsaParams</code></p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="key-4">key<a href="#key-4" class="hash-link" aria-label="Direct link to key" title="Direct link to key" translate="no">​</a></h5>
 <p><code>CryptoKey</code></p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="data-3">data<a href="#data-3" class="hash-link" aria-label="Direct link to data" title="Direct link to data" translate="no">​</a></h5>
 <p><code>BufferSource</code></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-28">Returns<a href="#returns-28" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-29">Returns<a href="#returns-29" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-30">Implementation of<a href="#implementation-of-30" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-31">Implementation of<a href="#implementation-of-31" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#sign"><code>sign</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="signwithprivatekey">signWithPrivateKey()<a href="#signwithprivatekey" class="hash-link" aria-label="Direct link to signWithPrivateKey()" title="Direct link to signWithPrivateKey()" translate="no">​</a></h3>
@@ -558,19 +573,19 @@
 <p><code>abstract</code> <strong>signWithPrivateKey</strong>(<code>data</code>, <code>privateKey</code>, <code>parameters</code>): <code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
 </blockquote>
 <p>Sign data with pre-defined private key</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-33">Parameters<a href="#parameters-33" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-34">Parameters<a href="#parameters-34" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="data-4">data<a href="#data-4" class="hash-link" aria-label="Direct link to data" title="Direct link to data" translate="no">​</a></h5>
 <p><code>BufferSource</code></p>
 <p>Data to be signed</p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="privatekey-1">privateKey<a href="#privatekey-1" class="hash-link" aria-label="Direct link to privateKey" title="Direct link to privateKey" translate="no">​</a></h5>
 <p><code>CryptoKey</code></p>
 <p>Private key to use</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-34">parameters<a href="#parameters-34" class="hash-link" aria-label="Direct link to parameters" title="Direct link to parameters" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-35">parameters<a href="#parameters-35" class="hash-link" aria-label="Direct link to parameters" title="Direct link to parameters" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/CryptoEngineSignWithPrivateKeyParams"><code>CryptoEngineSignWithPrivateKeyParams</code></a></p>
 <p>Parameters for used algorithm</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-29">Returns<a href="#returns-29" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-30">Returns<a href="#returns-30" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-31">Implementation of<a href="#implementation-of-31" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-32">Implementation of<a href="#implementation-of-32" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#signwithprivatekey"><code>signWithPrivateKey</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="stampdatawithpassword">stampDataWithPassword()<a href="#stampdatawithpassword" class="hash-link" aria-label="Direct link to stampDataWithPassword()" title="Direct link to stampDataWithPassword()" translate="no">​</a></h3>
@@ -578,47 +593,47 @@
 <p><code>abstract</code> <strong>stampDataWithPassword</strong>(<code>parameters</code>): <code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
 </blockquote>
 <p>Stamping (signing) data using algorithm similar to HMAC</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-35">Parameters<a href="#parameters-35" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-36">parameters<a href="#parameters-36" class="hash-link" aria-label="Direct link to parameters" title="Direct link to parameters" translate="no">​</a></h5>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-36">Parameters<a href="#parameters-36" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-37">parameters<a href="#parameters-37" class="hash-link" aria-label="Direct link to parameters" title="Direct link to parameters" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/CryptoEngineStampDataWithPasswordParams"><code>CryptoEngineStampDataWithPasswordParams</code></a></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-30">Returns<a href="#returns-30" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-31">Returns<a href="#returns-31" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-32">Implementation of<a href="#implementation-of-32" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-33">Implementation of<a href="#implementation-of-33" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#stampdatawithpassword"><code>stampDataWithPassword</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="unwrapkey">unwrapKey()<a href="#unwrapkey" class="hash-link" aria-label="Direct link to unwrapKey()" title="Direct link to unwrapKey()" translate="no">​</a></h3>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-15">Call Signature<a href="#call-signature-15" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-16">Call Signature<a href="#call-signature-16" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
 <blockquote>
 <p><strong>unwrapKey</strong>(<code>format</code>, <code>wrappedKey</code>, <code>unwrappingKey</code>, <code>unwrapAlgorithm</code>, <code>unwrappedKeyAlgorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
 </blockquote>
-<p>The <strong><code>unwrapKey()</code></strong> method of the SubtleCrypto interface &#x27;unwraps&#x27; a key.</p>
+<p>The <strong><code>unwrapKey()</code></strong> method of the SubtleCrypto interface &quot;unwraps&quot; a key. This means that it takes as its input a key that has been exported and then encrypted (also called &quot;wrapped&quot;). It decrypts the key and then imports it, returning a CryptoKey object that can be used in the Web Crypto API.</p>
 <p><a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/unwrapKey" target="_blank" rel="noopener noreferrer" class="">MDN Reference</a></p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-37">Parameters<a href="#parameters-37" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-38">Parameters<a href="#parameters-38" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="format-6">format<a href="#format-6" class="hash-link" aria-label="Direct link to format" title="Direct link to format" translate="no">​</a></h6>
 <p><code>KeyFormat</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="wrappedkey">wrappedKey<a href="#wrappedkey" class="hash-link" aria-label="Direct link to wrappedKey" title="Direct link to wrappedKey" translate="no">​</a></h6>
 <p><code>BufferSource</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="unwrappingkey">unwrappingKey<a href="#unwrappingkey" class="hash-link" aria-label="Direct link to unwrappingKey" title="Direct link to unwrappingKey" translate="no">​</a></h6>
 <p><code>CryptoKey</code></p>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="unwrapalgorithm">unwrapAlgorithm<a href="#unwrapalgorithm" class="hash-link" aria-label="Direct link to unwrapAlgorithm" title="Direct link to unwrapAlgorithm" translate="no"> ​</a></h6>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="unwrapalgorithm">unwrapAlgorithm<a href="#unwrapalgorithm" class="hash-link" aria-label="Direct link to unwrapAlgorithm" title="Direct link to unwrapAlgorithm" translate="no">​</a></h6>
 <p><code>AlgorithmIdentifier</code> | <code>RsaOaepParams</code> | <code>AesCtrParams</code> | <code>AesCbcParams</code> | <code>AesGcmParams</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="unwrappedkeyalgorithm">unwrappedKeyAlgorithm<a href="#unwrappedkeyalgorithm" class="hash-link" aria-label="Direct link to unwrappedKeyAlgorithm" title="Direct link to unwrappedKeyAlgorithm" translate="no">​</a></h6>
 <p><code>AlgorithmIdentifier</code> | <code>HmacImportParams</code> | <code>RsaHashedImportParams</code> | <code>EcKeyImportParams</code> | <code>AesKeyAlgorithm</code></p>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-10">extractable<a href="#extractable-10" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-11">extractable<a href="#extractable-11" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
 <p><code>boolean</code></p>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keyusages-10">keyUsages<a href="#keyusages-10" class="hash-link" aria-label="Direct link to keyUsages" title="Direct link to keyUsages" translate="no">​</a></h6>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keyusages-11">keyUsages<a href="#keyusages-11" class="hash-link" aria-label="Direct link to keyUsages" title="Direct link to keyUsages" translate="no">​</a></h6>
 <p><code>KeyUsage</code>[]</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-31">Returns<a href="#returns-31" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-32">Returns<a href="#returns-32" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
 <p><code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-33">Implementation of<a href="#implementation-of-33" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-34">Implementation of<a href="#implementation-of-34" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#unwrapkey"><code>unwrapKey</code></a></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-16">Call Signature<a href="#call-signature-16" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no"> ​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="call-signature-17">Call Signature<a href="#call-signature-17" class="hash-link" aria-label="Direct link to Call Signature" title="Direct link to Call Signature" translate="no">​</a></h4>
 <blockquote>
 <p><strong>unwrapKey</strong>(<code>format</code>, <code>wrappedKey</code>, <code>unwrappingKey</code>, <code>unwrapAlgorithm</code>, <code>unwrappedKeyAlgorithm</code>, <code>extractable</code>, <code>keyUsages</code>): <code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
 </blockquote>
-<p>The <strong><code>unwrapKey()</code></strong> method of the SubtleCrypto interface &#x27;unwraps&#x27; a key.</p>
+<p>The <strong><code>unwrapKey()</code></strong> method of the SubtleCrypto interface &quot;unwraps&quot; a key. This means that it takes as its input a key that has been exported and then encrypted (also called &quot;wrapped&quot;). It decrypts the key and then imports it, returning a CryptoKey object that can be used in the Web Crypto API.</p>
 <p><a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/unwrapKey" target="_blank" rel="noopener noreferrer" class="">MDN Reference</a></p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-38">Parameters<a href="#parameters-38" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-39">Parameters<a href="#parameters-39" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h5>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="format-7">format<a href="#format-7" class="hash-link" aria-label="Direct link to format" title="Direct link to format" translate="no">​</a></h6>
 <p><code>KeyFormat</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="wrappedkey-1">wrappedKey<a href="#wrappedkey-1" class="hash-link" aria-label="Direct link to wrappedKey" title="Direct link to wrappedKey" translate="no">​</a></h6>
@@ -629,13 +644,13 @@
 <p><code>AlgorithmIdentifier</code> | <code>RsaOaepParams</code> | <code>AesCtrParams</code> | <code>AesCbcParams</code> | <code>AesGcmParams</code></p>
 <h6 class="anchor anchorTargetStickyNavbar_tleR" id="unwrappedkeyalgorithm-1">unwrappedKeyAlgorithm<a href="#unwrappedkeyalgorithm-1" class="hash-link" aria-label="Direct link to unwrappedKeyAlgorithm" title="Direct link to unwrappedKeyAlgorithm" translate="no">​</a></h6>
 <p><code>AlgorithmIdentifier</code> | <code>HmacImportParams</code> | <code>RsaHashedImportParams</code> | <code>EcKeyImportParams</code> | <code>AesKeyAlgorithm</code></p>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-11">extractable<a href="#extractable-11" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="extractable-12">extractable<a href="#extractable-12" class="hash-link" aria-label="Direct link to extractable" title="Direct link to extractable" translate="no">​</a></h6>
 <p><code>boolean</code></p>
-<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keyusages-11">keyUsages<a href="#keyusages-11" class="hash-link" aria-label="Direct link to keyUsages" title="Direct link to keyUsages" translate="no">​</a></h6>
+<h6 class="anchor anchorTargetStickyNavbar_tleR" id="keyusages-12">keyUsages<a href="#keyusages-12" class="hash-link" aria-label="Direct link to keyUsages" title="Direct link to keyUsages" translate="no">​</a></h6>
 <p><code>Iterable</code>&lt;<code>KeyUsage</code>&gt;</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-32">Returns<a href="#returns-32" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="returns-33">Returns<a href="#returns-33" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h5>
 <p><code>Promise</code>&lt;<code>CryptoKey</code>&gt;</p>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-34">Implementation of<a href="#implementation-of-34" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-35">Implementation of<a href="#implementation-of-35" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#unwrapkey"><code>unwrapKey</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="verify">verify()<a href="#verify" class="hash-link" aria-label="Direct link to verify()" title="Direct link to verify()" translate="no">​</a></h3>
@@ -644,8 +659,8 @@
 </blockquote>
 <p>The <strong><code>verify()</code></strong> method of the SubtleCrypto interface verifies a digital signature.</p>
 <p><a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/verify" target="_blank" rel="noopener noreferrer" class="">MDN Reference</a></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-39">Parameters<a href="#parameters-39" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-16">algorithm<a href="#algorithm-16" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h5>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-40">Parameters<a href="#parameters-40" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="algorithm-17">algorithm<a href="#algorithm-17" class="hash-link" aria-label="Direct link to algorithm" title="Direct link to algorithm" translate="no">​</a></h5>
 <p><code>AlgorithmIdentifier</code> | <code>RsaPssParams</code> | <code>EcdsaParams</code></p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="key-5">key<a href="#key-5" class="hash-link" aria-label="Direct link to key" title="Direct link to key" translate="no">​</a></h5>
 <p><code>CryptoKey</code></p>
@@ -653,21 +668,21 @@
 <p><code>BufferSource</code></p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="data-5">data<a href="#data-5" class="hash-link" aria-label="Direct link to data" title="Direct link to data" translate="no">​</a></h5>
 <p><code>BufferSource</code></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-33">Returns<a href="#returns-33" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-34">Returns<a href="#returns-34" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>Promise</code>&lt;<code>boolean</code>&gt;</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-35">Implementation of<a href="#implementation-of-35" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-36">Implementation of<a href="#implementation-of-36" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#verify"><code>verify</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="verifydatastampedwithpassword">verifyDataStampedWithPassword()<a href="#verifydatastampedwithpassword" class="hash-link" aria-label="Direct link to verifyDataStampedWithPassword()" title="Direct link to verifyDataStampedWithPassword()" translate="no">​</a></h3>
 <blockquote>
 <p><code>abstract</code> <strong>verifyDataStampedWithPassword</strong>(<code>parameters</code>): <code>Promise</code>&lt;<code>boolean</code>&gt;</p>
 </blockquote>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-40">Parameters<a href="#parameters-40" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
-<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-41">parameters<a href="#parameters-41" class="hash-link" aria-label="Direct link to parameters" title="Direct link to parameters" translate="no">​</a></h5>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-41">Parameters<a href="#parameters-41" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h5 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-42">parameters<a href="#parameters-42" class="hash-link" aria-label="Direct link to parameters" title="Direct link to parameters" translate="no">​</a></h5>
 <p><a class="" href="/docs/api/interfaces/CryptoEngineVerifyDataStampedWithPasswordParams"><code>CryptoEngineVerifyDataStampedWithPasswordParams</code></a></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-34">Returns<a href="#returns-34" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-35">Returns<a href="#returns-35" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>Promise</code>&lt;<code>boolean</code>&gt;</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-36">Implementation of<a href="#implementation-of-36" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-37">Implementation of<a href="#implementation-of-37" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#verifydatastampedwithpassword"><code>verifyDataStampedWithPassword</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="verifywithpublickey">verifyWithPublicKey()<a href="#verifywithpublickey" class="hash-link" aria-label="Direct link to verifyWithPublicKey()" title="Direct link to verifyWithPublicKey()" translate="no">​</a></h3>
@@ -675,7 +690,7 @@
 <p><code>abstract</code> <strong>verifyWithPublicKey</strong>(<code>data</code>, <code>signature</code>, <code>publicKeyInfo</code>, <code>signatureAlgorithm</code>, <code>shaAlgorithm?</code>): <code>Promise</code>&lt;<code>boolean</code>&gt;</p>
 </blockquote>
 <p>Verify data with the public key</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-42">Parameters<a href="#parameters-42" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-43">Parameters<a href="#parameters-43" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="data-6">data<a href="#data-6" class="hash-link" aria-label="Direct link to data" title="Direct link to data" translate="no">​</a></h5>
 <p><code>BufferSource</code></p>
 <p>Data to be verified</p>
@@ -691,18 +706,18 @@
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="shaalgorithm">shaAlgorithm?<a href="#shaalgorithm" class="hash-link" aria-label="Direct link to shaAlgorithm?" title="Direct link to shaAlgorithm?" translate="no">​</a></h5>
 <p><code>string</code></p>
 <p>Hash algorithm</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-35">Returns<a href="#returns-35" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-36">Returns<a href="#returns-36" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>Promise</code>&lt;<code>boolean</code>&gt;</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-37">Implementation of<a href="#implementation-of-37" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-38">Implementation of<a href="#implementation-of-38" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#verifywithpublickey"><code>verifyWithPublicKey</code></a></p>
 <hr>
 <h3 class="anchor anchorTargetStickyNavbar_tleR" id="wrapkey">wrapKey()<a href="#wrapkey" class="hash-link" aria-label="Direct link to wrapKey()" title="Direct link to wrapKey()" translate="no">​</a></h3>
 <blockquote>
 <p><strong>wrapKey</strong>(<code>format</code>, <code>key</code>, <code>wrappingKey</code>, <code>wrapAlgorithm</code>): <code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
 </blockquote>
-<p>The <strong><code>wrapKey()</code></strong> method of the SubtleCrypto interface &#x27;wraps&#x27; a key.</p>
+<p>The <strong><code>wrapKey()</code></strong> method of the SubtleCrypto interface &quot;wraps&quot; a key. This means that it exports the key in an external, portable format, then encrypts the exported key. Wrapping a key helps protect it in untrusted environments, such as inside an otherwise unprotected data store or in transmission over an unprotected network.</p>
 <p><a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto/wrapKey" target="_blank" rel="noopener noreferrer" class="">MDN Reference</a></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-43">Parameters<a href="#parameters-43" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="parameters-44">Parameters<a href="#parameters-44" class="hash-link" aria-label="Direct link to Parameters" title="Direct link to Parameters" translate="no">​</a></h4>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="format-8">format<a href="#format-8" class="hash-link" aria-label="Direct link to format" title="Direct link to format" translate="no">​</a></h5>
 <p><code>KeyFormat</code></p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="key-6">key<a href="#key-6" class="hash-link" aria-label="Direct link to key" title="Direct link to key" translate="no">​</a></h5>
@@ -711,9 +726,9 @@
 <p><code>CryptoKey</code></p>
 <h5 class="anchor anchorTargetStickyNavbar_tleR" id="wrapalgorithm">wrapAlgorithm<a href="#wrapalgorithm" class="hash-link" aria-label="Direct link to wrapAlgorithm" title="Direct link to wrapAlgorithm" translate="no">​</a></h5>
 <p><code>AlgorithmIdentifier</code> | <code>RsaOaepParams</code> | <code>AesCtrParams</code> | <code>AesCbcParams</code> | <code>AesGcmParams</code></p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-36">Returns<a href="#returns-36" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="returns-37">Returns<a href="#returns-37" class="hash-link" aria-label="Direct link to Returns" title="Direct link to Returns" translate="no">​</a></h4>
 <p><code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
-<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-38">Implementation of<a href="#implementation-of-38" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
+<h4 class="anchor anchorTargetStickyNavbar_tleR" id="implementation-of-39">Implementation of<a href="#implementation-of-39" class="hash-link" aria-label="Direct link to Implementation of" title="Direct link to Implementation of" translate="no">​</a></h4>
 <p><a class="" href="/docs/api/interfaces/ICryptoEngine"><code>ICryptoEngine</code></a>.<a class="" href="/docs/api/interfaces/ICryptoEngine#wrapkey"><code>wrapKey</code></a></p></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/api/enumerations/TimeType"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">TimeType</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/api/classes/AccessDescription"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">AccessDescription</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_XG6w thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#extended-by" class="table-of-contents__link toc-highlight">Extended by</a></li><li><a href="#implements" class="table-of-contents__link toc-highlight">Implements</a></li><li><a href="#constructors" class="table-of-contents__link toc-highlight">Constructors</a><ul><li><a href="#constructor" class="table-of-contents__link toc-highlight">Constructor</a></li></ul></li><li><a href="#properties" class="table-of-contents__link toc-highlight">Properties</a><ul><li><a href="#crypto" class="table-of-contents__link toc-highlight">crypto</a></li><li><a href="#name" class="table-of-contents__link toc-highlight">name</a></li><li><a href="#subtle" class="table-of-contents__link toc-highlight">subtle</a></li></ul></li><li><a href="#methods" class="table-of-contents__link toc-highlight">Methods</a><ul><li><a href="#decrypt" class="table-of-contents__link toc-highlight">decrypt()</a></li><li><a href="#decryptencryptedcontentinfo" class="table-of-contents__link toc-highlight">decryptEncryptedContentInfo()</a></li><li><a href="#derivebits" class="table-of-contents__link toc-highlight">deriveBits()</a></li><li><a href="#derivekey" class="table-of-contents__link toc-highlight">deriveKey()</a></li><li><a href="#digest" class="table-of-contents__link toc-highlight">digest()</a></li><li><a href="#encrypt" class="table-of-contents__link toc-highlight">encrypt()</a></li><li><a href="#encryptencryptedcontentinfo" class="table-of-contents__link toc-highlight">encryptEncryptedContentInfo()</a></li><li><a href="#exportkey" class="table-of-contents__link toc-highlight">exportKey()</a></li><li><a href="#generatekey" class="table-of-contents__link toc-highlight">generateKey()</a></li><li><a href="#getalgorithmbyoid" class="table-of-contents__link toc-highlight">getAlgorithmByOID()</a></li><li><a href="#getalgorithmparameters" class="table-of-contents__link toc-highlight">getAlgorithmParameters()</a></li><li><a href="#gethashalgorithm" class="table-of-contents__link toc-highlight">getHashAlgorithm()</a></li><li><a href="#getoidbyalgorithm" class="table-of-contents__link toc-highlight">getOIDByAlgorithm()</a></li><li><a href="#getpublickey" class="table-of-contents__link toc-highlight">getPublicKey()</a></li><li><a href="#getrandomvalues" class="table-of-contents__link toc-highlight">getRandomValues()</a></li><li><a href="#getsignatureparameters" class="table-of-contents__link toc-highlight">getSignatureParameters()</a></li><li><a href="#importkey" class="table-of-contents__link toc-highlight">importKey()</a></li><li><a href="#sign" class="table-of-contents__link toc-highlight">sign()</a></li><li><a href="#signwithprivatekey" class="table-of-contents__link toc-highlight">signWithPrivateKey()</a></li><li><a href="#stampdatawithpassword" class="table-of-contents__link toc-highlight">stampDataWithPassword()</a></li><li><a href="#unwrapkey" class="table-of-contents__link toc-highlight">unwrapKey()</a></li><li><a href="#verify" class="table-of-contents__link toc-highlight">verify()</a></li><li><a href="#verifydatastampedwithpassword" class="table-of-contents__link toc-highlight">verifyDataStampedWithPassword()</a></li><li><a href="#verifywithpublickey" class="table-of-contents__link toc-highlight">verifyWithPublicKey()</a></li><li><a href="#wrapkey" class="table-of-contents__link toc-highlight">wrapKey()</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Learn</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/docs/installation">Installation</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/examples/certificates-and-revocation">Examples</a></li><li class="footer__item"><a class="footer__link-item" href="/docs/api/pkijs">API</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/PeculiarVentures/PKI.js" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPrP"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="mailto:info@peculiarventures.com" target="_blank" rel="noopener noreferrer" class="footer__link-item">Contact us<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPrP"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Version: 3.4.0</div><ul class="footer__items clean-list"></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Made with ❤️ across the globe</div></div></div></footer></div>
 </body>
 </html>
