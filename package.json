@@ -23,12 +23,12 @@
     "@vitest/coverage-v8": "^4.1.10",
     "emailjs-mime-builder": "^2.0.5",
     "emailjs-mime-parser": "^2.0.7",
-    "oxfmt": "^0.60.0",
+    "oxfmt": "^0.61.0",
     "oxlint": "^1.75.0",
     "rollup": "^4.60.2",
     "rollup-plugin-dts": "^6.2.3",
-    "rollup-plugin-typescript2": "^0.36.0",
-    "typescript": "^5.9.3",
+    "rollup-plugin-typescript2": "^0.37.0",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.10"
   },
   "dependencies": {

@@ -139,6 +139,11 @@ export abstract class AbstractCryptoEngine implements type.ICryptoEngine {
     keyUsages: ReadonlyArray<"sign" | "verify">
   ): Promise<CryptoKeyPair>;
   public generateKey(
+    algorithm: "X25519" | { name: "X25519" },
+    extractable: boolean,
+    keyUsages: ReadonlyArray<"deriveBits" | "deriveKey">
+  ): Promise<CryptoKeyPair>;
+  public generateKey(
     algorithm: RsaHashedKeyGenParams | EcKeyGenParams,
     extractable: boolean,
     keyUsages: KeyUsage[]
@@ -313,6 +318,6 @@ export abstract class AbstractCryptoEngine implements type.ICryptoEngine {
       throw new Error('Argument "array" must not be null');
     }
 
-    return this.crypto.getRandomValues(array) as T;
+    return this.crypto.getRandomValues(array as ArrayBufferView<ArrayBuffer>) as T;
   }
 }
