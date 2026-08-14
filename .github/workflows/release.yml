@@ -1,0 +1,198 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release type"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release_tag: ${{ steps.version.outputs.release_tag }}
+      major_tag: ${{ steps.version.outputs.major_tag }}
+      tgz: ${{ steps.pack.outputs.tgz }}
+
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bump version without git tag
+        id: version
+        run: |
+          npm version "${{ inputs.version }}" --no-git-tag-version
+
+          VERSION=$(node -p "require('./package.json').version")
+          MAJOR=$(node -p "require('./package.json').version.split('.')[0]")
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "major_tag=v$MAJOR" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: npm run build
+
+      - name: Pack release artifact
+        id: pack
+        run: |
+          TGZ=$(npm pack --ignore-scripts --json | node -e "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>console.log(JSON.parse(s)[0].filename))")
+
+          echo "tgz=$TGZ" >> "$GITHUB_OUTPUT"
+          sha256sum "$TGZ" > "$TGZ.sha256"
+
+      - name: Generate release summary
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          CURRENT_SHA=$(git rev-parse HEAD)
+          PREVIOUS_TAG=$(git tag --merged "$CURRENT_SHA" --sort=-version:refname | head -n 1)
+
+          echo "## Release preview" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Version:** ${{ steps.version.outputs.release_tag }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Release type:** ${{ inputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Package:** \`${{ steps.pack.outputs.tgz }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "### SHA256" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat "${{ steps.pack.outputs.tgz }}.sha256" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "### Changes" >> "$GITHUB_STEP_SUMMARY"
+
+          declare -A SEEN_PRS=()
+          if [ -n "$PREVIOUS_TAG" ]; then
+            COMMIT_RANGE="$PREVIOUS_TAG..$CURRENT_SHA"
+          else
+            COMMIT_RANGE="$CURRENT_SHA"
+          fi
+
+          while IFS= read -r COMMIT_SHA; do
+            [ -z "$COMMIT_SHA" ] && continue
+
+            COMMIT_SHORT_SHA=$(git rev-parse --short "$COMMIT_SHA")
+            COMMIT_SUBJECT=$(git show -s --format=%s "$COMMIT_SHA")
+            PR_JSON=$(gh api "repos/${{ github.repository }}/commits/$COMMIT_SHA/pulls" \
+              -H "Accept: application/vnd.github+json" 2>/dev/null || echo "")
+
+            if [ -n "$PR_JSON" ] && [ "$PR_JSON" != "[]" ]; then
+              PR_NUMBER=$(node -e 'const payload = JSON.parse(process.argv[1]); process.stdout.write(String(payload[0].number));' "$PR_JSON")
+
+              if [ -z "${SEEN_PRS[$PR_NUMBER]+x}" ]; then
+                PR_TITLE=$(node -e 'const payload = JSON.parse(process.argv[1]); process.stdout.write(payload[0].title);' "$PR_JSON")
+                PR_URL=$(node -e 'const payload = JSON.parse(process.argv[1]); process.stdout.write(payload[0].html_url);' "$PR_JSON")
+
+                echo "- PR #$PR_NUMBER: [$PR_TITLE]($PR_URL)" >> "$GITHUB_STEP_SUMMARY"
+                SEEN_PRS[$PR_NUMBER]=1
+              fi
+            else
+              echo "- $COMMIT_SUBJECT ($COMMIT_SHORT_SHA)" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done < <(git rev-list --reverse "$COMMIT_RANGE")
+
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "[View full diff](https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...$CURRENT_SHA)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload release package
+        uses: actions/upload-artifact@v7
+        with:
+          name: npm-package
+          path: |
+            *.tgz
+            *.tgz.sha256
+          retention-days: 7
+          if-no-files-found: error
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: prepare-release
+    environment: npm
+
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Download release package
+        uses: actions/download-artifact@v7
+        with:
+          name: npm-package
+          path: ./release-package
+
+      - name: Verify package checksum
+        run: |
+          cd release-package
+          sha256sum -c *.tgz.sha256
+
+      - name: Publish prepared package via Trusted Publisher
+        run: npm publish ./release-package/*.tgz --access public
+
+      - name: Commit release version and tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          npm version "${{ needs.prepare-release.outputs.version }}" --no-git-tag-version
+
+          git add package.json package-lock.json
+          git commit -m "chore(release): ${{ needs.prepare-release.outputs.release_tag }}"
+          git tag "${{ needs.prepare-release.outputs.release_tag }}"
+
+      - name: Push release commit and tag
+        run: |
+          git push origin "HEAD:${{ github.event.repository.default_branch }}"
+          git push origin "${{ needs.prepare-release.outputs.release_tag }}"
+
+      - name: Update major tag
+        run: |
+          git tag -f "${{ needs.prepare-release.outputs.major_tag }}" "${{ needs.prepare-release.outputs.release_tag }}"
+          git push origin "${{ needs.prepare-release.outputs.major_tag }}" --force
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ needs.prepare-release.outputs.release_tag }}" \
+            --verify-tag \
+            --title "${{ needs.prepare-release.outputs.release_tag }}" \
+            --generate-notes
