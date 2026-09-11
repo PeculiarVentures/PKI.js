@@ -12,6 +12,7 @@ import {
 } from "./EncryptedContentInfo";
 import { Attribute, AttributeJson } from "./Attribute";
 import { AlgorithmIdentifier, AlgorithmIdentifierParameters } from "./AlgorithmIdentifier";
+import { GCMParams } from "./GCMParams";
 import { RSAESOAEPParams } from "./RSAESOAEPParams";
 import { KeyTransRecipientInfo } from "./KeyTransRecipientInfo";
 import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
@@ -918,7 +919,9 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     crypto = common.getCrypto(true)
   ): Promise<(void | { ecdhPrivateKey: CryptoKey })[]> {
     //#region Initial variables
-    const ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
+    // AES-GCM takes a 12-byte nonce per RFC 5084, other AES modes a 16-byte IV
+    const isAesGcm = contentEncryptionAlgorithm.name.toUpperCase() === "AES-GCM";
+    const ivBuffer = new ArrayBuffer(isAesGcm ? 12 : 16);
     const ivView = new Uint8Array(ivBuffer);
     crypto.getRandomValues(ivView);
 
@@ -961,7 +964,11 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       contentType: "1.2.840.113549.1.7.1", // "data"
       contentEncryptionAlgorithm: new AlgorithmIdentifier({
         algorithmId: contentEncryptionOID,
-        algorithmParams: new asn1js.OctetString({ valueHex: ivBuffer })
+        // AES-GCM parameters are a GCMParameters SEQUENCE per RFC 5084, not a bare
+        // OCTET STRING; WebCrypto emits a 16-byte ICV, so state it instead of defaulting to 12
+        algorithmParams: isAesGcm
+          ? new GCMParams({ nonce: ivBuffer, icvLen: 16 }).toSchema()
+          : new asn1js.OctetString({ valueHex: ivBuffer })
       }),
       encryptedContent: new asn1js.OctetString({ valueHex: encryptedContent })
     });
@@ -1798,8 +1805,17 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     //#endregion
 
     //#region Get "initialization vector" for content encryption algorithm
-    const ivBuffer =
-      this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
+    // AES-GCM parameters are a GCMParameters SEQUENCE per RFC 5084, and carry the
+    // ICV length the tag must be read at
+    const isAesGcm = contentEncryptionAlgorithm.name.toUpperCase() === "AES-GCM";
+    const gcmParams = isAesGcm
+      ? GCMParams.fromAlgorithmParams(
+          this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams
+        )
+      : undefined;
+    const ivBuffer = gcmParams
+      ? gcmParams.nonce
+      : this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
     const ivView = new Uint8Array(ivBuffer);
     //#endregion
 
@@ -1810,14 +1826,14 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     const dataBuffer = this.encryptedContentInfo.getEncryptedContent();
     //#endregion
 
-    return crypto.decrypt(
-      {
-        name: (contentEncryptionAlgorithm as any).name,
-        iv: ivView
-      },
-      unwrappedKey,
-      dataBuffer
-    );
+    const decryptParams: AesGcmParams = {
+      name: (contentEncryptionAlgorithm as any).name,
+      iv: ivView
+    };
+    if (gcmParams?.tagLength !== undefined) {
+      decryptParams.tagLength = gcmParams.tagLength;
+    }
+    return crypto.decrypt(decryptParams, unwrappedKey, dataBuffer);
     //#endregion
   }
 }
