@@ -26,6 +26,19 @@ function isCryptoEngine(engine: unknown): engine is ICryptoEngine {
 }
 
 /**
+ * Returns the key under which the crypto engine is shared on the `global` object.
+ * The process id keeps engines of different processes separate; runtimes exposing
+ * a partial `process` shim may report a non-integer `pid` (e.g. `undefined`), and
+ * keys like `global["undefined"]` target read-only global properties, so a fixed
+ * registered symbol is used instead.
+ */
+function getEngineGlobalKey(): number | symbol {
+  return typeof process !== "undefined" && Number.isInteger(process.pid)
+    ? process.pid
+    : Symbol.for("pkijs.engine");
+}
+
+/**
  * Sets global crypto engine
  * @param name Name of the crypto engine
  * @param crypto
@@ -79,23 +92,26 @@ export function setEngine(name: string, ...args: any[]): void {
     typeof window === "undefined"
   ) {
     // We are in Node
-    if (typeof (global as any)[process.pid] === "undefined") {
-      (global as any)[process.pid] = {};
+    const engineKey = getEngineGlobalKey();
+    if (typeof (global as any)[engineKey] === "undefined") {
+      (global as any)[engineKey] = {};
     } else {
-      if (typeof (global as any)[process.pid] !== "object") {
-        throw new Error(`Name global.${process.pid} already exists and it is not an object`);
+      if (typeof (global as any)[engineKey] !== "object") {
+        throw new Error(`Name global.${String(engineKey)} already exists and it is not an object`);
       }
     }
 
-    if (typeof (global as any)[process.pid].pkijs === "undefined") {
-      (global as any)[process.pid].pkijs = {};
+    if (typeof (global as any)[engineKey].pkijs === "undefined") {
+      (global as any)[engineKey].pkijs = {};
     } else {
-      if (typeof (global as any)[process.pid].pkijs !== "object") {
-        throw new Error(`Name global.${process.pid}.pkijs already exists and it is not an object`);
+      if (typeof (global as any)[engineKey].pkijs !== "object") {
+        throw new Error(
+          `Name global.${String(engineKey)}.pkijs already exists and it is not an object`
+        );
       }
     }
 
-    (global as any)[process.pid].pkijs.engine = {
+    (global as any)[engineKey].pkijs.engine = {
       name: name,
       crypto
     };
@@ -119,7 +135,7 @@ export function getEngine(): GlobalCryptoEngine {
     let _engine;
 
     try {
-      _engine = (global as any)[process.pid].pkijs.engine;
+      _engine = (global as any)[getEngineGlobalKey()].pkijs.engine;
     } catch {
       throw new Error("Please call 'setEngine' before call to 'getEngine'");
     }
