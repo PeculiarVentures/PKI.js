@@ -3,7 +3,10 @@ import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
+import {
+  RelativeDistinguishedNames,
+  RelativeDistinguishedNamesJson
+} from "./RelativeDistinguishedNames";
 import * as Schema from "./Schema";
 
 export const TYPE = "type";
@@ -257,7 +260,7 @@ export interface GeneralNameSchema {
 
 export interface GeneralNameJson {
   type: number;
-  value: string;
+  value: string | RelativeDistinguishedNamesJson;
 }
 
 /**
@@ -621,10 +624,10 @@ export class GeneralName extends PkiObject implements IGeneralName {
   }
 
   public toJSON(): GeneralNameJson {
-    const _object = {
+    const _object: GeneralNameJson = {
       type: this.type,
       value: EMPTY_STRING
-    } as GeneralNameJson;
+    };
 
     if (typeof this.value === "string") _object.value = this.value;
     else {
