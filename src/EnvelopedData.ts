@@ -1151,29 +1151,21 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       }
       //#endregion
 
-      try {
-        const publicKey = await recipientInfo.recipientCertificate.getPublicKey(
-          {
-            algorithm: {
-              algorithm: algorithmParameters,
-              usages: ["encrypt", "wrapKey"]
-            }
-          },
-          crypto
-        );
+      const publicKey = await recipientInfo.recipientCertificate.getPublicKey(
+        {
+          algorithm: {
+            algorithm: algorithmParameters,
+            usages: ["encrypt", "wrapKey"]
+          }
+        },
+        crypto
+      );
 
-        const encryptedKey = await crypto.encrypt(
-          publicKey.algorithm,
-          publicKey,
-          exportedSessionKey
-        );
+      const encryptedKey = await crypto.encrypt(publicKey.algorithm, publicKey, exportedSessionKey);
 
-        //#region RecipientEncryptedKey
-        recipientInfo.encryptedKey = new asn1js.OctetString({ valueHex: encryptedKey });
-        //#endregion
-      } catch {
-        // nothing
-      }
+      //#region RecipientEncryptedKey
+      recipientInfo.encryptedKey = new asn1js.OctetString({ valueHex: encryptedKey });
+      //#endregion
     };
 
     const SubKEKRecipientInfo = async (index: number) => {
