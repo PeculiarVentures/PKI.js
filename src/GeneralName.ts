@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -255,9 +256,163 @@ export interface GeneralNameSchema {
   };
 }
 
+export interface GeneralNameDirectoryAttribute {
+  oid: string;
+  asn1Type: string;
+  value: string;
+}
+
+export type GeneralNameTypedValue =
+  | { kind: "otherName"; oid: string; valueBerHex: string }
+  | { kind: "rfc822Name"; value: string }
+  | { kind: "dNSName"; value: string }
+  | { kind: "x400Address"; berHex: string }
+  | { kind: "directoryName"; attributes: GeneralNameDirectoryAttribute[] }
+  | { kind: "ediPartyName"; nameAssigner?: string; partyName: string }
+  | { kind: "uniformResourceIdentifier"; value: string }
+  | { kind: "iPAddress"; address: string; mask?: string; bytesHex: string }
+  | { kind: "registeredID"; value: string };
+
 export interface GeneralNameJson {
   type: number;
   value: string;
+  /**
+   * Typed projection of `value`, keyed by `kind`. Omitted when the name
+   * cannot be represented faithfully.
+   */
+  typedValue?: GeneralNameTypedValue;
+}
+
+const STRING_KINDS: Record<
+  number,
+  "rfc822Name" | "dNSName" | "uniformResourceIdentifier" | "registeredID"
+> = {
+  1: "rfc822Name",
+  2: "dNSName",
+  6: "uniformResourceIdentifier",
+  8: "registeredID"
+};
+
+function isContextTagged(value: any, tagNumber: number): value is asn1js.Constructed {
+  return (
+    value instanceof asn1js.Constructed &&
+    value.idBlock.tagClass === 3 &&
+    value.idBlock.tagNumber === tagNumber
+  );
+}
+
+function ipToString(bytes: Uint8Array): string {
+  if (bytes.length === 4) return bytes.join(".");
+
+  const groups: number[] = [];
+  for (let i = 0; i < 16; i += 2) groups.push((bytes[i] << 8) | bytes[i + 1]);
+  // RFC 5952: compress the longest run (2+ groups) of zero groups, leftmost on a tie
+  let bestStart = -1;
+  let bestLength = 1;
+  for (let i = 0; i < 8;) {
+    let j = i;
+    while (j < 8 && groups[j] === 0) j++;
+    if (j - i > bestLength) {
+      bestStart = i;
+      bestLength = j - i;
+    }
+    i = j === i ? i + 1 : j;
+  }
+  const hex = groups.map(group => group.toString(16));
+  if (bestStart === -1) return hex.join(":");
+
+  return `${hex.slice(0, bestStart).join(":")}::${hex.slice(bestStart + bestLength).join(":")}`;
+}
+
+function directoryString(value: any): string | undefined {
+  const inner = value?.valueBlock?.value?.[0];
+
+  return inner instanceof asn1js.BaseStringBlock ? inner.valueBlock.value : undefined;
+}
+
+function typedValueOf(type: number, value: any): GeneralNameTypedValue | undefined {
+  if (type in STRING_KINDS) {
+    return typeof value === "string" ? { kind: STRING_KINDS[type], value } : undefined;
+  }
+
+  switch (type) {
+    case 0: {
+      if (!isContextTagged(value, 0)) return undefined;
+      const [oid, explicitValue] = value.valueBlock.value;
+      const payload = (explicitValue as any)?.valueBlock?.value;
+      if (
+        !(oid instanceof asn1js.ObjectIdentifier) ||
+        !isContextTagged(explicitValue, 0) ||
+        payload.length !== 1
+      ) {
+        return undefined;
+      }
+
+      return {
+        kind: "otherName",
+        oid: oid.valueBlock.toString(),
+        valueBerHex: pvtsutils.Convert.ToHex(payload[0].toBER(false))
+      };
+    }
+    case 3:
+      return isContextTagged(value, 3)
+        ? { kind: "x400Address", berHex: pvtsutils.Convert.ToHex(value.toBER(false)) }
+        : undefined;
+    case 4: {
+      if (!(value instanceof RelativeDistinguishedNames)) return undefined;
+      const attributes: GeneralNameDirectoryAttribute[] = [];
+      for (const { type: oid, value: attribute } of value.typesAndValues) {
+        if (!(attribute instanceof asn1js.BaseStringBlock)) return undefined;
+        attributes.push({
+          oid,
+          asn1Type: (attribute.constructor as typeof asn1js.BaseBlock).NAME,
+          value: attribute.valueBlock.value
+        });
+      }
+
+      return { kind: "directoryName", attributes };
+    }
+    case 5: {
+      if (!isContextTagged(value, 5)) return undefined;
+      let nameAssigner: string | undefined;
+      let partyName: string | undefined;
+      for (const element of value.valueBlock.value) {
+        if (isContextTagged(element, 0)) nameAssigner = directoryString(element);
+        else if (isContextTagged(element, 1)) partyName = directoryString(element);
+      }
+      if (partyName === undefined) return undefined;
+
+      return nameAssigner === undefined
+        ? { kind: "ediPartyName", partyName }
+        : { kind: "ediPartyName", nameAssigner, partyName };
+    }
+    case 7: {
+      if (!(value instanceof asn1js.OctetString)) return undefined;
+      const bytes = value.valueBlock.valueHexView;
+      const bytesHex = pvtsutils.Convert.ToHex(bytes);
+      // 4/16 bytes: an address; 8/32 bytes: address and mask, as used in NameConstraints
+      switch (bytes.length) {
+        case 4:
+        case 16:
+          return { kind: "iPAddress", address: ipToString(bytes), bytesHex };
+        case 8:
+        case 32: {
+          const half = bytes.length / 2;
+
+          return {
+            kind: "iPAddress",
+            address: ipToString(bytes.slice(0, half)),
+            mask: ipToString(bytes.slice(half)),
+            bytesHex
+          };
+        }
+        default:
+          return undefined;
+      }
+    }
+    default:
+      return undefined;
+  }
 }
 
 /**
@@ -537,7 +692,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
         this.value = new RelativeDistinguishedNames({ schema: asn1.result.directoryName });
         break;
       case 5: // ediPartyName
-        this.value = asn1.result.ediPartyName;
+        this.value = asn1.result.blockName;
         break;
       case 7: // iPAddress
         this.value = new asn1js.OctetString({
@@ -634,6 +789,9 @@ export class GeneralName extends PkiObject implements IGeneralName {
         // nothing
       }
     }
+
+    const typedValue = typedValueOf(this.type, this.value);
+    if (typedValue) _object.typedValue = typedValue;
 
     return _object;
   }
