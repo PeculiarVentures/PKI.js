@@ -83,13 +83,13 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   constructor(parameters: SignedCertificateTimestampParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, SignedCertificateTimestamp.defaultValues(VERSION));
-    this.logID = pvutils.getParametersValue(parameters, LOG_ID, SignedCertificateTimestamp.defaultValues(LOG_ID));
-    this.timestamp = pvutils.getParametersValue(parameters, TIMESTAMP, SignedCertificateTimestamp.defaultValues(TIMESTAMP));
-    this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, SignedCertificateTimestamp.defaultValues(EXTENSIONS));
-    this.hashAlgorithm = pvutils.getParametersValue(parameters, HASH_ALGORITHM, SignedCertificateTimestamp.defaultValues(HASH_ALGORITHM));
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, SignedCertificateTimestamp.defaultValues(SIGNATURE_ALGORITHM));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, SignedCertificateTimestamp.defaultValues(SIGNATURE));
+    this.version = parameters[VERSION] ?? SignedCertificateTimestamp.defaultValues(VERSION);
+    this.logID = parameters[LOG_ID] ?? SignedCertificateTimestamp.defaultValues(LOG_ID);
+    this.timestamp = parameters[TIMESTAMP] ?? SignedCertificateTimestamp.defaultValues(TIMESTAMP);
+    this.extensions = parameters[EXTENSIONS] ?? SignedCertificateTimestamp.defaultValues(EXTENSIONS);
+    this.hashAlgorithm = parameters[HASH_ALGORITHM] ?? SignedCertificateTimestamp.defaultValues(HASH_ALGORITHM);
+    this.signatureAlgorithm = parameters[SIGNATURE_ALGORITHM] ?? SignedCertificateTimestamp.defaultValues(SIGNATURE_ALGORITHM);
+    this.signature = parameters[SIGNATURE] ?? SignedCertificateTimestamp.defaultValues(SIGNATURE);
 
     if ("stream" in parameters && parameters.stream) {
       this.fromStream(parameters.stream);

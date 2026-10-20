@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { IssuerAndSerialNumber, type IssuerAndSerialNumberJson, type IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
@@ -44,8 +43,8 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
   constructor(parameters: KeyAgreeRecipientIdentifierParameters = {}) {
     super();
 
-    this.variant = pvutils.getParametersValue(parameters, VARIANT, KeyAgreeRecipientIdentifier.defaultValues(VARIANT));
-    this.value = pvutils.getParametersValue(parameters, VALUE, KeyAgreeRecipientIdentifier.defaultValues(VALUE));
+    this.variant = parameters[VARIANT] ?? KeyAgreeRecipientIdentifier.defaultValues(VARIANT);
+    this.value = parameters[VALUE] ?? KeyAgreeRecipientIdentifier.defaultValues(VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -96,7 +95,7 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
    *```
    */
   public static override schema(parameters: KeyAgreeRecipientIdentifierSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Choice({
       value: [
@@ -127,7 +126,7 @@ export class KeyAgreeRecipientIdentifier extends PkiObject implements IKeyAgreeR
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

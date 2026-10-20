@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import * as common from "./common";
 import { EncryptedContentInfo, type EncryptedContentInfoJson, type EncryptedContentInfoSchema } from "./EncryptedContentInfo";
 import { Attribute, type AttributeJson } from "./Attribute";
@@ -97,10 +96,10 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
   constructor(parameters: EncryptedDataParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, EncryptedData.defaultValues(VERSION));
-    this.encryptedContentInfo = pvutils.getParametersValue(parameters, ENCRYPTED_CONTENT_INFO, EncryptedData.defaultValues(ENCRYPTED_CONTENT_INFO));
+    this.version = parameters[VERSION] ?? EncryptedData.defaultValues(VERSION);
+    this.encryptedContentInfo = parameters[ENCRYPTED_CONTENT_INFO] ?? EncryptedData.defaultValues(ENCRYPTED_CONTENT_INFO);
     if (UNPROTECTED_ATTRS in parameters) {
-      this.unprotectedAttrs = pvutils.getParametersValue(parameters, UNPROTECTED_ATTRS, EncryptedData.defaultValues(UNPROTECTED_ATTRS));
+      this.unprotectedAttrs = parameters[UNPROTECTED_ATTRS] ?? EncryptedData.defaultValues(UNPROTECTED_ATTRS);
     }
 
     if (parameters.schema) {
@@ -169,7 +168,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
       unprotectedAttrs?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -195,7 +194,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

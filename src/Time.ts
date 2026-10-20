@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -56,8 +55,8 @@ export class Time extends PkiObject implements ITime {
   constructor(parameters: TimeParameters = {}) {
     super();
 
-    this.type = pvutils.getParametersValue(parameters, TYPE, Time.defaultValues(TYPE));
-    this.value = pvutils.getParametersValue(parameters, VALUE, Time.defaultValues(VALUE));
+    this.type = parameters[TYPE] ?? Time.defaultValues(TYPE);
+    this.value = parameters[VALUE] ?? Time.defaultValues(VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -96,7 +95,7 @@ export class Time extends PkiObject implements ITime {
    * @returns ASN.1 schema object
    */
   static override schema(parameters: TimeSchema = {}, optional = false): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Choice({
       optional,
@@ -106,7 +105,7 @@ export class Time extends PkiObject implements ITime {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

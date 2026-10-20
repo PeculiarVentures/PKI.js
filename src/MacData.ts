@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { DigestInfo, type DigestInfoJson, type DigestInfoSchema } from "./DigestInfo";
 import { AsnError } from "./errors";
@@ -48,10 +47,10 @@ export class MacData extends PkiObject implements IMacData {
   constructor(parameters: MacDataParameters = {}) {
     super();
 
-    this.mac = pvutils.getParametersValue(parameters, MAC, MacData.defaultValues(MAC));
-    this.macSalt = pvutils.getParametersValue(parameters, MAC_SALT, MacData.defaultValues(MAC_SALT));
+    this.mac = parameters[MAC] ?? MacData.defaultValues(MAC);
+    this.macSalt = parameters[MAC_SALT] ?? MacData.defaultValues(MAC_SALT);
     if (ITERATIONS in parameters) {
-      this.iterations = pvutils.getParametersValue(parameters, ITERATIONS, MacData.defaultValues(ITERATIONS));
+      this.iterations = parameters[ITERATIONS] ?? MacData.defaultValues(ITERATIONS);
     }
 
     if (parameters.schema) {
@@ -112,7 +111,7 @@ export class MacData extends PkiObject implements IMacData {
    *```
    */
   public static override schema(parameters: MacDataSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -136,7 +135,7 @@ export class MacData extends PkiObject implements IMacData {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

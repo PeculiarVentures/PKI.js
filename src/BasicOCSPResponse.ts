@@ -118,11 +118,11 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
   constructor(parameters: BasicOCSPResponseParameters = {}) {
     super();
 
-    this.tbsResponseData = pvutils.getParametersValue(parameters, TBS_RESPONSE_DATA, BasicOCSPResponse.defaultValues(TBS_RESPONSE_DATA));
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, BasicOCSPResponse.defaultValues(SIGNATURE_ALGORITHM));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, BasicOCSPResponse.defaultValues(SIGNATURE));
+    this.tbsResponseData = parameters[TBS_RESPONSE_DATA] ?? BasicOCSPResponse.defaultValues(TBS_RESPONSE_DATA);
+    this.signatureAlgorithm = parameters[SIGNATURE_ALGORITHM] ?? BasicOCSPResponse.defaultValues(SIGNATURE_ALGORITHM);
+    this.signature = parameters[SIGNATURE] ?? BasicOCSPResponse.defaultValues(SIGNATURE);
     if (CERTS in parameters) {
-      this.certs = pvutils.getParametersValue(parameters, CERTS, BasicOCSPResponse.defaultValues(CERTS));
+      this.certs = parameters[CERTS] ?? BasicOCSPResponse.defaultValues(CERTS);
     }
 
     if (parameters.schema) {
@@ -202,7 +202,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       certs?: CertificateSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || BASIC_OCSP_RESPONSE,
@@ -245,7 +245,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
     //#endregion
 
     // Check the schema is valid

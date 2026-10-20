@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import * as bs from "bytestreamjs";
 import { SignedCertificateTimestamp, type SignedCertificateTimestampJson } from "./SignedCertificateTimestamp";
 import type * as Schema from "./Schema";
@@ -32,7 +31,7 @@ export class SignedCertificateTimestampList extends PkiObject implements ISigned
   constructor(parameters: SignedCertificateTimestampListParameters = {}) {
     super();
 
-    this.timestamps = pvutils.getParametersValue(parameters, TIMESTAMPS, SignedCertificateTimestampList.defaultValues(TIMESTAMPS));
+    this.timestamps = parameters[TIMESTAMPS] ?? SignedCertificateTimestampList.defaultValues(TIMESTAMPS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -76,7 +75,7 @@ export class SignedCertificateTimestampList extends PkiObject implements ISigned
    *```
    */
   public static override schema(parameters: Schema.SchemaParameters = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     names.optional ??= false;
 

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -37,8 +36,8 @@ export class OtherRevocationInfoFormat extends PkiObject implements IOtherRevoca
   constructor(parameters: OtherRevocationInfoFormatParameters = {}) {
     super();
 
-    this.otherRevInfoFormat = pvutils.getParametersValue(parameters, OTHER_REV_INFO_FORMAT, OtherRevocationInfoFormat.defaultValues(OTHER_REV_INFO_FORMAT));
-    this.otherRevInfo = pvutils.getParametersValue(parameters, OTHER_REV_INFO, OtherRevocationInfoFormat.defaultValues(OTHER_REV_INFO));
+    this.otherRevInfoFormat = parameters[OTHER_REV_INFO_FORMAT] ?? OtherRevocationInfoFormat.defaultValues(OTHER_REV_INFO_FORMAT);
+    this.otherRevInfo = parameters[OTHER_REV_INFO] ?? OtherRevocationInfoFormat.defaultValues(OTHER_REV_INFO);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -78,7 +77,7 @@ export class OtherRevocationInfoFormat extends PkiObject implements IOtherRevoca
       otherRevInfo?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -88,7 +87,7 @@ export class OtherRevocationInfoFormat extends PkiObject implements IOtherRevoca
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, OtherRevocationInfoFormat.schema());

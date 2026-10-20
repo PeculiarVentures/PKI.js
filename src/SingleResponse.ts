@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { CertID, type CertIDJson, type CertIDSchema } from "./CertID";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -60,14 +59,14 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
   constructor(parameters: SingleResponseParameters = {}) {
     super();
 
-    this.certID = pvutils.getParametersValue(parameters, CERT_ID, SingleResponse.defaultValues(CERT_ID));
-    this.certStatus = pvutils.getParametersValue(parameters, CERT_STATUS, SingleResponse.defaultValues(CERT_STATUS));
-    this.thisUpdate = pvutils.getParametersValue(parameters, THIS_UPDATE, SingleResponse.defaultValues(THIS_UPDATE));
+    this.certID = parameters[CERT_ID] ?? SingleResponse.defaultValues(CERT_ID);
+    this.certStatus = parameters[CERT_STATUS] ?? SingleResponse.defaultValues(CERT_STATUS);
+    this.thisUpdate = parameters[THIS_UPDATE] ?? SingleResponse.defaultValues(THIS_UPDATE);
     if (NEXT_UPDATE in parameters) {
-      this.nextUpdate = pvutils.getParametersValue(parameters, NEXT_UPDATE, SingleResponse.defaultValues(NEXT_UPDATE));
+      this.nextUpdate = parameters[NEXT_UPDATE] ?? SingleResponse.defaultValues(NEXT_UPDATE);
     }
     if (SINGLE_EXTENSIONS in parameters) {
-      this.singleExtensions = pvutils.getParametersValue(parameters, SINGLE_EXTENSIONS, SingleResponse.defaultValues(SINGLE_EXTENSIONS));
+      this.singleExtensions = parameters[SINGLE_EXTENSIONS] ?? SingleResponse.defaultValues(SINGLE_EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -149,7 +148,7 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
    *```
    */
   public static override schema(parameters: SingleResponseSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -215,7 +214,7 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

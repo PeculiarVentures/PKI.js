@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -42,9 +41,9 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
   constructor(parameters: EncapsulatedContentInfoParameters = {}) {
     super();
 
-    this.eContentType = pvutils.getParametersValue(parameters, E_CONTENT_TYPE, EncapsulatedContentInfo.defaultValues(E_CONTENT_TYPE));
+    this.eContentType = parameters[E_CONTENT_TYPE] ?? EncapsulatedContentInfo.defaultValues(E_CONTENT_TYPE);
     if (E_CONTENT in parameters) {
-      this.eContent = pvutils.getParametersValue(parameters, E_CONTENT, EncapsulatedContentInfo.defaultValues(E_CONTENT));
+      this.eContent = parameters[E_CONTENT] ?? EncapsulatedContentInfo.defaultValues(E_CONTENT);
       if (this.eContent.idBlock.tagClass === 1 && this.eContent.idBlock.tagNumber === 4) {
         //#region Divide OCTET STRING value down to small pieces
         if (this.eContent.idBlock.isConstructed === false) {
@@ -130,7 +129,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
    *```
    */
   public static override schema(parameters: EncapsulatedContentInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -152,7 +151,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EncryptedData, type EncryptedDataEncryptParams } from "./EncryptedData";
 import { EncryptedContentInfo } from "./EncryptedContentInfo";
@@ -47,10 +46,10 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
   constructor(parameters: PKCS8ShroudedKeyBagParameters = {}) {
     super();
 
-    this.encryptionAlgorithm = pvutils.getParametersValue(parameters, ENCRYPTION_ALGORITHM, PKCS8ShroudedKeyBag.defaultValues(ENCRYPTION_ALGORITHM));
-    this.encryptedData = pvutils.getParametersValue(parameters, ENCRYPTED_DATA, PKCS8ShroudedKeyBag.defaultValues(ENCRYPTED_DATA));
+    this.encryptionAlgorithm = parameters[ENCRYPTION_ALGORITHM] ?? PKCS8ShroudedKeyBag.defaultValues(ENCRYPTION_ALGORITHM);
+    this.encryptedData = parameters[ENCRYPTED_DATA] ?? PKCS8ShroudedKeyBag.defaultValues(ENCRYPTED_DATA);
     if (PARSED_VALUE in parameters) {
-      this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, PKCS8ShroudedKeyBag.defaultValues(PARSED_VALUE));
+      this.parsedValue = parameters[PARSED_VALUE] ?? PKCS8ShroudedKeyBag.defaultValues(PARSED_VALUE);
     }
 
     if (parameters.schema) {
@@ -123,7 +122,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
      * @property {string} [encryptionAlgorithm]
      * @property {string} [encryptedData]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -152,7 +151,7 @@ export class PKCS8ShroudedKeyBag extends PkiObject implements IPKCS8ShroudedKeyB
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

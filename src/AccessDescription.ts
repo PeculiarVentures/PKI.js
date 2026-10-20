@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, type GeneralNameJson, type GeneralNameSchema } from "./GeneralName";
@@ -54,8 +53,8 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
   constructor(parameters: AccessDescriptionParameters = {}) {
     super();
 
-    this.accessMethod = pvutils.getParametersValue(parameters, ACCESS_METHOD, AccessDescription.defaultValues(ACCESS_METHOD));
-    this.accessLocation = pvutils.getParametersValue(parameters, ACCESS_LOCATION, AccessDescription.defaultValues(ACCESS_LOCATION));
+    this.accessMethod = parameters[ACCESS_METHOD] ?? AccessDescription.defaultValues(ACCESS_METHOD);
+    this.accessLocation = parameters[ACCESS_LOCATION] ?? AccessDescription.defaultValues(ACCESS_LOCATION);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -95,7 +94,7 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
       accessLocation?: GeneralNameSchema;
     }> = {},
   ) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -105,7 +104,7 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

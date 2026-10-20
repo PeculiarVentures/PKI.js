@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { CertificateSet, type CertificateSetJson } from "./CertificateSet";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -47,7 +46,7 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
   constructor(parameters: OriginatorInfoParameters = {}) {
     super();
 
-    this.crls = pvutils.getParametersValue(parameters, CRLS, OriginatorInfo.defaultValues(CRLS));
+    this.crls = parameters[CRLS] ?? OriginatorInfo.defaultValues(CRLS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -103,7 +102,7 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
       crls?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -132,7 +131,7 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { base64url } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { ECNamedCurves } from "./ECNamedCurves";
 import { ECPublicKey, type ECPublicKeyParameters } from "./ECPublicKey";
@@ -48,13 +47,13 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
   constructor(parameters: ECPrivateKeyParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, ECPrivateKey.defaultValues(VERSION));
-    this.privateKey = pvutils.getParametersValue(parameters, PRIVATE_KEY, ECPrivateKey.defaultValues(PRIVATE_KEY));
+    this.version = parameters[VERSION] ?? ECPrivateKey.defaultValues(VERSION);
+    this.privateKey = parameters[PRIVATE_KEY] ?? ECPrivateKey.defaultValues(PRIVATE_KEY);
     if (NAMED_CURVE in parameters) {
-      this.namedCurve = pvutils.getParametersValue(parameters, NAMED_CURVE, ECPrivateKey.defaultValues(NAMED_CURVE));
+      this.namedCurve = parameters[NAMED_CURVE] ?? ECPrivateKey.defaultValues(NAMED_CURVE);
     }
     if (PUBLIC_KEY in parameters) {
-      this.publicKey = pvutils.getParametersValue(parameters, PUBLIC_KEY, ECPrivateKey.defaultValues(PUBLIC_KEY));
+      this.publicKey = parameters[PUBLIC_KEY] ?? ECPrivateKey.defaultValues(PUBLIC_KEY);
     }
 
     if (parameters.json) {
@@ -130,7 +129,7 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
       publicKey?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -159,7 +158,7 @@ export class ECPrivateKey extends PkiObject implements IECPrivateKey {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

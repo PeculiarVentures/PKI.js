@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { CertificateRevocationList } from "./CertificateRevocationList";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -44,10 +43,10 @@ export class CRLBag extends PkiObject implements ICRLBag {
   constructor(parameters: CRLBagParameters = {}) {
     super();
 
-    this.crlId = pvutils.getParametersValue(parameters, CRL_ID, CRLBag.defaultValues(CRL_ID));
-    this.crlValue = pvutils.getParametersValue(parameters, CRL_VALUE, CRLBag.defaultValues(CRL_VALUE));
+    this.crlId = parameters[CRL_ID] ?? CRLBag.defaultValues(CRL_ID);
+    this.crlValue = parameters[CRL_VALUE] ?? CRLBag.defaultValues(CRL_VALUE);
     if (PARSED_VALUE in parameters) {
-      this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, CRLBag.defaultValues(PARSED_VALUE));
+      this.parsedValue = parameters[PARSED_VALUE] ?? CRLBag.defaultValues(PARSED_VALUE);
     }
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -109,7 +108,7 @@ export class CRLBag extends PkiObject implements ICRLBag {
       value?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -128,7 +127,7 @@ export class CRLBag extends PkiObject implements ICRLBag {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

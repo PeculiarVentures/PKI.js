@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -50,13 +49,13 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
   constructor(parameters: PasswordRecipientinfoParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, PasswordRecipientinfo.defaultValues(VERSION));
+    this.version = parameters[VERSION] ?? PasswordRecipientinfo.defaultValues(VERSION);
     if (KEY_DERIVATION_ALGORITHM in parameters) {
-      this.keyDerivationAlgorithm = pvutils.getParametersValue(parameters, KEY_DERIVATION_ALGORITHM, PasswordRecipientinfo.defaultValues(KEY_DERIVATION_ALGORITHM));
+      this.keyDerivationAlgorithm = parameters[KEY_DERIVATION_ALGORITHM] ?? PasswordRecipientinfo.defaultValues(KEY_DERIVATION_ALGORITHM);
     }
-    this.keyEncryptionAlgorithm = pvutils.getParametersValue(parameters, KEY_ENCRYPTION_ALGORITHM, PasswordRecipientinfo.defaultValues(KEY_ENCRYPTION_ALGORITHM));
-    this.encryptedKey = pvutils.getParametersValue(parameters, ENCRYPTED_KEY, PasswordRecipientinfo.defaultValues(ENCRYPTED_KEY));
-    this.password = pvutils.getParametersValue(parameters, PASSWORD, PasswordRecipientinfo.defaultValues(PASSWORD));
+    this.keyEncryptionAlgorithm = parameters[KEY_ENCRYPTION_ALGORITHM] ?? PasswordRecipientinfo.defaultValues(KEY_ENCRYPTION_ALGORITHM);
+    this.encryptedKey = parameters[ENCRYPTED_KEY] ?? PasswordRecipientinfo.defaultValues(ENCRYPTED_KEY);
+    this.password = parameters[PASSWORD] ?? PasswordRecipientinfo.defaultValues(PASSWORD);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -130,7 +129,7 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
       encryptedKey?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -153,7 +152,7 @@ export class PasswordRecipientinfo extends PkiObject implements IPasswordRecipie
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

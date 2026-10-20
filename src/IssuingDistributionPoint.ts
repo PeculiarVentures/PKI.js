@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, type GeneralNameJson } from "./GeneralName";
@@ -60,16 +59,16 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
     super();
 
     if (DISTRIBUTION_POINT in parameters) {
-      this.distributionPoint = pvutils.getParametersValue(parameters, DISTRIBUTION_POINT, IssuingDistributionPoint.defaultValues(DISTRIBUTION_POINT));
+      this.distributionPoint = parameters[DISTRIBUTION_POINT] ?? IssuingDistributionPoint.defaultValues(DISTRIBUTION_POINT);
     }
 
-    this.onlyContainsUserCerts = pvutils.getParametersValue(parameters, ONLY_CONTAINS_USER_CERTS, IssuingDistributionPoint.defaultValues(ONLY_CONTAINS_USER_CERTS));
-    this.onlyContainsCACerts = pvutils.getParametersValue(parameters, ONLY_CONTAINS_CA_CERTS, IssuingDistributionPoint.defaultValues(ONLY_CONTAINS_CA_CERTS));
+    this.onlyContainsUserCerts = parameters[ONLY_CONTAINS_USER_CERTS] ?? IssuingDistributionPoint.defaultValues(ONLY_CONTAINS_USER_CERTS);
+    this.onlyContainsCACerts = parameters[ONLY_CONTAINS_CA_CERTS] ?? IssuingDistributionPoint.defaultValues(ONLY_CONTAINS_CA_CERTS);
     if (ONLY_SOME_REASON in parameters) {
-      this.onlySomeReasons = pvutils.getParametersValue(parameters, ONLY_SOME_REASON, IssuingDistributionPoint.defaultValues(ONLY_SOME_REASON));
+      this.onlySomeReasons = parameters[ONLY_SOME_REASON] ?? IssuingDistributionPoint.defaultValues(ONLY_SOME_REASON);
     }
-    this.indirectCRL = pvutils.getParametersValue(parameters, INDIRECT_CRL, IssuingDistributionPoint.defaultValues(INDIRECT_CRL));
-    this.onlyContainsAttributeCerts = pvutils.getParametersValue(parameters, ONLY_CONTAINS_ATTRIBUTE_CERTS, IssuingDistributionPoint.defaultValues(ONLY_CONTAINS_ATTRIBUTE_CERTS));
+    this.indirectCRL = parameters[INDIRECT_CRL] ?? IssuingDistributionPoint.defaultValues(INDIRECT_CRL);
+    this.onlyContainsAttributeCerts = parameters[ONLY_CONTAINS_ATTRIBUTE_CERTS] ?? IssuingDistributionPoint.defaultValues(ONLY_CONTAINS_ATTRIBUTE_CERTS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -141,7 +140,7 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
       onlyContainsAttributeCerts?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -226,7 +225,7 @@ export class IssuingDistributionPoint extends PkiObject implements IIssuingDistr
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

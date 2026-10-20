@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { OtherKeyAttribute, type OtherKeyAttributeJson, type OtherKeyAttributeSchema } from "./OtherKeyAttribute";
@@ -48,12 +47,12 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
   constructor(parameters: RecipientKeyIdentifierParameters = {}) {
     super();
 
-    this.subjectKeyIdentifier = pvutils.getParametersValue(parameters, SUBJECT_KEY_IDENTIFIER, RecipientKeyIdentifier.defaultValues(SUBJECT_KEY_IDENTIFIER));
+    this.subjectKeyIdentifier = parameters[SUBJECT_KEY_IDENTIFIER] ?? RecipientKeyIdentifier.defaultValues(SUBJECT_KEY_IDENTIFIER);
     if (DATE in parameters) {
-      this.date = pvutils.getParametersValue(parameters, DATE, RecipientKeyIdentifier.defaultValues(DATE));
+      this.date = parameters[DATE] ?? RecipientKeyIdentifier.defaultValues(DATE);
     }
     if (OTHER in parameters) {
-      this.other = pvutils.getParametersValue(parameters, OTHER, RecipientKeyIdentifier.defaultValues(OTHER));
+      this.other = parameters[OTHER] ?? RecipientKeyIdentifier.defaultValues(OTHER);
     }
 
     if (parameters.schema) {
@@ -113,7 +112,7 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
    *```
    */
   public static override schema(parameters: RecipientKeyIdentifierSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -130,7 +129,7 @@ export class RecipientKeyIdentifier extends PkiObject implements IRecipientKeyId
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

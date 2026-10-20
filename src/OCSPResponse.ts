@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { ResponseBytes, type ResponseBytesJson, type ResponseBytesSchema } from "./ResponseBytes";
 import { BasicOCSPResponse } from "./BasicOCSPResponse";
 import type * as Schema from "./Schema";
@@ -100,9 +99,9 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
   constructor(parameters: OCSPResponseParameters = {}) {
     super();
 
-    this.responseStatus = pvutils.getParametersValue(parameters, RESPONSE_STATUS, OCSPResponse.defaultValues(RESPONSE_STATUS));
+    this.responseStatus = parameters[RESPONSE_STATUS] ?? OCSPResponse.defaultValues(RESPONSE_STATUS);
     if (RESPONSE_BYTES in parameters) {
-      this.responseBytes = pvutils.getParametersValue(parameters, RESPONSE_BYTES, OCSPResponse.defaultValues(RESPONSE_BYTES));
+      this.responseBytes = parameters[RESPONSE_BYTES] ?? OCSPResponse.defaultValues(RESPONSE_BYTES);
     }
 
     if (parameters.schema) {
@@ -169,7 +168,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
       responseBytes?: ResponseBytesSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || "OCSPResponse",
@@ -197,7 +196,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [RESPONSE_STATUS, RESPONSE_BYTES]);
+    for (const prop of [RESPONSE_STATUS, RESPONSE_BYTES]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, OCSPResponse.schema());

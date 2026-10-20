@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -37,8 +36,8 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
   constructor(parameters: PolicyQualifierInfoParameters = {}) {
     super();
 
-    this.policyQualifierId = pvutils.getParametersValue(parameters, POLICY_QUALIFIER_ID, PolicyQualifierInfo.defaultValues(POLICY_QUALIFIER_ID));
-    this.qualifier = pvutils.getParametersValue(parameters, QUALIFIER, PolicyQualifierInfo.defaultValues(QUALIFIER));
+    this.policyQualifierId = parameters[POLICY_QUALIFIER_ID] ?? PolicyQualifierInfo.defaultValues(POLICY_QUALIFIER_ID);
+    this.qualifier = parameters[QUALIFIER] ?? PolicyQualifierInfo.defaultValues(QUALIFIER);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -79,7 +78,7 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
    *```
    */
   static override schema(parameters: Schema.SchemaParameters<{ policyQualifierId?: string; qualifier?: string }> = {}) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -89,7 +88,7 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

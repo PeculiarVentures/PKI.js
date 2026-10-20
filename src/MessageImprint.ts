@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -67,8 +66,8 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
   constructor(parameters: MessageImprintParameters = {}) {
     super();
 
-    this.hashAlgorithm = pvutils.getParametersValue(parameters, HASH_ALGORITHM, MessageImprint.defaultValues(HASH_ALGORITHM));
-    this.hashedMessage = pvutils.getParametersValue(parameters, HASHED_MESSAGE, MessageImprint.defaultValues(HASHED_MESSAGE));
+    this.hashAlgorithm = parameters[HASH_ALGORITHM] ?? MessageImprint.defaultValues(HASH_ALGORITHM);
+    this.hashedMessage = parameters[HASHED_MESSAGE] ?? MessageImprint.defaultValues(HASHED_MESSAGE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -119,7 +118,7 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
    *```
    */
   public static override schema(parameters: MessageImprintSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -129,7 +128,7 @@ export class MessageImprint extends PkiObject implements IMessageImprint {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

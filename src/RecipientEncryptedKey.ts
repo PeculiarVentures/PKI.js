@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { KeyAgreeRecipientIdentifier, type KeyAgreeRecipientIdentifierJson, type KeyAgreeRecipientIdentifierSchema } from "./KeyAgreeRecipientIdentifier";
@@ -38,8 +37,8 @@ export class RecipientEncryptedKey extends PkiObject implements IRecipientEncryp
   constructor(parameters: RecipientEncryptedKeyParameters = {}) {
     super();
 
-    this.rid = pvutils.getParametersValue(parameters, RID, RecipientEncryptedKey.defaultValues(RID));
-    this.encryptedKey = pvutils.getParametersValue(parameters, ENCRYPTED_KEY, RecipientEncryptedKey.defaultValues(ENCRYPTED_KEY));
+    this.rid = parameters[RID] ?? RecipientEncryptedKey.defaultValues(RID);
+    this.encryptedKey = parameters[ENCRYPTED_KEY] ?? RecipientEncryptedKey.defaultValues(ENCRYPTED_KEY);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -97,7 +96,7 @@ export class RecipientEncryptedKey extends PkiObject implements IRecipientEncryp
       encryptedKey?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -107,7 +106,7 @@ export class RecipientEncryptedKey extends PkiObject implements IRecipientEncryp
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, type GeneralNameJson, type GeneralNameSchema } from "./GeneralName";
@@ -42,10 +41,10 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
   constructor(parameters: GeneralSubtreeParameters = {}) {
     super();
 
-    this.base = pvutils.getParametersValue(parameters, BASE, GeneralSubtree.defaultValues(BASE));
-    this.minimum = pvutils.getParametersValue(parameters, MINIMUM, GeneralSubtree.defaultValues(MINIMUM));
+    this.base = parameters[BASE] ?? GeneralSubtree.defaultValues(BASE);
+    this.minimum = parameters[MINIMUM] ?? GeneralSubtree.defaultValues(MINIMUM);
     if (MAXIMUM in parameters) {
-      this.maximum = pvutils.getParametersValue(parameters, MAXIMUM, GeneralSubtree.defaultValues(MAXIMUM));
+      this.maximum = parameters[MAXIMUM] ?? GeneralSubtree.defaultValues(MAXIMUM);
     }
 
     if (parameters.schema) {
@@ -93,7 +92,7 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
       maximum?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -121,7 +120,7 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -49,8 +49,8 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
   constructor(parameters: RelativeDistinguishedNamesParameters = {}) {
     super();
 
-    this.typesAndValues = pvutils.getParametersValue(parameters, TYPE_AND_VALUES, RelativeDistinguishedNames.defaultValues(TYPE_AND_VALUES));
-    this.valueBeforeDecode = pvutils.getParametersValue(parameters, VALUE_BEFORE_DECODE, RelativeDistinguishedNames.defaultValues(VALUE_BEFORE_DECODE));
+    this.typesAndValues = parameters[TYPE_AND_VALUES] ?? RelativeDistinguishedNames.defaultValues(TYPE_AND_VALUES);
+    this.valueBeforeDecode = parameters[VALUE_BEFORE_DECODE] ?? RelativeDistinguishedNames.defaultValues(VALUE_BEFORE_DECODE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -102,7 +102,7 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
    *```
    */
   static override schema(parameters: RelativeDistinguishedNamesSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -124,7 +124,7 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [RDN, TYPE_AND_VALUES]);
+    for (const prop of [RDN, TYPE_AND_VALUES]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

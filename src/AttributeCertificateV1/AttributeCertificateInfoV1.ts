@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { GeneralNames, type GeneralNamesJson } from "../GeneralNames";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
 import { Attribute, type AttributeJson } from "../Attribute";
@@ -109,22 +108,22 @@ export class AttributeCertificateInfoV1 extends PkiObject implements IAttributeC
   constructor(parameters: AttributeCertificateInfoV1Parameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, AttributeCertificateInfoV1.defaultValues(VERSION));
+    this.version = parameters[VERSION] ?? AttributeCertificateInfoV1.defaultValues(VERSION);
     if (BASE_CERTIFICATE_ID in parameters) {
-      this.baseCertificateID = pvutils.getParametersValue(parameters, BASE_CERTIFICATE_ID, AttributeCertificateInfoV1.defaultValues(BASE_CERTIFICATE_ID));
+      this.baseCertificateID = parameters[BASE_CERTIFICATE_ID] ?? AttributeCertificateInfoV1.defaultValues(BASE_CERTIFICATE_ID);
     }
     if (SUBJECT_NAME in parameters) {
-      this.subjectName = pvutils.getParametersValue(parameters, SUBJECT_NAME, AttributeCertificateInfoV1.defaultValues(SUBJECT_NAME));
+      this.subjectName = parameters[SUBJECT_NAME] ?? AttributeCertificateInfoV1.defaultValues(SUBJECT_NAME);
     }
-    this.issuer = pvutils.getParametersValue(parameters, ISSUER, AttributeCertificateInfoV1.defaultValues(ISSUER));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, AttributeCertificateInfoV1.defaultValues(SIGNATURE));
-    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, AttributeCertificateInfoV1.defaultValues(SERIAL_NUMBER));
-    this.attrCertValidityPeriod = pvutils.getParametersValue(parameters, ATTR_CERT_VALIDITY_PERIOD, AttributeCertificateInfoV1.defaultValues(ATTR_CERT_VALIDITY_PERIOD));
-    this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, AttributeCertificateInfoV1.defaultValues(ATTRIBUTES));
-    if (ISSUER_UNIQUE_ID in parameters) this.issuerUniqueID = pvutils.getParametersValue(parameters, ISSUER_UNIQUE_ID, AttributeCertificateInfoV1.defaultValues(ISSUER_UNIQUE_ID));
+    this.issuer = parameters[ISSUER] ?? AttributeCertificateInfoV1.defaultValues(ISSUER);
+    this.signature = parameters[SIGNATURE] ?? AttributeCertificateInfoV1.defaultValues(SIGNATURE);
+    this.serialNumber = parameters[SERIAL_NUMBER] ?? AttributeCertificateInfoV1.defaultValues(SERIAL_NUMBER);
+    this.attrCertValidityPeriod = parameters[ATTR_CERT_VALIDITY_PERIOD] ?? AttributeCertificateInfoV1.defaultValues(ATTR_CERT_VALIDITY_PERIOD);
+    this.attributes = parameters[ATTRIBUTES] ?? AttributeCertificateInfoV1.defaultValues(ATTRIBUTES);
+    if (ISSUER_UNIQUE_ID in parameters) this.issuerUniqueID = parameters[ISSUER_UNIQUE_ID] ?? AttributeCertificateInfoV1.defaultValues(ISSUER_UNIQUE_ID);
 
     if (EXTENSIONS in parameters) {
-      this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, AttributeCertificateInfoV1.defaultValues(EXTENSIONS));
+      this.extensions = parameters[EXTENSIONS] ?? AttributeCertificateInfoV1.defaultValues(EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -194,7 +193,7 @@ export class AttributeCertificateInfoV1 extends PkiObject implements IAttributeC
    *```
    */
   public static override schema(parameters: AttributeCertificateInfoV1Schema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -247,7 +246,7 @@ export class AttributeCertificateInfoV1 extends PkiObject implements IAttributeC
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(
       schema,

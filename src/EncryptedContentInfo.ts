@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -57,8 +56,8 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
   constructor(parameters: EncryptedContentParameters = {}) {
     super();
 
-    this.contentType = pvutils.getParametersValue(parameters, CONTENT_TYPE, EncryptedContentInfo.defaultValues(CONTENT_TYPE));
-    this.contentEncryptionAlgorithm = pvutils.getParametersValue(parameters, CONTENT_ENCRYPTION_ALGORITHM, EncryptedContentInfo.defaultValues(CONTENT_ENCRYPTION_ALGORITHM));
+    this.contentType = parameters[CONTENT_TYPE] ?? EncryptedContentInfo.defaultValues(CONTENT_TYPE);
+    this.contentEncryptionAlgorithm = parameters[CONTENT_ENCRYPTION_ALGORITHM] ?? EncryptedContentInfo.defaultValues(CONTENT_ENCRYPTION_ALGORITHM);
 
     if (ENCRYPTED_CONTENT in parameters && parameters.encryptedContent) {
       // encryptedContent (!!!) could be constructive or primitive value (!!!)
@@ -155,7 +154,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
    *```
    */
   public static override schema(parameters: EncryptedContentInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -193,7 +192,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

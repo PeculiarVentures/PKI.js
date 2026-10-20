@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "../constants";
 import { AsnError } from "../errors";
 import { PkiObject, type PkiObjectParameters } from "../PkiObject";
@@ -42,8 +41,8 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
   constructor(parameters: AttCertValidityPeriodParameters = {}) {
     super();
 
-    this.notBeforeTime = pvutils.getParametersValue(parameters, NOT_BEFORE_TIME, AttCertValidityPeriod.defaultValues(NOT_BEFORE_TIME));
-    this.notAfterTime = pvutils.getParametersValue(parameters, NOT_AFTER_TIME, AttCertValidityPeriod.defaultValues(NOT_AFTER_TIME));
+    this.notBeforeTime = parameters[NOT_BEFORE_TIME] ?? AttCertValidityPeriod.defaultValues(NOT_BEFORE_TIME);
+    this.notAfterTime = parameters[NOT_AFTER_TIME] ?? AttCertValidityPeriod.defaultValues(NOT_AFTER_TIME);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -78,7 +77,7 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
    *```
    */
   public static override schema(parameters: AttCertValidityPeriodSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -88,7 +87,7 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

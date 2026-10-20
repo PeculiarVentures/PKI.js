@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AccessDescription, type AccessDescriptionJson } from "./AccessDescription";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -33,7 +32,7 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
   constructor(parameters: InfoAccessParameters = {}) {
     super();
 
-    this.accessDescriptions = pvutils.getParametersValue(parameters, ACCESS_DESCRIPTIONS, InfoAccess.defaultValues(ACCESS_DESCRIPTIONS));
+    this.accessDescriptions = parameters[ACCESS_DESCRIPTIONS] ?? InfoAccess.defaultValues(ACCESS_DESCRIPTIONS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -68,7 +67,7 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
       accessDescriptions?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -83,7 +82,7 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [ACCESS_DESCRIPTIONS]);
+    for (const prop of [ACCESS_DESCRIPTIONS]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,6 +1,5 @@
 import type * as asn1js from "asn1js";
 import { bytes } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import { AuthorityKeyIdentifier } from "./AuthorityKeyIdentifier";
 import type { BasicOCSPResponse } from "./BasicOCSPResponse";
 import type { Certificate } from "./Certificate";
@@ -178,13 +177,13 @@ export class CertificateChainValidationEngine {
    */
   constructor(parameters: CertificateChainValidationEngineParameters = {}) {
     //#region Internal properties of the object
-    this.trustedCerts = pvutils.getParametersValue(parameters, TRUSTED_CERTS, this.defaultValues(TRUSTED_CERTS));
-    this.certs = pvutils.getParametersValue(parameters, CERTS, this.defaultValues(CERTS));
-    this.crls = pvutils.getParametersValue(parameters, CRLS, this.defaultValues(CRLS));
-    this.ocsps = pvutils.getParametersValue(parameters, OCSPS, this.defaultValues(OCSPS));
-    this.checkDate = pvutils.getParametersValue(parameters, CHECK_DATE, this.defaultValues(CHECK_DATE));
-    this.findOrigin = pvutils.getParametersValue(parameters, FIND_ORIGIN, this.defaultValues(FIND_ORIGIN));
-    this.findIssuer = pvutils.getParametersValue(parameters, FIND_ISSUER, this.defaultValues(FIND_ISSUER));
+    this.trustedCerts = parameters[TRUSTED_CERTS] ?? this.defaultValues(TRUSTED_CERTS);
+    this.certs = parameters[CERTS] ?? this.defaultValues(CERTS);
+    this.crls = parameters[CRLS] ?? this.defaultValues(CRLS);
+    this.ocsps = parameters[OCSPS] ?? this.defaultValues(OCSPS);
+    this.checkDate = parameters[CHECK_DATE] ?? this.defaultValues(CHECK_DATE);
+    this.findOrigin = parameters[FIND_ORIGIN] ?? this.defaultValues(FIND_ORIGIN);
+    this.findIssuer = parameters[FIND_ISSUER] ?? this.defaultValues(FIND_ISSUER);
     //#endregion
   }
 

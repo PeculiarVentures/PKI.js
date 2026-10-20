@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { Certificate, type CertificateJson } from "./Certificate";
 import { AttributeCertificateV1, type AttributeCertificateV1Json } from "./AttributeCertificateV1";
 import { AttributeCertificateV2, type AttributeCertificateV2Json } from "./AttributeCertificateV2";
@@ -41,7 +40,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
   constructor(parameters: CertificateSetParameters = {}) {
     super();
 
-    this.certificates = pvutils.getParametersValue(parameters, CERTIFICATES, CertificateSet.defaultValues(CERTIFICATES));
+    this.certificates = parameters[CERTIFICATES] ?? CertificateSet.defaultValues(CERTIFICATES);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -82,7 +81,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
       certificates?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Set({
       name: names.blockName || EMPTY_STRING,
@@ -129,7 +128,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, CertificateSet.schema());

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData, id_ContentType_SignedData } from "./ObjectIdentifiers";
@@ -47,8 +46,8 @@ export class ContentInfo extends PkiObject implements IContentInfo {
   constructor(parameters: ContentInfoParameters = {}) {
     super();
 
-    this.contentType = pvutils.getParametersValue(parameters, CONTENT_TYPE, ContentInfo.defaultValues(CONTENT_TYPE));
-    this.content = pvutils.getParametersValue(parameters, CONTENT, ContentInfo.defaultValues(CONTENT));
+    this.contentType = parameters[CONTENT_TYPE] ?? ContentInfo.defaultValues(CONTENT_TYPE);
+    this.content = parameters[CONTENT] ?? ContentInfo.defaultValues(CONTENT);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -99,7 +98,7 @@ export class ContentInfo extends PkiObject implements IContentInfo {
    *```
    */
   public static override schema(parameters: ContentInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     if ("optional" in names === false) {
       names.optional = false;
@@ -123,7 +122,7 @@ export class ContentInfo extends PkiObject implements IContentInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, ContentInfo.schema());

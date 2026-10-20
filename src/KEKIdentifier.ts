@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { OtherKeyAttribute, type OtherKeyAttributeJson, type OtherKeyAttributeSchema } from "./OtherKeyAttribute";
@@ -48,12 +47,12 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
   constructor(parameters: KEKIdentifierParameters = {}) {
     super();
 
-    this.keyIdentifier = pvutils.getParametersValue(parameters, KEY_IDENTIFIER, KEKIdentifier.defaultValues(KEY_IDENTIFIER));
+    this.keyIdentifier = parameters[KEY_IDENTIFIER] ?? KEKIdentifier.defaultValues(KEY_IDENTIFIER);
     if (DATE in parameters) {
-      this.date = pvutils.getParametersValue(parameters, DATE, KEKIdentifier.defaultValues(DATE));
+      this.date = parameters[DATE] ?? KEKIdentifier.defaultValues(DATE);
     }
     if (OTHER in parameters) {
-      this.other = pvutils.getParametersValue(parameters, OTHER, KEKIdentifier.defaultValues(OTHER));
+      this.other = parameters[OTHER] ?? KEKIdentifier.defaultValues(OTHER);
     }
 
     if (parameters.schema) {
@@ -113,7 +112,7 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
    *```
    */
   public static override schema(parameters: KEKIdentifierSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -130,7 +129,7 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

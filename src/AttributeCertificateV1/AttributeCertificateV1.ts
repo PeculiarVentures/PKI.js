@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
 import { AttributeCertificateInfoV1, type AttributeCertificateInfoV1Json, type AttributeCertificateInfoV1Schema } from "./AttributeCertificateInfoV1";
 import type * as Schema from "../Schema";
@@ -52,9 +51,9 @@ export class AttributeCertificateV1 extends PkiObject implements IAttributeCerti
   constructor(parameters: AttributeCertificateV1Parameters = {}) {
     super();
 
-    this.acinfo = pvutils.getParametersValue(parameters, ACINFO, AttributeCertificateV1.defaultValues(ACINFO));
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, AttributeCertificateV1.defaultValues(SIGNATURE_ALGORITHM));
-    this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, AttributeCertificateV1.defaultValues(SIGNATURE_VALUE));
+    this.acinfo = parameters[ACINFO] ?? AttributeCertificateV1.defaultValues(ACINFO);
+    this.signatureAlgorithm = parameters[SIGNATURE_ALGORITHM] ?? AttributeCertificateV1.defaultValues(SIGNATURE_ALGORITHM);
+    this.signatureValue = parameters[SIGNATURE_VALUE] ?? AttributeCertificateV1.defaultValues(SIGNATURE_VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -100,7 +99,7 @@ export class AttributeCertificateV1 extends PkiObject implements IAttributeCerti
       signatureValue?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -110,7 +109,7 @@ export class AttributeCertificateV1 extends PkiObject implements IAttributeCerti
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(

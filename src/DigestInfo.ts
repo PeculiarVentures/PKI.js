@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -43,8 +42,8 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
   constructor(parameters: DigestInfoParameters = {}) {
     super();
 
-    this.digestAlgorithm = pvutils.getParametersValue(parameters, DIGEST_ALGORITHM, DigestInfo.defaultValues(DIGEST_ALGORITHM));
-    this.digest = pvutils.getParametersValue(parameters, DIGEST, DigestInfo.defaultValues(DIGEST));
+    this.digestAlgorithm = parameters[DIGEST_ALGORITHM] ?? DigestInfo.defaultValues(DIGEST_ALGORITHM);
+    this.digest = parameters[DIGEST] ?? DigestInfo.defaultValues(DIGEST);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -97,7 +96,7 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
    *```
    */
   public static override schema(parameters: DigestInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -116,7 +115,7 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

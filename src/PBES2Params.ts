@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -38,8 +37,8 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
   constructor(parameters: PBES2ParamsParameters = {}) {
     super();
 
-    this.keyDerivationFunc = pvutils.getParametersValue(parameters, KEY_DERIVATION_FUNC, PBES2Params.defaultValues(KEY_DERIVATION_FUNC));
-    this.encryptionScheme = pvutils.getParametersValue(parameters, ENCRYPTION_SCHEME, PBES2Params.defaultValues(ENCRYPTION_SCHEME));
+    this.keyDerivationFunc = parameters[KEY_DERIVATION_FUNC] ?? PBES2Params.defaultValues(KEY_DERIVATION_FUNC);
+    this.encryptionScheme = parameters[ENCRYPTION_SCHEME] ?? PBES2Params.defaultValues(ENCRYPTION_SCHEME);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -79,7 +78,7 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
       encryptionScheme?: AlgorithmIdentifierSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -89,7 +88,7 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

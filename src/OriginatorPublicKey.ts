@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -38,8 +37,8 @@ export class OriginatorPublicKey extends PkiObject implements IOriginatorPublicK
   constructor(parameters: OriginatorPublicKeyParameters = {}) {
     super();
 
-    this.algorithm = pvutils.getParametersValue(parameters, ALGORITHM, OriginatorPublicKey.defaultValues(ALGORITHM));
-    this.publicKey = pvutils.getParametersValue(parameters, PUBLIC_KEY, OriginatorPublicKey.defaultValues(PUBLIC_KEY));
+    this.algorithm = parameters[ALGORITHM] ?? OriginatorPublicKey.defaultValues(ALGORITHM);
+    this.publicKey = parameters[PUBLIC_KEY] ?? OriginatorPublicKey.defaultValues(PUBLIC_KEY);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -95,7 +94,7 @@ export class OriginatorPublicKey extends PkiObject implements IOriginatorPublicK
       publicKey?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -105,7 +104,7 @@ export class OriginatorPublicKey extends PkiObject implements IOriginatorPublicK
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { OriginatorIdentifierOrKey, type OriginatorIdentifierOrKeyJson, type OriginatorIdentifierOrKeySchema } from "./OriginatorIdentifierOrKey";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { RecipientEncryptedKeys, type RecipientEncryptedKeysJson, type RecipientEncryptedKeysSchema } from "./RecipientEncryptedKeys";
@@ -59,15 +58,15 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
   constructor(parameters: KeyAgreeRecipientInfoParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, KeyAgreeRecipientInfo.defaultValues(VERSION));
-    this.originator = pvutils.getParametersValue(parameters, ORIGINATOR, KeyAgreeRecipientInfo.defaultValues(ORIGINATOR));
+    this.version = parameters[VERSION] ?? KeyAgreeRecipientInfo.defaultValues(VERSION);
+    this.originator = parameters[ORIGINATOR] ?? KeyAgreeRecipientInfo.defaultValues(ORIGINATOR);
     if (UKM in parameters) {
-      this.ukm = pvutils.getParametersValue(parameters, UKM, KeyAgreeRecipientInfo.defaultValues(UKM));
+      this.ukm = parameters[UKM] ?? KeyAgreeRecipientInfo.defaultValues(UKM);
     }
-    this.keyEncryptionAlgorithm = pvutils.getParametersValue(parameters, KEY_ENCRYPTION_ALGORITHM, KeyAgreeRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM));
-    this.recipientEncryptedKeys = pvutils.getParametersValue(parameters, RECIPIENT_ENCRYPTED_KEY, KeyAgreeRecipientInfo.defaultValues(RECIPIENT_ENCRYPTED_KEY));
-    this.recipientCertificate = pvutils.getParametersValue(parameters, RECIPIENT_CERTIFICATE, KeyAgreeRecipientInfo.defaultValues(RECIPIENT_CERTIFICATE));
-    this.recipientPublicKey = pvutils.getParametersValue(parameters, RECIPIENT_PUBLIC_KEY, KeyAgreeRecipientInfo.defaultValues(RECIPIENT_PUBLIC_KEY));
+    this.keyEncryptionAlgorithm = parameters[KEY_ENCRYPTION_ALGORITHM] ?? KeyAgreeRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM);
+    this.recipientEncryptedKeys = parameters[RECIPIENT_ENCRYPTED_KEY] ?? KeyAgreeRecipientInfo.defaultValues(RECIPIENT_ENCRYPTED_KEY);
+    this.recipientCertificate = parameters[RECIPIENT_CERTIFICATE] ?? KeyAgreeRecipientInfo.defaultValues(RECIPIENT_CERTIFICATE);
+    this.recipientPublicKey = parameters[RECIPIENT_PUBLIC_KEY] ?? KeyAgreeRecipientInfo.defaultValues(RECIPIENT_PUBLIC_KEY);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -154,7 +153,7 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
       recipientEncryptedKeys?: RecipientEncryptedKeysSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -183,7 +182,7 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -46,13 +45,13 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
   constructor(parameters: PBKDF2ParamsParameters = {}) {
     super();
 
-    this.salt = pvutils.getParametersValue(parameters, SALT, PBKDF2Params.defaultValues(SALT));
-    this.iterationCount = pvutils.getParametersValue(parameters, ITERATION_COUNT, PBKDF2Params.defaultValues(ITERATION_COUNT));
+    this.salt = parameters[SALT] ?? PBKDF2Params.defaultValues(SALT);
+    this.iterationCount = parameters[ITERATION_COUNT] ?? PBKDF2Params.defaultValues(ITERATION_COUNT);
     if (KEY_LENGTH in parameters) {
-      this.keyLength = pvutils.getParametersValue(parameters, KEY_LENGTH, PBKDF2Params.defaultValues(KEY_LENGTH));
+      this.keyLength = parameters[KEY_LENGTH] ?? PBKDF2Params.defaultValues(KEY_LENGTH);
     }
     if (PRF in parameters) {
-      this.prf = pvutils.getParametersValue(parameters, PRF, PBKDF2Params.defaultValues(PRF));
+      this.prf = parameters[PRF] ?? PBKDF2Params.defaultValues(PRF);
     }
 
     if (parameters.schema) {
@@ -110,7 +109,7 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
       prf?: AlgorithmIdentifierSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -136,7 +135,7 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

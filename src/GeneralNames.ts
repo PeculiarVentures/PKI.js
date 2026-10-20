@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import type * as Schema from "./Schema";
 import { GeneralName, type GeneralNameJson } from "./GeneralName";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -41,7 +40,7 @@ export class GeneralNames extends PkiObject implements IGeneralNames {
   constructor(parameters: GeneralNamesParameters = {}) {
     super();
 
-    this.names = pvutils.getParametersValue(parameters, NAMES, GeneralNames.defaultValues(NAMES));
+    this.names = parameters[NAMES] ?? GeneralNames.defaultValues(NAMES);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -75,7 +74,7 @@ export class GeneralNames extends PkiObject implements IGeneralNames {
    * @returns ASN.1 schema object
    */
   public static override schema(parameters: GeneralNamesSchema = {}, optional = false): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, NAMES, {});
+    const names = parameters[NAMES] ?? {};
 
     return new asn1js.Sequence({
       optional,
@@ -91,7 +90,7 @@ export class GeneralNames extends PkiObject implements IGeneralNames {
 
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    pvutils.clearProps(schema, [NAMES, GENERAL_NAMES]);
+    for (const prop of [NAMES, GENERAL_NAMES]) delete schema[prop];
     //#endregion
 
     //#region Check the schema is valid

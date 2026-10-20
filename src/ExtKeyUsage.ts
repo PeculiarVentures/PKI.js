@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -33,7 +32,7 @@ export class ExtKeyUsage extends PkiObject implements IExtKeyUsage {
   constructor(parameters: ExtKeyUsageParameters = {}) {
     super();
 
-    this.keyPurposes = pvutils.getParametersValue(parameters, KEY_PURPOSES, ExtKeyUsage.defaultValues(KEY_PURPOSES));
+    this.keyPurposes = parameters[KEY_PURPOSES] ?? ExtKeyUsage.defaultValues(KEY_PURPOSES);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -74,7 +73,7 @@ export class ExtKeyUsage extends PkiObject implements IExtKeyUsage {
      * @property {string} [blockName]
      * @property {string} [keyPurposes]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -88,7 +87,7 @@ export class ExtKeyUsage extends PkiObject implements IExtKeyUsage {
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

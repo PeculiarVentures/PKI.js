@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { ContentInfo, type ContentInfoJson } from "./ContentInfo";
 import { SafeContents } from "./SafeContents";
 import { EnvelopedData } from "./EnvelopedData";
@@ -44,9 +43,9 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
   constructor(parameters: AuthenticatedSafeParameters = {}) {
     super();
 
-    this.safeContents = pvutils.getParametersValue(parameters, SAFE_CONTENTS, AuthenticatedSafe.defaultValues(SAFE_CONTENTS));
+    this.safeContents = parameters[SAFE_CONTENTS] ?? AuthenticatedSafe.defaultValues(SAFE_CONTENTS);
     if (PARSED_VALUE in parameters) {
-      this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, AuthenticatedSafe.defaultValues(PARSED_VALUE));
+      this.parsedValue = parameters[PARSED_VALUE] ?? AuthenticatedSafe.defaultValues(PARSED_VALUE);
     }
 
     if (parameters.schema) {
@@ -103,7 +102,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
       contentInfos?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -118,7 +117,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [CONTENT_INFOS]);
+    for (const prop of [CONTENT_INFOS]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

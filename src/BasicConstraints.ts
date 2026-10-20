@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -36,9 +35,9 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
   constructor(parameters: BasicConstraintsParameters = {}) {
     super();
 
-    this.cA = pvutils.getParametersValue(parameters, CA, false);
+    this.cA = parameters[CA] ?? false;
     if (PATH_LENGTH_CONSTRAINT in parameters) {
-      this.pathLenConstraint = pvutils.getParametersValue(parameters, PATH_LENGTH_CONSTRAINT, 0);
+      this.pathLenConstraint = parameters[PATH_LENGTH_CONSTRAINT] ?? 0;
     }
 
     if (parameters.schema) {
@@ -71,7 +70,7 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
    *```
    */
   static override schema(parameters: Schema.SchemaParameters<{ cA?: string; pathLenConstraint?: string }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -90,7 +89,7 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [CA, PATH_LENGTH_CONSTRAINT]);
+    for (const prop of [CA, PATH_LENGTH_CONSTRAINT]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { hex, toArrayBuffer } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import * as common from "./common";
 import { PublicKeyInfo, type PublicKeyInfoJson } from "./PublicKeyInfo";
 import { RelativeDistinguishedNames, type RelativeDistinguishedNamesJson, type RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
@@ -90,7 +89,7 @@ function CertificationRequestInfo(parameters: CertificationRequestInfoParameters
   //    attributes    [0] Attributes{{ CRIAttributes }}
   //}
 
-  const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  const names = parameters.names ?? {};
 
   return new asn1js.Sequence({
     name: names.CertificationRequestInfo || CSR_INFO,
@@ -253,15 +252,15 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
   constructor(parameters: CertificationRequestParameters = {}) {
     super();
 
-    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, CertificationRequest.defaultValues(TBS)));
-    this.version = pvutils.getParametersValue(parameters, VERSION, CertificationRequest.defaultValues(VERSION));
-    this.subject = pvutils.getParametersValue(parameters, SUBJECT, CertificationRequest.defaultValues(SUBJECT));
-    this.subjectPublicKeyInfo = pvutils.getParametersValue(parameters, SPKI, CertificationRequest.defaultValues(SPKI));
+    this.tbsView = new Uint8Array(parameters[TBS] ?? CertificationRequest.defaultValues(TBS));
+    this.version = parameters[VERSION] ?? CertificationRequest.defaultValues(VERSION);
+    this.subject = parameters[SUBJECT] ?? CertificationRequest.defaultValues(SUBJECT);
+    this.subjectPublicKeyInfo = parameters[SPKI] ?? CertificationRequest.defaultValues(SPKI);
     if (ATTRIBUTES in parameters) {
-      this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, CertificationRequest.defaultValues(ATTRIBUTES));
+      this.attributes = parameters[ATTRIBUTES] ?? CertificationRequest.defaultValues(ATTRIBUTES);
     }
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, CertificationRequest.defaultValues(SIGNATURE_ALGORITHM));
-    this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, CertificationRequest.defaultValues(SIGNATURE_VALUE));
+    this.signatureAlgorithm = parameters[SIGNATURE_ALGORITHM] ?? CertificationRequest.defaultValues(SIGNATURE_ALGORITHM);
+    this.signatureValue = parameters[SIGNATURE_VALUE] ?? CertificationRequest.defaultValues(SIGNATURE_VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -319,7 +318,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
       signatureValue?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       value: [
@@ -335,7 +334,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, CertificationRequest.schema());

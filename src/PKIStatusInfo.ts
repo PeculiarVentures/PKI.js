@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -56,12 +55,12 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
   constructor(parameters: PKIStatusInfoParameters = {}) {
     super();
 
-    this.status = pvutils.getParametersValue(parameters, STATUS, PKIStatusInfo.defaultValues(STATUS));
+    this.status = parameters[STATUS] ?? PKIStatusInfo.defaultValues(STATUS);
     if (STATUS_STRINGS in parameters) {
-      this.statusStrings = pvutils.getParametersValue(parameters, STATUS_STRINGS, PKIStatusInfo.defaultValues(STATUS_STRINGS));
+      this.statusStrings = parameters[STATUS_STRINGS] ?? PKIStatusInfo.defaultValues(STATUS_STRINGS);
     }
     if (FAIL_INFO in parameters) {
-      this.failInfo = pvutils.getParametersValue(parameters, FAIL_INFO, PKIStatusInfo.defaultValues(FAIL_INFO));
+      this.failInfo = parameters[FAIL_INFO] ?? PKIStatusInfo.defaultValues(FAIL_INFO);
     }
 
     if (parameters.schema) {
@@ -119,7 +118,7 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
    *```
    */
   public static override schema(parameters: PKIStatusInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -144,7 +143,7 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, type GeneralNameJson } from "./GeneralName";
@@ -37,7 +36,7 @@ export class AltName extends PkiObject implements IAltName {
   constructor(parameters: AltNameParameters = {}) {
     super();
 
-    this.altNames = pvutils.getParametersValue(parameters, ALT_NAMES, AltName.defaultValues(ALT_NAMES));
+    this.altNames = parameters[ALT_NAMES] ?? AltName.defaultValues(ALT_NAMES);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -67,7 +66,7 @@ export class AltName extends PkiObject implements IAltName {
    *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{ altNames?: string }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -82,7 +81,7 @@ export class AltName extends PkiObject implements IAltName {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

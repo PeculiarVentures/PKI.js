@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -37,8 +36,8 @@ export class PolicyMapping extends PkiObject implements IPolicyMapping {
   constructor(parameters: PolicyMappingParameters = {}) {
     super();
 
-    this.issuerDomainPolicy = pvutils.getParametersValue(parameters, ISSUER_DOMAIN_POLICY, PolicyMapping.defaultValues(ISSUER_DOMAIN_POLICY));
-    this.subjectDomainPolicy = pvutils.getParametersValue(parameters, SUBJECT_DOMAIN_POLICY, PolicyMapping.defaultValues(SUBJECT_DOMAIN_POLICY));
+    this.issuerDomainPolicy = parameters[ISSUER_DOMAIN_POLICY] ?? PolicyMapping.defaultValues(ISSUER_DOMAIN_POLICY);
+    this.subjectDomainPolicy = parameters[SUBJECT_DOMAIN_POLICY] ?? PolicyMapping.defaultValues(SUBJECT_DOMAIN_POLICY);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -78,7 +77,7 @@ export class PolicyMapping extends PkiObject implements IPolicyMapping {
       subjectDomainPolicy?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -88,7 +87,7 @@ export class PolicyMapping extends PkiObject implements IPolicyMapping {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -42,9 +41,9 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
   constructor(parameters: RSAESOAEPParamsParameters = {}) {
     super();
 
-    this.hashAlgorithm = pvutils.getParametersValue(parameters, HASH_ALGORITHM, RSAESOAEPParams.defaultValues(HASH_ALGORITHM));
-    this.maskGenAlgorithm = pvutils.getParametersValue(parameters, MASK_GEN_ALGORITHM, RSAESOAEPParams.defaultValues(MASK_GEN_ALGORITHM));
-    this.pSourceAlgorithm = pvutils.getParametersValue(parameters, P_SOURCE_ALGORITHM, RSAESOAEPParams.defaultValues(P_SOURCE_ALGORITHM));
+    this.hashAlgorithm = parameters[HASH_ALGORITHM] ?? RSAESOAEPParams.defaultValues(HASH_ALGORITHM);
+    this.maskGenAlgorithm = parameters[MASK_GEN_ALGORITHM] ?? RSAESOAEPParams.defaultValues(MASK_GEN_ALGORITHM);
+    this.pSourceAlgorithm = parameters[P_SOURCE_ALGORITHM] ?? RSAESOAEPParams.defaultValues(P_SOURCE_ALGORITHM);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -104,7 +103,7 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
       pSourceAlgorithm?: AlgorithmIdentifierSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -139,7 +138,7 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

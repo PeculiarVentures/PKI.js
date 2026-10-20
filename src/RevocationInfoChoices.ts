@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { CertificateRevocationList, type CertificateRevocationListJson } from "./CertificateRevocationList";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -43,8 +42,8 @@ export class RevocationInfoChoices extends PkiObject implements IRevocationInfoC
   constructor(parameters: RevocationInfoChoicesParameters = {}) {
     super();
 
-    this.crls = pvutils.getParametersValue(parameters, CRLS, RevocationInfoChoices.defaultValues(CRLS));
-    this.otherRevocationInfos = pvutils.getParametersValue(parameters, OTHER_REVOCATION_INFOS, RevocationInfoChoices.defaultValues(OTHER_REVOCATION_INFOS));
+    this.crls = parameters[CRLS] ?? RevocationInfoChoices.defaultValues(CRLS);
+    this.otherRevocationInfos = parameters[OTHER_REVOCATION_INFOS] ?? RevocationInfoChoices.defaultValues(OTHER_REVOCATION_INFOS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -81,7 +80,7 @@ export class RevocationInfoChoices extends PkiObject implements IRevocationInfoC
    *```
    */
   public static override schema(parameters: RevocationInfoChoicesSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Set({
       name: names.blockName || EMPTY_STRING,
@@ -107,7 +106,7 @@ export class RevocationInfoChoices extends PkiObject implements IRevocationInfoC
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
