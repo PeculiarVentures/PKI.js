@@ -1,7 +1,7 @@
 /// <reference path="types.d.ts" />
 
 import * as pvutils from "pvutils";
-import * as utils from "../../test/utils";
+import * as utils from "../utils";
 import * as pkijs from "../../src";
 import * as common from "../common";
 

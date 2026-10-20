@@ -1,5 +1,5 @@
-import * as utils from "../../test/utils";
-import * as example from "../../test/p7bSimpleExample";
+import * as utils from "../utils";
+import * as example from "./example";
 import * as common from "../common";
 
 let cmsSignedBuffer = new ArrayBuffer(0);

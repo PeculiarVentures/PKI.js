@@ -1,6 +1,6 @@
 import * as pvtsutils from "pvtsutils";
-import * as example from "../../test/howToEncryptCMSviaCertificate";
-import * as utils from "../../test/utils";
+import * as example from "./example";
+import * as utils from "../utils";
 import * as common from "../common";
 
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT

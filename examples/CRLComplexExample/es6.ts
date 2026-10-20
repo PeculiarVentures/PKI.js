@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pkijs from "../../src";
-import * as example from "../../test/crlComplexExample";
-import * as utils from "../../test/utils";
+import * as example from "./example";
+import * as utils from "../utils";
 import * as common from "../common";
 
 let crlBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CRL

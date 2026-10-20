@@ -1,6 +1,6 @@
 import * as pkijs from "../../src";
-import * as utils from "../../test/utils";
-import * as example from "../../test/certificateComplexExample";
+import * as utils from "../utils";
+import * as example from "./example";
 import * as common from "../common";
 import * as pvtsutils from "pvtsutils";
 
