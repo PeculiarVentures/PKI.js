@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import * as pkijs from "../../src";
+import { base64, binary, toArrayBuffer } from "@peculiar/utils";
 
 // Global variables
 export const certificateBASE64 =
@@ -10,10 +10,10 @@ export const privateKeyBASE64 =
 
 export async function passwordBasedIntegrity(password: string, hash = "SHA-256"): Promise<ArrayBuffer> {
   //#region Create simplified structires for certificate and private key
-  const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64));
+  const certRaw = toArrayBuffer(base64.decode(certificateBASE64));
   const certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-  const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64));
+  const pkcs8Raw = toArrayBuffer(base64.decode(privateKeyBASE64));
   const pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
   //#endregion
   //#region Put initial values for PKCS#12 structures
@@ -60,7 +60,7 @@ export async function passwordBasedIntegrity(password: string, hash = "SHA-256")
   //#endregion
   //#region Encode internal values for "Integrity Protection" envelope
   await pkcs12.makeInternalValues({
-    password: pvutils.stringToArrayBuffer(password),
+    password: toArrayBuffer(binary.decode(password)),
     iterations: 100000,
     pbkdf2HashAlgorithm: hash,
     hmacHashAlgorithm: hash,
@@ -73,10 +73,10 @@ export async function passwordBasedIntegrity(password: string, hash = "SHA-256")
 
 export async function certificateBasedIntegrity(): Promise<ArrayBuffer> {
   //#region Create simplified structires for certificate and private key
-  const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64));
+  const certRaw = toArrayBuffer(base64.decode(certificateBASE64));
   const certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-  const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64));
+  const pkcs8Raw = toArrayBuffer(base64.decode(privateKeyBASE64));
   const pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
   //#endregion
 
@@ -132,7 +132,7 @@ export async function certificateBasedIntegrity(): Promise<ArrayBuffer> {
   const publicKey = await certSimpl.getPublicKey();
   const algorithm = pkijs.getAlgorithmParameters(publicKey.algorithm.name, "importKey") as any;
 
-  const privateKey = await crypto.importKey("pkcs8", pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64)), algorithm.algorithm, true, ["sign"]);
+  const privateKey = await crypto.importKey("pkcs8", toArrayBuffer(base64.decode(privateKeyBASE64)), algorithm.algorithm, true, ["sign"]);
   //#endregion
 
   //#region Encode internal values for "Integrity Protection" envelope
@@ -154,14 +154,14 @@ export async function noPrivacy(password: string) {
 
 export async function passwordPrivacy(password: string) {
   //#region Initial variables
-  const passwordConverted = pvutils.stringToArrayBuffer(password);
+  const passwordConverted = toArrayBuffer(binary.decode(password));
   //#endregion
 
   //#region Create simplified structires for certificate and private key
-  const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64));
+  const certRaw = toArrayBuffer(base64.decode(certificateBASE64));
   const certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-  const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64));
+  const pkcs8Raw = toArrayBuffer(base64.decode(privateKeyBASE64));
   const pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
   //#endregion
 
@@ -231,10 +231,10 @@ export async function passwordPrivacy(password: string) {
 
 export async function certificatePrivacy(password: string) {
   //#region Create simplified structires for certificate and private key
-  const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64));
+  const certRaw = toArrayBuffer(base64.decode(certificateBASE64));
   const certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-  const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64));
+  const pkcs8Raw = toArrayBuffer(base64.decode(privateKeyBASE64));
   const pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
   //#endregion
 
@@ -288,7 +288,7 @@ export async function certificatePrivacy(password: string) {
 
   //#region Encode internal values for "Integrity Protection" envelope
   await pkcs12.makeInternalValues({
-    password: pvutils.stringToArrayBuffer(password),
+    password: toArrayBuffer(binary.decode(password)),
     iterations: 100000,
     pbkdf2HashAlgorithm: "SHA-256", // Least two parameters are equal because at the moment it is not clear how to use PBMAC1 schema with PKCS#12 integrity protection
     hmacHashAlgorithm: "SHA-256",
@@ -324,14 +324,14 @@ export async function openSSLLike(password: string) {
   });
   //#endregion
 
-  const passwordConverted = pvutils.stringToArrayBuffer(password);
+  const passwordConverted = toArrayBuffer(binary.decode(password));
   //#endregion
 
   //#region Create simplified structires for certificate and private key
-  const certRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(certificateBASE64));
+  const certRaw = toArrayBuffer(base64.decode(certificateBASE64));
   const certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-  const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(privateKeyBASE64));
+  const pkcs8Raw = toArrayBuffer(base64.decode(privateKeyBASE64));
   const pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
 
   //#region Add "keyUsage" attribute
@@ -457,7 +457,7 @@ export async function openSSLLike(password: string) {
 }
 
 export async function parsePKCS12(buffer: ArrayBuffer, password: string) {
-  const passwordConverted = pvutils.stringToArrayBuffer(password);
+  const passwordConverted = toArrayBuffer(binary.decode(password));
 
   // Parse internal PKCS#12 values
   const pkcs12 = pkijs.PFX.fromBER(buffer);

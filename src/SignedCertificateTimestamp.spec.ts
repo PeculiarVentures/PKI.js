@@ -536,3 +536,48 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
     expectUnchanged(certificate, original);
   });
 });
+
+const sctLogID = new Uint8Array(32).fill(0xab).buffer;
+
+function createSCT(timestamp: Date): pkijs.SignedCertificateTimestamp {
+  return new pkijs.SignedCertificateTimestamp({
+    version: 0,
+    logID: sctLogID,
+    timestamp,
+    extensions: new ArrayBuffer(0),
+    hashAlgorithm: "sha256",
+    signatureAlgorithm: "ecdsa",
+    signature: new Uint8Array([0x30, 0x00, 0xfe]).buffer,
+  });
+}
+
+describe("SignedCertificateTimestamp", () => {
+  it("round-trips the timestamp with millisecond precision", () => {
+    const sct = createSCT(new Date(1700000000123));
+    const parsed = new pkijs.SignedCertificateTimestamp({ schema: sct.toSchema() });
+
+    expect(parsed.timestamp.getTime()).toBe(1700000000123);
+    expect(parsed.toJSON()).toMatchObject({ logID: "AB".repeat(32), signature: "3000FE", extensions: "" });
+  });
+
+  it("parses a timestamp above 2^53 ms as an invalid date", () => {
+    const data = new Uint8Array(createSCT(new Date(0)).toSchema().data);
+    data.fill(0xff, 35, 43); // length (2) + version (1) + logID (32), then 8 timestamp bytes
+
+    const parsed = new pkijs.SignedCertificateTimestamp({ schema: new asn1js.RawData({ data: data.buffer }) });
+
+    expect(Number.isNaN(parsed.timestamp.getTime())).toBe(true);
+  });
+
+  it("throws a RangeError when the timestamp can't be encoded", () => {
+    expect(() => createSCT(new Date(Number.NaN)).toStream()).toThrow(RangeError);
+    expect(() => createSCT(new Date(-1)).toStream()).toThrow(RangeError);
+  });
+
+  it("rejects a log key that isn't base64", async () => {
+    const sct = createSCT(new Date(1700000000123));
+    const logs = [{ log_id: base64.encode(sctLogID), key: "not base64!" }];
+
+    await expect(sct.verify(logs, new ArrayBuffer(0))).rejects.toThrow(TypeError);
+  });
+});

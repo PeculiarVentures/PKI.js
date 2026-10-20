@@ -1,8 +1,7 @@
 import { sha1 } from "@noble/hashes/sha1";
-import { toArrayBuffer } from "@peculiar/utils";
+import { binary, toArrayBuffer } from "@peculiar/utils";
 import { sha256, sha384, sha512 } from "@noble/hashes/sha2";
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import * as common from "../common";
 import { PublicKeyInfo } from "../PublicKeyInfo";
 import { PrivateKeyInfo } from "../PrivateKeyInfo";
@@ -489,7 +488,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     if (this.name.toLowerCase() === "safari") {
       // Try to use both ways - import using ArrayBuffer and pure JWK (for Safari Technology Preview)
       try {
-        return this.subtle.importKey("jwk", pvutils.stringToArrayBuffer(JSON.stringify(jwk)) as any, algorithm, extractable, keyUsages);
+        return this.subtle.importKey("jwk", binary.decode(JSON.stringify(jwk)).buffer as any, algorithm, extractable, keyUsages);
       } catch {
         return this.subtle.importKey("jwk", jwk, algorithm, extractable, keyUsages);
       }
@@ -514,7 +513,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
     if (this.name.toLowerCase() === "safari") {
       // Some additional checks for Safari Technology Preview
       if (jwk instanceof ArrayBuffer) {
-        jwk = JSON.parse(pvutils.arrayBufferToString(jwk));
+        jwk = JSON.parse(binary.encode(jwk));
       }
     }
     //#endregion

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
+import { bytes } from "@peculiar/utils";
 import type { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { EMPTY_BUFFER } from "./constants";
 import type { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
@@ -287,9 +287,9 @@ async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer, Counte
   //#endregion
 
   //#region Create a combined ArrayBuffer for digesting
-  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, zBuffer);
-  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, counterBuffer);
-  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, SharedInfo);
+  combinedBuffer = bytes.concat(combinedBuffer, zBuffer) as ArrayBuffer;
+  combinedBuffer = bytes.concat(combinedBuffer, counterBuffer) as ArrayBuffer;
+  combinedBuffer = bytes.concat(combinedBuffer, SharedInfo) as ArrayBuffer;
   //#endregion
 
   //#region Return digest of combined ArrayBuffer and information about current counter
@@ -367,7 +367,7 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
 
     for (const result of incomingResult) {
       if (result.counter === currentCounter) {
-        combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, result.result);
+        combinedBuffer = bytes.concat(combinedBuffer, result.result) as ArrayBuffer;
         found = true;
         break;
       }

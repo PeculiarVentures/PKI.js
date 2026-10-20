@@ -1,10 +1,10 @@
 import { describe, it, assert } from "vitest";
-import * as pvutils from "pvutils";
 import * as example from "../examples/OpenSSLPrivateKeyEncryption/example";
+import { binary, toArrayBuffer } from "@peculiar/utils";
 
 describe("OpenSSL Encrypted Private Key", () => {
   //#region Initial variables
-  const passwordBuffer = pvutils.stringToArrayBuffer("password");
+  const passwordBuffer = toArrayBuffer(binary.decode("password"));
 
   const encLens = [128, 192, 256];
   //#endregion

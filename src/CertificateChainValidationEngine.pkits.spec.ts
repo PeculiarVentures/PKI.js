@@ -1,8 +1,8 @@
 import { describe, it, assert } from "vitest";
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import * as pkijs from "./index";
 import type { CertificateChainValidationEngineVerifyParams } from "./CertificateChainValidationEngine";
+import { base64, toArrayBuffer } from "@peculiar/utils";
 
 //#region Testing constants
 
@@ -1867,7 +1867,7 @@ const PKITS: Record<string, Record<string, string>> = {
 //#region Aux functions
 
 function pkitsToArrayBuffer(pkitsValue: string) {
-  return pvutils.stringToArrayBuffer(pvutils.fromBase64(pkitsValue));
+  return toArrayBuffer(base64.decode(pkitsValue));
 }
 
 //#endregion
