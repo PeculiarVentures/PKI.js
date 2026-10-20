@@ -4,8 +4,8 @@ import { CertificateRevocationList } from "./CertificateRevocationList";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { id_CRLBag_X509CRL } from "./ObjectIdentifiers";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const CRL_ID = "crlId";
 const CRL_VALUE = "crlValue";

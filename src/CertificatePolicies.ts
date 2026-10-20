@@ -2,9 +2,9 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { PolicyInformation, PolicyInformationJson } from "./PolicyInformation";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import { PolicyInformation, type PolicyInformationJson } from "./PolicyInformation";
+import type * as Schema from "./Schema";
 
 const CERTIFICATE_POLICIES = "certificatePolicies";
 const CLEAR_PROPS = [CERTIFICATE_POLICIES];

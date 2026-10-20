@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 
 const SAFE_BUGS = "safeBags";
@@ -127,5 +127,5 @@ export class SafeContents extends PkiObject implements ISafeContents {
   }
 }
 
-import { SafeBag, SafeBagJson } from "./SafeBag";
+import { SafeBag, type SafeBagJson } from "./SafeBag";
 import { EMPTY_STRING } from "./constants";

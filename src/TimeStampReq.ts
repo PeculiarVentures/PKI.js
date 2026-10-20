@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { MessageImprint, MessageImprintJson, MessageImprintSchema } from "./MessageImprint";
-import { Extension, ExtensionJson } from "./Extension";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { MessageImprint, type MessageImprintJson, type MessageImprintSchema } from "./MessageImprint";
+import { Extension, type ExtensionJson } from "./Extension";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_STRING } from "./constants";
 

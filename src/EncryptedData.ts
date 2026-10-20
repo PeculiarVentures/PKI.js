@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { EncryptedContentInfo, EncryptedContentInfoJson, EncryptedContentInfoSchema } from "./EncryptedContentInfo";
-import { Attribute, AttributeJson } from "./Attribute";
-import * as Schema from "./Schema";
+import { EncryptedContentInfo, type EncryptedContentInfoJson, type EncryptedContentInfoSchema } from "./EncryptedContentInfo";
+import { Attribute, type AttributeJson } from "./Attribute";
+import type * as Schema from "./Schema";
 import { ArgumentError, AsnError } from "./errors";
-import { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import type { CryptoEngineEncryptParams } from "./CryptoEngine/CryptoEngineInterface";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";

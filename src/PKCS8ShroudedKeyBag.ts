@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { EncryptedData, EncryptedDataEncryptParams } from "./EncryptedData";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { EncryptedData, type EncryptedDataEncryptParams } from "./EncryptedData";
 import { EncryptedContentInfo } from "./EncryptedContentInfo";
 import { PrivateKeyInfo } from "./PrivateKeyInfo";
-import * as Schema from "./Schema";
+import type * as Schema from "./Schema";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_STRING } from "./constants";
 import * as common from "./common";
 

@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { GeneralNames, GeneralNamesJson } from "../GeneralNames";
-import { IssuerSerial, IssuerSerialJson } from "../AttributeCertificateV1";
-import { ObjectDigestInfo, ObjectDigestInfoJson } from "./ObjectDigestInfo";
-import * as Schema from "../Schema";
-import { PkiObject, PkiObjectParameters } from "../PkiObject";
+import { GeneralNames, type GeneralNamesJson } from "../GeneralNames";
+import { IssuerSerial, type IssuerSerialJson } from "../AttributeCertificateV1";
+import { ObjectDigestInfo, type ObjectDigestInfoJson } from "./ObjectDigestInfo";
+import type * as Schema from "../Schema";
+import { PkiObject, type PkiObjectParameters } from "../PkiObject";
 import { AsnError } from "../errors";
 import { EMPTY_STRING } from "../constants";
 

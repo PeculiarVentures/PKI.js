@@ -1,11 +1,11 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { Certificate, CertificateJson } from "./Certificate";
-import { AttributeCertificateV1, AttributeCertificateV1Json } from "./AttributeCertificateV1";
-import { AttributeCertificateV2, AttributeCertificateV2Json } from "./AttributeCertificateV2";
-import { OtherCertificateFormat, OtherCertificateFormatJson } from "./OtherCertificateFormat";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { Certificate, type CertificateJson } from "./Certificate";
+import { AttributeCertificateV1, type AttributeCertificateV1Json } from "./AttributeCertificateV1";
+import { AttributeCertificateV2, type AttributeCertificateV2Json } from "./AttributeCertificateV2";
+import { OtherCertificateFormat, type OtherCertificateFormatJson } from "./OtherCertificateFormat";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_STRING } from "./constants";
 

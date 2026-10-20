@@ -2,9 +2,9 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { KeyAgreeRecipientIdentifier, KeyAgreeRecipientIdentifierJson, KeyAgreeRecipientIdentifierSchema } from "./KeyAgreeRecipientIdentifier";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { KeyAgreeRecipientIdentifier, type KeyAgreeRecipientIdentifierJson, type KeyAgreeRecipientIdentifierSchema } from "./KeyAgreeRecipientIdentifier";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const RID = "rid";
 const ENCRYPTED_KEY = "encryptedKey";

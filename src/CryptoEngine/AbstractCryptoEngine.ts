@@ -1,10 +1,10 @@
-import { BitString, OctetString } from "asn1js";
+import type { BitString, OctetString } from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier } from "../AlgorithmIdentifier";
+import type { AlgorithmIdentifier } from "../AlgorithmIdentifier";
 import { EMPTY_STRING } from "../constants";
-import { EncryptedContentInfo } from "../EncryptedContentInfo";
-import { PublicKeyInfo } from "../PublicKeyInfo";
-import * as type from "./CryptoEngineInterface";
+import type { EncryptedContentInfo } from "../EncryptedContentInfo";
+import type { PublicKeyInfo } from "../PublicKeyInfo";
+import type * as type from "./CryptoEngineInterface";
 
 export abstract class AbstractCryptoEngine implements type.ICryptoEngine {
   public name: string;

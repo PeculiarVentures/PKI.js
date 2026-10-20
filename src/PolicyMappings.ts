@@ -2,9 +2,9 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { PolicyMapping, PolicyMappingJson } from "./PolicyMapping";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import { PolicyMapping, type PolicyMappingJson } from "./PolicyMapping";
+import type * as Schema from "./Schema";
 
 const MAPPINGS = "mappings";
 const CLEAR_PROPS = [MAPPINGS];

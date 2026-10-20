@@ -4,8 +4,8 @@ import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
 import { OriginatorPublicKey } from "./OriginatorPublicKey";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const VARIANT = "variant";
 const VALUE = "value";

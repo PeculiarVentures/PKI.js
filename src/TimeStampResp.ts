@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { PKIStatusInfo, PKIStatusInfoJson, PKIStatusInfoSchema } from "./PKIStatusInfo";
-import { ContentInfo, ContentInfoJson, ContentInfoSchema } from "./ContentInfo";
+import { PKIStatusInfo, type PKIStatusInfoJson, type PKIStatusInfoSchema } from "./PKIStatusInfo";
+import { ContentInfo, type ContentInfoJson, type ContentInfoSchema } from "./ContentInfo";
 import { SignedData } from "./SignedData";
-import * as Schema from "./Schema";
+import type * as Schema from "./Schema";
 import { id_ContentType_SignedData } from "./ObjectIdentifiers";
-import { Certificate } from "./Certificate";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import type { Certificate } from "./Certificate";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import * as common from "./common";

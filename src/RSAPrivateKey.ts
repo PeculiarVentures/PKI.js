@@ -3,9 +3,9 @@ import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
-import { OtherPrimeInfo, OtherPrimeInfoJson, OtherPrimeInfoSchema } from "./OtherPrimeInfo";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { OtherPrimeInfo, type OtherPrimeInfoJson, type OtherPrimeInfoSchema } from "./OtherPrimeInfo";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const VERSION = "version";
 const MODULUS = "modulus";

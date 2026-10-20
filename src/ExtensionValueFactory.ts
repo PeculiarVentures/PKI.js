@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as OID from "./ObjectIdentifiers";
-import * as Schema from "./Schema";
+import type * as Schema from "./Schema";
 
 export type ExtensionParsedValue =
   | (Schema.SchemaCompatible & {

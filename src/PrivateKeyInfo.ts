@@ -1,13 +1,13 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { Attribute, AttributeJson } from "./Attribute";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { Attribute, type AttributeJson } from "./Attribute";
 import { EMPTY_STRING } from "./constants";
 import { ECPrivateKey } from "./ECPrivateKey";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { RSAPrivateKey } from "./RSAPrivateKey";
-import * as Schema from "./Schema";
+import type * as Schema from "./Schema";
 
 const VERSION = "version";
 const PRIVATE_KEY_ALGORITHM = "privateKeyAlgorithm";

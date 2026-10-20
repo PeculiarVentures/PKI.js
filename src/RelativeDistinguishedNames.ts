@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AttributeTypeAndValue, AttributeTypeAndValueJson } from "./AttributeTypeAndValue";
+import { AttributeTypeAndValue, type AttributeTypeAndValueJson } from "./AttributeTypeAndValue";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 export const TYPE_AND_VALUES = "typesAndValues";
 export const VALUE_BEFORE_DECODE = "valueBeforeDecode";

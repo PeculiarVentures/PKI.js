@@ -2,10 +2,10 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { GeneralName, GeneralNameJson } from "./GeneralName";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { RelativeDistinguishedNames, RelativeDistinguishedNamesJson } from "./RelativeDistinguishedNames";
-import * as Schema from "./Schema";
+import { GeneralName, type GeneralNameJson } from "./GeneralName";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import { RelativeDistinguishedNames, type RelativeDistinguishedNamesJson } from "./RelativeDistinguishedNames";
+import type * as Schema from "./Schema";
 
 const DISTRIBUTION_POINT = "distributionPoint";
 const DISTRIBUTION_POINT_NAMES = "distributionPointNames";

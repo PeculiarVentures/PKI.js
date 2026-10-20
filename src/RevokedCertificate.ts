@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { Time, TimeJson } from "./Time";
-import { Extensions, ExtensionsJson } from "./Extensions";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { Time, type TimeJson } from "./Time";
+import { Extensions, type ExtensionsJson } from "./Extensions";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_STRING } from "./constants";
 

@@ -1,14 +1,14 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { TBSRequest, TBSRequestJson, TBSRequestSchema } from "./TBSRequest";
-import { Signature, SignatureJson, SignatureSchema } from "./Signature";
+import { TBSRequest, type TBSRequestJson, type TBSRequestSchema } from "./TBSRequest";
+import { Signature, type SignatureJson, type SignatureSchema } from "./Signature";
 import { Request } from "./Request";
-import { CertID, CertIDCreateParams } from "./CertID";
-import * as Schema from "./Schema";
-import { Certificate } from "./Certificate";
+import { CertID, type CertIDCreateParams } from "./CertID";
+import type * as Schema from "./Schema";
+import type { Certificate } from "./Certificate";
 import { AsnError, ParameterError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 
 const TBS_REQUEST = "tbsRequest";
 const OPTIONAL_SIGNATURE = "optionalSignature";

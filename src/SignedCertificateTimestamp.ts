@@ -3,12 +3,12 @@ import * as pvutils from "pvutils";
 import * as bs from "bytestreamjs";
 import * as common from "./common";
 import { PublicKeyInfo } from "./PublicKeyInfo";
-import * as Schema from "./Schema";
-import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import type * as Schema from "./Schema";
+import type { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { Certificate } from "./Certificate";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
-import { SignedCertificateTimestampList } from "./SignedCertificateTimestampList";
+import type { SignedCertificateTimestampList } from "./SignedCertificateTimestampList";
 import { Extension } from "./Extension";
 import { id_SignedCertificateTimestampList } from "./ObjectIdentifiers";
 

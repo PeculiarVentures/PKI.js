@@ -1,13 +1,13 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { KeyTransRecipientInfo, KeyTransRecipientInfoJson } from "./KeyTransRecipientInfo";
-import { KeyAgreeRecipientInfo, KeyAgreeRecipientInfoJson } from "./KeyAgreeRecipientInfo";
-import { KEKRecipientInfo, KEKRecipientInfoJson } from "./KEKRecipientInfo";
-import { PasswordRecipientinfo, PasswordRecipientInfoJson } from "./PasswordRecipientinfo";
-import { OtherRecipientInfo, OtherRecipientInfoJson } from "./OtherRecipientInfo";
-import * as Schema from "./Schema";
+import { KeyTransRecipientInfo, type KeyTransRecipientInfoJson } from "./KeyTransRecipientInfo";
+import { KeyAgreeRecipientInfo, type KeyAgreeRecipientInfoJson } from "./KeyAgreeRecipientInfo";
+import { KEKRecipientInfo, type KEKRecipientInfoJson } from "./KEKRecipientInfo";
+import { PasswordRecipientinfo, type PasswordRecipientInfoJson } from "./PasswordRecipientinfo";
+import { OtherRecipientInfo, type OtherRecipientInfoJson } from "./OtherRecipientInfo";
+import type * as Schema from "./Schema";
 import { AsnError, ParameterError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_STRING } from "./constants";
 
 const VARIANT = "variant";
