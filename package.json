@@ -48,6 +48,7 @@
     "format:check": "oxfmt --check",
     "coverage": "vitest run --coverage",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -87,7 +88,7 @@
     },
     "packageManager": {
       "name": "npm",
-      "version": "11.7.0",
+      "version": ">=11.7.0",
       "onFail": "warn"
     }
   },
