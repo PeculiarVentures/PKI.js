@@ -1,7 +1,7 @@
 /// <reference path="types.d.ts" />
 
 import { binary, toArrayBuffer, utf8 } from "@peculiar/utils";
-import parse from "emailjs-mime-parser";
+import mimeParser from "emailjs-mime-parser";
 import * as pkijs from "../../src";
 import * as common from "../common";
 
@@ -15,7 +15,7 @@ const trustedCertificates: pkijs.Certificate[] = [];
  */
 async function verifySMIME() {
   //#region Parse MIME contents to find signature and detached data
-  const parser = parse(common.getElement("smime_message", "textarea").value);
+  const parser = mimeParser.default(common.getElement("smime_message", "textarea").value);
   //#endregion
 
   if ("childNodes" in parser || parser.childNodes.length !== 2) {

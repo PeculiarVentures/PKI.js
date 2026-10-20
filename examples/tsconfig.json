@@ -1,0 +1,8 @@
+{
+  // Typechecks the browser examples and the Node.js PKCS#12 engine against src/.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["**/*.ts", "../src"]
+}

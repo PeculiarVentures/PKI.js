@@ -5,8 +5,8 @@ import * as utils from "../utils";
 import * as pkijs from "../../src";
 import * as common from "../common";
 
-import MimeNode from "emailjs-mime-builder";
-import parse from "emailjs-mime-parser";
+import mimeNode from "emailjs-mime-builder";
+import mimeParser from "emailjs-mime-parser";
 
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT
 
@@ -64,7 +64,7 @@ async function smimeEncrypt() {
   const ber = schema.toBER(false);
 
   // Insert enveloped data into new Mime message
-  const mimeBuilder = new MimeNode("application/pkcs7-mime; name=smime.p7m; smime-type=enveloped-data; charset=binary")
+  const mimeBuilder = new mimeNode.default("application/pkcs7-mime; name=smime.p7m; smime-type=enveloped-data; charset=binary")
     .setHeader("content-description", "Enveloped Data")
     .setHeader("content-disposition", "attachment; filename=smime.p7m")
     .setHeader("content-transfer-encoding", "base64")
@@ -91,7 +91,7 @@ async function smimeDecrypt() {
   const privateKeyBuffer = utils.fromPEM(common.getElement("pkcs8_key", "textarea").value);
 
   // Parse S/MIME message to get CMS enveloped content
-  const parser = parse(common.getElement("encrypted_content", "textarea").value);
+  const parser = mimeParser.default(common.getElement("encrypted_content", "textarea").value);
 
   // Make all CMS data
   const cmsContentSimpl = pkijs.ContentInfo.fromBER(parser.content.buffer);
