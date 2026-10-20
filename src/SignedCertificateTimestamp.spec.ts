@@ -1,20 +1,14 @@
 import { afterEach, beforeAll, describe, it, expect, vi } from "vitest";
 import * as asn1js from "asn1js";
 import { Convert } from "pvtsutils";
-import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname } from "node:path";
-import { runInThisContext } from "node:vm";
+import { pathToFileURL } from "node:url";
 import * as pkijs from "./index";
 
-function loadSeparateAsn1js(): typeof asn1js {
-  const nodeRequire = createRequire(__filename);
-  const filename = nodeRequire.resolve("asn1js");
-  const separateModule = { exports: {} };
-  // Evaluate the installed module again without changing Node's shared module cache.
-  const evaluate = runInThisContext(`(function (exports, require, module, __filename, __dirname) {\n${readFileSync(filename, "utf8")}\n})`, { filename });
-  evaluate(separateModule.exports, createRequire(filename), separateModule, filename, dirname(filename));
-  return separateModule.exports as typeof asn1js;
+async function loadSeparateAsn1js(): Promise<typeof asn1js> {
+  const filename = createRequire(import.meta.url).resolve("asn1js");
+  // A query string makes the module loader evaluate the installed module again as a separate instance.
+  return import(`${pathToFileURL(filename).href}?separate`);
 }
 
 function snapshot(certificate: pkijs.Certificate) {
@@ -379,7 +373,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
   });
 
   it.each(["wrapper", "sequence", "extension", "oid"] as const)("accepts a %s from a separate ASN1js copy", async (part) => {
-    const separateAsn1js = loadSeparateAsn1js();
+    const separateAsn1js = await loadSeparateAsn1js();
     expect(separateAsn1js.Constructed).not.toBe(asn1js.Constructed);
     expect(separateAsn1js.Sequence).not.toBe(asn1js.Sequence);
     expect(separateAsn1js.ObjectIdentifier).not.toBe(asn1js.ObjectIdentifier);

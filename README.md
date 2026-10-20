@@ -31,13 +31,20 @@ PKIjs provides a Typescript implementation of the most common formats and algori
 
 ## Installation
 
-To install the stable version:
-
 ```bash
-npm install --save pkijs
+npm install pkijs asn1js
 ```
 
-This assumes you are using [npm](https://www.npmjs.com/) as your package manager.
+`asn1js` is a peer dependency: pkijs and your application must use the same copy (see below).
+
+## Breaking Changes In v4
+
+v4 is ESM-only and requires Node.js `^20.19.0 || >=22.12.0` (was `>=16.0.0`). CommonJS code can still `require("pkijs")` on these versions; Node.js 22.0–22.11 can't. The exported API is unchanged.
+
+- **TypeScript compiling to CommonJS:** use `"module": "node20"` or `"nodenext"` (`node16` fails with TS1479). ESM and bundler setups need no changes.
+- **Jest in CommonJS mode:** switch to ESM mode or Vitest, or configure an ESM-to-CommonJS transformer and make sure `transformIgnorePatterns` doesn't exclude `pkijs` and its ESM dependencies (`asn1js`, `bytestreamjs`, `@peculiar/utils`, `@noble/hashes`).
+- **Deep imports** (`pkijs/build/index.js`, `pkijs/build/index.es.js`) are blocked by `exports`; import from `pkijs`.
+- **asn1js 4 is a peer dependency** (v3 depended on asn1js 3), and `bytestreamjs` moves to 3. Install `asn1js@^4` next to pkijs. pkijs checks `instanceof asn1js.Sequence` and similar on values you pass in, so they must come from the same asn1js copy as pkijs's: values built with asn1js 3 fail those checks. Upgrade other libraries that still depend on asn1js 3 (such as `@peculiar/asn1-schema` 2) at the same time.
 
 ## Examples
 
@@ -74,7 +81,7 @@ You can find the PKI.js documentation [on the website](https://pkijs.org/docs/in
 
 ## Want to help?
 
-Want to file a bug, contribute some code, or improve documentation? Excellent! Read up on our guidelines for [contribution](https://github.com/PeculiarVentures/PKI.js/blob/master/CONTRIBUTING.md).
+Want to file a bug, contribute some code, or improve documentation? Excellent! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, commit conventions and the release flow.
 
 ## Core Contributors
 

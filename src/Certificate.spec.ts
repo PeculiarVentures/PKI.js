@@ -1,7 +1,10 @@
 import { describe, it, expect } from "vitest";
 import * as asn1js from "asn1js";
 import { Convert } from "pvtsutils";
-import { Certificate } from "./index";
+import { Certificate, Time } from "./index";
+
+// asn1js 4 refuses to encode the default 1899 UTCTime, so give the certificates a valid period.
+const validity = { notBefore: new Time({ value: new Date(Date.UTC(2024, 0, 1)) }), notAfter: new Time({ value: new Date(Date.UTC(2025, 0, 1)) }) };
 
 function getExtensions(tbs: asn1js.Sequence): asn1js.Constructed | undefined {
   return tbs.valueBlock.value.find((value) => value.idBlock.tagClass === 3 && value.idBlock.tagNumber === 3) as asn1js.Constructed | undefined;
@@ -9,14 +12,14 @@ function getExtensions(tbs: asn1js.Sequence): asn1js.Constructed | undefined {
 
 describe("Certificate.encodeTBS legacy extensions encoding", () => {
   it("keeps absent extensions omitted without creating the property", () => {
-    const certificate = new Certificate({ version: 2 });
+    const certificate = new Certificate({ version: 2, ...validity });
 
     expect(getExtensions(certificate.encodeTBS())).toBeUndefined();
     expect(Reflect.ownKeys(certificate)).not.toContain("extensions");
   });
 
   it("preserves the exact legacy DER for an empty extensions array", () => {
-    const certificate = new Certificate({ version: 2, extensions: [] });
+    const certificate = new Certificate({ version: 2, ...validity, extensions: [] });
     const extensions = certificate.extensions!;
     Object.freeze(extensions);
     Object.freeze(certificate);

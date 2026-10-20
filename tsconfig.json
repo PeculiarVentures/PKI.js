@@ -1,16 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES2019",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
+    "target": "es2023",
+    "lib": ["es2023", "DOM"],
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "types": [],
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
     "strict": true,
     "skipLibCheck": true,
-    "importHelpers": true,
     "noImplicitOverride": true,
     "noErrorTruncation": true,
-    "experimentalDecorators": true,
-    "types": ["node"]
+    "noEmit": true,
+    "useDefineForClassFields": false
   },
-  "exclude": ["website", "build/*.ts"]
+  "include": ["src", "*.config.ts", "vitest.setup.ts"]
 }
