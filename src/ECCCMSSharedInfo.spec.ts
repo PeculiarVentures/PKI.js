@@ -1,7 +1,7 @@
 import { it, assert } from "vitest";
 import * as asn1js from "asn1js";
 import * as pkijs from "./index";
-import "./test-helpers";
+import "../examples/utils";
 import * as pvtsutils from "pvtsutils";
 
 const recipientPrivateKeyPem = `

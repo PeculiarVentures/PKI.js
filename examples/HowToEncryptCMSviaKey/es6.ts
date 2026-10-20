@@ -1,6 +1,6 @@
 import * as pvtsutils from "pvtsutils";
-import * as utils from "../../src/test-helpers";
-import * as example from "../../src/EnvelopedData.kek.example";
+import * as utils from "../utils";
+import * as example from "./example";
 import * as common from "../common";
 
 let keys: example.CreateKeyPairResult;

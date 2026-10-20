@@ -1,6 +1,6 @@
 import * as pvtsutils from "pvtsutils";
-import * as example from "../../src/EnvelopedData.password.example";
-import * as utils from "../../src/test-helpers";
+import * as example from "./example";
+import * as utils from "../utils";
 import * as common from "../common";
 
 let encryptionVariant = 2;

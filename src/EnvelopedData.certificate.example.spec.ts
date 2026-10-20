@@ -1,7 +1,7 @@
 import { describe, it, assert } from "vitest";
 import * as pvutils from "pvutils";
-import * as example from "./EnvelopedData.certificate.example";
-import * as utils from "./test-helpers";
+import * as example from "../examples/HowToEncryptCMSviaCertificate/example";
+import * as utils from "../examples/utils";
 
 describe("How To Encrypt CMS via Certificate", () => {
   //#region Initial variables

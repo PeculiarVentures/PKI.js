@@ -19,7 +19,7 @@
 import { assert, beforeAll, describe, it } from "vitest";
 import * as asn1js from "asn1js";
 import * as pkijs from "./index";
-import "./test-helpers";
+import "../examples/utils";
 
 //#region key purposes
 const KP_SERVER_AUTH = "1.3.6.1.5.5.7.3.1";

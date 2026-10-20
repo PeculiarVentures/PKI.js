@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
-import * as example from "../../src/OCSPResponse.example";
-import * as utils from "../../src/test-helpers";
+import * as example from "./example";
+import * as utils from "../utils";
 import * as pkijs from "../../src";
 import * as common from "../common";
 

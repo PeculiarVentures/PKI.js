@@ -3,7 +3,7 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as pkijs from "./index";
 import { CertificateChainValidationEngineVerifyParams } from "./CertificateChainValidationEngine";
-import "./test-helpers";
+import "../examples/utils";
 
 //#region Testing constants
 

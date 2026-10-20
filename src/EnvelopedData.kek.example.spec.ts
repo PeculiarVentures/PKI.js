@@ -1,6 +1,6 @@
 import { describe, it, assert } from "vitest";
 import * as pvutils from "pvutils";
-import * as example from "./EnvelopedData.kek.example";
+import * as example from "../examples/HowToEncryptCMSviaKey/example";
 
 describe("How To Encrypt CMS via Key Identifier", () => {
   //#region Initial variables

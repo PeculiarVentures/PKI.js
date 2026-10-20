@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import * as pkijs from "./index";
+import * as pkijs from "../../src";
 
 // Global variables
 export const certificateBASE64 =

@@ -1,6 +1,6 @@
 import { describe, it, assert } from "vitest";
 import * as pkijs from "./index";
-import { createTSPResp, verifyTSPResp } from "./TimeStampResp.example";
+import { createTSPResp, verifyTSPResp } from "../examples/TSPResponseComplexExample/example";
 
 describe("TSP Response Complex Example", () => {
   const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];

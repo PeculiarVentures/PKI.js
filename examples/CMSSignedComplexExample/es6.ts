@@ -1,7 +1,7 @@
 import * as pvutils from "pvutils";
 import * as pkijs from "../../src";
-import * as utils from "../../src/test-helpers";
-import * as example from "../../src/SignedData.example";
+import * as utils from "../utils";
+import * as example from "./example";
 import * as common from "../common";
 
 let cmsSignedBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CMS_Signed

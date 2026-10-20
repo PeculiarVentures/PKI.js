@@ -1,7 +1,7 @@
 import { describe, it, assert, expect } from "vitest";
 import * as crypto from "crypto";
-import "./test-helpers";
-import * as example from "./PFX.example";
+import "../examples/utils";
+import * as example from "../examples/PKCS12SimpleExample/example";
 import { CryptoEngine, PFX } from "./index";
 import { Convert } from "pvtsutils";
 

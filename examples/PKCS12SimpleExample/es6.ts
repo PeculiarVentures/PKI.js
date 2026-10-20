@@ -1,5 +1,5 @@
-import * as utils from "../../src/test-helpers";
-import * as example from "../../src/PFX.example";
+import * as utils from "../utils";
+import * as example from "./example";
 import * as common from "../common";
 
 function destroyClickedElement(event: any) {

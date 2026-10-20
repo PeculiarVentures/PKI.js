@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
-import * as pkijs from "./index";
+import * as pkijs from "../src";
 
 export function toPEM(buffer: BufferSource, tag: string): string {
   return [`-----BEGIN ${tag}-----`, formatPEM(pvtsutils.Convert.ToBase64(buffer)), `-----END ${tag}-----`, ""].join("\n");

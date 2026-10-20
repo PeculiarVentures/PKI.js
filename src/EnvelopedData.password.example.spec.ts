@@ -1,6 +1,6 @@
 import { describe, it, assert } from "vitest";
 import * as pvutils from "pvutils";
-import * as example from "./EnvelopedData.password.example";
+import * as example from "../examples/HowToEncryptCMSviaPassword/example";
 
 describe("How To Encrypt CMS via Password", () => {
   //#region Initial variables

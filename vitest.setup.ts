@@ -1,5 +1,5 @@
 import { Crypto as NodeCrypto } from "@peculiar/webcrypto";
-import * as pkijs from "./index";
+import * as pkijs from "./src/index";
 
 const webcrypto = new NodeCrypto();
 const name = "newEngine";

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import * as utils from "./test-helpers";
-import * as pkijs from "./index";
+import * as utils from "../utils";
+import * as pkijs from "../../src";
 
 interface CreateOcspRespResult extends utils.CertificateWithPrivateKey {
   ocspResp: pkijs.OCSPResponse;

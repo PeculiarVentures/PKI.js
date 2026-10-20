@@ -1,6 +1,6 @@
 import { describe, it, assert } from "vitest";
 import * as pkijs from "./index";
-import * as example from "./Certificate.example";
+import * as example from "../examples/CertificateComplexExample/example";
 
 describe("Certificate Complex Example", () => {
   //#region Initial variables

@@ -1,7 +1,7 @@
 import { describe, it, assert } from "vitest";
 import * as pvtsutils from "pvtsutils";
 import * as pkijs from "./index";
-import * as example from "./SignedData.example";
+import * as example from "../examples/CMSSignedComplexExample/example";
 
 describe("CMS Signed Complex Example", () => {
   //#region Initial variables

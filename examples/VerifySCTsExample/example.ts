@@ -1,5 +1,5 @@
-import * as pkijs from "./index";
-import * as utils from "./test-helpers";
+import * as pkijs from "../../src";
+import * as utils from "../utils";
 
 // Certificate w/ 3 SCTs to be verified
 const certPem = `

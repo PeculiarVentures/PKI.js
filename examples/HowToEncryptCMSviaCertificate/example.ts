@@ -1,4 +1,4 @@
-import * as pkijs from "./index";
+import * as pkijs from "../../src";
 
 export interface EnvelopedWithCertificateParams extends Algorithm {
   length: number;

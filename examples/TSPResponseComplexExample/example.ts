@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import * as pkijs from "./index";
-import * as utils from "./test-helpers";
+import * as pkijs from "../../src";
+import * as utils from "../utils";
 
 const testData = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09]);
 export interface CreateTSPResponseResult extends utils.CertificateWithPrivateKey {

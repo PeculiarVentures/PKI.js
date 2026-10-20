@@ -1,6 +1,6 @@
 import { describe, it, assert } from "vitest";
 import * as pvutils from "pvutils";
-import * as example from "./PrivateKeyInfo.openssl.example";
+import * as example from "../examples/OpenSSLPrivateKeyEncryption/example";
 
 describe("OpenSSL Encrypted Private Key", () => {
   //#region Initial variables

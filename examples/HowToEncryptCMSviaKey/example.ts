@@ -1,4 +1,4 @@
-import * as pkijs from "./index";
+import * as pkijs from "../../src";
 
 function getKeyAgreeAlgorithmParams(operation: pkijs.CryptoEngineAlgorithmOperation, curveName: string) {
   const algorithm = pkijs.getAlgorithmParameters("ECDH", operation) as any;

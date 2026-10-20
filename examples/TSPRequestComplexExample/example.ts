@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pkijs from "./index";
+import * as pkijs from "../../src";
 
 /**
  * Create TSP request
