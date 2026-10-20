@@ -18,9 +18,9 @@ export async function createTSPReq(): Promise<pkijs.TimeStampReq> {
 
   tspReqSimpl.messageImprint = new pkijs.MessageImprint({
     hashAlgorithm: new pkijs.AlgorithmIdentifier({
-      algorithmId: "1.3.14.3.2.26"
+      algorithmId: "1.3.14.3.2.26",
     }),
-    hashedMessage: new asn1js.OctetString({ valueHex: fictionBuffer })
+    hashedMessage: new asn1js.OctetString({ valueHex: fictionBuffer }),
   });
 
   tspReqSimpl.reqPolicy = "1.1.1";

@@ -3,12 +3,7 @@ import * as pvtsutils from "pvtsutils";
 import * as pkijs from "../src/index";
 
 export function toPEM(buffer: BufferSource, tag: string): string {
-  return [
-    `-----BEGIN ${tag}-----`,
-    formatPEM(pvtsutils.Convert.ToBase64(buffer)),
-    `-----END ${tag}-----`,
-    ""
-  ].join("\n");
+  return [`-----BEGIN ${tag}-----`, formatPEM(pvtsutils.Convert.ToBase64(buffer)), `-----END ${tag}-----`, ""].join("\n");
 }
 
 export function fromPEM(pem: string): ArrayBuffer {
@@ -51,10 +46,7 @@ export interface CertificateWithPrivateKey {
   pem: string;
 }
 
-export async function createSelfSignedCertificate(
-  hashAlg: string,
-  signAlg: string
-): Promise<CertificateWithPrivateKey> {
+export async function createSelfSignedCertificate(hashAlg: string, signAlg: string): Promise<CertificateWithPrivateKey> {
   const crypto = pkijs.getCrypto(true);
 
   //#region Create certificate
@@ -64,26 +56,26 @@ export async function createSelfSignedCertificate(
   certificate.issuer.typesAndValues.push(
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.6", // Country name
-      value: new asn1js.PrintableString({ value: "RU" })
-    })
+      value: new asn1js.PrintableString({ value: "RU" }),
+    }),
   );
   certificate.issuer.typesAndValues.push(
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.3", // Common name
-      value: new asn1js.BmpString({ value: "Test" })
-    })
+      value: new asn1js.BmpString({ value: "Test" }),
+    }),
   );
   certificate.subject.typesAndValues.push(
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.6", // Country name
-      value: new asn1js.PrintableString({ value: "RU" })
-    })
+      value: new asn1js.PrintableString({ value: "RU" }),
+    }),
   );
   certificate.subject.typesAndValues.push(
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.3", // Common name
-      value: new asn1js.BmpString({ value: "Test" })
-    })
+      value: new asn1js.BmpString({ value: "Test" }),
+    }),
   );
 
   certificate.notBefore.value = new Date();
@@ -96,7 +88,7 @@ export async function createSelfSignedCertificate(
   //#region "BasicConstraints" extension
   const basicConstr = new pkijs.BasicConstraints({
     cA: true,
-    pathLenConstraint: 3
+    pathLenConstraint: 3,
   });
 
   certificate.extensions.push(
@@ -104,8 +96,8 @@ export async function createSelfSignedCertificate(
       extnID: "2.5.29.19",
       critical: false,
       extnValue: basicConstr.toSchema().toBER(false),
-      parsedValue: basicConstr // Parsed value for well-known extensions
-    })
+      parsedValue: basicConstr, // Parsed value for well-known extensions
+    }),
   );
   //#endregion
 
@@ -123,8 +115,8 @@ export async function createSelfSignedCertificate(
       extnID: "2.5.29.15",
       critical: false,
       extnValue: keyUsage.toBER(false),
-      parsedValue: keyUsage // Parsed value for well-known extensions
-    })
+      parsedValue: keyUsage, // Parsed value for well-known extensions
+    }),
   );
   //#endregion
   //#endregion
@@ -134,11 +126,7 @@ export async function createSelfSignedCertificate(
     algorithm.algorithm.hash.name = hashAlg;
   }
 
-  const { privateKey, publicKey } = await crypto.generateKey(
-    algorithm.algorithm,
-    true,
-    algorithm.usages
-  );
+  const { privateKey, publicKey } = await crypto.generateKey(algorithm.algorithm, true, algorithm.usages);
 
   // Exporting public key into "subjectPublicKeyInfo" value of certificate
   await certificate.subjectPublicKeyInfo.importKey(publicKey);
@@ -156,6 +144,6 @@ export async function createSelfSignedCertificate(
     publicKey,
     pkcs8,
     spki,
-    pem: toPEM(certificate.toSchema().toBER(), "CERTIFICATE")
+    pem: toPEM(certificate.toSchema().toBER(), "CERTIFICATE"),
   };
 }

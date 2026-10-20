@@ -52,16 +52,8 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
   constructor(parameters: AttributeTypeAndValueParameters = {}) {
     super();
 
-    this.type = pvutils.getParametersValue(
-      parameters,
-      TYPE,
-      AttributeTypeAndValue.defaultValues(TYPE)
-    );
-    this.value = pvutils.getParametersValue(
-      parameters,
-      VALUE,
-      AttributeTypeAndValue.defaultValues(VALUE)
-    );
+    this.type = pvutils.getParametersValue(parameters, TYPE, AttributeTypeAndValue.defaultValues(TYPE));
+    this.value = pvutils.getParametersValue(parameters, VALUE, AttributeTypeAndValue.defaultValues(VALUE));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -99,21 +91,12 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
    * AttributeValue ::= ANY -- DEFINED BY AttributeType
    *```
    */
-  static override schema(
-    parameters: Schema.SchemaParameters<{ type?: string; value?: string }> = {}
-  ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+  static override schema(parameters: Schema.SchemaParameters<{ type?: string; value?: string }> = {}): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        new asn1js.ObjectIdentifier({ name: names.type || EMPTY_STRING }),
-        new asn1js.Any({ name: names.value || EMPTY_STRING })
-      ]
+      value: [new asn1js.ObjectIdentifier({ name: names.type || EMPTY_STRING }), new asn1js.Any({ name: names.value || EMPTY_STRING })],
     });
   }
 
@@ -129,9 +112,9 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
       AttributeTypeAndValue.schema({
         names: {
           type: TYPE,
-          value: "typeValue"
-        }
-      })
+          value: "typeValue",
+        },
+      }),
     );
 
     AsnError.assertSchema(asn1, this.className);
@@ -146,14 +129,14 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [new asn1js.ObjectIdentifier({ value: this.type }), this.value]
+      value: [new asn1js.ObjectIdentifier({ value: this.type }), this.value],
     });
     //#endregion
   }
 
   public toJSON(): AttributeTypeAndValueJson {
     const _object = {
-      type: this.type
+      type: this.type,
     } as AttributeTypeAndValueJson;
 
     if (Object.keys(this.value).length !== 0) {
@@ -182,17 +165,14 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
       asn1js.GraphicString.blockName(),
       asn1js.VisibleString.blockName(),
       asn1js.GeneralString.blockName(),
-      asn1js.CharacterString.blockName()
+      asn1js.CharacterString.blockName(),
     ];
 
     if (compareTo instanceof ArrayBuffer) {
       return pvtsutils.BufferSourceConverter.isEqual(this.value.valueBeforeDecodeView, compareTo);
     }
 
-    if (
-      (compareTo.constructor as typeof AttributeTypeAndValue).blockName() ===
-      AttributeTypeAndValue.blockName()
-    ) {
+    if ((compareTo.constructor as typeof AttributeTypeAndValue).blockName() === AttributeTypeAndValue.blockName()) {
       if (this.type !== compareTo.type) return false;
 
       //#region Check we do have both strings
@@ -221,13 +201,7 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
         if (value1.localeCompare(value2) !== 0) return false;
       } else // Comparing as two ArrayBuffers
       {
-        if (
-          !pvtsutils.BufferSourceConverter.isEqual(
-            this.value.valueBeforeDecodeView,
-            compareTo.value.valueBeforeDecodeView
-          )
-        )
-          return false;
+        if (!pvtsutils.BufferSourceConverter.isEqual(this.value.valueBeforeDecodeView, compareTo.value.valueBeforeDecodeView)) return false;
       }
 
       return true;

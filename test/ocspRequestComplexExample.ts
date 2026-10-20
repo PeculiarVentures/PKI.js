@@ -16,14 +16,14 @@ export async function createOCSPReq(): Promise<ArrayBuffer> {
       typesAndValues: [
         new pkijs.AttributeTypeAndValue({
           type: "2.5.4.6",
-          value: new asn1js.PrintableString({ value: "RU" })
+          value: new asn1js.PrintableString({ value: "RU" }),
         }),
         new pkijs.AttributeTypeAndValue({
           type: "2.5.4.3",
-          value: new asn1js.BmpString({ value: "Test" })
-        })
-      ]
-    })
+          value: new asn1js.BmpString({ value: "Test" }),
+        }),
+      ],
+    }),
   });
 
   const fictionBuffer = new ArrayBuffer(4);
@@ -37,38 +37,38 @@ export async function createOCSPReq(): Promise<ArrayBuffer> {
     typesAndValues: [
       new pkijs.AttributeTypeAndValue({
         type: "2.5.4.3", // CN
-        value: new asn1js.Utf8String({ value: "test-issuer" })
-      })
-    ]
+        value: new asn1js.Utf8String({ value: "test-issuer" }),
+      }),
+    ],
   });
   const serviceLocatorDer = new asn1js.Sequence({
-    value: [issuerName.toSchema()]
+    value: [issuerName.toSchema()],
   }).toBER(false);
   ocspReqSimpl.tbsRequest.requestList = [
     new pkijs.Request({
       reqCert: new pkijs.CertID({
         hashAlgorithm: new pkijs.AlgorithmIdentifier({
-          algorithmId: "1.3.14.3.2.26"
+          algorithmId: "1.3.14.3.2.26",
         }),
         issuerNameHash: new asn1js.OctetString({ valueHex: fictionBuffer }),
         issuerKeyHash: new asn1js.OctetString({ valueHex: fictionBuffer }),
-        serialNumber: new asn1js.Integer({ valueHex: fictionBuffer })
+        serialNumber: new asn1js.Integer({ valueHex: fictionBuffer }),
       }),
       singleRequestExtensions: [
         new pkijs.Extension({
           extnID: "1.3.6.1.5.5.7.48.1.7", // id-pkix-ocsp-service-locator
           critical: false,
-          extnValue: serviceLocatorDer
-        })
-      ]
-    })
+          extnValue: serviceLocatorDer,
+        }),
+      ],
+    }),
   ];
 
   ocspReqSimpl.tbsRequest.requestExtensions = [
     new pkijs.Extension({
       extnID: "1.3.6.1.5.5.7.48.1.2",
-      extnValue: new asn1js.OctetString({ valueHex: fictionBuffer }).toBER(false)
-    })
+      extnValue: new asn1js.OctetString({ valueHex: fictionBuffer }).toBER(false),
+    }),
   ];
   //#endregion
 

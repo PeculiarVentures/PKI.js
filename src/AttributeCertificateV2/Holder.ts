@@ -51,25 +51,13 @@ export class Holder extends PkiObject implements IHolder {
     super();
 
     if (BASE_CERTIFICATE_ID in parameters) {
-      this.baseCertificateID = pvutils.getParametersValue(
-        parameters,
-        BASE_CERTIFICATE_ID,
-        Holder.defaultValues(BASE_CERTIFICATE_ID)
-      );
+      this.baseCertificateID = pvutils.getParametersValue(parameters, BASE_CERTIFICATE_ID, Holder.defaultValues(BASE_CERTIFICATE_ID));
     }
     if (ENTITY_NAME in parameters) {
-      this.entityName = pvutils.getParametersValue(
-        parameters,
-        ENTITY_NAME,
-        Holder.defaultValues(ENTITY_NAME)
-      );
+      this.entityName = pvutils.getParametersValue(parameters, ENTITY_NAME, Holder.defaultValues(ENTITY_NAME));
     }
     if (OBJECT_DIGEST_INFO in parameters) {
-      this.objectDigestInfo = pvutils.getParametersValue(
-        parameters,
-        OBJECT_DIGEST_INFO,
-        Holder.defaultValues(OBJECT_DIGEST_INFO)
-      );
+      this.objectDigestInfo = pvutils.getParametersValue(parameters, OBJECT_DIGEST_INFO, Holder.defaultValues(OBJECT_DIGEST_INFO));
     }
 
     if (parameters.schema) {
@@ -115,11 +103,7 @@ export class Holder extends PkiObject implements IHolder {
    *```
    */
   public static override schema(parameters: HolderSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -129,29 +113,29 @@ export class Holder extends PkiObject implements IHolder {
           name: names.baseCertificateID || EMPTY_STRING,
           idBlock: {
             tagClass: 3,
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: IssuerSerial.schema().valueBlock.value
+          value: IssuerSerial.schema().valueBlock.value,
         }),
         new asn1js.Constructed({
           optional: true,
           name: names.entityName || EMPTY_STRING,
           idBlock: {
             tagClass: 3,
-            tagNumber: 1 // [2]
+            tagNumber: 1, // [2]
           },
-          value: GeneralNames.schema().valueBlock.value
+          value: GeneralNames.schema().valueBlock.value,
         }),
         new asn1js.Constructed({
           optional: true,
           name: names.objectDigestInfo || EMPTY_STRING,
           idBlock: {
             tagClass: 3,
-            tagNumber: 2 // [2]
+            tagNumber: 2, // [2]
           },
-          value: ObjectDigestInfo.schema().valueBlock.value
-        })
-      ]
+          value: ObjectDigestInfo.schema().valueBlock.value,
+        }),
+      ],
     });
   }
 
@@ -167,9 +151,9 @@ export class Holder extends PkiObject implements IHolder {
         names: {
           baseCertificateID: BASE_CERTIFICATE_ID,
           entityName: ENTITY_NAME,
-          objectDigestInfo: OBJECT_DIGEST_INFO
-        }
-      })
+          objectDigestInfo: OBJECT_DIGEST_INFO,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -177,22 +161,22 @@ export class Holder extends PkiObject implements IHolder {
     if (BASE_CERTIFICATE_ID in asn1.result) {
       this.baseCertificateID = new IssuerSerial({
         schema: new asn1js.Sequence({
-          value: asn1.result.baseCertificateID.valueBlock.value
-        })
+          value: asn1.result.baseCertificateID.valueBlock.value,
+        }),
       });
     }
     if (ENTITY_NAME in asn1.result) {
       this.entityName = new GeneralNames({
         schema: new asn1js.Sequence({
-          value: asn1.result.entityName.valueBlock.value
-        })
+          value: asn1.result.entityName.valueBlock.value,
+        }),
       });
     }
     if (OBJECT_DIGEST_INFO in asn1.result) {
       this.objectDigestInfo = new ObjectDigestInfo({
         schema: new asn1js.Sequence({
-          value: asn1.result.objectDigestInfo.valueBlock.value
-        })
+          value: asn1.result.objectDigestInfo.valueBlock.value,
+        }),
       });
     }
   }
@@ -205,10 +189,10 @@ export class Holder extends PkiObject implements IHolder {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3,
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: this.baseCertificateID.toSchema().valueBlock.value
-        })
+          value: this.baseCertificateID.toSchema().valueBlock.value,
+        }),
       );
     }
 
@@ -217,10 +201,10 @@ export class Holder extends PkiObject implements IHolder {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3,
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: this.entityName.toSchema().valueBlock.value
-        })
+          value: this.entityName.toSchema().valueBlock.value,
+        }),
       );
     }
 
@@ -229,10 +213,10 @@ export class Holder extends PkiObject implements IHolder {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3,
-            tagNumber: 2 // [2]
+            tagNumber: 2, // [2]
           },
-          value: this.objectDigestInfo.toSchema().valueBlock.value
-        })
+          value: this.objectDigestInfo.toSchema().valueBlock.value,
+        }),
       );
     }
 

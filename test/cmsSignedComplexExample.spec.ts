@@ -13,18 +13,12 @@ describe("CMS Signed Complex Example", () => {
   const dataBuffer = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09]).buffer;
   //#endregion
 
-  signAlgs.forEach(signAlg => {
-    hashAlgs.forEach(hashAlg => {
-      addExts.forEach(addExt => {
-        detachedSignatures.forEach(detachedSignature => {
+  signAlgs.forEach((signAlg) => {
+    hashAlgs.forEach((hashAlg) => {
+      addExts.forEach((addExt) => {
+        detachedSignatures.forEach((detachedSignature) => {
           it(`${hashAlg} + ${signAlg}, add ext: ${addExt}, detached signature: ${detachedSignature}`, async () => {
-            const cms = await example.createCMSSigned(
-              hashAlg,
-              signAlg,
-              dataBuffer,
-              detachedSignature,
-              addExt
-            );
+            const cms = await example.createCMSSigned(hashAlg, signAlg, dataBuffer, detachedSignature, addExt);
             //#region Simple test for decoding data
             assert.doesNotThrow(() => {
               const cmsContentSimpl = pkijs.ContentInfo.fromBER(cms.cmsSignedData);
@@ -32,11 +26,7 @@ describe("CMS Signed Complex Example", () => {
             });
             //#endregion
 
-            const result = await example.verifyCMSSigned(
-              cms.cmsSignedData,
-              [cms.certificate],
-              detachedSignature ? dataBuffer : undefined
-            );
+            const result = await example.verifyCMSSigned(cms.cmsSignedData, [cms.certificate], detachedSignature ? dataBuffer : undefined);
             assert.equal(result, true, "CMS SignedData must be verified successfully");
           });
         });
@@ -61,14 +51,7 @@ describe("CMS Signed Complex Example", () => {
   });
 
   it("should sign data using SHA-256 for message digest and SHA-1 for signature hash, then verify the signature", async () => {
-    const cms = await example.createCMSSigned(
-      "SHA-256",
-      "RSASSA-PKCS1-V1_5",
-      dataBuffer,
-      false,
-      true,
-      "SHA-1"
-    );
+    const cms = await example.createCMSSigned("SHA-256", "RSASSA-PKCS1-V1_5", dataBuffer, false, true, "SHA-1");
     //#region Verify that the CMS SignedData can be decoded without errors
     assert.doesNotThrow(() => {
       const cmsContentSimpl = pkijs.ContentInfo.fromBER(cms.cmsSignedData);
@@ -82,14 +65,7 @@ describe("CMS Signed Complex Example", () => {
   });
 
   it("should sign data using SHA-256 for message digest and SHA-1 for signature hash without considering the message hash, then verify the signature", async () => {
-    const cms = await example.createCMSSigned(
-      "SHA-256",
-      "RSASSA-PKCS1-V1_5",
-      dataBuffer,
-      false,
-      false,
-      "SHA-1"
-    );
+    const cms = await example.createCMSSigned("SHA-256", "RSASSA-PKCS1-V1_5", dataBuffer, false, false, "SHA-1");
     //#region Verify that the CMS SignedData can be decoded without errors
     assert.doesNotThrow(() => {
       const cmsContentSimpl = pkijs.ContentInfo.fromBER(cms.cmsSignedData);

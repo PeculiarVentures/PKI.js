@@ -54,16 +54,8 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
   constructor(parameters: AccessDescriptionParameters = {}) {
     super();
 
-    this.accessMethod = pvutils.getParametersValue(
-      parameters,
-      ACCESS_METHOD,
-      AccessDescription.defaultValues(ACCESS_METHOD)
-    );
-    this.accessLocation = pvutils.getParametersValue(
-      parameters,
-      ACCESS_LOCATION,
-      AccessDescription.defaultValues(ACCESS_LOCATION)
-    );
+    this.accessMethod = pvutils.getParametersValue(parameters, ACCESS_METHOD, AccessDescription.defaultValues(ACCESS_METHOD));
+    this.accessLocation = pvutils.getParametersValue(parameters, ACCESS_LOCATION, AccessDescription.defaultValues(ACCESS_LOCATION));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -101,20 +93,13 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
     parameters: Schema.SchemaParameters<{
       accessMethod?: string;
       accessLocation?: GeneralNameSchema;
-    }> = {}
+    }> = {},
   ) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        new asn1js.ObjectIdentifier({ name: names.accessMethod || EMPTY_STRING }),
-        GeneralName.schema(names.accessLocation || {})
-      ]
+      value: [new asn1js.ObjectIdentifier({ name: names.accessMethod || EMPTY_STRING }), GeneralName.schema(names.accessLocation || {})],
     });
   }
 
@@ -131,11 +116,11 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
           accessMethod: ACCESS_METHOD,
           accessLocation: {
             names: {
-              blockName: ACCESS_LOCATION
-            }
-          }
-        }
-      })
+              blockName: ACCESS_LOCATION,
+            },
+          },
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -147,10 +132,7 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [
-        new asn1js.ObjectIdentifier({ value: this.accessMethod }),
-        this.accessLocation.toSchema()
-      ]
+      value: [new asn1js.ObjectIdentifier({ value: this.accessMethod }), this.accessLocation.toSchema()],
     });
     //#endregion
   }
@@ -158,7 +140,7 @@ export class AccessDescription extends PkiObject implements IAccessDescription {
   public toJSON(): AccessDescriptionJson {
     return {
       accessMethod: this.accessMethod,
-      accessLocation: this.accessLocation.toJSON()
+      accessLocation: this.accessLocation.toJSON(),
     };
   }
 }

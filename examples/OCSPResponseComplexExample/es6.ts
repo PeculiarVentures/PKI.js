@@ -17,11 +17,7 @@ async function createOCSPResp() {
 
   trustedCertificates.push(ocsp.certificate);
 
-  const resultString = [
-    utils.toPEM(ocsp.certificate.toSchema().toBER(), "CERTIFICATE"),
-    utils.toPEM(ocsp.pkcs8, "PRIVATE KEY"),
-    utils.toPEM(ocspResponseBuffer, "OCSP RESPONSE")
-  ];
+  const resultString = [utils.toPEM(ocsp.certificate.toSchema().toBER(), "CERTIFICATE"), utils.toPEM(ocsp.pkcs8, "PRIVATE KEY"), utils.toPEM(ocspResponseBuffer, "OCSP RESPONSE")];
 
   console.info("Certificate created successfully!");
   console.info("Private key exported successfully!");
@@ -94,9 +90,7 @@ function parseOCSPResp(source: ArrayBuffer) {
 
   //#region Check that we do have "responseBytes"
   if (ocspRespSimpl.responseBytes) {
-    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(
-      ocspRespSimpl.responseBytes.response.valueBlock.valueHexView as BufferSource
-    );
+    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHexView as BufferSource);
   } else return; // Nothing else to display - only status information exists
   //#endregion
 
@@ -117,14 +111,12 @@ function parseOCSPResp(source: ArrayBuffer) {
     "2.16.840.1.101.3.4.2.2": "SHA384",
     "1.2.840.113549.1.1.12": "SHA384 with RSA",
     "2.16.840.1.101.3.4.2.3": "SHA512",
-    "1.2.840.113549.1.1.13": "SHA512 with RSA"
+    "1.2.840.113549.1.1.13": "SHA512 with RSA",
   };
 
   let signatureAlgorithm = algomap[ocspBasicResp.signatureAlgorithm.algorithmId];
-  if (typeof signatureAlgorithm === "undefined")
-    signatureAlgorithm = ocspBasicResp.signatureAlgorithm.algorithmId;
-  else
-    signatureAlgorithm = `${signatureAlgorithm} (${ocspBasicResp.signatureAlgorithm.algorithmId})`;
+  if (typeof signatureAlgorithm === "undefined") signatureAlgorithm = ocspBasicResp.signatureAlgorithm.algorithmId;
+  else signatureAlgorithm = `${signatureAlgorithm} (${ocspBasicResp.signatureAlgorithm.algorithmId})`;
 
   common.getElement("sig-algo").innerHTML = signatureAlgorithm;
   //#endregion
@@ -142,16 +134,14 @@ function parseOCSPResp(source: ArrayBuffer) {
       "2.5.4.42": "GN",
       "2.5.4.43": "I",
       "2.5.4.4": "SN",
-      "1.2.840.113549.1.9.1": "E-mail"
+      "1.2.840.113549.1.9.1": "E-mail",
     };
 
     for (let i = 0; i < ocspBasicResp.tbsResponseData.responderID.typesAndValues.length; i++) {
       let typeval = typemap[ocspBasicResp.tbsResponseData.responderID.typesAndValues[i].type];
-      if (typeof typeval === "undefined")
-        typeval = ocspBasicResp.tbsResponseData.responderID.typesAndValues[i].type;
+      if (typeof typeval === "undefined") typeval = ocspBasicResp.tbsResponseData.responderID.typesAndValues[i].type;
 
-      const subjval =
-        ocspBasicResp.tbsResponseData.responderID.typesAndValues[i].value.valueBlock.value;
+      const subjval = ocspBasicResp.tbsResponseData.responderID.typesAndValues[i].value.valueBlock.value;
 
       const row = respIDTable.insertRow(respIDTable.rows.length);
       const cell0 = row.insertCell(0);
@@ -164,10 +154,7 @@ function parseOCSPResp(source: ArrayBuffer) {
   } else {
     if (ocspBasicResp.tbsResponseData.responderID instanceof asn1js.OctetString) {
       common.getElement("ocsp-resp-respid-simpl").innerHTML = pvtsutils.Convert.ToHex(
-        ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.subarray(
-          0,
-          ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.byteLength
-        )
+        ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.subarray(0, ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.byteLength),
       );
       common.getElement("ocsp-resp-rspid-simpl").style.display = "block";
     } else {
@@ -193,13 +180,12 @@ function parseOCSPResp(source: ArrayBuffer) {
       "2.5.29.21": "CRL Reason",
       "2.5.29.24": "Invalidity Date",
       "2.5.29.29": "Certificate Issuer",
-      "1.3.6.1.4.1.311.21.4": "Next Update"
+      "1.3.6.1.4.1.311.21.4": "Next Update",
     };
 
     for (let i = 0; i < ocspBasicResp.tbsResponseData.responseExtensions.length; i++) {
       let typeval = extenmap[ocspBasicResp.tbsResponseData.responseExtensions[i].extnID];
-      if (typeof typeval === "undefined")
-        typeval = ocspBasicResp.tbsResponseData.responseExtensions[i].extnID;
+      if (typeof typeval === "undefined") typeval = ocspBasicResp.tbsResponseData.responseExtensions[i].extnID;
 
       const row = extensionTable.insertRow(extensionTable.rows.length);
       const cell0 = row.insertCell(0);
@@ -212,9 +198,7 @@ function parseOCSPResp(source: ArrayBuffer) {
 
   //#region Put information about OCSP responses
   for (let i = 0; i < ocspBasicResp.tbsResponseData.responses.length; i++) {
-    const typeval = pvtsutils.Convert.ToHex(
-      ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHexView
-    );
+    const typeval = pvtsutils.Convert.ToHex(ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHexView);
     let subjval: string;
 
     switch (ocspBasicResp.tbsResponseData.responses[i].certStatus.idBlock.tagNumber) {
@@ -252,7 +236,7 @@ async function verifyOCSPResp() {
 }
 
 function handleFileBrowse(evt: any) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     parseOCSPResp(file);
   });
 }
@@ -266,7 +250,7 @@ function parseCAbundle(buffer: ArrayBuffer) {
 }
 
 function handleCABundle(evt: any) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     parseCAbundle(file);
   });
 }

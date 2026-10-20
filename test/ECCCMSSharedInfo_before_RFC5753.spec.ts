@@ -49,7 +49,7 @@ it("EnvelopedData with an ECCCMSSharedInfo containing algorithmParams should be 
   const recipientPrivateKey = pemToDer(recipientPrivateKeyPem);
 
   const recipientCertificate = new pkijs.Certificate({
-    schema: pemToAsn1(recipientCertificatePem)
+    schema: pemToAsn1(recipientCertificatePem),
   });
 
   const contentInfo = new pkijs.ContentInfo({ schema: pemToAsn1(envelopedDataPem) });
@@ -60,9 +60,7 @@ it("EnvelopedData with an ECCCMSSharedInfo containing algorithmParams should be 
 });
 
 function pemToDer(pemString: string) {
-  const derBase64 = pemString
-    .replace(/(-----(BEGIN|END) [\w ]+-----|\n)/g, "")
-    .replace(/[\r\n]/g, "");
+  const derBase64 = pemString.replace(/(-----(BEGIN|END) [\w ]+-----|\n)/g, "").replace(/[\r\n]/g, "");
   return pvtsutils.Convert.FromBase64(derBase64);
 }
 

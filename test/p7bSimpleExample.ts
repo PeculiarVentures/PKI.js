@@ -16,26 +16,26 @@ export async function createP7B(hashAlg: string, signAlg: string): Promise<Array
   certSimpl.issuer.typesAndValues.push(
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.6",
-      value: new asn1js.PrintableString({ value: "RU" })
-    })
+      value: new asn1js.PrintableString({ value: "RU" }),
+    }),
   );
   certSimpl.issuer.typesAndValues.push(
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.3",
-      value: new asn1js.BmpString({ value: "Test" })
-    })
+      value: new asn1js.BmpString({ value: "Test" }),
+    }),
   );
   certSimpl.subject.typesAndValues.push(
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.6",
-      value: new asn1js.PrintableString({ value: "RU" })
-    })
+      value: new asn1js.PrintableString({ value: "RU" }),
+    }),
   );
   certSimpl.subject.typesAndValues.push(
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.3",
-      value: new asn1js.BmpString({ value: "Test" })
-    })
+      value: new asn1js.BmpString({ value: "Test" }),
+    }),
   );
 
   certSimpl.notBefore.value = new Date(2013, 0, 1);
@@ -55,8 +55,8 @@ export async function createP7B(hashAlg: string, signAlg: string): Promise<Array
       extnID: "2.5.29.15",
       critical: false,
       extnValue: keyUsage.toBER(false),
-      parsedValue: keyUsage // Parsed value for well-known extensions
-    })
+      parsedValue: keyUsage, // Parsed value for well-known extensions
+    }),
   );
   //#endregion
   //#endregion
@@ -65,11 +65,7 @@ export async function createP7B(hashAlg: string, signAlg: string): Promise<Array
   const algorithm = pkijs.getAlgorithmParameters(signAlg, "generateKey") as any;
   if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = hashAlg;
   //#endregion
-  const { privateKey, publicKey } = (await crypto.generateKey(
-    algorithm.algorithm,
-    true,
-    algorithm.usages
-  )) as Required<CryptoKeyPair>;
+  const { privateKey, publicKey } = (await crypto.generateKey(algorithm.algorithm, true, algorithm.usages)) as Required<CryptoKeyPair>;
   //#endregion
   //#endregion
   //#region Exporting public key into "subjectPublicKeyInfo" value of certificate
@@ -84,10 +80,10 @@ export async function createP7B(hashAlg: string, signAlg: string): Promise<Array
     content: new pkijs.SignedData({
       version: 1,
       encapContentInfo: new pkijs.EncapsulatedContentInfo({
-        eContentType: "1.2.840.113549.1.7.1" // "data" content type
+        eContentType: "1.2.840.113549.1.7.1", // "data" content type
       }),
-      certificates: [certSimpl, certSimpl, certSimpl] // Put 3 copies of the same X.509 certificate
-    }).toSchema(true)
+      certificates: [certSimpl, certSimpl, certSimpl], // Put 3 copies of the same X.509 certificate
+    }).toSchema(true),
   });
 
   return cmsContentSimp.toSchema().toBER(false);

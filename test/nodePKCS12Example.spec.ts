@@ -13,8 +13,7 @@ const attributeCertificateBASE64 =
 
 const x509PrivateKeyBASE64 =
   "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDioScK4XFmpMQz/xxhxpjF7FPr58Adqfn94YIU57VjGLQGNG4OihYE9fvX6GZYr8wqsqlZOkDdkN5atBHZYhxp//Kl3oMAQRZbOVCAFikRSP+jtzKQ3Ai9lF5T0lcJtm7QSZ5lfMGbWYhxZhF2TXtR2d4hFSRTfv3BUlwpcqWBmzHzf3lQ144yTXUblBofMBp9DWWMQoH/HbEODAXE1oqlIirctAWrQ/Ghi388EkMx9RKJZPlwWHUV0ohNdDPGci2EWf41UqJwBYFFpJkJFDFxKFfooelDUuaTT/tCgJwM4CZVJ9QBoGXbDxtimehsVJK3JjREkcGo22dNXcmicYAfAgMBAAECggEBANMO1fdyIVRAWmE6UspUU+7vuvBWMjruE9126NhjOjABz5Z/uYdc3kjcdSCMVNR/VBrnrINmlwZBZnL+hCj5EBE/xlDnOwU/mHx4khnXiYOJglqLwFHcOV+lD3vsxhZLikP8a8GEQCJXbZR+RADzA8gkqJQSxnPkLpqeAyqulKhviQ2lq2ZxeCXI+iZvURQPTSm86+szClwgzr2uW6NSlNKKeeLHMILed4mrwbPOdyhutnqvV79GUYH3yYdzbEbbw5GOat77+xPLt33cfLCL7pg5lGDrKEomu6V1d5KmBOhv0K8gGPKfxPrpeUG5n1q58k/2ouCiyAaKWpVoOWmnbzECgYEA/UzAGZ2N8YE+kC85Nl0wQof+WVm+RUDsv6C3L2vPUht3GwnbxSTMl4+NixbCWG46udVhsM2x7ZzYY1eB7LtnBnjvXZTYU4wqZtGR/+X2Rw5ou+oWm16/OgcEuFjP2zpQtr9r/bpKhyBV+IdSngnLy00RueKGUL6nvtecRklEhQ0CgYEA5Quek+c12qMtrmg5znHPQC7uuieZRzUL9jTlQtuZM5m4B3AfB/N/0qIQS06PHS1ijeHQ9SxEmG72weamUYC0SPi8GxJioFzaJEDVit0Ra38gf0CXQvcYT0XD1CwY/m+jDXDWL5L1CCIr60AzNjM3WEfGO4VHaNsovVLn1Fvy5tsCgYEA4ZOEUEubqUOsb8NedCexXs61mOTvKcWUEWQTP0wHqduDyrSQ35TSDvds2j0+fnpMGksJYOcOWcmge3fm4OhT69Ovd+uia2UcLczc9MPa+5S9ePwTffJ24jp13aZaFaZtUxJOHfvVe1k0tsvsq4mV0EumSaCOdUIVKUPijEWbm9ECgYBpFa+nxAidSwiGYCNFaEnh9KZqmghk9x2J1DLrPb1IQ1p/bx2NlFYs2VYIdv6KMGxrFBO+qJTAKwjjZWMhOZ99a0FCWmkNkgwzXdubXlnDrAvI1mWPv7ZTiHqUObct5SI15HMgWJg7JxJnWIkmcNEPm76DSF6+6O4EDql2cMk8yQKBgF5roj+l90lfwImr6V1NJo3J5VCi9wTT5x9enPY9WRcfSyRjqU7JWy6h0C+Jq+AYAxrkQVjQuv1AOhO8Uhc6amM5FA+gfg5HKKPnwuOe7r7B48LFF8eRjYRtHmrQUrFY0jH6O+t12dEQI+7qE+SffUScsZWCREX7QYEK/tuznv/U";
-const attributePrivateKeyBASE64 =
-  "MDgCAQAwDwYNKwYBBAGWZAMGg30FbgQiBCAShWZocFw8WW2dca/UUt9xQM5nhPdP9JLGNZiR0AAAAAAslAAYGBgYGBg==";
+const attributePrivateKeyBASE64 = "MDgCAQAwDwYNKwYBBAGWZAMGg30FbgQiBCAShWZocFw8WW2dca/UUt9xQM5nhPdP9JLGNZiR0AAAAAAslAAYGBgYGBg==";
 //#endregion
 
 async function pkcs12Like(
@@ -23,7 +22,7 @@ async function pkcs12Like(
   password: string,
   inputAlgorithm: string,
   inputHashAlgorithm = "SHA-256",
-  pbeSchema?: "PBES1"
+  pbeSchema?: "PBES1",
 ) {
   //#region Initial variables
   const keyLocalIDBuffer = new ArrayBuffer(4);
@@ -40,23 +39,19 @@ async function pkcs12Like(
 
   const keyUsage = new asn1js.BitString({
     valueHex: bitArray,
-    unusedBits: 7
+    unusedBits: 7,
   });
   //#endregion
   const passwordConverted = pvutils.stringToArrayBuffer(password);
 
-  const contentEncryptionAlgorithm = pkijs.getAlgorithmParameters(
-    inputAlgorithm,
-    "encrypt"
-  ).algorithm;
-  if ("name" in contentEncryptionAlgorithm === false)
-    throw new Error(`No support for selected algorithm: ${inputAlgorithm}`);
+  const contentEncryptionAlgorithm = pkijs.getAlgorithmParameters(inputAlgorithm, "encrypt").algorithm;
+  if ("name" in contentEncryptionAlgorithm === false) throw new Error(`No support for selected algorithm: ${inputAlgorithm}`);
 
   const makeInternalValuesParameters = {
     password: passwordConverted,
     contentEncryptionAlgorithm,
     hmacHashAlgorithm: inputHashAlgorithm,
-    iterationCount: 2048
+    iterationCount: 2048,
   } as any;
   if (pbeSchema) {
     makeInternalValuesParameters.pbeSchema = pbeSchema;
@@ -67,8 +62,8 @@ async function pkcs12Like(
   pkcs8Simpl.attributes = [
     new pkijs.Attribute({
       type: "2.5.29.15",
-      values: [keyUsage]
-    })
+      values: [keyUsage],
+    }),
   ];
   //#endregion
 
@@ -86,25 +81,25 @@ async function pkcs12Like(
                   new pkijs.SafeBag({
                     bagId: "1.2.840.113549.1.12.10.1.3",
                     bagValue: new pkijs.CertBag({
-                      parsedValue: certSimpl
+                      parsedValue: certSimpl,
                     }),
                     bagAttributes: [
                       new pkijs.Attribute({
                         type: "1.2.840.113549.1.9.20", // friendlyName
-                        values: [new asn1js.BmpString({ value: "CertBag from PKIjs" })]
+                        values: [new asn1js.BmpString({ value: "CertBag from PKIjs" })],
                       }),
                       new pkijs.Attribute({
                         type: "1.2.840.113549.1.9.21", // localKeyID
-                        values: [new asn1js.OctetString({ valueHex: certLocalIDBuffer })]
+                        values: [new asn1js.OctetString({ valueHex: certLocalIDBuffer })],
                       }),
                       new pkijs.Attribute({
                         type: "1.3.6.1.4.1.311.17.1", // pkcs12KeyProviderNameAttr
-                        values: [new asn1js.BmpString({ value: "http://www.pkijs.org" })]
-                      })
-                    ]
-                  })
-                ]
-              })
+                        values: [new asn1js.BmpString({ value: "http://www.pkijs.org" })],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
             },
             {
               privacyMode: 0, // "No-privacy" Protection Mode
@@ -113,43 +108,37 @@ async function pkcs12Like(
                   new pkijs.SafeBag({
                     bagId: "1.2.840.113549.1.12.10.1.2",
                     bagValue: new pkijs.PKCS8ShroudedKeyBag({
-                      parsedValue: pkcs8Simpl
+                      parsedValue: pkcs8Simpl,
                     }),
                     bagAttributes: [
                       new pkijs.Attribute({
                         type: "1.2.840.113549.1.9.20", // friendlyName
-                        values: [new asn1js.BmpString({ value: "PKCS8ShroudedKeyBag from PKIjs" })]
+                        values: [new asn1js.BmpString({ value: "PKCS8ShroudedKeyBag from PKIjs" })],
                       }),
                       new pkijs.Attribute({
                         type: "1.2.840.113549.1.9.21", // localKeyID
-                        values: [new asn1js.OctetString({ valueHex: keyLocalIDBuffer })]
+                        values: [new asn1js.OctetString({ valueHex: keyLocalIDBuffer })],
                       }),
                       new pkijs.Attribute({
                         type: "1.3.6.1.4.1.311.17.1", // pkcs12KeyProviderNameAttr
-                        values: [new asn1js.BmpString({ value: "http://www.pkijs.org" })]
-                      })
-                    ]
-                  })
-                ]
-              })
-            }
-          ]
-        }
-      })
-    }
+                        values: [new asn1js.BmpString({ value: "http://www.pkijs.org" })],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            },
+          ],
+        },
+      }),
+    },
   });
   //#endregion
 
   //#region Encode internal values for "PKCS8ShroudedKeyBag"
   pkijs.ParameterError.assertEmpty(pkcs12.parsedValue, "parsedValue", "pkcs12");
-  pkijs.ParameterError.assertEmpty(
-    pkcs12.parsedValue.authenticatedSafe,
-    "authenticatedSafe",
-    "pkcs12.parsedValue"
-  );
-  await pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.makeInternalValues(
-    makeInternalValuesParameters
-  );
+  pkijs.ParameterError.assertEmpty(pkcs12.parsedValue.authenticatedSafe, "authenticatedSafe", "pkcs12.parsedValue");
+  await pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.makeInternalValues(makeInternalValuesParameters);
   //#endregion
 
   //#region Encode internal values for all "SafeContents" firts (create all "Privacy Protection" envelopes)
@@ -158,8 +147,8 @@ async function pkcs12Like(
       makeInternalValuesParameters,
       {
         // Empty parameters for first SafeContent since "No Privacy" protection mode there
-      }
-    ]
+      },
+    ],
   });
   //#endregion
 
@@ -168,30 +157,18 @@ async function pkcs12Like(
     password: passwordConverted,
     iterations: 2048,
     pbkdf2HashAlgorithm: inputHashAlgorithm,
-    hmacHashAlgorithm: inputHashAlgorithm
+    hmacHashAlgorithm: inputHashAlgorithm,
   });
 
   //Save encoded data
   return pkcs12.toSchema().toBER(false);
 }
 
-async function openSSLLike(
-  pkcs8Simpl: pkijs.PrivateKeyInfo,
-  certSimpl: pkijs.Certificate | pkijs.AttributeCertificateV2,
-  password: string,
-  inputAlgorithm: string,
-  inputHashAlgorithm = "SHA-256"
-) {
+async function openSSLLike(pkcs8Simpl: pkijs.PrivateKeyInfo, certSimpl: pkijs.Certificate | pkijs.AttributeCertificateV2, password: string, inputAlgorithm: string, inputHashAlgorithm = "SHA-256") {
   return pkcs12Like(pkcs8Simpl, certSimpl, password, inputAlgorithm, inputHashAlgorithm);
 }
 
-function windowsLike(
-  pkcs8Simpl: pkijs.PrivateKeyInfo,
-  certSimpl: pkijs.Certificate | pkijs.AttributeCertificateV2,
-  password: string,
-  inputAlgorithm: string,
-  inputHashAlgorithm = "SHA-256"
-) {
+function windowsLike(pkcs8Simpl: pkijs.PrivateKeyInfo, certSimpl: pkijs.Certificate | pkijs.AttributeCertificateV2, password: string, inputAlgorithm: string, inputHashAlgorithm = "SHA-256") {
   return pkcs12Like(pkcs8Simpl, certSimpl, password, inputAlgorithm, inputHashAlgorithm, "PBES1");
 }
 
@@ -206,41 +183,33 @@ async function parsePKCS12(buffer: ArrayBuffer, password: string) {
   // Parse "AuthenticatedSafe" value of PKCS#12 data
   await pkcs12.parseInternalValues({
     password: passwordConverted,
-    checkIntegrity: true
+    checkIntegrity: true,
   });
 
   // Parse "SafeContents" values
   pkijs.ParameterError.assertEmpty(pkcs12.parsedValue, "parsedValue", "pkcs12");
-  pkijs.ParameterError.assertEmpty(
-    pkcs12.parsedValue.authenticatedSafe,
-    "authenticatedSafe",
-    "pkcs12.parsedValue"
-  );
+  pkijs.ParameterError.assertEmpty(pkcs12.parsedValue.authenticatedSafe, "authenticatedSafe", "pkcs12.parsedValue");
   await pkcs12.parsedValue.authenticatedSafe.parseInternalValues({
     safeContents: [
       {
-        password: passwordConverted
+        password: passwordConverted,
       },
       {
-        password: passwordConverted
-      }
-    ]
+        password: passwordConverted,
+      },
+    ],
   });
   //#endregion
 
   //#region Parse "PKCS8ShroudedKeyBag" value
   try {
-    pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.parseInternalValues(
-      {
-        password: passwordConverted
-      }
-    );
+    pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[0].value.safeBags[0].bagValue.parseInternalValues({
+      password: passwordConverted,
+    });
   } catch {
-    pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.parseInternalValues(
-      {
-        password: passwordConverted
-      }
-    );
+    pkcs12.parsedValue.authenticatedSafe.parsedValue.safeContents[1].value.safeBags[0].bagValue.parseInternalValues({
+      password: passwordConverted,
+    });
   }
   //#endregion
 
@@ -281,9 +250,7 @@ describe("Node.js PKCS#12 Example", () => {
     it("Forge 3DES", async () => {
       const windowsP12 =
         "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";
-      await expect(
-        parsePKCS12(pvutils.stringToArrayBuffer(pvutils.fromBase64(windowsP12)), "password")
-      ).resolves.toBeInstanceOf(pkijs.PFX);
+      await expect(parsePKCS12(pvutils.stringToArrayBuffer(pvutils.fromBase64(windowsP12)), "password")).resolves.toBeInstanceOf(pkijs.PFX);
     });
   });
 
@@ -306,15 +273,9 @@ describe("Node.js PKCS#12 Example", () => {
     });
 
     describe("DES-EDE3-CBC algorithm", () => {
-      ["SHA-1", "SHA-256", "SHA-384", "SHA-512"].forEach(hashAlg => {
+      ["SHA-1", "SHA-256", "SHA-384", "SHA-512"].forEach((hashAlg) => {
         it(`${hashAlg}`, async () => {
-          const pkcs12Raw = await openSSLLike(
-            pkcs8Simpl,
-            certSimpl,
-            password,
-            "DES-EDE3-CBC",
-            hashAlg
-          );
+          const pkcs12Raw = await openSSLLike(pkcs8Simpl, certSimpl, password, "DES-EDE3-CBC", hashAlg);
           await expect(parsePKCS12(pkcs12Raw, password)).resolves.toBeInstanceOf(pkijs.PFX);
         });
       });
@@ -331,16 +292,14 @@ describe("Node.js PKCS#12 Example", () => {
     let attrCertSimpl: pkijs.AttributeCertificateV2;
 
     beforeAll(() => {
-      const attrCertRaw = pvutils.stringToArrayBuffer(
-        pvutils.fromBase64(attributeCertificateBASE64)
-      );
+      const attrCertRaw = pvutils.stringToArrayBuffer(pvutils.fromBase64(attributeCertificateBASE64));
       attrCertSimpl = pkijs.AttributeCertificateV2.fromBER(attrCertRaw);
 
       const pkcs8Raw = pvutils.stringToArrayBuffer(pvutils.fromBase64(attributePrivateKeyBASE64));
       pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
     });
 
-    ["DES-EDE3-CBC", "AES-256-CBC"].forEach(encAlg => {
+    ["DES-EDE3-CBC", "AES-256-CBC"].forEach((encAlg) => {
       it(`${encAlg} algorithm`, async () => {
         const pkcs12Raw = await openSSLLike(pkcs8Simpl, attrCertSimpl, password, encAlg);
         await expect(parsePKCS12(pkcs12Raw, password)).resolves.toBeInstanceOf(pkijs.PFX);

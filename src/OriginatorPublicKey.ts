@@ -1,10 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import {
-  AlgorithmIdentifier,
-  AlgorithmIdentifierJson,
-  AlgorithmIdentifierSchema
-} from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -42,16 +38,8 @@ export class OriginatorPublicKey extends PkiObject implements IOriginatorPublicK
   constructor(parameters: OriginatorPublicKeyParameters = {}) {
     super();
 
-    this.algorithm = pvutils.getParametersValue(
-      parameters,
-      ALGORITHM,
-      OriginatorPublicKey.defaultValues(ALGORITHM)
-    );
-    this.publicKey = pvutils.getParametersValue(
-      parameters,
-      PUBLIC_KEY,
-      OriginatorPublicKey.defaultValues(PUBLIC_KEY)
-    );
+    this.algorithm = pvutils.getParametersValue(parameters, ALGORITHM, OriginatorPublicKey.defaultValues(ALGORITHM));
+    this.publicKey = pvutils.getParametersValue(parameters, PUBLIC_KEY, OriginatorPublicKey.defaultValues(PUBLIC_KEY));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -82,10 +70,7 @@ export class OriginatorPublicKey extends PkiObject implements IOriginatorPublicK
    * @param memberName String name for a class member
    * @param memberValue Value to compare with default value
    */
-  public static compareWithDefault<T extends { isEqual(data: any): boolean }>(
-    memberName: string,
-    memberValue: T
-  ): memberValue is T {
+  public static compareWithDefault<T extends { isEqual(data: any): boolean }>(memberName: string, memberValue: T): memberValue is T {
     switch (memberName) {
       case ALGORITHM:
       case PUBLIC_KEY:
@@ -108,20 +93,13 @@ export class OriginatorPublicKey extends PkiObject implements IOriginatorPublicK
     parameters: Schema.SchemaParameters<{
       algorithm?: AlgorithmIdentifierSchema;
       publicKey?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        AlgorithmIdentifier.schema(names.algorithm || {}),
-        new asn1js.BitString({ name: names.publicKey || EMPTY_STRING })
-      ]
+      value: [AlgorithmIdentifier.schema(names.algorithm || {}), new asn1js.BitString({ name: names.publicKey || EMPTY_STRING })],
     });
   }
 
@@ -137,12 +115,12 @@ export class OriginatorPublicKey extends PkiObject implements IOriginatorPublicK
         names: {
           algorithm: {
             names: {
-              blockName: ALGORITHM
-            }
+              blockName: ALGORITHM,
+            },
           },
-          publicKey: PUBLIC_KEY
-        }
-      })
+          publicKey: PUBLIC_KEY,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -154,7 +132,7 @@ export class OriginatorPublicKey extends PkiObject implements IOriginatorPublicK
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [this.algorithm.toSchema(), this.publicKey]
+      value: [this.algorithm.toSchema(), this.publicKey],
     });
     //#endregion
   }
@@ -162,7 +140,7 @@ export class OriginatorPublicKey extends PkiObject implements IOriginatorPublicK
   public toJSON(): OriginatorPublicKeyJson {
     return {
       algorithm: this.algorithm.toJSON(),
-      publicKey: this.publicKey.toJSON()
+      publicKey: this.publicKey.toJSON(),
     };
   }
 }

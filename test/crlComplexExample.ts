@@ -14,41 +14,41 @@ export async function createCRL(hashAlg: string, signAlg: string) {
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.6", // Country name
       value: new asn1js.PrintableString({
-        value: "RU"
-      })
-    })
+        value: "RU",
+      }),
+    }),
   );
   crlSimpl.issuer.typesAndValues.push(
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.3", // Common name
       value: new asn1js.BmpString({
-        value: "Test"
-      })
-    })
+        value: "Test",
+      }),
+    }),
   );
 
   crlSimpl.thisUpdate = new pkijs.Time({
     type: 0,
-    value: new Date()
+    value: new Date(),
   });
 
   const revokedCertificate = new pkijs.RevokedCertificate({
     userCertificate: new asn1js.Integer({
-      value: 999
+      value: 999,
     }),
     revocationDate: new pkijs.Time({
-      value: new Date()
+      value: new Date(),
     }),
     crlEntryExtensions: new pkijs.Extensions({
       extensions: [
         new pkijs.Extension({
           extnID: "2.5.29.21", // cRLReason
           extnValue: new asn1js.Enumerated({
-            value: 1
-          }).toBER(false)
-        })
-      ]
-    })
+            value: 1,
+          }).toBER(false),
+        }),
+      ],
+    }),
   });
 
   crlSimpl.revokedCertificates = [];
@@ -58,10 +58,10 @@ export async function createCRL(hashAlg: string, signAlg: string) {
       new pkijs.Extension({
         extnID: "2.5.29.20", // cRLNumber
         extnValue: new asn1js.Integer({
-          value: 2
-        }).toBER(false)
-      })
-    ]
+          value: 2,
+        }).toBER(false),
+      }),
+    ],
   });
 
   // Create a new key pair
@@ -70,11 +70,7 @@ export async function createCRL(hashAlg: string, signAlg: string) {
   if ("hash" in algorithm.algorithm) algorithm.algorithm.hash.name = hashAlg;
   //#endregion
 
-  const { privateKey, publicKey } = (await crypto.generateKey(
-    algorithm.algorithm,
-    true,
-    algorithm.usages
-  )) as Required<CryptoKeyPair>;
+  const { privateKey, publicKey } = (await crypto.generateKey(algorithm.algorithm, true, algorithm.usages)) as Required<CryptoKeyPair>;
 
   // Store new key in an interim variables
   const issuerPublicKey = new pkijs.PublicKeyInfo();
@@ -91,7 +87,7 @@ export async function createCRL(hashAlg: string, signAlg: string) {
 
   return {
     crlBuffer,
-    publicKeyBuffer
+    publicKeyBuffer,
   };
 }
 
@@ -106,7 +102,7 @@ export async function verifyCRL(crlBuffer: ArrayBuffer, issuer: pkijs.Certificat
   const asn1 = asn1js.fromBER(crlBuffer);
   pkijs.AsnError.assert(asn1, "CRL");
   const crlSimpl = new pkijs.CertificateRevocationList({
-    schema: asn1.result
+    schema: asn1.result,
   });
   //#endregion
 
@@ -115,14 +111,14 @@ export async function verifyCRL(crlBuffer: ArrayBuffer, issuer: pkijs.Certificat
 
   if (issuer instanceof pkijs.Certificate) {
     verifyParams = {
-      issuerCertificate: issuer
+      issuerCertificate: issuer,
     };
   } else {
     const asn = asn1js.fromBER(issuer);
     pkijs.AsnError.assert(asn1, "PublicKeyInfo");
     const publicKeyInfo = new pkijs.PublicKeyInfo({ schema: asn.result });
     verifyParams = {
-      publicKeyInfo: publicKeyInfo
+      publicKeyInfo: publicKeyInfo,
     };
   }
 

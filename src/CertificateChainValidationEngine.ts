@@ -22,7 +22,7 @@ import {
   id_PolicyConstraints,
   id_PolicyMappings,
   id_SubjectAltName,
-  id_SubjectKeyIdentifier
+  id_SubjectKeyIdentifier,
 } from "./ObjectIdentifiers";
 import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
 import { GeneralSubtree } from "./GeneralSubtree";
@@ -41,7 +41,7 @@ export enum ChainValidationCode {
   success = 0,
   noRevocation = 11,
   noPath = 60,
-  noValidPath = 97
+  noValidPath = 97,
 }
 
 export class ChainValidationError extends Error {
@@ -70,15 +70,8 @@ export interface CertificateChainValidationEngineVerifyResult {
   certificatePath?: Certificate[];
 }
 
-export type FindOriginCallback = (
-  certificate: Certificate,
-  validationEngine: CertificateChainValidationEngine
-) => string;
-export type FindIssuerCallback = (
-  certificate: Certificate,
-  validationEngine: CertificateChainValidationEngine,
-  crypto?: common.ICryptoEngine
-) => Promise<Certificate[]>;
+export type FindOriginCallback = (certificate: Certificate, validationEngine: CertificateChainValidationEngine) => string;
+export type FindIssuerCallback = (certificate: Certificate, validationEngine: CertificateChainValidationEngine, crypto?: common.ICryptoEngine) => Promise<Certificate[]>;
 
 export interface CertificateChainValidationEngineParameters {
   trustedCerts?: Certificate[];
@@ -185,36 +178,17 @@ export class CertificateChainValidationEngine {
    */
   constructor(parameters: CertificateChainValidationEngineParameters = {}) {
     //#region Internal properties of the object
-    this.trustedCerts = pvutils.getParametersValue(
-      parameters,
-      TRUSTED_CERTS,
-      this.defaultValues(TRUSTED_CERTS)
-    );
+    this.trustedCerts = pvutils.getParametersValue(parameters, TRUSTED_CERTS, this.defaultValues(TRUSTED_CERTS));
     this.certs = pvutils.getParametersValue(parameters, CERTS, this.defaultValues(CERTS));
     this.crls = pvutils.getParametersValue(parameters, CRLS, this.defaultValues(CRLS));
     this.ocsps = pvutils.getParametersValue(parameters, OCSPS, this.defaultValues(OCSPS));
-    this.checkDate = pvutils.getParametersValue(
-      parameters,
-      CHECK_DATE,
-      this.defaultValues(CHECK_DATE)
-    );
-    this.findOrigin = pvutils.getParametersValue(
-      parameters,
-      FIND_ORIGIN,
-      this.defaultValues(FIND_ORIGIN)
-    );
-    this.findIssuer = pvutils.getParametersValue(
-      parameters,
-      FIND_ISSUER,
-      this.defaultValues(FIND_ISSUER)
-    );
+    this.checkDate = pvutils.getParametersValue(parameters, CHECK_DATE, this.defaultValues(CHECK_DATE));
+    this.findOrigin = pvutils.getParametersValue(parameters, FIND_ORIGIN, this.defaultValues(FIND_ORIGIN));
+    this.findIssuer = pvutils.getParametersValue(parameters, FIND_ISSUER, this.defaultValues(FIND_ISSUER));
     //#endregion
   }
 
-  public static defaultFindOrigin(
-    certificate: Certificate,
-    validationEngine: CertificateChainValidationEngine
-  ): string {
+  public static defaultFindOrigin(certificate: Certificate, validationEngine: CertificateChainValidationEngine): string {
     //#region Firstly encode TBS for certificate
     if (certificate.tbsView.byteLength === 0) {
       certificate.tbsView = new Uint8Array(certificate.encodeTBS().toBER());
@@ -229,31 +203,24 @@ export class CertificateChainValidationEngine {
       }
       //#endregion
 
-      if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, localCert.tbsView))
-        return "Intermediate Certificates";
+      if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, localCert.tbsView)) return "Intermediate Certificates";
     }
     //#endregion
 
     //#region Search in Trusted Certificates
     for (const trustedCert of validationEngine.trustedCerts) {
       //#region Firstly encode TBS for certificate
-      if (trustedCert.tbsView.byteLength === 0)
-        trustedCert.tbsView = new Uint8Array(trustedCert.encodeTBS().toBER());
+      if (trustedCert.tbsView.byteLength === 0) trustedCert.tbsView = new Uint8Array(trustedCert.encodeTBS().toBER());
       //#endregion
 
-      if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, trustedCert.tbsView))
-        return "Trusted Certificates";
+      if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, trustedCert.tbsView)) return "Trusted Certificates";
     }
     //#endregion
 
     return "Unknown";
   }
 
-  public async defaultFindIssuer(
-    certificate: Certificate,
-    validationEngine: CertificateChainValidationEngine,
-    crypto = common.getCrypto(true)
-  ): Promise<Certificate[]> {
+  public async defaultFindIssuer(certificate: Certificate, validationEngine: CertificateChainValidationEngine, crypto = common.getCrypto(true)): Promise<Certificate[]> {
     //#region Initial variables
     const result: Certificate[] = [];
 
@@ -278,10 +245,7 @@ export class CertificateChainValidationEngine {
     //#region Find values to speed-up search
     if (certificate.extensions) {
       for (const extension of certificate.extensions) {
-        if (
-          extension.extnID === id_AuthorityKeyIdentifier &&
-          extension.parsedValue instanceof AuthorityKeyIdentifier
-        ) {
+        if (extension.extnID === id_AuthorityKeyIdentifier && extension.parsedValue instanceof AuthorityKeyIdentifier) {
           if (extension.parsedValue.keyIdentifier) {
             keyIdentifier = extension.parsedValue.keyIdentifier;
           } else {
@@ -310,12 +274,7 @@ export class CertificateChainValidationEngine {
             if (extension.extnID === id_SubjectKeyIdentifier && extension.parsedValue) {
               extensionFound = true;
 
-              if (
-                pvtsutils.BufferSourceConverter.isEqual(
-                  extension.parsedValue.valueBlock.valueHex,
-                  keyIdentifier.valueBlock.valueHexView
-                )
-              ) {
+              if (pvtsutils.BufferSourceConverter.isEqual(extension.parsedValue.valueBlock.valueHex, keyIdentifier.valueBlock.valueHexView)) {
                 result.push(possibleIssuer);
               }
 
@@ -333,9 +292,7 @@ export class CertificateChainValidationEngine {
       //#region Now search for authorityCertSerialNumber
       let authorityCertSerialNumberEqual = false;
 
-      if (authorityCertSerialNumber !== null)
-        authorityCertSerialNumberEqual =
-          possibleIssuer.serialNumber.isEqual(authorityCertSerialNumber);
+      if (authorityCertSerialNumber !== null) authorityCertSerialNumberEqual = possibleIssuer.serialNumber.isEqual(authorityCertSerialNumber);
       //#endregion
 
       //#region And at least search for Issuer data
@@ -401,24 +358,16 @@ export class CertificateChainValidationEngine {
       case FIND_ISSUER:
         return this.defaultFindIssuer;
       default:
-        throw new Error(
-          `Invalid member name for CertificateChainValidationEngine class: ${memberName}`
-        );
+        throw new Error(`Invalid member name for CertificateChainValidationEngine class: ${memberName}`);
     }
   }
 
-  public async sort(
-    passedWhenNotRevValues = false,
-    crypto = common.getCrypto(true)
-  ): Promise<Certificate[]> {
+  public async sort(passedWhenNotRevValues = false, crypto = common.getCrypto(true)): Promise<Certificate[]> {
     // Initial variables
     const localCerts: Certificate[] = [];
 
     //#region Building certificate path
-    const buildPath = async (
-      certificate: Certificate,
-      crypto: common.ICryptoEngine
-    ): Promise<Certificate[][]> => {
+    const buildPath = async (certificate: Certificate, crypto: common.ICryptoEngine): Promise<Certificate[][]> => {
       const result: Certificate[][] = [];
 
       // Aux function checking array for unique elements
@@ -451,9 +400,7 @@ export class CertificateChainValidationEngine {
       }
 
       for (let i = 0; i < findIssuerResult.length; i++) {
-        if (
-          pvtsutils.BufferSourceConverter.isEqual(findIssuerResult[i].tbsView, certificate.tbsView)
-        ) {
+        if (pvtsutils.BufferSourceConverter.isEqual(findIssuerResult[i].tbsView, certificate.tbsView)) {
           result.push([findIssuerResult[i]]);
           continue;
         }
@@ -482,23 +429,21 @@ export class CertificateChainValidationEngine {
       //#endregion
 
       //#region Find all possible CRL issuers
-      issuerCertificates.push(
-        ...localCerts.filter(element => certificate.issuer.isEqual(element.subject))
-      );
+      issuerCertificates.push(...localCerts.filter((element) => certificate.issuer.isEqual(element.subject)));
       if (issuerCertificates.length === 0) {
         return {
           status: 1,
-          statusMessage: "No certificate's issuers"
+          statusMessage: "No certificate's issuers",
         };
       }
       //#endregion
 
       //#region Find all CRLs for certificate's issuer
-      crls.push(...this.crls.filter(o => o.issuer.isEqual(certificate.issuer)));
+      crls.push(...this.crls.filter((o) => o.issuer.isEqual(certificate.issuer)));
       if (crls.length === 0) {
         return {
           status: 2,
-          statusMessage: "No CRLs for specific certificate issuer"
+          statusMessage: "No CRLs for specific certificate issuer",
         };
       }
       //#endregion
@@ -517,14 +462,11 @@ export class CertificateChainValidationEngine {
 
         for (let j = 0; j < issuerCertificates.length; j++) {
           try {
-            const result = await crls[i].verify(
-              { issuerCertificate: issuerCertificates[j] },
-              crypto
-            );
+            const result = await crls[i].verify({ issuerCertificate: issuerCertificates[j] }, crypto);
             if (result) {
               crlsAndCertificates.push({
                 crl: crls[i],
-                certificate: issuerCertificates[j]
+                certificate: issuerCertificates[j],
               });
 
               break;
@@ -540,26 +482,21 @@ export class CertificateChainValidationEngine {
         return {
           status: 0,
           statusMessage: EMPTY_STRING,
-          result: crlsAndCertificates
+          result: crlsAndCertificates,
         };
       }
 
       return {
         status: 3,
-        statusMessage: "No valid CRLs found"
+        statusMessage: "No valid CRLs found",
       };
     };
     //#endregion
 
     //#region Find OCSP for specific certificate
-    const findOCSP = async (
-      certificate: Certificate,
-      issuerCertificate: Certificate
-    ): Promise<number> => {
+    const findOCSP = async (certificate: Certificate, issuerCertificate: Certificate): Promise<number> => {
       //#region Get hash algorithm from certificate
-      const hashAlgorithm = crypto.getAlgorithmByOID<any>(
-        certificate.signatureAlgorithm.algorithmId
-      );
+      const hashAlgorithm = crypto.getAlgorithmByOID<any>(certificate.signatureAlgorithm.algorithmId);
       if (!hashAlgorithm.name) {
         return 1;
       }
@@ -600,7 +537,7 @@ export class CertificateChainValidationEngine {
             return {
               result: false,
               resultCode: 6,
-              resultMessage: `Unable to parse critical certificate extension: ${extension.extnID}`
+              resultMessage: `Unable to parse critical certificate extension: ${extension.extnID}`,
             };
           }
 
@@ -631,8 +568,7 @@ export class CertificateChainValidationEngine {
           return {
             result: false,
             resultCode: 3,
-            resultMessage:
-              'Unable to build certificate chain - using "keyCertSign" flag set without BasicConstraints'
+            resultMessage: 'Unable to build certificate chain - using "keyCertSign" flag set without BasicConstraints',
           };
         }
 
@@ -640,7 +576,7 @@ export class CertificateChainValidationEngine {
           return {
             result: false,
             resultCode: 4,
-            resultMessage: 'Unable to build certificate chain - "keyCertSign" flag was not set'
+            resultMessage: 'Unable to build certificate chain - "keyCertSign" flag was not set',
           };
         }
 
@@ -648,8 +584,7 @@ export class CertificateChainValidationEngine {
           return {
             result: false,
             resultCode: 5,
-            resultMessage:
-              'Unable to build certificate chain - intermediate certificate must have "cRLSign" key usage flag'
+            resultMessage: 'Unable to build certificate chain - intermediate certificate must have "cRLSign" key usage flag',
           };
         }
       }
@@ -658,31 +593,27 @@ export class CertificateChainValidationEngine {
         return {
           result: false,
           resultCode: 7,
-          resultMessage:
-            "Unable to build certificate chain - more than one possible end-user certificate"
+          resultMessage: "Unable to build certificate chain - more than one possible end-user certificate",
         };
       }
 
       return {
         result: true,
         resultCode: 0,
-        resultMessage: EMPTY_STRING
+        resultMessage: EMPTY_STRING,
       };
     }
     //#endregion
 
     //#region Basic check for certificate path
-    const basicCheck = async (
-      path: Certificate[],
-      checkDate: Date
-    ): Promise<{ result: boolean; resultCode?: number; resultMessage?: string }> => {
+    const basicCheck = async (path: Certificate[], checkDate: Date): Promise<{ result: boolean; resultCode?: number; resultMessage?: string }> => {
       //#region Check that all dates are valid
       for (let i = 0; i < path.length; i++) {
         if (path[i].notBefore.value > checkDate || path[i].notAfter.value < checkDate) {
           return {
             result: false,
             resultCode: 8,
-            resultMessage: "The certificate is either not yet valid or expired"
+            resultMessage: "The certificate is either not yet valid or expired",
           };
         }
       }
@@ -695,7 +626,7 @@ export class CertificateChainValidationEngine {
         return {
           result: false,
           resultCode: 9,
-          resultMessage: "Too short certificate path"
+          resultMessage: "Too short certificate path",
         };
       }
 
@@ -706,7 +637,7 @@ export class CertificateChainValidationEngine {
             return {
               result: false,
               resultCode: 10,
-              resultMessage: "Incorrect name chaining"
+              resultMessage: "Incorrect name chaining",
             };
           }
         }
@@ -715,17 +646,14 @@ export class CertificateChainValidationEngine {
       //#endregion
 
       //#region Check each certificate (except "trusted root") to be non-revoked
-      if (
-        this.crls.length !== 0 ||
-        this.ocsps.length !== 0
-      ) // If CRLs and OCSPs are empty then we consider all certificates to be valid
+      if (this.crls.length !== 0 || this.ocsps.length !== 0) // If CRLs and OCSPs are empty then we consider all certificates to be valid
       {
         for (let i = 0; i < path.length - 1; i++) {
           //#region Initial variables
           let ocspResult = 2;
           let crlResult: FindCrlResult = {
             status: 0,
-            statusMessage: EMPTY_STRING
+            statusMessage: EMPTY_STRING,
           };
           //#endregion
 
@@ -740,7 +668,7 @@ export class CertificateChainValidationEngine {
                 return {
                   result: false,
                   resultCode: 12,
-                  resultMessage: "One of certificates was revoked via OCSP response"
+                  resultMessage: "One of certificates was revoked via OCSP response",
                 };
               case 2: // continue to check the certificate with CRL
                 break;
@@ -761,7 +689,7 @@ export class CertificateChainValidationEngine {
                   return {
                     result: false,
                     resultCode: 12,
-                    resultMessage: "One of certificates had been revoked"
+                    resultMessage: "One of certificates had been revoked",
                   };
                 }
                 //#endregion
@@ -772,18 +700,14 @@ export class CertificateChainValidationEngine {
                   return {
                     result: false,
                     resultCode: 13,
-                    resultMessage:
-                      "CRL issuer certificate is not a CA certificate or does not have crlSign flag"
+                    resultMessage: "CRL issuer certificate is not a CA certificate or does not have crlSign flag",
                   };
                 }
                 //#endregion
               }
             } else {
               if (passedWhenNotRevValues === false) {
-                throw new ChainValidationError(
-                  ChainValidationCode.noRevocation,
-                  `No revocation values found for one of certificates: ${crlResult.statusMessage}`
-                );
+                throw new ChainValidationError(ChainValidationCode.noRevocation, `No revocation values found for one of certificates: ${crlResult.statusMessage}`);
               }
             }
           } else {
@@ -791,7 +715,7 @@ export class CertificateChainValidationEngine {
               return {
                 result: false,
                 resultCode: 11,
-                resultMessage: "No revocation values found for one of certificates"
+                resultMessage: "No revocation values found for one of certificates",
               };
             }
           }
@@ -816,10 +740,7 @@ export class CertificateChainValidationEngine {
             }
 
             if (extensionFound) {
-              throw new ChainValidationError(
-                ChainValidationCode.noRevocation,
-                `No revocation values found for one of certificates: ${crlResult.statusMessage}`
-              );
+              throw new ChainValidationError(ChainValidationCode.noRevocation, `No revocation values found for one of certificates: ${crlResult.statusMessage}`);
             }
           }
           //#endregion
@@ -839,14 +760,14 @@ export class CertificateChainValidationEngine {
           return {
             result: false,
             resultCode: 14,
-            resultMessage: "One of intermediate certificates is not a CA certificate"
+            resultMessage: "One of intermediate certificates is not a CA certificate",
           };
         }
       }
       //#endregion
 
       return {
-        result: true
+        result: true,
       };
     };
     //#endregion
@@ -893,12 +814,7 @@ export class CertificateChainValidationEngine {
         const certificate = result[i][j];
 
         for (let k = 0; k < this.trustedCerts.length; k++) {
-          if (
-            pvtsutils.BufferSourceConverter.isEqual(
-              certificate.tbsView,
-              this.trustedCerts[k].tbsView
-            )
-          ) {
+          if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, this.trustedCerts[k].tbsView)) {
             found = true;
             break;
           }
@@ -913,10 +829,7 @@ export class CertificateChainValidationEngine {
     }
 
     if (result.length === 0) {
-      throw new ChainValidationError(
-        ChainValidationCode.noValidPath,
-        "No valid certificate paths found"
-      );
+      throw new ChainValidationError(ChainValidationCode.noValidPath, "No valid certificate paths found");
     }
     //#endregion
 
@@ -933,8 +846,7 @@ export class CertificateChainValidationEngine {
     //#endregion
 
     //#region Create certificate path for basic check
-    for (let i = 0; i < result[shortestIndex].length; i++)
-      certificatePath.push(result[shortestIndex][i]);
+    for (let i = 0; i < result[shortestIndex].length; i++) certificatePath.push(result[shortestIndex][i]);
     //#endregion
 
     //#region Perform basic checking for all certificates in the path
@@ -952,10 +864,7 @@ export class CertificateChainValidationEngine {
    * @param crypto Crypto engine
    * @returns
    */
-  async verify(
-    parameters: CertificateChainValidationEngineVerifyParams = {},
-    crypto = common.getCrypto(true)
-  ): Promise<CertificateChainValidationEngineVerifyResult> {
+  async verify(parameters: CertificateChainValidationEngineVerifyParams = {}, crypto = common.getCrypto(true)): Promise<CertificateChainValidationEngineVerifyResult> {
     //#region Auxiliary functions for name constraints checking
     /**
      * Compare two dNSName values
@@ -1014,9 +923,7 @@ export class CertificateChainValidationEngine {
           continue;
         }
 
-        if (
-          nameSplitted[nameLen - 1 - i].localeCompare(constraintSplitted[constrLen - 1 - i]) !== 0
-        ) {
+        if (nameSplitted[nameLen - 1 - i].localeCompare(constraintSplitted[constrLen - 1 - i]) !== 0) {
           return false;
         }
       }
@@ -1043,12 +950,7 @@ export class CertificateChainValidationEngine {
       //#endregion
 
       //#region Splitted array length checking
-      if (
-        nameSplitted.length === 0 ||
-        constraintSplitted.length === 0 ||
-        nameSplitted.length < constraintSplitted.length
-      )
-        return false;
+      if (nameSplitted.length === 0 || constraintSplitted.length === 0 || nameSplitted.length < constraintSplitted.length) return false;
       //#endregion
 
       if (constraintSplitted.length === 1) {
@@ -1160,10 +1062,7 @@ export class CertificateChainValidationEngine {
      * @param constraint Constraint for directoryName from name
      * @returns Boolean result - valid or invalid the "name" against the "constraint"
      */
-    function compareDirectoryName(
-      name: RelativeDistinguishedNames,
-      constraint: RelativeDistinguishedNames
-    ): boolean {
+    function compareDirectoryName(name: RelativeDistinguishedNames, constraint: RelativeDistinguishedNames): boolean {
       //#region Initial check
       if (name.typesAndValues.length === 0 || constraint.typesAndValues.length === 0) return true;
 
@@ -1181,15 +1080,15 @@ export class CertificateChainValidationEngine {
         for (let j = nameStart; j < name.typesAndValues.length; j++) {
           localResult = name.typesAndValues[j].isEqual(constraint.typesAndValues[i]);
 
-          if (name.typesAndValues[j].type === constraint.typesAndValues[i].type)
-            result = result && localResult;
+          if (name.typesAndValues[j].type === constraint.typesAndValues[i].type) result = result && localResult;
 
           if (localResult === true) {
             if (nameStart === 0 || nameStart === j) {
               nameStart = j + 1;
               break;
-            } else // Structure of "name" must be the same with "constraint"
-            return false;
+            } else
+              // Structure of "name" must be the same with "constraint"
+              return false;
           }
         }
 
@@ -1225,7 +1124,7 @@ export class CertificateChainValidationEngine {
       const pendingConstraints = [
         false, // For "explicitPolicyPending"
         false, // For "policyMappingInhibitPending"
-        false // For "inhibitAnyPolicyPending"
+        false, // For "inhibitAnyPolicyPending"
       ];
 
       let explicitPolicyPending = 0;
@@ -1312,7 +1211,7 @@ export class CertificateChainValidationEngine {
                 return {
                   result: false,
                   resultCode: 98,
-                  resultMessage: "Policy mapping prohibited"
+                  resultMessage: "Policy mapping prohibited",
                 };
               }
 
@@ -1331,26 +1230,19 @@ export class CertificateChainValidationEngine {
                   if (pendingConstraints[0] === false) {
                     pendingConstraints[0] = true;
                     explicitPolicyPending = extension.parsedValue.requireExplicitPolicy;
-                  } else
-                    explicitPolicyPending =
-                      explicitPolicyPending > extension.parsedValue.requireExplicitPolicy
-                        ? extension.parsedValue.requireExplicitPolicy
-                        : explicitPolicyPending;
+                  } else explicitPolicyPending = explicitPolicyPending > extension.parsedValue.requireExplicitPolicy ? extension.parsedValue.requireExplicitPolicy : explicitPolicyPending;
                 }
                 //#endregion
 
                 //#region inhibitPolicyMapping
-                if (extension.parsedValue.inhibitPolicyMapping === 0)
-                  policyMappingInhibitIndicator = true;
+                if (extension.parsedValue.inhibitPolicyMapping === 0) policyMappingInhibitIndicator = true;
                 else {
                   if (pendingConstraints[1] === false) {
                     pendingConstraints[1] = true;
                     policyMappingInhibitPending = extension.parsedValue.inhibitPolicyMapping + 1;
                   } else
                     policyMappingInhibitPending =
-                      policyMappingInhibitPending > extension.parsedValue.inhibitPolicyMapping + 1
-                        ? extension.parsedValue.inhibitPolicyMapping + 1
-                        : policyMappingInhibitPending;
+                      policyMappingInhibitPending > extension.parsedValue.inhibitPolicyMapping + 1 ? extension.parsedValue.inhibitPolicyMapping + 1 : policyMappingInhibitPending;
                 }
                 //#endregion
               }
@@ -1360,17 +1252,12 @@ export class CertificateChainValidationEngine {
             //#region InhibitAnyPolicy
             if (extension.extnID === id_InhibitAnyPolicy) {
               if (inhibitAnyPolicyIndicator === false) {
-                if (extension.parsedValue.valueBlock.valueDec === 0)
-                  inhibitAnyPolicyIndicator = true;
+                if (extension.parsedValue.valueBlock.valueDec === 0) inhibitAnyPolicyIndicator = true;
                 else {
                   if (pendingConstraints[2] === false) {
                     pendingConstraints[2] = true;
                     inhibitAnyPolicyPending = extension.parsedValue.valueBlock.valueDec;
-                  } else
-                    inhibitAnyPolicyPending =
-                      inhibitAnyPolicyPending > extension.parsedValue.valueBlock.valueDec
-                        ? extension.parsedValue.valueBlock.valueDec
-                        : inhibitAnyPolicyPending;
+                  } else inhibitAnyPolicyPending = inhibitAnyPolicyPending > extension.parsedValue.valueBlock.valueDec ? extension.parsedValue.valueBlock.valueDec : inhibitAnyPolicyPending;
                 }
               }
             }
@@ -1438,14 +1325,11 @@ export class CertificateChainValidationEngine {
         if (i < this.certs.length - 2 && typeof policyMappings[i + 1] !== "undefined") {
           for (let k = 0; k < policyMappings[i + 1].mappings.length; k++) {
             //#region Check that we do not have "anyPolicy" in current mapping
-            if (
-              policyMappings[i + 1].mappings[k].issuerDomainPolicy === id_AnyPolicy ||
-              policyMappings[i + 1].mappings[k].subjectDomainPolicy === id_AnyPolicy
-            ) {
+            if (policyMappings[i + 1].mappings[k].issuerDomainPolicy === id_AnyPolicy || policyMappings[i + 1].mappings[k].subjectDomainPolicy === id_AnyPolicy) {
               return {
                 result: false,
                 resultCode: 99,
-                resultMessage: 'The "anyPolicy" should not be a part of policy mapping scheme'
+                resultMessage: 'The "anyPolicy" should not be a part of policy mapping scheme',
               };
             }
             //#endregion
@@ -1457,25 +1341,19 @@ export class CertificateChainValidationEngine {
 
             //#region Search for index of policies indexes
             for (let n = 0; n < allPolicies.length; n++) {
-              if (allPolicies[n] === policyMappings[i + 1].mappings[k].issuerDomainPolicy)
-                issuerDomainPolicyIndex = n;
+              if (allPolicies[n] === policyMappings[i + 1].mappings[k].issuerDomainPolicy) issuerDomainPolicyIndex = n;
 
-              if (allPolicies[n] === policyMappings[i + 1].mappings[k].subjectDomainPolicy)
-                subjectDomainPolicyIndex = n;
+              if (allPolicies[n] === policyMappings[i + 1].mappings[k].subjectDomainPolicy) subjectDomainPolicyIndex = n;
             }
             //#endregion
 
             //#region Delete existing "issuerDomainPolicy" because on the level we mapped the policy to another one
-            if (typeof policiesAndCerts[issuerDomainPolicyIndex][i] !== "undefined")
-              delete policiesAndCerts[issuerDomainPolicyIndex][i];
+            if (typeof policiesAndCerts[issuerDomainPolicyIndex][i] !== "undefined") delete policiesAndCerts[issuerDomainPolicyIndex][i];
             //#endregion
 
             //#region Check all policies for the certificate
             for (let j = 0; j < certPolicies[i].certificatePolicies.length; j++) {
-              if (
-                policyMappings[i + 1].mappings[k].subjectDomainPolicy ===
-                certPolicies[i].certificatePolicies[j].policyIdentifier
-              ) {
+              if (policyMappings[i + 1].mappings[k].subjectDomainPolicy === certPolicies[i].certificatePolicies[j].policyIdentifier) {
                 //#region Set mapped policy for current certificate
                 if (issuerDomainPolicyIndex !== -1 && subjectDomainPolicyIndex !== -1) {
                   for (let m = 0; m <= i; m++) {
@@ -1512,11 +1390,7 @@ export class CertificateChainValidationEngine {
         for (let j = 0; j < this.certs.length - 1; j++) {
           let anyPolicyFound = false;
 
-          if (
-            j < explicitPolicyStart &&
-            allPolicies[i] === id_AnyPolicy &&
-            allPolicies.length > 1
-          ) {
+          if (j < explicitPolicyStart && allPolicies[i] === id_AnyPolicy && allPolicies.length > 1) {
             found = false;
             break;
           }
@@ -1548,22 +1422,13 @@ export class CertificateChainValidationEngine {
       //#region Create "set of user-constrained policies"
       let userConstrPolicies: string[] = [];
 
-      if (
-        initialPolicySet.length === 1 &&
-        initialPolicySet[0] === id_AnyPolicy &&
-        explicitPolicyIndicator === false
-      )
-        userConstrPolicies = initialPolicySet;
+      if (initialPolicySet.length === 1 && initialPolicySet[0] === id_AnyPolicy && explicitPolicyIndicator === false) userConstrPolicies = initialPolicySet;
       else {
-        if (authConstrPolicies.length === 1 && authConstrPolicies[0] === id_AnyPolicy)
-          userConstrPolicies = initialPolicySet;
+        if (authConstrPolicies.length === 1 && authConstrPolicies[0] === id_AnyPolicy) userConstrPolicies = initialPolicySet;
         else {
           for (let i = 0; i < authConstrPolicies.length; i++) {
             for (let j = 0; j < initialPolicySet.length; j++) {
-              if (
-                initialPolicySet[j] === authConstrPolicies[i] ||
-                initialPolicySet[j] === id_AnyPolicy
-              ) {
+              if (initialPolicySet[j] === authConstrPolicies[i] || initialPolicySet[j] === id_AnyPolicy) {
                 userConstrPolicies.push(authConstrPolicies[i]);
                 break;
               }
@@ -1578,15 +1443,12 @@ export class CertificateChainValidationEngine {
       const policyResult: CertificateChainValidationEngineVerifyResult = {
         result: userConstrPolicies.length > 0,
         resultCode: 0,
-        resultMessage:
-          userConstrPolicies.length > 0
-            ? EMPTY_STRING
-            : 'Zero "userConstrPolicies" array, no intersections with "authConstrPolicies"',
+        resultMessage: userConstrPolicies.length > 0 ? EMPTY_STRING : 'Zero "userConstrPolicies" array, no intersections with "authConstrPolicies"',
         authConstrPolicies,
         userConstrPolicies,
         explicitPolicyIndicator,
         policyMappings,
-        certificatePath: this.certs
+        certificatePath: this.certs,
       };
 
       if (userConstrPolicies.length === 0) return policyResult;
@@ -1615,21 +1477,14 @@ export class CertificateChainValidationEngine {
             const extension = cert.extensions[j];
             //#region NameConstraints
             if (extension.extnID === id_NameConstraints) {
-              if ("permittedSubtrees" in extension.parsedValue)
-                certPermittedSubtrees = certPermittedSubtrees.concat(
-                  extension.parsedValue.permittedSubtrees
-                );
+              if ("permittedSubtrees" in extension.parsedValue) certPermittedSubtrees = certPermittedSubtrees.concat(extension.parsedValue.permittedSubtrees);
 
-              if ("excludedSubtrees" in extension.parsedValue)
-                certExcludedSubtrees = certExcludedSubtrees.concat(
-                  extension.parsedValue.excludedSubtrees
-                );
+              if ("excludedSubtrees" in extension.parsedValue) certExcludedSubtrees = certExcludedSubtrees.concat(extension.parsedValue.excludedSubtrees);
             }
             //#endregion
 
             //#region SubjectAltName
-            if (extension.extnID === id_SubjectAltName)
-              subjectAltNames = subjectAltNames.concat(extension.parsedValue.altNames);
+            if (extension.extnID === id_SubjectAltName) subjectAltNames = subjectAltNames.concat(extension.parsedValue.altNames);
             //#endregion
           }
         }
@@ -1641,19 +1496,12 @@ export class CertificateChainValidationEngine {
           switch (requiredNameForms[j].base.type) {
             case 4: // directoryName
               {
-                if (
-                  requiredNameForms[j].base.value.typesAndValues.length !==
-                  cert.subject.typesAndValues.length
-                )
-                  continue;
+                if (requiredNameForms[j].base.value.typesAndValues.length !== cert.subject.typesAndValues.length) continue;
 
                 formFound = true;
 
                 for (let k = 0; k < cert.subject.typesAndValues.length; k++) {
-                  if (
-                    cert.subject.typesAndValues[k].type !==
-                    requiredNameForms[j].base.value.typesAndValues[k].type
-                  ) {
+                  if (cert.subject.typesAndValues[k].type !== requiredNameForms[j].base.value.typesAndValues[k].type) {
                     formFound = false;
                     break;
                   }
@@ -1683,7 +1531,7 @@ export class CertificateChainValidationEngine {
           [], // dNSName
           [], // directoryName
           [], // uniformResourceIdentifier
-          [] // iPAddress
+          [], // iPAddress
         ];
 
         for (let j = 0; j < permittedSubtrees.length; j++) {
@@ -1735,9 +1583,7 @@ export class CertificateChainValidationEngine {
                     if (subjectAltNames[k].type === 1) // rfc822Name
                     {
                       valueExists = true;
-                      groupPermitted =
-                        groupPermitted ||
-                        compareRFC822Name(subjectAltNames[k].value, group[j].base.value);
+                      groupPermitted = groupPermitted || compareRFC822Name(subjectAltNames[k].value, group[j].base.value);
                     }
                   }
                 } else // Try to find out "emailAddress" inside "subject"
@@ -1749,12 +1595,7 @@ export class CertificateChainValidationEngine {
                     ) // RFC1274 "rfc822Mailbox" e-mail address
                     {
                       valueExists = true;
-                      groupPermitted =
-                        groupPermitted ||
-                        compareRFC822Name(
-                          cert.subject.typesAndValues[k].value.valueBlock.value,
-                          group[j].base.value
-                        );
+                      groupPermitted = groupPermitted || compareRFC822Name(cert.subject.typesAndValues[k].value.valueBlock.value, group[j].base.value);
                     }
                   }
                 }
@@ -1767,9 +1608,7 @@ export class CertificateChainValidationEngine {
                     if (subjectAltNames[k].type === 2) // dNSName
                     {
                       valueExists = true;
-                      groupPermitted =
-                        groupPermitted ||
-                        compareDNSName(subjectAltNames[k].value, group[j].base.value);
+                      groupPermitted = groupPermitted || compareDNSName(subjectAltNames[k].value, group[j].base.value);
                     }
                   }
                 }
@@ -1788,12 +1627,7 @@ export class CertificateChainValidationEngine {
                     if (subjectAltNames[k].type === 6) // uniformResourceIdentifier
                     {
                       valueExists = true;
-                      groupPermitted =
-                        groupPermitted ||
-                        compareUniformResourceIdentifier(
-                          subjectAltNames[k].value,
-                          group[j].base.value
-                        );
+                      groupPermitted = groupPermitted || compareUniformResourceIdentifier(subjectAltNames[k].value, group[j].base.value);
                     }
                   }
                 }
@@ -1806,9 +1640,7 @@ export class CertificateChainValidationEngine {
                     if (subjectAltNames[k].type === 7) // iPAddress
                     {
                       valueExists = true;
-                      groupPermitted =
-                        groupPermitted ||
-                        compareIPAddress(subjectAltNames[k].value, group[j].base.value);
+                      groupPermitted = groupPermitted || compareIPAddress(subjectAltNames[k].value, group[j].base.value);
                     }
                   }
                 }
@@ -1844,9 +1676,7 @@ export class CertificateChainValidationEngine {
                 for (let k = 0; k < subjectAltNames.length; k++) {
                   if (subjectAltNames[k].type === 1)
                     // rfc822Name
-                    excluded =
-                      excluded ||
-                      compareRFC822Name(subjectAltNames[k].value, excludedSubtrees[j].base.value);
+                    excluded = excluded || compareRFC822Name(subjectAltNames[k].value, excludedSubtrees[j].base.value);
                 }
               } else // Try to find out "emailAddress" inside "subject"
               {
@@ -1856,12 +1686,7 @@ export class CertificateChainValidationEngine {
                     cert.subject.typesAndValues[k].type === "0.9.2342.19200300.100.1.3"
                   )
                     // RFC1274 "rfc822Mailbox" e-mail address
-                    excluded =
-                      excluded ||
-                      compareRFC822Name(
-                        cert.subject.typesAndValues[k].value.valueBlock.value,
-                        excludedSubtrees[j].base.value
-                      );
+                    excluded = excluded || compareRFC822Name(cert.subject.typesAndValues[k].value.valueBlock.value, excludedSubtrees[j].base.value);
                 }
               }
               break;
@@ -1872,17 +1697,14 @@ export class CertificateChainValidationEngine {
                 for (let k = 0; k < subjectAltNames.length; k++) {
                   if (subjectAltNames[k].type === 2)
                     // dNSName
-                    excluded =
-                      excluded ||
-                      compareDNSName(subjectAltNames[k].value, excludedSubtrees[j].base.value);
+                    excluded = excluded || compareDNSName(subjectAltNames[k].value, excludedSubtrees[j].base.value);
                 }
               }
               break;
             //#endregion
             //#region directoryName
             case 4:
-              excluded =
-                excluded || compareDirectoryName(cert.subject, excludedSubtrees[j].base.value);
+              excluded = excluded || compareDirectoryName(cert.subject, excludedSubtrees[j].base.value);
               break;
             //#endregion
             //#region uniformResourceIdentifier
@@ -1891,12 +1713,7 @@ export class CertificateChainValidationEngine {
                 for (let k = 0; k < subjectAltNames.length; k++) {
                   if (subjectAltNames[k].type === 6)
                     // uniformResourceIdentifier
-                    excluded =
-                      excluded ||
-                      compareUniformResourceIdentifier(
-                        subjectAltNames[k].value,
-                        excludedSubtrees[j].base.value
-                      );
+                    excluded = excluded || compareUniformResourceIdentifier(subjectAltNames[k].value, excludedSubtrees[j].base.value);
                 }
               }
               break;
@@ -1907,9 +1724,7 @@ export class CertificateChainValidationEngine {
                 for (let k = 0; k < subjectAltNames.length; k++) {
                   if (subjectAltNames[k].type === 7)
                     // iPAddress
-                    excluded =
-                      excluded ||
-                      compareIPAddress(subjectAltNames[k].value, excludedSubtrees[j].base.value);
+                    excluded = excluded || compareIPAddress(subjectAltNames[k].value, excludedSubtrees[j].base.value);
                 }
               }
               break;
@@ -1947,7 +1762,7 @@ export class CertificateChainValidationEngine {
             result: false,
             resultCode: error.code,
             resultMessage: error.message,
-            error: error
+            error: error,
           };
         }
 
@@ -1955,7 +1770,7 @@ export class CertificateChainValidationEngine {
           result: false,
           resultCode: ChainValidationCode.unknown,
           resultMessage: error.message,
-          error: error
+          error: error,
         };
       }
 
@@ -1966,7 +1781,7 @@ export class CertificateChainValidationEngine {
       return {
         result: false,
         resultCode: -1,
-        resultMessage: `${error}`
+        resultMessage: `${error}`,
       };
     }
   }

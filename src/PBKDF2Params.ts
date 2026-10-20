@@ -1,10 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import {
-  AlgorithmIdentifier,
-  AlgorithmIdentifierJson,
-  AlgorithmIdentifierSchema
-} from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -51,17 +47,9 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
     super();
 
     this.salt = pvutils.getParametersValue(parameters, SALT, PBKDF2Params.defaultValues(SALT));
-    this.iterationCount = pvutils.getParametersValue(
-      parameters,
-      ITERATION_COUNT,
-      PBKDF2Params.defaultValues(ITERATION_COUNT)
-    );
+    this.iterationCount = pvutils.getParametersValue(parameters, ITERATION_COUNT, PBKDF2Params.defaultValues(ITERATION_COUNT));
     if (KEY_LENGTH in parameters) {
-      this.keyLength = pvutils.getParametersValue(
-        parameters,
-        KEY_LENGTH,
-        PBKDF2Params.defaultValues(KEY_LENGTH)
-      );
+      this.keyLength = pvutils.getParametersValue(parameters, KEY_LENGTH, PBKDF2Params.defaultValues(KEY_LENGTH));
     }
     if (PRF in parameters) {
       this.prf = pvutils.getParametersValue(parameters, PRF, PBKDF2Params.defaultValues(PRF));
@@ -92,7 +80,7 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
       case PRF:
         return new AlgorithmIdentifier({
           algorithmId: "1.3.14.3.2.26", // SHA-1
-          algorithmParams: new asn1js.Null()
+          algorithmParams: new asn1js.Null(),
         });
       default:
         return super.defaultValues(memberName);
@@ -120,36 +108,29 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
       iterationCount?: string;
       keyLength?: string;
       prf?: AlgorithmIdentifierSchema;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Choice({
-          value: [
-            new asn1js.OctetString({ name: names.saltPrimitive || EMPTY_STRING }),
-            AlgorithmIdentifier.schema(names.saltConstructed || {})
-          ]
+          value: [new asn1js.OctetString({ name: names.saltPrimitive || EMPTY_STRING }), AlgorithmIdentifier.schema(names.saltConstructed || {})],
         }),
         new asn1js.Integer({ name: names.iterationCount || EMPTY_STRING }),
         new asn1js.Integer({
           name: names.keyLength || EMPTY_STRING,
-          optional: true
+          optional: true,
         }),
         AlgorithmIdentifier.schema(
           names.prf || {
             names: {
-              optional: true
-            }
-          }
-        )
-      ]
+              optional: true,
+            },
+          },
+        ),
+      ],
     });
   }
 
@@ -166,19 +147,19 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
           saltPrimitive: SALT,
           saltConstructed: {
             names: {
-              blockName: SALT
-            }
+              blockName: SALT,
+            },
           },
           iterationCount: ITERATION_COUNT,
           keyLength: KEY_LENGTH,
           prf: {
             names: {
               blockName: PRF,
-              optional: true
-            }
-          }
-        }
-      })
+              optional: true,
+            },
+          },
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -197,19 +178,17 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
     outputArray.push(new asn1js.Integer({ value: this.iterationCount }));
 
     if (KEY_LENGTH in this) {
-      if (PBKDF2Params.defaultValues(KEY_LENGTH) !== this.keyLength)
-        outputArray.push(new asn1js.Integer({ value: this.keyLength }));
+      if (PBKDF2Params.defaultValues(KEY_LENGTH) !== this.keyLength) outputArray.push(new asn1js.Integer({ value: this.keyLength }));
     }
 
     if (this.prf) {
-      if (PBKDF2Params.defaultValues(PRF).isEqual(this.prf) === false)
-        outputArray.push(this.prf.toSchema());
+      if (PBKDF2Params.defaultValues(PRF).isEqual(this.prf) === false) outputArray.push(this.prf.toSchema());
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
@@ -217,7 +196,7 @@ export class PBKDF2Params extends PkiObject implements IPBKDF2Params {
   public toJSON(): PBKDF2ParamsJson {
     const res: PBKDF2ParamsJson = {
       salt: this.salt.toJSON(),
-      iterationCount: this.iterationCount
+      iterationCount: this.iterationCount,
     };
 
     if (KEY_LENGTH in this) {

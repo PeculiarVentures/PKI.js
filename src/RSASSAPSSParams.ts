@@ -1,10 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import {
-  AlgorithmIdentifier,
-  AlgorithmIdentifierJson,
-  AlgorithmIdentifierSchema
-} from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -62,26 +58,10 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
   constructor(parameters: RSASSAPSSParamsParameters = {}) {
     super();
 
-    this.hashAlgorithm = pvutils.getParametersValue(
-      parameters,
-      HASH_ALGORITHM,
-      RSASSAPSSParams.defaultValues(HASH_ALGORITHM)
-    );
-    this.maskGenAlgorithm = pvutils.getParametersValue(
-      parameters,
-      MASK_GEN_ALGORITHM,
-      RSASSAPSSParams.defaultValues(MASK_GEN_ALGORITHM)
-    );
-    this.saltLength = pvutils.getParametersValue(
-      parameters,
-      SALT_LENGTH,
-      RSASSAPSSParams.defaultValues(SALT_LENGTH)
-    );
-    this.trailerField = pvutils.getParametersValue(
-      parameters,
-      TRAILER_FIELD,
-      RSASSAPSSParams.defaultValues(TRAILER_FIELD)
-    );
+    this.hashAlgorithm = pvutils.getParametersValue(parameters, HASH_ALGORITHM, RSASSAPSSParams.defaultValues(HASH_ALGORITHM));
+    this.maskGenAlgorithm = pvutils.getParametersValue(parameters, MASK_GEN_ALGORITHM, RSASSAPSSParams.defaultValues(MASK_GEN_ALGORITHM));
+    this.saltLength = pvutils.getParametersValue(parameters, SALT_LENGTH, RSASSAPSSParams.defaultValues(SALT_LENGTH));
+    this.trailerField = pvutils.getParametersValue(parameters, TRAILER_FIELD, RSASSAPSSParams.defaultValues(TRAILER_FIELD));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -102,15 +82,15 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
       case HASH_ALGORITHM:
         return new AlgorithmIdentifier({
           algorithmId: "1.3.14.3.2.26", // SHA-1
-          algorithmParams: new asn1js.Null()
+          algorithmParams: new asn1js.Null(),
         });
       case MASK_GEN_ALGORITHM:
         return new AlgorithmIdentifier({
           algorithmId: "1.2.840.113549.1.1.8", // MGF1
           algorithmParams: new AlgorithmIdentifier({
             algorithmId: "1.3.14.3.2.26", // SHA-1
-            algorithmParams: new asn1js.Null()
-          }).toSchema()
+            algorithmParams: new asn1js.Null(),
+          }).toSchema(),
         });
       case SALT_LENGTH:
         return 20;
@@ -138,13 +118,9 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
       maskGenAlgorithm?: AlgorithmIdentifierSchema;
       saltLength?: string;
       trailerField?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -152,36 +128,36 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
           optional: true,
-          value: [AlgorithmIdentifier.schema(names.hashAlgorithm || {})]
+          value: [AlgorithmIdentifier.schema(names.hashAlgorithm || {})],
         }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
           optional: true,
-          value: [AlgorithmIdentifier.schema(names.maskGenAlgorithm || {})]
+          value: [AlgorithmIdentifier.schema(names.maskGenAlgorithm || {})],
         }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 2 // [2]
+            tagNumber: 2, // [2]
           },
           optional: true,
-          value: [new asn1js.Integer({ name: names.saltLength || EMPTY_STRING })]
+          value: [new asn1js.Integer({ name: names.saltLength || EMPTY_STRING })],
         }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 3 // [3]
+            tagNumber: 3, // [3]
           },
           optional: true,
-          value: [new asn1js.Integer({ name: names.trailerField || EMPTY_STRING })]
-        })
-      ]
+          value: [new asn1js.Integer({ name: names.trailerField || EMPTY_STRING })],
+        }),
+      ],
     });
   }
 
@@ -197,32 +173,29 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
         names: {
           hashAlgorithm: {
             names: {
-              blockName: HASH_ALGORITHM
-            }
+              blockName: HASH_ALGORITHM,
+            },
           },
           maskGenAlgorithm: {
             names: {
-              blockName: MASK_GEN_ALGORITHM
-            }
+              blockName: MASK_GEN_ALGORITHM,
+            },
           },
           saltLength: SALT_LENGTH,
-          trailerField: TRAILER_FIELD
-        }
-      })
+          trailerField: TRAILER_FIELD,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    if (HASH_ALGORITHM in asn1.result)
-      this.hashAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.hashAlgorithm });
+    if (HASH_ALGORITHM in asn1.result) this.hashAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.hashAlgorithm });
 
-    if (MASK_GEN_ALGORITHM in asn1.result)
-      this.maskGenAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.maskGenAlgorithm });
+    if (MASK_GEN_ALGORITHM in asn1.result) this.maskGenAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.maskGenAlgorithm });
 
     if (SALT_LENGTH in asn1.result) this.saltLength = asn1.result.saltLength.valueBlock.valueDec;
 
-    if (TRAILER_FIELD in asn1.result)
-      this.trailerField = asn1.result.trailerField.valueBlock.valueDec;
+    if (TRAILER_FIELD in asn1.result) this.trailerField = asn1.result.trailerField.valueBlock.valueDec;
   }
 
   public toSchema(): asn1js.Sequence {
@@ -234,10 +207,10 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [this.hashAlgorithm.toSchema()]
-        })
+          value: [this.hashAlgorithm.toSchema()],
+        }),
       );
     }
 
@@ -246,10 +219,10 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: [this.maskGenAlgorithm.toSchema()]
-        })
+          value: [this.maskGenAlgorithm.toSchema()],
+        }),
       );
     }
 
@@ -258,10 +231,10 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 2 // [2]
+            tagNumber: 2, // [2]
           },
-          value: [new asn1js.Integer({ value: this.saltLength })]
-        })
+          value: [new asn1js.Integer({ value: this.saltLength })],
+        }),
       );
     }
 
@@ -270,17 +243,17 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 3 // [3]
+            tagNumber: 3, // [3]
           },
-          value: [new asn1js.Integer({ value: this.trailerField })]
-        })
+          value: [new asn1js.Integer({ value: this.trailerField })],
+        }),
       );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }

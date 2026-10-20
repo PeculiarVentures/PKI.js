@@ -178,11 +178,8 @@
             <option value="alg_ECDSA">ECDSA</option>
           </select>
         </p>
-        <label for="new_signed_data" style="font-weight: bold; float: left"
-          >OCSP resp data + BASE-64 encoded new certificate + PKCS#8 private key:</label
-        >
-        <textarea id="new_signed_data">
-&lt; New OCSP response data + new encoded certificate + PKCS#8 exported private key will be stored here &gt;</textarea>
+        <label for="new_signed_data" style="font-weight: bold; float: left">OCSP resp data + BASE-64 encoded new certificate + PKCS#8 private key:</label>
+        <textarea id="new_signed_data">&lt; New OCSP response data + new encoded certificate + PKCS#8 exported private key will be stored here &gt;</textarea>
         <a id="ocsp_resp_create">Create</a>
       </div>
       <p class="header-block">Parse loaded/created OCSP response</p>
@@ -202,9 +199,7 @@
             </tr>
           </table>
         </div>
-        <p id="ocsp-resp-rspid-simpl" style="display: none">
-          <span class="type">Responder ID:</span> <span id="ocsp-resp-respid-simpl"></span>
-        </p>
+        <p id="ocsp-resp-rspid-simpl" style="display: none"><span class="type">Responder ID:</span> <span id="ocsp-resp-respid-simpl"></span></p>
         <p><span class="type">Produced at:</span> <span id="prod-at"></span></p>
         <div id="ocsp-resp-attributes" class="two-col">
           <p class="subject">Responses:</p>

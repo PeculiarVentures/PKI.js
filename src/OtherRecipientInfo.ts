@@ -37,16 +37,8 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
   constructor(parameters: OtherRecipientInfoParameters = {}) {
     super();
 
-    this.oriType = pvutils.getParametersValue(
-      parameters,
-      ORI_TYPE,
-      OtherRecipientInfo.defaultValues(ORI_TYPE)
-    );
-    this.oriValue = pvutils.getParametersValue(
-      parameters,
-      ORI_VALUE,
-      OtherRecipientInfo.defaultValues(ORI_VALUE)
-    );
+    this.oriType = pvutils.getParametersValue(parameters, ORI_TYPE, OtherRecipientInfo.defaultValues(ORI_TYPE));
+    this.oriValue = pvutils.getParametersValue(parameters, ORI_VALUE, OtherRecipientInfo.defaultValues(ORI_VALUE));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -100,20 +92,13 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
     parameters: Schema.SchemaParameters<{
       oriType?: string;
       oriValue?: string;
-    }> = {}
+    }> = {},
   ) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        new asn1js.ObjectIdentifier({ name: names.oriType || EMPTY_STRING }),
-        new asn1js.Any({ name: names.oriValue || EMPTY_STRING })
-      ]
+      value: [new asn1js.ObjectIdentifier({ name: names.oriType || EMPTY_STRING }), new asn1js.Any({ name: names.oriValue || EMPTY_STRING })],
     });
   }
 
@@ -128,9 +113,9 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
       OtherRecipientInfo.schema({
         names: {
           oriType: ORI_TYPE,
-          oriValue: ORI_VALUE
-        }
-      })
+          oriValue: ORI_VALUE,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -142,14 +127,14 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [new asn1js.ObjectIdentifier({ value: this.oriType }), this.oriValue]
+      value: [new asn1js.ObjectIdentifier({ value: this.oriType }), this.oriValue],
     });
     //#endregion
   }
 
   public toJSON(): OtherRecipientInfoJson {
     const res: OtherRecipientInfoJson = {
-      oriType: this.oriType
+      oriType: this.oriType,
     };
 
     if (!OtherRecipientInfo.compareWithDefault(ORI_VALUE, this.oriValue)) {

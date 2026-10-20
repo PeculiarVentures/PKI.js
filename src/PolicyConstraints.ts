@@ -38,18 +38,10 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
     super();
 
     if (REQUIRE_EXPLICIT_POLICY in parameters) {
-      this.requireExplicitPolicy = pvutils.getParametersValue(
-        parameters,
-        REQUIRE_EXPLICIT_POLICY,
-        PolicyConstraints.defaultValues(REQUIRE_EXPLICIT_POLICY)
-      );
+      this.requireExplicitPolicy = pvutils.getParametersValue(parameters, REQUIRE_EXPLICIT_POLICY, PolicyConstraints.defaultValues(REQUIRE_EXPLICIT_POLICY));
     }
     if (INHIBIT_POLICY_MAPPING in parameters) {
-      this.inhibitPolicyMapping = pvutils.getParametersValue(
-        parameters,
-        INHIBIT_POLICY_MAPPING,
-        PolicyConstraints.defaultValues(INHIBIT_POLICY_MAPPING)
-      );
+      this.inhibitPolicyMapping = pvutils.getParametersValue(parameters, INHIBIT_POLICY_MAPPING, PolicyConstraints.defaultValues(INHIBIT_POLICY_MAPPING));
     }
 
     if (parameters.schema) {
@@ -90,13 +82,9 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
     parameters: Schema.SchemaParameters<{
       requireExplicitPolicy?: string;
       inhibitPolicyMapping?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -106,18 +94,18 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
-          }
+            tagNumber: 0, // [0]
+          },
         }), // IMPLICIT integer value
         new asn1js.Primitive({
           name: names.inhibitPolicyMapping || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
-          }
-        }) // IMPLICIT integer value
-      ]
+            tagNumber: 1, // [1]
+          },
+        }), // IMPLICIT integer value
+      ],
     });
   }
 
@@ -132,9 +120,9 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
       PolicyConstraints.schema({
         names: {
           requireExplicitPolicy: REQUIRE_EXPLICIT_POLICY,
-          inhibitPolicyMapping: INHIBIT_POLICY_MAPPING
-        }
-      })
+          inhibitPolicyMapping: INHIBIT_POLICY_MAPPING,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -192,7 +180,7 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }

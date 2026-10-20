@@ -19,8 +19,7 @@ export interface OtherRevocationInfoFormatJson {
   otherRevInfo?: any;
 }
 
-export type OtherRevocationInfoFormatParameters = PkiObjectParameters &
-  Partial<IOtherRevocationInfoFormat>;
+export type OtherRevocationInfoFormatParameters = PkiObjectParameters & Partial<IOtherRevocationInfoFormat>;
 
 /**
  * Represents the OtherRevocationInfoFormat structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
@@ -38,16 +37,8 @@ export class OtherRevocationInfoFormat extends PkiObject implements IOtherRevoca
   constructor(parameters: OtherRevocationInfoFormatParameters = {}) {
     super();
 
-    this.otherRevInfoFormat = pvutils.getParametersValue(
-      parameters,
-      OTHER_REV_INFO_FORMAT,
-      OtherRevocationInfoFormat.defaultValues(OTHER_REV_INFO_FORMAT)
-    );
-    this.otherRevInfo = pvutils.getParametersValue(
-      parameters,
-      OTHER_REV_INFO,
-      OtherRevocationInfoFormat.defaultValues(OTHER_REV_INFO)
-    );
+    this.otherRevInfoFormat = pvutils.getParametersValue(parameters, OTHER_REV_INFO_FORMAT, OtherRevocationInfoFormat.defaultValues(OTHER_REV_INFO_FORMAT));
+    this.otherRevInfo = pvutils.getParametersValue(parameters, OTHER_REV_INFO, OtherRevocationInfoFormat.defaultValues(OTHER_REV_INFO));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -85,20 +76,13 @@ export class OtherRevocationInfoFormat extends PkiObject implements IOtherRevoca
     parameters: Schema.SchemaParameters<{
       otherRevInfoFormat?: string;
       otherRevInfo?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        new asn1js.ObjectIdentifier({ name: names.otherRevInfoFormat || OTHER_REV_INFO_FORMAT }),
-        new asn1js.Any({ name: names.otherRevInfo || OTHER_REV_INFO })
-      ]
+      value: [new asn1js.ObjectIdentifier({ name: names.otherRevInfoFormat || OTHER_REV_INFO_FORMAT }), new asn1js.Any({ name: names.otherRevInfo || OTHER_REV_INFO })],
     });
   }
 
@@ -118,13 +102,13 @@ export class OtherRevocationInfoFormat extends PkiObject implements IOtherRevoca
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [new asn1js.ObjectIdentifier({ value: this.otherRevInfoFormat }), this.otherRevInfo]
+      value: [new asn1js.ObjectIdentifier({ value: this.otherRevInfoFormat }), this.otherRevInfo],
     });
   }
 
   public toJSON(): OtherRevocationInfoFormatJson {
     const res: OtherRevocationInfoFormatJson = {
-      otherRevInfoFormat: this.otherRevInfoFormat
+      otherRevInfoFormat: this.otherRevInfoFormat,
     };
 
     if (!(this.otherRevInfo instanceof asn1js.Any)) {

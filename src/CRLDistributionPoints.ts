@@ -34,11 +34,7 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
   constructor(parameters: CRLDistributionPointsParameters = {}) {
     super();
 
-    this.distributionPoints = pvutils.getParametersValue(
-      parameters,
-      DISTRIBUTION_POINTS,
-      CRLDistributionPoints.defaultValues(DISTRIBUTION_POINTS)
-    );
+    this.distributionPoints = pvutils.getParametersValue(parameters, DISTRIBUTION_POINTS, CRLDistributionPoints.defaultValues(DISTRIBUTION_POINTS));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -70,27 +66,23 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
   public static override schema(
     parameters: Schema.SchemaParameters<{
       distributionPoints?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
     /**
      * @type {Object}
      * @property {string} [blockName]
      * @property {string} [distributionPoints]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
           name: names.distributionPoints || EMPTY_STRING,
-          value: DistributionPoint.schema()
-        })
-      ]
+          value: DistributionPoint.schema(),
+        }),
+      ],
     });
   }
 
@@ -104,29 +96,26 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
       schema,
       CRLDistributionPoints.schema({
         names: {
-          distributionPoints: DISTRIBUTION_POINTS
-        }
-      })
+          distributionPoints: DISTRIBUTION_POINTS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.distributionPoints = Array.from(
-      asn1.result.distributionPoints,
-      element => new DistributionPoint({ schema: element })
-    );
+    this.distributionPoints = Array.from(asn1.result.distributionPoints, (element) => new DistributionPoint({ schema: element }));
   }
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: Array.from(this.distributionPoints, o => o.toSchema())
+      value: Array.from(this.distributionPoints, (o) => o.toSchema()),
     });
   }
 
   public toJSON(): CRLDistributionPointsJson {
     return {
-      distributionPoints: Array.from(this.distributionPoints, o => o.toJSON())
+      distributionPoints: Array.from(this.distributionPoints, (o) => o.toJSON()),
     };
   }
 }

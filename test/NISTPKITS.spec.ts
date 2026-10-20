@@ -704,7 +704,7 @@ const PKITS: Record<string, Record<string, string>> = {
     "WrongCRLCACertforwardcrossCertificatePair.cp":
       "MIIDiaCCA4UwggOBMIICaaADAgECAgEKMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNVBAYTAlVTMR8wHQYDVQQKExZUZXN0IENlcnRpZmljYXRlcyAyMDExMRUwEwYDVQQDEwxUcnVzdCBBbmNob3IwHhcNMTAwMTAxMDgzMDAwWhcNMzAxMjMxMDgzMDAwWjBFMQswCQYDVQQGEwJVUzEfMB0GA1UEChMWVGVzdCBDZXJ0aWZpY2F0ZXMgMjAxMTEVMBMGA1UEAxMMV3JvbmcgQ1JMIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt9J2pT599t4hQofzLXjUe4LC1XSkVdtBYDyXi6UEo239X7Tf846SgVcUh3m3K71O9mui5Cu6GI6tZbXxtY6KlYmeWv9LifQlsh0hh26EwIP+Lskig6C1b/ds3hP49+8vXYIHu2/IZOLhGXvLougMwxex7VVpPNLoz0wlmumYZr/JVHdZUrMtZJyormCowNfNwAeYSjRxGcZ0uanuEfOQCJZkRn1fRtXkr9rByNR6txELXEmmd8lfNSA5pAmnvjSTatAP1A8ZIzh5AhQLQm+ouMg3Pc6a5C2TJBOouRT7v1aySJGUzvIw1sp2W+lnkT6KpFgElqotAfmNVNbt+9bAAwIDAQABo3wwejAfBgNVHSMEGDAWgBTkfV/RXJWGCCwFrr51tmWn2V2oZjAdBgNVHQ4EFgQUDCVG4Il6UQdKrzWvzZDEcg63qAYwDgYDVR0PAQH/BAQDAgEGMBcGA1UdIAQQMA4wDAYKYIZIAWUDAgEwATAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQA3SIyS3zyQLdb94umwxG0M1jCa0xRkjpO0U0Ogt1eXCE6NGM05fSryDq94dGJlO11cjzc/gpBhvdhitz4vj8GmIY1XwszcoMbh+k5Sp+PzOryPFk1p76tuXBcyCzVwjQOnER0le0W/irvggu9a35ankfZK3uck+ht46fVJMZmh7gcYhDrZd0d88Jpwtgip6OlkkPdBgE8dCVMokoXaJ8wAXRBqha2O84Q0FFCvyx+YOpaWLEKFmkwNkxGEsdQuIBLbYCiqqX7K56H8b4eBU5oD+sHyIPwKzGi3bcxAzeSiKOd04WDMMYyFMl/ARD3o1cv4mm26hw/DMpY7MuJ4xhjD",
     "WrongCRLCACertreversecrossCertificatePair.cp":
-      "MIIDiaGCA4UwggOBMIICaaADAgECAgEKMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNVBAYTAlVTMR8wHQYDVQQKExZUZXN0IENlcnRpZmljYXRlcyAyMDExMRUwEwYDVQQDEwxUcnVzdCBBbmNob3IwHhcNMTAwMTAxMDgzMDAwWhcNMzAxMjMxMDgzMDAwWjBFMQswCQYDVQQGEwJVUzEfMB0GA1UEChMWVGVzdCBDZXJ0aWZpY2F0ZXMgMjAxMTEVMBMGA1UEAxMMV3JvbmcgQ1JMIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt9J2pT599t4hQofzLXjUe4LC1XSkVdtBYDyXi6UEo239X7Tf846SgVcUh3m3K71O9mui5Cu6GI6tZbXxtY6KlYmeWv9LifQlsh0hh26EwIP+Lskig6C1b/ds3hP49+8vXYIHu2/IZOLhGXvLougMwxex7VVpPNLoz0wlmumYZr/JVHdZUrMtZJyormCowNfNwAeYSjRxGcZ0uanuEfOQCJZkRn1fRtXkr9rByNR6txELXEmmd8lfNSA5pAmnvjSTatAP1A8ZIzh5AhQLQm+ouMg3Pc6a5C2TJBOouRT7v1aySJGUzvIw1sp2W+lnkT6KpFgElqotAfmNVNbt+9bAAwIDAQABo3wwejAfBgNVHSMEGDAWgBTkfV/RXJWGCCwFrr51tmWn2V2oZjAdBgNVHQ4EFgQUDCVG4Il6UQdKrzWvzZDEcg63qAYwDgYDVR0PAQH/BAQDAgEGMBcGA1UdIAQQMA4wDAYKYIZIAWUDAgEwATAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQA3SIyS3zyQLdb94umwxG0M1jCa0xRkjpO0U0Ogt1eXCE6NGM05fSryDq94dGJlO11cjzc/gpBhvdhitz4vj8GmIY1XwszcoMbh+k5Sp+PzOryPFk1p76tuXBcyCzVwjQOnER0le0W/irvggu9a35ankfZK3uck+ht46fVJMZmh7gcYhDrZd0d88Jpwtgip6OlkkPdBgE8dCVMokoXaJ8wAXRBqha2O84Q0FFCvyx+YOpaWLEKFmkwNkxGEsdQuIBLbYCiqqX7K56H8b4eBU5oD+sHyIPwKzGi3bcxAzeSiKOd04WDMMYyFMl/ARD3o1cv4mm26hw/DMpY7MuJ4xhjD"
+      "MIIDiaGCA4UwggOBMIICaaADAgECAgEKMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNVBAYTAlVTMR8wHQYDVQQKExZUZXN0IENlcnRpZmljYXRlcyAyMDExMRUwEwYDVQQDEwxUcnVzdCBBbmNob3IwHhcNMTAwMTAxMDgzMDAwWhcNMzAxMjMxMDgzMDAwWjBFMQswCQYDVQQGEwJVUzEfMB0GA1UEChMWVGVzdCBDZXJ0aWZpY2F0ZXMgMjAxMTEVMBMGA1UEAxMMV3JvbmcgQ1JMIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt9J2pT599t4hQofzLXjUe4LC1XSkVdtBYDyXi6UEo239X7Tf846SgVcUh3m3K71O9mui5Cu6GI6tZbXxtY6KlYmeWv9LifQlsh0hh26EwIP+Lskig6C1b/ds3hP49+8vXYIHu2/IZOLhGXvLougMwxex7VVpPNLoz0wlmumYZr/JVHdZUrMtZJyormCowNfNwAeYSjRxGcZ0uanuEfOQCJZkRn1fRtXkr9rByNR6txELXEmmd8lfNSA5pAmnvjSTatAP1A8ZIzh5AhQLQm+ouMg3Pc6a5C2TJBOouRT7v1aySJGUzvIw1sp2W+lnkT6KpFgElqotAfmNVNbt+9bAAwIDAQABo3wwejAfBgNVHSMEGDAWgBTkfV/RXJWGCCwFrr51tmWn2V2oZjAdBgNVHQ4EFgQUDCVG4Il6UQdKrzWvzZDEcg63qAYwDgYDVR0PAQH/BAQDAgEGMBcGA1UdIAQQMA4wDAYKYIZIAWUDAgEwATAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQA3SIyS3zyQLdb94umwxG0M1jCa0xRkjpO0U0Ogt1eXCE6NGM05fSryDq94dGJlO11cjzc/gpBhvdhitz4vj8GmIY1XwszcoMbh+k5Sp+PzOryPFk1p76tuXBcyCzVwjQOnER0le0W/irvggu9a35ankfZK3uck+ht46fVJMZmh7gcYhDrZd0d88Jpwtgip6OlkkPdBgE8dCVMokoXaJ8wAXRBqha2O84Q0FFCvyx+YOpaWLEKFmkwNkxGEsdQuIBLbYCiqqX7K56H8b4eBU5oD+sHyIPwKzGi3bcxAzeSiKOd04WDMMYyFMl/ARD3o1cv4mm26hw/DMpY7MuJ4xhjD",
   },
   certs: {
     "AllCertificatesanyPolicyTest11EE.crt":
@@ -1512,7 +1512,7 @@ const PKITS: Record<string, Record<string, string>> = {
     "ValidUTF8StringEncodedNamesTest9EE.crt":
       "MIIDmDCCAoCgAwIBAgIBATANBgkqhkiG9w0BAQsFADBGMQswCQYDVQQGEwJVUzEfMB0GA1UECgwWVGVzdCBDZXJ0aWZpY2F0ZXMgMjAxMTEWMBQGA1UEAwwNVVRGOFN0cmluZyBDQTAeFw0xMDAxMDEwODMwMDBaFw0zMDEyMzEwODMwMDBaMGwxCzAJBgNVBAYTAlVTMR8wHQYDVQQKDBZUZXN0IENlcnRpZmljYXRlcyAyMDExMTwwOgYDVQQDDDNWYWxpZCBVVEY4U3RyaW5nIEVuY29kZWQgTmFtZXMgRUUgQ2VydGlmaWNhdGUgVGVzdDkwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDiQyHe+Qlww7JGF56OLnXVa6/PwDW5nMyghTVjB/9SVbOF2cOOtFS/pGw9Qbc42wajSZuKP0tEBph0SkZlyhpyHwcGn2UMrWolAnAGDugxr83ijb/AElL+Orzm5lxPcuVG8+D1w9EW7JOqI4iwhHe70XKdM5RaGRzQpQmfvGMuj6VsMUJaIv+9/5RLycevwNEZl3yiLTV6APuihoI8LQQc9C+YQfAzRqz+e9adZIBayMhshpAJtgZ9pdNRPiUXt/NDw4jSbHp+fABs3x0i5GMDGBQMI44rUVY4odIM7GcIFZ14HyLY0stkp2PsHCvmd2DBS9QbCA7rWhHu8gcdQ021AgMBAAGjazBpMB8GA1UdIwQYMBaAFDtnW0TyDadIfXMpjJOf1STjEmAmMB0GA1UdDgQWBBS4qOG97iGSGhivTSqPnNsjcsGavzAOBgNVHQ8BAf8EBAMCBPAwFwYDVR0gBBAwDjAMBgpghkgBZQMCATABMA0GCSqGSIb3DQEBCwUAA4IBAQAeayInZVW7XoaTBtQWUmvNBO3bMOq/FsCioTns6lSZp3JeTMG0yj6HmxJGNLuDNMzcfN88piQ7sfvNf+lcWb0gwdB2HXWTU4TcpAHUkn83Fid9og3gZv4YDh+fIQtcaL4/Yja0cSDiy/OYHvV3ehEuTAnMPh8Utd5UI72eFwznL+7lFdJMp6IMTa0GD5iVjkYDSOE8CBFv1vyFZOpiM3US56Kuo93VQdDUSXZdbHphgddospcnlW1fQ4wvMUTZpXeqcbu0kDqNIM10ooUbnkpa8Zsf1aOdna1p3GcFyJTdpKiellXrtc52azNxwHgPwvchG4k9RqHAGNJlDwsEHMB2",
     "WrongCRLCACert.crt":
-      "MIIDgTCCAmmgAwIBAgIBCjANBgkqhkiG9w0BAQsFADBFMQswCQYDVQQGEwJVUzEfMB0GA1UEChMWVGVzdCBDZXJ0aWZpY2F0ZXMgMjAxMTEVMBMGA1UEAxMMVHJ1c3QgQW5jaG9yMB4XDTEwMDEwMTA4MzAwMFoXDTMwMTIzMTA4MzAwMFowRTELMAkGA1UEBhMCVVMxHzAdBgNVBAoTFlRlc3QgQ2VydGlmaWNhdGVzIDIwMTExFTATBgNVBAMTDFdyb25nIENSTCBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALfSdqU+ffbeIUKH8y141HuCwtV0pFXbQWA8l4ulBKNt/V+03/OOkoFXFId5tyu9TvZrouQruhiOrWW18bWOipWJnlr/S4n0JbIdIYduhMCD/i7JIoOgtW/3bN4T+PfvL12CB7tvyGTi4Rl7y6LoDMMXse1VaTzS6M9MJZrpmGa/yVR3WVKzLWScqK5gqMDXzcAHmEo0cRnGdLmp7hHzkAiWZEZ9X0bV5K/awcjUercRC1xJpnfJXzUgOaQJp740k2rQD9QPGSM4eQIUC0JvqLjINz3OmuQtkyQTqLkU+79WskiRlM7yMNbKdlvpZ5E+iqRYBJaqLQH5jVTW7fvWwAMCAwEAAaN8MHowHwYDVR0jBBgwFoAU5H1f0VyVhggsBa6+dbZlp9ldqGYwHQYDVR0OBBYEFAwlRuCJelEHSq81r82QxHIOt6gGMA4GA1UdDwEB/wQEAwIBBjAXBgNVHSAEEDAOMAwGCmCGSAFlAwIBMAEwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAN0iMkt88kC3W/eLpsMRtDNYwmtMUZI6TtFNDoLdXlwhOjRjNOX0q8g6veHRiZTtdXI83P4KQYb3YYrc+L4/BpiGNV8LM3KDG4fpOUqfj8zq8jxZNae+rblwXMgs1cI0DpxEdJXtFv4q74ILvWt+Wp5H2St7nJPobeOn1STGZoe4HGIQ62XdHfPCacLYIqejpZJD3QYBPHQlTKJKF2ifMAF0QaoWtjvOENBRQr8sfmDqWlixChZpMDZMRhLHULiAS22Aoqql+yueh/G+HgVOaA/rB8iD8Csxot23MQM3koijndOFgzDGMhTJfwEQ96NXL+JptuocPwzKWOzLieMYYw8=="
+      "MIIDgTCCAmmgAwIBAgIBCjANBgkqhkiG9w0BAQsFADBFMQswCQYDVQQGEwJVUzEfMB0GA1UEChMWVGVzdCBDZXJ0aWZpY2F0ZXMgMjAxMTEVMBMGA1UEAxMMVHJ1c3QgQW5jaG9yMB4XDTEwMDEwMTA4MzAwMFoXDTMwMTIzMTA4MzAwMFowRTELMAkGA1UEBhMCVVMxHzAdBgNVBAoTFlRlc3QgQ2VydGlmaWNhdGVzIDIwMTExFTATBgNVBAMTDFdyb25nIENSTCBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALfSdqU+ffbeIUKH8y141HuCwtV0pFXbQWA8l4ulBKNt/V+03/OOkoFXFId5tyu9TvZrouQruhiOrWW18bWOipWJnlr/S4n0JbIdIYduhMCD/i7JIoOgtW/3bN4T+PfvL12CB7tvyGTi4Rl7y6LoDMMXse1VaTzS6M9MJZrpmGa/yVR3WVKzLWScqK5gqMDXzcAHmEo0cRnGdLmp7hHzkAiWZEZ9X0bV5K/awcjUercRC1xJpnfJXzUgOaQJp740k2rQD9QPGSM4eQIUC0JvqLjINz3OmuQtkyQTqLkU+79WskiRlM7yMNbKdlvpZ5E+iqRYBJaqLQH5jVTW7fvWwAMCAwEAAaN8MHowHwYDVR0jBBgwFoAU5H1f0VyVhggsBa6+dbZlp9ldqGYwHQYDVR0OBBYEFAwlRuCJelEHSq81r82QxHIOt6gGMA4GA1UdDwEB/wQEAwIBBjAXBgNVHSAEEDAOMAwGCmCGSAFlAwIBMAEwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAN0iMkt88kC3W/eLpsMRtDNYwmtMUZI6TtFNDoLdXlwhOjRjNOX0q8g6veHRiZTtdXI83P4KQYb3YYrc+L4/BpiGNV8LM3KDG4fpOUqfj8zq8jxZNae+rblwXMgs1cI0DpxEdJXtFv4q74ILvWt+Wp5H2St7nJPobeOn1STGZoe4HGIQ62XdHfPCacLYIqejpZJD3QYBPHQlTKJKF2ifMAF0QaoWtjvOENBRQr8sfmDqWlixChZpMDZMRhLHULiAS22Aoqql+yueh/G+HgVOaA/rB8iD8Csxot23MQM3koijndOFgzDGMhTJfwEQ96NXL+JptuocPwzKWOzLieMYYw8==",
   },
   crls: {
     "anyPolicyCACRL.crl":
@@ -1859,8 +1859,8 @@ const PKITS: Record<string, Record<string, string>> = {
     "UTF8StringEncodedNamesCACRL.crl":
       "MIIBwDCBqQIBATANBgkqhkiG9w0BAQsFADBGMQswCQYDVQQGEwJVUzEfMB0GA1UECgwWVGVzdCBDZXJ0aWZpY2F0ZXMgMjAxMTEWMBQGA1UEAwwNVVRGOFN0cmluZyBDQRcNMTAwMTAxMDgzMDAwWhcNMzAxMjMxMDgzMDAwWqAvMC0wHwYDVR0jBBgwFoAUO2dbRPINp0h9cymMk5/VJOMSYCYwCgYDVR0UBAMCAQEwDQYJKoZIhvcNAQELBQADggEBAE2uI86u6pYfkenx+nHcN7B8ymkICJpPJlIqNfjteDVjwz9D2ra89nHKdXRE83ftELk0cXxN4qEuylBI+2V/WUNjll1VsTqvRSGDFu6KhjZHEjbdGHu2Z+tT7E9a72X3hxYJEDycSTlaR4OvFUWeKksPaKXt6HdhV7AQUHT9KbewgLDekpPKj1O1tjzs/NN2mt0mBqbm9dzi4oL2PezZLfEOpa1BXQR9r37HWKmDxO4SixOGNaOd+jplpzhyPDqftcMmgRZnKesEvKcXul1GRxreqhaF+dlvluKwzRgC9Z0x8iS8HyoqlCzdGy8xOuRJvqqfg0aPDn/waUA0pF7Qfwr=",
     "WrongCRLCACRL.crl":
-      "MIIB4zCBzAIBATANBgkqhkiG9w0BAQsFADBFMQswCQYDVQQGEwJVUzEfMB0GA1UEChMWVGVzdCBDZXJ0aWZpY2F0ZXMgMjAxMTEVMBMGA1UEAxMMVHJ1c3QgQW5jaG9yFw0xMDAxMDEwODMwMDBaFw0zMDEyMzEwODMwMDBaMCIwIAIBaBcNMTAwMTAxMDgzMDAwWjAMMAoGA1UdFQQDCgEBoC8wLTAfBgNVHSMEGDAWgBTkfV/RXJWGCCwFrr51tmWn2V2oZjAKBgNVHRQEAwIBATANBgkqhkiG9w0BAQsFAAOCAQEAqxkdtbsha7bhTM3wtzeelTjR1IGQgK4R8Psc2fw2NOydlq8PeSc3qitHV6m4dqHzchQlytYprOK4dRitEh+RYY4UKUNu+OQQ5VFLSvuC0Wv3xn2w29VqpQtavBFfJ8Lst9520pece6x86fB9L6VP4YNGIrLc+7hEjEDALJs+ttPoxNNXGMApQQi5xyZEksXQAo60ZdH/r95ldVCa7U2OVXO1MCuZlWQRlql0Bi3CzE26cW1jccEdU6yQ0ONKNuROR+6NsXZ2Qm2ClHEGWFJAZ/CWB7NjQ9maNkoioZb4IB2AKPKBcb0mT3TYspgT8zcZSP5DLC8iVOrcx2SLSvd35s=="
-  }
+      "MIIB4zCBzAIBATANBgkqhkiG9w0BAQsFADBFMQswCQYDVQQGEwJVUzEfMB0GA1UEChMWVGVzdCBDZXJ0aWZpY2F0ZXMgMjAxMTEVMBMGA1UEAxMMVHJ1c3QgQW5jaG9yFw0xMDAxMDEwODMwMDBaFw0zMDEyMzEwODMwMDBaMCIwIAIBaBcNMTAwMTAxMDgzMDAwWjAMMAoGA1UdFQQDCgEBoC8wLTAfBgNVHSMEGDAWgBTkfV/RXJWGCCwFrr51tmWn2V2oZjAKBgNVHRQEAwIBATANBgkqhkiG9w0BAQsFAAOCAQEAqxkdtbsha7bhTM3wtzeelTjR1IGQgK4R8Psc2fw2NOydlq8PeSc3qitHV6m4dqHzchQlytYprOK4dRitEh+RYY4UKUNu+OQQ5VFLSvuC0Wv3xn2w29VqpQtavBFfJ8Lst9520pece6x86fB9L6VP4YNGIrLc+7hEjEDALJs+ttPoxNNXGMApQQi5xyZEksXQAo60ZdH/r95ldVCa7U2OVXO1MCuZlWQRlql0Bi3CzE26cW1jccEdU6yQ0ONKNuROR+6NsXZ2Qm2ClHEGWFJAZ/CWB7NjQ9maNkoioZb4IB2AKPKBcb0mT3TYspgT8zcZSP5DLC8iVOrcx2SLSvd35s==",
+  },
 };
 
 //#endregion
@@ -1890,7 +1890,7 @@ describe("PKITS's certificates parsing test", () => {
             func(buffer);
           },
           Error,
-          "Correct convertion to CERT"
+          "Correct convertion to CERT",
         );
       };
     };
@@ -1918,7 +1918,7 @@ describe("PKITS's CRL parsing test", () => {
             func(buffer);
           },
           Error,
-          "Correct convertion to CRL"
+          "Correct convertion to CRL",
         );
       };
     };
@@ -1965,7 +1965,7 @@ describe("PKITS's certificate pairs parsing test", () => {
                 func(value.valueBlock.value[0].valueBeforeDecodeView as BufferSource);
               },
               Error,
-              `Correct convertion to CERT for ${name}`
+              `Correct convertion to CERT for ${name}`,
             );
           }
         }
@@ -2002,11 +2002,7 @@ function simpleVerification(params: {
       }
     }
 
-    assert.doesNotThrow(
-      initializeTrustedCertificates,
-      Error,
-      "Successfully initialize trusted root certificates"
-    );
+    assert.doesNotThrow(initializeTrustedCertificates, Error, "Successfully initialize trusted root certificates");
     //#endregion
 
     //#region Initialize intermediate and end entity certificates
@@ -2017,11 +2013,7 @@ function simpleVerification(params: {
       }
     }
 
-    assert.doesNotThrow(
-      initializeIntermediateCertificates,
-      Error,
-      "Successfully initialize intermediate and end entity certificates"
-    );
+    assert.doesNotThrow(initializeIntermediateCertificates, Error, "Successfully initialize intermediate and end entity certificates");
     //#endregion
 
     //#region Initialize CRLs
@@ -2038,15 +2030,13 @@ function simpleVerification(params: {
     const certChain = new pkijs.CertificateChainValidationEngine({
       trustedCerts,
       certs,
-      crls
+      crls,
     });
 
     const result = await certChain.verify(params.verifyParameters || {});
     if (params.successExpected) {
       if (!result.result) {
-        throw new Error(
-          `Successfull verification expected, but FAILED return: ${result.resultMessage}`
-        );
+        throw new Error(`Successfull verification expected, but FAILED return: ${result.resultMessage}`);
       }
     } else {
       if (result.result) throw new Error("Fail on verification expected, but SUCCESS return");
@@ -2063,8 +2053,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "ValidCertificatePathTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2073,8 +2063,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["BadSignedCACert.crt", "InvalidCASignatureTest2EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "BadSignedCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2083,8 +2073,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "InvalidEESignatureTest3EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // Currently (2015, September) WebCrypto can not handle DSA signatures
@@ -2094,22 +2084,18 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["DSACACert.crt", "ValidDSASignaturesTest4EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "DSACACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it.skip(
       "4.1.5 Valid DSA Parameter Inheritance Test5",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "DSACACert.crt",
-          "DSAParametersInheritedCACert.crt",
-          "ValidDSAParameterInheritanceTest5EE.crt"
-        ],
+        certificates: ["DSACACert.crt", "DSAParametersInheritedCACert.crt", "ValidDSAParameterInheritanceTest5EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "DSACACRL.crl", "DSAParametersInheritedCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it.skip(
@@ -2118,8 +2104,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["DSACACert.crt", "InvalidDSASignatureTest6EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "DSACACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2128,8 +2114,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["GoodCACert.crt"],
         certificates: ["ValidCertificatePathTest1EE.crt"],
         crls: ["GoodCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2138,8 +2124,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["GoodCACert.crt"],
         certificates: ["ValidCertificatePathTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
   });
   //#endregion
@@ -2152,8 +2138,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["BadnotBeforeDateCACert.crt", "InvalidCAnotBeforeDateTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "BadnotBeforeDateCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2162,8 +2148,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "InvalidEEnotBeforeDateTest2EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2172,8 +2158,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "Validpre2000UTCnotBeforeDateTest3EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2182,8 +2168,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "ValidGeneralizedTimenotBeforeDateTest4EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2192,8 +2178,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["BadnotAfterDateCACert.crt", "InvalidCAnotAfterDateTest5EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "BadnotAfterDateCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2202,8 +2188,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "InvalidEEnotAfterDateTest6EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2212,8 +2198,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "Invalidpre2000UTCEEnotAfterDateTest7EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2222,8 +2208,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "ValidGeneralizedTimenotAfterDateTest8EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
   });
   //#endregion
@@ -2236,8 +2222,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "InvalidNameChainingTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2246,8 +2232,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["NameOrderingCACert.crt", "InvalidNameChainingOrderTest2EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "NameOrderCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2256,8 +2242,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "ValidNameChainingWhitespaceTest3EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2266,8 +2252,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "ValidNameChainingWhitespaceTest4EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2276,8 +2262,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "ValidNameChainingCapitalizationTest5EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2286,47 +2272,38 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["UIDCACert.crt", "ValidNameUIDsTest6EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "UIDCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.3.7 Valid RFC3280 Mandatory Attribute Types Test7",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "RFC3280MandatoryAttributeTypesCACert.crt",
-          "ValidRFC3280MandatoryAttributeTypesTest7EE.crt"
-        ],
+        certificates: ["RFC3280MandatoryAttributeTypesCACert.crt", "ValidRFC3280MandatoryAttributeTypesTest7EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "RFC3280MandatoryAttributeTypesCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.3.8 Valid RFC3280 Optional Attribute Types Test8",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "RFC3280OptionalAttributeTypesCACert.crt",
-          "ValidRFC3280OptionalAttributeTypesTest8EE.crt"
-        ],
+        certificates: ["RFC3280OptionalAttributeTypesCACert.crt", "ValidRFC3280OptionalAttributeTypesTest8EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "RFC3280OptionalAttributeTypesCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.3.9 Valid UTF8String Encoded Names Test9",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "UTF8StringEncodedNamesCACert.crt",
-          "ValidUTF8StringEncodedNamesTest9EE.crt"
-        ],
+        certificates: ["UTF8StringEncodedNamesCACert.crt", "ValidUTF8StringEncodedNamesTest9EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "UTF8StringEncodedNamesCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // !!! PROBABLY INCORRECT TEST !!!
@@ -2334,26 +2311,20 @@ describe("NIST PKITS tests", () => {
       "4.3.10 Valid Rollover from PrintableString to UTF8String Test10",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "RolloverfromPrintableStringtoUTF8StringCACert.crt",
-          "ValidRolloverfromPrintableStringtoUTF8StringTest10EE.crt"
-        ],
+        certificates: ["RolloverfromPrintableStringtoUTF8StringCACert.crt", "ValidRolloverfromPrintableStringtoUTF8StringTest10EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "RolloverfromPrintableStringtoUTF8StringCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.3.11 Valid UTF8String Case Insensitive Match Test11",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "UTF8StringCaseInsensitiveMatchCACert.crt",
-          "ValidUTF8StringCaseInsensitiveMatchTest11EE.crt"
-        ],
+        certificates: ["UTF8StringCaseInsensitiveMatchCACert.crt", "ValidUTF8StringCaseInsensitiveMatchTest11EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "UTF8StringCaseInsensitiveMatchCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
   });
   //#endregion
@@ -2366,8 +2337,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["NoCRLCACert.crt", "InvalidMissingCRLTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2376,8 +2347,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "RevokedsubCACert.crt", "InvalidRevokedCATest2EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl", "RevokedsubCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2386,8 +2357,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["GoodCACert.crt", "InvalidRevokedEETest3EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2396,8 +2367,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["BadCRLSignatureCACert.crt", "InvalidBadCRLSignatureTest4EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "BadCRLSignatureCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2406,8 +2377,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["BadCRLIssuerNameCACert.crt", "InvalidBadCRLIssuerNameTest5EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "BadCRLIssuerNameCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2416,8 +2387,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["WrongCRLCACert.crt", "InvalidWrongCRLTest6EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "WrongCRLCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2426,21 +2397,18 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["TwoCRLsCACert.crt", "ValidTwoCRLsTest7EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "TwoCRLsCAGoodCRL.crl", "TwoCRLsCABadCRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.4.8 Invalid Unknown CRL Entry Extension Test8",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "UnknownCRLEntryExtensionCACert.crt",
-          "InvalidUnknownCRLEntryExtensionTest8EE.crt"
-        ],
+        certificates: ["UnknownCRLEntryExtensionCACert.crt", "InvalidUnknownCRLEntryExtensionTest8EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "UnknownCRLEntryExtensionCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2449,8 +2417,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["UnknownCRLExtensionCACert.crt", "InvalidUnknownCRLExtensionTest9EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "UnknownCRLExtensionCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2459,8 +2427,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["UnknownCRLExtensionCACert.crt", "InvalidUnknownCRLExtensionTest10EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "UnknownCRLExtensionCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2469,8 +2437,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["OldCRLnextUpdateCACert.crt", "InvalidOldCRLnextUpdateTest11EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "OldCRLnextUpdateCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2479,21 +2447,18 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["pre2000CRLnextUpdateCACert.crt", "Invalidpre2000CRLnextUpdateTest12EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "pre2000CRLnextUpdateCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.4.13 Valid GeneralizedTime CRL nextUpdate Test13",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "GeneralizedTimeCRLnextUpdateCACert.crt",
-          "ValidGeneralizedTimeCRLnextUpdateTest13EE.crt"
-        ],
+        certificates: ["GeneralizedTimeCRLnextUpdateCACert.crt", "ValidGeneralizedTimeCRLnextUpdateTest13EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GeneralizedTimeCRLnextUpdateCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2502,8 +2467,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["NegativeSerialNumberCACert.crt", "ValidNegativeSerialNumberTest14EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "NegativeSerialNumberCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2512,8 +2477,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["NegativeSerialNumberCACert.crt", "InvalidNegativeSerialNumberTest15EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "NegativeSerialNumberCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2522,8 +2487,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["LongSerialNumberCACert.crt", "ValidLongSerialNumberTest16EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "LongSerialNumberCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2532,8 +2497,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["LongSerialNumberCACert.crt", "ValidLongSerialNumberTest17EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "LongSerialNumberCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2542,8 +2507,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["LongSerialNumberCACert.crt", "InvalidLongSerialNumberTest18EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "LongSerialNumberCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // INVALID
@@ -2553,42 +2518,30 @@ describe("NIST PKITS tests", () => {
       "4.4.19 Valid Separate Certificate and CRL Keys Test19",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "SeparateCertificateandCRLKeysCertificateSigningCACert.crt",
-          "SeparateCertificateandCRLKeysCRLSigningCert.crt",
-          "ValidSeparateCertificateandCRLKeysTest19EE.crt"
-        ],
+        certificates: ["SeparateCertificateandCRLKeysCertificateSigningCACert.crt", "SeparateCertificateandCRLKeysCRLSigningCert.crt", "ValidSeparateCertificateandCRLKeysTest19EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "SeparateCertificateandCRLKeysCRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.4.20 Invalid Separate Certificate and CRL Keys Test20",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "SeparateCertificateandCRLKeysCertificateSigningCACert.crt",
-          "SeparateCertificateandCRLKeysCRLSigningCert.crt",
-          "InvalidSeparateCertificateandCRLKeysTest20EE.crt"
-        ],
+        certificates: ["SeparateCertificateandCRLKeysCertificateSigningCACert.crt", "SeparateCertificateandCRLKeysCRLSigningCert.crt", "InvalidSeparateCertificateandCRLKeysTest20EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "SeparateCertificateandCRLKeysCRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.4.21 Invalid Separate Certificate and CRL Keys Test21",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "SeparateCertificateandCRLKeysCA2CertificateSigningCACert.crt",
-          "SeparateCertificateandCRLKeysCA2CRLSigningCert.crt",
-          "InvalidSeparateCertificateandCRLKeysTest21EE.crt"
-        ],
+        certificates: ["SeparateCertificateandCRLKeysCA2CertificateSigningCACert.crt", "SeparateCertificateandCRLKeysCA2CRLSigningCert.crt", "InvalidSeparateCertificateandCRLKeysTest21EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "SeparateCertificateandCRLKeysCA2CRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
   });
   //#endregion
@@ -2599,82 +2552,50 @@ describe("NIST PKITS tests", () => {
       "4.5.1 Valid Basic Self-Issued Old With New Test1",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "BasicSelfIssuedNewKeyCACert.crt",
-          "BasicSelfIssuedNewKeyOldWithNewCACert.crt",
-          "ValidBasicSelfIssuedOldWithNewTest1EE.crt"
-        ],
+        certificates: ["BasicSelfIssuedNewKeyCACert.crt", "BasicSelfIssuedNewKeyOldWithNewCACert.crt", "ValidBasicSelfIssuedOldWithNewTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "BasicSelfIssuedNewKeyCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.5.2 Invalid Basic Self-Issued Old With New Test2",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "BasicSelfIssuedNewKeyCACert.crt",
-          "BasicSelfIssuedNewKeyOldWithNewCACert.crt",
-          "InvalidBasicSelfIssuedOldWithNewTest2EE.crt"
-        ],
+        certificates: ["BasicSelfIssuedNewKeyCACert.crt", "BasicSelfIssuedNewKeyOldWithNewCACert.crt", "InvalidBasicSelfIssuedOldWithNewTest2EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "BasicSelfIssuedNewKeyCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.5.3 Valid Basic Self-Issued New With Old Test3",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "BasicSelfIssuedOldKeyCACert.crt",
-          "BasicSelfIssuedOldKeyNewWithOldCACert.crt",
-          "ValidBasicSelfIssuedNewWithOldTest3EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "BasicSelfIssuedOldKeyCACRL.crl",
-          "BasicSelfIssuedOldKeySelfIssuedCertCRL.crl"
-        ],
-        successExpected: true
-      })
+        certificates: ["BasicSelfIssuedOldKeyCACert.crt", "BasicSelfIssuedOldKeyNewWithOldCACert.crt", "ValidBasicSelfIssuedNewWithOldTest3EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "BasicSelfIssuedOldKeyCACRL.crl", "BasicSelfIssuedOldKeySelfIssuedCertCRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
       "4.5.4 Valid Basic Self-Issued New With Old Test4",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "BasicSelfIssuedOldKeyCACert.crt",
-          "BasicSelfIssuedOldKeyNewWithOldCACert.crt",
-          "ValidBasicSelfIssuedNewWithOldTest4EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "BasicSelfIssuedOldKeyCACRL.crl",
-          "BasicSelfIssuedOldKeySelfIssuedCertCRL.crl"
-        ],
-        successExpected: true
-      })
+        certificates: ["BasicSelfIssuedOldKeyCACert.crt", "BasicSelfIssuedOldKeyNewWithOldCACert.crt", "ValidBasicSelfIssuedNewWithOldTest4EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "BasicSelfIssuedOldKeyCACRL.crl", "BasicSelfIssuedOldKeySelfIssuedCertCRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
       "4.5.5 Invalid Basic Self-Issued New With Old Test5",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "BasicSelfIssuedOldKeyCACert.crt",
-          "BasicSelfIssuedOldKeyNewWithOldCACert.crt",
-          "InvalidBasicSelfIssuedNewWithOldTest5EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "BasicSelfIssuedOldKeyCACRL.crl",
-          "BasicSelfIssuedOldKeySelfIssuedCertCRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["BasicSelfIssuedOldKeyCACert.crt", "BasicSelfIssuedOldKeyNewWithOldCACert.crt", "InvalidBasicSelfIssuedNewWithOldTest5EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "BasicSelfIssuedOldKeyCACRL.crl", "BasicSelfIssuedOldKeySelfIssuedCertCRL.crl"],
+        successExpected: false,
+      }),
     );
 
     // INVALID
@@ -2684,54 +2605,30 @@ describe("NIST PKITS tests", () => {
       "4.5.6 Valid Basic Self-Issued CRL Signing Key Test6",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "BasicSelfIssuedCRLSigningKeyCACert.crt",
-          "BasicSelfIssuedCRLSigningKeyCRLCert.crt",
-          "ValidBasicSelfIssuedCRLSigningKeyTest6EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "BasicSelfIssuedCRLSigningKeyCACRL.crl",
-          "BasicSelfIssuedCRLSigningKeyCRLCertCRL.crl"
-        ],
-        successExpected: true
-      })
+        certificates: ["BasicSelfIssuedCRLSigningKeyCACert.crt", "BasicSelfIssuedCRLSigningKeyCRLCert.crt", "ValidBasicSelfIssuedCRLSigningKeyTest6EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "BasicSelfIssuedCRLSigningKeyCACRL.crl", "BasicSelfIssuedCRLSigningKeyCRLCertCRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
       "4.5.7 Invalid Basic Self-Issued CRL Signing Key Test7",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "BasicSelfIssuedCRLSigningKeyCACert.crt",
-          "BasicSelfIssuedCRLSigningKeyCRLCert.crt",
-          "InvalidBasicSelfIssuedCRLSigningKeyTest7EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "BasicSelfIssuedCRLSigningKeyCACRL.crl",
-          "BasicSelfIssuedCRLSigningKeyCRLCertCRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["BasicSelfIssuedCRLSigningKeyCACert.crt", "BasicSelfIssuedCRLSigningKeyCRLCert.crt", "InvalidBasicSelfIssuedCRLSigningKeyTest7EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "BasicSelfIssuedCRLSigningKeyCACRL.crl", "BasicSelfIssuedCRLSigningKeyCRLCertCRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
       "4.5.8 Invalid Basic Self-Issued CRL Signing Key Test8",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "BasicSelfIssuedCRLSigningKeyCACert.crt",
-          "BasicSelfIssuedCRLSigningKeyCRLCert.crt",
-          "InvalidBasicSelfIssuedCRLSigningKeyTest8EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "BasicSelfIssuedCRLSigningKeyCACRL.crl",
-          "BasicSelfIssuedCRLSigningKeyCRLCertCRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["BasicSelfIssuedCRLSigningKeyCACert.crt", "BasicSelfIssuedCRLSigningKeyCRLCert.crt", "InvalidBasicSelfIssuedCRLSigningKeyTest8EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "BasicSelfIssuedCRLSigningKeyCACRL.crl", "BasicSelfIssuedCRLSigningKeyCRLCertCRL.crl"],
+        successExpected: false,
+      }),
     );
   });
   //#endregion
@@ -2742,13 +2639,10 @@ describe("NIST PKITS tests", () => {
       "4.6.1 Invalid Missing basicConstraints Test1",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "MissingbasicConstraintsCACert.crt",
-          "InvalidMissingbasicConstraintsTest1EE.crt"
-        ],
+        certificates: ["MissingbasicConstraintsCACert.crt", "InvalidMissingbasicConstraintsTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "MissingbasicConstraintsCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2757,8 +2651,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["basicConstraintsCriticalcAFalseCACert.crt", "InvalidcAFalseTest2EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "basicConstraintsCriticalcAFalseCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2767,21 +2661,18 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["basicConstraintsCriticalcAFalseCACert.crt", "InvalidcAFalseTest3EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "basicConstraintsCriticalcAFalseCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.6.4 Valid basicConstraints Not Critical Test4",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "basicConstraintsNotCriticalCACert.crt",
-          "ValidbasicConstraintsNotCriticalTest4EE.crt"
-        ],
+        certificates: ["basicConstraintsNotCriticalCACert.crt", "ValidbasicConstraintsNotCriticalTest4EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "basicConstraintsNotCriticalCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // TODO: Fix later
@@ -2789,18 +2680,10 @@ describe("NIST PKITS tests", () => {
       "4.6.5 Invalid pathLenConstraint Test5",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "pathLenConstraint0CACert.crt",
-          "pathLenConstraint0subCACert.crt",
-          "InvalidpathLenConstraintTest5EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "pathLenConstraint0CACRL.crl",
-          "pathLenConstraint0subCACRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["pathLenConstraint0CACert.crt", "pathLenConstraint0subCACert.crt", "InvalidpathLenConstraintTest5EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint0CACRL.crl", "pathLenConstraint0subCACRL.crl"],
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -2808,18 +2691,10 @@ describe("NIST PKITS tests", () => {
       "4.6.6 Invalid pathLenConstraint Test6",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "pathLenConstraint0CACert.crt",
-          "pathLenConstraint0subCACert.crt",
-          "InvalidpathLenConstraintTest6EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "pathLenConstraint0CACRL.crl",
-          "pathLenConstraint0subCACRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["pathLenConstraint0CACert.crt", "pathLenConstraint0subCACert.crt", "InvalidpathLenConstraintTest6EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint0CACRL.crl", "pathLenConstraint0subCACRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2828,8 +2703,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["pathLenConstraint0CACert.crt", "ValidpathLenConstraintTest7EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint0CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2838,8 +2713,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["pathLenConstraint0CACert.crt", "ValidpathLenConstraintTest8EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint0CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // TODO: Fix later
@@ -2847,20 +2722,10 @@ describe("NIST PKITS tests", () => {
       "4.6.9 Invalid pathLenConstraint Test9",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "pathLenConstraint6CACert.crt",
-          "pathLenConstraint6subCA0Cert.crt",
-          "pathLenConstraint6subsubCA00Cert.crt",
-          "InvalidpathLenConstraintTest9EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "pathLenConstraint6CACRL.crl",
-          "pathLenConstraint6subCA0CRL.crl",
-          "pathLenConstraint6subsubCA00CRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["pathLenConstraint6CACert.crt", "pathLenConstraint6subCA0Cert.crt", "pathLenConstraint6subsubCA00Cert.crt", "InvalidpathLenConstraintTest9EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint6CACRL.crl", "pathLenConstraint6subCA0CRL.crl", "pathLenConstraint6subsubCA00CRL.crl"],
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -2868,20 +2733,10 @@ describe("NIST PKITS tests", () => {
       "4.6.10 Invalid pathLenConstraint Test10",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "pathLenConstraint6CACert.crt",
-          "pathLenConstraint6subCA0Cert.crt",
-          "pathLenConstraint6subsubCA00Cert.crt",
-          "InvalidpathLenConstraintTest10EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "pathLenConstraint6CACRL.crl",
-          "pathLenConstraint6subCA0CRL.crl",
-          "pathLenConstraint6subsubCA00CRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["pathLenConstraint6CACert.crt", "pathLenConstraint6subCA0Cert.crt", "pathLenConstraint6subsubCA00Cert.crt", "InvalidpathLenConstraintTest10EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint6CACRL.crl", "pathLenConstraint6subCA0CRL.crl", "pathLenConstraint6subsubCA00CRL.crl"],
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -2894,17 +2749,11 @@ describe("NIST PKITS tests", () => {
           "pathLenConstraint6subCA1Cert.crt",
           "pathLenConstraint6subsubCA11Cert.crt",
           "pathLenConstraint6subsubsubCA11XCert.crt",
-          "InvalidpathLenConstraintTest11EE.crt"
+          "InvalidpathLenConstraintTest11EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "pathLenConstraint6CACRL.crl",
-          "pathLenConstraint6subCA1CRL.crl",
-          "pathLenConstraint6subsubCA11CRL.crl",
-          "pathLenConstraint6subsubsubCA11XCRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint6CACRL.crl", "pathLenConstraint6subCA1CRL.crl", "pathLenConstraint6subsubCA11CRL.crl", "pathLenConstraint6subsubsubCA11XCRL.crl"],
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -2917,17 +2766,11 @@ describe("NIST PKITS tests", () => {
           "pathLenConstraint6subCA1Cert.crt",
           "pathLenConstraint6subsubCA11Cert.crt",
           "pathLenConstraint6subsubsubCA11XCert.crt",
-          "InvalidpathLenConstraintTest12EE.crt"
+          "InvalidpathLenConstraintTest12EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "pathLenConstraint6CACRL.crl",
-          "pathLenConstraint6subCA1CRL.crl",
-          "pathLenConstraint6subsubCA11CRL.crl",
-          "pathLenConstraint6subsubsubCA11XCRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint6CACRL.crl", "pathLenConstraint6subCA1CRL.crl", "pathLenConstraint6subsubCA11CRL.crl", "pathLenConstraint6subsubsubCA11XCRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -2939,17 +2782,11 @@ describe("NIST PKITS tests", () => {
           "pathLenConstraint6subCA4Cert.crt",
           "pathLenConstraint6subsubCA41Cert.crt",
           "pathLenConstraint6subsubsubCA41XCert.crt",
-          "ValidpathLenConstraintTest13EE.crt"
+          "ValidpathLenConstraintTest13EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "pathLenConstraint6CACRL.crl",
-          "pathLenConstraint6subCA4CRL.crl",
-          "pathLenConstraint6subsubCA41CRL.crl",
-          "pathLenConstraint6subsubsubCA41XCRL.crl"
-        ],
-        successExpected: true
-      })
+        crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint6CACRL.crl", "pathLenConstraint6subCA4CRL.crl", "pathLenConstraint6subsubCA41CRL.crl", "pathLenConstraint6subsubsubCA41XCRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
@@ -2961,31 +2798,21 @@ describe("NIST PKITS tests", () => {
           "pathLenConstraint6subCA4Cert.crt",
           "pathLenConstraint6subsubCA41Cert.crt",
           "pathLenConstraint6subsubsubCA41XCert.crt",
-          "ValidpathLenConstraintTest14EE.crt"
+          "ValidpathLenConstraintTest14EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "pathLenConstraint6CACRL.crl",
-          "pathLenConstraint6subCA4CRL.crl",
-          "pathLenConstraint6subsubCA41CRL.crl",
-          "pathLenConstraint6subsubsubCA41XCRL.crl"
-        ],
-        successExpected: true
-      })
+        crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint6CACRL.crl", "pathLenConstraint6subCA4CRL.crl", "pathLenConstraint6subsubCA41CRL.crl", "pathLenConstraint6subsubsubCA41XCRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
       "4.6.15 Valid Self-Issued pathLenConstraint Test15",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "pathLenConstraint0CACert.crt",
-          "pathLenConstraint0SelfIssuedCACert.crt",
-          "ValidSelfIssuedpathLenConstraintTest15EE.crt"
-        ],
+        certificates: ["pathLenConstraint0CACert.crt", "pathLenConstraint0SelfIssuedCACert.crt", "ValidSelfIssuedpathLenConstraintTest15EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint0CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // TODO: Fix later
@@ -2993,19 +2820,10 @@ describe("NIST PKITS tests", () => {
       "4.6.16 Invalid Self-Issued pathLenConstraint Test16",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "pathLenConstraint0CACert.crt",
-          "pathLenConstraint0SelfIssuedCACert.crt",
-          "pathLenConstraint0subCA2Cert.crt",
-          "InvalidSelfIssuedpathLenConstraintTest16EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "pathLenConstraint0CACRL.crl",
-          "pathLenConstraint0subCA2CRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["pathLenConstraint0CACert.crt", "pathLenConstraint0SelfIssuedCACert.crt", "pathLenConstraint0subCA2Cert.crt", "InvalidSelfIssuedpathLenConstraintTest16EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint0CACRL.crl", "pathLenConstraint0subCA2CRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -3017,15 +2835,11 @@ describe("NIST PKITS tests", () => {
           "pathLenConstraint1SelfIssuedCACert.crt",
           "pathLenConstraint1subCACert.crt",
           "pathLenConstraint1SelfIssuedsubCACert.crt",
-          "ValidSelfIssuedpathLenConstraintTest17EE.crt"
+          "ValidSelfIssuedpathLenConstraintTest17EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "pathLenConstraint1CACRL.crl",
-          "pathLenConstraint1subCACRL.crl"
-        ],
-        successExpected: true
-      })
+        crls: ["TrustAnchorRootCRL.crl", "pathLenConstraint1CACRL.crl", "pathLenConstraint1subCACRL.crl"],
+        successExpected: true,
+      }),
     );
   });
   //#endregion
@@ -3036,26 +2850,20 @@ describe("NIST PKITS tests", () => {
       "4.7.1 Invalid keyUsage Critical keyCertSign False Test1",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "keyUsageCriticalkeyCertSignFalseCACert.crt",
-          "InvalidkeyUsageCriticalkeyCertSignFalseTest1EE.crt"
-        ],
+        certificates: ["keyUsageCriticalkeyCertSignFalseCACert.crt", "InvalidkeyUsageCriticalkeyCertSignFalseTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "keyUsageCriticalkeyCertSignFalseCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.7.2 Invalid keyUsage Not Critical keyCertSign False Test2",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "keyUsageNotCriticalkeyCertSignFalseCACert.crt",
-          "InvalidkeyUsageNotCriticalkeyCertSignFalseTest2EE.crt"
-        ],
+        certificates: ["keyUsageNotCriticalkeyCertSignFalseCACert.crt", "InvalidkeyUsageNotCriticalkeyCertSignFalseTest2EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "keyUsageNotCriticalkeyCertSignFalseCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -3064,34 +2872,28 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["keyUsageNotCriticalCACert.crt", "ValidkeyUsageNotCriticalTest3EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "keyUsageNotCriticalCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.7.4 Invalid keyUsage Critical cRLSign False Test4",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "keyUsageCriticalcRLSignFalseCACert.crt",
-          "InvalidkeyUsageCriticalcRLSignFalseTest4EE.crt"
-        ],
+        certificates: ["keyUsageCriticalcRLSignFalseCACert.crt", "InvalidkeyUsageCriticalcRLSignFalseTest4EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "keyUsageCriticalcRLSignFalseCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.7.5 Invalid keyUsage Not Critical cRLSign False Test5",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "keyUsageNotCriticalcRLSignFalseCACert.crt",
-          "InvalidkeyUsageNotCriticalcRLSignFalseTest5EE.crt"
-        ],
+        certificates: ["keyUsageNotCriticalcRLSignFalseCACert.crt", "InvalidkeyUsageNotCriticalcRLSignFalseTest5EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "keyUsageNotCriticalcRLSignFalseCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
   });
   //#endregion
@@ -3117,10 +2919,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["GoodCACert.crt", "ValidCertificatePathTest1EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
           verifyParameters: {
-            initialExplicitPolicy: true
+            initialExplicitPolicy: true,
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
@@ -3131,10 +2933,10 @@ describe("NIST PKITS tests", () => {
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
           verifyParameters: {
             initialExplicitPolicy: true,
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
@@ -3145,10 +2947,10 @@ describe("NIST PKITS tests", () => {
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
           verifyParameters: {
             initialExplicitPolicy: true,
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"],
           },
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
 
       it(
@@ -3159,10 +2961,10 @@ describe("NIST PKITS tests", () => {
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
           verifyParameters: {
             initialExplicitPolicy: true,
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1", "2.16.840.1.101.3.2.1.48.2"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1", "2.16.840.1.101.3.2.1.48.2"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -3173,8 +2975,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["NoPoliciesCACert.crt", "AllCertificatesNoPoliciesTest2EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "NoPoliciesCACRL.crl"],
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
@@ -3184,10 +2986,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["NoPoliciesCACert.crt", "AllCertificatesNoPoliciesTest2EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "NoPoliciesCACRL.crl"],
           verifyParameters: {
-            initialExplicitPolicy: true
+            initialExplicitPolicy: true,
           },
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -3196,49 +2998,37 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "GoodCACert.crt",
-            "PoliciesP2subCACert.crt",
-            "DifferentPoliciesTest3EE.crt"
-          ],
+          certificates: ["GoodCACert.crt", "PoliciesP2subCACert.crt", "DifferentPoliciesTest3EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl", "PoliciesP2subCACRL.crl"],
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
         "with initial-explicit-policy set",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "GoodCACert.crt",
-            "PoliciesP2subCACert.crt",
-            "DifferentPoliciesTest3EE.crt"
-          ],
+          certificates: ["GoodCACert.crt", "PoliciesP2subCACert.crt", "DifferentPoliciesTest3EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl", "PoliciesP2subCACRL.crl"],
           verifyParameters: {
-            initialExplicitPolicy: true
+            initialExplicitPolicy: true,
           },
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
 
       it(
         "with initial-explicit-policy set and initial-policy-set = {NIST-test-policy-1, NIST-test-policy-2}",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "GoodCACert.crt",
-            "PoliciesP2subCACert.crt",
-            "DifferentPoliciesTest3EE.crt"
-          ],
+          certificates: ["GoodCACert.crt", "PoliciesP2subCACert.crt", "DifferentPoliciesTest3EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl", "PoliciesP2subCACRL.crl"],
           verifyParameters: {
             initialExplicitPolicy: true,
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1", "2.16.840.1.101.3.2.1.48.2"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1", "2.16.840.1.101.3.2.1.48.2"],
           },
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -3249,8 +3039,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["GoodCACert.crt", "GoodsubCACert.crt", "DifferentPoliciesTest4EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl", "GoodsubCACRL.crl"],
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -3259,14 +3049,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "GoodCACert.crt",
-            "PoliciesP2subCA2Cert.crt",
-            "DifferentPoliciesTest5EE.crt"
-          ],
+          certificates: ["GoodCACert.crt", "PoliciesP2subCA2Cert.crt", "DifferentPoliciesTest5EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl", "PoliciesP2subCA2CRL.crl"],
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -3278,66 +3064,36 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "PoliciesP1234CACert.crt",
-            "PoliciesP1234subCAP123Cert.crt",
-            "PoliciesP1234subsubCAP123P12Cert.crt",
-            "OverlappingPoliciesTest6EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "PoliciesP1234CACRL.crl",
-            "PoliciesP1234subCAP123CRL.crl",
-            "PoliciesP1234subsubCAP123P12CRL.crl"
-          ],
-          successExpected: true
-        })
+          certificates: ["PoliciesP1234CACert.crt", "PoliciesP1234subCAP123Cert.crt", "PoliciesP1234subsubCAP123P12Cert.crt", "OverlappingPoliciesTest6EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "PoliciesP1234CACRL.crl", "PoliciesP1234subCAP123CRL.crl", "PoliciesP1234subsubCAP123P12CRL.crl"],
+          successExpected: true,
+        }),
       );
 
       it.skip(
         "with initial-policy-set = {NIST-test-policy-1}",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "PoliciesP1234CACert.crt",
-            "PoliciesP1234subCAP123Cert.crt",
-            "PoliciesP1234subsubCAP123P12Cert.crt",
-            "OverlappingPoliciesTest6EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "PoliciesP1234CACRL.crl",
-            "PoliciesP1234subCAP123CRL.crl",
-            "PoliciesP1234subsubCAP123P12CRL.crl"
-          ],
+          certificates: ["PoliciesP1234CACert.crt", "PoliciesP1234subCAP123Cert.crt", "PoliciesP1234subsubCAP123P12Cert.crt", "OverlappingPoliciesTest6EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "PoliciesP1234CACRL.crl", "PoliciesP1234subCAP123CRL.crl", "PoliciesP1234subsubCAP123P12CRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it.skip(
         "with initial-policy-set = {NIST-test-policy-2}",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "PoliciesP1234CACert.crt",
-            "PoliciesP1234subCAP123Cert.crt",
-            "PoliciesP1234subsubCAP123P12Cert.crt",
-            "OverlappingPoliciesTest6EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "PoliciesP1234CACRL.crl",
-            "PoliciesP1234subCAP123CRL.crl",
-            "PoliciesP1234subsubCAP123P12CRL.crl"
-          ],
+          certificates: ["PoliciesP1234CACert.crt", "PoliciesP1234subCAP123Cert.crt", "PoliciesP1234subsubCAP123P12Cert.crt", "OverlappingPoliciesTest6EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "PoliciesP1234CACRL.crl", "PoliciesP1234subCAP123CRL.crl", "PoliciesP1234subsubCAP123P12CRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -3346,20 +3102,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "PoliciesP123CACert.crt",
-            "PoliciesP123subCAP12Cert.crt",
-            "PoliciesP123subsubCAP12P1Cert.crt",
-            "DifferentPoliciesTest7EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "PoliciesP123CACRL.crl",
-            "PoliciesP123subCAP12CRL.crl",
-            "PoliciesP123subsubCAP12P1CRL.crl"
-          ],
-          successExpected: false
-        })
+          certificates: ["PoliciesP123CACert.crt", "PoliciesP123subCAP12Cert.crt", "PoliciesP123subsubCAP12P1Cert.crt", "DifferentPoliciesTest7EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "PoliciesP123CACRL.crl", "PoliciesP123subCAP12CRL.crl", "PoliciesP123subsubCAP12P1CRL.crl"],
+          successExpected: false,
+        }),
       );
     });
 
@@ -3368,20 +3114,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "PoliciesP12CACert.crt",
-            "PoliciesP12subCAP1Cert.crt",
-            "PoliciesP12subsubCAP1P2Cert.crt",
-            "DifferentPoliciesTest8EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "PoliciesP12CACRL.crl",
-            "PoliciesP12subCAP1CRL.crl",
-            "PoliciesP12subsubCAP1P2CRL.crl"
-          ],
-          successExpected: false
-        })
+          certificates: ["PoliciesP12CACert.crt", "PoliciesP12subCAP1Cert.crt", "PoliciesP12subsubCAP1P2Cert.crt", "DifferentPoliciesTest8EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "PoliciesP12CACRL.crl", "PoliciesP12subCAP1CRL.crl", "PoliciesP12subsubCAP1P2CRL.crl"],
+          successExpected: false,
+        }),
       );
     });
 
@@ -3390,22 +3126,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "PoliciesP123CACert.crt",
-            "PoliciesP123subCAP12Cert.crt",
-            "PoliciesP123subsubCAP12P2Cert.crt",
-            "PoliciesP123subsubsubCAP12P2P1Cert.crt",
-            "DifferentPoliciesTest9EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "PoliciesP123CACRL.crl",
-            "PoliciesP123subCAP12CRL.crl",
-            "PoliciesP123subsubCAP2P2CRL.crl",
-            "PoliciesP123subsubsubCAP12P2P1CRL.crl"
-          ],
-          successExpected: false
-        })
+          certificates: ["PoliciesP123CACert.crt", "PoliciesP123subCAP12Cert.crt", "PoliciesP123subsubCAP12P2Cert.crt", "PoliciesP123subsubsubCAP12P2P1Cert.crt", "DifferentPoliciesTest9EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "PoliciesP123CACRL.crl", "PoliciesP123subCAP12CRL.crl", "PoliciesP123subsubCAP2P2CRL.crl", "PoliciesP123subsubsubCAP12P2P1CRL.crl"],
+          successExpected: false,
+        }),
       );
     });
 
@@ -3416,8 +3140,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["PoliciesP12CACert.crt", "AllCertificatesSamePoliciesTest10EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "PoliciesP12CACRL.crl"],
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
@@ -3427,10 +3151,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["PoliciesP12CACert.crt", "AllCertificatesSamePoliciesTest10EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "PoliciesP12CACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
@@ -3440,10 +3164,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["PoliciesP12CACert.crt", "AllCertificatesSamePoliciesTest10EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "PoliciesP12CACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -3457,8 +3181,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["anyPolicyCACert.crt", "AllCertificatesanyPolicyTest11EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "anyPolicyCACRL.crl"],
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it.skip(
@@ -3468,10 +3192,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["anyPolicyCACert.crt", "AllCertificatesanyPolicyTest11EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "anyPolicyCACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -3482,8 +3206,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["PoliciesP3CACert.crt", "DifferentPoliciesTest12EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "PoliciesP3CACRL.crl"],
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -3495,10 +3219,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["PoliciesP123CACert.crt", "AllCertificatesSamePoliciesTest13EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "PoliciesP123CACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
@@ -3508,10 +3232,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["PoliciesP123CACert.crt", "AllCertificatesSamePoliciesTest13EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "PoliciesP123CACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
@@ -3521,10 +3245,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["PoliciesP123CACert.crt", "AllCertificatesSamePoliciesTest13EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "PoliciesP123CACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.3"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.3"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -3536,10 +3260,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["anyPolicyCACert.crt", "AnyPolicyTest14EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "anyPolicyCACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
@@ -3549,10 +3273,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["anyPolicyCACert.crt", "AnyPolicyTest14EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "anyPolicyCACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"],
           },
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -3564,8 +3288,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["UserNoticeQualifierTest15EE.crt"],
           crls: ["TrustAnchorRootCRL.crl"],
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -3576,8 +3300,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["GoodCACert.crt", "UserNoticeQualifierTest16EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -3588,8 +3312,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["GoodCACert.crt", "UserNoticeQualifierTest17EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -3601,10 +3325,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["PoliciesP12CACert.crt", "UserNoticeQualifierTest18EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "PoliciesP12CACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       // I do not agree with the test because:
@@ -3619,10 +3343,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["PoliciesP12CACert.crt", "UserNoticeQualifierTest18EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "PoliciesP12CACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -3633,8 +3357,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["UserNoticeQualifierTest19EE.crt"],
           crls: ["TrustAnchorRootCRL.crl"],
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -3645,8 +3369,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["GoodCACert.crt", "CPSPointerQualifierTest20EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
@@ -3656,10 +3380,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["GoodCACert.crt", "CPSPointerQualifierTest20EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
           verifyParameters: {
-            initialExplicitPolicy: true
+            initialExplicitPolicy: true,
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
   });
@@ -3676,17 +3400,17 @@ describe("NIST PKITS tests", () => {
           "requireExplicitPolicy10subCACert.crt",
           "requireExplicitPolicy10subsubCACert.crt",
           "requireExplicitPolicy10subsubsubCACert.crt",
-          "ValidrequireExplicitPolicyTest1EE.crt"
+          "ValidrequireExplicitPolicyTest1EE.crt",
         ],
         crls: [
           "TrustAnchorRootCRL.crl",
           "requireExplicitPolicy10CACRL.crl",
           "requireExplicitPolicy10subCACRL.crl",
           "requireExplicitPolicy10subsubCACRL.crl",
-          "requireExplicitPolicy10subsubsubCACRL.crl"
+          "requireExplicitPolicy10subsubsubCACRL.crl",
         ],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -3698,17 +3422,11 @@ describe("NIST PKITS tests", () => {
           "requireExplicitPolicy5subCACert.crt",
           "requireExplicitPolicy5subsubCACert.crt",
           "requireExplicitPolicy5subsubsubCACert.crt",
-          "ValidrequireExplicitPolicyTest2EE.crt"
+          "ValidrequireExplicitPolicyTest2EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "requireExplicitPolicy5CACRL.crl",
-          "requireExplicitPolicy5subCACRL.crl",
-          "requireExplicitPolicy5subsubCACRL.crl",
-          "requireExplicitPolicy5subsubsubCACRL.crl"
-        ],
-        successExpected: true
-      })
+        crls: ["TrustAnchorRootCRL.crl", "requireExplicitPolicy5CACRL.crl", "requireExplicitPolicy5subCACRL.crl", "requireExplicitPolicy5subsubCACRL.crl", "requireExplicitPolicy5subsubsubCACRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
@@ -3720,17 +3438,11 @@ describe("NIST PKITS tests", () => {
           "requireExplicitPolicy4subCACert.crt",
           "requireExplicitPolicy4subsubCACert.crt",
           "requireExplicitPolicy4subsubsubCACert.crt",
-          "InvalidrequireExplicitPolicyTest3EE.crt"
+          "InvalidrequireExplicitPolicyTest3EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "requireExplicitPolicy4CACRL.crl",
-          "requireExplicitPolicy4subCACRL.crl",
-          "requireExplicitPolicy4subsubCACRL.crl",
-          "requireExplicitPolicy4subsubsubCACRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "requireExplicitPolicy4CACRL.crl", "requireExplicitPolicy4subCACRL.crl", "requireExplicitPolicy4subsubCACRL.crl", "requireExplicitPolicy4subsubsubCACRL.crl"],
+        successExpected: false,
+      }),
     );
 
     // I do not agree with the test because "requireExplicitPolicy0 CA Cert" set
@@ -3745,17 +3457,11 @@ describe("NIST PKITS tests", () => {
           "requireExplicitPolicy0subCACert.crt",
           "requireExplicitPolicy0subsubCACert.crt",
           "requireExplicitPolicy0subsubsubCACert.crt",
-          "ValidrequireExplicitPolicyTest4EE.crt"
+          "ValidrequireExplicitPolicyTest4EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "requireExplicitPolicy0CACRL.crl",
-          "requireExplicitPolicy0subCACRL.crl",
-          "requireExplicitPolicy0subsubCACRL.crl",
-          "requireExplicitPolicy0subsubsubCACRL.crl"
-        ],
-        successExpected: true
-      })
+        crls: ["TrustAnchorRootCRL.crl", "requireExplicitPolicy0CACRL.crl", "requireExplicitPolicy0subCACRL.crl", "requireExplicitPolicy0subsubCACRL.crl", "requireExplicitPolicy0subsubsubCACRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
@@ -3767,17 +3473,17 @@ describe("NIST PKITS tests", () => {
           "requireExplicitPolicy7subCARE2Cert.crt",
           "requireExplicitPolicy7subsubCARE2RE4Cert.crt",
           "requireExplicitPolicy7subsubsubCARE2RE4Cert.crt",
-          "InvalidrequireExplicitPolicyTest5EE.crt"
+          "InvalidrequireExplicitPolicyTest5EE.crt",
         ],
         crls: [
           "TrustAnchorRootCRL.crl",
           "requireExplicitPolicy7CACRL.crl",
           "requireExplicitPolicy7subCARE2CRL.crl",
           "requireExplicitPolicy7subsubCARE2RE4CRL.crl",
-          "requireExplicitPolicy7subsubsubCARE2RE4CRL.crl"
+          "requireExplicitPolicy7subsubsubCARE2RE4CRL.crl",
         ],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -3785,33 +3491,20 @@ describe("NIST PKITS tests", () => {
       "4.9.6 Valid Self-Issued requireExplicitPolicy Test6",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "requireExplicitPolicy2CACert.crt",
-          "requireExplicitPolicy2SelfIssuedCACert.crt",
-          "ValidSelfIssuedrequireExplicitPolicyTest6EE.crt"
-        ],
+        certificates: ["requireExplicitPolicy2CACert.crt", "requireExplicitPolicy2SelfIssuedCACert.crt", "ValidSelfIssuedrequireExplicitPolicyTest6EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "requireExplicitPolicy2CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.9.7 Invalid Self-Issued requireExplicitPolicy Test7",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "requireExplicitPolicy2CACert.crt",
-          "requireExplicitPolicy2SelfIssuedCACert.crt",
-          "requireExplicitPolicy2subCACert.crt",
-          "InvalidSelfIssuedrequireExplicitPolicyTest7EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "requireExplicitPolicy2CACRL.crl",
-          "requireExplicitPolicy2subCACRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["requireExplicitPolicy2CACert.crt", "requireExplicitPolicy2SelfIssuedCACert.crt", "requireExplicitPolicy2subCACert.crt", "InvalidSelfIssuedrequireExplicitPolicyTest7EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "requireExplicitPolicy2CACRL.crl", "requireExplicitPolicy2subCACRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -3823,15 +3516,11 @@ describe("NIST PKITS tests", () => {
           "requireExplicitPolicy2SelfIssuedCACert.crt",
           "requireExplicitPolicy2subCACert.crt",
           "requireExplicitPolicy2SelfIssuedsubCACert.crt",
-          "InvalidSelfIssuedrequireExplicitPolicyTest8EE.crt"
+          "InvalidSelfIssuedrequireExplicitPolicyTest8EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "requireExplicitPolicy2CACRL.crl",
-          "requireExplicitPolicy2subCACRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "requireExplicitPolicy2CACRL.crl", "requireExplicitPolicy2subCACRL.crl"],
+        successExpected: false,
+      }),
     );
   });
   //#endregion
@@ -3846,10 +3535,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["Mapping1to2CACert.crt", "ValidPolicyMappingTest1EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "Mapping1to2CACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
@@ -3859,10 +3548,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["Mapping1to2CACert.crt", "ValidPolicyMappingTest1EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "Mapping1to2CACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"],
           },
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -3873,8 +3562,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["Mapping1to2CACert.crt", "InvalidPolicyMappingTest2EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "Mapping1to2CACRL.crl"],
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
 
       it(
@@ -3884,10 +3573,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["Mapping1to2CACert.crt", "InvalidPolicyMappingTest2EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "Mapping1to2CACRL.crl"],
           verifyParameters: {
-            initialPolicyMappingInhibit: true
+            initialPolicyMappingInhibit: true,
           },
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -3896,46 +3585,26 @@ describe("NIST PKITS tests", () => {
         "with initial-policy-set = {NIST-test-policy-1}",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "P12Mapping1to3CACert.crt",
-            "P12Mapping1to3subCACert.crt",
-            "P12Mapping1to3subsubCACert.crt",
-            "ValidPolicyMappingTest3EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "P12Mapping1to3CACRL.crl",
-            "P12Mapping1to3subCACRL.crl",
-            "P12Mapping1to3subsubCACRL.crl"
-          ],
+          certificates: ["P12Mapping1to3CACert.crt", "P12Mapping1to3subCACert.crt", "P12Mapping1to3subsubCACert.crt", "ValidPolicyMappingTest3EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "P12Mapping1to3CACRL.crl", "P12Mapping1to3subCACRL.crl", "P12Mapping1to3subsubCACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
 
       it(
         "with initial-policy-set = {NIST-test-policy-2}",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "P12Mapping1to3CACert.crt",
-            "P12Mapping1to3subCACert.crt",
-            "P12Mapping1to3subsubCACert.crt",
-            "ValidPolicyMappingTest3EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "P12Mapping1to3CACRL.crl",
-            "P12Mapping1to3subCACRL.crl",
-            "P12Mapping1to3subsubCACRL.crl"
-          ],
+          certificates: ["P12Mapping1to3CACert.crt", "P12Mapping1to3subCACert.crt", "P12Mapping1to3subsubCACert.crt", "ValidPolicyMappingTest3EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "P12Mapping1to3CACRL.crl", "P12Mapping1to3subCACRL.crl", "P12Mapping1to3subsubCACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -3944,20 +3613,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "P12Mapping1to3CACert.crt",
-            "P12Mapping1to3subCACert.crt",
-            "P12Mapping1to3subsubCACert.crt",
-            "InvalidPolicyMappingTest4EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "P12Mapping1to3CACRL.crl",
-            "P12Mapping1to3subCACRL.crl",
-            "P12Mapping1to3subsubCACRL.crl"
-          ],
-          successExpected: false
-        })
+          certificates: ["P12Mapping1to3CACert.crt", "P12Mapping1to3subCACert.crt", "P12Mapping1to3subsubCACert.crt", "InvalidPolicyMappingTest4EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "P12Mapping1to3CACRL.crl", "P12Mapping1to3subCACRL.crl", "P12Mapping1to3subsubCACRL.crl"],
+          successExpected: false,
+        }),
       );
     });
 
@@ -3966,42 +3625,26 @@ describe("NIST PKITS tests", () => {
         "with initial-policy-set = {NIST-test-policy-1}",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "P1Mapping1to234CACert.crt",
-            "P1Mapping1to234subCACert.crt",
-            "ValidPolicyMappingTest5EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "P1Mapping1to234CACRL.crl",
-            "P1Mapping1to234subCACRL.crl"
-          ],
+          certificates: ["P1Mapping1to234CACert.crt", "P1Mapping1to234subCACert.crt", "ValidPolicyMappingTest5EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "P1Mapping1to234CACRL.crl", "P1Mapping1to234subCACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
         "with initial-policy-set = {NIST-test-policy-6}",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "P1Mapping1to234CACert.crt",
-            "P1Mapping1to234subCACert.crt",
-            "ValidPolicyMappingTest5EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "P1Mapping1to234CACRL.crl",
-            "P1Mapping1to234subCACRL.crl"
-          ],
+          certificates: ["P1Mapping1to234CACert.crt", "P1Mapping1to234subCACert.crt", "ValidPolicyMappingTest5EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "P1Mapping1to234CACRL.crl", "P1Mapping1to234subCACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.6"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.6"],
           },
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -4010,42 +3653,26 @@ describe("NIST PKITS tests", () => {
         "with initial-policy-set = {NIST-test-policy-1}",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "P1Mapping1to234CACert.crt",
-            "P1Mapping1to234subCACert.crt",
-            "ValidPolicyMappingTest6EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "P1Mapping1to234CACRL.crl",
-            "P1Mapping1to234subCACRL.crl"
-          ],
+          certificates: ["P1Mapping1to234CACert.crt", "P1Mapping1to234subCACert.crt", "ValidPolicyMappingTest6EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "P1Mapping1to234CACRL.crl", "P1Mapping1to234subCACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       it(
         "with initial-policy-set = {NIST-test-policy-6}",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "P1Mapping1to234CACert.crt",
-            "P1Mapping1to234subCACert.crt",
-            "ValidPolicyMappingTest6EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "P1Mapping1to234CACRL.crl",
-            "P1Mapping1to234subCACRL.crl"
-          ],
+          certificates: ["P1Mapping1to234CACert.crt", "P1Mapping1to234subCACert.crt", "ValidPolicyMappingTest6EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "P1Mapping1to234CACRL.crl", "P1Mapping1to234subCACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.6"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.6"],
           },
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -4054,13 +3681,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "MappingFromanyPolicyCACert.crt",
-            "InvalidMappingFromanyPolicyTest7EE.crt"
-          ],
+          certificates: ["MappingFromanyPolicyCACert.crt", "InvalidMappingFromanyPolicyTest7EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "MappingFromanyPolicyCACRL.crl"],
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -4071,8 +3695,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["MappingToanyPolicyCACert.crt", "InvalidMappingToanyPolicyTest8EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "MappingToanyPolicyCACRL.crl"],
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -4083,8 +3707,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["PanyPolicyMapping1to2CACert.crt", "ValidPolicyMappingTest9EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "PanyPolicyMapping1to2CACRL.crl"],
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -4093,18 +3717,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "GoodCACert.crt",
-            "GoodsubCAPanyPolicyMapping1to2CACert.crt",
-            "InvalidPolicyMappingTest10EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "GoodCACRL.crl",
-            "GoodsubCAPanyPolicyMapping1to2CACRL.crl"
-          ],
-          successExpected: false
-        })
+          certificates: ["GoodCACert.crt", "GoodsubCAPanyPolicyMapping1to2CACert.crt", "InvalidPolicyMappingTest10EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl", "GoodsubCAPanyPolicyMapping1to2CACRL.crl"],
+          successExpected: false,
+        }),
       );
     });
 
@@ -4113,18 +3729,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "GoodCACert.crt",
-            "GoodsubCAPanyPolicyMapping1to2CACert.crt",
-            "ValidPolicyMappingTest11EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "GoodCACRL.crl",
-            "GoodsubCAPanyPolicyMapping1to2CACRL.crl"
-          ],
-          successExpected: true
-        })
+          certificates: ["GoodCACert.crt", "GoodsubCAPanyPolicyMapping1to2CACert.crt", "ValidPolicyMappingTest11EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl", "GoodsubCAPanyPolicyMapping1to2CACRL.crl"],
+          successExpected: true,
+        }),
       );
     });
 
@@ -4136,10 +3744,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["P12Mapping1to3CACert.crt", "ValidPolicyMappingTest12EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "P12Mapping1to3CACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.1"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
 
       // I do not agree with the NIST interpretation of the test.
@@ -4152,10 +3760,10 @@ describe("NIST PKITS tests", () => {
           certificates: ["P12Mapping1to3CACert.crt", "ValidPolicyMappingTest12EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "P12Mapping1to3CACRL.crl"],
           verifyParameters: {
-            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"]
+            initialPolicySet: ["2.16.840.1.101.3.2.1.48.2"],
           },
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -4166,8 +3774,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["P1anyPolicyMapping1to2CACert.crt", "ValidPolicyMappingTest13EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "P1anyPolicyMapping1to2CACRL.crl"],
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
 
@@ -4182,8 +3790,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["P1anyPolicyMapping1to2CACert.crt", "ValidPolicyMappingTest14EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "P1anyPolicyMapping1to2CACRL.crl"],
-          successExpected: true
-        })
+          successExpected: true,
+        }),
       );
     });
   });
@@ -4195,56 +3803,30 @@ describe("NIST PKITS tests", () => {
       "4.11.1 Invalid inhibitPolicyMapping Test1",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "inhibitPolicyMapping0CACert.crt",
-          "inhibitPolicyMapping0subCACert.crt",
-          "InvalidinhibitPolicyMappingTest1EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "inhibitPolicyMapping0CACRL.crl",
-          "inhibitPolicyMapping0subCACRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["inhibitPolicyMapping0CACert.crt", "inhibitPolicyMapping0subCACert.crt", "InvalidinhibitPolicyMappingTest1EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "inhibitPolicyMapping0CACRL.crl", "inhibitPolicyMapping0subCACRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
       "4.11.2 Valid inhibitPolicyMapping Test2",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "inhibitPolicyMapping1P12CACert.crt",
-          "inhibitPolicyMapping1P12subCACert.crt",
-          "ValidinhibitPolicyMappingTest2EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "inhibitPolicyMapping1P12CACRL.crl",
-          "inhibitPolicyMapping1P12subCACRL.crl"
-        ],
-        successExpected: true
-      })
+        certificates: ["inhibitPolicyMapping1P12CACert.crt", "inhibitPolicyMapping1P12subCACert.crt", "ValidinhibitPolicyMappingTest2EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "inhibitPolicyMapping1P12CACRL.crl", "inhibitPolicyMapping1P12subCACRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
       "4.11.3 Invalid inhibitPolicyMapping Test3",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "inhibitPolicyMapping1P12CACert.crt",
-          "inhibitPolicyMapping1P12subCACert.crt",
-          "inhibitPolicyMapping1P12subsubCACert.crt",
-          "InvalidinhibitPolicyMappingTest3EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "inhibitPolicyMapping1P12CACRL.crl",
-          "inhibitPolicyMapping1P12subCACRL.crl",
-          "inhibitPolicyMapping1P12subsubCACRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["inhibitPolicyMapping1P12CACert.crt", "inhibitPolicyMapping1P12subCACert.crt", "inhibitPolicyMapping1P12subsubCACert.crt", "InvalidinhibitPolicyMappingTest3EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "inhibitPolicyMapping1P12CACRL.crl", "inhibitPolicyMapping1P12subCACRL.crl", "inhibitPolicyMapping1P12subsubCACRL.crl"],
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -4252,20 +3834,10 @@ describe("NIST PKITS tests", () => {
       "4.11.4 Valid inhibitPolicyMapping Test4",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "inhibitPolicyMapping1P12CACert.crt",
-          "inhibitPolicyMapping1P12subCACert.crt",
-          "inhibitPolicyMapping1P12subsubCACert.crt",
-          "ValidinhibitPolicyMappingTest4EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "inhibitPolicyMapping1P12CACRL.crl",
-          "inhibitPolicyMapping1P12subCACRL.crl",
-          "inhibitPolicyMapping1P12subsubCACRL.crl"
-        ],
-        successExpected: true
-      })
+        certificates: ["inhibitPolicyMapping1P12CACert.crt", "inhibitPolicyMapping1P12subCACert.crt", "inhibitPolicyMapping1P12subsubCACert.crt", "ValidinhibitPolicyMappingTest4EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "inhibitPolicyMapping1P12CACRL.crl", "inhibitPolicyMapping1P12subCACRL.crl", "inhibitPolicyMapping1P12subsubCACRL.crl"],
+        successExpected: true,
+      }),
     );
 
     // TODO: Fix later
@@ -4278,37 +3850,21 @@ describe("NIST PKITS tests", () => {
           "inhibitPolicyMapping5subCACert.crt",
           "inhibitPolicyMapping5subsubCACert.crt",
           "inhibitPolicyMapping5subsubsubCACert.crt",
-          "InvalidinhibitPolicyMappingTest5EE.crt"
+          "InvalidinhibitPolicyMappingTest5EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "inhibitPolicyMapping5CACRL.crl",
-          "inhibitPolicyMapping5subCACRL.crl",
-          "inhibitPolicyMapping5subsubCACRL.crl",
-          "inhibitPolicyMapping5subsubsubCACRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "inhibitPolicyMapping5CACRL.crl", "inhibitPolicyMapping5subCACRL.crl", "inhibitPolicyMapping5subsubCACRL.crl", "inhibitPolicyMapping5subsubsubCACRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
       "4.11.6 Invalid inhibitPolicyMapping Test6",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "inhibitPolicyMapping1P12CACert.crt",
-          "inhibitPolicyMapping1P12subCAIPM5Cert.crt",
-          "inhibitPolicyMapping1P12subsubCAIPM5Cert.crt",
-          "InvalidinhibitPolicyMappingTest6EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "inhibitPolicyMapping1P12CACRL.crl",
-          "inhibitPolicyMapping1P12subCAIPM5CRL.crl",
-          "inhibitPolicyMapping1P12subsubCAIPM5CRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["inhibitPolicyMapping1P12CACert.crt", "inhibitPolicyMapping1P12subCAIPM5Cert.crt", "inhibitPolicyMapping1P12subsubCAIPM5Cert.crt", "InvalidinhibitPolicyMappingTest6EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "inhibitPolicyMapping1P12CACRL.crl", "inhibitPolicyMapping1P12subCAIPM5CRL.crl", "inhibitPolicyMapping1P12subsubCAIPM5CRL.crl"],
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -4316,19 +3872,10 @@ describe("NIST PKITS tests", () => {
       "4.11.7 Valid Self-Issued inhibitPolicyMapping Test7",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "inhibitPolicyMapping1P1CACert.crt",
-          "inhibitPolicyMapping1P1SelfIssuedCACert.crt",
-          "inhibitPolicyMapping1P1subCACert.crt",
-          "ValidSelfIssuedinhibitPolicyMappingTest7EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "inhibitPolicyMapping1P1CACRL.crl",
-          "inhibitPolicyMapping1P1subCACRL.crl"
-        ],
-        successExpected: true
-      })
+        certificates: ["inhibitPolicyMapping1P1CACert.crt", "inhibitPolicyMapping1P1SelfIssuedCACert.crt", "inhibitPolicyMapping1P1subCACert.crt", "ValidSelfIssuedinhibitPolicyMappingTest7EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "inhibitPolicyMapping1P1CACRL.crl", "inhibitPolicyMapping1P1subCACRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
@@ -4340,16 +3887,11 @@ describe("NIST PKITS tests", () => {
           "inhibitPolicyMapping1P1SelfIssuedCACert.crt",
           "inhibitPolicyMapping1P1subCACert.crt",
           "inhibitPolicyMapping1P1subsubCACert.crt",
-          "InvalidSelfIssuedinhibitPolicyMappingTest8EE.crt"
+          "InvalidSelfIssuedinhibitPolicyMappingTest8EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "inhibitPolicyMapping1P1CACRL.crl",
-          "inhibitPolicyMapping1P1subCACRL.crl",
-          "inhibitPolicyMapping1P1subsubCACRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "inhibitPolicyMapping1P1CACRL.crl", "inhibitPolicyMapping1P1subCACRL.crl", "inhibitPolicyMapping1P1subsubCACRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -4361,16 +3903,11 @@ describe("NIST PKITS tests", () => {
           "inhibitPolicyMapping1P1SelfIssuedCACert.crt",
           "inhibitPolicyMapping1P1subCACert.crt",
           "inhibitPolicyMapping1P1subsubCACert.crt",
-          "InvalidSelfIssuedinhibitPolicyMappingTest9EE.crt"
+          "InvalidSelfIssuedinhibitPolicyMappingTest9EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "inhibitPolicyMapping1P1CACRL.crl",
-          "inhibitPolicyMapping1P1subCACRL.crl",
-          "inhibitPolicyMapping1P1subsubCACRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "inhibitPolicyMapping1P1CACRL.crl", "inhibitPolicyMapping1P1subCACRL.crl", "inhibitPolicyMapping1P1subsubCACRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -4382,15 +3919,11 @@ describe("NIST PKITS tests", () => {
           "inhibitPolicyMapping1P1SelfIssuedCACert.crt",
           "inhibitPolicyMapping1P1subCACert.crt",
           "inhibitPolicyMapping1P1SelfIssuedsubCACert.crt",
-          "InvalidSelfIssuedinhibitPolicyMappingTest10EE.crt"
+          "InvalidSelfIssuedinhibitPolicyMappingTest10EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "inhibitPolicyMapping1P1CACRL.crl",
-          "inhibitPolicyMapping1P1subCACRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "inhibitPolicyMapping1P1CACRL.crl", "inhibitPolicyMapping1P1subCACRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -4402,15 +3935,11 @@ describe("NIST PKITS tests", () => {
           "inhibitPolicyMapping1P1SelfIssuedCACert.crt",
           "inhibitPolicyMapping1P1subCACert.crt",
           "inhibitPolicyMapping1P1SelfIssuedsubCACert.crt",
-          "InvalidSelfIssuedinhibitPolicyMappingTest11EE.crt"
+          "InvalidSelfIssuedinhibitPolicyMappingTest11EE.crt",
         ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "inhibitPolicyMapping1P1CACRL.crl",
-          "inhibitPolicyMapping1P1subCACRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "inhibitPolicyMapping1P1CACRL.crl", "inhibitPolicyMapping1P1subCACRL.crl"],
+        successExpected: false,
+      }),
     );
   });
   //#endregion
@@ -4424,8 +3953,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["inhibitAnyPolicy0CACert.crt", "InvalidinhibitAnyPolicyTest1EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "inhibitAnyPolicy0CACRL.crl"],
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -4437,8 +3966,8 @@ describe("NIST PKITS tests", () => {
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
           certificates: ["inhibitAnyPolicy0CACert.crt", "ValidinhibitAnyPolicyTest2EE.crt"],
           crls: ["TrustAnchorRootCRL.crl", "inhibitAnyPolicy0CACRL.crl"],
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -4448,39 +3977,23 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "inhibitAnyPolicy1CACert.crt",
-            "inhibitAnyPolicy1subCA1Cert.crt",
-            "inhibitAnyPolicyTest3EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "inhibitAnyPolicy1CACRL.crl",
-            "inhibitAnyPolicy1subCA1CRL.crl"
-          ],
-          successExpected: true
-        })
+          certificates: ["inhibitAnyPolicy1CACert.crt", "inhibitAnyPolicy1subCA1Cert.crt", "inhibitAnyPolicyTest3EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "inhibitAnyPolicy1CACRL.crl", "inhibitAnyPolicy1subCA1CRL.crl"],
+          successExpected: true,
+        }),
       );
 
       it(
         "with initial-inhibit-any-policy set",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "inhibitAnyPolicy1CACert.crt",
-            "inhibitAnyPolicy1subCA1Cert.crt",
-            "inhibitAnyPolicyTest3EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "inhibitAnyPolicy1CACRL.crl",
-            "inhibitAnyPolicy1subCA1CRL.crl"
-          ],
+          certificates: ["inhibitAnyPolicy1CACert.crt", "inhibitAnyPolicy1subCA1Cert.crt", "inhibitAnyPolicyTest3EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "inhibitAnyPolicy1CACRL.crl", "inhibitAnyPolicy1subCA1CRL.crl"],
           verifyParameters: {
-            initialInhibitPolicy: true
+            initialInhibitPolicy: true,
           },
-          successExpected: false
-        })
+          successExpected: false,
+        }),
       );
     });
 
@@ -4489,18 +4002,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "inhibitAnyPolicy1CACert.crt",
-            "inhibitAnyPolicy1subCA1Cert.crt",
-            "InvalidinhibitAnyPolicyTest4EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "inhibitAnyPolicy1CACRL.crl",
-            "inhibitAnyPolicy1subCA1CRL.crl"
-          ],
-          successExpected: false
-        })
+          certificates: ["inhibitAnyPolicy1CACert.crt", "inhibitAnyPolicy1subCA1Cert.crt", "InvalidinhibitAnyPolicyTest4EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "inhibitAnyPolicy1CACRL.crl", "inhibitAnyPolicy1subCA1CRL.crl"],
+          successExpected: false,
+        }),
       );
     });
 
@@ -4509,20 +4014,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "inhibitAnyPolicy5CACert.crt",
-            "inhibitAnyPolicy5subCACert.crt",
-            "inhibitAnyPolicy5subsubCACert.crt",
-            "InvalidinhibitAnyPolicyTest5EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "inhibitAnyPolicy5CACRL.crl",
-            "inhibitAnyPolicy5subCACRL.crl",
-            "inhibitAnyPolicy5subsubCACRL.crl"
-          ],
-          successExpected: false
-        })
+          certificates: ["inhibitAnyPolicy5CACert.crt", "inhibitAnyPolicy5subCACert.crt", "inhibitAnyPolicy5subsubCACert.crt", "InvalidinhibitAnyPolicyTest5EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "inhibitAnyPolicy5CACRL.crl", "inhibitAnyPolicy5subCACRL.crl", "inhibitAnyPolicy5subsubCACRL.crl"],
+          successExpected: false,
+        }),
       );
     });
 
@@ -4531,18 +4026,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "inhibitAnyPolicy1CACert.crt",
-            "inhibitAnyPolicy1subCAIAP5Cert.crt",
-            "InvalidinhibitAnyPolicyTest6EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "inhibitAnyPolicy1CACRL.crl",
-            "inhibitAnyPolicy1subCAIAP5CRL.crl"
-          ],
-          successExpected: false
-        })
+          certificates: ["inhibitAnyPolicy1CACert.crt", "inhibitAnyPolicy1subCAIAP5Cert.crt", "InvalidinhibitAnyPolicyTest6EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "inhibitAnyPolicy1CACRL.crl", "inhibitAnyPolicy1subCAIAP5CRL.crl"],
+          successExpected: false,
+        }),
       );
     });
 
@@ -4552,19 +4039,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "inhibitAnyPolicy1CACert.crt",
-            "inhibitAnyPolicy1SelfIssuedCACert.crt",
-            "inhibitAnyPolicy1subCA2Cert.crt",
-            "ValidSelfIssuedinhibitAnyPolicyTest7EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "inhibitAnyPolicy1CACRL.crl",
-            "inhibitAnyPolicy1subCA2CRL.crl"
-          ],
-          successExpected: true
-        })
+          certificates: ["inhibitAnyPolicy1CACert.crt", "inhibitAnyPolicy1SelfIssuedCACert.crt", "inhibitAnyPolicy1subCA2Cert.crt", "ValidSelfIssuedinhibitAnyPolicyTest7EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "inhibitAnyPolicy1CACRL.crl", "inhibitAnyPolicy1subCA2CRL.crl"],
+          successExpected: true,
+        }),
       );
     });
 
@@ -4578,16 +4056,11 @@ describe("NIST PKITS tests", () => {
             "inhibitAnyPolicy1SelfIssuedCACert.crt",
             "inhibitAnyPolicy1subCA2Cert.crt",
             "inhibitAnyPolicy1subsubCA2Cert.crt",
-            "InvalidSelfIssuedinhibitAnyPolicyTest8EE.crt"
+            "InvalidSelfIssuedinhibitAnyPolicyTest8EE.crt",
           ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "inhibitAnyPolicy1CACRL.crl",
-            "inhibitAnyPolicy1subCA2CRL.crl",
-            "inhibitAnyPolicy1subsubCA2CRL.crl"
-          ],
-          successExpected: false
-        })
+          crls: ["TrustAnchorRootCRL.crl", "inhibitAnyPolicy1CACRL.crl", "inhibitAnyPolicy1subCA2CRL.crl", "inhibitAnyPolicy1subsubCA2CRL.crl"],
+          successExpected: false,
+        }),
       );
     });
 
@@ -4602,15 +4075,11 @@ describe("NIST PKITS tests", () => {
             "inhibitAnyPolicy1SelfIssuedCACert.crt",
             "inhibitAnyPolicy1subCA2Cert.crt",
             "inhibitAnyPolicy1SelfIssuedsubCA2Cert.crt",
-            "ValidSelfIssuedinhibitAnyPolicyTest9EE.crt"
+            "ValidSelfIssuedinhibitAnyPolicyTest9EE.crt",
           ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "inhibitAnyPolicy1CACRL.crl",
-            "inhibitAnyPolicy1subCA2CRL.crl"
-          ],
-          successExpected: true
-        })
+          crls: ["TrustAnchorRootCRL.crl", "inhibitAnyPolicy1CACRL.crl", "inhibitAnyPolicy1subCA2CRL.crl"],
+          successExpected: true,
+        }),
       );
     });
 
@@ -4619,19 +4088,10 @@ describe("NIST PKITS tests", () => {
         "with default settings",
         simpleVerification({
           trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-          certificates: [
-            "inhibitAnyPolicy1CACert.crt",
-            "inhibitAnyPolicy1SelfIssuedCACert.crt",
-            "inhibitAnyPolicy1subCA2Cert.crt",
-            "InvalidSelfIssuedinhibitAnyPolicyTest10EE.crt"
-          ],
-          crls: [
-            "TrustAnchorRootCRL.crl",
-            "inhibitAnyPolicy1CACRL.crl",
-            "inhibitAnyPolicy1subCA2CRL.crl"
-          ],
-          successExpected: false
-        })
+          certificates: ["inhibitAnyPolicy1CACert.crt", "inhibitAnyPolicy1SelfIssuedCACert.crt", "inhibitAnyPolicy1subCA2Cert.crt", "InvalidSelfIssuedinhibitAnyPolicyTest10EE.crt"],
+          crls: ["TrustAnchorRootCRL.crl", "inhibitAnyPolicy1CACRL.crl", "inhibitAnyPolicy1subCA2CRL.crl"],
+          successExpected: false,
+        }),
       );
     });
   });
@@ -4645,8 +4105,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN1CACert.crt", "ValidDNnameConstraintsTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -4655,8 +4115,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN1CACert.crt", "InvalidDNnameConstraintsTest2EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -4666,8 +4126,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN1CACert.crt", "InvalidDNnameConstraintsTest3EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -4676,8 +4136,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN1CACert.crt", "ValidDNnameConstraintsTest4EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -4686,8 +4146,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN2CACert.crt", "ValidDNnameConstraintsTest5EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN2CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -4696,8 +4156,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN3CACert.crt", "ValidDNnameConstraintsTest6EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN3CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -4706,8 +4166,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN3CACert.crt", "InvalidDNnameConstraintsTest7EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN3CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -4716,8 +4176,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN4CACert.crt", "InvalidDNnameConstraintsTest8EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN4CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -4726,8 +4186,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN4CACert.crt", "InvalidDNnameConstraintsTest9EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN4CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -4736,8 +4196,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN5CACert.crt", "InvalidDNnameConstraintsTest10EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN5CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -4746,8 +4206,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN5CACert.crt", "ValidDNnameConstraintsTest11EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN5CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // TODO: Fix later
@@ -4755,18 +4215,10 @@ describe("NIST PKITS tests", () => {
       "4.13.12 Invalid DN nameConstraints Test12",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsDN1CACert.crt",
-          "nameConstraintsDN1subCA1Cert.crt",
-          "InvalidDNnameConstraintsTest12EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "nameConstraintsDN1CACRL.crl",
-          "nameConstraintsDN1subCA1CRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["nameConstraintsDN1CACert.crt", "nameConstraintsDN1subCA1Cert.crt", "InvalidDNnameConstraintsTest12EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl", "nameConstraintsDN1subCA1CRL.crl"],
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -4774,108 +4226,60 @@ describe("NIST PKITS tests", () => {
       "4.13.13 Invalid DN nameConstraints Test13",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsDN1CACert.crt",
-          "nameConstraintsDN1subCA2Cert.crt",
-          "InvalidDNnameConstraintsTest13EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "nameConstraintsDN1CACRL.crl",
-          "nameConstraintsDN1subCA2CRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["nameConstraintsDN1CACert.crt", "nameConstraintsDN1subCA2Cert.crt", "InvalidDNnameConstraintsTest13EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl", "nameConstraintsDN1subCA2CRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
       "4.13.14 Valid DN nameConstraints Test14",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsDN1CACert.crt",
-          "nameConstraintsDN1subCA2Cert.crt",
-          "ValidDNnameConstraintsTest14EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "nameConstraintsDN1CACRL.crl",
-          "nameConstraintsDN1subCA2CRL.crl"
-        ],
-        successExpected: true
-      })
+        certificates: ["nameConstraintsDN1CACert.crt", "nameConstraintsDN1subCA2Cert.crt", "ValidDNnameConstraintsTest14EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl", "nameConstraintsDN1subCA2CRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
       "4.13.15 Invalid DN nameConstraints Test15",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsDN3CACert.crt",
-          "nameConstraintsDN3subCA1Cert.crt",
-          "InvalidDNnameConstraintsTest15EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "nameConstraintsDN3CACRL.crl",
-          "nameConstraintsDN3subCA1CRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["nameConstraintsDN3CACert.crt", "nameConstraintsDN3subCA1Cert.crt", "InvalidDNnameConstraintsTest15EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN3CACRL.crl", "nameConstraintsDN3subCA1CRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
       "4.13.16 Invalid DN nameConstraints Test16",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsDN3CACert.crt",
-          "nameConstraintsDN3subCA1Cert.crt",
-          "InvalidDNnameConstraintsTest16EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "nameConstraintsDN3CACRL.crl",
-          "nameConstraintsDN3subCA1CRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["nameConstraintsDN3CACert.crt", "nameConstraintsDN3subCA1Cert.crt", "InvalidDNnameConstraintsTest16EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN3CACRL.crl", "nameConstraintsDN3subCA1CRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
       "4.13.17 Invalid DN nameConstraints Test17",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsDN3CACert.crt",
-          "nameConstraintsDN3subCA2Cert.crt",
-          "InvalidDNnameConstraintsTest17EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "nameConstraintsDN3CACRL.crl",
-          "nameConstraintsDN3subCA2CRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["nameConstraintsDN3CACert.crt", "nameConstraintsDN3subCA2Cert.crt", "InvalidDNnameConstraintsTest17EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN3CACRL.crl", "nameConstraintsDN3subCA2CRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
       "4.13.18 Valid DN nameConstraints Test18",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsDN3CACert.crt",
-          "nameConstraintsDN3subCA2Cert.crt",
-          "ValidDNnameConstraintsTest18EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "nameConstraintsDN3CACRL.crl",
-          "nameConstraintsDN3subCA2CRL.crl"
-        ],
-        successExpected: true
-      })
+        certificates: ["nameConstraintsDN3CACert.crt", "nameConstraintsDN3subCA2Cert.crt", "ValidDNnameConstraintsTest18EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN3CACRL.crl", "nameConstraintsDN3subCA2CRL.crl"],
+        successExpected: true,
+      }),
     );
 
     // TODO: Fix later
@@ -4883,14 +4287,10 @@ describe("NIST PKITS tests", () => {
       "4.13.19 Valid Self-Issued DN nameConstraints Test19",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsDN1CACert.crt",
-          "nameConstraintsDN1SelfIssuedCACert.crt",
-          "ValidDNnameConstraintsTest19EE.crt"
-        ],
+        certificates: ["nameConstraintsDN1CACert.crt", "nameConstraintsDN1SelfIssuedCACert.crt", "ValidDNnameConstraintsTest19EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -4899,140 +4299,98 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDN1CACert.crt", "InvalidDNnameConstraintsTest20EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.13.21 Valid RFC822 nameConstraints Test21",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsRFC822CA1Cert.crt",
-          "ValidRFC822nameConstraintsTest21EE.crt"
-        ],
+        certificates: ["nameConstraintsRFC822CA1Cert.crt", "ValidRFC822nameConstraintsTest21EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsRFC822CA1CRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.13.22 Invalid RFC822 nameConstraints Test22",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsRFC822CA1Cert.crt",
-          "InvalidRFC822nameConstraintsTest22EE.crt"
-        ],
+        certificates: ["nameConstraintsRFC822CA1Cert.crt", "InvalidRFC822nameConstraintsTest22EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsRFC822CA1CRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.13.23 Valid RFC822 nameConstraints Test23",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsRFC822CA2Cert.crt",
-          "ValidRFC822nameConstraintsTest23EE.crt"
-        ],
+        certificates: ["nameConstraintsRFC822CA2Cert.crt", "ValidRFC822nameConstraintsTest23EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsRFC822CA2CRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.13.24 Invalid RFC822 nameConstraints Test24",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsRFC822CA2Cert.crt",
-          "InvalidRFC822nameConstraintsTest24EE.crt"
-        ],
+        certificates: ["nameConstraintsRFC822CA2Cert.crt", "InvalidRFC822nameConstraintsTest24EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsRFC822CA2CRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.13.25 Valid RFC822 nameConstraints Test25",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsRFC822CA3Cert.crt",
-          "ValidRFC822nameConstraintsTest25EE.crt"
-        ],
+        certificates: ["nameConstraintsRFC822CA3Cert.crt", "ValidRFC822nameConstraintsTest25EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsRFC822CA3CRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.13.26 Invalid RFC822 nameConstraints Test26",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsRFC822CA3Cert.crt",
-          "InvalidRFC822nameConstraintsTest26EE.crt"
-        ],
+        certificates: ["nameConstraintsRFC822CA3Cert.crt", "InvalidRFC822nameConstraintsTest26EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsRFC822CA3CRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.13.27 Valid DN and RFC822 nameConstraints Test27",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsDN1CACert.crt",
-          "nameConstraintsDN1subCA3Cert.crt",
-          "ValidDNandRFC822nameConstraintsTest27EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "nameConstraintsDN1CACRL.crl",
-          "nameConstraintsDN1subCA3CRL.crl"
-        ],
-        successExpected: true
-      })
+        certificates: ["nameConstraintsDN1CACert.crt", "nameConstraintsDN1subCA3Cert.crt", "ValidDNandRFC822nameConstraintsTest27EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl", "nameConstraintsDN1subCA3CRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
       "4.13.28 Invalid DN and RFC822 nameConstraints Test28",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsDN1CACert.crt",
-          "nameConstraintsDN1subCA3Cert.crt",
-          "InvalidDNandRFC822nameConstraintsTest28EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "nameConstraintsDN1CACRL.crl",
-          "nameConstraintsDN1subCA3CRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["nameConstraintsDN1CACert.crt", "nameConstraintsDN1subCA3Cert.crt", "InvalidDNandRFC822nameConstraintsTest28EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl", "nameConstraintsDN1subCA3CRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
       "4.13.29 Invalid DN and RFC822 nameConstraints Test29",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "nameConstraintsDN1CACert.crt",
-          "nameConstraintsDN1subCA3Cert.crt",
-          "InvalidDNandRFC822nameConstraintsTest29EE.crt"
-        ],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "nameConstraintsDN1CACRL.crl",
-          "nameConstraintsDN1subCA3CRL.crl"
-        ],
-        successExpected: false
-      })
+        certificates: ["nameConstraintsDN1CACert.crt", "nameConstraintsDN1subCA3Cert.crt", "InvalidDNandRFC822nameConstraintsTest29EE.crt"],
+        crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDN1CACRL.crl", "nameConstraintsDN1subCA3CRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5041,8 +4399,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDNS1CACert.crt", "ValidDNSnameConstraintsTest30EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDNS1CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5051,8 +4409,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDNS1CACert.crt", "InvalidDNSnameConstraintsTest31EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDNS1CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5061,8 +4419,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDNS2CACert.crt", "ValidDNSnameConstraintsTest32EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDNS2CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5071,8 +4429,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDNS2CACert.crt", "InvalidDNSnameConstraintsTest33EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDNS2CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5081,8 +4439,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsURI1CACert.crt", "ValidURInameConstraintsTest34EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsURI1CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5091,8 +4449,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsURI1CACert.crt", "InvalidURInameConstraintsTest35EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsURI1CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5101,8 +4459,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsURI2CACert.crt", "ValidURInameConstraintsTest36EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsURI2CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5111,8 +4469,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsURI2CACert.crt", "InvalidURInameConstraintsTest37EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsURI2CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5121,8 +4479,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["nameConstraintsDNS1CACert.crt", "InvalidDNSnameConstraintsTest38EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "nameConstraintsDNS1CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
   });
   //#endregion
@@ -5135,8 +4493,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["distributionPoint1CACert.crt", "ValiddistributionPointTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "distributionPoint1CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5145,8 +4503,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["distributionPoint1CACert.crt", "InvaliddistributionPointTest2EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "distributionPoint1CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -5156,8 +4514,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["distributionPoint1CACert.crt", "InvaliddistributionPointTest3EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "distributionPoint1CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // In the test was used "ValiddistributionPointTest4EE.crt" certificate which is incorrectly encoded (CRLDistributionPoints problem)
@@ -5167,8 +4525,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["distributionPoint1CACert.crt", "ValiddistributionPointTest4EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "distributionPoint1CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // In the test was used "ValiddistributionPointTest5EE.crt" certificate which is incorrectly encoded (CRLDistributionPoints problem)
@@ -5179,8 +4537,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["distributionPoint2CACert.crt", "ValiddistributionPointTest5EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "distributionPoint2CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // In the test used "InvaliddistributionPointTest6EE.crt" certificate which is incorrecty encoded (CRLDistributionPoints problem)
@@ -5191,8 +4549,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["distributionPoint2CACert.crt", "InvaliddistributionPointTest6EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "distributionPoint2CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // In the test was used "distributionPoint2CACRL.crl" CRL which is incorrectly encoded
@@ -5202,8 +4560,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["distributionPoint2CACert.crt", "ValiddistributionPointTest7EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "distributionPoint2CACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // In the test was used "distributionPoint2CACRL.crl" CRL which is incorrectly encoded
@@ -5213,8 +4571,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["distributionPoint2CACert.crt", "InvaliddistributionPointTest8EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "distributionPoint2CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // In the test was used "distributionPoint2CACRL.crl" CRL which is incorrectly encoded
@@ -5224,21 +4582,18 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["distributionPoint2CACert.crt", "InvaliddistributionPointTest9EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "distributionPoint2CACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.14.10 Valid No issuingDistributionPoint Test10",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "NoissuingDistributionPointCACert.crt",
-          "ValidNoissuingDistributionPointTest10EE.crt"
-        ],
+        certificates: ["NoissuingDistributionPointCACert.crt", "ValidNoissuingDistributionPointTest10EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "NoissuingDistributionPointCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5247,8 +4602,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["onlyContainsCACertsCACert.crt", "InvalidonlyContainsUserCertsTest11EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "onlyContainsCACertsCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -5258,8 +4613,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["onlyContainsCACertsCACert.crt", "InvalidonlyContainsCACertsTest12EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "onlyContainsCACertsCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5268,8 +4623,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["onlyContainsCACertsCACert.crt", "ValidonlyContainsCACertsTest13EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "onlyContainsCACertsCACRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // TODO: Fix later
@@ -5277,13 +4632,10 @@ describe("NIST PKITS tests", () => {
       "4.14.14 Invalid onlyContainsAttributeCerts Test14",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "onlyContainsAttributeCertsCACert.crt",
-          "InvalidonlyContainsAttributeCertsTest14EE.crt"
-        ],
+        certificates: ["onlyContainsAttributeCertsCACert.crt", "InvalidonlyContainsAttributeCertsTest14EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "onlyContainsAttributeCertsCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5291,13 +4643,9 @@ describe("NIST PKITS tests", () => {
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["onlySomeReasonsCA1Cert.crt", "InvalidonlySomeReasonsTest15EE.crt"],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "onlySomeReasonsCA1compromiseCRL.crl",
-          "onlySomeReasonsCA1otherreasonsCRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "onlySomeReasonsCA1compromiseCRL.crl", "onlySomeReasonsCA1otherreasonsCRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5305,13 +4653,9 @@ describe("NIST PKITS tests", () => {
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["onlySomeReasonsCA1Cert.crt", "InvalidonlySomeReasonsTest16EE.crt"],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "onlySomeReasonsCA1compromiseCRL.crl",
-          "onlySomeReasonsCA1otherreasonsCRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "onlySomeReasonsCA1compromiseCRL.crl", "onlySomeReasonsCA1otherreasonsCRL.crl"],
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -5320,13 +4664,9 @@ describe("NIST PKITS tests", () => {
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["onlySomeReasonsCA2Cert.crt", "InvalidonlySomeReasonsTest17EE.crt"],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "onlySomeReasonsCA2CRL1.crl",
-          "onlySomeReasonsCA2CRL2.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "onlySomeReasonsCA2CRL1.crl", "onlySomeReasonsCA2CRL2.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5334,13 +4674,9 @@ describe("NIST PKITS tests", () => {
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["onlySomeReasonsCA3Cert.crt", "ValidonlySomeReasonsTest18EE.crt"],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "onlySomeReasonsCA3compromiseCRL.crl",
-          "onlySomeReasonsCA3otherreasonsCRL.crl"
-        ],
-        successExpected: true
-      })
+        crls: ["TrustAnchorRootCRL.crl", "onlySomeReasonsCA3compromiseCRL.crl", "onlySomeReasonsCA3otherreasonsCRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5348,13 +4684,9 @@ describe("NIST PKITS tests", () => {
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["onlySomeReasonsCA4Cert.crt", "ValidonlySomeReasonsTest19EE.crt"],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "onlySomeReasonsCA4compromiseCRL.crl",
-          "onlySomeReasonsCA4otherreasonsCRL.crl"
-        ],
-        successExpected: true
-      })
+        crls: ["TrustAnchorRootCRL.crl", "onlySomeReasonsCA4compromiseCRL.crl", "onlySomeReasonsCA4otherreasonsCRL.crl"],
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5362,13 +4694,9 @@ describe("NIST PKITS tests", () => {
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["onlySomeReasonsCA4Cert.crt", "InvalidonlySomeReasonsTest20EE.crt"],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "onlySomeReasonsCA4compromiseCRL.crl",
-          "onlySomeReasonsCA4otherreasonsCRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "onlySomeReasonsCA4compromiseCRL.crl", "onlySomeReasonsCA4otherreasonsCRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5376,13 +4704,9 @@ describe("NIST PKITS tests", () => {
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["onlySomeReasonsCA4Cert.crt", "InvalidonlySomeReasonsTest21EE.crt"],
-        crls: [
-          "TrustAnchorRootCRL.crl",
-          "onlySomeReasonsCA4compromiseCRL.crl",
-          "onlySomeReasonsCA4otherreasonsCRL.crl"
-        ],
-        successExpected: false
-      })
+        crls: ["TrustAnchorRootCRL.crl", "onlySomeReasonsCA4compromiseCRL.crl", "onlySomeReasonsCA4otherreasonsCRL.crl"],
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5391,8 +4715,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["indirectCRLCA1Cert.crt", "ValidIDPwithindirectCRLTest22EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA1CRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5401,8 +4725,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["indirectCRLCA1Cert.crt", "InvalidIDPwithindirectCRLTest23EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA1CRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -5410,14 +4734,10 @@ describe("NIST PKITS tests", () => {
       "4.14.24 Valid IDP with indirectCRL Test24",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "indirectCRLCA2Cert.crt",
-          "indirectCRLCA1Cert.crt",
-          "ValidIDPwithindirectCRLTest24EE.crt"
-        ],
+        certificates: ["indirectCRLCA2Cert.crt", "indirectCRLCA1Cert.crt", "ValidIDPwithindirectCRLTest24EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA1CRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // TODO: Fix later
@@ -5425,28 +4745,20 @@ describe("NIST PKITS tests", () => {
       "4.14.25 Valid IDP with indirectCRL Test25",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "indirectCRLCA2Cert.crt",
-          "indirectCRLCA1Cert.crt",
-          "ValidIDPwithindirectCRLTest25EE.crt"
-        ],
+        certificates: ["indirectCRLCA2Cert.crt", "indirectCRLCA1Cert.crt", "ValidIDPwithindirectCRLTest25EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA1CRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.14.26 Invalid IDP with indirectCRL Test26",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "indirectCRLCA2Cert.crt",
-          "indirectCRLCA1Cert.crt",
-          "InvalidIDPwithindirectCRLTest26EE.crt"
-        ],
+        certificates: ["indirectCRLCA2Cert.crt", "indirectCRLCA1Cert.crt", "InvalidIDPwithindirectCRLTest26EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA1CRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5455,22 +4767,18 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["indirectCRLCA2Cert.crt", "GoodCACert.crt", "InvalidcRLIssuerTest27EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "GoodCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.14.28 Valid cRLIssuer Test28",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "indirectCRLCA3Cert.crt",
-          "indirectCRLCA3cRLIssuerCert.crt",
-          "ValidcRLIssuerTest28EE.crt"
-        ],
+        certificates: ["indirectCRLCA3Cert.crt", "indirectCRLCA3cRLIssuerCert.crt", "ValidcRLIssuerTest28EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA3CRL.crl", "indirectCRLCA3cRLIssuerCRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // In the test was used "ValidcRLIssuerTest29EE.crt" certificate which is incorrectly encoded (CRLDistributionPoints problem)
@@ -5478,14 +4786,10 @@ describe("NIST PKITS tests", () => {
       "4.14.29 Valid cRLIssuer Test29",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "indirectCRLCA3Cert.crt",
-          "indirectCRLCA3cRLIssuerCert.crt",
-          "ValidcRLIssuerTest29EE.crt"
-        ],
+        certificates: ["indirectCRLCA3Cert.crt", "indirectCRLCA3cRLIssuerCert.crt", "ValidcRLIssuerTest29EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA3CRL.crl", "indirectCRLCA3cRLIssuerCRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // TODO: Fix later
@@ -5493,42 +4797,30 @@ describe("NIST PKITS tests", () => {
       "4.14.30 Valid cRLIssuer Test30",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "indirectCRLCA4Cert.crt",
-          "indirectCRLCA4cRLIssuerCert.crt",
-          "ValidcRLIssuerTest30EE.crt"
-        ],
+        certificates: ["indirectCRLCA4Cert.crt", "indirectCRLCA4cRLIssuerCert.crt", "ValidcRLIssuerTest30EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA4cRLIssuerCRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
       "4.14.31 Invalid cRLIssuer Test31",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "indirectCRLCA5Cert.crt",
-          "indirectCRLCA6Cert.crt",
-          "InvalidcRLIssuerTest31EE.crt"
-        ],
+        certificates: ["indirectCRLCA5Cert.crt", "indirectCRLCA6Cert.crt", "InvalidcRLIssuerTest31EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA5CRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
       "4.14.32 Invalid cRLIssuer Test32",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "indirectCRLCA5Cert.crt",
-          "indirectCRLCA6Cert.crt",
-          "InvalidcRLIssuerTest32EE.crt"
-        ],
+        certificates: ["indirectCRLCA5Cert.crt", "indirectCRLCA6Cert.crt", "InvalidcRLIssuerTest32EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA5CRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -5536,14 +4828,10 @@ describe("NIST PKITS tests", () => {
       "4.14.33 Valid cRLIssuer Test33",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "indirectCRLCA5Cert.crt",
-          "indirectCRLCA6Cert.crt",
-          "ValidcRLIssuerTest33EE.crt"
-        ],
+        certificates: ["indirectCRLCA5Cert.crt", "indirectCRLCA6Cert.crt", "ValidcRLIssuerTest33EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA5CRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5552,8 +4840,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["indirectCRLCA5Cert.crt", "InvalidcRLIssuerTest34EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA5CRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -5563,8 +4851,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["indirectCRLCA5Cert.crt", "InvalidcRLIssuerTest35EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "indirectCRLCA5CRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
   });
   //#endregion
@@ -5576,13 +4864,10 @@ describe("NIST PKITS tests", () => {
       "4.15.1 Invalid deltaCRLIndicator No Base Test1",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
-        certificates: [
-          "deltaCRLIndicatorNoBaseCACert.crt",
-          "InvaliddeltaCRLIndicatorNoBaseTest1EE.crt"
-        ],
+        certificates: ["deltaCRLIndicatorNoBaseCACert.crt", "InvaliddeltaCRLIndicatorNoBaseTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "deltaCRLIndicatorNoBaseCACRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5591,8 +4876,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["deltaCRLCA1Cert.crt", "ValiddeltaCRLTest2EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "deltaCRLCA1CRL.crl", "deltaCRLCA1deltaCRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5601,8 +4886,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["deltaCRLCA1Cert.crt", "InvaliddeltaCRLTest3EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "deltaCRLCA1CRL.crl", "deltaCRLCA1deltaCRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     it(
@@ -5611,8 +4896,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["deltaCRLCA1Cert.crt", "InvaliddeltaCRLTest4EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "deltaCRLCA1CRL.crl", "deltaCRLCA1deltaCRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -5622,8 +4907,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["deltaCRLCA1Cert.crt", "ValiddeltaCRLTest5EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "deltaCRLCA1CRL.crl", "deltaCRLCA1deltaCRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5632,8 +4917,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["deltaCRLCA1Cert.crt", "InvaliddeltaCRLTest6EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "deltaCRLCA1CRL.crl", "deltaCRLCA1deltaCRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -5643,8 +4928,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["deltaCRLCA1Cert.crt", "ValiddeltaCRLTest7EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "deltaCRLCA1CRL.crl", "deltaCRLCA1deltaCRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5653,8 +4938,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["deltaCRLCA2Cert.crt", "ValiddeltaCRLTest8EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "deltaCRLCA2CRL.crl", "deltaCRLCA2deltaCRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     it(
@@ -5663,8 +4948,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["deltaCRLCA2Cert.crt", "InvaliddeltaCRLTest9EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "deltaCRLCA2CRL.crl", "deltaCRLCA2deltaCRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
 
     // TODO: Fix later
@@ -5674,8 +4959,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["deltaCRLCA3Cert.crt", "InvaliddeltaCRLTest10EE.crt"],
         crls: ["TrustAnchorRootCRL.crl", "deltaCRLCA3CRL.crl", "deltaCRLCA3deltaCRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
   });
   //#endregion
@@ -5688,8 +4973,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["ValidUnknownNotCriticalCertificateExtensionTest1EE.crt"],
         crls: ["TrustAnchorRootCRL.crl"],
-        successExpected: true
-      })
+        successExpected: true,
+      }),
     );
 
     // TODO: Fix later
@@ -5699,8 +4984,8 @@ describe("NIST PKITS tests", () => {
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
         certificates: ["InvalidUnknownCriticalCertificateExtensionTest2EE.crt"],
         crls: ["TrustAnchorRootCRL.crl"],
-        successExpected: false
-      })
+        successExpected: false,
+      }),
     );
   });
   //#endregion

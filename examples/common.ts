@@ -34,7 +34,7 @@ export function handleFileBrowse(evt: Event, cb: (file: ArrayBuffer) => void) {
   Assert.ok(currentFiles);
 
   const tempReader = new FileReader();
-  tempReader.onload = event => {
+  tempReader.onload = (event) => {
     Assert.ok(event.target);
     const file = event.target.result;
     if (!(file instanceof ArrayBuffer)) {
@@ -49,10 +49,7 @@ export function handleFileBrowse(evt: Event, cb: (file: ArrayBuffer) => void) {
 }
 
 function decodePEM(pem: string, tag = "[A-Z0-9 ]+"): ArrayBuffer[] {
-  const pattern = new RegExp(
-    `-{5}BEGIN ${tag}-{5}([a-zA-Z0-9=+\\/\\n\\r]+)-{5}END ${tag}-{5}`,
-    "g"
-  );
+  const pattern = new RegExp(`-{5}BEGIN ${tag}-{5}([a-zA-Z0-9=+\\/\\n\\r]+)-{5}END ${tag}-{5}`, "g");
 
   const res: ArrayBuffer[] = [];
   let matches: RegExpExecArray | null = null;

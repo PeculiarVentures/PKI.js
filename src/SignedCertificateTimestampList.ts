@@ -1,10 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as bs from "bytestreamjs";
-import {
-  SignedCertificateTimestamp,
-  SignedCertificateTimestampJson
-} from "./SignedCertificateTimestamp";
+import { SignedCertificateTimestamp, SignedCertificateTimestampJson } from "./SignedCertificateTimestamp";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 
@@ -18,16 +15,12 @@ export interface SignedCertificateTimestampListJson {
   timestamps: SignedCertificateTimestampJson[];
 }
 
-export type SignedCertificateTimestampListParameters = PkiObjectParameters &
-  Partial<ISignedCertificateTimestampList>;
+export type SignedCertificateTimestampListParameters = PkiObjectParameters & Partial<ISignedCertificateTimestampList>;
 
 /**
  * Represents the SignedCertificateTimestampList structure described in [RFC6962](https://datatracker.ietf.org/doc/html/rfc6962)
  */
-export class SignedCertificateTimestampList
-  extends PkiObject
-  implements ISignedCertificateTimestampList
-{
+export class SignedCertificateTimestampList extends PkiObject implements ISignedCertificateTimestampList {
   public static override CLASS_NAME = "SignedCertificateTimestampList";
 
   public timestamps!: SignedCertificateTimestamp[];
@@ -39,11 +32,7 @@ export class SignedCertificateTimestampList
   constructor(parameters: SignedCertificateTimestampListParameters = {}) {
     super();
 
-    this.timestamps = pvutils.getParametersValue(
-      parameters,
-      TIMESTAMPS,
-      SignedCertificateTimestampList.defaultValues(TIMESTAMPS)
-    );
+    this.timestamps = pvutils.getParametersValue(parameters, TIMESTAMPS, SignedCertificateTimestampList.defaultValues(TIMESTAMPS));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -87,40 +76,32 @@ export class SignedCertificateTimestampList
    *```
    */
   public static override schema(parameters: Schema.SchemaParameters = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     names.optional ??= false;
 
     return new asn1js.OctetString({
       name: names.blockName || "SignedCertificateTimestampList",
-      optional: names.optional
+      optional: names.optional,
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Check the schema is valid
     if (schema instanceof asn1js.OctetString === false) {
-      throw new Error(
-        "Object's schema was not verified against input data for SignedCertificateTimestampList"
-      );
+      throw new Error("Object's schema was not verified against input data for SignedCertificateTimestampList");
     }
     //#endregion
     //#region Get internal properties from parsed schema
     const seqStream = new bs.SeqStream({
       stream: new bs.ByteStream({
-        buffer: schema.valueBlock.valueHex
-      })
+        buffer: schema.valueBlock.valueHex,
+      }),
     });
 
     const dataLength = seqStream.getUint16();
     if (dataLength !== seqStream.length) {
-      throw new Error(
-        "Object's schema was not verified against input data for SignedCertificateTimestampList"
-      );
+      throw new Error("Object's schema was not verified against input data for SignedCertificateTimestampList");
     }
 
     while (seqStream.length) {
@@ -156,7 +137,7 @@ export class SignedCertificateTimestampList
 
   public toJSON(): SignedCertificateTimestampListJson {
     return {
-      timestamps: Array.from(this.timestamps, o => o.toJSON())
+      timestamps: Array.from(this.timestamps, (o) => o.toJSON()),
     };
   }
 }

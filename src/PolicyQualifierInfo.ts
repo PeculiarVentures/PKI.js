@@ -37,16 +37,8 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
   constructor(parameters: PolicyQualifierInfoParameters = {}) {
     super();
 
-    this.policyQualifierId = pvutils.getParametersValue(
-      parameters,
-      POLICY_QUALIFIER_ID,
-      PolicyQualifierInfo.defaultValues(POLICY_QUALIFIER_ID)
-    );
-    this.qualifier = pvutils.getParametersValue(
-      parameters,
-      QUALIFIER,
-      PolicyQualifierInfo.defaultValues(QUALIFIER)
-    );
+    this.policyQualifierId = pvutils.getParametersValue(parameters, POLICY_QUALIFIER_ID, PolicyQualifierInfo.defaultValues(POLICY_QUALIFIER_ID));
+    this.qualifier = pvutils.getParametersValue(parameters, QUALIFIER, PolicyQualifierInfo.defaultValues(QUALIFIER));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -86,21 +78,12 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
    * PolicyQualifierId ::= OBJECT IDENTIFIER ( id-qt-cps | id-qt-unotice )
    *```
    */
-  static override schema(
-    parameters: Schema.SchemaParameters<{ policyQualifierId?: string; qualifier?: string }> = {}
-  ) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+  static override schema(parameters: Schema.SchemaParameters<{ policyQualifierId?: string; qualifier?: string }> = {}) {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        new asn1js.ObjectIdentifier({ name: names.policyQualifierId || EMPTY_STRING }),
-        new asn1js.Any({ name: names.qualifier || EMPTY_STRING })
-      ]
+      value: [new asn1js.ObjectIdentifier({ name: names.policyQualifierId || EMPTY_STRING }), new asn1js.Any({ name: names.qualifier || EMPTY_STRING })],
     });
   }
 
@@ -115,9 +98,9 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
       PolicyQualifierInfo.schema({
         names: {
           policyQualifierId: POLICY_QUALIFIER_ID,
-          qualifier: QUALIFIER
-        }
-      })
+          qualifier: QUALIFIER,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -128,14 +111,14 @@ export class PolicyQualifierInfo extends PkiObject implements IPolicyQualifierIn
 
   public toSchema(): asn1js.Sequence {
     return new asn1js.Sequence({
-      value: [new asn1js.ObjectIdentifier({ value: this.policyQualifierId }), this.qualifier]
+      value: [new asn1js.ObjectIdentifier({ value: this.policyQualifierId }), this.qualifier],
     });
   }
 
   public toJSON(): PolicyQualifierInfoJson {
     return {
       policyQualifierId: this.policyQualifierId,
-      qualifier: this.qualifier.toJSON()
+      qualifier: this.qualifier.toJSON(),
     };
   }
 }

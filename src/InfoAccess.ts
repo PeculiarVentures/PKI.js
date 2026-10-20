@@ -33,11 +33,7 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
   constructor(parameters: InfoAccessParameters = {}) {
     super();
 
-    this.accessDescriptions = pvutils.getParametersValue(
-      parameters,
-      ACCESS_DESCRIPTIONS,
-      InfoAccess.defaultValues(ACCESS_DESCRIPTIONS)
-    );
+    this.accessDescriptions = pvutils.getParametersValue(parameters, ACCESS_DESCRIPTIONS, InfoAccess.defaultValues(ACCESS_DESCRIPTIONS));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -70,22 +66,18 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
   public static override schema(
     parameters: Schema.SchemaParameters<{
       accessDescriptions?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
           name: names.accessDescriptions || EMPTY_STRING,
-          value: AccessDescription.schema()
-        })
-      ]
+          value: AccessDescription.schema(),
+        }),
+      ],
     });
   }
 
@@ -99,29 +91,26 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
       schema,
       InfoAccess.schema({
         names: {
-          accessDescriptions: ACCESS_DESCRIPTIONS
-        }
-      })
+          accessDescriptions: ACCESS_DESCRIPTIONS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.accessDescriptions = Array.from(
-      asn1.result.accessDescriptions,
-      element => new AccessDescription({ schema: element })
-    );
+    this.accessDescriptions = Array.from(asn1.result.accessDescriptions, (element) => new AccessDescription({ schema: element }));
   }
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: Array.from(this.accessDescriptions, o => o.toSchema())
+      value: Array.from(this.accessDescriptions, (o) => o.toSchema()),
     });
   }
 
   public toJSON(): InfoAccessJson {
     return {
-      accessDescriptions: Array.from(this.accessDescriptions, o => o.toJSON())
+      accessDescriptions: Array.from(this.accessDescriptions, (o) => o.toJSON()),
     };
   }
 }

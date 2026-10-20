@@ -9,17 +9,13 @@ describe("P7B Simple Example", () => {
   const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
   //#endregion
 
-  signAlgs.forEach(signAlg => {
-    hashAlgs.forEach(hashAlg => {
+  signAlgs.forEach((signAlg) => {
+    hashAlgs.forEach((hashAlg) => {
       it(`${hashAlg} + ${signAlg}`, async () => {
         const cmsSignedBuffer = await example.createP7B(hashAlg, signAlg);
         const contentInfo = pkijs.ContentInfo.fromBER(cmsSignedBuffer);
 
-        assert.equal(
-          contentInfo.contentType,
-          "1.2.840.113549.1.7.2",
-          "Content Type ID must be '1.2.840.113549.1.7.2'"
-        );
+        assert.equal(contentInfo.contentType, "1.2.840.113549.1.7.2", "Content Type ID must be '1.2.840.113549.1.7.2'");
 
         const signedData = new pkijs.SignedData({ schema: contentInfo.content });
 

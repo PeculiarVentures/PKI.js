@@ -2,11 +2,7 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import {
-  OtherKeyAttribute,
-  OtherKeyAttributeJson,
-  OtherKeyAttributeSchema
-} from "./OtherKeyAttribute";
+import { OtherKeyAttribute, OtherKeyAttributeJson, OtherKeyAttributeSchema } from "./OtherKeyAttribute";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import * as Schema from "./Schema";
 
@@ -52,20 +48,12 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
   constructor(parameters: KEKIdentifierParameters = {}) {
     super();
 
-    this.keyIdentifier = pvutils.getParametersValue(
-      parameters,
-      KEY_IDENTIFIER,
-      KEKIdentifier.defaultValues(KEY_IDENTIFIER)
-    );
+    this.keyIdentifier = pvutils.getParametersValue(parameters, KEY_IDENTIFIER, KEKIdentifier.defaultValues(KEY_IDENTIFIER));
     if (DATE in parameters) {
       this.date = pvutils.getParametersValue(parameters, DATE, KEKIdentifier.defaultValues(DATE));
     }
     if (OTHER in parameters) {
-      this.other = pvutils.getParametersValue(
-        parameters,
-        OTHER,
-        KEKIdentifier.defaultValues(OTHER)
-      );
+      this.other = pvutils.getParametersValue(parameters, OTHER, KEKIdentifier.defaultValues(OTHER));
     }
 
     if (parameters.schema) {
@@ -105,19 +93,10 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
         return memberValue.isEqual(KEKIdentifier.defaultValues(KEY_IDENTIFIER));
       case DATE:
         return (
-          memberValue.year === 0 &&
-          memberValue.month === 0 &&
-          memberValue.day === 0 &&
-          memberValue.hour === 0 &&
-          memberValue.minute === 0 &&
-          memberValue.second === 0 &&
-          memberValue.millisecond === 0
+          memberValue.year === 0 && memberValue.month === 0 && memberValue.day === 0 && memberValue.hour === 0 && memberValue.minute === 0 && memberValue.second === 0 && memberValue.millisecond === 0
         );
       case OTHER:
-        return (
-          memberValue.compareWithDefault("keyAttrId", memberValue.keyAttrId) &&
-          "keyAttr" in memberValue === false
-        );
+        return memberValue.compareWithDefault("keyAttrId", memberValue.keyAttrId) && "keyAttr" in memberValue === false;
       default:
         return super.defaultValues(memberName);
     }
@@ -134,11 +113,7 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
    *```
    */
   public static override schema(parameters: KEKIdentifierSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -146,10 +121,10 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
         new asn1js.OctetString({ name: names.keyIdentifier || EMPTY_STRING }),
         new asn1js.GeneralizedTime({
           optional: true,
-          name: names.date || EMPTY_STRING
+          name: names.date || EMPTY_STRING,
         }),
-        OtherKeyAttribute.schema(names.other || {})
-      ]
+        OtherKeyAttribute.schema(names.other || {}),
+      ],
     });
   }
 
@@ -167,11 +142,11 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
           date: DATE,
           other: {
             names: {
-              blockName: OTHER
-            }
-          }
-        }
-      })
+              blockName: OTHER,
+            },
+          },
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -197,14 +172,14 @@ export class KEKIdentifier extends PkiObject implements IKEKIdentifier {
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
 
   public toJSON(): KEKIdentifierJson {
     const res: KEKIdentifierJson = {
-      keyIdentifier: this.keyIdentifier.toJSON()
+      keyIdentifier: this.keyIdentifier.toJSON(),
     };
 
     if (this.date) {

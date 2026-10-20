@@ -17,18 +17,7 @@ const EXPONENT1 = "exponent1";
 const EXPONENT2 = "exponent2";
 const COEFFICIENT = "coefficient";
 const OTHER_PRIME_INFOS = "otherPrimeInfos";
-const CLEAR_PROPS = [
-  VERSION,
-  MODULUS,
-  PUBLIC_EXPONENT,
-  PRIVATE_EXPONENT,
-  PRIME1,
-  PRIME2,
-  EXPONENT1,
-  EXPONENT2,
-  COEFFICIENT,
-  OTHER_PRIME_INFOS
-];
+const CLEAR_PROPS = [VERSION, MODULUS, PUBLIC_EXPONENT, PRIVATE_EXPONENT, PRIME1, PRIME2, EXPONENT1, EXPONENT2, COEFFICIENT, OTHER_PRIME_INFOS];
 
 export interface IRSAPrivateKey {
   version: number;
@@ -43,8 +32,7 @@ export interface IRSAPrivateKey {
   otherPrimeInfos?: OtherPrimeInfo[];
 }
 
-export type RSAPrivateKeyParameters = PkiObjectParameters &
-  Partial<IRSAPrivateKey> & { json?: RSAPrivateKeyJson };
+export type RSAPrivateKeyParameters = PkiObjectParameters & Partial<IRSAPrivateKey> & { json?: RSAPrivateKeyJson };
 
 export interface RSAPrivateKeyJson {
   n: string;
@@ -82,57 +70,17 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
   constructor(parameters: RSAPrivateKeyParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(
-      parameters,
-      VERSION,
-      RSAPrivateKey.defaultValues(VERSION)
-    );
-    this.modulus = pvutils.getParametersValue(
-      parameters,
-      MODULUS,
-      RSAPrivateKey.defaultValues(MODULUS)
-    );
-    this.publicExponent = pvutils.getParametersValue(
-      parameters,
-      PUBLIC_EXPONENT,
-      RSAPrivateKey.defaultValues(PUBLIC_EXPONENT)
-    );
-    this.privateExponent = pvutils.getParametersValue(
-      parameters,
-      PRIVATE_EXPONENT,
-      RSAPrivateKey.defaultValues(PRIVATE_EXPONENT)
-    );
-    this.prime1 = pvutils.getParametersValue(
-      parameters,
-      PRIME1,
-      RSAPrivateKey.defaultValues(PRIME1)
-    );
-    this.prime2 = pvutils.getParametersValue(
-      parameters,
-      PRIME2,
-      RSAPrivateKey.defaultValues(PRIME2)
-    );
-    this.exponent1 = pvutils.getParametersValue(
-      parameters,
-      EXPONENT1,
-      RSAPrivateKey.defaultValues(EXPONENT1)
-    );
-    this.exponent2 = pvutils.getParametersValue(
-      parameters,
-      EXPONENT2,
-      RSAPrivateKey.defaultValues(EXPONENT2)
-    );
-    this.coefficient = pvutils.getParametersValue(
-      parameters,
-      COEFFICIENT,
-      RSAPrivateKey.defaultValues(COEFFICIENT)
-    );
+    this.version = pvutils.getParametersValue(parameters, VERSION, RSAPrivateKey.defaultValues(VERSION));
+    this.modulus = pvutils.getParametersValue(parameters, MODULUS, RSAPrivateKey.defaultValues(MODULUS));
+    this.publicExponent = pvutils.getParametersValue(parameters, PUBLIC_EXPONENT, RSAPrivateKey.defaultValues(PUBLIC_EXPONENT));
+    this.privateExponent = pvutils.getParametersValue(parameters, PRIVATE_EXPONENT, RSAPrivateKey.defaultValues(PRIVATE_EXPONENT));
+    this.prime1 = pvutils.getParametersValue(parameters, PRIME1, RSAPrivateKey.defaultValues(PRIME1));
+    this.prime2 = pvutils.getParametersValue(parameters, PRIME2, RSAPrivateKey.defaultValues(PRIME2));
+    this.exponent1 = pvutils.getParametersValue(parameters, EXPONENT1, RSAPrivateKey.defaultValues(EXPONENT1));
+    this.exponent2 = pvutils.getParametersValue(parameters, EXPONENT2, RSAPrivateKey.defaultValues(EXPONENT2));
+    this.coefficient = pvutils.getParametersValue(parameters, COEFFICIENT, RSAPrivateKey.defaultValues(COEFFICIENT));
     if (OTHER_PRIME_INFOS in parameters) {
-      this.otherPrimeInfos = pvutils.getParametersValue(
-        parameters,
-        OTHER_PRIME_INFOS,
-        RSAPrivateKey.defaultValues(OTHER_PRIME_INFOS)
-      );
+      this.otherPrimeInfos = pvutils.getParametersValue(parameters, OTHER_PRIME_INFOS, RSAPrivateKey.defaultValues(OTHER_PRIME_INFOS));
     }
 
     if (parameters.json) {
@@ -219,13 +167,9 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
       coefficient?: string;
       otherPrimeInfosName?: string;
       otherPrimeInfo?: OtherPrimeInfoSchema;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -244,11 +188,11 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
           value: [
             new asn1js.Repeated({
               name: names.otherPrimeInfosName || EMPTY_STRING,
-              value: OtherPrimeInfo.schema(names.otherPrimeInfo || {})
-            })
-          ]
-        })
-      ]
+              value: OtherPrimeInfo.schema(names.otherPrimeInfo || {}),
+            }),
+          ],
+        }),
+      ],
     });
   }
 
@@ -273,11 +217,11 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
           coefficient: COEFFICIENT,
           otherPrimeInfo: {
             names: {
-              blockName: OTHER_PRIME_INFOS
-            }
-          }
-        }
-      })
+              blockName: OTHER_PRIME_INFOS,
+            },
+          },
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -292,11 +236,7 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
     this.exponent2 = asn1.result.exponent2.convertFromDER(128);
     this.coefficient = asn1.result.coefficient.convertFromDER(128);
 
-    if (OTHER_PRIME_INFOS in asn1.result)
-      this.otherPrimeInfos = Array.from(
-        asn1.result.otherPrimeInfos,
-        element => new OtherPrimeInfo({ schema: element })
-      );
+    if (OTHER_PRIME_INFOS in asn1.result) this.otherPrimeInfos = Array.from(asn1.result.otherPrimeInfos, (element) => new OtherPrimeInfo({ schema: element }));
     //#endregion
   }
 
@@ -317,15 +257,15 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
     if (this.otherPrimeInfos) {
       outputArray.push(
         new asn1js.Sequence({
-          value: Array.from(this.otherPrimeInfos, o => o.toSchema())
-        })
+          value: Array.from(this.otherPrimeInfos, (o) => o.toSchema()),
+        }),
       );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
@@ -339,10 +279,10 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
       q: pvtsutils.Convert.ToBase64Url(this.prime2.valueBlock.valueHexView),
       dp: pvtsutils.Convert.ToBase64Url(this.exponent1.valueBlock.valueHexView),
       dq: pvtsutils.Convert.ToBase64Url(this.exponent2.valueBlock.valueHexView),
-      qi: pvtsutils.Convert.ToBase64Url(this.coefficient.valueBlock.valueHexView)
+      qi: pvtsutils.Convert.ToBase64Url(this.coefficient.valueBlock.valueHexView),
     };
     if (this.otherPrimeInfos) {
-      jwk.oth = Array.from(this.otherPrimeInfos, o => o.toJSON());
+      jwk.oth = Array.from(this.otherPrimeInfos, (o) => o.toJSON());
     }
 
     return jwk;
@@ -358,7 +298,7 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
     this.modulus = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.n) });
     this.publicExponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.e) });
     this.privateExponent = new asn1js.Integer({
-      valueHex: pvtsutils.Convert.FromBase64Url(json.d)
+      valueHex: pvtsutils.Convert.FromBase64Url(json.d),
     });
     this.prime1 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.p) });
     this.prime2 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.q) });
@@ -366,10 +306,7 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
     this.exponent2 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.dq) });
     this.coefficient = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.qi) });
     if (json.oth) {
-      this.otherPrimeInfos = Array.from(
-        json.oth,
-        (element: any) => new OtherPrimeInfo({ json: element })
-      );
+      this.otherPrimeInfos = Array.from(json.oth, (element: any) => new OtherPrimeInfo({ json: element }));
     }
   }
 }

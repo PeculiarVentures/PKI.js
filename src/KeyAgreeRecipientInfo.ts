@@ -1,20 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import {
-  OriginatorIdentifierOrKey,
-  OriginatorIdentifierOrKeyJson,
-  OriginatorIdentifierOrKeySchema
-} from "./OriginatorIdentifierOrKey";
-import {
-  AlgorithmIdentifier,
-  AlgorithmIdentifierJson,
-  AlgorithmIdentifierSchema
-} from "./AlgorithmIdentifier";
-import {
-  RecipientEncryptedKeys,
-  RecipientEncryptedKeysJson,
-  RecipientEncryptedKeysSchema
-} from "./RecipientEncryptedKeys";
+import { OriginatorIdentifierOrKey, OriginatorIdentifierOrKeyJson, OriginatorIdentifierOrKeySchema } from "./OriginatorIdentifierOrKey";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { RecipientEncryptedKeys, RecipientEncryptedKeysJson, RecipientEncryptedKeysSchema } from "./RecipientEncryptedKeys";
 import { Certificate } from "./Certificate";
 import * as Schema from "./Schema";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -71,43 +59,15 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
   constructor(parameters: KeyAgreeRecipientInfoParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(
-      parameters,
-      VERSION,
-      KeyAgreeRecipientInfo.defaultValues(VERSION)
-    );
-    this.originator = pvutils.getParametersValue(
-      parameters,
-      ORIGINATOR,
-      KeyAgreeRecipientInfo.defaultValues(ORIGINATOR)
-    );
+    this.version = pvutils.getParametersValue(parameters, VERSION, KeyAgreeRecipientInfo.defaultValues(VERSION));
+    this.originator = pvutils.getParametersValue(parameters, ORIGINATOR, KeyAgreeRecipientInfo.defaultValues(ORIGINATOR));
     if (UKM in parameters) {
-      this.ukm = pvutils.getParametersValue(
-        parameters,
-        UKM,
-        KeyAgreeRecipientInfo.defaultValues(UKM)
-      );
+      this.ukm = pvutils.getParametersValue(parameters, UKM, KeyAgreeRecipientInfo.defaultValues(UKM));
     }
-    this.keyEncryptionAlgorithm = pvutils.getParametersValue(
-      parameters,
-      KEY_ENCRYPTION_ALGORITHM,
-      KeyAgreeRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM)
-    );
-    this.recipientEncryptedKeys = pvutils.getParametersValue(
-      parameters,
-      RECIPIENT_ENCRYPTED_KEY,
-      KeyAgreeRecipientInfo.defaultValues(RECIPIENT_ENCRYPTED_KEY)
-    );
-    this.recipientCertificate = pvutils.getParametersValue(
-      parameters,
-      RECIPIENT_CERTIFICATE,
-      KeyAgreeRecipientInfo.defaultValues(RECIPIENT_CERTIFICATE)
-    );
-    this.recipientPublicKey = pvutils.getParametersValue(
-      parameters,
-      RECIPIENT_PUBLIC_KEY,
-      KeyAgreeRecipientInfo.defaultValues(RECIPIENT_PUBLIC_KEY)
-    );
+    this.keyEncryptionAlgorithm = pvutils.getParametersValue(parameters, KEY_ENCRYPTION_ALGORITHM, KeyAgreeRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM));
+    this.recipientEncryptedKeys = pvutils.getParametersValue(parameters, RECIPIENT_ENCRYPTED_KEY, KeyAgreeRecipientInfo.defaultValues(RECIPIENT_ENCRYPTED_KEY));
+    this.recipientCertificate = pvutils.getParametersValue(parameters, RECIPIENT_CERTIFICATE, KeyAgreeRecipientInfo.defaultValues(RECIPIENT_CERTIFICATE));
+    this.recipientPublicKey = pvutils.getParametersValue(parameters, RECIPIENT_PUBLIC_KEY, KeyAgreeRecipientInfo.defaultValues(RECIPIENT_PUBLIC_KEY));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -122,12 +82,8 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
   public static override defaultValues(memberName: typeof VERSION): number;
   public static override defaultValues(memberName: typeof ORIGINATOR): OriginatorIdentifierOrKey;
   public static override defaultValues(memberName: typeof UKM): asn1js.OctetString;
-  public static override defaultValues(
-    memberName: typeof KEY_ENCRYPTION_ALGORITHM
-  ): AlgorithmIdentifier;
-  public static override defaultValues(
-    memberName: typeof RECIPIENT_ENCRYPTED_KEY
-  ): RecipientEncryptedKeys;
+  public static override defaultValues(memberName: typeof KEY_ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof RECIPIENT_ENCRYPTED_KEY): RecipientEncryptedKeys;
   public static override defaultValues(memberName: typeof RECIPIENT_CERTIFICATE): Certificate;
   public static override defaultValues(memberName: typeof RECIPIENT_PUBLIC_KEY): null;
   public static override defaultValues(memberName: string): any {
@@ -165,9 +121,7 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
       case UKM:
         return memberValue.isEqual(KeyAgreeRecipientInfo.defaultValues(UKM));
       case KEY_ENCRYPTION_ALGORITHM:
-        return (
-          memberValue.algorithmId === EMPTY_STRING && "algorithmParams" in memberValue === false
-        );
+        return memberValue.algorithmId === EMPTY_STRING && "algorithmParams" in memberValue === false;
       case RECIPIENT_ENCRYPTED_KEY:
         return memberValue.encryptedKeys.length === 0;
       case RECIPIENT_CERTIFICATE:
@@ -198,13 +152,9 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
       ukm?: string;
       keyEncryptionAlgorithm?: AlgorithmIdentifierSchema;
       recipientEncryptedKeys?: RecipientEncryptedKeysSchema;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -213,21 +163,21 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [OriginatorIdentifierOrKey.schema(names.originator || {})]
+          value: [OriginatorIdentifierOrKey.schema(names.originator || {})],
         }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: [new asn1js.OctetString({ name: names.ukm || EMPTY_STRING })]
+          value: [new asn1js.OctetString({ name: names.ukm || EMPTY_STRING })],
         }),
         AlgorithmIdentifier.schema(names.keyEncryptionAlgorithm || {}),
-        RecipientEncryptedKeys.schema(names.recipientEncryptedKeys || {})
-      ]
+        RecipientEncryptedKeys.schema(names.recipientEncryptedKeys || {}),
+      ],
     });
   }
 
@@ -244,22 +194,22 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
           version: VERSION,
           originator: {
             names: {
-              blockName: ORIGINATOR
-            }
+              blockName: ORIGINATOR,
+            },
           },
           ukm: UKM,
           keyEncryptionAlgorithm: {
             names: {
-              blockName: KEY_ENCRYPTION_ALGORITHM
-            }
+              blockName: KEY_ENCRYPTION_ALGORITHM,
+            },
           },
           recipientEncryptedKeys: {
             names: {
-              blockName: RECIPIENT_ENCRYPTED_KEY
-            }
-          }
-        }
-      })
+              blockName: RECIPIENT_ENCRYPTED_KEY,
+            },
+          },
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -268,10 +218,10 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
     this.originator = new OriginatorIdentifierOrKey({ schema: asn1.result.originator });
     if (UKM in asn1.result) this.ukm = asn1.result.ukm;
     this.keyEncryptionAlgorithm = new AlgorithmIdentifier({
-      schema: asn1.result.keyEncryptionAlgorithm
+      schema: asn1.result.keyEncryptionAlgorithm,
     });
     this.recipientEncryptedKeys = new RecipientEncryptedKeys({
-      schema: asn1.result.recipientEncryptedKeys
+      schema: asn1.result.recipientEncryptedKeys,
     });
   }
 
@@ -284,10 +234,10 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
       new asn1js.Constructed({
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
+          tagNumber: 0, // [0]
         },
-        value: [this.originator.toSchema()]
-      })
+        value: [this.originator.toSchema()],
+      }),
     );
 
     if (this.ukm) {
@@ -296,10 +246,10 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: [this.ukm]
-        })
+          value: [this.ukm],
+        }),
       );
     }
 
@@ -309,7 +259,7 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
@@ -323,7 +273,7 @@ export class KeyAgreeRecipientInfo extends PkiObject implements IKeyAgreeRecipie
       version: this.version,
       originator: this.originator.toJSON(),
       keyEncryptionAlgorithm: this.keyEncryptionAlgorithm.toJSON(),
-      recipientEncryptedKeys: this.recipientEncryptedKeys.toJSON()
+      recipientEncryptedKeys: this.recipientEncryptedKeys.toJSON(),
     };
 
     if (this.ukm) {

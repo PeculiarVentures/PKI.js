@@ -1,10 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import {
-  AlgorithmIdentifier,
-  AlgorithmIdentifierJson,
-  AlgorithmIdentifierSchema
-} from "../AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
 import { EMPTY_STRING } from "../constants";
 import { AsnError } from "../errors";
 import { PkiObject, PkiObjectParameters } from "../PkiObject";
@@ -50,28 +46,12 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
   constructor(parameters: ObjectDigestInfoParameters = {}) {
     super();
 
-    this.digestedObjectType = pvutils.getParametersValue(
-      parameters,
-      DIGESTED_OBJECT_TYPE,
-      ObjectDigestInfo.defaultValues(DIGESTED_OBJECT_TYPE)
-    );
+    this.digestedObjectType = pvutils.getParametersValue(parameters, DIGESTED_OBJECT_TYPE, ObjectDigestInfo.defaultValues(DIGESTED_OBJECT_TYPE));
     if (OTHER_OBJECT_TYPE_ID in parameters) {
-      this.otherObjectTypeID = pvutils.getParametersValue(
-        parameters,
-        OTHER_OBJECT_TYPE_ID,
-        ObjectDigestInfo.defaultValues(OTHER_OBJECT_TYPE_ID)
-      );
+      this.otherObjectTypeID = pvutils.getParametersValue(parameters, OTHER_OBJECT_TYPE_ID, ObjectDigestInfo.defaultValues(OTHER_OBJECT_TYPE_ID));
     }
-    this.digestAlgorithm = pvutils.getParametersValue(
-      parameters,
-      DIGEST_ALGORITHM,
-      ObjectDigestInfo.defaultValues(DIGEST_ALGORITHM)
-    );
-    this.objectDigest = pvutils.getParametersValue(
-      parameters,
-      OBJECT_DIGEST,
-      ObjectDigestInfo.defaultValues(OBJECT_DIGEST)
-    );
+    this.digestAlgorithm = pvutils.getParametersValue(parameters, DIGEST_ALGORITHM, ObjectDigestInfo.defaultValues(DIGEST_ALGORITHM));
+    this.objectDigest = pvutils.getParametersValue(parameters, OBJECT_DIGEST, ObjectDigestInfo.defaultValues(OBJECT_DIGEST));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -84,9 +64,7 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
    * @returns Default value
    */
   public static override defaultValues(memberName: typeof DIGESTED_OBJECT_TYPE): asn1js.Enumerated;
-  public static override defaultValues(
-    memberName: typeof OTHER_OBJECT_TYPE_ID
-  ): asn1js.ObjectIdentifier;
+  public static override defaultValues(memberName: typeof OTHER_OBJECT_TYPE_ID): asn1js.ObjectIdentifier;
   public static override defaultValues(memberName: typeof DIGEST_ALGORITHM): AlgorithmIdentifier;
   public static override defaultValues(memberName: typeof OBJECT_DIGEST): asn1js.BitString;
   public static override defaultValues(memberName: string): any {
@@ -127,13 +105,9 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
       otherObjectTypeID?: string;
       digestAlgorithm?: AlgorithmIdentifierSchema;
       objectDigest?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -141,11 +115,11 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
         new asn1js.Enumerated({ name: names.digestedObjectType || EMPTY_STRING }),
         new asn1js.ObjectIdentifier({
           optional: true,
-          name: names.otherObjectTypeID || EMPTY_STRING
+          name: names.otherObjectTypeID || EMPTY_STRING,
         }),
         AlgorithmIdentifier.schema(names.digestAlgorithm || {}),
-        new asn1js.BitString({ name: names.objectDigest || EMPTY_STRING })
-      ]
+        new asn1js.BitString({ name: names.objectDigest || EMPTY_STRING }),
+      ],
     });
   }
 
@@ -163,12 +137,12 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
           otherObjectTypeID: OTHER_OBJECT_TYPE_ID,
           digestAlgorithm: {
             names: {
-              blockName: DIGEST_ALGORITHM
-            }
+              blockName: DIGEST_ALGORITHM,
+            },
           },
-          objectDigest: OBJECT_DIGEST
-        }
-      })
+          objectDigest: OBJECT_DIGEST,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -186,7 +160,7 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
 
   public toSchema(): asn1js.Sequence {
     const result = new asn1js.Sequence({
-      value: [this.digestedObjectType]
+      value: [this.digestedObjectType],
     });
 
     if (this.otherObjectTypeID) {
@@ -203,7 +177,7 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
     const result: ObjectDigestInfoJson = {
       digestedObjectType: this.digestedObjectType.toJSON(),
       digestAlgorithm: this.digestAlgorithm.toJSON(),
-      objectDigest: this.objectDigest.toJSON()
+      objectDigest: this.objectDigest.toJSON(),
     };
 
     if (this.otherObjectTypeID) {

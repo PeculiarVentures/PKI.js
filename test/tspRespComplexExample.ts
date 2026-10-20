@@ -13,10 +13,7 @@ export interface CreateTSPResponseResult extends utils.CertificateWithPrivateKey
  * @param signAlg Signing algorithm
  * @returns
  */
-export async function createTSPResp(
-  hashAlgorithm: string,
-  signAlg: string
-): Promise<CreateTSPResponseResult> {
+export async function createTSPResp(hashAlgorithm: string, signAlg: string): Promise<CreateTSPResponseResult> {
   const crypto = pkijs.getCrypto(true);
 
   const certWithKey = await utils.createSelfSignedCertificate(hashAlgorithm, signAlg);
@@ -37,9 +34,9 @@ export async function createTSPResp(
     policy: "1.1.1",
     messageImprint: new pkijs.MessageImprint({
       hashAlgorithm: new pkijs.AlgorithmIdentifier({
-        algorithmId: pkijs.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm")
+        algorithmId: pkijs.getOIDByAlgorithm({ name: hashAlgorithm }, true, "hashAlgorithm"),
       }),
-      hashedMessage: new asn1js.OctetString({ valueHex: hashedMessage })
+      hashedMessage: new asn1js.OctetString({ valueHex: hashedMessage }),
     }),
     serialNumber: new asn1js.Integer({ valueHex: hashedBuffer }),
     genTime: new Date(),
@@ -47,9 +44,9 @@ export async function createTSPResp(
     accuracy: new pkijs.Accuracy({
       seconds: 1,
       millis: 1,
-      micros: 10
+      micros: 10,
     }),
-    nonce: new asn1js.Integer({ valueHex: hashedBuffer })
+    nonce: new asn1js.Integer({ valueHex: hashedBuffer }),
   });
 
   const tstInfoRaw = tstInfoSimpl.toSchema().toBER(false);
@@ -67,11 +64,11 @@ export async function createTSPResp(
         version: 1,
         sid: new pkijs.IssuerAndSerialNumber({
           issuer: certWithKey.certificate.issuer,
-          serialNumber: certWithKey.certificate.serialNumber
-        })
-      })
+          serialNumber: certWithKey.certificate.serialNumber,
+        }),
+      }),
     ],
-    certificates: [certWithKey.certificate]
+    certificates: [certWithKey.certificate],
   });
 
   await cmsSignedSimpl.sign(certWithKey.privateKey, 0, hashAlgorithm);
@@ -82,7 +79,7 @@ export async function createTSPResp(
 
   const cmsContentSimp = new pkijs.ContentInfo({
     contentType: "1.2.840.113549.1.7.2",
-    content: cmsSignedSchema
+    content: cmsSignedSchema,
   });
 
   const cmsRaw = cmsContentSimp.toSchema();
@@ -90,13 +87,13 @@ export async function createTSPResp(
   //#region Finally create completed TSP response structure
   const tspResponse = new pkijs.TimeStampResp({
     status: new pkijs.PKIStatusInfo({ status: 0 }),
-    timeStampToken: new pkijs.ContentInfo({ schema: cmsRaw })
+    timeStampToken: new pkijs.ContentInfo({ schema: cmsRaw }),
   });
   //#endregion
   return {
     ...certWithKey,
     trustedCertificates: [certWithKey.certificate],
-    tspResponse
+    tspResponse,
   };
 }
 /**
@@ -109,6 +106,6 @@ export async function verifyTSPResp(params: CreateTSPResponseResult): Promise<bo
   return params.tspResponse.verify({
     signer: 0,
     trustedCerts: params.trustedCertificates,
-    data: testData.buffer
+    data: testData.buffer,
   });
 }

@@ -1,18 +1,5 @@
-export type BagType =
-  | PrivateKeyInfo
-  | PKCS8ShroudedKeyBag
-  | CertBag
-  | CRLBag
-  | SecretBag
-  | SafeContents;
-export type BagTypeJson =
-  | PrivateKeyInfoJson
-  | JsonWebKey
-  | PKCS8ShroudedKeyBagJson
-  | CertBagJson
-  | CRLBagJson
-  | SecretBagJson
-  | SafeContentsJson;
+export type BagType = PrivateKeyInfo | PKCS8ShroudedKeyBag | CertBag | CRLBag | SecretBag | SafeContents;
+export type BagTypeJson = PrivateKeyInfoJson | JsonWebKey | PKCS8ShroudedKeyBagJson | CertBagJson | CRLBagJson | SecretBagJson | SafeContentsJson;
 
 export interface BagTypeConstructor<T extends BagType> {
   new (params: { schema: any }): T;
@@ -35,10 +22,7 @@ export class SafeBagValueFactory {
 
     return this.items;
   }
-  public static register<T extends BagType = BagType>(
-    id: string,
-    type: BagTypeConstructor<T>
-  ): void {
+  public static register<T extends BagType = BagType>(id: string, type: BagTypeConstructor<T>): void {
     this.getItems()[id] = type;
   }
 

@@ -22,22 +22,18 @@ describe("PKCS#10 Complex Example", () => {
     ["SHA-1 + RSA-PSS", "1.2.840.113549.1.1.10"],
     ["SHA-256 + RSA-PSS", "1.2.840.113549.1.1.10"],
     ["SHA-384 + RSA-PSS", "1.2.840.113549.1.1.10"],
-    ["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"]
+    ["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"],
   ]);
   //#endregion
 
-  signAlgs.forEach(signAlg => {
-    hashAlgs.forEach(hashAlg => {
+  signAlgs.forEach((signAlg) => {
+    hashAlgs.forEach((hashAlg) => {
       it(`${hashAlg} + ${signAlg}`, async () => {
         const testName = `${hashAlg} + ${signAlg}`;
         const pkcs10Buffer = await example.createPKCS10Internal(hashAlg, signAlg);
         const pkcs10 = pkijs.CertificationRequest.fromBER(pkcs10Buffer);
 
-        assert.equal(
-          pkcs10.signatureAlgorithm.algorithmId,
-          algorithmsMap.get(testName),
-          `Signature algorithm must be ${testName}`
-        );
+        assert.equal(pkcs10.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);
 
         const result = await example.verifyPKCS10Internal(pkcs10Buffer);
         assert.equal(result, true, "PKCS#10 must be verified successfully");

@@ -163,23 +163,17 @@
       <div class="border-block">
         <label for="content" style="font-weight: bold; float: left">Content to encrypt:</label>
         <textarea id="content">&lt; Put input data here &gt;</textarea>
-        <label for="password" style="font-weight: bold; float: left"
-          >Password (pre-defined data):</label
-        >
+        <label for="password" style="font-weight: bold; float: left">Password (pre-defined data):</label>
         <textarea id="password">&lt; Put password here &gt;</textarea>
         <p>
-          <label for="content_enc_alg" style="font-weight: bold"
-            >Content encryption algorithm:</label
-          >
+          <label for="content_enc_alg" style="font-weight: bold">Content encryption algorithm:</label>
           <select id="content_enc_alg">
             <option value="alg_CBC">AES-CBC</option>
             <option value="alg_GCM">AES-GCM</option>
           </select>
         </p>
         <p>
-          <label for="content_enc_alg_len" style="font-weight: bold"
-            >Content encryption algorithm length:</label
-          >
+          <label for="content_enc_alg_len" style="font-weight: bold">Content encryption algorithm length:</label>
           <select id="content_enc_alg_len">
             <option value="len_128">128</option>
             <!-- Currently in Google Chrome AES 192 bit keys are not supported
@@ -198,16 +192,12 @@
         <p>
           <a id="enveloped_encrypt">Encrypt</a>
         </p>
-        <label for="encrypted_content" style="font-weight: bold; float: left"
-          >BASE-64 encoded encrypted content:</label
-        >
+        <label for="encrypted_content" style="font-weight: bold; float: left">BASE-64 encoded encrypted content:</label>
         <textarea id="encrypted_content">&lt; Put encrypted content here &gt;</textarea>
         <p>
           <a id="enveloped_decrypt">Decrypt</a>
         </p>
-        <label for="decrypted_content" style="font-weight: bold; float: left"
-          >Decrypted content:</label
-        >
+        <label for="decrypted_content" style="font-weight: bold; float: left">Decrypted content:</label>
         <textarea id="decrypted_content">&lt; Decrypted content will be put here &gt;</textarea>
       </div>
     </div>

@@ -31,11 +31,7 @@ export class SafeContents extends PkiObject implements ISafeContents {
   constructor(parameters: SafeContentsParameters = {}) {
     super();
 
-    this.safeBags = pvutils.getParametersValue(
-      parameters,
-      SAFE_BUGS,
-      SafeContents.defaultValues(SAFE_BUGS)
-    );
+    this.safeBags = pvutils.getParametersValue(parameters, SAFE_BUGS, SafeContents.defaultValues(SAFE_BUGS));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -81,22 +77,18 @@ export class SafeContents extends PkiObject implements ISafeContents {
   public static override schema(
     parameters: Schema.SchemaParameters<{
       safeBags?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
           name: names.safeBags || EMPTY_STRING,
-          value: SafeBag.schema()
-        })
-      ]
+          value: SafeBag.schema(),
+        }),
+      ],
     });
   }
 
@@ -110,27 +102,27 @@ export class SafeContents extends PkiObject implements ISafeContents {
       schema,
       SafeContents.schema({
         names: {
-          safeBags: SAFE_BUGS
-        }
-      })
+          safeBags: SAFE_BUGS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.safeBags = Array.from(asn1.result.safeBags, element => new SafeBag({ schema: element }));
+    this.safeBags = Array.from(asn1.result.safeBags, (element) => new SafeBag({ schema: element }));
   }
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: Array.from(this.safeBags, o => o.toSchema())
+      value: Array.from(this.safeBags, (o) => o.toSchema()),
     });
     //#endregion
   }
 
   public toJSON(): SafeContentsJson {
     return {
-      safeBags: Array.from(this.safeBags, o => o.toJSON())
+      safeBags: Array.from(this.safeBags, (o) => o.toJSON()),
     };
   }
 }

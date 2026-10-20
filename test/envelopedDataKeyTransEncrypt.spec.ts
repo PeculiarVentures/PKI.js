@@ -13,10 +13,10 @@ async function create1024BitRsaCertificate(): Promise<pkijs.Certificate> {
       name: "RSASSA-PKCS1-v1_5",
       modulusLength: 1024,
       publicExponent: new Uint8Array([1, 0, 1]),
-      hash: { name: "SHA-256" }
+      hash: { name: "SHA-256" },
     } as RsaHashedKeyGenParams,
     true,
-    ["sign", "verify"]
+    ["sign", "verify"],
   )) as CryptoKeyPair;
 
   const certificate = new pkijs.Certificate();
@@ -25,14 +25,14 @@ async function create1024BitRsaCertificate(): Promise<pkijs.Certificate> {
   certificate.issuer.typesAndValues.push(
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.3",
-      value: new asn1js.Utf8String({ value: "Test" })
-    })
+      value: new asn1js.Utf8String({ value: "Test" }),
+    }),
   );
   certificate.subject.typesAndValues.push(
     new pkijs.AttributeTypeAndValue({
       type: "2.5.4.3",
-      value: new asn1js.Utf8String({ value: "Test" })
-    })
+      value: new asn1js.Utf8String({ value: "Test" }),
+    }),
   );
   certificate.notBefore.value = new Date();
   certificate.notAfter.value = new Date(Date.now() + 86400000);
@@ -47,16 +47,9 @@ describe("EnvelopedData KeyTransRecipientInfo encrypt errors", () => {
     const cmsEnveloped = new pkijs.EnvelopedData();
     cmsEnveloped.addRecipientByCertificate(certificate, { oaepHashAlgorithm: "SHA-512" });
 
-    await expect(
-      cmsEnveloped.encrypt(
-        { name: "AES-CBC", length: 128 } as AesKeyGenParams,
-        new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]).buffer
-      )
-    ).rejects.toThrow(Error);
+    await expect(cmsEnveloped.encrypt({ name: "AES-CBC", length: 128 } as AesKeyGenParams, new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]).buffer)).rejects.toThrow(Error);
 
     const recipient = cmsEnveloped.recipientInfos[0].value as pkijs.KeyTransRecipientInfo;
-    expect(
-      recipient.encryptedKey.isEqual(pkijs.KeyTransRecipientInfo.defaultValues("encryptedKey"))
-    ).toBe(true);
+    expect(recipient.encryptedKey.isEqual(pkijs.KeyTransRecipientInfo.defaultValues("encryptedKey"))).toBe(true);
   });
 });
