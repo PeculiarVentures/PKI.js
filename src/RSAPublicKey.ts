@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { base64url } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -134,12 +133,8 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
   fromJSON(json: RSAPublicKeyJson): void {
     ParameterError.assert("json", json, "n", "e");
 
-    const array = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.n, true));
-    this.modulus = new asn1js.Integer({
-      valueHex: array.slice(0, Math.pow(2, pvutils.nearestPowerOf2(array.byteLength))),
-    });
-    this.publicExponent = new asn1js.Integer({
-      valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.e, true)).slice(0, 3),
-    });
+    // JWK members are unpadded base64url (RFC 7518); padding is accepted as before.
+    this.modulus = new asn1js.Integer({ valueHex: base64url.decode(json.n, { allowPadding: true }) });
+    this.publicExponent = new asn1js.Integer({ valueHex: base64url.decode(json.e, { allowPadding: true }) });
   }
 }
