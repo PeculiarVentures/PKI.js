@@ -11,7 +11,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     super({
       crypto: nodeSpecificCrypto as any,
       subtle: {} as any,
-      name: "nodeCryptoEngine"
+      name: "nodeCryptoEngine",
     });
   }
 
@@ -24,57 +24,45 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     return array;
   }
 
-  public override getAlgorithmByOID<T extends Algorithm = Algorithm>(
-    oid: string,
-    safety?: boolean,
-    target?: string
-  ): object | T;
-  public override getAlgorithmByOID<T extends Algorithm = Algorithm>(
-    oid: string,
-    safety: true,
-    target?: string
-  ): T;
+  public override getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety?: boolean, target?: string): object | T;
+  public override getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety: true, target?: string): T;
   public override getAlgorithmByOID(oid: string, safety?: boolean, target?: string) {
     switch (oid) {
       case "1.2.840.113549.3.2":
         return {
           name: "RC2-40-CBC",
-          length: 5
+          length: 5,
         };
       case "1.2.840.113549.3.7":
         return {
           name: "DES-EDE3-CBC",
-          length: 24
+          length: 24,
         };
       case "2.16.840.1.101.3.4.1.2":
         return {
           name: "AES-128-CBC",
-          length: 16
+          length: 16,
         };
       case "2.16.840.1.101.3.4.1.22":
         return {
           name: "AES-192-CBC",
-          length: 24
+          length: 24,
         };
       case "2.16.840.1.101.3.4.1.42":
         return {
           name: "AES-256-CBC",
-          length: 32
+          length: 32,
         };
       case "1.2.840.113549.1.5.12":
         return {
-          name: "PBKDF2"
+          name: "PBKDF2",
         };
       default:
         return super.getAlgorithmByOID(oid, safety, target);
     }
   }
 
-  public override getOIDByAlgorithm(
-    algorithm: Algorithm,
-    safety?: boolean,
-    target?: string
-  ): string {
+  public override getOIDByAlgorithm(algorithm: Algorithm, safety?: boolean, target?: string): string {
     switch (algorithm.name.toUpperCase()) {
       case "RC2-40-CBC":
         return "1.2.840.113549.3.2";
@@ -91,10 +79,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     }
   }
 
-  public override getAlgorithmParameters(
-    algorithmName: string,
-    operation: pkijs.CryptoEngineAlgorithmOperation
-  ): pkijs.CryptoEngineAlgorithmParams {
+  public override getAlgorithmParameters(algorithmName: string, operation: pkijs.CryptoEngineAlgorithmOperation): pkijs.CryptoEngineAlgorithmParams {
     switch (algorithmName.toUpperCase()) {
       case "RC2-40-CBC":
         switch (operation.toLowerCase()) {
@@ -104,9 +89,9 @@ export default class NodeEngine extends pkijs.CryptoEngine {
             return {
               algorithm: {
                 name: "RC2-40-CBC",
-                length: 5
+                length: 5,
               },
-              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"],
             };
           case "decrypt":
           case "encrypt":
@@ -114,16 +99,16 @@ export default class NodeEngine extends pkijs.CryptoEngine {
               algorithm: {
                 name: "RC2-40-CBC",
                 iv: this.getRandomValues(new Uint8Array(8)), // For "decrypt" the value should be replaced with value got on "encrypt" step
-                length: 5
+                length: 5,
               },
-              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"],
             };
           default:
             return {
               algorithm: {
-                name: "RC2-40-CBC"
+                name: "RC2-40-CBC",
               },
-              usages: []
+              usages: [],
             };
         }
       case "DES-EDE3-CBC":
@@ -134,9 +119,9 @@ export default class NodeEngine extends pkijs.CryptoEngine {
             return {
               algorithm: {
                 name: "DES-EDE3-CBC",
-                length: 24
+                length: 24,
               },
-              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"],
             };
           case "decrypt":
           case "encrypt":
@@ -144,16 +129,16 @@ export default class NodeEngine extends pkijs.CryptoEngine {
               algorithm: {
                 name: "DES-EDE3-CBC",
                 iv: this.getRandomValues(new Uint8Array(8)), // For "decrypt" the value should be replaced with value got on "encrypt" step
-                length: 24
+                length: 24,
               },
-              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"],
             };
           default:
             return {
               algorithm: {
-                name: "DES-EDE3-CBC"
+                name: "DES-EDE3-CBC",
               },
-              usages: []
+              usages: [],
             };
         }
       case "AES-128-CBC":
@@ -164,9 +149,9 @@ export default class NodeEngine extends pkijs.CryptoEngine {
             return {
               algorithm: {
                 name: "AES-128-CBC",
-                length: 16
+                length: 16,
               },
-              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"],
             };
           case "decrypt":
           case "encrypt":
@@ -174,17 +159,17 @@ export default class NodeEngine extends pkijs.CryptoEngine {
               algorithm: {
                 name: "AES-128-CBC",
                 iv: this.getRandomValues(new Uint8Array(16)), // For "decrypt" the value should be replaced with value got on "encrypt" step
-                length: 16
+                length: 16,
               },
-              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"],
             };
           default:
             return {
               algorithm: {
                 name: "AES-128-CBC",
-                length: 16
+                length: 16,
               },
-              usages: []
+              usages: [],
             };
         }
       case "AES-192-CBC":
@@ -195,9 +180,9 @@ export default class NodeEngine extends pkijs.CryptoEngine {
             return {
               algorithm: {
                 name: "AES-192-CBC",
-                length: 24
+                length: 24,
               },
-              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"],
             };
           case "decrypt":
           case "encrypt":
@@ -205,17 +190,17 @@ export default class NodeEngine extends pkijs.CryptoEngine {
               algorithm: {
                 name: "AES-192-CBC",
                 iv: this.getRandomValues(new Uint8Array(16)), // For "decrypt" the value should be replaced with value got on "encrypt" step
-                length: 24
+                length: 24,
               },
-              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"],
             };
           default:
             return {
               algorithm: {
                 name: "AES-192-CBC",
-                length: 24
+                length: 24,
               },
-              usages: []
+              usages: [],
             };
         }
       case "AES-256-CBC":
@@ -226,9 +211,9 @@ export default class NodeEngine extends pkijs.CryptoEngine {
             return {
               algorithm: {
                 name: "AES-256-CBC",
-                length: 32
+                length: 32,
               },
-              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"],
             };
           case "decrypt":
           case "encrypt":
@@ -236,17 +221,17 @@ export default class NodeEngine extends pkijs.CryptoEngine {
               algorithm: {
                 name: "AES-256-CBC",
                 iv: this.getRandomValues(new Uint8Array(16)), // For "decrypt" the value should be replaced with value got on "encrypt" step
-                length: 32
+                length: 32,
               },
-              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"]
+              usages: ["encrypt", "decrypt", "wrapKey", "unwrapKey"],
             };
           default:
             return {
               algorithm: {
                 name: "AES-256-CBC",
-                length: 32
+                length: 32,
               },
-              usages: []
+              usages: [],
             };
         }
       case "PBKDF2":
@@ -257,16 +242,16 @@ export default class NodeEngine extends pkijs.CryptoEngine {
                 name: "PBKDF2",
                 hash: { name: "SHA-256" },
                 salt: new Uint8Array([]),
-                iterations: 10000
+                iterations: 10000,
               },
-              usages: ["encrypt", "decrypt"]
+              usages: ["encrypt", "decrypt"],
             };
           default:
             return {
               algorithm: {
-                name: "PBKDF2"
+                name: "PBKDF2",
               },
-              usages: []
+              usages: [],
             };
         }
       default:
@@ -278,43 +263,28 @@ export default class NodeEngine extends pkijs.CryptoEngine {
    * Specialized function encrypting "EncryptedContentInfo" object using parameters
    * @param parameters
    */
-  public override async encryptEncryptedContentInfo(
-    parameters: NodeEngineEncryptParams
-  ): Promise<pkijs.EncryptedContentInfo> {
-    pkijs.ParameterError.assert(
-      parameters,
-      "password",
-      "contentEncryptionAlgorithm",
-      "hmacHashAlgorithm",
-      "iterationCount",
-      "contentToEncrypt",
-      "contentToEncrypt",
-      "contentType"
-    );
+  public override async encryptEncryptedContentInfo(parameters: NodeEngineEncryptParams): Promise<pkijs.EncryptedContentInfo> {
+    pkijs.ParameterError.assert(parameters, "password", "contentEncryptionAlgorithm", "hmacHashAlgorithm", "iterationCount", "contentToEncrypt", "contentToEncrypt", "contentType");
 
     parameters.pbeSchema ??= "PBES2";
 
-    const contentEncryptionOID = this.getOIDByAlgorithm(
-      parameters.contentEncryptionAlgorithm,
-      true,
-      "contentEncryptionAlgorithm"
-    );
+    const contentEncryptionOID = this.getOIDByAlgorithm(parameters.contentEncryptionAlgorithm, true, "contentEncryptionAlgorithm");
     const pbkdf2OID = this.getOIDByAlgorithm(
       {
-        name: "PBKDF2"
+        name: "PBKDF2",
       },
       true,
-      "PBKDF2"
+      "PBKDF2",
     );
     const hmacOID = this.getOIDByAlgorithm(
       {
         name: "HMAC",
         hash: {
-          name: parameters.hmacHashAlgorithm
-        }
+          name: parameters.hmacHashAlgorithm,
+        },
       } as Algorithm,
       true,
-      "hmacHashAlgorithm"
+      "hmacHashAlgorithm",
     );
 
     //#region Special case for PBES1
@@ -339,9 +309,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
           pbeAlgorithm = "1.2.840.113549.1.12.1.6"; // pbeWithSHAAnd40BitRC2-CBC
           break;
         default:
-          throw new Error(
-            "For PBES1 encryption algorithm could be only DES-EDE3-CBC or RC2-40-CBC"
-          );
+          throw new Error("For PBES1 encryption algorithm could be only DES-EDE3-CBC or RC2-40-CBC");
       }
       //#endregion
 
@@ -353,7 +321,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
         parameters.password,
         saltBuffer,
         parameters.iterationCount,
-        parameters.contentToEncrypt
+        parameters.contentToEncrypt,
       );
 
       //#region Store all parameters in EncryptedData object
@@ -362,15 +330,12 @@ export default class NodeEngine extends pkijs.CryptoEngine {
         contentEncryptionAlgorithm: new pkijs.AlgorithmIdentifier({
           algorithmId: pbeAlgorithm,
           algorithmParams: new asn1js.Sequence({
-            value: [
-              new asn1js.OctetString({ valueHex: saltBuffer }),
-              new asn1js.Integer({ value: parameters.iterationCount })
-            ]
-          })
-        })
+            value: [new asn1js.OctetString({ valueHex: saltBuffer }), new asn1js.Integer({ value: parameters.iterationCount })],
+          }),
+        }),
       });
       encryptedContentInfo.encryptedContent = new asn1js.OctetString({
-        valueHex: encryptedContent
+        valueHex: encryptedContent,
       });
 
       return encryptedContentInfo;
@@ -379,9 +344,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     //#endregion
 
     //#region Initial variables
-    const ivBuffer = new ArrayBuffer(
-      (parameters.contentEncryptionAlgorithm as AesCbcParams).iv.byteLength
-    );
+    const ivBuffer = new ArrayBuffer((parameters.contentEncryptionAlgorithm as AesCbcParams).iv.byteLength);
     const ivView = new Uint8Array(ivBuffer);
     this.getRandomValues(ivView);
 
@@ -394,8 +357,8 @@ export default class NodeEngine extends pkijs.CryptoEngine {
       iterationCount: parameters.iterationCount,
       prf: new pkijs.AlgorithmIdentifier({
         algorithmId: hmacOID,
-        algorithmParams: new asn1js.Null()
-      })
+        algorithmParams: new asn1js.Null(),
+      }),
     });
     //#endregion
 
@@ -408,27 +371,27 @@ export default class NodeEngine extends pkijs.CryptoEngine {
       parameters.iterationCount,
       parameters.hmacHashAlgorithm,
       ivBuffer,
-      parameters.contentToEncrypt
+      parameters.contentToEncrypt,
     );
 
     //#region Store all parameters in EncryptedData object
     const pbes2Parameters = new pkijs.PBES2Params({
       keyDerivationFunc: new pkijs.AlgorithmIdentifier({
         algorithmId: pbkdf2OID,
-        algorithmParams: pbkdf2Params.toSchema()
+        algorithmParams: pbkdf2Params.toSchema(),
       }),
       encryptionScheme: new pkijs.AlgorithmIdentifier({
         algorithmId: contentEncryptionOID,
-        algorithmParams: new asn1js.OctetString({ valueHex: ivBuffer })
-      })
+        algorithmParams: new asn1js.OctetString({ valueHex: ivBuffer }),
+      }),
     });
 
     const encryptedContentInfo = new pkijs.EncryptedContentInfo({
       contentType: parameters.contentType,
       contentEncryptionAlgorithm: new pkijs.AlgorithmIdentifier({
         algorithmId: "1.2.840.113549.1.5.13", // pkcs5PBES2
-        algorithmParams: pbes2Parameters.toSchema()
-      })
+        algorithmParams: pbes2Parameters.toSchema(),
+      }),
     });
     encryptedContentInfo.encryptedContent = new asn1js.OctetString({ valueHex: encryptedContent });
 
@@ -440,9 +403,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
    * Decrypt data stored in "EncryptedContentInfo" object using parameters
    * @param parameters
    */
-  public override async decryptEncryptedContentInfo(
-    parameters: pkijs.CryptoEngineDecryptParams
-  ): Promise<ArrayBuffer> {
+  public override async decryptEncryptedContentInfo(parameters: pkijs.CryptoEngineDecryptParams): Promise<ArrayBuffer> {
     //#region Initial variables
     let pbes1EncryptionAlgorithm = "";
     let pbes1EncryptionAlgorithmLength = 0;
@@ -466,19 +427,13 @@ export default class NodeEngine extends pkijs.CryptoEngine {
         pbes1EncryptionAlgorithmLength = 5;
         break;
       default:
-        throw new Error(
-          `Unknown "contentEncryptionAlgorithm": ${parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`
-        );
+        throw new Error(`Unknown "contentEncryptionAlgorithm": ${parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId}`);
     }
     //#endregion
 
     //#region Create correct data block for decryption
     if (!parameters.encryptedContentInfo.encryptedContent) {
-      pkijs.ParameterError.assertEmpty(
-        parameters.encryptedContentInfo.encryptedContent,
-        "encryptedContent",
-        "parameters.encryptedContentInfo"
-      );
+      pkijs.ParameterError.assertEmpty(parameters.encryptedContentInfo.encryptedContent, "encryptedContent", "parameters.encryptedContentInfo");
     }
     const dataBuffer = parameters.encryptedContentInfo.getEncryptedContent();
     //#endregion
@@ -486,8 +441,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     //#region Check if we have PBES1
     if (pbes1EncryptionAlgorithm.length) {
       //#region Description
-      const pbesParameters =
-        parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams;
+      const pbesParameters = parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams;
 
       const saltBuffer = pbesParameters.valueBlock.value[0].valueBlock.valueHex;
       const iterationCount = pbesParameters.valueBlock.value[1].valueBlock.valueDec;
@@ -500,7 +454,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
         parameters.password,
         saltBuffer,
         iterationCount,
-        dataBuffer
+        dataBuffer,
       );
     }
     //#endregion
@@ -508,7 +462,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     //#region Initial variables
     try {
       pbes2Parameters = new pkijs.PBES2Params({
-        schema: parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams
+        schema: parameters.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams,
       });
     } catch {
       throw new Error("Incorrectly encoded 'pbes2Parameters'");
@@ -516,17 +470,13 @@ export default class NodeEngine extends pkijs.CryptoEngine {
 
     try {
       pbkdf2Params = new pkijs.PBKDF2Params({
-        schema: pbes2Parameters.keyDerivationFunc.algorithmParams
+        schema: pbes2Parameters.keyDerivationFunc.algorithmParams,
       });
     } catch {
       throw new Error("Incorrectly encoded 'pbkdf2Params'");
     }
 
-    const contentEncryptionAlgorithm = this.getAlgorithmByOID(
-      pbes2Parameters.encryptionScheme.algorithmId,
-      true,
-      "contentEncryptionAlgorithm"
-    );
+    const contentEncryptionAlgorithm = this.getAlgorithmByOID(pbes2Parameters.encryptionScheme.algorithmId, true, "contentEncryptionAlgorithm");
 
     const ivBuffer = pbes2Parameters.encryptionScheme.algorithmParams.valueBlock.valueHex;
     const saltBuffer = pbkdf2Params.salt.valueBlock.valueHex;
@@ -536,11 +486,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
     let hmacHashAlgorithm = "SHA-1";
 
     if (pbkdf2Params.prf) {
-      const algorithm = this.getAlgorithmByOID(
-        pbkdf2Params.prf.algorithmId,
-        true,
-        "HMAC hash algorithm"
-      ) as any;
+      const algorithm = this.getAlgorithmByOID(pbkdf2Params.prf.algorithmId, true, "HMAC hash algorithm") as any;
       hmacHashAlgorithm = algorithm.hash.name;
     }
     //#endregion
@@ -554,8 +500,8 @@ export default class NodeEngine extends pkijs.CryptoEngine {
         iterationCount,
         hmacHashAlgorithm,
         ivBuffer,
-        dataBuffer
-      )
+        dataBuffer,
+      ),
     );
   }
 
@@ -573,42 +519,16 @@ export default class NodeEngine extends pkijs.CryptoEngine {
         throw new Error(`Incorrect 'parameters.hashAlgorithm' parameter: ${hashAlgorithm}`);
     }
   }
-  public override async stampDataWithPassword(
-    parameters: pkijs.CryptoEngineStampDataWithPasswordParams
-  ): Promise<ArrayBuffer> {
-    pkijs.ParameterError.assert(
-      parameters,
-      "password",
-      "hashAlgorithm",
-      "salt",
-      "iterationCount",
-      "contentToStamp"
-    );
+  public override async stampDataWithPassword(parameters: pkijs.CryptoEngineStampDataWithPasswordParams): Promise<ArrayBuffer> {
+    pkijs.ParameterError.assert(parameters, "password", "hashAlgorithm", "salt", "iterationCount", "contentToStamp");
 
     const length = this.getHashAlgorithmLength(parameters.hashAlgorithm);
 
-    return nodeSpecificCrypto.stampDataWithPassword(
-      parameters.hashAlgorithm,
-      length,
-      parameters.password,
-      parameters.salt,
-      parameters.iterationCount,
-      parameters.contentToStamp
-    );
+    return nodeSpecificCrypto.stampDataWithPassword(parameters.hashAlgorithm, length, parameters.password, parameters.salt, parameters.iterationCount, parameters.contentToStamp);
   }
 
-  public override async verifyDataStampedWithPassword(
-    parameters: pkijs.CryptoEngineVerifyDataStampedWithPasswordParams
-  ): Promise<boolean> {
-    pkijs.ParameterError.assert(
-      parameters,
-      "password",
-      "hashAlgorithm",
-      "salt",
-      "iterationCount",
-      "contentToVerify",
-      "signatureToVerify"
-    );
+  public override async verifyDataStampedWithPassword(parameters: pkijs.CryptoEngineVerifyDataStampedWithPasswordParams): Promise<boolean> {
+    pkijs.ParameterError.assert(parameters, "password", "hashAlgorithm", "salt", "iterationCount", "contentToVerify", "signatureToVerify");
 
     const length = this.getHashAlgorithmLength(parameters.hashAlgorithm);
 
@@ -619,7 +539,7 @@ export default class NodeEngine extends pkijs.CryptoEngine {
       parameters.salt,
       parameters.iterationCount,
       parameters.contentToVerify,
-      parameters.signatureToVerify
+      parameters.signatureToVerify,
     );
   }
 }

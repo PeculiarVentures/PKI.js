@@ -23,8 +23,7 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
     const sigField = pdf.xref.fetch(fields[0]);
 
     const sigFieldType = sigField.get("FT");
-    if (typeof sigFieldType === "undefined" || sigFieldType.name !== "Sig")
-      throw new Error("Wrong structure of PDF!");
+    if (typeof sigFieldType === "undefined" || sigFieldType.name !== "Sig") throw new Error("Wrong structure of PDF!");
 
     const v = sigField.get("V");
     const byteRange = v.get("ByteRange");
@@ -43,16 +42,14 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
     const signedDataView = new Uint8Array(signedDataBuffer);
 
     let count = 0;
-    for (let i = byteRange[0]; i < byteRange[0] + byteRange[1]; i++, count++)
-      signedDataView[count] = view[i];
+    for (let i = byteRange[0]; i < byteRange[0] + byteRange[1]; i++, count++) signedDataView[count] = view[i];
 
-    for (let j = byteRange[2]; j < byteRange[2] + byteRange[3]; j++, count++)
-      signedDataView[count] = view[j];
+    for (let j = byteRange[2]; j < byteRange[2] + byteRange[3]; j++, count++) signedDataView[count] = view[j];
 
     const verifyResult = await cmsSignedSimp.verify({
       signer: 0,
       data: signedDataBuffer,
-      trustedCerts: trustedCertificates
+      trustedCerts: trustedCertificates,
     });
 
     if ("signedAttrs" in cmsSignedSimp.signerInfos[0]) {
@@ -114,13 +111,13 @@ async function verifyPDFSignature(buffer: ArrayBuffer) {
 }
 
 function handleFileBrowse(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     verifyPDFSignature(file);
   });
 }
 
 function handleCABundle(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     trustedCertificates.push(...common.parseCertificate(file));
   });
 }

@@ -3,13 +3,7 @@ import type { AlgorithmIdentifier } from "../AlgorithmIdentifier";
 import type { EncryptedContentInfo } from "../EncryptedContentInfo";
 import type { PublicKeyInfo } from "../PublicKeyInfo";
 
-export type CryptoEngineAlgorithmOperation =
-  | "sign"
-  | "encrypt"
-  | "generateKey"
-  | "importKey"
-  | "exportKey"
-  | "verify";
+export type CryptoEngineAlgorithmOperation = "sign" | "encrypt" | "generateKey" | "importKey" | "exportKey" | "verify";
 
 /**
  * Algorithm parameters
@@ -46,9 +40,7 @@ export interface CryptoEnginePublicKeyParams {
 
 export type ContentEncryptionAesCbcParams = AesCbcParams & AesDerivedKeyParams;
 export type ContentEncryptionAesGcmParams = AesGcmParams & AesDerivedKeyParams;
-export type ContentEncryptionAlgorithm =
-  | ContentEncryptionAesCbcParams
-  | ContentEncryptionAesGcmParams;
+export type ContentEncryptionAlgorithm = ContentEncryptionAesCbcParams | ContentEncryptionAesGcmParams;
 
 export interface CryptoEngineEncryptParams {
   password: ArrayBuffer;
@@ -102,10 +94,7 @@ export interface ICryptoEngine extends SubtleCrypto {
    * @param operation Kind of operation: "sign", "encrypt", "generateKey", "importKey", "exportKey", "verify"
    */
   // TODO Use safety
-  getAlgorithmParameters(
-    algorithmName: string,
-    operation: CryptoEngineAlgorithmOperation
-  ): CryptoEngineAlgorithmParams;
+  getAlgorithmParameters(algorithmName: string, operation: CryptoEngineAlgorithmOperation): CryptoEngineAlgorithmParams;
 
   /**
    * Gets WebCrypto algorithm by wel-known OID
@@ -114,11 +103,7 @@ export interface ICryptoEngine extends SubtleCrypto {
    * @param target name of the target
    * @returns Returns WebCrypto algorithm or an empty object
    */
-  getAlgorithmByOID<T extends Algorithm = Algorithm>(
-    oid: string,
-    safety?: boolean,
-    target?: string
-  ): T | object;
+  getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety?: boolean, target?: string): T | object;
   /**
    * Gets WebCrypto algorithm by wel-known OID
    * @param oid algorithm identifier
@@ -141,10 +126,7 @@ export interface ICryptoEngine extends SubtleCrypto {
    * @param privateKey The private key user would like to use
    * @param hashAlgorithm Hash algorithm user would like to use. Default is SHA-1
    */
-  getSignatureParameters(
-    privateKey: CryptoKey,
-    hashAlgorithm?: string
-  ): Promise<CryptoEngineSignatureParams>;
+  getSignatureParameters(privateKey: CryptoKey, hashAlgorithm?: string): Promise<CryptoEngineSignatureParams>;
 
   /**
    * Sign data with pre-defined private key
@@ -152,11 +134,7 @@ export interface ICryptoEngine extends SubtleCrypto {
    * @param privateKey Private key to use
    * @param parameters Parameters for used algorithm
    */
-  signWithPrivateKey(
-    data: BufferSource,
-    privateKey: CryptoKey,
-    parameters: CryptoEngineSignWithPrivateKeyParams
-  ): Promise<ArrayBuffer>;
+  signWithPrivateKey(data: BufferSource, privateKey: CryptoKey, parameters: CryptoEngineSignWithPrivateKeyParams): Promise<ArrayBuffer>;
 
   /**
    * Verify data with the public key
@@ -171,14 +149,10 @@ export interface ICryptoEngine extends SubtleCrypto {
     signature: asn1js.BitString | asn1js.OctetString,
     publicKeyInfo: PublicKeyInfo,
     signatureAlgorithm: AlgorithmIdentifier,
-    shaAlgorithm?: string
+    shaAlgorithm?: string,
   ): Promise<boolean>;
 
-  getPublicKey(
-    publicKeyInfo: PublicKeyInfo,
-    signatureAlgorithm: AlgorithmIdentifier,
-    parameters?: CryptoEnginePublicKeyParams
-  ): Promise<CryptoKey>;
+  getPublicKey(publicKeyInfo: PublicKeyInfo, signatureAlgorithm: AlgorithmIdentifier, parameters?: CryptoEnginePublicKeyParams): Promise<CryptoKey>;
 
   /**
    * Specialized function encrypting "EncryptedContentInfo" object using parameters
@@ -197,9 +171,7 @@ export interface ICryptoEngine extends SubtleCrypto {
    * @param parameters
    */
   stampDataWithPassword(parameters: CryptoEngineStampDataWithPasswordParams): Promise<ArrayBuffer>;
-  verifyDataStampedWithPassword(
-    parameters: CryptoEngineVerifyDataStampedWithPasswordParams
-  ): Promise<boolean>;
+  verifyDataStampedWithPassword(parameters: CryptoEngineVerifyDataStampedWithPasswordParams): Promise<boolean>;
 }
 
 export interface CryptoEngineParameters {

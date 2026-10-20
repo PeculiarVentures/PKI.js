@@ -37,11 +37,7 @@ export class AltName extends PkiObject implements IAltName {
   constructor(parameters: AltNameParameters = {}) {
     super();
 
-    this.altNames = pvutils.getParametersValue(
-      parameters,
-      ALT_NAMES,
-      AltName.defaultValues(ALT_NAMES)
-    );
+    this.altNames = pvutils.getParametersValue(parameters, ALT_NAMES, AltName.defaultValues(ALT_NAMES));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -70,23 +66,17 @@ export class AltName extends PkiObject implements IAltName {
    * AltName ::= GeneralNames
    *```
    */
-  public static override schema(
-    parameters: Schema.SchemaParameters<{ altNames?: string }> = {}
-  ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+  public static override schema(parameters: Schema.SchemaParameters<{ altNames?: string }> = {}): Schema.SchemaType {
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
           name: names.altNames || EMPTY_STRING,
-          value: GeneralName.schema()
-        })
-      ]
+          value: GeneralName.schema(),
+        }),
+      ],
     });
   }
 
@@ -100,32 +90,29 @@ export class AltName extends PkiObject implements IAltName {
       schema,
       AltName.schema({
         names: {
-          altNames: ALT_NAMES
-        }
-      })
+          altNames: ALT_NAMES,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     if (ALT_NAMES in asn1.result) {
-      this.altNames = Array.from(
-        asn1.result.altNames,
-        element => new GeneralName({ schema: element })
-      );
+      this.altNames = Array.from(asn1.result.altNames, (element) => new GeneralName({ schema: element }));
     }
   }
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: Array.from(this.altNames, o => o.toSchema())
+      value: Array.from(this.altNames, (o) => o.toSchema()),
     });
     //#endregion
   }
 
   public toJSON(): AltNameJson {
     return {
-      altNames: Array.from(this.altNames, o => o.toJSON())
+      altNames: Array.from(this.altNames, (o) => o.toJSON()),
     };
   }
 }

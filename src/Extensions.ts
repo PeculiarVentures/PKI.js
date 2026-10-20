@@ -42,11 +42,7 @@ export class Extensions extends PkiObject implements IExtensions {
   constructor(parameters: ExtensionsParameters = {}) {
     super();
 
-    this.extensions = pvutils.getParametersValue(
-      parameters,
-      EXTENSIONS,
-      Extensions.defaultValues(EXTENSIONS)
-    );
+    this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, Extensions.defaultValues(EXTENSIONS));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -80,11 +76,7 @@ export class Extensions extends PkiObject implements IExtensions {
    * @returns ASN.1 schema object
    */
   public static override schema(parameters: ExtensionsSchema = {}, optional = false) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       optional,
@@ -92,9 +84,9 @@ export class Extensions extends PkiObject implements IExtensions {
       value: [
         new asn1js.Repeated({
           name: names.extensions || EMPTY_STRING,
-          value: Extension.schema(names.extension || {})
-        })
-      ]
+          value: Extension.schema(names.extension || {}),
+        }),
+      ],
     });
   }
 
@@ -108,30 +100,27 @@ export class Extensions extends PkiObject implements IExtensions {
       schema,
       Extensions.schema({
         names: {
-          extensions: EXTENSIONS
-        }
-      })
+          extensions: EXTENSIONS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.extensions = Array.from(
-      asn1.result.extensions,
-      element => new Extension({ schema: element })
-    );
+    this.extensions = Array.from(asn1.result.extensions, (element) => new Extension({ schema: element }));
   }
 
   public toSchema(): asn1js.Sequence {
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: Array.from(this.extensions, o => o.toSchema())
+      value: Array.from(this.extensions, (o) => o.toSchema()),
     });
     //#endregion
   }
 
   public toJSON(): ExtensionsJson {
     return {
-      extensions: this.extensions.map(o => o.toJSON())
+      extensions: this.extensions.map((o) => o.toJSON()),
     };
   }
 }

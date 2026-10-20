@@ -115,17 +115,9 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
   constructor(parameters: TimeStampRespParameters = {}) {
     super();
 
-    this.status = pvutils.getParametersValue(
-      parameters,
-      STATUS,
-      TimeStampResp.defaultValues(STATUS)
-    );
+    this.status = pvutils.getParametersValue(parameters, STATUS, TimeStampResp.defaultValues(STATUS));
     if (TIME_STAMP_TOKEN in parameters) {
-      this.timeStampToken = pvutils.getParametersValue(
-        parameters,
-        TIME_STAMP_TOKEN,
-        TimeStampResp.defaultValues(TIME_STAMP_TOKEN)
-      );
+      this.timeStampToken = pvutils.getParametersValue(parameters, TIME_STAMP_TOKEN, TimeStampResp.defaultValues(TIME_STAMP_TOKEN));
     }
 
     if (parameters.schema) {
@@ -159,15 +151,9 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case STATUS:
-        return (
-          PKIStatusInfo.compareWithDefault(STATUS, memberValue.status) &&
-          "statusStrings" in memberValue === false &&
-          "failInfo" in memberValue === false
-        );
+        return PKIStatusInfo.compareWithDefault(STATUS, memberValue.status) && "statusStrings" in memberValue === false && "failInfo" in memberValue === false;
       case TIME_STAMP_TOKEN:
-        return (
-          memberValue.contentType === EMPTY_STRING && memberValue.content instanceof asn1js.Any
-        );
+        return memberValue.contentType === EMPTY_STRING && memberValue.content instanceof asn1js.Any;
       default:
         return super.defaultValues(memberName);
     }
@@ -186,13 +172,9 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
     parameters: Schema.SchemaParameters<{
       status?: PKIStatusInfoSchema;
       timeStampToken?: ContentInfoSchema;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || TIME_STAMP_RESP,
@@ -200,19 +182,19 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
         PKIStatusInfo.schema(
           names.status || {
             names: {
-              blockName: TIME_STAMP_RESP_STATUS
-            }
-          }
+              blockName: TIME_STAMP_RESP_STATUS,
+            },
+          },
         ),
         ContentInfo.schema(
           names.timeStampToken || {
             names: {
               blockName: TIME_STAMP_RESP_TOKEN,
-              optional: true
-            }
-          }
-        )
-      ]
+              optional: true,
+            },
+          },
+        ),
+      ],
     });
   }
 
@@ -226,8 +208,7 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
 
     // Get internal properties from parsed schema
     this.status = new PKIStatusInfo({ schema: asn1.result[TIME_STAMP_RESP_STATUS] });
-    if (TIME_STAMP_RESP_TOKEN in asn1.result)
-      this.timeStampToken = new ContentInfo({ schema: asn1.result[TIME_STAMP_RESP_TOKEN] });
+    if (TIME_STAMP_RESP_TOKEN in asn1.result) this.timeStampToken = new ContentInfo({ schema: asn1.result[TIME_STAMP_RESP_TOKEN] });
   }
 
   public toSchema(): asn1js.Sequence {
@@ -242,14 +223,14 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
 
   public toJSON(): TimeStampRespJson {
     const res: TimeStampRespJson = {
-      status: this.status.toJSON()
+      status: this.status.toJSON(),
     };
 
     if (this.timeStampToken) {
@@ -265,11 +246,7 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
    * @param crypto Crypto engine
    */
-  public async sign(
-    privateKey: CryptoKey,
-    hashAlgorithm?: string,
-    crypto = common.getCrypto(true)
-  ) {
+  public async sign(privateKey: CryptoKey, hashAlgorithm?: string, crypto = common.getCrypto(true)) {
     this.assertContentType();
 
     // Sign internal signed data value
@@ -287,9 +264,9 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
     verificationParameters: TimeStampRespVerifyParams = {
       signer: 0,
       trustedCerts: [],
-      data: EMPTY_BUFFER
+      data: EMPTY_BUFFER,
     },
-    crypto = common.getCrypto(true)
+    crypto = common.getCrypto(true),
   ): Promise<boolean> {
     this.assertContentType();
 

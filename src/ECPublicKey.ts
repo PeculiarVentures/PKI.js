@@ -23,8 +23,7 @@ export interface ECPublicKeyJson {
   y: string;
 }
 
-export type ECPublicKeyParameters = PkiObjectParameters &
-  Partial<IECPublicKey> & { json?: ECPublicKeyJson };
+export type ECPublicKeyParameters = PkiObjectParameters & Partial<IECPublicKey> & { json?: ECPublicKeyJson };
 
 /**
  * Represents the PrivateKeyInfo structure described in [RFC5480](https://datatracker.ietf.org/doc/html/rfc5480)
@@ -45,11 +44,7 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
 
     this.x = pvutils.getParametersValue(parameters, X, ECPublicKey.defaultValues(X));
     this.y = pvutils.getParametersValue(parameters, Y, ECPublicKey.defaultValues(Y));
-    this.namedCurve = pvutils.getParametersValue(
-      parameters,
-      NAMED_CURVE,
-      ECPublicKey.defaultValues(NAMED_CURVE)
-    );
+    this.namedCurve = pvutils.getParametersValue(parameters, NAMED_CURVE, ECPublicKey.defaultValues(NAMED_CURVE));
 
     if (parameters.json) {
       this.fromJSON(parameters.json);
@@ -88,14 +83,9 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
     switch (memberName) {
       case X:
       case Y:
-        return (
-          memberValue instanceof ArrayBuffer &&
-          pvutils.isEqualBuffer(memberValue, ECPublicKey.defaultValues(memberName))
-        );
+        return memberValue instanceof ArrayBuffer && pvutils.isEqualBuffer(memberValue, ECPublicKey.defaultValues(memberName));
       case NAMED_CURVE:
-        return (
-          typeof memberValue === "string" && memberValue === ECPublicKey.defaultValues(memberName)
-        );
+        return typeof memberValue === "string" && memberValue === ECPublicKey.defaultValues(memberName);
       default:
         return super.defaultValues(memberName);
     }
@@ -138,7 +128,7 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
 
   public toSchema(): asn1js.RawData {
     return new asn1js.RawData({
-      data: pvutils.utilConcatBuf(new Uint8Array([0x04]).buffer, this.x, this.y)
+      data: pvutils.utilConcatBuf(new Uint8Array([0x04]).buffer, this.x, this.y),
     });
   }
 
@@ -148,7 +138,7 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
     return {
       crv: namedCurve ? namedCurve.name : this.namedCurve,
       x: pvutils.toBase64(pvutils.arrayBufferToString(this.x), true, true, false),
-      y: pvutils.toBase64(pvutils.arrayBufferToString(this.y), true, true, false)
+      y: pvutils.toBase64(pvutils.arrayBufferToString(this.y), true, true, false),
     };
   }
 

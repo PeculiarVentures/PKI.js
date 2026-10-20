@@ -165,23 +165,17 @@
         <input id="password" type="text" />
       </p>
       <div id="input_div" class="border-block">
-        <label for="openssl_data" style="font-weight: bold; float: left"
-          >PEM encoded Open SSL Private Key:</label
-        >
+        <label for="openssl_data" style="font-weight: bold; float: left">PEM encoded Open SSL Private Key:</label>
         <textarea id="openssl_data">&lt;  Paste OpenSSL Encrypted Private Key here &gt;</textarea>
         <a id="open_ssl_decrypt">Decrypt</a>
       </div>
 
       <p class="header-block">Parsed OpenSSL Encrypted Private Key</p>
       <div id="output_div" class="border-block">
-        <label for="pkijs_data" style="font-weight: bold; float: left"
-          >Decrypted Open SSL Private Key:</label
-        >
+        <label for="pkijs_data" style="font-weight: bold; float: left">Decrypted Open SSL Private Key:</label>
         <textarea id="pkijs_data">&lt;  Decrypted Open SSL Private Key would be here &gt;</textarea>
         <p>
-          <label for="content_enc_alg_len" style="font-weight: bold"
-            >Content encryption algorithm length:</label
-          >
+          <label for="content_enc_alg_len" style="font-weight: bold">Content encryption algorithm length:</label>
           <select id="content_enc_alg_len">
             <option value="len_128">128</option>
             <!-- Currently in Google Chrome AES 192 bit keys are not supported

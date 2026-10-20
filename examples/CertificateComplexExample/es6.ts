@@ -53,7 +53,7 @@ function parseCertificate() {
     "2.5.4.42": "GN",
     "2.5.4.43": "I",
     "2.5.4.4": "SN",
-    "1.2.840.113549.1.9.1": "E-mail"
+    "1.2.840.113549.1.9.1": "E-mail",
   };
 
   for (const typeAndValue of certificate.issuer.typesAndValues) {
@@ -86,9 +86,7 @@ function parseCertificate() {
   //#endregion
 
   //#region Put information about X.509 certificate serial number
-  common.getElement("cert-serial-number").innerHTML = pvtsutils.Convert.ToHex(
-    certificate.serialNumber.valueBlock.valueHexView
-  );
+  common.getElement("cert-serial-number").innerHTML = pvtsutils.Convert.ToHex(certificate.serialNumber.valueBlock.valueHexView);
   //#endregion
 
   //#region Put information about issuance date
@@ -103,15 +101,12 @@ function parseCertificate() {
   let publicKeySize = "< unknown >";
 
   if (certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== -1) {
-    const rsaPublicKey = pkijs.RSAPublicKey.fromBER(
-      certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource
-    );
+    const rsaPublicKey = pkijs.RSAPublicKey.fromBER(certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
 
     const modulusView = rsaPublicKey.modulus.valueBlock.valueHexView;
     let modulusBitLength = 0;
 
-    if (modulusView[0] === 0x00)
-      modulusBitLength = (rsaPublicKey.modulus.valueBlock.valueHexView.byteLength - 1) * 8;
+    if (modulusView[0] === 0x00) modulusBitLength = (rsaPublicKey.modulus.valueBlock.valueHexView.byteLength - 1) * 8;
     else modulusBitLength = rsaPublicKey.modulus.valueBlock.valueHexView.byteLength * 8;
 
     publicKeySize = modulusBitLength.toString();
@@ -134,12 +129,11 @@ function parseCertificate() {
     "1.2.840.113549.1.1.14": "SHA224 with RSA",
     "1.2.840.113549.1.1.11": "SHA256 with RSA",
     "1.2.840.113549.1.1.12": "SHA384 with RSA",
-    "1.2.840.113549.1.1.13": "SHA512 with RSA"
+    "1.2.840.113549.1.1.13": "SHA512 with RSA",
   }; // array mapping of common algorithm OIDs and corresponding types
 
   let signatureAlgorithm = algomap[certificate.signatureAlgorithm.algorithmId];
-  if (typeof signatureAlgorithm === "undefined")
-    signatureAlgorithm = certificate.signatureAlgorithm.algorithmId;
+  if (typeof signatureAlgorithm === "undefined") signatureAlgorithm = certificate.signatureAlgorithm.algorithmId;
   else signatureAlgorithm = `${signatureAlgorithm} (${certificate.signatureAlgorithm.algorithmId})`;
 
   common.getElement("cert-sign-algo").innerHTML = signatureAlgorithm;
@@ -170,10 +164,7 @@ async function createCertificate() {
     console.info("Certificate created successfully!");
     console.info("Private key exported successfully!");
 
-    common.getElement("new_signed_data").innerHTML = [
-      utils.toPEM(cert.certificateBuffer, "CERTIFICATE"),
-      utils.toPEM(cert.privateKeyBuffer, "PRIVATE KEY")
-    ].join("\n\n");
+    common.getElement("new_signed_data").innerHTML = [utils.toPEM(cert.certificateBuffer, "CERTIFICATE"), utils.toPEM(cert.privateKeyBuffer, "PRIVATE KEY")].join("\n\n");
 
     alert("Certificate created successfully!");
   } catch (error) {
@@ -183,12 +174,7 @@ async function createCertificate() {
 
 async function verifyCertificate() {
   try {
-    const chainStatus = await example.verifyCertificate(
-      certificateBuffer,
-      intermediateCertificates,
-      trustedCertificates,
-      crls
-    );
+    const chainStatus = await example.verifyCertificate(certificateBuffer, intermediateCertificates, trustedCertificates, crls);
     alert(`Verification result: ${chainStatus.result}`);
   } catch (e) {
     common.processError(e, "Error on Certificate verifying");
@@ -209,25 +195,25 @@ function handleFileBrowse(evt: any) {
 }
 
 function handleCABundle(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     trustedCertificates.push(...common.parseCertificate(file));
   });
 }
 
 function handleTrustedCertsFile(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     trustedCertificates.push(...common.parseCertificate(file));
   });
 }
 
 function handleInterCertsFile(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     intermediateCertificates.push(...common.parseCertificate(file));
   });
 }
 
 function handleCRLsFile(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     const crl = pkijs.CertificateRevocationList.fromBER(file);
 
     crls.push(crl);

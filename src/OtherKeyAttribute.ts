@@ -39,17 +39,9 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
   constructor(parameters: OtherKeyAttributeParameters = {}) {
     super();
 
-    this.keyAttrId = pvutils.getParametersValue(
-      parameters,
-      KEY_ATTR_ID,
-      OtherKeyAttribute.defaultValues(KEY_ATTR_ID)
-    );
+    this.keyAttrId = pvutils.getParametersValue(parameters, KEY_ATTR_ID, OtherKeyAttribute.defaultValues(KEY_ATTR_ID));
     if (KEY_ATTR in parameters) {
-      this.keyAttr = pvutils.getParametersValue(
-        parameters,
-        KEY_ATTR,
-        OtherKeyAttribute.defaultValues(KEY_ATTR)
-      );
+      this.keyAttr = pvutils.getParametersValue(parameters, KEY_ATTR, OtherKeyAttribute.defaultValues(KEY_ATTR));
     }
 
     if (parameters.schema) {
@@ -80,10 +72,7 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
    * @param memberName String name for a class member
    * @param memberValue Value to compare with default value
    */
-  public static compareWithDefault<T extends object>(
-    memberName: string,
-    memberValue: T
-  ): memberValue is T {
+  public static compareWithDefault<T extends object>(memberName: string, memberValue: T): memberValue is T {
     switch (memberName) {
       case KEY_ATTR_ID:
         return typeof memberValue === "string" && memberValue === EMPTY_STRING;
@@ -104,11 +93,7 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
    *```
    */
   public static override schema(parameters: OtherKeyAttributeSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       optional: names.optional || true,
@@ -117,9 +102,9 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
         new asn1js.ObjectIdentifier({ name: names.keyAttrId || EMPTY_STRING }),
         new asn1js.Any({
           optional: true,
-          name: names.keyAttr || EMPTY_STRING
-        })
-      ]
+          name: names.keyAttr || EMPTY_STRING,
+        }),
+      ],
     });
   }
 
@@ -134,9 +119,9 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
       OtherKeyAttribute.schema({
         names: {
           keyAttrId: KEY_ATTR_ID,
-          keyAttr: KEY_ATTR
-        }
-      })
+          keyAttr: KEY_ATTR,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -160,14 +145,14 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
 
   public toJSON(): OtherKeyAttributeJson {
     const res: OtherKeyAttributeJson = {
-      keyAttrId: this.keyAttrId
+      keyAttrId: this.keyAttrId,
     };
 
     if (KEY_ATTR in this) {

@@ -1,11 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import {
-  EncryptedContentInfo,
-  EncryptedContentInfoJson,
-  EncryptedContentInfoSchema
-} from "./EncryptedContentInfo";
+import { EncryptedContentInfo, EncryptedContentInfoJson, EncryptedContentInfoSchema } from "./EncryptedContentInfo";
 import { Attribute, AttributeJson } from "./Attribute";
 import * as Schema from "./Schema";
 import { ArgumentError, AsnError } from "./errors";
@@ -101,22 +97,10 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
   constructor(parameters: EncryptedDataParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(
-      parameters,
-      VERSION,
-      EncryptedData.defaultValues(VERSION)
-    );
-    this.encryptedContentInfo = pvutils.getParametersValue(
-      parameters,
-      ENCRYPTED_CONTENT_INFO,
-      EncryptedData.defaultValues(ENCRYPTED_CONTENT_INFO)
-    );
+    this.version = pvutils.getParametersValue(parameters, VERSION, EncryptedData.defaultValues(VERSION));
+    this.encryptedContentInfo = pvutils.getParametersValue(parameters, ENCRYPTED_CONTENT_INFO, EncryptedData.defaultValues(ENCRYPTED_CONTENT_INFO));
     if (UNPROTECTED_ATTRS in parameters) {
-      this.unprotectedAttrs = pvutils.getParametersValue(
-        parameters,
-        UNPROTECTED_ATTRS,
-        EncryptedData.defaultValues(UNPROTECTED_ATTRS)
-      );
+      this.unprotectedAttrs = pvutils.getParametersValue(parameters, UNPROTECTED_ATTRS, EncryptedData.defaultValues(UNPROTECTED_ATTRS));
     }
 
     if (parameters.schema) {
@@ -130,9 +114,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
    * @returns Default value
    */
   public static override defaultValues(memberName: typeof VERSION): number;
-  public static override defaultValues(
-    memberName: typeof ENCRYPTED_CONTENT_INFO
-  ): EncryptedContentInfo;
+  public static override defaultValues(memberName: typeof ENCRYPTED_CONTENT_INFO): EncryptedContentInfo;
   public static override defaultValues(memberName: typeof UNPROTECTED_ATTRS): Attribute[];
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
@@ -160,10 +142,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
         // TODO move to isEmpty method
         return (
           EncryptedContentInfo.compareWithDefault("contentType", memberValue.contentType) &&
-          EncryptedContentInfo.compareWithDefault(
-            "contentEncryptionAlgorithm",
-            memberValue.contentEncryptionAlgorithm
-          ) &&
+          EncryptedContentInfo.compareWithDefault("contentEncryptionAlgorithm", memberValue.contentEncryptionAlgorithm) &&
           EncryptedContentInfo.compareWithDefault("encryptedContent", memberValue.encryptedContent)
         );
       case UNPROTECTED_ATTRS:
@@ -188,13 +167,9 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
       version?: string;
       encryptedContentInfo?: EncryptedContentInfoSchema;
       unprotectedAttrs?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -205,16 +180,16 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
           value: [
             new asn1js.Repeated({
               name: names.unprotectedAttrs || EMPTY_STRING,
-              value: Attribute.schema()
-            })
-          ]
-        })
-      ]
+              value: Attribute.schema(),
+            }),
+          ],
+        }),
+      ],
     });
   }
 
@@ -231,25 +206,21 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
           version: VERSION,
           encryptedContentInfo: {
             names: {
-              blockName: ENCRYPTED_CONTENT_INFO
-            }
+              blockName: ENCRYPTED_CONTENT_INFO,
+            },
           },
-          unprotectedAttrs: UNPROTECTED_ATTRS
-        }
-      })
+          unprotectedAttrs: UNPROTECTED_ATTRS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     this.version = asn1.result.version.valueBlock.valueDec;
     this.encryptedContentInfo = new EncryptedContentInfo({
-      schema: asn1.result.encryptedContentInfo
+      schema: asn1.result.encryptedContentInfo,
     });
-    if (UNPROTECTED_ATTRS in asn1.result)
-      this.unprotectedAttrs = Array.from(
-        asn1.result.unprotectedAttrs,
-        element => new Attribute({ schema: element })
-      );
+    if (UNPROTECTED_ATTRS in asn1.result) this.unprotectedAttrs = Array.from(asn1.result.unprotectedAttrs, (element) => new Attribute({ schema: element }));
   }
 
   public toSchema(): asn1js.Sequence {
@@ -265,17 +236,17 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: Array.from(this.unprotectedAttrs, o => o.toSchema())
-        })
+          value: Array.from(this.unprotectedAttrs, (o) => o.toSchema()),
+        }),
       );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
@@ -283,11 +254,10 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
   public toJSON(): EncryptedDataJson {
     const res: EncryptedDataJson = {
       version: this.version,
-      encryptedContentInfo: this.encryptedContentInfo.toJSON()
+      encryptedContentInfo: this.encryptedContentInfo.toJSON(),
     };
 
-    if (this.unprotectedAttrs)
-      res.unprotectedAttrs = Array.from(this.unprotectedAttrs, o => o.toJSON());
+    if (this.unprotectedAttrs) res.unprotectedAttrs = Array.from(this.unprotectedAttrs, (o) => o.toJSON());
 
     return res;
   }
@@ -296,10 +266,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
    * Creates a new CMS Encrypted Data content
    * @param parameters Parameters necessary for encryption
    */
-  public async encrypt(
-    parameters: EncryptedDataEncryptParams,
-    crypto = common.getCrypto(true)
-  ): Promise<void> {
+  public async encrypt(parameters: EncryptedDataEncryptParams, crypto = common.getCrypto(true)): Promise<void> {
     //#region Check for input parameters
     ArgumentError.assert(parameters, "parameters", "object");
     //#endregion
@@ -307,7 +274,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
     //#region Set "contentType" parameter
     const encryptParams: CryptoEngineEncryptParams = {
       ...parameters,
-      contentType: "1.2.840.113549.1.7.1"
+      contentType: "1.2.840.113549.1.7.1",
     };
     //#endregion
 
@@ -324,7 +291,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
     parameters: {
       password: ArrayBuffer;
     },
-    crypto = common.getCrypto(true)
+    crypto = common.getCrypto(true),
   ): Promise<ArrayBuffer> {
     // Check for input parameters
     ArgumentError.assert(parameters, "parameters", "object");
@@ -332,7 +299,7 @@ export class EncryptedData extends PkiObject implements IEncryptedData {
     // Set ENCRYPTED_CONTENT_INFO value
     const decryptParams = {
       ...parameters,
-      encryptedContentInfo: this.encryptedContentInfo
+      encryptedContentInfo: this.encryptedContentInfo,
     };
 
     return crypto.decryptEncryptedContentInfo(decryptParams);

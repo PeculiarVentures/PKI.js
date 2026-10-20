@@ -37,16 +37,8 @@ export class PolicyMapping extends PkiObject implements IPolicyMapping {
   constructor(parameters: PolicyMappingParameters = {}) {
     super();
 
-    this.issuerDomainPolicy = pvutils.getParametersValue(
-      parameters,
-      ISSUER_DOMAIN_POLICY,
-      PolicyMapping.defaultValues(ISSUER_DOMAIN_POLICY)
-    );
-    this.subjectDomainPolicy = pvutils.getParametersValue(
-      parameters,
-      SUBJECT_DOMAIN_POLICY,
-      PolicyMapping.defaultValues(SUBJECT_DOMAIN_POLICY)
-    );
+    this.issuerDomainPolicy = pvutils.getParametersValue(parameters, ISSUER_DOMAIN_POLICY, PolicyMapping.defaultValues(ISSUER_DOMAIN_POLICY));
+    this.subjectDomainPolicy = pvutils.getParametersValue(parameters, SUBJECT_DOMAIN_POLICY, PolicyMapping.defaultValues(SUBJECT_DOMAIN_POLICY));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -84,20 +76,13 @@ export class PolicyMapping extends PkiObject implements IPolicyMapping {
     parameters: Schema.SchemaParameters<{
       issuerDomainPolicy?: string;
       subjectDomainPolicy?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        new asn1js.ObjectIdentifier({ name: names.issuerDomainPolicy || EMPTY_STRING }),
-        new asn1js.ObjectIdentifier({ name: names.subjectDomainPolicy || EMPTY_STRING })
-      ]
+      value: [new asn1js.ObjectIdentifier({ name: names.issuerDomainPolicy || EMPTY_STRING }), new asn1js.ObjectIdentifier({ name: names.subjectDomainPolicy || EMPTY_STRING })],
     });
   }
 
@@ -112,9 +97,9 @@ export class PolicyMapping extends PkiObject implements IPolicyMapping {
       PolicyMapping.schema({
         names: {
           issuerDomainPolicy: ISSUER_DOMAIN_POLICY,
-          subjectDomainPolicy: SUBJECT_DOMAIN_POLICY
-        }
-      })
+          subjectDomainPolicy: SUBJECT_DOMAIN_POLICY,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -126,17 +111,14 @@ export class PolicyMapping extends PkiObject implements IPolicyMapping {
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [
-        new asn1js.ObjectIdentifier({ value: this.issuerDomainPolicy }),
-        new asn1js.ObjectIdentifier({ value: this.subjectDomainPolicy })
-      ]
+      value: [new asn1js.ObjectIdentifier({ value: this.issuerDomainPolicy }), new asn1js.ObjectIdentifier({ value: this.subjectDomainPolicy })],
     });
   }
 
   public toJSON(): PolicyMappingJson {
     return {
       issuerDomainPolicy: this.issuerDomainPolicy,
-      subjectDomainPolicy: this.subjectDomainPolicy
+      subjectDomainPolicy: this.subjectDomainPolicy,
     };
   }
 }

@@ -161,11 +161,8 @@
     <div class="wrapper">
       <p class="header-block">Create new TSP request</p>
       <div id="output_div" class="border-block">
-        <label for="new_signed_data" style="font-weight: bold; float: left"
-          >BASE-64 encoded new TSP request:</label
-        >
-        <textarea id="new_signed_data">
-&lt;  New encoded TSP request will be stored here &gt;</textarea>
+        <label for="new_signed_data" style="font-weight: bold; float: left">BASE-64 encoded new TSP request:</label>
+        <textarea id="new_signed_data">&lt;  New encoded TSP request will be stored here &gt;</textarea>
         <a id="create-tsp-req">Create</a>
       </div>
 
@@ -184,15 +181,9 @@
             </tr>
           </table>
         </div>
-        <p id="tsp-req-pol" style="display: none">
-          <span class="type">Policy:</span> <span id="tsp-req-policy"></span>
-        </p>
-        <p id="tsp-req-non" style="display: none">
-          <span class="type">Nonce:</span> <span id="tsp-req-nonce"></span>
-        </p>
-        <p id="tsp-req-cert" style="display: none">
-          <span class="type">Cert. req. exists:</span> <span id="tsp-req-cert-req"></span>
-        </p>
+        <p id="tsp-req-pol" style="display: none"><span class="type">Policy:</span> <span id="tsp-req-policy"></span></p>
+        <p id="tsp-req-non" style="display: none"><span class="type">Nonce:</span> <span id="tsp-req-nonce"></span></p>
+        <p id="tsp-req-cert" style="display: none"><span class="type">Cert. req. exists:</span> <span id="tsp-req-cert-req"></span></p>
         <div id="tsp-req-extn-div" class="two-col" style="display: none">
           <p class="subject">Extensions:</p>
           <table id="tsp-req-extn-table">

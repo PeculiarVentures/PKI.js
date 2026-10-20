@@ -10,10 +10,7 @@ export let signAlg = "RSASSA-PKCS1-V1_5";
 
 async function createPKCS10() {
   pkcs10Buffer = await example.createPKCS10Internal(hashAlg, signAlg);
-  common.getElement("pem-text-block", "textarea").value = utils.toPEM(
-    pkcs10Buffer,
-    "CERTIFICATE REQUEST"
-  );
+  common.getElement("pem-text-block", "textarea").value = utils.toPEM(pkcs10Buffer, "CERTIFICATE REQUEST");
   parsePKCS10();
 }
 
@@ -40,7 +37,7 @@ function parsePKCS10() {
     "2.5.4.42": "GN",
     "2.5.4.43": "I",
     "2.5.4.4": "SN",
-    "1.2.840.113549.1.9.1": "E-mail"
+    "1.2.840.113549.1.9.1": "E-mail",
   };
 
   for (let i = 0; i < pkcs10.subject.typesAndValues.length; i++) {
@@ -50,8 +47,7 @@ function parsePKCS10() {
     const subjval = pkcs10.subject.typesAndValues[i].value.valueBlock.value;
     const ulrow = `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
 
-    common.getElement("pkcs10-subject").innerHTML =
-      common.getElement("pkcs10-subject").innerHTML + ulrow;
+    common.getElement("pkcs10-subject").innerHTML = common.getElement("pkcs10-subject").innerHTML + ulrow;
     if (typeval === "CN") {
       common.getElement("pkcs10-subject-cn").innerHTML = subjval;
     }
@@ -62,14 +58,11 @@ function parsePKCS10() {
   let publicKeySize = "< unknown >";
 
   if (pkcs10.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== -1) {
-    const rsaPublicKeySimple = pkijs.RSAPublicKey.fromBER(
-      pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource
-    );
+    const rsaPublicKeySimple = pkijs.RSAPublicKey.fromBER(pkcs10.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
     const modulusView = rsaPublicKeySimple.modulus.valueBlock.valueHexView;
     let modulusBitLength = 0;
 
-    if (modulusView[0] === 0x00)
-      modulusBitLength = (rsaPublicKeySimple.modulus.valueBlock.valueHexView.byteLength - 1) * 8;
+    if (modulusView[0] === 0x00) modulusBitLength = (rsaPublicKeySimple.modulus.valueBlock.valueHexView.byteLength - 1) * 8;
     else modulusBitLength = rsaPublicKeySimple.modulus.valueBlock.valueHexView.byteLength * 8;
 
     publicKeySize = modulusBitLength.toString();
@@ -92,11 +85,10 @@ function parsePKCS10() {
     "1.2.840.113549.1.1.14": "SHA224 with RSA",
     "1.2.840.113549.1.1.11": "SHA256 with RSA",
     "1.2.840.113549.1.1.12": "SHA384 with RSA",
-    "1.2.840.113549.1.1.13": "SHA512 with RSA"
+    "1.2.840.113549.1.1.13": "SHA512 with RSA",
   };
   let signatureAlgorithm = algomap[pkcs10.signatureAlgorithm.algorithmId];
-  if (typeof signatureAlgorithm === "undefined")
-    signatureAlgorithm = pkcs10.signatureAlgorithm.algorithmId;
+  if (typeof signatureAlgorithm === "undefined") signatureAlgorithm = pkcs10.signatureAlgorithm.algorithmId;
   else signatureAlgorithm = `${signatureAlgorithm} (${pkcs10.signatureAlgorithm.algorithmId})`;
 
   common.getElement("sig-algo").innerHTML = signatureAlgorithm;
@@ -123,20 +115,12 @@ function parsePKCS10() {
           pkcs10.attributes[i].values[j] instanceof asn1js.GeneralString ||
           pkcs10.attributes[i].values[j] instanceof asn1js.CharacterString
         ) {
-          subjval =
-            subjval +
-            (subjval.length === 0 ? "" : ";") +
-            pkcs10.attributes[i].values[j].valueBlock.value;
-        } else
-          subjval =
-            subjval +
-            (subjval.length === 0 ? "" : ";") +
-            pkcs10.attributes[i].values[j].constructor.blockName();
+          subjval = subjval + (subjval.length === 0 ? "" : ";") + pkcs10.attributes[i].values[j].valueBlock.value;
+        } else subjval = subjval + (subjval.length === 0 ? "" : ";") + pkcs10.attributes[i].values[j].constructor.blockName();
       }
 
       const ulrow = `<li><p><span>${typeval}</span> ${subjval}</p></li>`;
-      common.getElement("pkcs10-exten").innerHTML =
-        common.getElement("pkcs10-exten").innerHTML + ulrow;
+      common.getElement("pkcs10-exten").innerHTML = common.getElement("pkcs10-exten").innerHTML + ulrow;
     }
 
     common.getElement("pkcs10-attributes").style.display = "block";

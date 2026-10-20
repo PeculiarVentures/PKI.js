@@ -1,9 +1,6 @@
 import * as pkijs from "../src/index";
 
-function getKeyAgreeAlgorithmParams(
-  operation: pkijs.CryptoEngineAlgorithmOperation,
-  curveName: string
-) {
+function getKeyAgreeAlgorithmParams(operation: pkijs.CryptoEngineAlgorithmOperation, curveName: string) {
   const algorithm = pkijs.getAlgorithmParameters("ECDH", operation) as any;
   algorithm.algorithm.namedCurve = curveName;
   return algorithm;
@@ -23,11 +20,7 @@ export async function createKeyPair(curveName: string): Promise<CreateKeyPairRes
 
   // Create a new key pair
   const algorithm = getKeyAgreeAlgorithmParams("generateKey", curveName);
-  const { privateKey, publicKey } = (await crypto.generateKey(
-    algorithm.algorithm,
-    true,
-    algorithm.usages
-  )) as Required<CryptoKeyPair>;
+  const { privateKey, publicKey } = (await crypto.generateKey(algorithm.algorithm, true, algorithm.usages)) as Required<CryptoKeyPair>;
 
   // Exporting private key
   const pkcs8 = await crypto.exportKey("pkcs8", privateKey);
@@ -42,18 +35,14 @@ export async function createKeyPair(curveName: string): Promise<CreateKeyPairRes
   return {
     pkcs8,
     spki,
-    keyPairIdBuffer
+    keyPairIdBuffer,
   };
 }
 
 /**
  * Encrypt input data
  */
-export async function envelopedEncrypt(
-  keys: CreateKeyPairResult,
-  alg: EcKeyAlgorithm & { kdfHash: string },
-  valueBuffer: ArrayBuffer
-): Promise<ArrayBuffer> {
+export async function envelopedEncrypt(keys: CreateKeyPairResult, alg: EcKeyAlgorithm & { kdfHash: string }, valueBuffer: ArrayBuffer): Promise<ArrayBuffer> {
   const crypto = pkijs.getCrypto(true);
 
   const cmsEnveloped = new pkijs.EnvelopedData();
@@ -64,7 +53,7 @@ export async function envelopedEncrypt(
   //#endregion
 
   cmsEnveloped.addRecipientByKeyIdentifier(publicKey, keys.keyPairIdBuffer, {
-    kdfAlgorithm: alg.kdfHash
+    kdfAlgorithm: alg.kdfHash,
   });
   await cmsEnveloped.encrypt(alg, valueBuffer);
 
@@ -85,6 +74,6 @@ export async function envelopedDecrypt(pkcs8: ArrayBuffer, cmsEnvelopedBuffer: A
   //#endregion
 
   return cmsEnvelopedSimp.decrypt(0, {
-    recipientPrivateKey: pkcs8
+    recipientPrivateKey: pkcs8,
   });
 }

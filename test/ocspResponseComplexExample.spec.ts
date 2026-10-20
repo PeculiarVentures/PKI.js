@@ -8,8 +8,8 @@ describe("OCSP Response Complex Example", () => {
   const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
   //#endregion
 
-  signAlgs.forEach(sigAlg => {
-    hashAlgs.forEach(hashAlg => {
+  signAlgs.forEach((sigAlg) => {
+    hashAlgs.forEach((hashAlg) => {
       it(`${hashAlg} + ${sigAlg}`, async () => {
         const ocspResp = await example.createOCSPResp(hashAlg, sigAlg);
         const ocspRespRaw = ocspResp.ocspResp.toSchema().toBER();

@@ -43,17 +43,9 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
     super();
 
     this.base = pvutils.getParametersValue(parameters, BASE, GeneralSubtree.defaultValues(BASE));
-    this.minimum = pvutils.getParametersValue(
-      parameters,
-      MINIMUM,
-      GeneralSubtree.defaultValues(MINIMUM)
-    );
+    this.minimum = pvutils.getParametersValue(parameters, MINIMUM, GeneralSubtree.defaultValues(MINIMUM));
     if (MAXIMUM in parameters) {
-      this.maximum = pvutils.getParametersValue(
-        parameters,
-        MAXIMUM,
-        GeneralSubtree.defaultValues(MAXIMUM)
-      );
+      this.maximum = pvutils.getParametersValue(parameters, MAXIMUM, GeneralSubtree.defaultValues(MAXIMUM));
     }
 
     if (parameters.schema) {
@@ -99,13 +91,9 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
       base?: GeneralNameSchema;
       minimum?: string;
       maximum?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -115,19 +103,19 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [new asn1js.Integer({ name: names.minimum || EMPTY_STRING })]
+          value: [new asn1js.Integer({ name: names.minimum || EMPTY_STRING })],
         }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: [new asn1js.Integer({ name: names.maximum || EMPTY_STRING })]
-        })
-      ]
+          value: [new asn1js.Integer({ name: names.maximum || EMPTY_STRING })],
+        }),
+      ],
     });
   }
 
@@ -143,13 +131,13 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
         names: {
           base: {
             names: {
-              blockName: BASE
-            }
+              blockName: BASE,
+            },
           },
           minimum: MINIMUM,
-          maximum: MAXIMUM
-        }
-      })
+          maximum: MAXIMUM,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -187,10 +175,10 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [valueMinimum]
-        })
+          value: [valueMinimum],
+        }),
       );
     }
 
@@ -208,24 +196,24 @@ export class GeneralSubtree extends PkiObject implements IGeneralSubtree {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: [valueMaximum]
-        })
+          value: [valueMaximum],
+        }),
       );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
 
   public toJSON(): GeneralSubtreeJson {
     const res: GeneralSubtreeJson = {
-      base: this.base.toJSON()
+      base: this.base.toJSON(),
     };
 
     if (this.minimum !== 0) {

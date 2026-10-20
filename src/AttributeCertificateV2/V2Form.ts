@@ -45,25 +45,13 @@ export class V2Form extends PkiObject implements IV2Form {
     super();
 
     if (ISSUER_NAME in parameters) {
-      this.issuerName = pvutils.getParametersValue(
-        parameters,
-        ISSUER_NAME,
-        V2Form.defaultValues(ISSUER_NAME)
-      );
+      this.issuerName = pvutils.getParametersValue(parameters, ISSUER_NAME, V2Form.defaultValues(ISSUER_NAME));
     }
     if (BASE_CERTIFICATE_ID in parameters) {
-      this.baseCertificateID = pvutils.getParametersValue(
-        parameters,
-        BASE_CERTIFICATE_ID,
-        V2Form.defaultValues(BASE_CERTIFICATE_ID)
-      );
+      this.baseCertificateID = pvutils.getParametersValue(parameters, BASE_CERTIFICATE_ID, V2Form.defaultValues(BASE_CERTIFICATE_ID));
     }
     if (OBJECT_DIGEST_INFO in parameters) {
-      this.objectDigestInfo = pvutils.getParametersValue(
-        parameters,
-        OBJECT_DIGEST_INFO,
-        V2Form.defaultValues(OBJECT_DIGEST_INFO)
-      );
+      this.objectDigestInfo = pvutils.getParametersValue(parameters, OBJECT_DIGEST_INFO, V2Form.defaultValues(OBJECT_DIGEST_INFO));
     }
 
     if (parameters.schema) {
@@ -111,13 +99,9 @@ export class V2Form extends PkiObject implements IV2Form {
       issuerName?: string;
       baseCertificateID?: string;
       objectDigestInfo?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -125,30 +109,30 @@ export class V2Form extends PkiObject implements IV2Form {
         GeneralNames.schema(
           {
             names: {
-              blockName: names.issuerName
-            }
+              blockName: names.issuerName,
+            },
           },
-          true
+          true,
         ),
         new asn1js.Constructed({
           optional: true,
           name: names.baseCertificateID || EMPTY_STRING,
           idBlock: {
             tagClass: 3,
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: IssuerSerial.schema().valueBlock.value
+          value: IssuerSerial.schema().valueBlock.value,
         }),
         new asn1js.Constructed({
           optional: true,
           name: names.objectDigestInfo || EMPTY_STRING,
           idBlock: {
             tagClass: 3,
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: ObjectDigestInfo.schema().valueBlock.value
-        })
-      ]
+          value: ObjectDigestInfo.schema().valueBlock.value,
+        }),
+      ],
     });
   }
 
@@ -164,29 +148,28 @@ export class V2Form extends PkiObject implements IV2Form {
         names: {
           issuerName: ISSUER_NAME,
           baseCertificateID: BASE_CERTIFICATE_ID,
-          objectDigestInfo: OBJECT_DIGEST_INFO
-        }
-      })
+          objectDigestInfo: OBJECT_DIGEST_INFO,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
-    if (ISSUER_NAME in asn1.result)
-      this.issuerName = new GeneralNames({ schema: asn1.result.issuerName });
+    if (ISSUER_NAME in asn1.result) this.issuerName = new GeneralNames({ schema: asn1.result.issuerName });
 
     if (BASE_CERTIFICATE_ID in asn1.result) {
       this.baseCertificateID = new IssuerSerial({
         schema: new asn1js.Sequence({
-          value: asn1.result.baseCertificateID.valueBlock.value
-        })
+          value: asn1.result.baseCertificateID.valueBlock.value,
+        }),
       });
     }
 
     if (OBJECT_DIGEST_INFO in asn1.result) {
       this.objectDigestInfo = new ObjectDigestInfo({
         schema: new asn1js.Sequence({
-          value: asn1.result.objectDigestInfo.valueBlock.value
-        })
+          value: asn1.result.objectDigestInfo.valueBlock.value,
+        }),
       });
     }
     //#endregion
@@ -202,10 +185,10 @@ export class V2Form extends PkiObject implements IV2Form {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3,
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: this.baseCertificateID.toSchema().valueBlock.value
-        })
+          value: this.baseCertificateID.toSchema().valueBlock.value,
+        }),
       );
     }
 
@@ -214,10 +197,10 @@ export class V2Form extends PkiObject implements IV2Form {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3,
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: this.objectDigestInfo.toSchema().valueBlock.value
-        })
+          value: this.objectDigestInfo.toSchema().valueBlock.value,
+        }),
       );
     }
 

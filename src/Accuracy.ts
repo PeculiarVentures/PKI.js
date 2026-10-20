@@ -59,11 +59,7 @@ export class Accuracy extends PkiObject implements IAccuracy {
     super();
 
     if (SECONDS in parameters) {
-      this.seconds = pvutils.getParametersValue(
-        parameters,
-        SECONDS,
-        Accuracy.defaultValues(SECONDS)
-      );
+      this.seconds = pvutils.getParametersValue(parameters, SECONDS, Accuracy.defaultValues(SECONDS));
     }
     if (MILLIS in parameters) {
       this.millis = pvutils.getParametersValue(parameters, MILLIS, Accuracy.defaultValues(MILLIS));
@@ -102,10 +98,7 @@ export class Accuracy extends PkiObject implements IAccuracy {
    * @param memberName String name for a class member
    * @param memberValue Value to compare with default value
    */
-  public static compareWithDefault(
-    memberName: typeof SECONDS | typeof MILLIS | typeof MICROS,
-    memberValue: number
-  ): boolean;
+  public static compareWithDefault(memberName: typeof SECONDS | typeof MILLIS | typeof MICROS, memberValue: number): boolean;
   public static compareWithDefault(memberName: string, memberValue: any): boolean;
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
@@ -129,11 +122,7 @@ export class Accuracy extends PkiObject implements IAccuracy {
    *```
    */
   public static override schema(parameters: AccuracySchema = {}): any {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -141,25 +130,25 @@ export class Accuracy extends PkiObject implements IAccuracy {
       value: [
         new asn1js.Integer({
           optional: true,
-          name: names.seconds || EMPTY_STRING
+          name: names.seconds || EMPTY_STRING,
         }),
         new asn1js.Primitive({
           name: names.millis || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
-          }
+            tagNumber: 0, // [0]
+          },
         }),
         new asn1js.Primitive({
           name: names.micros || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
-          }
-        })
-      ]
+            tagNumber: 1, // [1]
+          },
+        }),
+      ],
     });
   }
 
@@ -175,9 +164,9 @@ export class Accuracy extends PkiObject implements IAccuracy {
         names: {
           seconds: SECONDS,
           millis: MILLIS,
-          micros: MICROS
-        }
-      })
+          micros: MICROS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -208,10 +197,10 @@ export class Accuracy extends PkiObject implements IAccuracy {
         new asn1js.Primitive({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          valueHex: intMillis.valueBlock.valueHexView
-        })
+          valueHex: intMillis.valueBlock.valueHexView,
+        }),
       );
     }
 
@@ -222,16 +211,16 @@ export class Accuracy extends PkiObject implements IAccuracy {
         new asn1js.Primitive({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          valueHex: intMicros.valueBlock.valueHexView
-        })
+          valueHex: intMicros.valueBlock.valueHexView,
+        }),
       );
     }
     //#endregion
 
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
   }
   public toJSON(): AccuracyJson {

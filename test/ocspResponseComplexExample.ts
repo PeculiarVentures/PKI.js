@@ -12,10 +12,7 @@ interface CreateOcspRespResult extends utils.CertificateWithPrivateKey {
  * @param signAlg Signing algorithm
  * @returns
  */
-export async function createOCSPResp(
-  hashAlg: string,
-  signAlg: string
-): Promise<CreateOcspRespResult> {
+export async function createOCSPResp(hashAlg: string, signAlg: string): Promise<CreateOcspRespResult> {
   const ocspRespSimpl = new pkijs.OCSPResponse();
   const ocspBasicResp = new pkijs.BasicOCSPResponse();
 
@@ -40,8 +37,8 @@ export async function createOCSPResp(
   response.certStatus = new asn1js.Primitive({
     idBlock: {
       tagClass: 3, // CONTEXT-SPECIFIC
-      tagNumber: 0 // [0]
-    }
+      tagNumber: 0, // [0]
+    },
   }); // status - success
   response.thisUpdate = new Date();
   response.nextUpdate = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); // Next day
@@ -50,8 +47,8 @@ export async function createOCSPResp(
     new pkijs.Extension({
       extnID: "1.3.6.1.5.5.7.48.1.6", // id-pkix-ocsp-archive-cutoff
       critical: false,
-      extnValue: new asn1js.GeneralizedTime({ valueDate: archiveCutoffDate }).toBER(false)
-    })
+      extnValue: new asn1js.GeneralizedTime({ valueDate: archiveCutoffDate }).toBER(false),
+    }),
   ];
 
   ocspBasicResp.tbsResponseData.responses.push(response);
@@ -66,7 +63,7 @@ export async function createOCSPResp(
 
   return {
     ...certWithKey,
-    ocspResp: ocspRespSimpl
+    ocspResp: ocspRespSimpl,
   };
 }
 
@@ -76,19 +73,14 @@ export async function createOCSPResp(
  * @param trustedCertificates List of trusted certificates
  * @returns
  */
-export async function verifyOCSPResp(
-  ocspResponseBuffer: ArrayBuffer,
-  trustedCertificates: pkijs.Certificate[]
-): Promise<boolean> {
+export async function verifyOCSPResp(ocspResponseBuffer: ArrayBuffer, trustedCertificates: pkijs.Certificate[]): Promise<boolean> {
   let ocspBasicResp: pkijs.BasicOCSPResponse;
 
   //#region Decode existing OCSP response
   const ocspRespSimpl = pkijs.OCSPResponse.fromBER(ocspResponseBuffer);
 
   if (ocspRespSimpl.responseBytes) {
-    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(
-      ocspRespSimpl.responseBytes.response.valueBlock.valueHexView as BufferSource
-    );
+    ocspBasicResp = pkijs.BasicOCSPResponse.fromBER(ocspRespSimpl.responseBytes.response.valueBlock.valueHexView as BufferSource);
   } else {
     throw new Error('No "ResponseBytes" in the OCSP Response - nothing to verify');
   }
@@ -103,7 +95,7 @@ export async function verifyOCSPResp(
   // responder, so it is intentionally omitted.
   return ocspBasicResp.verify({
     trustedCerts: trustedCertificates,
-    trustedResponders: trustedCertificates
+    trustedResponders: trustedCertificates,
   });
   //#endregion
 }

@@ -21,10 +21,7 @@ async function verifySMIME() {
 
   if ("childNodes" in parser || parser.childNodes.length !== 2) {
     const lastNode = parser.childNodes[1];
-    if (
-      lastNode.contentType.value === "application/x-pkcs7-signature" ||
-      lastNode.contentType.value === "application/pkcs7-signature"
-    ) {
+    if (lastNode.contentType.value === "application/x-pkcs7-signature" || lastNode.contentType.value === "application/pkcs7-signature") {
       // Parse into pkijs types
       let cmsContentSimpl;
       let cmsSignedSimpl;
@@ -38,16 +35,14 @@ async function verifySMIME() {
       }
 
       // Get signed data buffer
-      const signedDataBuffer = pvutils.stringToArrayBuffer(
-        parser.childNodes[0].raw.replace(/\n/g, "\r\n")
-      );
+      const signedDataBuffer = pvutils.stringToArrayBuffer(parser.childNodes[0].raw.replace(/\n/g, "\r\n"));
 
       // Verify the signed data
       try {
         const result = await cmsSignedSimpl.verify({
           signer: 0,
           data: signedDataBuffer,
-          trustedCerts: trustedCertificates
+          trustedCerts: trustedCertificates,
         });
         alert(`S/MIME message ${!result ? "verification failed" : "successfully verified"}!`);
       } catch (e) {
@@ -61,13 +56,13 @@ async function verifySMIME() {
 // Functions handling file selection
 
 function handleMIMEFile(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     common.getElement("smime_message", "textarea").value = pvtsutils.Convert.ToUtf8String(file);
   });
 }
 
 function handleCABundle(evt: Event) {
-  common.handleFileBrowse(evt, file => {
+  common.handleFileBrowse(evt, (file) => {
     try {
       trustedCertificates.push(...common.parseCertificate(file));
     } catch (e) {

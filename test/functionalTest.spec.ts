@@ -9,8 +9,7 @@ describe("PKIjs functional testing", () => {
   //region Initial variables
   const results: Record<string, any> = {};
   const fakeHex = new Uint8Array([
-    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-    0x07, 0x08, 0x09, 0x0a, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x01, 0x02
+    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x01, 0x02,
   ]).buffer;
   const fakeString = "fakeString";
   const fakeOID = "1.2.3.4.5";
@@ -38,8 +37,8 @@ describe("PKIjs functional testing", () => {
     results["GeneralName1"] = new pkijs.GeneralName({
       schema: new pkijs.GeneralName({
         type: 1,
-        value: fakeString
-      }).toSchema()
+        value: fakeString,
+      }).toSchema(),
     });
 
     //
@@ -62,13 +61,9 @@ describe("PKIjs functional testing", () => {
     results["AuthorityKeyIdentifier"] = new pkijs.AuthorityKeyIdentifier({
       schema: new pkijs.AuthorityKeyIdentifier({
         keyIdentifier: new asn1js.OctetString({ valueHex: fakeHex }),
-        authorityCertIssuer: [
-          results["GeneralName1"],
-          results["GeneralName1"],
-          results["GeneralName1"]
-        ],
-        authorityCertSerialNumber: new asn1js.Integer({ valueHex: fakeHex })
-      }).toSchema()
+        authorityCertIssuer: [results["GeneralName1"], results["GeneralName1"], results["GeneralName1"]],
+        authorityCertSerialNumber: new asn1js.Integer({ valueHex: fakeHex }),
+      }).toSchema(),
     });
   });
 
@@ -77,8 +72,8 @@ describe("PKIjs functional testing", () => {
       schema: new pkijs.Accuracy({
         seconds: 1000,
         millis: 1000,
-        micros: 1000
-      }).toSchema()
+        micros: 1000,
+      }).toSchema(),
     });
   });
 
@@ -86,8 +81,8 @@ describe("PKIjs functional testing", () => {
     results["AlgorithmIdentifier"] = new pkijs.AlgorithmIdentifier({
       schema: new pkijs.AlgorithmIdentifier({
         algorithmId: fakeOID,
-        algorithmParams: new asn1js.Null()
-      }).toSchema()
+        algorithmParams: new asn1js.Null(),
+      }).toSchema(),
     });
   });
 
@@ -95,8 +90,8 @@ describe("PKIjs functional testing", () => {
     results["Attribute"] = new pkijs.Attribute({
       schema: new pkijs.Attribute({
         type: fakeOID,
-        values: [new asn1js.Null()]
-      }).toSchema()
+        values: [new asn1js.Null()],
+      }).toSchema(),
     });
   });
 
@@ -104,16 +99,16 @@ describe("PKIjs functional testing", () => {
     results["AccessDescription"] = new pkijs.AccessDescription({
       schema: new pkijs.AccessDescription({
         accessMethod: fakeOID,
-        accessLocation: results["GeneralName1"]
-      }).toSchema()
+        accessLocation: results["GeneralName1"],
+      }).toSchema(),
     });
   });
 
   it("AltName", () => {
     results["AltName"] = new pkijs.AltName({
       schema: new pkijs.AltName({
-        altNames: [results["GeneralName1"], results["GeneralName1"], results["GeneralName1"]]
-      }).toSchema()
+        altNames: [results["GeneralName1"], results["GeneralName1"], results["GeneralName1"]],
+      }).toSchema(),
     });
   });
 
@@ -121,8 +116,8 @@ describe("PKIjs functional testing", () => {
     results["Attribute"] = new pkijs.Attribute({
       schema: new pkijs.Attribute({
         type: fakeOID,
-        values: [new asn1js.Null(), new asn1js.Null()]
-      }).toSchema()
+        values: [new asn1js.Null(), new asn1js.Null()],
+      }).toSchema(),
     });
   });
 
@@ -130,8 +125,8 @@ describe("PKIjs functional testing", () => {
     results["BasicConstraints"] = new pkijs.BasicConstraints({
       schema: new pkijs.BasicConstraints({
         cA: false,
-        pathLenConstraint: 10
-      }).toSchema()
+        pathLenConstraint: 10,
+      }).toSchema(),
     });
   });
 
@@ -139,8 +134,8 @@ describe("PKIjs functional testing", () => {
     results["AttributeTypeAndValue"] = new pkijs.AttributeTypeAndValue({
       schema: new pkijs.AttributeTypeAndValue({
         type: fakeOID,
-        value: new asn1js.Null() as any
-      }).toSchema()
+        value: new asn1js.Null() as any,
+      }).toSchema(),
     });
   });
 
@@ -150,8 +145,8 @@ describe("PKIjs functional testing", () => {
         hashAlgorithm: results["AlgorithmIdentifier"],
         issuerNameHash: new asn1js.OctetString({ valueHex: fakeHex }),
         issuerKeyHash: new asn1js.OctetString({ valueHex: fakeHex }),
-        serialNumber: new asn1js.Integer({ value: 10 })
-      }).toSchema()
+        serialNumber: new asn1js.Integer({ value: 10 }),
+      }).toSchema(),
     });
   });
 
@@ -159,8 +154,8 @@ describe("PKIjs functional testing", () => {
     results["PolicyQualifierInfo"] = new pkijs.PolicyQualifierInfo({
       schema: new pkijs.PolicyQualifierInfo({
         policyQualifierId: fakeOID,
-        qualifier: new asn1js.Null()
-      }).toSchema()
+        qualifier: new asn1js.Null(),
+      }).toSchema(),
     });
   });
 
@@ -168,24 +163,16 @@ describe("PKIjs functional testing", () => {
     results["PolicyInformation"] = new pkijs.PolicyInformation({
       schema: new pkijs.PolicyInformation({
         policyIdentifier: fakeOID,
-        policyQualifiers: [
-          results["PolicyQualifierInfo"],
-          results["PolicyQualifierInfo"],
-          results["PolicyQualifierInfo"]
-        ]
-      }).toSchema()
+        policyQualifiers: [results["PolicyQualifierInfo"], results["PolicyQualifierInfo"], results["PolicyQualifierInfo"]],
+      }).toSchema(),
     });
   });
 
   it("CertificatePolicies", () => {
     results["CertificatePolicies"] = new pkijs.CertificatePolicies({
       schema: new pkijs.CertificatePolicies({
-        certificatePolicies: [
-          results["PolicyInformation"],
-          results["PolicyInformation"],
-          results["PolicyInformation"]
-        ]
-      }).toSchema()
+        certificatePolicies: [results["PolicyInformation"], results["PolicyInformation"], results["PolicyInformation"]],
+      }).toSchema(),
     });
   });
 
@@ -193,8 +180,8 @@ describe("PKIjs functional testing", () => {
     results["ContentInfo"] = new pkijs.ContentInfo({
       schema: new pkijs.ContentInfo({
         contentType: fakeOID,
-        content: new asn1js.Null()
-      }).toSchema()
+        content: new asn1js.Null(),
+      }).toSchema(),
     });
   });
 
@@ -202,35 +189,27 @@ describe("PKIjs functional testing", () => {
     results["DigestInfo"] = new pkijs.DigestInfo({
       schema: new pkijs.DigestInfo({
         digestAlgorithm: results["AlgorithmIdentifier"],
-        digest: new asn1js.OctetString({ valueHex: fakeHex })
-      }).toSchema()
+        digest: new asn1js.OctetString({ valueHex: fakeHex }),
+      }).toSchema(),
     });
   });
 
   it("RelativeDistinguishedNames", () => {
     results["RelativeDistinguishedNames"] = new pkijs.RelativeDistinguishedNames({
       schema: new pkijs.RelativeDistinguishedNames({
-        typesAndValues: [
-          results["AttributeTypeAndValue"],
-          results["AttributeTypeAndValue"],
-          results["AttributeTypeAndValue"]
-        ]
+        typesAndValues: [results["AttributeTypeAndValue"], results["AttributeTypeAndValue"], results["AttributeTypeAndValue"]],
         //valueBeforeDecode - should be missing because of "toSchema" internal functionality
-      }).toSchema()
+      }).toSchema(),
     });
   });
 
   it("DistributionPoint", () => {
     results["DistributionPoint"] = new pkijs.DistributionPoint({
       schema: new pkijs.DistributionPoint({
-        distributionPoint: [
-          results["GeneralName1"],
-          results["GeneralName1"],
-          results["GeneralName1"]
-        ],
+        distributionPoint: [results["GeneralName1"], results["GeneralName1"], results["GeneralName1"]],
         reasons: new asn1js.BitString({ valueHex: fakeHex }),
-        cRLIssuer: [results["GeneralName1"], results["GeneralName1"], results["GeneralName1"]]
-      }).toSchema()
+        cRLIssuer: [results["GeneralName1"], results["GeneralName1"], results["GeneralName1"]],
+      }).toSchema(),
     });
   });
 
@@ -239,8 +218,8 @@ describe("PKIjs functional testing", () => {
       schema: new pkijs.ECCCMSSharedInfo({
         keyInfo: results["AlgorithmIdentifier"],
         entityUInfo: new asn1js.OctetString({ valueHex: fakeHex }),
-        suppPubInfo: new asn1js.OctetString({ valueHex: fakeHex })
-      }).toSchema()
+        suppPubInfo: new asn1js.OctetString({ valueHex: fakeHex }),
+      }).toSchema(),
     });
   });
 
@@ -249,11 +228,11 @@ describe("PKIjs functional testing", () => {
       schema: new pkijs.ECPublicKey({
         x: fakeHex,
         y: fakeHex,
-        namedCurve: "1.2.840.10045.3.1.7"
+        namedCurve: "1.2.840.10045.3.1.7",
       })
         .toSchema()
         .dataView.slice().buffer, // Return specifically ArrayBuffer
-      namedCurve: "1.2.840.10045.3.1.7" // Needs specifically for this class
+      namedCurve: "1.2.840.10045.3.1.7", // Needs specifically for this class
     });
   });
 
@@ -263,8 +242,8 @@ describe("PKIjs functional testing", () => {
         version: 1,
         privateKey: new asn1js.OctetString({ valueHex: fakeHex }),
         namedCurve: "1.2.840.10045.3.1.7",
-        publicKey: results["ECPublicKey"]
-      }).toSchema()
+        publicKey: results["ECPublicKey"],
+      }).toSchema(),
     });
   });
 
@@ -272,8 +251,8 @@ describe("PKIjs functional testing", () => {
     results["EncapsulatedContentInfo"] = new pkijs.EncapsulatedContentInfo({
       schema: new pkijs.EncapsulatedContentInfo({
         eContentType: fakeOID,
-        eContent: new asn1js.OctetString({ valueHex: fakeHex })
-      }).toSchema()
+        eContent: new asn1js.OctetString({ valueHex: fakeHex }),
+      }).toSchema(),
     });
   });
 
@@ -282,8 +261,8 @@ describe("PKIjs functional testing", () => {
       schema: new pkijs.EncryptedContentInfo({
         contentType: fakeOID,
         contentEncryptionAlgorithm: results["AlgorithmIdentifier"],
-        encryptedContent: new asn1js.OctetString({ valueHex: fakeHex })
-      }).toSchema()
+        encryptedContent: new asn1js.OctetString({ valueHex: fakeHex }),
+      }).toSchema(),
     });
   });
 
@@ -292,8 +271,8 @@ describe("PKIjs functional testing", () => {
       schema: new pkijs.EncryptedData({
         version: 1,
         encryptedContentInfo: results["EncryptedContentInfo"],
-        unprotectedAttrs: [results["Attribute"], results["Attribute"], results["Attribute"]]
-      }).toSchema()
+        unprotectedAttrs: [results["Attribute"], results["Attribute"], results["Attribute"]],
+      }).toSchema(),
     });
   });
 
@@ -309,22 +288,22 @@ describe("PKIjs functional testing", () => {
         {
           name: "disabled",
           params: {
-            disableSplit: true
+            disableSplit: true,
           },
-          want: false
+          want: false,
         },
         {
           name: "enabled",
           params: {
-            disableSplit: false
+            disableSplit: false,
           },
-          want: true
+          want: true,
         },
         {
           name: "default",
           params: {},
-          want: true
-        }
+          want: true,
+        },
       ];
       const crypto = new Crypto();
 
@@ -335,33 +314,24 @@ describe("PKIjs functional testing", () => {
 
           let envelopedData = new pkijs.EnvelopedData({
             version: 0,
-            ...t.params
+            ...t.params,
           });
           envelopedData.addRecipientByCertificate(certData.certificate, {
-            oaepHashAlgorithm: "SHA-256"
+            oaepHashAlgorithm: "SHA-256",
           });
 
           await envelopedData.encrypt({ name: "AES-CBC", length: 256 } as AesKeyGenParams, data);
 
           const raw = envelopedData.toSchema().toBER(false);
 
-          const key = await crypto.subtle.importKey(
-            "pkcs8",
-            certData.privateKeyBuffer,
-            { name: "RSA-OAEP", hash: "SHA-256" },
-            false,
-            ["decrypt"]
-          );
+          const key = await crypto.subtle.importKey("pkcs8", certData.privateKeyBuffer, { name: "RSA-OAEP", hash: "SHA-256" }, false, ["decrypt"]);
           envelopedData = pkijs.EnvelopedData.fromBER(raw);
           assert.ok(envelopedData.encryptedContentInfo.encryptedContent);
-          assert.equal(
-            envelopedData.encryptedContentInfo.encryptedContent.idBlock.isConstructed,
-            t.want
-          );
+          assert.equal(envelopedData.encryptedContentInfo.encryptedContent.idBlock.isConstructed, t.want);
 
           const decryptedData = await envelopedData.decrypt(0, {
             recipientPrivateKey: key,
-            crypto: pkijs.getCrypto(true).crypto
+            crypto: pkijs.getCrypto(true).crypto,
           });
 
           assert.equal(pvtsutils.Convert.ToHex(decryptedData), pvtsutils.Convert.ToHex(data));
@@ -375,32 +345,32 @@ describe("PKIjs functional testing", () => {
       schema: new pkijs.Extension({
         extnID: fakeOID,
         critical: true,
-        extnValue: fakeHex
-      }).toSchema()
+        extnValue: fakeHex,
+      }).toSchema(),
     });
   });
 
   it("Extensions", () => {
     results["Extensions"] = new pkijs.Extensions({
       schema: new pkijs.Extensions({
-        extensions: [results["Extension"], results["Extension"], results["Extension"]]
-      }).toSchema()
+        extensions: [results["Extension"], results["Extension"], results["Extension"]],
+      }).toSchema(),
     });
   });
 
   it("ExtKeyUsage", () => {
     results["ExtKeyUsage"] = new pkijs.ExtKeyUsage({
       schema: new pkijs.ExtKeyUsage({
-        keyPurposes: [fakeOID, fakeOID, fakeOID]
-      }).toSchema()
+        keyPurposes: [fakeOID, fakeOID, fakeOID],
+      }).toSchema(),
     });
   });
 
   it("GeneralNames", () => {
     results["GeneralNames"] = new pkijs.GeneralNames({
       schema: new pkijs.GeneralNames({
-        names: [results["GeneralName1"], results["GeneralName1"], results["GeneralName1"]]
-      }).toSchema()
+        names: [results["GeneralName1"], results["GeneralName1"], results["GeneralName1"]],
+      }).toSchema(),
     });
   });
 
@@ -409,20 +379,16 @@ describe("PKIjs functional testing", () => {
       schema: new pkijs.GeneralSubtree({
         base: results["GeneralName1"],
         minimum: 1,
-        maximum: 10
-      }).toSchema()
+        maximum: 10,
+      }).toSchema(),
     });
   });
 
   it("InfoAccess", () => {
     results["InfoAccess"] = new pkijs.InfoAccess({
       schema: new pkijs.InfoAccess({
-        accessDescriptions: [
-          results["AccessDescription"],
-          results["AccessDescription"],
-          results["AccessDescription"]
-        ]
-      }).toSchema()
+        accessDescriptions: [results["AccessDescription"], results["AccessDescription"], results["AccessDescription"]],
+      }).toSchema(),
     });
   });
 
@@ -430,25 +396,21 @@ describe("PKIjs functional testing", () => {
     results["IssuerAndSerialNumber"] = new pkijs.IssuerAndSerialNumber({
       schema: new pkijs.IssuerAndSerialNumber({
         issuer: results["RelativeDistinguishedNames"],
-        serialNumber: new asn1js.Integer({ value: 10 })
-      }).toSchema()
+        serialNumber: new asn1js.Integer({ value: 10 }),
+      }).toSchema(),
     });
   });
 
   it("IssuingDistributionPoint", () => {
     results["IssuingDistributionPoint1"] = new pkijs.IssuingDistributionPoint({
       schema: new pkijs.IssuingDistributionPoint({
-        distributionPoint: [
-          results["GeneralName1"],
-          results["GeneralName1"],
-          results["GeneralName1"]
-        ],
+        distributionPoint: [results["GeneralName1"], results["GeneralName1"], results["GeneralName1"]],
         onlyContainsUserCerts: true,
         onlyContainsCACerts: false,
         onlySomeReasons: 10,
         indirectCRL: false,
-        onlyContainsAttributeCerts: true
-      }).toSchema()
+        onlyContainsAttributeCerts: true,
+      }).toSchema(),
     });
 
     results["IssuingDistributionPoint2"] = new pkijs.IssuingDistributionPoint({
@@ -458,8 +420,8 @@ describe("PKIjs functional testing", () => {
         onlyContainsCACerts: false,
         onlySomeReasons: 10,
         indirectCRL: false,
-        onlyContainsAttributeCerts: true
-      }).toSchema()
+        onlyContainsAttributeCerts: true,
+      }).toSchema(),
     });
   });
 
@@ -467,8 +429,8 @@ describe("PKIjs functional testing", () => {
     results["OtherKeyAttribute"] = new pkijs.OtherKeyAttribute({
       schema: new pkijs.OtherKeyAttribute({
         keyAttrId: fakeOID,
-        keyAttr: new asn1js.Null()
-      }).toSchema()
+        keyAttr: new asn1js.Null(),
+      }).toSchema(),
     });
   });
 
@@ -477,8 +439,8 @@ describe("PKIjs functional testing", () => {
       schema: new pkijs.KEKIdentifier({
         keyIdentifier: new asn1js.OctetString({ valueHex: fakeHex }),
         date: new asn1js.GeneralizedTime({ valueDate: new Date() }),
-        other: results["OtherKeyAttribute"]
-      }).toSchema()
+        other: results["OtherKeyAttribute"],
+      }).toSchema(),
     });
   });
 
@@ -489,8 +451,8 @@ describe("PKIjs functional testing", () => {
         kekid: results["KEKIdentifier"],
         keyEncryptionAlgorithm: results["AlgorithmIdentifier"],
         encryptedKey: new asn1js.OctetString({ valueHex: fakeHex }),
-        preDefinedKEK: fakeHex
-      }).toSchema()
+        preDefinedKEK: fakeHex,
+      }).toSchema(),
     });
   });
 
@@ -499,8 +461,8 @@ describe("PKIjs functional testing", () => {
       schema: new pkijs.RecipientKeyIdentifier({
         subjectKeyIdentifier: new asn1js.OctetString({ valueHex: fakeHex }),
         date: new asn1js.GeneralizedTime({ valueDate: new Date() }),
-        other: results["OtherKeyAttribute"]
-      }).toSchema()
+        other: results["OtherKeyAttribute"],
+      }).toSchema(),
     });
   });
 
@@ -508,15 +470,15 @@ describe("PKIjs functional testing", () => {
     results["KeyAgreeRecipientIdentifier1"] = new pkijs.KeyAgreeRecipientIdentifier({
       schema: new pkijs.KeyAgreeRecipientIdentifier({
         variant: 1,
-        value: results["IssuerAndSerialNumber"]
-      }).toSchema()
+        value: results["IssuerAndSerialNumber"],
+      }).toSchema(),
     });
 
     results["KeyAgreeRecipientIdentifier2"] = new pkijs.KeyAgreeRecipientIdentifier({
       schema: new pkijs.KeyAgreeRecipientIdentifier({
         variant: 2,
-        value: results["RecipientKeyIdentifier"]
-      }).toSchema()
+        value: results["RecipientKeyIdentifier"],
+      }).toSchema(),
     });
   });
 
@@ -525,8 +487,8 @@ describe("PKIjs functional testing", () => {
       schema: new pkijs.MacData({
         mac: results["DigestInfo"],
         macSalt: new asn1js.OctetString({ valueHex: fakeHex }),
-        iterations: 10
-      }).toSchema()
+        iterations: 10,
+      }).toSchema(),
     });
   });
 
@@ -534,25 +496,17 @@ describe("PKIjs functional testing", () => {
     results["MessageImprint"] = new pkijs.MessageImprint({
       schema: new pkijs.MessageImprint({
         hashAlgorithm: results["AlgorithmIdentifier"],
-        hashedMessage: new asn1js.OctetString({ valueHex: fakeHex })
-      }).toSchema()
+        hashedMessage: new asn1js.OctetString({ valueHex: fakeHex }),
+      }).toSchema(),
     });
   });
 
   it("NameConstraints", () => {
     results["NameConstraints"] = new pkijs.NameConstraints({
       schema: new pkijs.NameConstraints({
-        permittedSubtrees: [
-          results["GeneralSubtree"],
-          results["GeneralSubtree"],
-          results["GeneralSubtree"]
-        ],
-        excludedSubtrees: [
-          results["GeneralSubtree"],
-          results["GeneralSubtree"],
-          results["GeneralSubtree"]
-        ]
-      }).toSchema()
+        permittedSubtrees: [results["GeneralSubtree"], results["GeneralSubtree"], results["GeneralSubtree"]],
+        excludedSubtrees: [results["GeneralSubtree"], results["GeneralSubtree"], results["GeneralSubtree"]],
+      }).toSchema(),
     });
   });
 
@@ -560,8 +514,8 @@ describe("PKIjs functional testing", () => {
     results["OriginatorPublicKey"] = new pkijs.OriginatorPublicKey({
       schema: new pkijs.OriginatorPublicKey({
         algorithm: results["AlgorithmIdentifier"],
-        publicKey: new asn1js.BitString({ valueHex: fakeHex })
-      }).toSchema()
+        publicKey: new asn1js.BitString({ valueHex: fakeHex }),
+      }).toSchema(),
     });
   });
 
@@ -569,22 +523,22 @@ describe("PKIjs functional testing", () => {
     results["OriginatorIdentifierOrKey1"] = new pkijs.OriginatorIdentifierOrKey({
       schema: new pkijs.OriginatorIdentifierOrKey({
         variant: 1,
-        value: results["IssuerAndSerialNumber"]
-      }).toSchema()
+        value: results["IssuerAndSerialNumber"],
+      }).toSchema(),
     });
 
     results["OriginatorIdentifierOrKey2"] = new pkijs.OriginatorIdentifierOrKey({
       schema: new pkijs.OriginatorIdentifierOrKey({
         variant: 2,
-        value: new asn1js.OctetString({ valueHex: fakeHex })
-      }).toSchema()
+        value: new asn1js.OctetString({ valueHex: fakeHex }),
+      }).toSchema(),
     });
 
     results["OriginatorIdentifierOrKey3"] = new pkijs.OriginatorIdentifierOrKey({
       schema: new pkijs.OriginatorIdentifierOrKey({
         variant: 3,
-        value: results["OriginatorPublicKey"]
-      }).toSchema()
+        value: results["OriginatorPublicKey"],
+      }).toSchema(),
     });
   });
 
@@ -593,8 +547,8 @@ describe("PKIjs functional testing", () => {
       schema: new pkijs.OtherPrimeInfo({
         prime: new asn1js.Integer({ value: 10 }),
         exponent: new asn1js.Integer({ value: 10 }),
-        coefficient: new asn1js.Integer({ value: 10 })
-      }).toSchema()
+        coefficient: new asn1js.Integer({ value: 10 }),
+      }).toSchema(),
     });
   });
 
@@ -602,8 +556,8 @@ describe("PKIjs functional testing", () => {
     results["OtherRecipientInfo"] = new pkijs.OtherRecipientInfo({
       schema: new pkijs.OtherRecipientInfo({
         oriType: fakeOID,
-        oriValue: new asn1js.Null()
-      }).toSchema()
+        oriValue: new asn1js.Null(),
+      }).toSchema(),
     });
   });
 
@@ -611,8 +565,8 @@ describe("PKIjs functional testing", () => {
     results["OtherRevocationInfoFormat"] = new pkijs.OtherRevocationInfoFormat({
       schema: new pkijs.OtherRevocationInfoFormat({
         otherRevInfoFormat: fakeString,
-        otherRevInfo: new asn1js.Null()
-      }).toSchema()
+        otherRevInfo: new asn1js.Null(),
+      }).toSchema(),
     });
   });
 
@@ -623,8 +577,8 @@ describe("PKIjs functional testing", () => {
         keyDerivationAlgorithm: results["AlgorithmIdentifier"],
         keyEncryptionAlgorithm: results["AlgorithmIdentifier"],
         encryptedKey: new asn1js.OctetString({ valueHex: fakeHex }),
-        password: fakeHex
-      }).toSchema()
+        password: fakeHex,
+      }).toSchema(),
     });
   });
 
@@ -632,8 +586,8 @@ describe("PKIjs functional testing", () => {
     results["PBES2Params"] = new pkijs.PBES2Params({
       schema: new pkijs.PBES2Params({
         keyDerivationFunc: results["AlgorithmIdentifier"],
-        encryptionScheme: results["AlgorithmIdentifier"]
-      }).toSchema()
+        encryptionScheme: results["AlgorithmIdentifier"],
+      }).toSchema(),
     });
   });
 
@@ -662,7 +616,7 @@ describe("PKIjs functional testing", () => {
 
   it("__template__", () => {
     results["AuthorityKeyIdentifier"] = new pkijs.AuthorityKeyIdentifier({
-      schema: new pkijs.AuthorityKeyIdentifier({}).toSchema()
+      schema: new pkijs.AuthorityKeyIdentifier({}).toSchema(),
     });
   });
 
@@ -684,7 +638,7 @@ describe("PKIjs functional testing", () => {
         const ok = await signedData.verify({
           checkChain: false,
           signer: 0,
-          trustedCerts: signedData.certificates as pkijs.Certificate[]
+          trustedCerts: signedData.certificates as pkijs.Certificate[],
         });
         assert.deepEqual(ok, true);
       });
@@ -693,7 +647,7 @@ describe("PKIjs functional testing", () => {
         const ok = await signedData.verify({
           checkChain: false,
           signer: 1,
-          trustedCerts: signedData.certificates as pkijs.Certificate[]
+          trustedCerts: signedData.certificates as pkijs.Certificate[],
         });
         assert.deepEqual(ok, true);
       });
@@ -702,7 +656,7 @@ describe("PKIjs functional testing", () => {
         const ok = await signedData.verify({
           checkChain: false,
           signer: 2,
-          trustedCerts: signedData.certificates as pkijs.Certificate[]
+          trustedCerts: signedData.certificates as pkijs.Certificate[],
         });
         assert.deepEqual(ok, true);
       });
@@ -713,7 +667,7 @@ describe("PKIjs functional testing", () => {
     const crypto = new Crypto();
     const provider = new pkijs.CryptoEngine({
       name: "",
-      crypto
+      crypto,
     });
 
     const tests: {
@@ -725,29 +679,29 @@ describe("PKIjs functional testing", () => {
       {
         name: "use deprecated (name, crypto, subtle)",
         args: ["test", crypto, crypto.subtle],
-        want: crypto
+        want: crypto,
       },
       {
         name: "use deprecated (name, provider, provider)",
         args: ["test", provider, provider],
-        want: crypto
+        want: crypto,
       },
       {
         name: "name, provider",
         args: ["test", provider],
-        want: crypto
+        want: crypto,
       },
       {
         name: "default NodeJS",
         args: ["test"],
-        want: null
+        want: null,
       },
       {
         name: "default Browser",
         args: ["test"],
         want: crypto,
-        browser: true
-      }
+        browser: true,
+      },
     ];
 
     let oldEngine: pkijs.GlobalCryptoEngine;
@@ -780,19 +734,9 @@ describe("PKIjs functional testing", () => {
           if (t.want === null) {
             assert.strictEqual(engine.crypto, t.want, "engine.crypto shall be null");
           } else {
-            assert.ok(
-              engine.crypto instanceof pkijs.CryptoEngine,
-              "engine.crypto shall be CryptoEngine"
-            );
-            assert.ok(
-              engine.crypto.crypto instanceof Crypto,
-              "engine.crypto.crypto shall be Crypto"
-            );
-            assert.equal(
-              engine.crypto.subtle,
-              crypto.subtle,
-              "engine.subtle shall be SubtleCrypto"
-            );
+            assert.ok(engine.crypto instanceof pkijs.CryptoEngine, "engine.crypto shall be CryptoEngine");
+            assert.ok(engine.crypto.crypto instanceof Crypto, "engine.crypto.crypto shall be Crypto");
+            assert.equal(engine.crypto.subtle, crypto.subtle, "engine.subtle shall be SubtleCrypto");
           }
         } finally {
           if (t.browser) {

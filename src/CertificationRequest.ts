@@ -3,11 +3,7 @@ import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { PublicKeyInfo, PublicKeyInfoJson } from "./PublicKeyInfo";
-import {
-  RelativeDistinguishedNames,
-  RelativeDistinguishedNamesJson,
-  RelativeDistinguishedNamesSchema
-} from "./RelativeDistinguishedNames";
+import { RelativeDistinguishedNames, RelativeDistinguishedNamesJson, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
 import { AlgorithmIdentifier, AlgorithmIdentifierJson } from "./AlgorithmIdentifier";
 import { Attribute, AttributeJson, AttributeSchema } from "./Attribute";
 import * as Schema from "./Schema";
@@ -28,15 +24,7 @@ const CSR_INFO_VERSION = `${CSR_INFO}.version`;
 const CSR_INFO_SUBJECT = `${CSR_INFO}.subject`;
 const CSR_INFO_SPKI = `${CSR_INFO}.subjectPublicKeyInfo`;
 const CSR_INFO_ATTRS = `${CSR_INFO}.attributes`;
-const CLEAR_PROPS = [
-  CSR_INFO,
-  CSR_INFO_VERSION,
-  CSR_INFO_SUBJECT,
-  CSR_INFO_SPKI,
-  CSR_INFO_ATTRS,
-  SIGNATURE_ALGORITHM,
-  SIGNATURE_VALUE
-];
+const CLEAR_PROPS = [CSR_INFO, CSR_INFO_VERSION, CSR_INFO_SUBJECT, CSR_INFO_SPKI, CSR_INFO_ATTRS, SIGNATURE_ALGORITHM, SIGNATURE_VALUE];
 
 export interface ICertificationRequest {
   /**
@@ -102,11 +90,7 @@ function CertificationRequestInfo(parameters: CertificationRequestInfoParameters
   //    attributes    [0] Attributes{{ CRIAttributes }}
   //}
 
-  const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-    parameters,
-    "names",
-    {}
-  );
+  const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
   return new asn1js.Sequence({
     name: names.CertificationRequestInfo || CSR_INFO,
@@ -115,30 +99,30 @@ function CertificationRequestInfo(parameters: CertificationRequestInfoParameters
       RelativeDistinguishedNames.schema(
         names.subject || {
           names: {
-            blockName: CSR_INFO_SUBJECT
-          }
-        }
+            blockName: CSR_INFO_SUBJECT,
+          },
+        },
       ),
       PublicKeyInfo.schema({
         names: {
-          blockName: CSR_INFO_SPKI
-        }
+          blockName: CSR_INFO_SPKI,
+        },
       }),
       new asn1js.Constructed({
         optional: true,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
+          tagNumber: 0, // [0]
         },
         value: [
           new asn1js.Repeated({
             optional: true, // Because OpenSSL makes wrong ATTRIBUTES field
             name: names.CertificationRequestInfoAttributes || CSR_INFO_ATTRS,
-            value: Attribute.schema(names.attributes || {})
-          })
-        ]
-      })
-    ]
+            value: Attribute.schema(names.attributes || {}),
+          }),
+        ],
+      }),
+    ],
   });
 }
 
@@ -269,41 +253,15 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
   constructor(parameters: CertificationRequestParameters = {}) {
     super();
 
-    this.tbsView = new Uint8Array(
-      pvutils.getParametersValue(parameters, TBS, CertificationRequest.defaultValues(TBS))
-    );
-    this.version = pvutils.getParametersValue(
-      parameters,
-      VERSION,
-      CertificationRequest.defaultValues(VERSION)
-    );
-    this.subject = pvutils.getParametersValue(
-      parameters,
-      SUBJECT,
-      CertificationRequest.defaultValues(SUBJECT)
-    );
-    this.subjectPublicKeyInfo = pvutils.getParametersValue(
-      parameters,
-      SPKI,
-      CertificationRequest.defaultValues(SPKI)
-    );
+    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, CertificationRequest.defaultValues(TBS)));
+    this.version = pvutils.getParametersValue(parameters, VERSION, CertificationRequest.defaultValues(VERSION));
+    this.subject = pvutils.getParametersValue(parameters, SUBJECT, CertificationRequest.defaultValues(SUBJECT));
+    this.subjectPublicKeyInfo = pvutils.getParametersValue(parameters, SPKI, CertificationRequest.defaultValues(SPKI));
     if (ATTRIBUTES in parameters) {
-      this.attributes = pvutils.getParametersValue(
-        parameters,
-        ATTRIBUTES,
-        CertificationRequest.defaultValues(ATTRIBUTES)
-      );
+      this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, CertificationRequest.defaultValues(ATTRIBUTES));
     }
-    this.signatureAlgorithm = pvutils.getParametersValue(
-      parameters,
-      SIGNATURE_ALGORITHM,
-      CertificationRequest.defaultValues(SIGNATURE_ALGORITHM)
-    );
-    this.signatureValue = pvutils.getParametersValue(
-      parameters,
-      SIGNATURE_VALUE,
-      CertificationRequest.defaultValues(SIGNATURE_VALUE)
-    );
+    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, CertificationRequest.defaultValues(SIGNATURE_ALGORITHM));
+    this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, CertificationRequest.defaultValues(SIGNATURE_VALUE));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -359,23 +317,19 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
       certificationRequestInfo?: CertificationRequestInfoParameters;
       signatureAlgorithm?: string;
       signatureValue?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       value: [
         CertificationRequestInfo(names.certificationRequestInfo || {}),
         new asn1js.Sequence({
           name: names.signatureAlgorithm || SIGNATURE_ALGORITHM,
-          value: [new asn1js.ObjectIdentifier(), new asn1js.Any({ optional: true })]
+          value: [new asn1js.ObjectIdentifier(), new asn1js.Any({ optional: true })],
         }),
-        new asn1js.BitString({ name: names.signatureValue || SIGNATURE_VALUE })
-      ]
+        new asn1js.BitString({ name: names.signatureValue || SIGNATURE_VALUE }),
+      ],
     });
   }
 
@@ -393,10 +347,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
     this.subject = new RelativeDistinguishedNames({ schema: asn1.result[CSR_INFO_SUBJECT] });
     this.subjectPublicKeyInfo = new PublicKeyInfo({ schema: asn1.result[CSR_INFO_SPKI] });
     if (CSR_INFO_ATTRS in asn1.result) {
-      this.attributes = Array.from(
-        asn1.result[CSR_INFO_ATTRS],
-        element => new Attribute({ schema: element })
-      );
+      this.attributes = Array.from(asn1.result[CSR_INFO_ATTRS], (element) => new Attribute({ schema: element }));
     }
     this.signatureAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.signatureAlgorithm });
     this.signatureValue = asn1.result.signatureValue;
@@ -408,27 +359,23 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
    */
   protected encodeTBS(): asn1js.Sequence {
     //#region Create array for output sequence
-    const outputArray = [
-      new asn1js.Integer({ value: this.version }),
-      this.subject.toSchema(),
-      this.subjectPublicKeyInfo.toSchema()
-    ];
+    const outputArray = [new asn1js.Integer({ value: this.version }), this.subject.toSchema(), this.subjectPublicKeyInfo.toSchema()];
 
     if (ATTRIBUTES in this) {
       outputArray.push(
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: Array.from(this.attributes || [], o => o.toSchema())
-        })
+          value: Array.from(this.attributes || [], (o) => o.toSchema()),
+        }),
       );
     }
     //#endregion
 
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
   }
 
@@ -451,7 +398,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [tbsSchema, this.signatureAlgorithm.toSchema(), this.signatureValue]
+      value: [tbsSchema, this.signatureAlgorithm.toSchema(), this.signatureValue],
     });
     //#endregion
   }
@@ -463,11 +410,11 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
       subject: this.subject.toJSON(),
       subjectPublicKeyInfo: this.subjectPublicKeyInfo.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON()
+      signatureValue: this.signatureValue.toJSON(),
     };
 
     if (ATTRIBUTES in this) {
-      object.attributes = Array.from(this.attributes || [], o => o.toJSON());
+      object.attributes = Array.from(this.attributes || [], (o) => o.toJSON());
     }
 
     return object;
@@ -479,11 +426,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
    * @param hashAlgorithm String representing current hashing algorithm
    * @param crypto Crypto engine
    */
-  async sign(
-    privateKey: CryptoKey,
-    hashAlgorithm = "SHA-1",
-    crypto = common.getCrypto(true)
-  ): Promise<void> {
+  async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
     // Initial checking
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
@@ -500,11 +443,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await crypto.signWithPrivateKey(
-      this.tbsView as BufferSource,
-      privateKey,
-      parameters as any
-    );
+    const signature = await crypto.signWithPrivateKey(this.tbsView as BufferSource, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -515,12 +454,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
    * @returns Returns `true` if signature value is valid, otherwise `false`
    */
   public async verify(crypto = common.getCrypto(true)): Promise<boolean> {
-    return crypto.verifyWithPublicKey(
-      this.tbsView as BufferSource,
-      this.signatureValue,
-      this.subjectPublicKeyInfo,
-      this.signatureAlgorithm
-    );
+    return crypto.verifyWithPublicKey(this.tbsView as BufferSource, this.signatureValue, this.subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 
   /**
@@ -529,10 +463,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
    * @param crypto Crypto engine
    * @returns WebCrypt public key
    */
-  public async getPublicKey(
-    parameters?: CryptoEnginePublicKeyParams,
-    crypto = common.getCrypto(true)
-  ): Promise<CryptoKey> {
+  public async getPublicKey(parameters?: CryptoEnginePublicKeyParams, crypto = common.getCrypto(true)): Promise<CryptoKey> {
     return crypto.getPublicKey(this.subjectPublicKeyInfo, this.signatureAlgorithm, parameters);
   }
 }

@@ -14,7 +14,7 @@ const CLEAR_PROPS = [UTC_TIME_NAME, GENERAL_TIME_NAME];
 export enum TimeType {
   UTCTime,
   GeneralizedTime,
-  empty
+  empty,
 }
 
 export interface ITime {
@@ -96,18 +96,11 @@ export class Time extends PkiObject implements ITime {
    * @returns ASN.1 schema object
    */
   static override schema(parameters: TimeSchema = {}, optional = false): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Choice({
       optional,
-      value: [
-        new asn1js.UTCTime({ name: names.utcTimeName || EMPTY_STRING }),
-        new asn1js.GeneralizedTime({ name: names.generalTimeName || EMPTY_STRING })
-      ]
+      value: [new asn1js.UTCTime({ name: names.utcTimeName || EMPTY_STRING }), new asn1js.GeneralizedTime({ name: names.generalTimeName || EMPTY_STRING })],
     });
   }
 
@@ -122,9 +115,9 @@ export class Time extends PkiObject implements ITime {
       Time.schema({
         names: {
           utcTimeName: UTC_TIME_NAME,
-          generalTimeName: GENERAL_TIME_NAME
-        }
-      })
+          generalTimeName: GENERAL_TIME_NAME,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -152,7 +145,7 @@ export class Time extends PkiObject implements ITime {
   public toJSON(): TimeJson {
     return {
       type: this.type,
-      value: this.value
+      value: this.value,
     };
   }
 }

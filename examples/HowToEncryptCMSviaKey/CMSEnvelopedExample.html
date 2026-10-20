@@ -172,17 +172,11 @@
         <p>
           <a id="create_key_pair">Create</a>
         </p>
-        <label for="pkcs8_key" style="font-weight: bold; float: left"
-          >BASE-64 encoded PKCS#8 private key:</label
-        >
+        <label for="pkcs8_key" style="font-weight: bold; float: left">BASE-64 encoded PKCS#8 private key:</label>
         <textarea id="pkcs8_key">&lt; PKCS#8 private key must be put here &gt;</textarea>
-        <label for="pkcs8_key_pub" style="font-weight: bold; float: left"
-          >BASE-64 encoded PKCS#8 public key:</label
-        >
+        <label for="pkcs8_key_pub" style="font-weight: bold; float: left">BASE-64 encoded PKCS#8 public key:</label>
         <textarea id="pkcs8_key_pub">&lt; PKCS#8 public key must be put here &gt;</textarea>
-        <label for="pkcs8_key_id" style="font-weight: bold; float: left"
-          >BASE-64 encoded key pair id:</label
-        >
+        <label for="pkcs8_key_id" style="font-weight: bold; float: left">BASE-64 encoded key pair id:</label>
         <textarea id="pkcs8_key_id">&lt;  Encoded key id must be put here &gt;</textarea>
       </div>
     </div>
@@ -192,18 +186,14 @@
         <label for="content" style="font-weight: bold; float: left">Content to encrypt:</label>
         <textarea id="content">&lt; Put input data here &gt;</textarea>
         <p>
-          <label for="content_enc_alg" style="font-weight: bold"
-            >Content encryption algorithm:</label
-          >
+          <label for="content_enc_alg" style="font-weight: bold">Content encryption algorithm:</label>
           <select id="content_enc_alg">
             <option value="alg_CBC">AES-CBC</option>
             <option value="alg_GCM">AES-GCM</option>
           </select>
         </p>
         <p>
-          <label for="content_enc_alg_len" style="font-weight: bold"
-            >Content encryption algorithm length:</label
-          >
+          <label for="content_enc_alg_len" style="font-weight: bold">Content encryption algorithm length:</label>
           <select id="content_enc_alg_len">
             <option value="len_128">128</option>
             <!-- Currently in Google Chrome AES 192 bit keys are not supported
@@ -224,16 +214,12 @@
         <p>
           <a id="enveloped_encrypt">Encrypt</a>
         </p>
-        <label for="encrypted_content" style="font-weight: bold; float: left"
-          >BASE-64 encoded encrypted content:</label
-        >
+        <label for="encrypted_content" style="font-weight: bold; float: left">BASE-64 encoded encrypted content:</label>
         <textarea id="encrypted_content">&lt; Put encrypted content here &gt;</textarea>
         <p>
           <a id="enveloped_decrypt">Decrypt</a>
         </p>
-        <label for="decrypted_content" style="font-weight: bold; float: left"
-          >Decrypted content:</label
-        >
+        <label for="decrypted_content" style="font-weight: bold; float: left">Decrypted content:</label>
         <textarea id="decrypted_content">&lt; Decrypted content will be put here &gt;</textarea>
       </div>
     </div>

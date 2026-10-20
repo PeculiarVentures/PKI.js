@@ -162,21 +162,15 @@
       <p class="header-block">Create new CMS Signed Data</p>
       <div id="output_div" class="border-block">
         <p>
-          <label for="input_file" style="font-weight: bold"
-            >Select a file to make signature for:</label
-          >
+          <label for="input_file" style="font-weight: bold">Select a file to make signature for:</label>
           <input type="file" id="input_file" title="Input file" />
         </p>
         <p>
-          <label for="add_ext" style="font-weight: bold"
-            >Add signed extensions in SignerInfo:</label
-          >
+          <label for="add_ext" style="font-weight: bold">Add signed extensions in SignerInfo:</label>
           <input type="checkbox" id="add_ext" value="0" />
         </p>
         <p>
-          <label for="detached_signature" style="font-weight: bold"
-            >Make CMS signature with detached data:</label
-          >
+          <label for="detached_signature" style="font-weight: bold">Make CMS signature with detached data:</label>
           <input type="checkbox" id="detached_signature" value="0" />
         </p>
         <p>
@@ -196,11 +190,8 @@
             <option value="alg_ECDSA">ECDSA</option>
           </select>
         </p>
-        <label for="new_signed_data" style="font-weight: bold; float: left"
-          >CMS data + BASE-64 encoded new certificate + PKCS#8 private key:</label
-        >
-        <textarea id="new_signed_data">
-&lt;  New CSM signed data + new encoded certificate + PKCS#8 exported private key will be stored here &gt;</textarea>
+        <label for="new_signed_data" style="font-weight: bold; float: left">CMS data + BASE-64 encoded new certificate + PKCS#8 private key:</label>
+        <textarea id="new_signed_data">&lt;  New CSM signed data + new encoded certificate + PKCS#8 exported private key will be stored here &gt;</textarea>
       </div>
       <p class="header-block">Parse loaded/created CMS Signed Data</p>
       <div id="cms-signed-data-block" class="border-block">

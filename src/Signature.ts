@@ -1,10 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import {
-  AlgorithmIdentifier,
-  AlgorithmIdentifierJson,
-  AlgorithmIdentifierSchema
-} from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { Certificate, CertificateJson } from "./Certificate";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -52,16 +48,8 @@ export class Signature extends PkiObject implements ISignature {
   constructor(parameters: SignatureParameters = {}) {
     super();
 
-    this.signatureAlgorithm = pvutils.getParametersValue(
-      parameters,
-      SIGNATURE_ALGORITHM,
-      Signature.defaultValues(SIGNATURE_ALGORITHM)
-    );
-    this.signature = pvutils.getParametersValue(
-      parameters,
-      SIGNATURE,
-      Signature.defaultValues(SIGNATURE)
-    );
+    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, Signature.defaultValues(SIGNATURE_ALGORITHM));
+    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, Signature.defaultValues(SIGNATURE));
     if (CERTS in parameters) {
       this.certs = pvutils.getParametersValue(parameters, CERTS, Signature.defaultValues(CERTS));
     }
@@ -99,9 +87,7 @@ export class Signature extends PkiObject implements ISignature {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case SIGNATURE_ALGORITHM:
-        return (
-          memberValue.algorithmId === EMPTY_STRING && "algorithmParams" in memberValue === false
-        );
+        return memberValue.algorithmId === EMPTY_STRING && "algorithmParams" in memberValue === false;
       case SIGNATURE:
         return memberValue.isEqual(Signature.defaultValues(memberName));
       case CERTS:
@@ -122,11 +108,7 @@ export class Signature extends PkiObject implements ISignature {
    *```
    */
   public static override schema(parameters: SignatureSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -137,7 +119,7 @@ export class Signature extends PkiObject implements ISignature {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
           value: [
             new asn1js.Sequence({
@@ -146,13 +128,13 @@ export class Signature extends PkiObject implements ISignature {
                   name: names.certs || EMPTY_STRING,
                   // TODO Double check
                   // value: Certificate.schema(names.certs || {})
-                  value: Certificate.schema({})
-                })
-              ]
-            })
-          ]
-        })
-      ]
+                  value: Certificate.schema({}),
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
     });
   }
 
@@ -168,21 +150,20 @@ export class Signature extends PkiObject implements ISignature {
         names: {
           signatureAlgorithm: {
             names: {
-              blockName: SIGNATURE_ALGORITHM
-            }
+              blockName: SIGNATURE_ALGORITHM,
+            },
           },
           signature: SIGNATURE,
-          certs: CERTS
-        }
-      })
+          certs: CERTS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     this.signatureAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.signatureAlgorithm });
     this.signature = asn1.result.signature;
-    if (CERTS in asn1.result)
-      this.certs = Array.from(asn1.result.certs, element => new Certificate({ schema: element }));
+    if (CERTS in asn1.result) this.certs = Array.from(asn1.result.certs, (element) => new Certificate({ schema: element }));
   }
 
   public toSchema(): asn1js.Sequence {
@@ -198,21 +179,21 @@ export class Signature extends PkiObject implements ISignature {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
           value: [
             new asn1js.Sequence({
-              value: Array.from(this.certs, o => o.toSchema())
-            })
-          ]
-        })
+              value: Array.from(this.certs, (o) => o.toSchema()),
+            }),
+          ],
+        }),
       );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
@@ -220,11 +201,11 @@ export class Signature extends PkiObject implements ISignature {
   public toJSON(): SignatureJson {
     const res: SignatureJson = {
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signature: this.signature.toJSON()
+      signature: this.signature.toJSON(),
     };
 
     if (this.certs) {
-      res.certs = Array.from(this.certs, o => o.toJSON());
+      res.certs = Array.from(this.certs, (o) => o.toJSON());
     }
 
     return res;

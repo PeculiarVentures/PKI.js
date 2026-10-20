@@ -69,17 +69,9 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
   constructor(parameters: OCSPRequestParameters = {}) {
     super();
 
-    this.tbsRequest = pvutils.getParametersValue(
-      parameters,
-      TBS_REQUEST,
-      OCSPRequest.defaultValues(TBS_REQUEST)
-    );
+    this.tbsRequest = pvutils.getParametersValue(parameters, TBS_REQUEST, OCSPRequest.defaultValues(TBS_REQUEST));
     if (OPTIONAL_SIGNATURE in parameters) {
-      this.optionalSignature = pvutils.getParametersValue(
-        parameters,
-        OPTIONAL_SIGNATURE,
-        OCSPRequest.defaultValues(OPTIONAL_SIGNATURE)
-      );
+      this.optionalSignature = pvutils.getParametersValue(parameters, OPTIONAL_SIGNATURE, OCSPRequest.defaultValues(OPTIONAL_SIGNATURE));
     }
 
     if (parameters.schema) {
@@ -145,13 +137,9 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
     parameters: Schema.SchemaParameters<{
       tbsRequest?: TBSRequestSchema;
       optionalSignature?: SignatureSchema;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || "OCSPRequest",
@@ -159,27 +147,27 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
         TBSRequest.schema(
           names.tbsRequest || {
             names: {
-              blockName: TBS_REQUEST
-            }
-          }
+              blockName: TBS_REQUEST,
+            },
+          },
         ),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
           value: [
             Signature.schema(
               names.optionalSignature || {
                 names: {
-                  blockName: OPTIONAL_SIGNATURE
-                }
-              }
-            )
-          ]
-        })
-      ]
+                  blockName: OPTIONAL_SIGNATURE,
+                },
+              },
+            ),
+          ],
+        }),
+      ],
     });
   }
 
@@ -193,8 +181,7 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
 
     // Get internal properties from parsed schema
     this.tbsRequest = new TBSRequest({ schema: asn1.result.tbsRequest });
-    if (OPTIONAL_SIGNATURE in asn1.result)
-      this.optionalSignature = new Signature({ schema: asn1.result.optionalSignature });
+    if (OPTIONAL_SIGNATURE in asn1.result) this.optionalSignature = new Signature({ schema: asn1.result.optionalSignature });
   }
 
   public toSchema(encodeFlag = false) {
@@ -208,23 +195,23 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [this.optionalSignature.toSchema()]
-        })
+          value: [this.optionalSignature.toSchema()],
+        }),
       );
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
 
   public toJSON(): OCSPRequestJson {
     const res: OCSPRequestJson = {
-      tbsRequest: this.tbsRequest.toJSON()
+      tbsRequest: this.tbsRequest.toJSON(),
     };
 
     if (this.optionalSignature) {
@@ -240,11 +227,7 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
    * @param parameters Additional parameters
    * @param crypto Crypto engine
    */
-  public async createForCertificate(
-    certificate: Certificate,
-    parameters: CertIDCreateParams,
-    crypto = common.getCrypto(true)
-  ): Promise<void> {
+  public async createForCertificate(certificate: Certificate, parameters: CertIDCreateParams, crypto = common.getCrypto(true)): Promise<void> {
     //#region Initial variables
     const certID = new CertID();
     //#endregion
@@ -256,8 +239,8 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
     //#region Make final request data
     this.tbsRequest.requestList.push(
       new Request({
-        reqCert: certID
-      })
+        reqCert: certID,
+      }),
     );
     //#endregion
   }
@@ -268,11 +251,7 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
    * @param crypto Crypto engine
    */
-  public async sign(
-    privateKey: CryptoKey,
-    hashAlgorithm = "SHA-1",
-    crypto = common.getCrypto(true)
-  ) {
+  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)) {
     // Initial checking
     ParameterError.assertEmpty(privateKey, "privateKey", "OCSPRequest.sign method");
 

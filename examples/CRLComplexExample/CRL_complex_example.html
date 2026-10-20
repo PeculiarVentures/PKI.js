@@ -178,11 +178,8 @@
             <option value="algECDSA">ECDSA</option>
           </select>
         </p>
-        <label for="newSignedData" style="font-weight: bold; float: left"
-          >BASE-64 encoded new certificate + PKCS#8 private key:</label
-        >
-        <textarea id="newSignedData">
-&lt;  New encoded CRL + PKCS#8 exported private key will be stored here &gt;</textarea>
+        <label for="newSignedData" style="font-weight: bold; float: left">BASE-64 encoded new certificate + PKCS#8 private key:</label>
+        <textarea id="newSignedData">&lt;  New encoded CRL + PKCS#8 exported private key will be stored here &gt;</textarea>
         <a id="crl-create">Create</a>
       </div>
 
@@ -202,9 +199,7 @@
           </table>
         </div>
         <p><span class="type">This update:</span> <span id="crl-this-update"></span></p>
-        <p id="crl-next-update-div" style="display: none">
-          <span class="type">Next update:</span> <span id="crl-next-update"></span>
-        </p>
+        <p id="crl-next-update-div" style="display: none"><span class="type">Next update:</span> <span id="crl-next-update"></span></p>
         <p><span class="type">Signature algorithm:</span> <span id="crl-sign-algo"></span></p>
         <div id="crl-rev-certs-div" class="two-col">
           <p class="subject">Revoked certificates:</p>

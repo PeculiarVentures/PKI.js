@@ -40,17 +40,9 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
   constructor(parameters: RecipientIdentifierParameters = {}) {
     super();
 
-    this.variant = pvutils.getParametersValue(
-      parameters,
-      VARIANT,
-      RecipientIdentifier.defaultValues(VARIANT)
-    );
+    this.variant = pvutils.getParametersValue(parameters, VARIANT, RecipientIdentifier.defaultValues(VARIANT));
     if (VALUE in parameters) {
-      this.value = pvutils.getParametersValue(
-        parameters,
-        VALUE,
-        RecipientIdentifier.defaultValues(VALUE)
-      );
+      this.value = pvutils.getParametersValue(parameters, VALUE, RecipientIdentifier.defaultValues(VALUE));
     }
 
     if (parameters.schema) {
@@ -104,27 +96,23 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
    *```
    */
   public static override schema(parameters: RecipientIdentifierSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Choice({
       value: [
         IssuerAndSerialNumber.schema({
           names: {
-            blockName: names.blockName || EMPTY_STRING
-          }
+            blockName: names.blockName || EMPTY_STRING,
+          },
         }),
         new asn1js.Primitive({
           name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
-          }
-        })
-      ]
+            tagNumber: 0, // [0]
+          },
+        }),
+      ],
     });
   }
 
@@ -138,9 +126,9 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
       schema,
       RecipientIdentifier.schema({
         names: {
-          blockName: "blockName"
-        }
-      })
+          blockName: "blockName",
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -159,23 +147,19 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
     switch (this.variant) {
       case 1:
         if (!(this.value instanceof IssuerAndSerialNumber)) {
-          throw new Error(
-            "Incorrect type of RecipientIdentifier.value. It should be IssuerAndSerialNumber."
-          );
+          throw new Error("Incorrect type of RecipientIdentifier.value. It should be IssuerAndSerialNumber.");
         }
         return this.value.toSchema();
       case 2:
         if (!(this.value instanceof asn1js.OctetString)) {
-          throw new Error(
-            "Incorrect type of RecipientIdentifier.value. It should be ASN.1 OctetString."
-          );
+          throw new Error("Incorrect type of RecipientIdentifier.value. It should be ASN.1 OctetString.");
         }
         return new asn1js.Primitive({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          valueHex: this.value.valueBlock.valueHexView
+          valueHex: this.value.valueBlock.valueHexView,
         });
       default:
         return new asn1js.Any() as any;
@@ -184,7 +168,7 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
 
   public toJSON(): RecipientIdentifierJson {
     const res: RecipientIdentifierJson = {
-      variant: this.variant
+      variant: this.variant,
     };
 
     if ((this.variant === 1 || this.variant === 2) && this.value) {

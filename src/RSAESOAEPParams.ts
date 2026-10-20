@@ -1,10 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import {
-  AlgorithmIdentifier,
-  AlgorithmIdentifierJson,
-  AlgorithmIdentifierSchema
-} from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -46,21 +42,9 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
   constructor(parameters: RSAESOAEPParamsParameters = {}) {
     super();
 
-    this.hashAlgorithm = pvutils.getParametersValue(
-      parameters,
-      HASH_ALGORITHM,
-      RSAESOAEPParams.defaultValues(HASH_ALGORITHM)
-    );
-    this.maskGenAlgorithm = pvutils.getParametersValue(
-      parameters,
-      MASK_GEN_ALGORITHM,
-      RSAESOAEPParams.defaultValues(MASK_GEN_ALGORITHM)
-    );
-    this.pSourceAlgorithm = pvutils.getParametersValue(
-      parameters,
-      P_SOURCE_ALGORITHM,
-      RSAESOAEPParams.defaultValues(P_SOURCE_ALGORITHM)
-    );
+    this.hashAlgorithm = pvutils.getParametersValue(parameters, HASH_ALGORITHM, RSAESOAEPParams.defaultValues(HASH_ALGORITHM));
+    this.maskGenAlgorithm = pvutils.getParametersValue(parameters, MASK_GEN_ALGORITHM, RSAESOAEPParams.defaultValues(MASK_GEN_ALGORITHM));
+    this.pSourceAlgorithm = pvutils.getParametersValue(parameters, P_SOURCE_ALGORITHM, RSAESOAEPParams.defaultValues(P_SOURCE_ALGORITHM));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -80,25 +64,22 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
       case HASH_ALGORITHM:
         return new AlgorithmIdentifier({
           algorithmId: "1.3.14.3.2.26", // SHA-1
-          algorithmParams: new asn1js.Null()
+          algorithmParams: new asn1js.Null(),
         });
       case MASK_GEN_ALGORITHM:
         return new AlgorithmIdentifier({
           algorithmId: "1.2.840.113549.1.1.8", // MGF1
           algorithmParams: new AlgorithmIdentifier({
             algorithmId: "1.3.14.3.2.26", // SHA-1
-            algorithmParams: new asn1js.Null()
-          }).toSchema()
+            algorithmParams: new asn1js.Null(),
+          }).toSchema(),
         });
       case P_SOURCE_ALGORITHM:
         return new AlgorithmIdentifier({
           algorithmId: "1.2.840.113549.1.1.9", // id-pSpecified
           algorithmParams: new asn1js.OctetString({
-            valueHex: new Uint8Array([
-              0xda, 0x39, 0xa3, 0xee, 0x5e, 0x6b, 0x4b, 0x0d, 0x32, 0x55, 0xbf, 0xef, 0x95, 0x60,
-              0x18, 0x90, 0xaf, 0xd8, 0x07, 0x09
-            ]).buffer
-          }) // SHA-1 hash of empty string
+            valueHex: new Uint8Array([0xda, 0x39, 0xa3, 0xee, 0x5e, 0x6b, 0x4b, 0x0d, 0x32, 0x55, 0xbf, 0xef, 0x95, 0x60, 0x18, 0x90, 0xaf, 0xd8, 0x07, 0x09]).buffer,
+          }), // SHA-1 hash of empty string
         });
       default:
         return super.defaultValues(memberName);
@@ -121,13 +102,9 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
       hashAlgorithm?: AlgorithmIdentifierSchema;
       maskGenAlgorithm?: AlgorithmIdentifierSchema;
       pSourceAlgorithm?: AlgorithmIdentifierSchema;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -135,28 +112,28 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
           optional: true,
-          value: [AlgorithmIdentifier.schema(names.hashAlgorithm || {})]
+          value: [AlgorithmIdentifier.schema(names.hashAlgorithm || {})],
         }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
           optional: true,
-          value: [AlgorithmIdentifier.schema(names.maskGenAlgorithm || {})]
+          value: [AlgorithmIdentifier.schema(names.maskGenAlgorithm || {})],
         }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 2 // [2]
+            tagNumber: 2, // [2]
           },
           optional: true,
-          value: [AlgorithmIdentifier.schema(names.pSourceAlgorithm || {})]
-        })
-      ]
+          value: [AlgorithmIdentifier.schema(names.pSourceAlgorithm || {})],
+        }),
+      ],
     });
   }
 
@@ -172,33 +149,30 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
         names: {
           hashAlgorithm: {
             names: {
-              blockName: HASH_ALGORITHM
-            }
+              blockName: HASH_ALGORITHM,
+            },
           },
           maskGenAlgorithm: {
             names: {
-              blockName: MASK_GEN_ALGORITHM
-            }
+              blockName: MASK_GEN_ALGORITHM,
+            },
           },
           pSourceAlgorithm: {
             names: {
-              blockName: P_SOURCE_ALGORITHM
-            }
-          }
-        }
-      })
+              blockName: P_SOURCE_ALGORITHM,
+            },
+          },
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    if (HASH_ALGORITHM in asn1.result)
-      this.hashAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.hashAlgorithm });
+    if (HASH_ALGORITHM in asn1.result) this.hashAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.hashAlgorithm });
 
-    if (MASK_GEN_ALGORITHM in asn1.result)
-      this.maskGenAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.maskGenAlgorithm });
+    if (MASK_GEN_ALGORITHM in asn1.result) this.maskGenAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.maskGenAlgorithm });
 
-    if (P_SOURCE_ALGORITHM in asn1.result)
-      this.pSourceAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.pSourceAlgorithm });
+    if (P_SOURCE_ALGORITHM in asn1.result) this.pSourceAlgorithm = new AlgorithmIdentifier({ schema: asn1.result.pSourceAlgorithm });
   }
 
   public toSchema(): asn1js.Sequence {
@@ -210,10 +184,10 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [this.hashAlgorithm.toSchema()]
-        })
+          value: [this.hashAlgorithm.toSchema()],
+        }),
       );
     }
 
@@ -222,10 +196,10 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: [this.maskGenAlgorithm.toSchema()]
-        })
+          value: [this.maskGenAlgorithm.toSchema()],
+        }),
       );
     }
 
@@ -234,17 +208,17 @@ export class RSAESOAEPParams extends PkiObject implements IRSAESOAEPParams {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 2 // [2]
+            tagNumber: 2, // [2]
           },
-          value: [this.pSourceAlgorithm.toSchema()]
-        })
+          value: [this.pSourceAlgorithm.toSchema()],
+        }),
       );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }

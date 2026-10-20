@@ -30,7 +30,7 @@ function builtInStandardAttributes(
     personal_name?: string;
     organizational_unit_names?: string;
   }> = {},
-  optional = false
+  optional = false,
 ) {
   //builtInStandardAttributes ::= Sequence {
   //    country-name                  CountryName OPTIONAL,
@@ -42,11 +42,7 @@ function builtInStandardAttributes(
   //    numeric-user-identifier   [4] IMPLICIT NumericUserIdentifier OPTIONAL,
   //    personal-name             [5] IMPLICIT PersonalName OPTIONAL,
   //    organizational-unit-names [6] IMPLICIT OrganizationalUnitNames OPTIONAL }
-  const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-    parameters,
-    "names",
-    {}
-  );
+  const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
   return new asn1js.Sequence({
     optional,
@@ -55,132 +51,132 @@ function builtInStandardAttributes(
         optional: true,
         idBlock: {
           tagClass: 2, // APPLICATION-SPECIFIC
-          tagNumber: 1 // [1]
+          tagNumber: 1, // [1]
         },
         name: names.country_name || EMPTY_STRING,
         value: [
           new asn1js.Choice({
-            value: [new asn1js.NumericString(), new asn1js.PrintableString()]
-          })
-        ]
+            value: [new asn1js.NumericString(), new asn1js.PrintableString()],
+          }),
+        ],
       }),
       new asn1js.Constructed({
         optional: true,
         idBlock: {
           tagClass: 2, // APPLICATION-SPECIFIC
-          tagNumber: 2 // [2]
+          tagNumber: 2, // [2]
         },
         name: names.administration_domain_name || EMPTY_STRING,
         value: [
           new asn1js.Choice({
-            value: [new asn1js.NumericString(), new asn1js.PrintableString()]
-          })
-        ]
+            value: [new asn1js.NumericString(), new asn1js.PrintableString()],
+          }),
+        ],
       }),
       new asn1js.Primitive({
         optional: true,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
+          tagNumber: 0, // [0]
         },
         name: names.network_address || EMPTY_STRING,
-        isHexOnly: true
+        isHexOnly: true,
       }),
       new asn1js.Primitive({
         optional: true,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 1 // [1]
+          tagNumber: 1, // [1]
         },
         name: names.terminal_identifier || EMPTY_STRING,
-        isHexOnly: true
+        isHexOnly: true,
       }),
       new asn1js.Constructed({
         optional: true,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 2 // [2]
+          tagNumber: 2, // [2]
         },
         name: names.private_domain_name || EMPTY_STRING,
         value: [
           new asn1js.Choice({
-            value: [new asn1js.NumericString(), new asn1js.PrintableString()]
-          })
-        ]
+            value: [new asn1js.NumericString(), new asn1js.PrintableString()],
+          }),
+        ],
       }),
       new asn1js.Primitive({
         optional: true,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 3 // [3]
+          tagNumber: 3, // [3]
         },
         name: names.organization_name || EMPTY_STRING,
-        isHexOnly: true
+        isHexOnly: true,
       }),
       new asn1js.Primitive({
         optional: true,
         name: names.numeric_user_identifier || EMPTY_STRING,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 4 // [4]
+          tagNumber: 4, // [4]
         },
-        isHexOnly: true
+        isHexOnly: true,
       }),
       new asn1js.Constructed({
         optional: true,
         name: names.personal_name || EMPTY_STRING,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 5 // [5]
+          tagNumber: 5, // [5]
         },
         value: [
           new asn1js.Primitive({
             idBlock: {
               tagClass: 3, // CONTEXT-SPECIFIC
-              tagNumber: 0 // [0]
+              tagNumber: 0, // [0]
             },
-            isHexOnly: true
+            isHexOnly: true,
           }),
           new asn1js.Primitive({
             optional: true,
             idBlock: {
               tagClass: 3, // CONTEXT-SPECIFIC
-              tagNumber: 1 // [1]
+              tagNumber: 1, // [1]
             },
-            isHexOnly: true
+            isHexOnly: true,
           }),
           new asn1js.Primitive({
             optional: true,
             idBlock: {
               tagClass: 3, // CONTEXT-SPECIFIC
-              tagNumber: 2 // [2]
+              tagNumber: 2, // [2]
             },
-            isHexOnly: true
+            isHexOnly: true,
           }),
           new asn1js.Primitive({
             optional: true,
             idBlock: {
               tagClass: 3, // CONTEXT-SPECIFIC
-              tagNumber: 3 // [3]
+              tagNumber: 3, // [3]
             },
-            isHexOnly: true
-          })
-        ]
+            isHexOnly: true,
+          }),
+        ],
       }),
       new asn1js.Constructed({
         optional: true,
         name: names.organizational_unit_names || EMPTY_STRING,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 6 // [6]
+          tagNumber: 6, // [6]
         },
         value: [
           new asn1js.Repeated({
-            value: new asn1js.PrintableString()
-          })
-        ]
-      })
-    ]
+            value: new asn1js.PrintableString(),
+          }),
+        ],
+      }),
+    ],
   });
 }
 
@@ -191,7 +187,7 @@ function builtInStandardAttributes(
 function builtInDomainDefinedAttributes(optional = false): Schema.SchemaType {
   return new asn1js.Sequence({
     optional,
-    value: [new asn1js.PrintableString(), new asn1js.PrintableString()]
+    value: [new asn1js.PrintableString(), new asn1js.PrintableString()],
   });
 }
 
@@ -207,19 +203,19 @@ function extensionAttributes(optional = false): Schema.SchemaType {
         optional: true,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
+          tagNumber: 0, // [0]
         },
-        isHexOnly: true
+        isHexOnly: true,
       }),
       new asn1js.Constructed({
         optional: true,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 1 // [1]
+          tagNumber: 1, // [1]
         },
-        value: [new asn1js.Any()]
-      })
-    ]
+        value: [new asn1js.Any()],
+      }),
+    ],
   });
 }
 
@@ -236,8 +232,7 @@ export interface IGeneralName {
   value: any;
 }
 
-export type GeneralNameParameters = PkiObjectParameters &
-  Partial<{ type: 1 | 2 | 6; value: string } | { type: 0 | 3 | 4 | 7 | 8; value: any }>;
+export type GeneralNameParameters = PkiObjectParameters & Partial<{ type: 1 | 2 | 6; value: string } | { type: 0 | 3 | 4 | 7 | 8; value: any }>;
 
 export interface GeneralNameSchema {
   names?: {
@@ -335,18 +330,14 @@ export class GeneralName extends PkiObject implements IGeneralName {
    *```
    */
   static override schema(parameters: GeneralNameSchema = {}): asn1js.Choice {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Choice({
       value: [
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
           name: names.blockName || EMPTY_STRING,
           value: [
@@ -354,50 +345,46 @@ export class GeneralName extends PkiObject implements IGeneralName {
             new asn1js.Constructed({
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
-                tagNumber: 0 // [0]
+                tagNumber: 0, // [0]
               },
-              value: [new asn1js.Any()]
-            })
-          ]
+              value: [new asn1js.Any()],
+            }),
+          ],
         }),
         new asn1js.Primitive({
           name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
-          }
+            tagNumber: 1, // [1]
+          },
         }),
         new asn1js.Primitive({
           name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 2 // [2]
-          }
+            tagNumber: 2, // [2]
+          },
         }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 3 // [3]
+            tagNumber: 3, // [3]
           },
           name: names.blockName || EMPTY_STRING,
-          value: [
-            builtInStandardAttributes(names.builtInStandardAttributes || {}, false),
-            builtInDomainDefinedAttributes(true),
-            extensionAttributes(true)
-          ]
+          value: [builtInStandardAttributes(names.builtInStandardAttributes || {}, false), builtInDomainDefinedAttributes(true), extensionAttributes(true)],
         }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 4 // [4]
+            tagNumber: 4, // [4]
           },
           name: names.blockName || EMPTY_STRING,
-          value: [RelativeDistinguishedNames.schema(names.directoryName || {})]
+          value: [RelativeDistinguishedNames.schema(names.directoryName || {})],
         }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 5 // [5]
+            tagNumber: 5, // [5]
           },
           name: names.blockName || EMPTY_STRING,
           value: [
@@ -405,78 +392,55 @@ export class GeneralName extends PkiObject implements IGeneralName {
               optional: true,
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
-                tagNumber: 0 // [0]
+                tagNumber: 0, // [0]
               },
               value: [
                 new asn1js.Choice({
-                  value: [
-                    new asn1js.TeletexString(),
-                    new asn1js.PrintableString(),
-                    new asn1js.UniversalString(),
-                    new asn1js.Utf8String(),
-                    new asn1js.BmpString()
-                  ]
-                })
-              ]
+                  value: [new asn1js.TeletexString(), new asn1js.PrintableString(), new asn1js.UniversalString(), new asn1js.Utf8String(), new asn1js.BmpString()],
+                }),
+              ],
             }),
             new asn1js.Constructed({
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
-                tagNumber: 1 // [1]
+                tagNumber: 1, // [1]
               },
               value: [
                 new asn1js.Choice({
-                  value: [
-                    new asn1js.TeletexString(),
-                    new asn1js.PrintableString(),
-                    new asn1js.UniversalString(),
-                    new asn1js.Utf8String(),
-                    new asn1js.BmpString()
-                  ]
-                })
-              ]
-            })
-          ]
+                  value: [new asn1js.TeletexString(), new asn1js.PrintableString(), new asn1js.UniversalString(), new asn1js.Utf8String(), new asn1js.BmpString()],
+                }),
+              ],
+            }),
+          ],
         }),
         new asn1js.Primitive({
           name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 6 // [6]
-          }
+            tagNumber: 6, // [6]
+          },
         }),
         new asn1js.Primitive({
           name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 7 // [7]
-          }
+            tagNumber: 7, // [7]
+          },
         }),
         new asn1js.Primitive({
           name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 8 // [8]
-          }
-        })
-      ]
+            tagNumber: 8, // [8]
+          },
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    pvutils.clearProps(schema, [
-      "blockName",
-      "otherName",
-      "rfc822Name",
-      "dNSName",
-      "x400Address",
-      "directoryName",
-      "ediPartyName",
-      "uniformResourceIdentifier",
-      "iPAddress",
-      "registeredID"
-    ]);
+    pvutils.clearProps(schema, ["blockName", "otherName", "rfc822Name", "dNSName", "x400Address", "directoryName", "ediPartyName", "uniformResourceIdentifier", "iPAddress", "registeredID"]);
     //#endregion
 
     //#region Check the schema is valid
@@ -492,15 +456,15 @@ export class GeneralName extends PkiObject implements IGeneralName {
           x400Address: "x400Address",
           directoryName: {
             names: {
-              blockName: "directoryName"
-            }
+              blockName: "directoryName",
+            },
           },
           ediPartyName: "ediPartyName",
           uniformResourceIdentifier: "uniformResourceIdentifier",
           iPAddress: "iPAddress",
-          registeredID: "registeredID"
-        }
-      })
+          registeredID: "registeredID",
+        },
+      }),
     );
 
     AsnError.assertSchema(asn1, this.className);
@@ -541,7 +505,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
         break;
       case 7: // iPAddress
         this.value = new asn1js.OctetString({
-          valueHex: asn1.result.blockName.valueBlock.valueHex
+          valueHex: asn1.result.blockName.valueBlock.valueHex,
         });
         break;
       case 8: // registeredID
@@ -563,11 +527,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
     //#endregion
   }
 
-  public toSchema():
-    | asn1js.Constructed
-    | asn1js.IA5String
-    | asn1js.ObjectIdentifier
-    | asn1js.Choice {
+  public toSchema(): asn1js.Constructed | asn1js.IA5String | asn1js.ObjectIdentifier | asn1js.Choice {
     //#region Construct and return new ASN.1 schema for this object
     switch (this.type) {
       case 0:
@@ -576,9 +536,9 @@ export class GeneralName extends PkiObject implements IGeneralName {
         return new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: this.type
+            tagNumber: this.type,
           },
-          value: [this.value]
+          value: [this.value],
         });
       case 1:
       case 2:
@@ -594,9 +554,9 @@ export class GeneralName extends PkiObject implements IGeneralName {
         return new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 4
+            tagNumber: 4,
           },
-          value: [this.value.toSchema()]
+          value: [this.value.toSchema()],
         });
       case 7: {
         const value = this.value;
@@ -623,7 +583,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
   public toJSON(): GeneralNameJson {
     const _object = {
       type: this.type,
-      value: EMPTY_STRING
+      value: EMPTY_STRING,
     } as GeneralNameJson;
 
     if (typeof this.value === "string") _object.value = this.value;

@@ -102,11 +102,7 @@ export class Attribute extends PkiObject implements IAttribute {
    *```
    */
   public static override schema(parameters: AttributeSchema = {}) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -117,11 +113,11 @@ export class Attribute extends PkiObject implements IAttribute {
           value: [
             new asn1js.Repeated({
               name: names.values || EMPTY_STRING,
-              value: new asn1js.Any()
-            })
-          ]
-        })
-      ]
+              value: new asn1js.Any(),
+            }),
+          ],
+        }),
+      ],
     });
   }
 
@@ -136,9 +132,9 @@ export class Attribute extends PkiObject implements IAttribute {
       Attribute.schema({
         names: {
           type: TYPE,
-          values: VALUES
-        }
-      })
+          values: VALUES,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -153,9 +149,9 @@ export class Attribute extends PkiObject implements IAttribute {
       value: [
         new asn1js.ObjectIdentifier({ value: this.type }),
         new asn1js.Set({
-          value: this.values
-        })
-      ]
+          value: this.values,
+        }),
+      ],
     });
     //#endregion
   }
@@ -163,7 +159,7 @@ export class Attribute extends PkiObject implements IAttribute {
   public toJSON(): AttributeJson {
     return {
       type: this.type,
-      values: Array.from(this.values, o => o.toJSON())
+      values: Array.from(this.values, (o) => o.toJSON()),
     };
   }
 }

@@ -159,20 +159,13 @@
         <legend>NOTE</legend>
         <div>
           <p>
-            PKIjs supports many different combinations of PKCS#12. Most clients only support one
-            combination. Clients typically only support a combination where the same password is
-            used for protection and integrity.
+            PKIjs supports many different combinations of PKCS#12. Most clients only support one combination. Clients typically only support a combination where the same password is used for
+            protection and integrity.
           </p>
 
-          <p>
-            PKIjs, also only supports creation of AES-CBC and AES-GCM protected PKCS#12’s which will
-            not be readable by Windows which only supports weak ciphers in PKCS#12 files.
-          </p>
+          <p>PKIjs, also only supports creation of AES-CBC and AES-GCM protected PKCS#12’s which will not be readable by Windows which only supports weak ciphers in PKCS#12 files.</p>
 
-          <p>
-            You can parse the Password-Based Privacy Protection variant PKIjs creates using this
-            command:
-          </p>
+          <p>You can parse the Password-Based Privacy Protection variant PKIjs creates using this command:</p>
 
           <p>openssl pkcs12 -in pkijs_pkcs12.p12</p>
         </div>
@@ -195,9 +188,7 @@
 
       <div>
         <fieldset>
-          <legend>
-            PKCS#12 With Password-Based Integrity Protection And No Privacy Protection
-          </legend>
+          <legend>PKCS#12 With Password-Based Integrity Protection And No Privacy Protection</legend>
 
           <p>
             <label for="password2" style="float: left">Password:</label>
@@ -210,18 +201,14 @@
 
       <div>
         <fieldset>
-          <legend>
-            PKCS#12 With Certificate-Based Integrity Protection And No Privacy Protection
-          </legend>
+          <legend>PKCS#12 With Certificate-Based Integrity Protection And No Privacy Protection</legend>
           <button id="certificate_based_integrity">Create</button>
         </fieldset>
       </div>
 
       <div>
         <fieldset>
-          <legend>
-            PKCS#12 With No Privacy Protection and Password-Based Integrity Protection
-          </legend>
+          <legend>PKCS#12 With No Privacy Protection and Password-Based Integrity Protection</legend>
 
           <p>
             <label for="password3" style="float: left">Password:</label>
@@ -247,9 +234,7 @@
 
       <div>
         <fieldset>
-          <legend>
-            PKCS#12 With Certificate-Based Privacy And Password-Based Integrity Protection
-          </legend>
+          <legend>PKCS#12 With Certificate-Based Privacy And Password-Based Integrity Protection</legend>
 
           <p>
             <label for="password5" style="float: left">Password:</label>
@@ -269,20 +254,13 @@
           <legend>NOTE</legend>
           <div>
             <p>
-              Unfortunately current versions of Windows and OpenSSL only support using weak
-              cryptographic primitives in PKCS#12. WebCrypto does not support these weaker
-              mechanisms so we can not fully parse files all files created by them.
+              Unfortunately current versions of Windows and OpenSSL only support using weak cryptographic primitives in PKCS#12. WebCrypto does not support these weaker mechanisms so we can not fully
+              parse files all files created by them.
             </p>
 
-            <p>
-              With that said OpenSSL does support some stronger options, specifically it allows
-              creation of PKCS#12’s using AES-CBC. You can create such a file with this command:
-            </p>
+            <p>With that said OpenSSL does support some stronger options, specifically it allows creation of PKCS#12’s using AES-CBC. You can create such a file with this command:</p>
 
-            <p>
-              openssl pkcs12 -export -inkey key.pem -in test.cer -out test.p12 -certpbe AES-256-CBC
-              -keypbe AES-256-CBC
-            </p>
+            <p>openssl pkcs12 -export -inkey key.pem -in test.cer -out test.p12 -certpbe AES-256-CBC -keypbe AES-256-CBC</p>
           </div>
         </fieldset>
         <p>
@@ -295,11 +273,8 @@
           <input type="file" id="pkcs12_file" title="PKCS#12 data" />
         </p>
 
-        <label for="parsing_result" style="float: left"
-          >BASE-64 decoded certificate + PKCS#8 private key:</label
-        >
-        <textarea id="parsing_result">
-&lt; PKCS#12 parsing result will be stored here &gt;</textarea>
+        <label for="parsing_result" style="float: left">BASE-64 decoded certificate + PKCS#8 private key:</label>
+        <textarea id="parsing_result">&lt; PKCS#12 parsing result will be stored here &gt;</textarea>
       </fieldset>
     </div>
 

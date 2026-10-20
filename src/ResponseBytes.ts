@@ -42,16 +42,8 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
   constructor(parameters: ResponseBytesParameters = {}) {
     super();
 
-    this.responseType = pvutils.getParametersValue(
-      parameters,
-      RESPONSE_TYPE,
-      ResponseBytes.defaultValues(RESPONSE_TYPE)
-    );
-    this.response = pvutils.getParametersValue(
-      parameters,
-      RESPONSE,
-      ResponseBytes.defaultValues(RESPONSE)
-    );
+    this.responseType = pvutils.getParametersValue(parameters, RESPONSE_TYPE, ResponseBytes.defaultValues(RESPONSE_TYPE));
+    this.response = pvutils.getParametersValue(parameters, RESPONSE, ResponseBytes.defaultValues(RESPONSE));
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -102,18 +94,11 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
    *```
    */
   public static override schema(parameters: ResponseBytesSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        new asn1js.ObjectIdentifier({ name: names.responseType || EMPTY_STRING }),
-        new asn1js.OctetString({ name: names.response || EMPTY_STRING })
-      ]
+      value: [new asn1js.ObjectIdentifier({ name: names.responseType || EMPTY_STRING }), new asn1js.OctetString({ name: names.response || EMPTY_STRING })],
     });
   }
 
@@ -128,9 +113,9 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
       ResponseBytes.schema({
         names: {
           responseType: RESPONSE_TYPE,
-          response: RESPONSE
-        }
-      })
+          response: RESPONSE,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -142,14 +127,14 @@ export class ResponseBytes extends PkiObject implements IResponseBytes {
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [new asn1js.ObjectIdentifier({ value: this.responseType }), this.response]
+      value: [new asn1js.ObjectIdentifier({ value: this.responseType }), this.response],
     });
   }
 
   public toJSON(): ResponseBytesJson {
     return {
       responseType: this.responseType,
-      response: this.response.toJSON()
+      response: this.response.toJSON(),
     };
   }
 }

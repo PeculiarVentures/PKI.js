@@ -1,10 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import {
-  AlgorithmIdentifier,
-  AlgorithmIdentifierJson,
-  AlgorithmIdentifierSchema
-} from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
@@ -34,9 +30,7 @@ export interface EncryptedContentInfoSplit {
   disableSplit?: boolean;
 }
 
-export type EncryptedContentParameters = PkiObjectParameters &
-  Partial<IEncryptedContentInfo> &
-  EncryptedContentInfoSplit;
+export type EncryptedContentParameters = PkiObjectParameters & Partial<IEncryptedContentInfo> & EncryptedContentInfoSplit;
 
 export type EncryptedContentInfoSchema = Schema.SchemaParameters<{
   contentType?: string;
@@ -63,31 +57,20 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
   constructor(parameters: EncryptedContentParameters = {}) {
     super();
 
-    this.contentType = pvutils.getParametersValue(
-      parameters,
-      CONTENT_TYPE,
-      EncryptedContentInfo.defaultValues(CONTENT_TYPE)
-    );
-    this.contentEncryptionAlgorithm = pvutils.getParametersValue(
-      parameters,
-      CONTENT_ENCRYPTION_ALGORITHM,
-      EncryptedContentInfo.defaultValues(CONTENT_ENCRYPTION_ALGORITHM)
-    );
+    this.contentType = pvutils.getParametersValue(parameters, CONTENT_TYPE, EncryptedContentInfo.defaultValues(CONTENT_TYPE));
+    this.contentEncryptionAlgorithm = pvutils.getParametersValue(parameters, CONTENT_ENCRYPTION_ALGORITHM, EncryptedContentInfo.defaultValues(CONTENT_ENCRYPTION_ALGORITHM));
 
     if (ENCRYPTED_CONTENT in parameters && parameters.encryptedContent) {
       // encryptedContent (!!!) could be constructive or primitive value (!!!)
       this.encryptedContent = parameters.encryptedContent;
 
-      if (
-        this.encryptedContent.idBlock.tagClass === 1 &&
-        this.encryptedContent.idBlock.tagNumber === 4
-      ) {
+      if (this.encryptedContent.idBlock.tagClass === 1 && this.encryptedContent.idBlock.tagNumber === 4) {
         //#region Divide OCTET STRING value down to small pieces
         // NOTE: Acrobat cannot decrypt the content, if constructed OctetString is used
         if (this.encryptedContent.idBlock.isConstructed === false && !parameters.disableSplit) {
           const constrString = new asn1js.OctetString({
             idBlock: { isConstructed: true },
-            isConstructed: true
+            isConstructed: true,
           });
 
           let offset = 0;
@@ -95,11 +78,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
           let length = valueHex.byteLength;
 
           while (length > 0) {
-            const pieceView = new Uint8Array(
-              valueHex,
-              offset,
-              offset + PIECE_SIZE > valueHex.byteLength ? valueHex.byteLength - offset : PIECE_SIZE
-            );
+            const pieceView = new Uint8Array(valueHex, offset, offset + PIECE_SIZE > valueHex.byteLength ? valueHex.byteLength - offset : PIECE_SIZE);
             const _array = new ArrayBuffer(pieceView.length);
             const _view = new Uint8Array(_array);
 
@@ -128,9 +107,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
    * @returns Default value
    */
   public static override defaultValues(memberName: typeof CONTENT_TYPE): string;
-  public static override defaultValues(
-    memberName: typeof CONTENT_ENCRYPTION_ALGORITHM
-  ): AlgorithmIdentifier;
+  public static override defaultValues(memberName: typeof CONTENT_ENCRYPTION_ALGORITHM): AlgorithmIdentifier;
   public static override defaultValues(memberName: typeof ENCRYPTED_CONTENT): asn1js.OctetString;
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
@@ -155,9 +132,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
       case CONTENT_TYPE:
         return memberValue === EMPTY_STRING;
       case CONTENT_ENCRYPTION_ALGORITHM:
-        return (
-          memberValue.algorithmId === EMPTY_STRING && "algorithmParams" in memberValue === false
-        );
+        return memberValue.algorithmId === EMPTY_STRING && "algorithmParams" in memberValue === false;
       case ENCRYPTED_CONTENT:
         return memberValue.isEqual(EncryptedContentInfo.defaultValues(ENCRYPTED_CONTENT));
       default:
@@ -180,11 +155,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
    *```
    */
   public static override schema(parameters: EncryptedContentInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -199,24 +170,24 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
               name: names.encryptedContent || EMPTY_STRING,
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
-                tagNumber: 0 // [0]
+                tagNumber: 0, // [0]
               },
               value: [
                 new asn1js.Repeated({
-                  value: new asn1js.OctetString()
-                })
-              ]
+                  value: new asn1js.OctetString(),
+                }),
+              ],
             }),
             new asn1js.Primitive({
               name: names.encryptedContent || EMPTY_STRING,
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
-                tagNumber: 0 // [0]
-              }
-            })
-          ]
-        })
-      ]
+                tagNumber: 0, // [0]
+              },
+            }),
+          ],
+        }),
+      ],
     });
   }
 
@@ -233,19 +204,19 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
           contentType: CONTENT_TYPE,
           contentEncryptionAlgorithm: {
             names: {
-              blockName: CONTENT_ENCRYPTION_ALGORITHM
-            }
+              blockName: CONTENT_ENCRYPTION_ALGORITHM,
+            },
           },
-          encryptedContent: ENCRYPTED_CONTENT
-        }
-      })
+          encryptedContent: ENCRYPTED_CONTENT,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     this.contentType = asn1.result.contentType.valueBlock.toString();
     this.contentEncryptionAlgorithm = new AlgorithmIdentifier({
-      schema: asn1.result.contentEncryptionAlgorithm
+      schema: asn1.result.contentEncryptionAlgorithm,
     });
     if (ENCRYPTED_CONTENT in asn1.result) {
       this.encryptedContent = asn1.result.encryptedContent as asn1js.OctetString;
@@ -258,7 +229,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
   public toSchema(): asn1js.Sequence {
     //#region Create array for output sequence
     const sequenceLengthBlock = {
-      isIndefiniteForm: false
+      isIndefiniteForm: false,
     };
 
     const outputArray = [];
@@ -283,7 +254,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
       lenBlock: sequenceLengthBlock,
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
@@ -291,7 +262,7 @@ export class EncryptedContentInfo extends PkiObject implements IEncryptedContent
   public toJSON(): EncryptedContentInfoJson {
     const res: EncryptedContentInfoJson = {
       contentType: this.contentType,
-      contentEncryptionAlgorithm: this.contentEncryptionAlgorithm.toJSON()
+      contentEncryptionAlgorithm: this.contentEncryptionAlgorithm.toJSON(),
     };
 
     if (this.encryptedContent) {

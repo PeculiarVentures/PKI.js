@@ -6,8 +6,8 @@ describe("TSP Response Complex Example", () => {
   const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
   const signAlgs = ["RSASSA-PKCS1-V1_5", "ECDSA", "RSA-PSS"];
 
-  signAlgs.forEach(signAlg => {
-    hashAlgs.forEach(hashAlg => {
+  signAlgs.forEach((signAlg) => {
+    hashAlgs.forEach((hashAlg) => {
       it(`${hashAlg} + ${signAlg}`, async () => {
         const tsp = await createTSPResp(hashAlg, signAlg);
         assert.doesNotThrow(() => {

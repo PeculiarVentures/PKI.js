@@ -21,29 +21,20 @@ describe("Certificate Complex Example", () => {
     ["SHA-1 + RSA-PSS", "1.2.840.113549.1.1.10"],
     ["SHA-256 + RSA-PSS", "1.2.840.113549.1.1.10"],
     ["SHA-384 + RSA-PSS", "1.2.840.113549.1.1.10"],
-    ["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"]
+    ["SHA-512 + RSA-PSS", "1.2.840.113549.1.1.10"],
   ]);
   //#endregion
 
-  signAlgs.forEach(signAlg => {
-    hashAlgs.forEach(hashAlg => {
+  signAlgs.forEach((signAlg) => {
+    hashAlgs.forEach((hashAlg) => {
       it(`${hashAlg} + ${signAlg}`, async () => {
         const testName = `${hashAlg} + ${signAlg}`;
         const cert = await example.createCertificate(hashAlg, signAlg);
 
         const certificate = pkijs.Certificate.fromBER(cert.certificateBuffer);
-        assert.equal(
-          certificate.signatureAlgorithm.algorithmId,
-          algorithmsMap.get(testName),
-          `Signature algorithm must be ${testName}`
-        );
+        assert.equal(certificate.signatureAlgorithm.algorithmId, algorithmsMap.get(testName), `Signature algorithm must be ${testName}`);
 
-        const result = await example.verifyCertificate(
-          cert.certificateBuffer,
-          [],
-          [cert.certificate],
-          []
-        );
+        const result = await example.verifyCertificate(cert.certificateBuffer, [], [cert.certificate], []);
         assert.equal(result.result, true, "Certificate must be verified successfully");
       });
     });

@@ -2,17 +2,7 @@ export interface AnyConstructor {
   new (args: any): any;
 }
 
-export type ArgumentType =
-  | "undefined"
-  | "null"
-  | "boolean"
-  | "number"
-  | "string"
-  | "object"
-  | "Array"
-  | "ArrayBuffer"
-  | "ArrayBufferView"
-  | AnyConstructor;
+export type ArgumentType = "undefined" | "null" | "boolean" | "number" | "string" | "object" | "Array" | "ArrayBuffer" | "ArrayBufferView" | AnyConstructor;
 
 export class ArgumentError extends TypeError {
   public static readonly NAME = "ArgumentError";
@@ -51,30 +41,13 @@ export class ArgumentError extends TypeError {
   public static assert(value: any, name: string, type: "null"): asserts value is null;
   public static assert(value: any, name: string, type: "boolean"): asserts value is boolean;
   public static assert(value: any, name: string, type: "number"): asserts value is number;
-  public static assert(
-    value: any,
-    name: string,
-    type: "object"
-  ): asserts value is { [key: string]: any };
+  public static assert(value: any, name: string, type: "object"): asserts value is { [key: string]: any };
   public static assert(value: any, name: string, type: "string"): asserts value is string;
   public static assert(value: any, name: string, type: "Array"): asserts value is any[];
   public static assert(value: any, name: string, type: "ArrayBuffer"): asserts value is ArrayBuffer;
-  public static assert(
-    value: any,
-    name: string,
-    type: "ArrayBufferView"
-  ): asserts value is ArrayBufferView;
-  public static assert<T>(
-    value: any,
-    name: string,
-    type: new (...args: any[]) => T
-  ): asserts value is T;
-  public static assert(
-    value: any,
-    name: string,
-    type: ArgumentType,
-    ...types: ArgumentType[]
-  ): void;
+  public static assert(value: any, name: string, type: "ArrayBufferView"): asserts value is ArrayBufferView;
+  public static assert<T>(value: any, name: string, type: new (...args: any[]) => T): asserts value is T;
+  public static assert(value: any, name: string, type: ArgumentType, ...types: ArgumentType[]): void;
   public static assert(value: any, name: string, ...types: ArgumentType[]): void {
     for (const type of types) {
       if (this.isType(value, type)) {
@@ -82,10 +55,8 @@ export class ArgumentError extends TypeError {
       }
     }
 
-    const typeNames = types.map(o => (o instanceof Function && "name" in o ? o.name : `${o}`));
-    throw new ArgumentError(
-      `Parameter '${name}' is not of type ${typeNames.length > 1 ? `(${typeNames.join(" or ")})` : typeNames[0]}`
-    );
+    const typeNames = types.map((o) => (o instanceof Function && "name" in o ? o.name : `${o}`));
+    throw new ArgumentError(`Parameter '${name}' is not of type ${typeNames.length > 1 ? `(${typeNames.join(" or ")})` : typeNames[0]}`);
   }
 
   public override name: typeof ArgumentError.NAME = ArgumentError.NAME;

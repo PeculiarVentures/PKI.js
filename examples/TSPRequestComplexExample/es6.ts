@@ -50,12 +50,11 @@ function parseTSPReq() {
     "1.3.14.3.2.26": "SHA-1",
     "2.16.840.1.101.3.4.2.1": "SHA-256",
     "2.16.840.1.101.3.4.2.2": "SHA-384",
-    "2.16.840.1.101.3.4.2.3": "SHA-512"
+    "2.16.840.1.101.3.4.2.3": "SHA-512",
   };
 
   let hashAlgorithm = dgstmap[tspReqSimpl.messageImprint.hashAlgorithm.algorithmId];
-  if (typeof hashAlgorithm === "undefined")
-    hashAlgorithm = tspReqSimpl.messageImprint.hashAlgorithm.algorithmId;
+  if (typeof hashAlgorithm === "undefined") hashAlgorithm = tspReqSimpl.messageImprint.hashAlgorithm.algorithmId;
 
   const row = imprintTable.insertRow(imprintTable.rows.length);
   const cell0 = row.insertCell(0);
@@ -73,9 +72,7 @@ function parseTSPReq() {
 
   //#region Put information about nonce
   if (tspReqSimpl.nonce) {
-    common.getElement("tsp-req-nonce").innerHTML = Convert.ToHex(
-      tspReqSimpl.nonce.valueBlock.valueHexView
-    );
+    common.getElement("tsp-req-nonce").innerHTML = Convert.ToHex(tspReqSimpl.nonce.valueBlock.valueHexView);
     common.getElement("tsp-req-non").style.display = "block";
   }
   //#endregion

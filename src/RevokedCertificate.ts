@@ -43,22 +43,10 @@ export class RevokedCertificate extends PkiObject implements IRevokedCertificate
   constructor(parameters: RevokedCertificateParameters = {}) {
     super();
 
-    this.userCertificate = pvutils.getParametersValue(
-      parameters,
-      USER_CERTIFICATE,
-      RevokedCertificate.defaultValues(USER_CERTIFICATE)
-    );
-    this.revocationDate = pvutils.getParametersValue(
-      parameters,
-      REVOCATION_DATE,
-      RevokedCertificate.defaultValues(REVOCATION_DATE)
-    );
+    this.userCertificate = pvutils.getParametersValue(parameters, USER_CERTIFICATE, RevokedCertificate.defaultValues(USER_CERTIFICATE));
+    this.revocationDate = pvutils.getParametersValue(parameters, REVOCATION_DATE, RevokedCertificate.defaultValues(REVOCATION_DATE));
     if (CRL_ENTRY_EXTENSIONS in parameters) {
-      this.crlEntryExtensions = pvutils.getParametersValue(
-        parameters,
-        CRL_ENTRY_EXTENSIONS,
-        RevokedCertificate.defaultValues(CRL_ENTRY_EXTENSIONS)
-      );
+      this.crlEntryExtensions = pvutils.getParametersValue(parameters, CRL_ENTRY_EXTENSIONS, RevokedCertificate.defaultValues(CRL_ENTRY_EXTENSIONS));
     }
 
     if (parameters.schema) {
@@ -104,13 +92,9 @@ export class RevokedCertificate extends PkiObject implements IRevokedCertificate
       userCertificate?: string;
       revocationDate?: string;
       crlEntryExtensions?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -119,18 +103,18 @@ export class RevokedCertificate extends PkiObject implements IRevokedCertificate
         Time.schema({
           names: {
             utcTimeName: names.revocationDate || REVOCATION_DATE,
-            generalTimeName: names.revocationDate || REVOCATION_DATE
-          }
+            generalTimeName: names.revocationDate || REVOCATION_DATE,
+          },
         }),
         Extensions.schema(
           {
             names: {
-              blockName: names.crlEntryExtensions || CRL_ENTRY_EXTENSIONS
-            }
+              blockName: names.crlEntryExtensions || CRL_ENTRY_EXTENSIONS,
+            },
           },
-          true
-        )
-      ]
+          true,
+        ),
+      ],
     });
   }
 
@@ -159,14 +143,14 @@ export class RevokedCertificate extends PkiObject implements IRevokedCertificate
 
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
   }
 
   public toJSON(): RevokedCertificateJson {
     const res: RevokedCertificateJson = {
       userCertificate: this.userCertificate.toJSON(),
-      revocationDate: this.revocationDate.toJSON()
+      revocationDate: this.revocationDate.toJSON(),
     };
 
     if (this.crlEntryExtensions) {
