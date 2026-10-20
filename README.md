@@ -5,7 +5,7 @@
 <div align="center">
 
 ![NPM License](https://img.shields.io/npm/l/pkijs)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/PeculiarVentures/PKI.js/library.yml?label=test)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/PeculiarVentures/PKI.js/publish.yml?branch=master&label=publish)
 [![npm version](https://img.shields.io/npm/v/pkijs.svg)](https://www.npmjs.com/package/pkijs)
 ![Coveralls](https://img.shields.io/coverallsCoverage/github/PeculiarVentures/PKI.js)
 [![npm downloads](https://img.shields.io/npm/dm/pkijs.svg)](https://www.npmjs.com/package/pkijs)
