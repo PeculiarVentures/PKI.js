@@ -1,7 +1,7 @@
 import { Convert } from "pvtsutils";
 import * as pkijs from "../../src";
-import * as example from "../../test/tspReqComplexExample";
-import * as utils from "../../test/utils";
+import * as example from "../../src/TimeStampReq.example";
+import * as utils from "../../src/test-helpers";
 import * as common from "../common";
 
 let tspReqBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created TSP request

@@ -1,6 +1,6 @@
 import * as pkijs from "../../src";
-import * as utils from "../../test/utils";
-import * as example from "../../test/tspRespComplexExample";
+import * as utils from "../../src/test-helpers";
+import * as example from "../../src/TimeStampResp.example";
 import * as common from "../common";
 import { Convert } from "pvtsutils";
 

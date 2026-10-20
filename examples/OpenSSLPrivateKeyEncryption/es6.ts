@@ -1,6 +1,6 @@
 import * as pvtsutils from "pvtsutils";
-import * as example from "../../test/opensslPrivateKeyEncryption";
-import * as utils from "../../test/utils";
+import * as example from "../../src/PrivateKeyInfo.openssl.example";
+import * as utils from "../../src/test-helpers";
 import * as pkijs from "../../src";
 import * as common from "../common";
 

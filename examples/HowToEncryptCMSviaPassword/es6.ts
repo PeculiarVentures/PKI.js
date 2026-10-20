@@ -1,6 +1,6 @@
 import * as pvtsutils from "pvtsutils";
-import * as example from "../../test/howToEncryptCMSviaPassword";
-import * as utils from "../../test/utils";
+import * as example from "../../src/EnvelopedData.password.example";
+import * as utils from "../../src/test-helpers";
 import * as common from "../common";
 
 let encryptionVariant = 2;

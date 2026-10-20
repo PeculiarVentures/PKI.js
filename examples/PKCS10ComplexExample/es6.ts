@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
-import * as example from "../../test/pkcs10ComplexExample";
-import * as utils from "../../test/utils";
+import * as example from "../../src/CertificationRequest.example";
+import * as utils from "../../src/test-helpers";
 import * as pkijs from "../../src";
 import * as common from "../common";
 

@@ -1,6 +1,6 @@
 import * as pvtsutils from "pvtsutils";
-import * as utils from "../../test/utils";
-import * as example from "../../test/howToEncryptCMSviaKey";
+import * as utils from "../../src/test-helpers";
+import * as example from "../../src/EnvelopedData.kek.example";
 import * as common from "../common";
 
 let keys: example.CreateKeyPairResult;
