@@ -1,50 +1,22 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "oxc", "import", "vitest"],
+  "plugins": ["eslint", "import", "oxc", "typescript", "unicorn"],
   "categories": {
-    "correctness": "error"
+    "correctness": "error",
+    "perf": "warn",
+    "suspicious": "warn"
   },
   "rules": {
-    "no-redeclare": "off",
-    "no-dupe-class-members": "off",
-    "no-duplicate-imports": "warn",
-    "no-unused-vars": [
-      "error",
-      {
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_",
-        "caughtErrorsIgnorePattern": "^_"
-      }
-    ],
+    "eslint/no-shadow": "off",
     "typescript/no-explicit-any": "off",
-    "typescript/explicit-module-boundary-types": "off",
-    "typescript/explicit-function-return-type": "off",
+    "typescript/no-extraneous-class": "off",
+    "typescript/no-non-null-assertion": "off",
+    "typescript/prefer-for-of": "off",
     "typescript/triple-slash-reference": "off",
+    "typescript/unified-signatures": "off",
+    "unicorn/no-array-reverse": "off",
+    "unicorn/no-array-sort": "off",
     "unicorn/no-new-array": "off"
   },
-  "ignorePatterns": ["examples/**/*.js"],
-  "overrides": [
-    {
-      "files": ["website/docs/examples/**/*.example.ts"],
-      "rules": {
-        "no-unused-vars": "off",
-        "unicorn/no-empty-file": "off"
-      }
-    },
-    {
-      "files": ["test/NISTPKITS.spec.ts", "test/functionalTest.spec.ts"],
-      "rules": {
-        "vitest/expect-expect": "off"
-      }
-    },
-    {
-      "files": ["test/NISTPKITS.spec.ts", "test/nodePKCS12Example.spec.ts"],
-      "rules": {
-        "vitest/no-disabled-tests": "off"
-      }
-    }
-  ],
-  "env": {
-    "builtin": true
-  }
+  "ignorePatterns": ["**/build/**", "coverage/**", "website/**", "examples/**/*.js"]
 }
