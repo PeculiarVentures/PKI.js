@@ -1,7 +1,7 @@
 import { it, assert } from "vitest";
 import * as asn1js from "asn1js";
 import * as pkijs from "./index";
-import * as pvtsutils from "pvtsutils";
+import { base64, toArrayBuffer, utf8 } from "@peculiar/utils";
 
 const recipientPrivateKeyPem = `
 -----BEGIN PRIVATE KEY-----
@@ -55,12 +55,12 @@ it("EnvelopedData with an ECCCMSSharedInfo containing algorithmParams should be 
   const envelopedData = new pkijs.EnvelopedData({ schema: contentInfo.content });
 
   const plaintext = await envelopedData.decrypt(0, { recipientCertificate, recipientPrivateKey });
-  assert.equal("Hi. My name is Alice.", pvtsutils.Convert.ToUtf8String(plaintext));
+  assert.equal("Hi. My name is Alice.", utf8.decode(plaintext));
 });
 
 function pemToDer(pemString: string) {
   const derBase64 = pemString.replace(/(-----(BEGIN|END) [\w ]+-----|\n)/g, "").replace(/[\r\n]/g, "");
-  return pvtsutils.Convert.FromBase64(derBase64);
+  return toArrayBuffer(base64.decode(derBase64));
 }
 
 function pemToAsn1(pemString: string) {

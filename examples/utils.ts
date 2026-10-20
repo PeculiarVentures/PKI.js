@@ -1,14 +1,14 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { base64, toArrayBuffer } from "@peculiar/utils";
 import * as pkijs from "../src";
 
 export function toPEM(buffer: BufferSource, tag: string): string {
-  return [`-----BEGIN ${tag}-----`, formatPEM(pvtsutils.Convert.ToBase64(buffer)), `-----END ${tag}-----`, ""].join("\n");
+  return [`-----BEGIN ${tag}-----`, formatPEM(base64.encode(buffer)), `-----END ${tag}-----`, ""].join("\n");
 }
 
 export function fromPEM(pem: string): ArrayBuffer {
-  const base64 = pem.replace(/-{5}(BEGIN|END) .*-{5}/gm, "").replace(/\s/gm, "");
-  return pvtsutils.Convert.FromBase64(base64);
+  const text = pem.replace(/-{5}(BEGIN|END) .*-{5}/gm, "").replace(/\s/gm, "");
+  return toArrayBuffer(base64.decode(text));
 }
 
 /**

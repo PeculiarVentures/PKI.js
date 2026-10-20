@@ -1,4 +1,4 @@
-import * as pvtsutils from "pvtsutils";
+import { toUint8Array } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import * as pkijs from "../../src";
 
@@ -29,7 +29,7 @@ function md5(data: BufferSource, offset: number): ArrayBuffer {
 
   // pre-processing
   const length = data.byteLength;
-  const view = pvtsutils.BufferSourceConverter.toUint8Array(data);
+  const view = toUint8Array(data);
 
   const paddedLength = (length + 72) & ~63; // data + 9 extra bytes
   const padded = new Uint8Array(paddedLength);

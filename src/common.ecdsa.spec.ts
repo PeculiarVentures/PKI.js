@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { assert, describe, it } from "vitest";
-import { Convert } from "pvtsutils";
+import { hex, toArrayBuffer } from "@peculiar/utils";
 import { createCMSECDSASignature, createECDSASignatureFromCMS } from "./index";
 
 const testVectors = [
@@ -47,20 +47,20 @@ const testVectors = [
 describe("createCMSECDSASignature - ", () => {
   testVectors.forEach(({ name, rHex, sHex, derHex }) => {
     it(`should encode ${name} as DER`, () => {
-      const signatureBuffer = Convert.FromHex(rHex + sHex);
+      const signatureBuffer = toArrayBuffer(hex.decode(rHex + sHex));
       const derBuffer = createCMSECDSASignature(signatureBuffer);
 
-      assert.strictEqual(Convert.ToHex(derBuffer), derHex);
+      assert.strictEqual(hex.encode(derBuffer), derHex);
     });
 
     it(`should round-trip ${name} through createECDSASignatureFromCMS`, () => {
-      const signatureBuffer = Convert.FromHex(rHex + sHex);
+      const signatureBuffer = toArrayBuffer(hex.decode(rHex + sHex));
       const derBuffer = createCMSECDSASignature(signatureBuffer);
       const asn1 = asn1js.fromBER(derBuffer);
 
       const restored = createECDSASignatureFromCMS(asn1.result, rHex.length / 2);
 
-      assert.strictEqual(Convert.ToHex(restored), rHex + sHex);
+      assert.strictEqual(hex.encode(restored), rHex + sHex);
     });
   });
 });

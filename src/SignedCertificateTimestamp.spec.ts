@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, it, expect, vi } from "vitest";
 import * as asn1js from "asn1js";
-import { Convert } from "pvtsutils";
+import { base64, hex } from "@peculiar/utils";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import * as pkijs from "./index";
@@ -17,7 +17,7 @@ function snapshot(certificate: pkijs.Certificate) {
     items: certificate.extensions?.slice(),
     tbs: certificate.tbsView,
     tbsBytes: certificate.tbsView.slice(),
-    der: Convert.ToHex(certificate.toSchema(true).toBER(false)),
+    der: hex.encode(certificate.toSchema(true).toBER(false)),
     hasExtensions: Reflect.ownKeys(certificate).includes("extensions"),
   };
 }
@@ -28,7 +28,7 @@ function expectUnchanged(certificate: pkijs.Certificate, original: ReturnType<ty
   original.items?.forEach((extension, index) => expect(certificate.extensions?.[index]).toBe(extension));
   expect(certificate.tbsView).toBe(original.tbs);
   expect(certificate.tbsView).toEqual(original.tbsBytes);
-  expect(Convert.ToHex(certificate.toSchema(true).toBER(false))).toBe(original.der);
+  expect(hex.encode(certificate.toSchema(true).toBER(false))).toBe(original.der);
   expect(Reflect.ownKeys(certificate).includes("extensions")).toBe(original.hasExtensions);
 }
 
@@ -54,7 +54,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
 
     const spki = await crypto.exportKey("spki", keys.publicKey);
     issuerKeyHash = await crypto.digest("SHA-256", spki);
-    logs = [{ log_id: Convert.ToBase64(issuerKeyHash), key: Convert.ToBase64(spki) }];
+    logs = [{ log_id: base64.encode(issuerKeyHash), key: base64.encode(spki) }];
   });
 
   afterEach(() => vi.restoreAllMocks());
@@ -133,7 +133,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
 
   it("uses the exact stored TBS bytes even when the model cannot round-trip them", async () => {
     const { certificate, loggedTBS } = await createCertificateFixture({ explicitCriticalFalse: true });
-    expect(Convert.ToHex(certificate.encodeTBS().toBER(false))).not.toBe(Convert.ToHex(certificate.tbsView));
+    expect(hex.encode(certificate.encodeTBS().toBER(false))).not.toBe(hex.encode(certificate.tbsView));
     await expect(certificate.verify(issuer)).resolves.toBe(true);
     const original = snapshot(certificate);
     const verify = vi.spyOn(pkijs.SignedCertificateTimestamp.prototype, "verify");
@@ -143,9 +143,9 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
 
     await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).resolves.toEqual([true, true]);
     const preCert = new Uint8Array(verify.mock.calls[0][1]);
-    expect(Convert.ToHex(preCert.subarray(0, 32))).toBe(Convert.ToHex(issuerKeyHash));
+    expect(hex.encode(preCert.subarray(0, 32))).toBe(hex.encode(issuerKeyHash));
     expect((preCert[32] << 16) | (preCert[33] << 8) | preCert[34]).toBe(loggedTBS.byteLength);
-    expect(Convert.ToHex(preCert.subarray(35))).toBe(Convert.ToHex(loggedTBS));
+    expect(hex.encode(preCert.subarray(35))).toBe(hex.encode(loggedTBS));
     expectUnchanged(certificate, original);
   });
 
@@ -185,7 +185,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
     }
     const source = await createCertificate();
     const certificate = StoredCertificate.fromBER(source.toSchema().toBER(false));
-    const originalDer = Convert.ToHex(certificate.toSchema().toBER(false));
+    const originalDer = hex.encode(certificate.toSchema().toBER(false));
     const originalTbs = certificate.tbsView;
     const extensions = certificate.extensions;
     const encode = vi.spyOn(StoredCertificate.prototype, "encodeTBS");
@@ -196,7 +196,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
     expect(encode).not.toHaveBeenCalled();
     expect(certificate.tbsView).toBe(originalTbs);
     expect(certificate.extensions).toBe(extensions);
-    expect(Convert.ToHex(certificate.toSchema().toBER(false))).toBe(originalDer);
+    expect(hex.encode(certificate.toSchema().toBER(false))).toBe(originalDer);
   });
 
   it("uses one subclass schema for both SCTs and TBS when stored bytes are empty", async () => {
@@ -312,7 +312,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
     const certificate = CachedCertificate.fromBER(source.toSchema().toBER(false));
     certificate.tbsView = new Uint8Array();
     const cachedTbs = certificate.encodeTBS();
-    const originalTbs = Convert.ToHex(cachedTbs.toBER(false));
+    const originalTbs = hex.encode(cachedTbs.toBER(false));
     const original = snapshot(certificate);
     const extensions = cachedTbs.valueBlock.value.find((field) => field.idBlock.tagClass === 3 && field.idBlock.tagNumber === 3) as asn1js.Constructed;
     Object.freeze(cachedTbs.valueBlock.value);
@@ -322,7 +322,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
     await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).resolves.toEqual([true, true]);
     await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs, 0)).resolves.toEqual([true]);
     expect(certificate.encodeTBS()).toBe(cachedTbs);
-    expect(Convert.ToHex(cachedTbs.toBER(false))).toBe(originalTbs);
+    expect(hex.encode(cachedTbs.toBER(false))).toBe(originalTbs);
     expectUnchanged(certificate, original);
   });
 
@@ -336,7 +336,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
           const sequence = extension as asn1js.Sequence;
           const oid = sequence.valueBlock.value[0];
           const primitive = new asn1js.Primitive({ idBlock: { tagClass: 1, tagNumber: 6 }, valueHex: oid.valueBlock.toBER(false) });
-          expect(Convert.ToHex(primitive.toBER(false))).toBe(Convert.ToHex(oid.toBER(false)));
+          expect(hex.encode(primitive.toBER(false))).toBe(hex.encode(oid.toBER(false)));
           expect(primitive.valueBlock.toString()).not.toBe(pkijs.id_SignedCertificateTimestampList);
           sequence.valueBlock.value[0] = primitive;
         }
@@ -365,8 +365,8 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
     const tbs = asn1js.fromBER(certificate.tbsView).result as asn1js.Sequence;
     const wrapper = tbs.valueBlock.value.find((field) => field.idBlock.tagClass === 3 && field.idBlock.tagNumber === 3);
     expect(wrapper).toBeDefined();
-    expect(Convert.ToHex(wrapper!.toBER(false))).toBe("a3023000");
-    expect(Convert.ToHex(certificate.toSchema(true).valueBlock.value[0].toBER(false))).toBe(Convert.ToHex(certificate.tbsView));
+    expect(hex.encode(wrapper!.toBER(false))).toBe("a3023000");
+    expect(hex.encode(certificate.toSchema(true).valueBlock.value[0].toBER(false))).toBe(hex.encode(certificate.tbsView));
     await expect(certificate.verify(issuer)).resolves.toBe(true);
     expect(certificate.extensions).toBe(extensions);
     expect(certificate.extensions).toHaveLength(0);

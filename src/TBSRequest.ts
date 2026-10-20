@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { toArrayBuffer } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import { GeneralName, type GeneralNameJson, type GeneralNameSchema } from "./GeneralName";
 import { Request, type RequestJson, type RequestSchema } from "./Request";
@@ -61,7 +61,7 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
    * @deprecated Since version 3.0.0
    */
   public get tbs(): ArrayBuffer {
-    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+    return toArrayBuffer(this.tbsView);
   }
 
   /**

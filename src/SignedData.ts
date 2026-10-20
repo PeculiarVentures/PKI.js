@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { toUint8Array } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson } from "./AlgorithmIdentifier";
@@ -941,7 +941,7 @@ export class SignedData extends PkiObject implements ISignedData {
         data = signerInfo.signedAttrs.toSchema().toBER();
 
         //#region Change type from "[0]" to "SET" accordingly to standard
-        const view = pvtsutils.BufferSourceConverter.toUint8Array(data);
+        const view = toUint8Array(data);
         view[0] = 0x31;
         //#endregion
       }

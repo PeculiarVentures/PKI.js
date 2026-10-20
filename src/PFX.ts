@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import { toArrayBuffer } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { ContentInfo, type ContentInfoJson, type ContentInfoSchema } from "./ContentInfo";
@@ -16,7 +17,6 @@ import type * as Schema from "./Schema";
 import type { Certificate } from "./Certificate";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
-import { BufferSourceConverter } from "pvtsutils";
 import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
@@ -466,10 +466,10 @@ export class PFX extends PkiObject implements IPFX {
             const result = await crypto.verifyDataStampedWithPassword({
               password: parameters.password,
               hashAlgorithm: hashAlgorithm.name,
-              salt: BufferSourceConverter.toArrayBuffer(this.macData.macSalt.valueBlock.valueHexView),
+              salt: toArrayBuffer(this.macData.macSalt.valueBlock.valueHexView),
               iterationCount: this.macData.iterations || 1,
               contentToVerify: authSafeContent,
-              signatureToVerify: BufferSourceConverter.toArrayBuffer(this.macData.mac.digest.valueBlock.valueHexView),
+              signatureToVerify: toArrayBuffer(this.macData.mac.digest.valueBlock.valueHexView),
             });
             //#endregion
 

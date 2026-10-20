@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { base64url } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
@@ -133,9 +133,9 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
 
   public toJSON(): OtherPrimeInfoJson {
     return {
-      r: pvtsutils.Convert.ToBase64Url(this.prime.valueBlock.valueHexView),
-      d: pvtsutils.Convert.ToBase64Url(this.exponent.valueBlock.valueHexView),
-      t: pvtsutils.Convert.ToBase64Url(this.coefficient.valueBlock.valueHexView),
+      r: base64url.encode(this.prime.valueBlock.valueHexView),
+      d: base64url.encode(this.exponent.valueBlock.valueHexView),
+      t: base64url.encode(this.coefficient.valueBlock.valueHexView),
     };
   }
 
@@ -146,8 +146,8 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
   public fromJSON(json: OtherPrimeInfoJson): void {
     ParameterError.assert("json", json, "r", "d", "r");
 
-    this.prime = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.r) });
-    this.exponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.d) });
-    this.coefficient = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.t) });
+    this.prime = new asn1js.Integer({ valueHex: base64url.decode(json.r) });
+    this.exponent = new asn1js.Integer({ valueHex: base64url.decode(json.d) });
+    this.coefficient = new asn1js.Integer({ valueHex: base64url.decode(json.t) });
   }
 }

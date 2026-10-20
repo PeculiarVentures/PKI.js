@@ -1,8 +1,8 @@
 import { sha1 } from "@noble/hashes/sha1";
+import { toArrayBuffer } from "@peculiar/utils";
 import { sha256, sha384, sha512 } from "@noble/hashes/sha2";
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import * as pvtsutils from "pvtsutils";
 import * as common from "../common";
 import { PublicKeyInfo } from "../PublicKeyInfo";
 import { PrivateKeyInfo } from "../PrivateKeyInfo";
@@ -159,7 +159,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
         return this.subtle.importKey("raw", keyData as BufferSource, algorithm, extractable, keyUsages);
       case "spki":
         {
-          const asn1 = asn1js.fromBER(pvtsutils.BufferSourceConverter.toArrayBuffer(keyData as BufferSource));
+          const asn1 = asn1js.fromBER(toArrayBuffer(keyData as BufferSource));
           AsnError.assert(asn1, "keyData");
 
           const publicKeyInfo = new PublicKeyInfo();
@@ -328,7 +328,7 @@ export class CryptoEngine extends AbstractCryptoEngine {
           const privateKeyInfo = new PrivateKeyInfo();
 
           //#region Parse "PrivateKeyInfo" object
-          const asn1 = asn1js.fromBER(pvtsutils.BufferSourceConverter.toArrayBuffer(keyData as BufferSource));
+          const asn1 = asn1js.fromBER(toArrayBuffer(keyData as BufferSource));
           AsnError.assert(asn1, "keyData");
 
           try {

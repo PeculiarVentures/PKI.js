@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { toArrayBuffer } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import { RelativeDistinguishedNames, type RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
 import { SingleResponse, type SingleResponseJson, type SingleResponseSchema } from "./SingleResponse";
@@ -66,7 +66,7 @@ export class ResponseData extends PkiObject implements IResponseData {
    * @deprecated Since version 3.0.0
    */
   public get tbs(): ArrayBuffer {
-    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+    return toArrayBuffer(this.tbsView);
   }
 
   /**

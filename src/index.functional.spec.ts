@@ -1,6 +1,6 @@
 import { describe, it, assert, beforeAll, afterAll, beforeEach } from "vitest";
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { base64, hex } from "@peculiar/utils";
 import { Crypto } from "@peculiar/webcrypto";
 import * as pkijs from "./index";
 import { createCertificate } from "../examples/CertificateComplexExample/example";
@@ -334,7 +334,7 @@ describe("PKIjs functional testing", () => {
             crypto: pkijs.getCrypto(true).crypto,
           });
 
-          assert.equal(pvtsutils.Convert.ToHex(decryptedData), pvtsutils.Convert.ToHex(data));
+          assert.equal(hex.encode(decryptedData), hex.encode(data));
         });
       }
     });
@@ -624,7 +624,7 @@ describe("PKIjs functional testing", () => {
     describe("get signing certificate", () => {
       const b64 =
         "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";
-      const raw = new Uint8Array(pvtsutils.Convert.FromBase64(b64)).buffer;
+      const raw = new Uint8Array(base64.decode(b64)).buffer;
       let signedData: pkijs.SignedData;
 
       beforeAll(() => {

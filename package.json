@@ -52,8 +52,8 @@
   },
   "dependencies": {
     "@noble/hashes": "1.8.0",
+    "@peculiar/utils": "^4.1.0",
     "bytestreamjs": "^3.0.0",
-    "pvtsutils": "^1.3.6",
     "pvutils": "^1.1.3"
   },
   "peerDependencies": {

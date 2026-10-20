@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { bytes } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { ResponseData, type ResponseDataJson, type ResponseDataSchema } from "./ResponseData";
@@ -581,7 +581,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
    */
   private static containsCertificateByDer(certs: Certificate[], cert: Certificate): boolean {
     const certDer = cert.toSchema(true).toBER(false);
-    return certs.some((c) => pvtsutils.BufferSourceConverter.isEqual(c.toSchema(true).toBER(false), certDer));
+    return certs.some((c) => bytes.equal(c.toSchema(true).toBER(false), certDer));
   }
 
   //#region Responder candidate collection (multi-candidate)
@@ -748,10 +748,10 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
       if (candidateID.hashAlgorithm.algorithmId !== certID.hashAlgorithm.algorithmId) {
         continue;
       }
-      if (!pvtsutils.BufferSourceConverter.isEqual(candidateID.issuerNameHash.valueBlock.valueHexView, certID.issuerNameHash.valueBlock.valueHexView)) {
+      if (!bytes.equal(candidateID.issuerNameHash.valueBlock.valueHexView, certID.issuerNameHash.valueBlock.valueHexView)) {
         continue;
       }
-      if (!pvtsutils.BufferSourceConverter.isEqual(candidateID.issuerKeyHash.valueBlock.valueHexView, certID.issuerKeyHash.valueBlock.valueHexView)) {
+      if (!bytes.equal(candidateID.issuerKeyHash.valueBlock.valueHexView, certID.issuerKeyHash.valueBlock.valueHexView)) {
         continue;
       }
       matched.push(candidate);
@@ -778,13 +778,13 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
     try {
       const nameHash = await crypto.digest({ name: hashAlgName }, certificate.subject.toSchema().toBER(false));
-      if (!pvtsutils.BufferSourceConverter.isEqual(new Uint8Array(nameHash), certID.issuerNameHash.valueBlock.valueHexView)) {
+      if (!bytes.equal(new Uint8Array(nameHash), certID.issuerNameHash.valueBlock.valueHexView)) {
         return false;
       }
 
       const keyBytes = certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView;
       const keyHash = await crypto.digest({ name: hashAlgName }, keyBytes as BufferSource);
-      return pvtsutils.BufferSourceConverter.isEqual(new Uint8Array(keyHash), certID.issuerKeyHash.valueBlock.valueHexView);
+      return bytes.equal(new Uint8Array(keyHash), certID.issuerKeyHash.valueBlock.valueHexView);
     } catch {
       return false;
     }
