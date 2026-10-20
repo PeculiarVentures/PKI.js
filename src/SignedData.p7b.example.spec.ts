@@ -1,5 +1,4 @@
 import { describe, it, assert } from "vitest";
-import "../examples/utils";
 import * as pkijs from "./index";
 import * as example from "../examples/P7BSimpleExample/example";
 

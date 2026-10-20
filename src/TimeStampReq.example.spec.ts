@@ -1,6 +1,5 @@
 import { describe, it, assert } from "vitest";
 import * as pkijs from "./index";
-import "../examples/utils";
 import { createTSPReq } from "../examples/TSPRequestComplexExample/example";
 
 //#endregion

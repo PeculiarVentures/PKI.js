@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import * as pkijs from "../../src";
-import "../utils";
 
 export async function createCertificate(hashAlg: string, signAlg: string) {
   const certificate = new pkijs.Certificate();
