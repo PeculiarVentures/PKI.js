@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { bytes } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -169,7 +169,7 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
     ];
 
     if (compareTo instanceof ArrayBuffer) {
-      return pvtsutils.BufferSourceConverter.isEqual(this.value.valueBeforeDecodeView, compareTo);
+      return bytes.equal(this.value.valueBeforeDecodeView, compareTo);
     }
 
     if ((compareTo.constructor as typeof AttributeTypeAndValue).blockName() === AttributeTypeAndValue.blockName()) {
@@ -201,7 +201,7 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
         if (value1.localeCompare(value2) !== 0) return false;
       } else // Comparing as two ArrayBuffers
       {
-        if (!pvtsutils.BufferSourceConverter.isEqual(this.value.valueBeforeDecodeView, compareTo.value.valueBeforeDecodeView)) return false;
+        if (!bytes.equal(this.value.valueBeforeDecodeView, compareTo.value.valueBeforeDecodeView)) return false;
       }
 
       return true;

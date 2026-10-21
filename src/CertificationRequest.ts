@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { hex, toArrayBuffer } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { PublicKeyInfo, type PublicKeyInfoJson } from "./PublicKeyInfo";
@@ -230,7 +230,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
    * @deprecated Since version 3.0.0
    */
   public get tbs(): ArrayBuffer {
-    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+    return toArrayBuffer(this.tbsView);
   }
 
   /**
@@ -405,7 +405,7 @@ export class CertificationRequest extends PkiObject implements ICertificationReq
 
   public toJSON(): CertificationRequestJson {
     const object: CertificationRequestJson = {
-      tbs: pvtsutils.Convert.ToHex(this.tbsView),
+      tbs: hex.encode(this.tbsView),
       version: this.version,
       subject: this.subject.toJSON(),
       subjectPublicKeyInfo: this.subjectPublicKeyInfo.toJSON(),

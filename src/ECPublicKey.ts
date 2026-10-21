@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import { BufferSourceConverter } from "pvtsutils";
+import { toUint8Array } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { ECNamedCurves } from "./ECNamedCurves";
@@ -103,7 +103,7 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
   public fromSchema(schema1: BufferSource): any {
     //#region Check the schema is valid
 
-    const view = BufferSourceConverter.toUint8Array(schema1);
+    const view = toUint8Array(schema1);
     if (view[0] !== 0x04) {
       throw new Error("Object's schema was not verified against input data for ECPublicKey");
     }

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
+import { isBufferSource } from "@peculiar/utils";
 import * as pvutils from "pvutils";
-import { BufferSourceConverter } from "pvtsutils";
 import * as common from "./common";
 import { OriginatorInfo, type OriginatorInfoJson } from "./OriginatorInfo";
 import { RecipientInfo, type RecipientInfoJson } from "./RecipientInfo";
@@ -1221,7 +1221,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
       let ecdhPrivateKey: CryptoKey;
       let keyCrypto: SubtleCrypto = crypto;
-      if (BufferSourceConverter.isBufferSource(decryptionParameters.recipientPrivateKey)) {
+      if (isBufferSource(decryptionParameters.recipientPrivateKey)) {
         ecdhPrivateKey = await crypto.importKey(
           "pkcs8",
           decryptionParameters.recipientPrivateKey,
@@ -1381,7 +1381,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
       let privateKey: CryptoKey;
       let keyCrypto: SubtleCrypto = crypto;
-      if (BufferSourceConverter.isBufferSource(decryptionParameters.recipientPrivateKey)) {
+      if (isBufferSource(decryptionParameters.recipientPrivateKey)) {
         privateKey = await crypto.importKey("pkcs8", decryptionParameters.recipientPrivateKey, algorithmParameters, true, ["decrypt"]);
       } else {
         privateKey = decryptionParameters.recipientPrivateKey;

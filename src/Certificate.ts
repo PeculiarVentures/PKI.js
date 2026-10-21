@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { hex, toArrayBuffer } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
@@ -370,7 +370,7 @@ export class Certificate extends PkiObject implements ICertificate {
    * @deprecated Since version 3.0.0
    */
   public get tbs(): ArrayBuffer {
-    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+    return toArrayBuffer(this.tbsView);
   }
 
   /**
@@ -715,7 +715,7 @@ export class Certificate extends PkiObject implements ICertificate {
 
   public toJSON(): CertificateJson {
     const res: CertificateJson = {
-      tbs: pvtsutils.Convert.ToHex(this.tbsView),
+      tbs: hex.encode(this.tbsView),
       version: this.version,
       serialNumber: this.serialNumber.toJSON(),
       signature: this.signature.toJSON(),
@@ -733,11 +733,11 @@ export class Certificate extends PkiObject implements ICertificate {
     }
 
     if (this.issuerUniqueID) {
-      res.issuerUniqueID = pvtsutils.Convert.ToHex(this.issuerUniqueID);
+      res.issuerUniqueID = hex.encode(this.issuerUniqueID);
     }
 
     if (this.subjectUniqueID) {
-      res.subjectUniqueID = pvtsutils.Convert.ToHex(this.subjectUniqueID);
+      res.subjectUniqueID = hex.encode(this.subjectUniqueID);
     }
 
     if (this.extensions) {

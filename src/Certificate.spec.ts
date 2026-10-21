@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import * as asn1js from "asn1js";
-import { Convert } from "pvtsutils";
+import { hex } from "@peculiar/utils";
 import { Certificate, Time } from "./index";
 
 // asn1js 4 refuses to encode the default 1899 UTCTime, so give the certificates a valid period.
@@ -26,10 +26,10 @@ describe("Certificate.encodeTBS legacy extensions encoding", () => {
 
     const encoded = getExtensions(certificate.encodeTBS());
     expect(encoded).toBeDefined();
-    expect(Convert.ToHex(encoded!.toBER(false))).toBe("a3023000");
+    expect(hex.encode(encoded!.toBER(false))).toBe("a3023000");
 
     const rebuiltTbs = certificate.toSchema(true).valueBlock.value[0] as asn1js.Sequence;
-    expect(Convert.ToHex(getExtensions(rebuiltTbs)!.toBER(false))).toBe("a3023000");
+    expect(hex.encode(getExtensions(rebuiltTbs)!.toBER(false))).toBe("a3023000");
     expect(certificate.extensions).toBe(extensions);
     expect(certificate.extensions).toHaveLength(0);
   });

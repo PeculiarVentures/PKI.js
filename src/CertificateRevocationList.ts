@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { hex, toArrayBuffer } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
@@ -212,7 +212,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
    * @deprecated Since version 3.0.0
    */
   public get tbs(): ArrayBuffer {
-    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+    return toArrayBuffer(this.tbsView);
   }
 
   /**
@@ -452,7 +452,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
 
   public toJSON(): CertificateRevocationListJson {
     const res: CertificateRevocationListJson = {
-      tbs: pvtsutils.Convert.ToHex(this.tbsView),
+      tbs: hex.encode(this.tbsView),
       version: this.version,
       signature: this.signature.toJSON(),
       issuer: this.issuer.toJSON(),

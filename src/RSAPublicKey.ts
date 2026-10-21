@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { base64url } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
@@ -122,8 +122,8 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
 
   public toJSON(): RSAPublicKeyJson {
     return {
-      n: pvtsutils.Convert.ToBase64Url(this.modulus.valueBlock.valueHexView),
-      e: pvtsutils.Convert.ToBase64Url(this.publicExponent.valueBlock.valueHexView),
+      n: base64url.encode(this.modulus.valueBlock.valueHexView),
+      e: base64url.encode(this.publicExponent.valueBlock.valueHexView),
     };
   }
 

@@ -1,6 +1,6 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { toArrayBuffer, utf8 } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import NodeEngine from "../examples/NodePKCS12Example/NodeEngine";
 import * as pkijs from "./index";
@@ -174,7 +174,7 @@ function windowsLike(pkcs8Simpl: pkijs.PrivateKeyInfo, certSimpl: pkijs.Certific
 
 async function parsePKCS12(buffer: ArrayBuffer, password: string) {
   // Initial variables
-  const passwordConverted = pvtsutils.Convert.FromUtf8String(password);
+  const passwordConverted = toArrayBuffer(utf8.encode(password));
 
   //#region Parse internal PKCS#12 values
   const pkcs12 = pkijs.PFX.fromBER(buffer);

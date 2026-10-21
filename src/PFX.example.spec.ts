@@ -2,7 +2,7 @@ import { describe, it, assert, expect } from "vitest";
 import * as crypto from "crypto";
 import * as example from "../examples/PKCS12SimpleExample/example";
 import { CryptoEngine, PFX } from "./index";
-import { Convert } from "pvtsutils";
+import { base64, toArrayBuffer, utf8 } from "@peculiar/utils";
 
 describe("PKCS#12 Simple Example", () => {
   const password = "12345567890";
@@ -68,12 +68,12 @@ describe("PKCS#12 Simple Example", () => {
       crypto: crypto.webcrypto as globalThis.Crypto,
     });
     const encData = await engine.stampDataWithPassword({
-      password: Convert.FromUtf8String(password),
+      password: toArrayBuffer(utf8.encode(password)),
       salt: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]).buffer,
       iterationCount: 6e5,
       hashAlgorithm: "SHA-256",
       contentToStamp: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]).buffer,
     });
-    assert.strictEqual(Convert.ToBase64(encData), "4iwFEULKTVUoMs1fF6EQ9q+vhr+DFeT10IRnVVSqKdg=");
+    assert.strictEqual(base64.encode(encData), "4iwFEULKTVUoMs1fF6EQ9q+vhr+DFeT10IRnVVSqKdg=");
   });
 });

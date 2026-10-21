@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { toArrayBuffer } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import { Attribute, type AttributeJson } from "./Attribute";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
@@ -145,7 +145,7 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
 
     // Get internal properties from parsed schema
     this.type = asn1.result.idBlock.tagNumber;
-    this.encodedValue = pvtsutils.BufferSourceConverter.toArrayBuffer(asn1.result.valueBeforeDecodeView);
+    this.encodedValue = toArrayBuffer(asn1.result.valueBeforeDecodeView);
 
     //#region Change type from "[0]" to "SET" accordingly to standard
     const encodedView = new Uint8Array(this.encodedValue);

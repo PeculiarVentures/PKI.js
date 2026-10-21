@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { bytes } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
 import { MessageImprint, HASHED_MESSAGE, HASH_ALGORITHM, type MessageImprintSchema, type MessageImprintJson } from "./MessageImprint";
@@ -472,6 +472,6 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
 
     // Calculate message digest for input "data" buffer
     const hash = await crypto.digest(shaAlgorithm.name, new Uint8Array(data));
-    return pvtsutils.BufferSourceConverter.isEqual(hash, this.messageImprint.hashedMessage.valueBlock.valueHexView);
+    return bytes.equal(hash, this.messageImprint.hashedMessage.valueBlock.valueHexView);
   }
 }

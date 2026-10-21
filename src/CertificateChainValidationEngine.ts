@@ -1,5 +1,5 @@
 import type * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { bytes } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import { AuthorityKeyIdentifier } from "./AuthorityKeyIdentifier";
 import type { BasicOCSPResponse } from "./BasicOCSPResponse";
@@ -112,7 +112,7 @@ export interface CertificateChainValidationEngineVerifyParams {
  */
 function isTrusted(cert: Certificate, trustedList: Certificate[]): boolean {
   for (let i = 0; i < trustedList.length; i++) {
-    if (pvtsutils.BufferSourceConverter.isEqual(cert.tbsView, trustedList[i].tbsView)) {
+    if (bytes.equal(cert.tbsView, trustedList[i].tbsView)) {
       return true;
     }
   }
@@ -203,7 +203,7 @@ export class CertificateChainValidationEngine {
       }
       //#endregion
 
-      if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, localCert.tbsView)) return "Intermediate Certificates";
+      if (bytes.equal(certificate.tbsView, localCert.tbsView)) return "Intermediate Certificates";
     }
     //#endregion
 
@@ -213,7 +213,7 @@ export class CertificateChainValidationEngine {
       if (trustedCert.tbsView.byteLength === 0) trustedCert.tbsView = new Uint8Array(trustedCert.encodeTBS().toBER());
       //#endregion
 
-      if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, trustedCert.tbsView)) return "Trusted Certificates";
+      if (bytes.equal(certificate.tbsView, trustedCert.tbsView)) return "Trusted Certificates";
     }
     //#endregion
 
@@ -274,7 +274,7 @@ export class CertificateChainValidationEngine {
             if (extension.extnID === id_SubjectKeyIdentifier && extension.parsedValue) {
               extensionFound = true;
 
-              if (pvtsutils.BufferSourceConverter.isEqual(extension.parsedValue.valueBlock.valueHex, keyIdentifier.valueBlock.valueHexView)) {
+              if (bytes.equal(extension.parsedValue.valueBlock.valueHex, keyIdentifier.valueBlock.valueHexView)) {
                 result.push(possibleIssuer);
               }
 
@@ -400,7 +400,7 @@ export class CertificateChainValidationEngine {
       }
 
       for (let i = 0; i < findIssuerResult.length; i++) {
-        if (pvtsutils.BufferSourceConverter.isEqual(findIssuerResult[i].tbsView, certificate.tbsView)) {
+        if (bytes.equal(findIssuerResult[i].tbsView, certificate.tbsView)) {
           result.push([findIssuerResult[i]]);
           continue;
         }
@@ -783,7 +783,7 @@ export class CertificateChainValidationEngine {
       for (let j = 0; j < localCerts.length; j++) {
         if (i === j) continue;
 
-        if (pvtsutils.BufferSourceConverter.isEqual(localCerts[i].tbsView, localCerts[j].tbsView)) {
+        if (bytes.equal(localCerts[i].tbsView, localCerts[j].tbsView)) {
           localCerts.splice(j, 1);
           i = 0;
           break;
@@ -814,7 +814,7 @@ export class CertificateChainValidationEngine {
         const certificate = result[i][j];
 
         for (let k = 0; k < this.trustedCerts.length; k++) {
-          if (pvtsutils.BufferSourceConverter.isEqual(certificate.tbsView, this.trustedCerts[k].tbsView)) {
+          if (bytes.equal(certificate.tbsView, this.trustedCerts[k].tbsView)) {
             found = true;
             break;
           }

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { base64url } from "@peculiar/utils";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
@@ -272,14 +272,14 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
 
   public toJSON(): RSAPrivateKeyJson {
     const jwk: RSAPrivateKeyJson = {
-      n: pvtsutils.Convert.ToBase64Url(this.modulus.valueBlock.valueHexView),
-      e: pvtsutils.Convert.ToBase64Url(this.publicExponent.valueBlock.valueHexView),
-      d: pvtsutils.Convert.ToBase64Url(this.privateExponent.valueBlock.valueHexView),
-      p: pvtsutils.Convert.ToBase64Url(this.prime1.valueBlock.valueHexView),
-      q: pvtsutils.Convert.ToBase64Url(this.prime2.valueBlock.valueHexView),
-      dp: pvtsutils.Convert.ToBase64Url(this.exponent1.valueBlock.valueHexView),
-      dq: pvtsutils.Convert.ToBase64Url(this.exponent2.valueBlock.valueHexView),
-      qi: pvtsutils.Convert.ToBase64Url(this.coefficient.valueBlock.valueHexView),
+      n: base64url.encode(this.modulus.valueBlock.valueHexView),
+      e: base64url.encode(this.publicExponent.valueBlock.valueHexView),
+      d: base64url.encode(this.privateExponent.valueBlock.valueHexView),
+      p: base64url.encode(this.prime1.valueBlock.valueHexView),
+      q: base64url.encode(this.prime2.valueBlock.valueHexView),
+      dp: base64url.encode(this.exponent1.valueBlock.valueHexView),
+      dq: base64url.encode(this.exponent2.valueBlock.valueHexView),
+      qi: base64url.encode(this.coefficient.valueBlock.valueHexView),
     };
     if (this.otherPrimeInfos) {
       jwk.oth = Array.from(this.otherPrimeInfos, (o) => o.toJSON());
@@ -295,16 +295,16 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
   public fromJSON(json: any): void {
     ParameterError.assert("json", json, "n", "e", "d", "p", "q", "dp", "dq", "qi");
 
-    this.modulus = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.n) });
-    this.publicExponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.e) });
+    this.modulus = new asn1js.Integer({ valueHex: base64url.decode(json.n) });
+    this.publicExponent = new asn1js.Integer({ valueHex: base64url.decode(json.e) });
     this.privateExponent = new asn1js.Integer({
-      valueHex: pvtsutils.Convert.FromBase64Url(json.d),
+      valueHex: base64url.decode(json.d),
     });
-    this.prime1 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.p) });
-    this.prime2 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.q) });
-    this.exponent1 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.dp) });
-    this.exponent2 = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.dq) });
-    this.coefficient = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.qi) });
+    this.prime1 = new asn1js.Integer({ valueHex: base64url.decode(json.p) });
+    this.prime2 = new asn1js.Integer({ valueHex: base64url.decode(json.q) });
+    this.exponent1 = new asn1js.Integer({ valueHex: base64url.decode(json.dp) });
+    this.exponent2 = new asn1js.Integer({ valueHex: base64url.decode(json.dq) });
+    this.coefficient = new asn1js.Integer({ valueHex: base64url.decode(json.qi) });
     if (json.oth) {
       this.otherPrimeInfos = Array.from(json.oth, (element: any) => new OtherPrimeInfo({ json: element }));
     }
