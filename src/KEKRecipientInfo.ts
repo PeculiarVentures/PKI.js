@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { KEKIdentifier, KEKIdentifierJson, KEKIdentifierSchema } from "./KEKIdentifier";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { KEKIdentifier, type KEKIdentifierJson, type KEKIdentifierSchema } from "./KEKIdentifier";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 

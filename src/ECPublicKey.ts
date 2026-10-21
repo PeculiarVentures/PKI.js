@@ -4,8 +4,8 @@ import * as pvutils from "pvutils";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { ECNamedCurves } from "./ECNamedCurves";
 import { ParameterError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const X = "x";
 const Y = "y";

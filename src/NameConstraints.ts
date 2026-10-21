@@ -2,9 +2,9 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { GeneralSubtree, GeneralSubtreeJson } from "./GeneralSubtree";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { GeneralSubtree, type GeneralSubtreeJson } from "./GeneralSubtree";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const PERMITTED_SUBTREES = "permittedSubtrees";
 const EXCLUDED_SUBTREES = "excludedSubtrees";

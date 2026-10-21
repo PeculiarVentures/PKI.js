@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
-import { AttributeCertificateInfoV1, AttributeCertificateInfoV1Json, AttributeCertificateInfoV1Schema } from "./AttributeCertificateInfoV1";
-import * as Schema from "../Schema";
-import { PkiObject, PkiObjectParameters } from "../PkiObject";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import { AttributeCertificateInfoV1, type AttributeCertificateInfoV1Json, type AttributeCertificateInfoV1Schema } from "./AttributeCertificateInfoV1";
+import type * as Schema from "../Schema";
+import { PkiObject, type PkiObjectParameters } from "../PkiObject";
 import { AsnError } from "../errors";
 import { EMPTY_STRING } from "../constants";
 

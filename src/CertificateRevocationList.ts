@@ -2,14 +2,14 @@ import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { RelativeDistinguishedNames, RelativeDistinguishedNamesJson, RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
-import { Time, TimeJson, TimeSchema } from "./Time";
-import { RevokedCertificate, RevokedCertificateJson } from "./RevokedCertificate";
-import { Extensions, ExtensionsJson, ExtensionsSchema } from "./Extensions";
-import * as Schema from "./Schema";
-import { Certificate } from "./Certificate";
-import { PublicKeyInfo } from "./PublicKeyInfo";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { RelativeDistinguishedNames, type RelativeDistinguishedNamesJson, type RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import { Time, type TimeJson, type TimeSchema } from "./Time";
+import { RevokedCertificate, type RevokedCertificateJson } from "./RevokedCertificate";
+import { Extensions, type ExtensionsJson, type ExtensionsSchema } from "./Extensions";
+import type * as Schema from "./Schema";
+import type { Certificate } from "./Certificate";
+import type { PublicKeyInfo } from "./PublicKeyInfo";
 import {
   id_AuthorityInfoAccess,
   id_AuthorityKeyIdentifier,
@@ -23,7 +23,7 @@ import {
   id_IssuingDistributionPoint,
 } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_BUFFER } from "./constants";
 
 const TBS = "tbs";

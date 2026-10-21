@@ -1,13 +1,13 @@
-import * as asn1js from "asn1js";
+import type * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { AuthorityKeyIdentifier } from "./AuthorityKeyIdentifier";
-import { BasicOCSPResponse } from "./BasicOCSPResponse";
-import { Certificate } from "./Certificate";
-import { CertificateRevocationList } from "./CertificateRevocationList";
+import type { BasicOCSPResponse } from "./BasicOCSPResponse";
+import type { Certificate } from "./Certificate";
+import type { CertificateRevocationList } from "./CertificateRevocationList";
 import * as common from "./common";
 import * as Helpers from "./Helpers";
-import { GeneralName } from "./GeneralName";
+import type { GeneralName } from "./GeneralName";
 import {
   id_AnyPolicy,
   id_AuthorityInfoAccess,
@@ -24,8 +24,8 @@ import {
   id_SubjectAltName,
   id_SubjectKeyIdentifier,
 } from "./ObjectIdentifiers";
-import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
-import { GeneralSubtree } from "./GeneralSubtree";
+import type { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
+import type { GeneralSubtree } from "./GeneralSubtree";
 import { EMPTY_STRING } from "./constants";
 
 const TRUSTED_CERTS = "trustedCerts";

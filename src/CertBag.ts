@@ -2,10 +2,10 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { Certificate } from "./Certificate";
 import { AttributeCertificateV2 } from "./AttributeCertificateV2";
-import * as Schema from "./Schema";
+import type * as Schema from "./Schema";
 import { id_CertBag_AttributeCertificate, id_CertBag_SDSICertificate, id_CertBag_X509Certificate } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_STRING } from "./constants";
 
 const CERT_ID = "certId";

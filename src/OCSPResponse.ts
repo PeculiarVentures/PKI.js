@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { ResponseBytes, ResponseBytesJson, ResponseBytesSchema } from "./ResponseBytes";
+import { ResponseBytes, type ResponseBytesJson, type ResponseBytesSchema } from "./ResponseBytes";
 import { BasicOCSPResponse } from "./BasicOCSPResponse";
-import * as Schema from "./Schema";
-import { Certificate } from "./Certificate";
+import type * as Schema from "./Schema";
+import type { Certificate } from "./Certificate";
 import { id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import * as common from "./common";
 
 const RESPONSE_STATUS = "responseStatus";

@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { SignedAndUnsignedAttributes, SignedAndUnsignedAttributesJson, SignedAndUnsignedAttributesSchema } from "./SignedAndUnsignedAttributes";
-import { IssuerAndSerialNumber, IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { SignedAndUnsignedAttributes, type SignedAndUnsignedAttributesJson, type SignedAndUnsignedAttributesSchema } from "./SignedAndUnsignedAttributes";
+import { IssuerAndSerialNumber, type IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 
 const VERSION = "version";

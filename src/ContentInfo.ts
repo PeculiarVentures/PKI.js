@@ -3,8 +3,8 @@ import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData, id_ContentType_SignedData } from "./ObjectIdentifiers";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const CONTENT_TYPE = "contentType";
 const CONTENT = "content";

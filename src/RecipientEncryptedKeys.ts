@@ -2,9 +2,9 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { RecipientEncryptedKey, RecipientEncryptedKeyJson } from "./RecipientEncryptedKey";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import { RecipientEncryptedKey, type RecipientEncryptedKeyJson } from "./RecipientEncryptedKey";
+import type * as Schema from "./Schema";
 
 const ENCRYPTED_KEYS = "encryptedKeys";
 const RECIPIENT_ENCRYPTED_KEYS = "RecipientEncryptedKeys";

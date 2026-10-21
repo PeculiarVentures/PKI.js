@@ -2,7 +2,7 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import { AsnError } from "./errors";
-import * as Schema from "./Schema";
+import type * as Schema from "./Schema";
 
 export interface PkiObjectParameters {
   schema?: Schema.SchemaType;

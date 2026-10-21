@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { Attribute, AttributeJson } from "./Attribute";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { Attribute, type AttributeJson } from "./Attribute";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 
 const BAG_ID = "bagId";
@@ -209,5 +209,5 @@ export class SafeBag<T extends BagType = BagType> extends PkiObject implements I
   }
 }
 
-import { type BagType, SafeBagValueFactory, BagTypeJson } from "./SafeBagValueFactory";
+import { type BagType, SafeBagValueFactory, type BagTypeJson } from "./SafeBagValueFactory";
 import { EMPTY_STRING } from "./constants";

@@ -1,13 +1,13 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { GeneralNames, GeneralNamesJson } from "../GeneralNames";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
-import { Attribute, AttributeJson } from "../Attribute";
-import { Extensions, ExtensionsJson, ExtensionsSchema } from "../Extensions";
-import { AttCertValidityPeriod, AttCertValidityPeriodJson, AttCertValidityPeriodSchema } from "./AttCertValidityPeriod";
-import { IssuerSerial, IssuerSerialJson } from "./IssuerSerial";
-import * as Schema from "../Schema";
-import { PkiObject, PkiObjectParameters } from "../PkiObject";
+import { GeneralNames, type GeneralNamesJson } from "../GeneralNames";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import { Attribute, type AttributeJson } from "../Attribute";
+import { Extensions, type ExtensionsJson, type ExtensionsSchema } from "../Extensions";
+import { AttCertValidityPeriod, type AttCertValidityPeriodJson, type AttCertValidityPeriodSchema } from "./AttCertValidityPeriod";
+import { IssuerSerial, type IssuerSerialJson } from "./IssuerSerial";
+import type * as Schema from "../Schema";
+import { PkiObject, type PkiObjectParameters } from "../PkiObject";
 import { AsnError } from "../errors";
 import { EMPTY_STRING } from "../constants";
 

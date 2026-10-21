@@ -1,11 +1,11 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
-import { Attribute, AttributeJson } from "./Attribute";
+import { Attribute, type AttributeJson } from "./Attribute";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const TYPE = "type";
 const ATTRIBUTES = "attributes";

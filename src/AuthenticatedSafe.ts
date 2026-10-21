@@ -1,13 +1,13 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { ContentInfo, ContentInfoJson } from "./ContentInfo";
+import { ContentInfo, type ContentInfoJson } from "./ContentInfo";
 import { SafeContents } from "./SafeContents";
 import { EnvelopedData } from "./EnvelopedData";
 import { EncryptedData } from "./EncryptedData";
-import * as Schema from "./Schema";
+import type * as Schema from "./Schema";
 import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData } from "./ObjectIdentifiers";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_STRING } from "./constants";
 import * as common from "./common";
 

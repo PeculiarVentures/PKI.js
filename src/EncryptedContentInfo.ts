@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const CONTENT_TYPE = "contentType";
 const CONTENT_ENCRYPTION_ALGORITHM = "contentEncryptionAlgorithm";

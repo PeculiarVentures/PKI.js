@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import type { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { EMPTY_BUFFER } from "./constants";
 import type { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
 import { ArgumentError } from "./errors";
 
 //#region Crypto engine related function
-export { ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
+export type { ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
 
 export interface GlobalCryptoEngine {
   name: string;

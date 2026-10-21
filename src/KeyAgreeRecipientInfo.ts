@@ -1,11 +1,11 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { OriginatorIdentifierOrKey, OriginatorIdentifierOrKeyJson, OriginatorIdentifierOrKeySchema } from "./OriginatorIdentifierOrKey";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
-import { RecipientEncryptedKeys, RecipientEncryptedKeysJson, RecipientEncryptedKeysSchema } from "./RecipientEncryptedKeys";
+import { OriginatorIdentifierOrKey, type OriginatorIdentifierOrKeyJson, type OriginatorIdentifierOrKeySchema } from "./OriginatorIdentifierOrKey";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { RecipientEncryptedKeys, type RecipientEncryptedKeysJson, type RecipientEncryptedKeysSchema } from "./RecipientEncryptedKeys";
 import { Certificate } from "./Certificate";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_STRING } from "./constants";
 

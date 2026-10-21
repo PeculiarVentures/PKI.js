@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import * as Schema from "./Schema";
-import { ExtensionParsedValue, ExtensionValueFactory } from "./ExtensionValueFactory";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
+import { type ExtensionParsedValue, ExtensionValueFactory } from "./ExtensionValueFactory";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_STRING } from "./constants";
 

@@ -2,9 +2,9 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
-import * as Schema from "./Schema";
+import type * as Schema from "./Schema";
 
 export const TYPE = "type";
 export const VALUE = "value";

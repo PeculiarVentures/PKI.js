@@ -1,13 +1,13 @@
 import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
-import { GeneralName, GeneralNameJson, GeneralNameSchema } from "./GeneralName";
-import { Request, RequestJson, RequestSchema } from "./Request";
-import { Extension, ExtensionJson } from "./Extension";
-import { Extensions, ExtensionsSchema } from "./Extensions";
-import * as Schema from "./Schema";
+import { GeneralName, type GeneralNameJson, type GeneralNameSchema } from "./GeneralName";
+import { Request, type RequestJson, type RequestSchema } from "./Request";
+import { Extension, type ExtensionJson } from "./Extension";
+import { Extensions, type ExtensionsSchema } from "./Extensions";
+import type * as Schema from "./Schema";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_BUFFER } from "./constants";
 
 const TBS = "tbs";

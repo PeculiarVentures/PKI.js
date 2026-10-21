@@ -1,14 +1,14 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { GeneralNames, GeneralNamesJson } from "../GeneralNames";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
-import { Attribute, AttributeJson } from "../Attribute";
-import { Extensions, ExtensionsJson, ExtensionsSchema } from "../Extensions";
-import { AttCertValidityPeriod, AttCertValidityPeriodJson, AttCertValidityPeriodSchema } from "../AttributeCertificateV1";
-import { V2Form, V2FormJson } from "./V2Form";
-import { Holder, HolderJson, HolderSchema } from "./Holder";
-import * as Schema from "../Schema";
-import { PkiObject, PkiObjectParameters } from "../PkiObject";
+import { GeneralNames, type GeneralNamesJson } from "../GeneralNames";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
+import { Attribute, type AttributeJson } from "../Attribute";
+import { Extensions, type ExtensionsJson, type ExtensionsSchema } from "../Extensions";
+import { AttCertValidityPeriod, type AttCertValidityPeriodJson, type AttCertValidityPeriodSchema } from "../AttributeCertificateV1";
+import { V2Form, type V2FormJson } from "./V2Form";
+import { Holder, type HolderJson, type HolderSchema } from "./Holder";
+import type * as Schema from "../Schema";
+import { PkiObject, type PkiObjectParameters } from "../PkiObject";
 import { AsnError } from "../errors";
 import { EMPTY_STRING } from "../constants";
 

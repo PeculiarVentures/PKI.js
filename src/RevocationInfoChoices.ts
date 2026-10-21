@@ -1,11 +1,11 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { CertificateRevocationList, CertificateRevocationListJson } from "./CertificateRevocationList";
+import { CertificateRevocationList, type CertificateRevocationListJson } from "./CertificateRevocationList";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { OtherRevocationInfoFormat, OtherRevocationInfoFormatJson } from "./OtherRevocationInfoFormat";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { OtherRevocationInfoFormat, type OtherRevocationInfoFormatJson } from "./OtherRevocationInfoFormat";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const CRLS = "crls";
 const OTHER_REVOCATION_INFOS = "otherRevocationInfos";

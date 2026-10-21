@@ -2,9 +2,9 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { IssuerAndSerialNumber, IssuerAndSerialNumberJson } from "./IssuerAndSerialNumber";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { IssuerAndSerialNumber, type IssuerAndSerialNumberJson } from "./IssuerAndSerialNumber";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const VARIANT = "variant";
 const VALUE = "value";

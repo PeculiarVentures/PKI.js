@@ -3,10 +3,10 @@ import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { ECNamedCurves } from "./ECNamedCurves";
-import { ECPublicKey, ECPublicKeyParameters } from "./ECPublicKey";
+import { ECPublicKey, type ECPublicKeyParameters } from "./ECPublicKey";
 import { AsnError, ParameterError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const VERSION = "version";
 const PRIVATE_KEY = "privateKey";

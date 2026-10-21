@@ -1,9 +1,9 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as bs from "bytestreamjs";
-import { SignedCertificateTimestamp, SignedCertificateTimestampJson } from "./SignedCertificateTimestamp";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { SignedCertificateTimestamp, type SignedCertificateTimestampJson } from "./SignedCertificateTimestamp";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 
 const TIMESTAMPS = "timestamps";
 

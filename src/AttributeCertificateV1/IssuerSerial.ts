@@ -2,9 +2,9 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "../constants";
 import { AsnError } from "../errors";
-import { GeneralNames, GeneralNamesJson, GeneralNamesSchema } from "../GeneralNames";
-import { PkiObject, PkiObjectParameters } from "../PkiObject";
-import * as Schema from "../Schema";
+import { GeneralNames, type GeneralNamesJson, type GeneralNamesSchema } from "../GeneralNames";
+import { PkiObject, type PkiObjectParameters } from "../PkiObject";
+import type * as Schema from "../Schema";
 
 const ISSUER = "issuer";
 const SERIAL_NUMBER = "serialNumber";

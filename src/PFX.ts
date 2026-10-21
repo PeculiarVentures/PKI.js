@@ -1,8 +1,8 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { ContentInfo, ContentInfoJson, ContentInfoSchema } from "./ContentInfo";
-import { MacData, MacDataJson, MacDataSchema } from "./MacData";
+import { ContentInfo, type ContentInfoJson, type ContentInfoSchema } from "./ContentInfo";
+import { MacData, type MacDataJson, type MacDataSchema } from "./MacData";
 import { DigestInfo } from "./DigestInfo";
 import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { SignedData } from "./SignedData";
@@ -12,10 +12,10 @@ import { SignerInfo } from "./SignerInfo";
 import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
 import { SignedAndUnsignedAttributes } from "./SignedAndUnsignedAttributes";
 import { AuthenticatedSafe } from "./AuthenticatedSafe";
-import * as Schema from "./Schema";
-import { Certificate } from "./Certificate";
+import type * as Schema from "./Schema";
+import type { Certificate } from "./Certificate";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { BufferSourceConverter } from "pvtsutils";
 import { EMPTY_STRING } from "./constants";
 

@@ -1,11 +1,11 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { AlgorithmIdentifier, AlgorithmIdentifierJson, AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { ECPublicKey } from "./ECPublicKey";
 import { RSAPublicKey } from "./RSAPublicKey";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_STRING } from "./constants";
 

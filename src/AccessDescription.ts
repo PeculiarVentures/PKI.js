@@ -2,9 +2,9 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { GeneralName, GeneralNameJson, GeneralNameSchema } from "./GeneralName";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { GeneralName, type GeneralNameJson, type GeneralNameSchema } from "./GeneralName";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const ACCESS_METHOD = "accessMethod";
 const ACCESS_LOCATION = "accessLocation";

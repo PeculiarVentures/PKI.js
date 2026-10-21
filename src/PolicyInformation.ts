@@ -2,9 +2,9 @@ import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { PolicyQualifierInfo, PolicyQualifierInfoJson } from "./PolicyQualifierInfo";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import { PolicyQualifierInfo, type PolicyQualifierInfoJson } from "./PolicyQualifierInfo";
+import type * as Schema from "./Schema";
 
 export const POLICY_IDENTIFIER = "policyIdentifier";
 export const POLICY_QUALIFIERS = "policyQualifiers";

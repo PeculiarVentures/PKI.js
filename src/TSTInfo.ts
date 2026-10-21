@@ -2,12 +2,12 @@ import * as asn1js from "asn1js";
 import * as pvtsutils from "pvtsutils";
 import * as pvutils from "pvutils";
 import * as common from "./common";
-import { MessageImprint, HASHED_MESSAGE, HASH_ALGORITHM, MessageImprintSchema, MessageImprintJson } from "./MessageImprint";
-import { Accuracy, AccuracyJson, AccuracySchema, MICROS, MILLIS, SECONDS } from "./Accuracy";
-import { GeneralName, GeneralNameJson, GeneralNameSchema, TYPE, VALUE } from "./GeneralName";
-import { Extension, ExtensionJson, ExtensionSchema } from "./Extension";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { MessageImprint, HASHED_MESSAGE, HASH_ALGORITHM, type MessageImprintSchema, type MessageImprintJson } from "./MessageImprint";
+import { Accuracy, type AccuracyJson, type AccuracySchema, MICROS, MILLIS, SECONDS } from "./Accuracy";
+import { GeneralName, type GeneralNameJson, type GeneralNameSchema, TYPE, VALUE } from "./GeneralName";
+import { Extension, type ExtensionJson, type ExtensionSchema } from "./Extension";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_STRING } from "./constants";
 

@@ -1,12 +1,12 @@
 import * as asn1js from "asn1js";
 import * as pvutils from "pvutils";
-import { CertID, CertIDJson, CertIDSchema } from "./CertID";
+import { CertID, type CertIDJson, type CertIDSchema } from "./CertID";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { Extension, ExtensionJson } from "./Extension";
-import { Extensions, ExtensionsSchema } from "./Extensions";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { Extension, type ExtensionJson } from "./Extension";
+import { Extensions, type ExtensionsSchema } from "./Extensions";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const REQ_CERT = "reqCert";
 const SINGLE_REQUEST_EXTENSIONS = "singleRequestExtensions";
