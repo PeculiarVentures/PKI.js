@@ -65,7 +65,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
 
   afterEach(() => vi.restoreAllMocks());
 
-  async function createCertificate(withOtherExtensions = true): Promise<pkijs.Certificate> {
+  async function createCertificateFixture({ withOtherExtensions = true, explicitCriticalFalse = false } = {}) {
     const certificate = pkijs.Certificate.fromBER(issuer.toSchema().toBER(false));
     certificate.serialNumber = new asn1js.Integer({ value: 2 });
     const otherExtensions = [
@@ -73,7 +73,18 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
       new pkijs.Extension({ extnID: pkijs.id_SubjectKeyIdentifier, extnValue: new asn1js.OctetString({ valueHex: new Uint8Array([1, 2, 3]).buffer }).toBER(false) }),
     ];
     if (withOtherExtensions) certificate.extensions = otherExtensions;
-    const tbs = new Uint8Array(certificate.encodeTBS().toBER(false));
+    function encodeTBS(): ArrayBuffer {
+      const schema = certificate.encodeTBS();
+      if (explicitCriticalFalse) {
+        const wrapper = schema.valueBlock.value.find((field) => field.idBlock.tagClass === 3 && field.idBlock.tagNumber === 3) as asn1js.Constructed;
+        const extensions = wrapper.valueBlock.value[0] as asn1js.Sequence;
+        const basicConstraints = extensions.valueBlock.value[0] as asn1js.Sequence;
+        basicConstraints.valueBlock.value.splice(1, 0, new asn1js.Boolean({ value: false }));
+      }
+      return schema.toBER(false);
+    }
+
+    const tbs = new Uint8Array(encodeTBS());
     const timestamps = await Promise.all(
       [1767225600000, 1767225601000].map(async (time) => {
         // RFC 6962: version, signature type, uint64 timestamp, precert entry type,
@@ -114,8 +125,143 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
     const extension = new pkijs.Extension({ extnID: pkijs.id_SignedCertificateTimestampList, extnValue: new asn1js.OctetString({ valueHex: list.buffer }).toBER(false) });
     certificate.extensions = withOtherExtensions ? [otherExtensions[0], extension, otherExtensions[1]] : [extension];
     await certificate.sign(keys.privateKey, "SHA-256");
-    return pkijs.Certificate.fromBER(certificate.toSchema().toBER(false));
+    if (explicitCriticalFalse) {
+      const signedTbs = encodeTBS();
+      certificate.tbsView = new Uint8Array(signedTbs);
+      certificate.signatureValue = new asn1js.BitString({ valueHex: await crypto.sign({ name: "RSASSA-PKCS1-v1_5" }, keys.privateKey, signedTbs) });
+    }
+    return { certificate: pkijs.Certificate.fromBER(certificate.toSchema().toBER(false)), loggedTBS: tbs };
   }
+
+  async function createCertificate(withOtherExtensions = true): Promise<pkijs.Certificate> {
+    return (await createCertificateFixture({ withOtherExtensions })).certificate;
+  }
+
+  it("uses the exact stored TBS bytes even when the model cannot round-trip them", async () => {
+    const { certificate, loggedTBS } = await createCertificateFixture({ explicitCriticalFalse: true });
+    expect(Convert.ToHex(certificate.encodeTBS().toBER(false))).not.toBe(Convert.ToHex(certificate.tbsView));
+    await expect(certificate.verify(issuer)).resolves.toBe(true);
+    const original = snapshot(certificate);
+    const verify = vi.spyOn(pkijs.SignedCertificateTimestamp.prototype, "verify");
+    certificate.extensions!.forEach(Object.freeze);
+    Object.freeze(certificate.extensions);
+    Object.freeze(certificate);
+
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).resolves.toEqual([true, true]);
+    const preCert = new Uint8Array(verify.mock.calls[0][1]);
+    expect(Convert.ToHex(preCert.subarray(0, 32))).toBe(Convert.ToHex(issuerKeyHash));
+    expect((preCert[32] << 16) | (preCert[33] << 8) | preCert[34]).toBe(loggedTBS.byteLength);
+    expect(Convert.ToHex(preCert.subarray(35))).toBe(Convert.ToHex(loggedTBS));
+    expectUnchanged(certificate, original);
+  });
+
+  it.each(["replaced", "deleted"] as const)("uses the stored SCTs and TBS when model extensions are %s", async (change) => {
+    const certificate = await createCertificate();
+    if (change === "replaced") certificate.extensions = (await createCertificate(false)).extensions;
+    else delete certificate.extensions;
+    certificate.serialNumber = new asn1js.Integer({ value: 99 });
+    certificate.notBefore.value = new Date("2020-01-01T00:00:00Z");
+    const original = snapshot(certificate);
+    const encode = vi.spyOn(pkijs.Certificate.prototype, "encodeTBS");
+    certificate.extensions?.forEach(Object.freeze);
+    Object.freeze(certificate.extensions);
+    Object.freeze(certificate);
+
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).resolves.toEqual([true, true]);
+    expect(encode).not.toHaveBeenCalled();
+    expectUnchanged(certificate, original);
+  });
+
+  it("does not use model SCTs when the stored TBS has no SCT extension", async () => {
+    const certificate = pkijs.Certificate.fromBER(issuer.toSchema().toBER(false));
+    certificate.extensions = (await createCertificate()).extensions;
+    const original = snapshot(certificate);
+    const encode = vi.spyOn(pkijs.Certificate.prototype, "encodeTBS");
+
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).rejects.toThrow("No SignedCertificateTimestampList extension");
+    expect(encode).not.toHaveBeenCalled();
+    expectUnchanged(certificate, original);
+  });
+
+  it("does not call a subclass encoder when stored TBS bytes are present", async () => {
+    class StoredCertificate extends pkijs.Certificate {
+      public override encodeTBS(): asn1js.Sequence {
+        throw new Error("The stored certificate must not be re-encoded");
+      }
+    }
+    const source = await createCertificate();
+    const certificate = StoredCertificate.fromBER(source.toSchema().toBER(false));
+    const originalDer = Convert.ToHex(certificate.toSchema().toBER(false));
+    const originalTbs = certificate.tbsView;
+    const extensions = certificate.extensions;
+    const encode = vi.spyOn(StoredCertificate.prototype, "encodeTBS");
+    Object.freeze(extensions);
+    Object.freeze(certificate);
+
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).resolves.toEqual([true, true]);
+    expect(encode).not.toHaveBeenCalled();
+    expect(certificate.tbsView).toBe(originalTbs);
+    expect(certificate.extensions).toBe(extensions);
+    expect(Convert.ToHex(certificate.toSchema().toBER(false))).toBe(originalDer);
+  });
+
+  it("uses one subclass schema for both SCTs and TBS when stored bytes are empty", async () => {
+    const source = await createCertificate();
+    class EncodedCertificate extends pkijs.Certificate {
+      public override encodeTBS(): asn1js.Sequence {
+        return asn1js.fromBER(source.tbsView).result as asn1js.Sequence;
+      }
+    }
+    const certificate = new EncodedCertificate({ extensions: [] });
+    const original = snapshot(certificate);
+    const encode = vi.spyOn(EncodedCertificate.prototype, "encodeTBS");
+    Object.freeze(certificate.extensions);
+    Object.freeze(certificate);
+
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).resolves.toEqual([true, true]);
+    expect(encode).toHaveBeenCalledExactlyOnceWith();
+    expectUnchanged(certificate, original);
+  });
+
+  it.each(["truncated", "wrong tag", "empty sequence", "trailing data"])("rejects invalid stored TBS without falling back to the model (%s)", async (kind) => {
+    const certificate = await createCertificate();
+    switch (kind) {
+      case "truncated":
+        certificate.tbsView = certificate.tbsView.slice(0, -1);
+        break;
+      case "wrong tag":
+        certificate.tbsView = new Uint8Array([5, 0]);
+        break;
+      case "empty sequence":
+        certificate.tbsView = new Uint8Array([0x30, 0]);
+        break;
+      case "trailing data": {
+        const value = new Uint8Array(certificate.tbsView.length + 2);
+        value.set(certificate.tbsView);
+        value.set([5, 0], certificate.tbsView.length);
+        certificate.tbsView = value;
+        break;
+      }
+    }
+    const original = snapshot(certificate);
+    const encode = vi.spyOn(pkijs.Certificate.prototype, "encodeTBS");
+    Object.freeze(certificate);
+
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).rejects.toThrow("Invalid certificate TBS encoding");
+    expect(encode).not.toHaveBeenCalled();
+    expectUnchanged(certificate, original);
+  });
+
+  it("reads only the stored TBS view when its buffer also contains other bytes", async () => {
+    const certificate = await createCertificate();
+    const value = new Uint8Array(certificate.tbsView.length + 5).fill(0xff);
+    value.set(certificate.tbsView, 3);
+    certificate.tbsView = value.subarray(3, -2);
+    const original = snapshot(certificate);
+
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).resolves.toEqual([true, true]);
+    expectUnchanged(certificate, original);
+  });
 
   it("verifies each SCT and then all SCTs repeatedly without changing references or DER", async () => {
     const certificate = await createCertificate();
@@ -148,6 +294,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
 
     const source = await createCertificate(withOtherExtensions);
     const certificate = CustomCertificate.fromBER(source.toSchema().toBER(false));
+    certificate.tbsView = new Uint8Array();
     const original = snapshot(certificate);
     const encode = vi.spyOn(CustomCertificate.prototype, "encodeTBS");
     Object.freeze(certificate.extensions);
@@ -169,6 +316,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
 
     const source = await createCertificate();
     const certificate = CachedCertificate.fromBER(source.toSchema().toBER(false));
+    certificate.tbsView = new Uint8Array();
     const cachedTbs = certificate.encodeTBS();
     const originalTbs = Convert.ToHex(cachedTbs.toBER(false));
     const original = snapshot(certificate);
@@ -204,6 +352,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
 
     const source = await createCertificate(withOtherExtensions);
     const certificate = PrimitiveOidCertificate.fromBER(source.toSchema().toBER(false));
+    certificate.tbsView = new Uint8Array();
     const original = snapshot(certificate);
     Object.freeze(certificate.extensions);
     Object.freeze(certificate);
@@ -273,6 +422,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
     for (const withOtherExtensions of [true, false]) {
       const source = await createCertificate(withOtherExtensions);
       const certificate = SeparateSchemaCertificate.fromBER(source.toSchema().toBER(false));
+      certificate.tbsView = new Uint8Array();
       const original = snapshot(certificate);
       Object.freeze(certificate.extensions);
       Object.freeze(certificate);
@@ -342,6 +492,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
 
   it("preserves the certificate if TBS encoding throws", async () => {
     const certificate = await createCertificate();
+    certificate.tbsView = new Uint8Array();
     const original = snapshot(certificate);
     const error = new Error("TBS encoding failed");
     const encode = vi.spyOn(certificate, "encodeTBS").mockImplementationOnce(() => {
@@ -355,10 +506,9 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
 
   it("preserves the certificate if SCT verification rejects", async () => {
     const certificate = await createCertificate();
-    const list = certificate.extensions!.find((extension) => extension.extnID === pkijs.id_SignedCertificateTimestampList)!.parsedValue as pkijs.SignedCertificateTimestampList;
     const original = snapshot(certificate);
     const error = new Error("SCT verification failed");
-    vi.spyOn(list.timestamps[0], "verify").mockRejectedValueOnce(error);
+    vi.spyOn(pkijs.SignedCertificateTimestamp.prototype, "verify").mockRejectedValueOnce(error);
 
     await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs, 0)).rejects.toBe(error);
     expectUnchanged(certificate, original);
@@ -375,6 +525,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
   it("leaves a certificate without SCT extensions unchanged on rejection", async () => {
     const certificate = await createCertificate();
     certificate.extensions = certificate.extensions!.filter((extension) => extension.extnID !== pkijs.id_SignedCertificateTimestampList);
+    certificate.tbsView = new Uint8Array();
     const original = snapshot(certificate);
 
     await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).rejects.toThrow("No SignedCertificateTimestampList extension");
@@ -384,6 +535,7 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
   it("does not add an extensions property to a certificate without extensions", async () => {
     const certificate = await createCertificate();
     delete certificate.extensions;
+    certificate.tbsView = new Uint8Array();
     const original = snapshot(certificate);
 
     await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).rejects.toThrow("No SignedCertificateTimestampList extension");

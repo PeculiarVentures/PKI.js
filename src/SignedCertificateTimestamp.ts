@@ -9,6 +9,7 @@ import { Certificate } from "./Certificate";
 import { PkiObject, PkiObjectParameters } from "./PkiObject";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { SignedCertificateTimestampList } from "./SignedCertificateTimestampList";
+import { Extension } from "./Extension";
 import { id_SignedCertificateTimestampList } from "./ObjectIdentifiers";
 
 const VERSION = "version";
@@ -398,30 +399,59 @@ function hasConstructedTag(value: asn1js.AsnType | undefined, tagClass: number, 
   return !!value && value.idBlock.tagClass === tagClass && value.idBlock.tagNumber === tagNumber && value.idBlock.isConstructed && "value" in value.valueBlock && Array.isArray(value.valueBlock.value);
 }
 
-function encodePreCertTBS(certificate: Certificate): ArrayBuffer {
-  // Preserve legacy overrides and leave their potentially cached schema intact.
-  const schema = certificate.encodeTBS();
+function readCertificateTBS(certificate: Certificate): asn1js.Sequence {
+  const encoded = certificate.tbsView.byteLength ? certificate.tbsView : new Uint8Array(certificate.encodeTBS().toBER(false));
+  const decoded = asn1js.fromBER(encoded);
+  if (decoded.offset !== encoded.byteLength || !hasConstructedTag(decoded.result, 1, 16)) throw new Error("Invalid certificate TBS encoding");
+  const tbsSchema = (Certificate.schema() as asn1js.Sequence).valueBlock.value[0];
+  if (!asn1js.compareSchema(decoded.result, decoded.result, tbsSchema).verified) throw new Error("Invalid certificate TBS encoding");
+  return decoded.result as asn1js.Sequence;
+}
+
+function encodeConstructedValue(schema: asn1js.Constructed, children: Uint8Array[]): ArrayBuffer {
+  // Rebuild container headers while retaining each child's original encoding.
+  const container = new asn1js.Constructed({ idBlock: { tagClass: schema.idBlock.tagClass, tagNumber: schema.idBlock.tagNumber } });
+  const content = pvutils.utilConcatView(...children);
+  container.lenBlock.length = content.byteLength;
+  return pvutils.utilConcatBuf(container.idBlock.toBER(false), container.lenBlock.toBER(false), content.buffer as ArrayBuffer);
+}
+
+function preparePreCert(certificate: Certificate): { tbs: ArrayBuffer; timestamps: SignedCertificateTimestampList } {
+  const schema = readCertificateTBS(certificate);
+  let timestamps: SignedCertificateTimestampList | undefined;
   const sctExtensionOid = new asn1js.ObjectIdentifier({ value: id_SignedCertificateTimestampList }).valueBlock.toBER(false);
   const value = schema.valueBlock.value.flatMap((field) => {
-    if (!hasConstructedTag(field, 3, 3)) return [field];
+    if (!hasConstructedTag(field, 3, 3)) return [field.valueBeforeDecodeView];
 
     const extensions = field.valueBlock.value[0];
-    if (!hasConstructedTag(extensions, 1, 16)) return [field];
+    if (!hasConstructedTag(extensions, 1, 16)) return [field.valueBeforeDecodeView];
 
     const filtered = extensions.valueBlock.value.filter((extension) => {
       const oid = hasConstructedTag(extension, 1, 16) ? extension.valueBlock.value[0] : undefined;
-      return !oid || oid.idBlock.tagClass !== 1 || oid.idBlock.tagNumber !== 6 || oid.idBlock.isConstructed || !pvutils.isEqualBuffer(oid.valueBlock.toBER(false), sctExtensionOid);
+      if (!oid || oid.idBlock.tagClass !== 1 || oid.idBlock.tagNumber !== 6 || oid.idBlock.isConstructed || !pvutils.isEqualBuffer(oid.valueBlock.toBER(false), sctExtensionOid)) return true;
+
+      const parsed = Extension.fromBER(extension.valueBeforeDecodeView.slice().buffer).parsedValue as SignedCertificateTimestampList | undefined;
+      if (!parsed || parsed.timestamps.length === 0) throw new Error("Nothing to verify in the certificate");
+      timestamps ??= parsed;
+      return false;
     });
     if (filtered.length === 0) return [];
 
-    return [new asn1js.Constructed({ idBlock: { tagClass: 3, tagNumber: 3 }, value: [new asn1js.Sequence({ value: filtered })] })];
+    const encodedExtensions = encodeConstructedValue(
+      extensions,
+      filtered.map((extension) => extension.valueBeforeDecodeView),
+    );
+    return [new Uint8Array(encodeConstructedValue(field, [new Uint8Array(encodedExtensions)]))];
   });
 
-  return new asn1js.Sequence({ value }).toBER(false);
+  if (!timestamps) throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
+  return { tbs: encodeConstructedValue(schema, value), timestamps };
 }
 
 /**
  * Verify SignedCertificateTimestamp for specific certificate content
+ * Uses stored tbsView bytes, including their SCTs, when present. Otherwise, uses
+ * one encodeTBS() result for both the SCTs and signed data.
  * @param certificate Certificate for which verification would be performed
  * @param issuerCertificate Certificate of the issuer of target certificate
  * @param logs Array of objects with information about each CT Log (like here: https://ct.grahamedgecombe.com/logs.json)
@@ -430,34 +460,8 @@ function encodePreCertTBS(certificate: Certificate): ArrayBuffer {
  * @return Array of verification results
  */
 export async function verifySCTsForCertificate(certificate: Certificate, issuerCertificate: Certificate, logs: Log[], index = -1, crypto = common.getCrypto(true)) {
-  let parsedValue: SignedCertificateTimestampList | null = null;
-
+  const { tbs, timestamps: parsedValue } = preparePreCert(certificate);
   const stream = new bs.SeqStream();
-
-  //#region Find the SCT extension without changing the certificate
-  if (certificate.extensions) {
-    for (let i = certificate.extensions.length - 1; i >= 0; i--) {
-      switch (certificate.extensions[i].extnID) {
-        case id_SignedCertificateTimestampList:
-          {
-            parsedValue = certificate.extensions[i].parsedValue;
-
-            if (!parsedValue || parsedValue.timestamps.length === 0) throw new Error("Nothing to verify in the certificate");
-          }
-          break;
-        default:
-      }
-    }
-  }
-  //#endregion
-
-  //#region Check we do have what to verify
-  if (parsedValue === null) throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
-  //#endregion
-
-  //#region Prepare modifier TBS value
-  const tbs = encodePreCertTBS(certificate);
-  //#endregion
 
   //#region Initialize "issuer_key_hash" value
   const issuerId = await crypto.digest({ name: "SHA-256" }, new Uint8Array(issuerCertificate.subjectPublicKeyInfo.toSchema().toBER(false)));
