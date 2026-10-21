@@ -1,7 +1,8 @@
 import { it, assert } from "vitest";
 import * as asn1js from "asn1js";
 import * as pkijs from "./index";
-import { base64, toArrayBuffer, utf8 } from "@peculiar/utils";
+import { utf8 } from "@peculiar/utils";
+import { fromBase64 } from "../examples/utils";
 
 const recipientPrivateKeyPem = `
 -----BEGIN PRIVATE KEY-----
@@ -60,7 +61,7 @@ it("EnvelopedData with an ECCCMSSharedInfo containing algorithmParams should be 
 
 function pemToDer(pemString: string) {
   const derBase64 = pemString.replace(/(-----(BEGIN|END) [\w ]+-----|\n)/g, "").replace(/[\r\n]/g, "");
-  return toArrayBuffer(base64.decode(derBase64));
+  return fromBase64(derBase64);
 }
 
 function pemToAsn1(pemString: string) {

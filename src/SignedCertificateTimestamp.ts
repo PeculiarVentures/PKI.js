@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
+import { base64, bytes, hex, toArrayBuffer, uint } from "@peculiar/utils";
 import * as bs from "bytestreamjs";
 import * as common from "./common";
 import { PublicKeyInfo } from "./PublicKeyInfo";
@@ -154,7 +154,8 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
 
     if (this.version === 0) {
       this.logID = new Uint8Array(stream.getBlock(32)).buffer.slice(0);
-      this.timestamp = new Date(pvutils.utilFromBase(new Uint8Array(stream.getBlock(8)), 8));
+      // Values above 2^53 ms are not valid dates either way, so parsing doesn't throw for them.
+      this.timestamp = new Date(Number(uint.decodeBigInt(stream.getBlock(8))));
 
       //#region Extensions
       const extensionsLength = stream.getUint16();
@@ -236,13 +237,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
     stream.appendChar(this.version);
     stream.appendView(new Uint8Array(this.logID));
 
-    const timeBuffer = new ArrayBuffer(8);
-    const timeView = new Uint8Array(timeBuffer);
-
-    const baseArray = pvutils.utilToBase(this.timestamp.valueOf(), 8);
-    timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
-
-    stream.appendView(timeView);
+    stream.appendView(uint.encode(this.timestamp.valueOf(), { length: 8 }));
     stream.appendUint16(this.extensions.byteLength);
 
     if (this.extensions.byteLength) stream.appendView(new Uint8Array(this.extensions));
@@ -307,12 +302,12 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   public toJSON(): SignedCertificateTimestampJson {
     return {
       version: this.version,
-      logID: pvutils.bufferToHexCodes(this.logID),
+      logID: hex.encode(this.logID, { case: "upper" }),
       timestamp: this.timestamp,
-      extensions: pvutils.bufferToHexCodes(this.extensions),
+      extensions: hex.encode(this.extensions, { case: "upper" }),
       hashAlgorithm: this.hashAlgorithm,
       signatureAlgorithm: this.signatureAlgorithm,
-      signature: pvutils.bufferToHexCodes(this.signature),
+      signature: hex.encode(this.signature, { case: "upper" }),
     };
   }
 
@@ -325,7 +320,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
    */
   async verify(logs: Log[], data: ArrayBuffer, dataType = 0, crypto = common.getCrypto(true)): Promise<boolean> {
     //#region Initial variables
-    const logId = pvutils.toBase64(pvutils.arrayBufferToString(this.logID));
+    const logId = base64.encode(this.logID);
 
     let publicKeyBase64 = null;
 
@@ -344,7 +339,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
       throw new Error(`Public key not found for CT with logId: ${logId}`);
     }
 
-    const pki = pvutils.stringToArrayBuffer(pvutils.fromBase64(publicKeyBase64));
+    const pki = toArrayBuffer(base64.decode(publicKeyBase64));
     const publicKeyInfo = PublicKeyInfo.fromBER(pki);
     //#endregion
 
@@ -352,13 +347,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
     stream.appendChar(0x00); // sct_version
     stream.appendChar(0x00); // signature_type = certificate_timestamp
 
-    const timeBuffer = new ArrayBuffer(8);
-    const timeView = new Uint8Array(timeBuffer);
-
-    const baseArray = pvutils.utilToBase(this.timestamp.valueOf(), 8);
-    timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
-
-    stream.appendView(timeView);
+    stream.appendView(uint.encode(this.timestamp.valueOf(), { length: 8 }));
 
     stream.appendUint16(dataType);
 
@@ -415,9 +404,9 @@ function readCertificateTBS(certificate: Certificate): asn1js.Sequence {
 function encodeConstructedValue(schema: asn1js.Constructed, children: Uint8Array[]): ArrayBuffer {
   // Rebuild container headers while retaining each child's original encoding.
   const container = new asn1js.Constructed({ idBlock: { tagClass: schema.idBlock.tagClass, tagNumber: schema.idBlock.tagNumber } });
-  const content = pvutils.utilConcatView(...children);
+  const content = bytes.concat(children);
   container.lenBlock.length = content.byteLength;
-  return pvutils.utilConcatBuf(container.idBlock.toBER(false), container.lenBlock.toBER(false), content.buffer as ArrayBuffer);
+  return bytes.concat(container.idBlock.toBER(false), container.lenBlock.toBER(false), content) as ArrayBuffer;
 }
 
 function readExtensionField(schema: asn1js.Sequence): { field: asn1js.Constructed; extensions: asn1js.Constructed } {
@@ -431,7 +420,7 @@ function isSCTExtension(extension: asn1js.AsnType): boolean {
   if (!hasConstructedTag(extension, 1, 16)) return false;
   const oid = extension.valueBlock.value[0];
   if (!oid || oid.idBlock.tagClass !== 1 || oid.idBlock.tagNumber !== 6 || oid.idBlock.isConstructed) return false;
-  return pvutils.isEqualBuffer(oid.valueBlock.toBER(false), SCT_EXTENSION_OID);
+  return bytes.equal(oid.valueBlock.toBER(false), SCT_EXTENSION_OID);
 }
 
 function readSCTList(extensions: asn1js.AsnType[]): SignedCertificateTimestampList {

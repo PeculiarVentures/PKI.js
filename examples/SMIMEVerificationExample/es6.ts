@@ -1,10 +1,9 @@
 /// <reference path="types.d.ts" />
 
-import * as pvutils from "pvutils";
+import { binary, toArrayBuffer, utf8 } from "@peculiar/utils";
 import parse from "emailjs-mime-parser";
 import * as pkijs from "../../src";
 import * as common from "../common";
-import * as pvtsutils from "pvtsutils";
 
 /**
  * Array of root certificates from "CA Bundle"
@@ -35,7 +34,7 @@ async function verifySMIME() {
       }
 
       // Get signed data buffer
-      const signedDataBuffer = pvutils.stringToArrayBuffer(parser.childNodes[0].raw.replace(/\n/g, "\r\n"));
+      const signedDataBuffer = toArrayBuffer(binary.decode(parser.childNodes[0].raw.replace(/\n/g, "\r\n")));
 
       // Verify the signed data
       try {
@@ -57,7 +56,7 @@ async function verifySMIME() {
 
 function handleMIMEFile(evt: Event) {
   common.handleFileBrowse(evt, (file) => {
-    common.getElement("smime_message", "textarea").value = pvtsutils.Convert.ToUtf8String(file);
+    common.getElement("smime_message", "textarea").value = utf8.decode(file);
   });
 }
 

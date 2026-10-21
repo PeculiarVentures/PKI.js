@@ -1,5 +1,4 @@
-import { toUint8Array } from "@peculiar/utils";
-import * as pvutils from "pvutils";
+import { bytes, toUint8Array } from "@peculiar/utils";
 import * as pkijs from "../../src";
 
 function md5(data: BufferSource, offset: number): ArrayBuffer {
@@ -120,11 +119,11 @@ function openSSLBytesToKey(password: ArrayBuffer, salt: ArrayBuffer, keyLength: 
   const hashes: ArrayBuffer[] = [];
   //#endregion
 
-  hashes.push(md5(pvutils.utilConcatBuf(password, salt), 0));
+  hashes.push(md5(bytes.concat(password, salt) as ArrayBuffer, 0));
 
-  for (let i = 1; i <= count; i++) hashes.push(md5(pvutils.utilConcatBuf(hashes[i - 1], password, salt), 0));
+  for (let i = 1; i <= count; i++) hashes.push(md5(bytes.concat(hashes[i - 1], password, salt) as ArrayBuffer, 0));
 
-  return pvutils.utilConcatBuf(...hashes).slice(0, keyLength);
+  return (bytes.concat(...hashes) as ArrayBuffer).slice(0, keyLength);
 }
 
 /**

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
+import { bytes } from "@peculiar/utils";
 import type { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { EMPTY_BUFFER } from "./constants";
 import type { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
@@ -282,14 +282,10 @@ async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer, Counte
   counterView[1] = 0x00;
   counterView[2] = 0x00;
   counterView[3] = Counter;
-
-  let combinedBuffer = EMPTY_BUFFER;
   //#endregion
 
   //#region Create a combined ArrayBuffer for digesting
-  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, zBuffer);
-  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, counterBuffer);
-  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, SharedInfo);
+  const combinedBuffer = bytes.concat(zBuffer, counterBuffer, SharedInfo) as ArrayBuffer;
   //#endregion
 
   //#region Return digest of combined ArrayBuffer and information about current counter
@@ -355,26 +351,8 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
   //#endregion
 
   //#region Return combined digest with specified length
-  //#region Initial variables
-  let combinedBuffer = EMPTY_BUFFER;
-  let currentCounter = 1;
-  let found = true;
-  //#endregion
-
   //#region Combine all buffer together
-  while (found) {
-    found = false;
-
-    for (const result of incomingResult) {
-      if (result.counter === currentCounter) {
-        combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, result.result);
-        found = true;
-        break;
-      }
-    }
-
-    currentCounter++;
-  }
+  const combinedBuffer = bytes.concat(incomingResult.map((item) => item.result)) as ArrayBuffer;
   //#endregion
 
   //#region Create output buffer with specified length

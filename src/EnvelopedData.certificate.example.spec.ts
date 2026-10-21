@@ -1,7 +1,7 @@
 import { describe, it, assert } from "vitest";
-import * as pvutils from "pvutils";
 import * as example from "../examples/HowToEncryptCMSviaCertificate/example";
 import * as utils from "../examples/utils";
+import { bytes } from "@peculiar/utils";
 
 describe("How To Encrypt CMS via Certificate", () => {
   //#region Initial variables
@@ -32,7 +32,7 @@ describe("How To Encrypt CMS via Certificate", () => {
                 valueBuffer,
               );
               const result = await example.envelopedDecrypt(certRaw, certWithKey.pkcs8, cmsEnvelopedBuffer);
-              assert.equal(pvutils.isEqualBuffer(result, valueBuffer), true, "Decrypted value must be equal with initially encrypted value");
+              assert.equal(bytes.equal(result, valueBuffer), true, "Decrypted value must be equal with initially encrypted value");
             });
           });
         });

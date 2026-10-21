@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
+import { bytes } from "@peculiar/utils";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import type * as Schema from "./Schema";
 
@@ -154,7 +154,7 @@ export class CAVersion extends PkiObject implements ICAVersion {
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Integer({
-      valueHex: pvutils.utilConcatBuf(keyIndexBuffer, certificateIndexBuffer),
+      valueHex: bytes.concat(keyIndexBuffer, certificateIndexBuffer),
     });
     //#endregion
   }

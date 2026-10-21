@@ -1,4 +1,4 @@
-import * as pvutils from "pvutils";
+import { hex } from "@peculiar/utils";
 import * as pkijs from "../../src";
 import * as utils from "../utils";
 import * as example from "./example";
@@ -123,7 +123,7 @@ function parseCMSSigned() {
 
       const row = certificatesTable.insertRow(certificatesTable.rows.length);
       const cell0 = row.insertCell(0);
-      cell0.innerHTML = pvutils.bufferToHexCodes(cert.serialNumber.valueBlock.valueHexView.slice().buffer);
+      cell0.innerHTML = hex.encode(cert.serialNumber.valueBlock.valueHexView, { case: "upper" });
       const cell1 = row.insertCell(1);
       cell1.innerHTML = ul;
     }

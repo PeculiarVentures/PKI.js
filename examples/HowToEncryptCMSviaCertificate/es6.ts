@@ -1,4 +1,4 @@
-import * as pvtsutils from "pvtsutils";
+import { toArrayBuffer, utf8 } from "@peculiar/utils";
 import * as example from "./example";
 import * as utils from "../utils";
 import * as common from "../common";
@@ -45,7 +45,7 @@ async function createCertificate() {
  */
 async function envelopedEncrypt() {
   certificateBuffer = utils.fromPEM(common.getElement("cert", "textarea").value);
-  valueBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("encrypted_content", "textarea").value);
+  valueBuffer = toArrayBuffer(utf8.encode(common.getElement("encrypted_content", "textarea").value));
 
   cmsEnvelopedBuffer = await example.envelopedEncrypt(
     certificateBuffer,
@@ -70,7 +70,7 @@ async function envelopedDecrypt() {
   cmsEnvelopedBuffer = utils.fromPEM(common.getElement("encrypted_content", "textarea").value);
 
   const result = await example.envelopedDecrypt(certificateBuffer, privateKeyBuffer, cmsEnvelopedBuffer);
-  common.getElement("decrypted_content").innerHTML = pvtsutils.Convert.ToUtf8String(result);
+  common.getElement("decrypted_content").innerHTML = utf8.decode(result);
 }
 
 function handleHashAlgOnChange() {

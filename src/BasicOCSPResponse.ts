@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { bytes } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import * as common from "./common";
 import { ResponseData, type ResponseDataJson, type ResponseDataSchema } from "./ResponseData";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
@@ -608,7 +607,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
           continue;
         }
         const hash = await crypto.digest({ name: "sha-1" }, spk.valueBlock.valueHexView as BufferSource);
-        if (pvutils.isEqualBuffer(hash, responderID.valueBlock.valueHex)) {
+        if (bytes.equal(hash, responderID.valueBlock.valueHex)) {
           indices.push(index);
         }
       }

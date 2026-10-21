@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
-import { toUint8Array } from "@peculiar/utils";
-import * as pvutils from "pvutils";
+import { base64url, bytes, toUint8Array } from "@peculiar/utils";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { ECNamedCurves } from "./ECNamedCurves";
 import { ParameterError } from "./errors";
@@ -83,7 +82,7 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
     switch (memberName) {
       case X:
       case Y:
-        return memberValue instanceof ArrayBuffer && pvutils.isEqualBuffer(memberValue, ECPublicKey.defaultValues(memberName));
+        return memberValue instanceof ArrayBuffer && bytes.equal(memberValue, ECPublicKey.defaultValues(memberName));
       case NAMED_CURVE:
         return typeof memberValue === "string" && memberValue === ECPublicKey.defaultValues(memberName);
       default:
@@ -128,7 +127,7 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
 
   public toSchema(): asn1js.RawData {
     return new asn1js.RawData({
-      data: pvutils.utilConcatBuf(new Uint8Array([0x04]).buffer, this.x, this.y),
+      data: bytes.concat(new Uint8Array([0x04]), this.x, this.y) as ArrayBuffer,
     });
   }
 
@@ -137,8 +136,8 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
 
     return {
       crv: namedCurve ? namedCurve.name : this.namedCurve,
-      x: pvutils.toBase64(pvutils.arrayBufferToString(this.x), true, true, false),
-      y: pvutils.toBase64(pvutils.arrayBufferToString(this.y), true, true, false),
+      x: base64url.encode(this.x),
+      y: base64url.encode(this.y),
     };
   }
 
@@ -156,8 +155,7 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
       coordinateLength = namedCurve.size;
     }
 
-    // TODO Simplify Base64url encoding
-    const xConvertBuffer = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.x, true));
+    const xConvertBuffer = base64url.decode(json.x, { allowPadding: true });
 
     if (xConvertBuffer.byteLength < coordinateLength) {
       this.x = new ArrayBuffer(coordinateLength);
@@ -165,11 +163,10 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
       const convertBufferView = new Uint8Array(xConvertBuffer);
       view.set(convertBufferView, 1);
     } else {
-      this.x = xConvertBuffer.slice(0, coordinateLength);
+      this.x = xConvertBuffer.slice(0, coordinateLength).buffer;
     }
 
-    // TODO Simplify Base64url encoding
-    const yConvertBuffer = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.y, true));
+    const yConvertBuffer = base64url.decode(json.y, { allowPadding: true });
 
     if (yConvertBuffer.byteLength < coordinateLength) {
       this.y = new ArrayBuffer(coordinateLength);
@@ -177,7 +174,7 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
       const convertBufferView = new Uint8Array(yConvertBuffer);
       view.set(convertBufferView, 1);
     } else {
-      this.y = yConvertBuffer.slice(0, coordinateLength);
+      this.y = yConvertBuffer.slice(0, coordinateLength).buffer;
     }
   }
 }

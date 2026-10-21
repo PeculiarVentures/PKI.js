@@ -1,6 +1,6 @@
 /// <reference path="types.d.ts" />
 
-import * as pvutils from "pvutils";
+import { binary, toArrayBuffer } from "@peculiar/utils";
 import * as utils from "../utils";
 import * as pkijs from "../../src";
 import * as common from "../common";
@@ -50,7 +50,7 @@ async function smimeEncrypt() {
   cmsEnveloped.addRecipientByCertificate(certSimpl, { oaepHashAlgorithm: oaepHashAlg });
 
   try {
-    await cmsEnveloped.encrypt(encAlg, pvutils.stringToArrayBuffer(common.getElement("content", "textarea").value));
+    await cmsEnveloped.encrypt(encAlg, toArrayBuffer(binary.decode(common.getElement("content", "textarea").value)));
   } catch (e) {
     console.error(e);
     alert("Error during encryption process. See developer console for more details");
@@ -104,7 +104,7 @@ async function smimeDecrypt() {
       recipientPrivateKey: privateKeyBuffer,
     });
 
-    common.getElement("decrypted_content").innerHTML = pvutils.arrayBufferToString(result);
+    common.getElement("decrypted_content").innerHTML = binary.encode(result);
   } catch (e) {
     console.error(e);
     alert("error during decryption process. See developer console for more details");

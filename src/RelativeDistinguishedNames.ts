@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
+import { bytes } from "@peculiar/utils";
 import { AttributeTypeAndValue, type AttributeTypeAndValueJson } from "./AttributeTypeAndValue";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -191,7 +191,7 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
     }
 
     if (compareTo instanceof ArrayBuffer) {
-      return pvutils.isEqualBuffer(this.valueBeforeDecode, compareTo);
+      return bytes.equal(this.valueBeforeDecode, compareTo);
     }
 
     return false;

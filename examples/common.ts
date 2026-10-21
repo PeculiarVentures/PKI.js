@@ -1,5 +1,6 @@
 import * as pkijs from "../src";
-import * as pvtsutils from "pvtsutils";
+import { binary, toArrayBuffer } from "@peculiar/utils";
+import { fromBase64 } from "./utils";
 
 export function getElement(id: string, type: "span"): HTMLSpanElement;
 export function getElement(id: string, type: "select"): HTMLSelectElement;
@@ -55,8 +56,8 @@ function decodePEM(pem: string, tag = "[A-Z0-9 ]+"): ArrayBuffer[] {
   let matches: RegExpExecArray | null = null;
   // oxlint-disable-next-line no-cond-assign
   while ((matches = pattern.exec(pem))) {
-    const base64 = matches[1].replace(/\r/g, "").replace(/\n/g, "");
-    res.push(pvtsutils.Convert.FromBase64(base64));
+    const text = matches[1].replace(/\r/g, "").replace(/\n/g, "");
+    res.push(fromBase64(text));
   }
 
   return res;
@@ -65,8 +66,8 @@ function decodePEM(pem: string, tag = "[A-Z0-9 ]+"): ArrayBuffer[] {
 export function parseCertificate(source: BufferSource): pkijs.Certificate[] {
   const buffers: ArrayBuffer[] = [];
 
-  const buffer = pvtsutils.BufferSourceConverter.toArrayBuffer(source);
-  const pem = pvtsutils.Convert.ToBinary(buffer);
+  const buffer = toArrayBuffer(source);
+  const pem = binary.encode(buffer);
   if (/----BEGIN CERTIFICATE-----/.test(pem)) {
     buffers.push(...decodePEM(pem, "CERTIFICATE"));
   } else {

@@ -1,5 +1,5 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { hex } from "@peculiar/utils";
 import * as example from "./example";
 import * as utils from "../utils";
 import * as pkijs from "../../src";
@@ -153,7 +153,7 @@ function parseOCSPResp(source: ArrayBuffer) {
     common.getElement("ocsp-resp-rspid-rdn").style.display = "block";
   } else {
     if (ocspBasicResp.tbsResponseData.responderID instanceof asn1js.OctetString) {
-      common.getElement("ocsp-resp-respid-simpl").innerHTML = pvtsutils.Convert.ToHex(
+      common.getElement("ocsp-resp-respid-simpl").innerHTML = hex.encode(
         ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.subarray(0, ocspBasicResp.tbsResponseData.responderID.valueBlock.valueHexView.byteLength),
       );
       common.getElement("ocsp-resp-rspid-simpl").style.display = "block";
@@ -198,7 +198,7 @@ function parseOCSPResp(source: ArrayBuffer) {
 
   //#region Put information about OCSP responses
   for (let i = 0; i < ocspBasicResp.tbsResponseData.responses.length; i++) {
-    const typeval = pvtsutils.Convert.ToHex(ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHexView);
+    const typeval = hex.encode(ocspBasicResp.tbsResponseData.responses[i].certID.serialNumber.valueBlock.valueHexView);
     let subjval: string;
 
     switch (ocspBasicResp.tbsResponseData.responses[i].certStatus.idBlock.tagNumber) {

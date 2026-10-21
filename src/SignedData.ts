@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
-import { toUint8Array } from "@peculiar/utils";
-import * as pvutils from "pvutils";
+import { bytes, toUint8Array } from "@peculiar/utils";
 import * as common from "./common";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson } from "./AlgorithmIdentifier";
 import { EncapsulatedContentInfo, type EncapsulatedContentInfoJson, type EncapsulatedContentInfoSchema } from "./EncapsulatedContentInfo";
@@ -607,7 +606,7 @@ export class SignedData extends PkiObject implements ISignedData {
           }
 
           const digest = await crypto.digest({ name: "sha-1" }, certificate.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView as BufferSource);
-          if (pvutils.isEqualBuffer(digest, keyId)) {
+          if (bytes.equal(digest, keyId)) {
             signerCert = certificate;
             break;
           }
@@ -832,7 +831,7 @@ export class SignedData extends PkiObject implements ISignedData {
       //#region Verify "message-digest" attribute in case of "signedAttrs"
       if (signerInfo.signedAttrs) {
         const messageDigest = await crypto.digest(shaAlgorithm, new Uint8Array(data));
-        if (!pvutils.isEqualBuffer(messageDigest, messageDigestValue)) {
+        if (!bytes.equal(messageDigest, messageDigestValue)) {
           throw new SignedDataVerifyError({
             date: checkDate,
             code: 15,

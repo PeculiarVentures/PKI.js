@@ -6,9 +6,12 @@ export function toPEM(buffer: BufferSource, tag: string): string {
   return [`-----BEGIN ${tag}-----`, formatPEM(base64.encode(buffer)), `-----END ${tag}-----`, ""].join("\n");
 }
 
-export function fromPEM(pem: string): ArrayBuffer {
-  const text = pem.replace(/-{5}(BEGIN|END) .*-{5}/gm, "").replace(/\s/gm, "");
+export function fromBase64(text: string): ArrayBuffer {
   return toArrayBuffer(base64.decode(text));
+}
+
+export function fromPEM(pem: string): ArrayBuffer {
+  return fromBase64(pem.replace(/-{5}(BEGIN|END) .*-{5}/gm, "").replace(/\s/gm, ""));
 }
 
 /**

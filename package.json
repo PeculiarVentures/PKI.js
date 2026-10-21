@@ -53,8 +53,7 @@
   "dependencies": {
     "@noble/hashes": "1.8.0",
     "@peculiar/utils": "^4.1.0",
-    "bytestreamjs": "^3.0.0",
-    "pvutils": "^1.1.3"
+    "bytestreamjs": "^3.0.0"
   },
   "peerDependencies": {
     "asn1js": "^4.0.0"
