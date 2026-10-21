@@ -1,6 +1,6 @@
-import { sha1 } from "@noble/hashes/sha1";
+import { sha1 } from "@noble/hashes/legacy.js";
 import { binary, toArrayBuffer } from "@peculiar/utils";
-import { sha256, sha384, sha512 } from "@noble/hashes/sha2";
+import { sha256, sha384, sha512 } from "@noble/hashes/sha2.js";
 import * as asn1js from "asn1js";
 import * as common from "../common";
 import { PublicKeyInfo } from "../PublicKeyInfo";
