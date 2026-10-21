@@ -407,7 +407,7 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
 
   const stream = new bs.SeqStream();
 
-  //#region Remove certificate extension
+  //#region Find the SCT extension without changing the certificate
   if (certificate.extensions) {
     for (let i = certificate.extensions.length - 1; i >= 0; i--) {
       switch (certificate.extensions[i].extnID) {
@@ -416,8 +416,6 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
             parsedValue = certificate.extensions[i].parsedValue;
 
             if (!parsedValue || parsedValue.timestamps.length === 0) throw new Error("Nothing to verify in the certificate");
-
-            certificate.extensions.splice(i, 1);
           }
           break;
         default:
@@ -431,7 +429,8 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
   //#endregion
 
   //#region Prepare modifier TBS value
-  const tbs = certificate.encodeTBS().toBER();
+  const extensions = certificate.extensions?.filter((extension) => extension.extnID !== id_SignedCertificateTimestampList);
+  const tbs = certificate.encodeTBS({ extensions }).toBER(false);
   //#endregion
 
   //#region Initialize "issuer_key_hash" value
