@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import { Convert } from "pvtsutils";
 import * as pvutils from "pvutils";
 import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { EMPTY_BUFFER } from "./constants";
@@ -190,23 +189,12 @@ export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuff
   //#region Initial variables
   const length = signatureBuffer.byteLength / 2; // There are two equal parts inside incoming ArrayBuffer
 
-  const rBuffer = new ArrayBuffer(length);
-  const rView = new Uint8Array(rBuffer);
-  rView.set(new Uint8Array(signatureBuffer, 0, length));
-
-  const rBigInt = bufferToBigInt(rBuffer);
-  const rInteger = asn1js.Integer.fromBigInt(rBigInt);
-
-  const sBuffer = new ArrayBuffer(length);
-  const sView = new Uint8Array(sBuffer);
-  sView.set(new Uint8Array(signatureBuffer, length, length));
-
-  const sBigInt = bufferToBigInt(sBuffer);
-  const sInteger = asn1js.Integer.fromBigInt(sBigInt);
+  const rInteger = new asn1js.Integer({ valueHex: toMinimalUnsignedInteger(new Uint8Array(signatureBuffer, 0, length)) });
+  const sInteger = new asn1js.Integer({ valueHex: toMinimalUnsignedInteger(new Uint8Array(signatureBuffer, length, length)) });
   //#endregion
 
   return new asn1js.Sequence({
-    value: [rInteger.convertToDER(), sInteger.convertToDER()],
+    value: [rInteger, sInteger],
   }).toBER(false);
 }
 
@@ -407,13 +395,25 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
   //#endregion
 }
 
-//#region To ensure correct ASN.1 formatting, convert buffer to BigInt to use asn1js.Integer.fromBigInt
-function bufferToBigInt(buffer: ArrayBuffer): bigint {
-  const hex = "0x" + Convert.ToHex(buffer);
-  return BigInt(hex);
-}
+/**
+ * Encodes an unsigned big-endian value as minimal DER INTEGER contents:
+ * strips redundant leading zero octets and prepends 0x00 when the high bit is set
+ * @param view Unsigned big-endian value (WebCrypto pads r and s to the curve size)
+ */
+function toMinimalUnsignedInteger(view: Uint8Array): Uint8Array {
+  let start = 0;
+  while (start < view.length - 1 && view[start] === 0) start++;
+  const value = view.subarray(start);
 
-//#endregion
+  if (value.length && value[0] & 0x80) {
+    const res = new Uint8Array(value.length + 1);
+    res.set(value, 1);
+
+    return res;
+  }
+
+  return value.slice();
+}
 //#endregion
 
 import { CryptoEngine } from "./CryptoEngine/CryptoEngine";
