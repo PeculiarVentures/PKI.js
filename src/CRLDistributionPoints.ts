@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { DistributionPoint, type DistributionPointJson } from "./DistributionPoint";
 import { AsnError } from "./errors";
@@ -34,7 +33,7 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
   constructor(parameters: CRLDistributionPointsParameters = {}) {
     super();
 
-    this.distributionPoints = pvutils.getParametersValue(parameters, DISTRIBUTION_POINTS, CRLDistributionPoints.defaultValues(DISTRIBUTION_POINTS));
+    this.distributionPoints = parameters[DISTRIBUTION_POINTS] ?? CRLDistributionPoints.defaultValues(DISTRIBUTION_POINTS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -73,7 +72,7 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
      * @property {string} [blockName]
      * @property {string} [distributionPoints]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -88,7 +87,7 @@ export class CRLDistributionPoints extends PkiObject implements ICRLDistribution
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { Attribute, type AttributeJson } from "./Attribute";
 import { EMPTY_STRING } from "./constants";
@@ -52,14 +51,14 @@ export class PrivateKeyInfo extends PkiObject implements IPrivateKeyInfo {
   constructor(parameters: PrivateKeyInfoParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, PrivateKeyInfo.defaultValues(VERSION));
-    this.privateKeyAlgorithm = pvutils.getParametersValue(parameters, PRIVATE_KEY_ALGORITHM, PrivateKeyInfo.defaultValues(PRIVATE_KEY_ALGORITHM));
-    this.privateKey = pvutils.getParametersValue(parameters, PRIVATE_KEY, PrivateKeyInfo.defaultValues(PRIVATE_KEY));
+    this.version = parameters[VERSION] ?? PrivateKeyInfo.defaultValues(VERSION);
+    this.privateKeyAlgorithm = parameters[PRIVATE_KEY_ALGORITHM] ?? PrivateKeyInfo.defaultValues(PRIVATE_KEY_ALGORITHM);
+    this.privateKey = parameters[PRIVATE_KEY] ?? PrivateKeyInfo.defaultValues(PRIVATE_KEY);
     if (ATTRIBUTES in parameters) {
-      this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, PrivateKeyInfo.defaultValues(ATTRIBUTES));
+      this.attributes = parameters[ATTRIBUTES] ?? PrivateKeyInfo.defaultValues(ATTRIBUTES);
     }
     if (PARSED_KEY in parameters) {
-      this.parsedKey = pvutils.getParametersValue(parameters, PARSED_KEY, PrivateKeyInfo.defaultValues(PARSED_KEY));
+      this.parsedKey = parameters[PARSED_KEY] ?? PrivateKeyInfo.defaultValues(PARSED_KEY);
     }
 
     if (parameters.json) {
@@ -118,7 +117,7 @@ export class PrivateKeyInfo extends PkiObject implements IPrivateKeyInfo {
       attributes?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -145,7 +144,7 @@ export class PrivateKeyInfo extends PkiObject implements IPrivateKeyInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

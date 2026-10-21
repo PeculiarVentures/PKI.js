@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { Certificate } from "./Certificate";
 import { AttributeCertificateV2 } from "./AttributeCertificateV2";
 import type * as Schema from "./Schema";
@@ -43,10 +42,10 @@ export class CertBag extends PkiObject implements ICertBag {
   constructor(parameters: CertBagParameters = {}) {
     super();
 
-    this.certId = pvutils.getParametersValue(parameters, CERT_ID, CertBag.defaultValues(CERT_ID));
-    this.certValue = pvutils.getParametersValue(parameters, CERT_VALUE, CertBag.defaultValues(CERT_VALUE));
+    this.certId = parameters[CERT_ID] ?? CertBag.defaultValues(CERT_ID);
+    this.certValue = parameters[CERT_VALUE] ?? CertBag.defaultValues(CERT_VALUE);
     if (PARSED_VALUE in parameters) {
-      this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, CertBag.defaultValues(PARSED_VALUE));
+      this.parsedValue = parameters[PARSED_VALUE] ?? CertBag.defaultValues(PARSED_VALUE);
     }
 
     if (parameters.schema) {
@@ -109,7 +108,7 @@ export class CertBag extends PkiObject implements ICertBag {
       value?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -128,7 +127,7 @@ export class CertBag extends PkiObject implements ICertBag {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

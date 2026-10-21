@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { GeneralNames, type GeneralNamesJson } from "../GeneralNames";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
 import { Attribute, type AttributeJson } from "../Attribute";
@@ -84,18 +83,18 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
   constructor(parameters: AttributeCertificateInfoV2Parameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, AttributeCertificateInfoV2.defaultValues(VERSION));
-    this.holder = pvutils.getParametersValue(parameters, HOLDER, AttributeCertificateInfoV2.defaultValues(HOLDER));
-    this.issuer = pvutils.getParametersValue(parameters, ISSUER, AttributeCertificateInfoV2.defaultValues(ISSUER));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, AttributeCertificateInfoV2.defaultValues(SIGNATURE));
-    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, AttributeCertificateInfoV2.defaultValues(SERIAL_NUMBER));
-    this.attrCertValidityPeriod = pvutils.getParametersValue(parameters, ATTR_CERT_VALIDITY_PERIOD, AttributeCertificateInfoV2.defaultValues(ATTR_CERT_VALIDITY_PERIOD));
-    this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, AttributeCertificateInfoV2.defaultValues(ATTRIBUTES));
+    this.version = parameters[VERSION] ?? AttributeCertificateInfoV2.defaultValues(VERSION);
+    this.holder = parameters[HOLDER] ?? AttributeCertificateInfoV2.defaultValues(HOLDER);
+    this.issuer = parameters[ISSUER] ?? AttributeCertificateInfoV2.defaultValues(ISSUER);
+    this.signature = parameters[SIGNATURE] ?? AttributeCertificateInfoV2.defaultValues(SIGNATURE);
+    this.serialNumber = parameters[SERIAL_NUMBER] ?? AttributeCertificateInfoV2.defaultValues(SERIAL_NUMBER);
+    this.attrCertValidityPeriod = parameters[ATTR_CERT_VALIDITY_PERIOD] ?? AttributeCertificateInfoV2.defaultValues(ATTR_CERT_VALIDITY_PERIOD);
+    this.attributes = parameters[ATTRIBUTES] ?? AttributeCertificateInfoV2.defaultValues(ATTRIBUTES);
     if (ISSUER_UNIQUE_ID in parameters) {
-      this.issuerUniqueID = pvutils.getParametersValue(parameters, ISSUER_UNIQUE_ID, AttributeCertificateInfoV2.defaultValues(ISSUER_UNIQUE_ID));
+      this.issuerUniqueID = parameters[ISSUER_UNIQUE_ID] ?? AttributeCertificateInfoV2.defaultValues(ISSUER_UNIQUE_ID);
     }
     if (EXTENSIONS in parameters) {
-      this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, AttributeCertificateInfoV2.defaultValues(EXTENSIONS));
+      this.extensions = parameters[EXTENSIONS] ?? AttributeCertificateInfoV2.defaultValues(EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -160,7 +159,7 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
    *```
    */
   public static override schema(parameters: AttributeCertificateInfoV2Schema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -206,7 +205,7 @@ export class AttributeCertificateInfoV2 extends PkiObject implements IAttributeC
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

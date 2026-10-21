@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { base64url } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -48,9 +47,9 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
   constructor(parameters: OtherPrimeInfoParameters = {}) {
     super();
 
-    this.prime = pvutils.getParametersValue(parameters, PRIME, OtherPrimeInfo.defaultValues(PRIME));
-    this.exponent = pvutils.getParametersValue(parameters, EXPONENT, OtherPrimeInfo.defaultValues(EXPONENT));
-    this.coefficient = pvutils.getParametersValue(parameters, COEFFICIENT, OtherPrimeInfo.defaultValues(COEFFICIENT));
+    this.prime = parameters[PRIME] ?? OtherPrimeInfo.defaultValues(PRIME);
+    this.exponent = parameters[EXPONENT] ?? OtherPrimeInfo.defaultValues(EXPONENT);
+    this.coefficient = parameters[COEFFICIENT] ?? OtherPrimeInfo.defaultValues(COEFFICIENT);
 
     if (parameters.json) {
       this.fromJSON(parameters.json);
@@ -92,7 +91,7 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
    *```
    */
   public static override schema(parameters: OtherPrimeInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -102,7 +101,7 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

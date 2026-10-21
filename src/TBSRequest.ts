@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { toArrayBuffer } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import { GeneralName, type GeneralNameJson, type GeneralNameSchema } from "./GeneralName";
 import { Request, type RequestJson, type RequestSchema } from "./Request";
 import { Extension, type ExtensionJson } from "./Extension";
@@ -82,16 +81,16 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
   constructor(parameters: TBSRequestParameters = {}) {
     super();
 
-    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, TBSRequest.defaultValues(TBS)));
+    this.tbsView = new Uint8Array(parameters[TBS] ?? TBSRequest.defaultValues(TBS));
     if (VERSION in parameters) {
-      this.version = pvutils.getParametersValue(parameters, VERSION, TBSRequest.defaultValues(VERSION));
+      this.version = parameters[VERSION] ?? TBSRequest.defaultValues(VERSION);
     }
     if (REQUESTOR_NAME in parameters) {
-      this.requestorName = pvutils.getParametersValue(parameters, REQUESTOR_NAME, TBSRequest.defaultValues(REQUESTOR_NAME));
+      this.requestorName = parameters[REQUESTOR_NAME] ?? TBSRequest.defaultValues(REQUESTOR_NAME);
     }
-    this.requestList = pvutils.getParametersValue(parameters, REQUEST_LIST, TBSRequest.defaultValues(REQUEST_LIST));
+    this.requestList = parameters[REQUEST_LIST] ?? TBSRequest.defaultValues(REQUEST_LIST);
     if (REQUEST_EXTENSIONS in parameters) {
-      this.requestExtensions = pvutils.getParametersValue(parameters, REQUEST_EXTENSIONS, TBSRequest.defaultValues(REQUEST_EXTENSIONS));
+      this.requestExtensions = parameters[REQUEST_EXTENSIONS] ?? TBSRequest.defaultValues(REQUEST_EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -158,7 +157,7 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
    *```
    */
   public static override schema(parameters: TBSRequestSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || TBS_REQUEST,
@@ -218,7 +217,7 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, TBSRequest.schema());

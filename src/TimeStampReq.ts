@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { MessageImprint, type MessageImprintJson, type MessageImprintSchema } from "./MessageImprint";
 import { Extension, type ExtensionJson } from "./Extension";
 import type * as Schema from "./Schema";
@@ -107,19 +106,19 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
   constructor(parameters: TimeStampReqParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, TimeStampReq.defaultValues(VERSION));
-    this.messageImprint = pvutils.getParametersValue(parameters, MESSAGE_IMPRINT, TimeStampReq.defaultValues(MESSAGE_IMPRINT));
+    this.version = parameters[VERSION] ?? TimeStampReq.defaultValues(VERSION);
+    this.messageImprint = parameters[MESSAGE_IMPRINT] ?? TimeStampReq.defaultValues(MESSAGE_IMPRINT);
     if (REQ_POLICY in parameters) {
-      this.reqPolicy = pvutils.getParametersValue(parameters, REQ_POLICY, TimeStampReq.defaultValues(REQ_POLICY));
+      this.reqPolicy = parameters[REQ_POLICY] ?? TimeStampReq.defaultValues(REQ_POLICY);
     }
     if (NONCE in parameters) {
-      this.nonce = pvutils.getParametersValue(parameters, NONCE, TimeStampReq.defaultValues(NONCE));
+      this.nonce = parameters[NONCE] ?? TimeStampReq.defaultValues(NONCE);
     }
     if (CERT_REQ in parameters) {
-      this.certReq = pvutils.getParametersValue(parameters, CERT_REQ, TimeStampReq.defaultValues(CERT_REQ));
+      this.certReq = parameters[CERT_REQ] ?? TimeStampReq.defaultValues(CERT_REQ);
     }
     if (EXTENSIONS in parameters) {
-      this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, TimeStampReq.defaultValues(EXTENSIONS));
+      this.extensions = parameters[EXTENSIONS] ?? TimeStampReq.defaultValues(EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -204,7 +203,7 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
       extensions?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || TIME_STAMP_REQ,
@@ -248,7 +247,7 @@ export class TimeStampReq extends PkiObject implements ITimeStampReq {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, TimeStampReq.schema());

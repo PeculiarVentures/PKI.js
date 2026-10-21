@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -37,8 +36,8 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
   constructor(parameters: OtherRecipientInfoParameters = {}) {
     super();
 
-    this.oriType = pvutils.getParametersValue(parameters, ORI_TYPE, OtherRecipientInfo.defaultValues(ORI_TYPE));
-    this.oriValue = pvutils.getParametersValue(parameters, ORI_VALUE, OtherRecipientInfo.defaultValues(ORI_VALUE));
+    this.oriType = parameters[ORI_TYPE] ?? OtherRecipientInfo.defaultValues(ORI_TYPE);
+    this.oriValue = parameters[ORI_VALUE] ?? OtherRecipientInfo.defaultValues(ORI_VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -94,7 +93,7 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
       oriValue?: string;
     }> = {},
   ) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -104,7 +103,7 @@ export class OtherRecipientInfo extends PkiObject implements IOtherRecipientInfo
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

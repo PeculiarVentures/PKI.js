@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -42,11 +41,11 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
   constructor(parameters: ECCCMSSharedInfoParameters = {}) {
     super();
 
-    this.keyInfo = pvutils.getParametersValue(parameters, KEY_INFO, ECCCMSSharedInfo.defaultValues(KEY_INFO));
+    this.keyInfo = parameters[KEY_INFO] ?? ECCCMSSharedInfo.defaultValues(KEY_INFO);
     if (ENTITY_U_INFO in parameters) {
-      this.entityUInfo = pvutils.getParametersValue(parameters, ENTITY_U_INFO, ECCCMSSharedInfo.defaultValues(ENTITY_U_INFO));
+      this.entityUInfo = parameters[ENTITY_U_INFO] ?? ECCCMSSharedInfo.defaultValues(ENTITY_U_INFO);
     }
-    this.suppPubInfo = pvutils.getParametersValue(parameters, SUPP_PUB_INFO, ECCCMSSharedInfo.defaultValues(SUPP_PUB_INFO));
+    this.suppPubInfo = parameters[SUPP_PUB_INFO] ?? ECCCMSSharedInfo.defaultValues(SUPP_PUB_INFO);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -107,7 +106,7 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
       suppPubInfo?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -136,7 +135,7 @@ export class ECCCMSSharedInfo extends PkiObject implements IECCCMSSharedInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

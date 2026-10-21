@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { Time, type TimeJson } from "./Time";
 import { Extensions, type ExtensionsJson } from "./Extensions";
 import type * as Schema from "./Schema";
@@ -43,10 +42,10 @@ export class RevokedCertificate extends PkiObject implements IRevokedCertificate
   constructor(parameters: RevokedCertificateParameters = {}) {
     super();
 
-    this.userCertificate = pvutils.getParametersValue(parameters, USER_CERTIFICATE, RevokedCertificate.defaultValues(USER_CERTIFICATE));
-    this.revocationDate = pvutils.getParametersValue(parameters, REVOCATION_DATE, RevokedCertificate.defaultValues(REVOCATION_DATE));
+    this.userCertificate = parameters[USER_CERTIFICATE] ?? RevokedCertificate.defaultValues(USER_CERTIFICATE);
+    this.revocationDate = parameters[REVOCATION_DATE] ?? RevokedCertificate.defaultValues(REVOCATION_DATE);
     if (CRL_ENTRY_EXTENSIONS in parameters) {
-      this.crlEntryExtensions = pvutils.getParametersValue(parameters, CRL_ENTRY_EXTENSIONS, RevokedCertificate.defaultValues(CRL_ENTRY_EXTENSIONS));
+      this.crlEntryExtensions = parameters[CRL_ENTRY_EXTENSIONS] ?? RevokedCertificate.defaultValues(CRL_ENTRY_EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -94,7 +93,7 @@ export class RevokedCertificate extends PkiObject implements IRevokedCertificate
       crlEntryExtensions?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -120,7 +119,7 @@ export class RevokedCertificate extends PkiObject implements IRevokedCertificate
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, RevokedCertificate.schema());

@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { hex, toArrayBuffer } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { RelativeDistinguishedNames, type RelativeDistinguishedNamesJson, type RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
@@ -91,7 +90,7 @@ function tbsCertificate(parameters: TBSCertificateSchema = {}): Schema.SchemaTyp
   //    -- If present, version MUST be v3
   //}
 
-  const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  const names = parameters.names ?? {};
 
   return new asn1js.Sequence({
     name: names.blockName || TBS_CERTIFICATE,
@@ -401,26 +400,26 @@ export class Certificate extends PkiObject implements ICertificate {
   constructor(parameters: CertificateParameters = {}) {
     super();
 
-    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, Certificate.defaultValues(TBS)));
-    this.version = pvutils.getParametersValue(parameters, VERSION, Certificate.defaultValues(VERSION));
-    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, Certificate.defaultValues(SERIAL_NUMBER));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, Certificate.defaultValues(SIGNATURE));
-    this.issuer = pvutils.getParametersValue(parameters, ISSUER, Certificate.defaultValues(ISSUER));
-    this.notBefore = pvutils.getParametersValue(parameters, NOT_BEFORE, Certificate.defaultValues(NOT_BEFORE));
-    this.notAfter = pvutils.getParametersValue(parameters, NOT_AFTER, Certificate.defaultValues(NOT_AFTER));
-    this.subject = pvutils.getParametersValue(parameters, SUBJECT, Certificate.defaultValues(SUBJECT));
-    this.subjectPublicKeyInfo = pvutils.getParametersValue(parameters, SUBJECT_PUBLIC_KEY_INFO, Certificate.defaultValues(SUBJECT_PUBLIC_KEY_INFO));
+    this.tbsView = new Uint8Array(parameters[TBS] ?? Certificate.defaultValues(TBS));
+    this.version = parameters[VERSION] ?? Certificate.defaultValues(VERSION);
+    this.serialNumber = parameters[SERIAL_NUMBER] ?? Certificate.defaultValues(SERIAL_NUMBER);
+    this.signature = parameters[SIGNATURE] ?? Certificate.defaultValues(SIGNATURE);
+    this.issuer = parameters[ISSUER] ?? Certificate.defaultValues(ISSUER);
+    this.notBefore = parameters[NOT_BEFORE] ?? Certificate.defaultValues(NOT_BEFORE);
+    this.notAfter = parameters[NOT_AFTER] ?? Certificate.defaultValues(NOT_AFTER);
+    this.subject = parameters[SUBJECT] ?? Certificate.defaultValues(SUBJECT);
+    this.subjectPublicKeyInfo = parameters[SUBJECT_PUBLIC_KEY_INFO] ?? Certificate.defaultValues(SUBJECT_PUBLIC_KEY_INFO);
     if (ISSUER_UNIQUE_ID in parameters) {
-      this.issuerUniqueID = pvutils.getParametersValue(parameters, ISSUER_UNIQUE_ID, Certificate.defaultValues(ISSUER_UNIQUE_ID));
+      this.issuerUniqueID = parameters[ISSUER_UNIQUE_ID] ?? Certificate.defaultValues(ISSUER_UNIQUE_ID);
     }
     if (SUBJECT_UNIQUE_ID in parameters) {
-      this.subjectUniqueID = pvutils.getParametersValue(parameters, SUBJECT_UNIQUE_ID, Certificate.defaultValues(SUBJECT_UNIQUE_ID));
+      this.subjectUniqueID = parameters[SUBJECT_UNIQUE_ID] ?? Certificate.defaultValues(SUBJECT_UNIQUE_ID);
     }
     if (EXTENSIONS in parameters) {
-      this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, Certificate.defaultValues(EXTENSIONS));
+      this.extensions = parameters[EXTENSIONS] ?? Certificate.defaultValues(EXTENSIONS);
     }
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, Certificate.defaultValues(SIGNATURE_ALGORITHM));
-    this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, Certificate.defaultValues(SIGNATURE_VALUE));
+    this.signatureAlgorithm = parameters[SIGNATURE_ALGORITHM] ?? Certificate.defaultValues(SIGNATURE_ALGORITHM);
+    this.signatureValue = parameters[SIGNATURE_VALUE] ?? Certificate.defaultValues(SIGNATURE_VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -537,7 +536,7 @@ export class Certificate extends PkiObject implements ICertificate {
    *```
    */
   public static override schema(parameters: CertificateSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -557,7 +556,7 @@ export class Certificate extends PkiObject implements ICertificate {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(

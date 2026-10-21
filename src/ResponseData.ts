@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { toArrayBuffer } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import { RelativeDistinguishedNames, type RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
 import { SingleResponse, type SingleResponseJson, type SingleResponseSchema } from "./SingleResponse";
 import { Extension, type ExtensionJson } from "./Extension";
@@ -87,15 +86,15 @@ export class ResponseData extends PkiObject implements IResponseData {
   constructor(parameters: ResponseDataParameters = {}) {
     super();
 
-    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, ResponseData.defaultValues(TBS)));
+    this.tbsView = new Uint8Array(parameters[TBS] ?? ResponseData.defaultValues(TBS));
     if (VERSION in parameters) {
-      this.version = pvutils.getParametersValue(parameters, VERSION, ResponseData.defaultValues(VERSION));
+      this.version = parameters[VERSION] ?? ResponseData.defaultValues(VERSION);
     }
-    this.responderID = pvutils.getParametersValue(parameters, RESPONDER_ID, ResponseData.defaultValues(RESPONDER_ID));
-    this.producedAt = pvutils.getParametersValue(parameters, PRODUCED_AT, ResponseData.defaultValues(PRODUCED_AT));
-    this.responses = pvutils.getParametersValue(parameters, RESPONSES, ResponseData.defaultValues(RESPONSES));
+    this.responderID = parameters[RESPONDER_ID] ?? ResponseData.defaultValues(RESPONDER_ID);
+    this.producedAt = parameters[PRODUCED_AT] ?? ResponseData.defaultValues(PRODUCED_AT);
+    this.responses = parameters[RESPONSES] ?? ResponseData.defaultValues(RESPONSES);
     if (RESPONSE_EXTENSIONS in parameters) {
-      this.responseExtensions = pvutils.getParametersValue(parameters, RESPONSE_EXTENSIONS, ResponseData.defaultValues(RESPONSE_EXTENSIONS));
+      this.responseExtensions = parameters[RESPONSE_EXTENSIONS] ?? ResponseData.defaultValues(RESPONSE_EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -167,7 +166,7 @@ export class ResponseData extends PkiObject implements IResponseData {
    *```
    */
   public static override schema(parameters: ResponseDataSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || RESPONSE_DATA,
@@ -239,7 +238,7 @@ export class ResponseData extends PkiObject implements IResponseData {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, ResponseData.schema());

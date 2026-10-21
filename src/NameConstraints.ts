@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralSubtree, type GeneralSubtreeJson } from "./GeneralSubtree";
@@ -39,10 +38,10 @@ export class NameConstraints extends PkiObject implements INameConstraints {
     super();
 
     if (PERMITTED_SUBTREES in parameters) {
-      this.permittedSubtrees = pvutils.getParametersValue(parameters, PERMITTED_SUBTREES, NameConstraints.defaultValues(PERMITTED_SUBTREES));
+      this.permittedSubtrees = parameters[PERMITTED_SUBTREES] ?? NameConstraints.defaultValues(PERMITTED_SUBTREES);
     }
     if (EXCLUDED_SUBTREES in parameters) {
-      this.excludedSubtrees = pvutils.getParametersValue(parameters, EXCLUDED_SUBTREES, NameConstraints.defaultValues(EXCLUDED_SUBTREES));
+      this.excludedSubtrees = parameters[EXCLUDED_SUBTREES] ?? NameConstraints.defaultValues(EXCLUDED_SUBTREES);
     }
 
     if (parameters.schema) {
@@ -82,7 +81,7 @@ export class NameConstraints extends PkiObject implements INameConstraints {
       excludedSubtrees?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -119,7 +118,7 @@ export class NameConstraints extends PkiObject implements INameConstraints {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

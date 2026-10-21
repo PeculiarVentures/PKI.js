@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "../AlgorithmIdentifier";
 import { EMPTY_STRING } from "../constants";
 import { AsnError } from "../errors";
@@ -46,12 +45,12 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
   constructor(parameters: ObjectDigestInfoParameters = {}) {
     super();
 
-    this.digestedObjectType = pvutils.getParametersValue(parameters, DIGESTED_OBJECT_TYPE, ObjectDigestInfo.defaultValues(DIGESTED_OBJECT_TYPE));
+    this.digestedObjectType = parameters[DIGESTED_OBJECT_TYPE] ?? ObjectDigestInfo.defaultValues(DIGESTED_OBJECT_TYPE);
     if (OTHER_OBJECT_TYPE_ID in parameters) {
-      this.otherObjectTypeID = pvutils.getParametersValue(parameters, OTHER_OBJECT_TYPE_ID, ObjectDigestInfo.defaultValues(OTHER_OBJECT_TYPE_ID));
+      this.otherObjectTypeID = parameters[OTHER_OBJECT_TYPE_ID] ?? ObjectDigestInfo.defaultValues(OTHER_OBJECT_TYPE_ID);
     }
-    this.digestAlgorithm = pvutils.getParametersValue(parameters, DIGEST_ALGORITHM, ObjectDigestInfo.defaultValues(DIGEST_ALGORITHM));
-    this.objectDigest = pvutils.getParametersValue(parameters, OBJECT_DIGEST, ObjectDigestInfo.defaultValues(OBJECT_DIGEST));
+    this.digestAlgorithm = parameters[DIGEST_ALGORITHM] ?? ObjectDigestInfo.defaultValues(DIGEST_ALGORITHM);
+    this.objectDigest = parameters[OBJECT_DIGEST] ?? ObjectDigestInfo.defaultValues(OBJECT_DIGEST);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -107,7 +106,7 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
       objectDigest?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -125,7 +124,7 @@ export class ObjectDigestInfo extends PkiObject implements IObjectDigestInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

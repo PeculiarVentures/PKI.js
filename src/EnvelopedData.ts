@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { isBufferSource } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import * as common from "./common";
 import { OriginatorInfo, type OriginatorInfoJson } from "./OriginatorInfo";
 import { RecipientInfo, type RecipientInfoJson } from "./RecipientInfo";
@@ -194,14 +193,14 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
   constructor(parameters: EnvelopedDataParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, EnvelopedData.defaultValues(VERSION));
+    this.version = parameters[VERSION] ?? EnvelopedData.defaultValues(VERSION);
     if (ORIGINATOR_INFO in parameters) {
-      this.originatorInfo = pvutils.getParametersValue(parameters, ORIGINATOR_INFO, EnvelopedData.defaultValues(ORIGINATOR_INFO));
+      this.originatorInfo = parameters[ORIGINATOR_INFO] ?? EnvelopedData.defaultValues(ORIGINATOR_INFO);
     }
-    this.recipientInfos = pvutils.getParametersValue(parameters, RECIPIENT_INFOS, EnvelopedData.defaultValues(RECIPIENT_INFOS));
-    this.encryptedContentInfo = pvutils.getParametersValue(parameters, ENCRYPTED_CONTENT_INFO, EnvelopedData.defaultValues(ENCRYPTED_CONTENT_INFO));
+    this.recipientInfos = parameters[RECIPIENT_INFOS] ?? EnvelopedData.defaultValues(RECIPIENT_INFOS);
+    this.encryptedContentInfo = parameters[ENCRYPTED_CONTENT_INFO] ?? EnvelopedData.defaultValues(ENCRYPTED_CONTENT_INFO);
     if (UNPROTECTED_ATTRS in parameters) {
-      this.unprotectedAttrs = pvutils.getParametersValue(parameters, UNPROTECTED_ATTRS, EnvelopedData.defaultValues(UNPROTECTED_ATTRS));
+      this.unprotectedAttrs = parameters[UNPROTECTED_ATTRS] ?? EnvelopedData.defaultValues(UNPROTECTED_ATTRS);
     }
     this.policy = {
       disableSplit: !!parameters.disableSplit,
@@ -285,7 +284,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       unprotectedAttrs?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -328,7 +327,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

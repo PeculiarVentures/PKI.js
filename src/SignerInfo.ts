@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { SignedAndUnsignedAttributes, type SignedAndUnsignedAttributesJson, type SignedAndUnsignedAttributesSchema } from "./SignedAndUnsignedAttributes";
 import { IssuerAndSerialNumber, type IssuerAndSerialNumberSchema } from "./IssuerAndSerialNumber";
@@ -67,16 +66,16 @@ export class SignerInfo extends PkiObject implements ISignerInfo {
   constructor(parameters: SignerInfoParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, SignerInfo.defaultValues(VERSION));
-    this.sid = pvutils.getParametersValue(parameters, SID, SignerInfo.defaultValues(SID));
-    this.digestAlgorithm = pvutils.getParametersValue(parameters, DIGEST_ALGORITHM, SignerInfo.defaultValues(DIGEST_ALGORITHM));
+    this.version = parameters[VERSION] ?? SignerInfo.defaultValues(VERSION);
+    this.sid = parameters[SID] ?? SignerInfo.defaultValues(SID);
+    this.digestAlgorithm = parameters[DIGEST_ALGORITHM] ?? SignerInfo.defaultValues(DIGEST_ALGORITHM);
     if (SIGNED_ATTRS in parameters) {
-      this.signedAttrs = pvutils.getParametersValue(parameters, SIGNED_ATTRS, SignerInfo.defaultValues(SIGNED_ATTRS));
+      this.signedAttrs = parameters[SIGNED_ATTRS] ?? SignerInfo.defaultValues(SIGNED_ATTRS);
     }
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, SignerInfo.defaultValues(SIGNATURE_ALGORITHM));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, SignerInfo.defaultValues(SIGNATURE));
+    this.signatureAlgorithm = parameters[SIGNATURE_ALGORITHM] ?? SignerInfo.defaultValues(SIGNATURE_ALGORITHM);
+    this.signature = parameters[SIGNATURE] ?? SignerInfo.defaultValues(SIGNATURE);
     if (UNSIGNED_ATTRS in parameters) {
-      this.unsignedAttrs = pvutils.getParametersValue(parameters, UNSIGNED_ATTRS, SignerInfo.defaultValues(UNSIGNED_ATTRS));
+      this.unsignedAttrs = parameters[UNSIGNED_ATTRS] ?? SignerInfo.defaultValues(UNSIGNED_ATTRS);
     }
 
     if (parameters.schema) {
@@ -186,7 +185,7 @@ export class SignerInfo extends PkiObject implements ISignerInfo {
       unsignedAttrs?: SignedAndUnsignedAttributesSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: SIGNER_INFO,
@@ -261,7 +260,7 @@ export class SignerInfo extends PkiObject implements ISignerInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, SignerInfo.schema());

@@ -209,19 +209,19 @@ export class SignedData extends PkiObject implements ISignedData {
   constructor(parameters: SignedDataParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, SignedData.defaultValues(VERSION));
-    this.digestAlgorithms = pvutils.getParametersValue(parameters, DIGEST_ALGORITHMS, SignedData.defaultValues(DIGEST_ALGORITHMS));
-    this.encapContentInfo = pvutils.getParametersValue(parameters, ENCAP_CONTENT_INFO, SignedData.defaultValues(ENCAP_CONTENT_INFO));
+    this.version = parameters[VERSION] ?? SignedData.defaultValues(VERSION);
+    this.digestAlgorithms = parameters[DIGEST_ALGORITHMS] ?? SignedData.defaultValues(DIGEST_ALGORITHMS);
+    this.encapContentInfo = parameters[ENCAP_CONTENT_INFO] ?? SignedData.defaultValues(ENCAP_CONTENT_INFO);
     if (CERTIFICATES in parameters) {
-      this.certificates = pvutils.getParametersValue(parameters, CERTIFICATES, SignedData.defaultValues(CERTIFICATES));
+      this.certificates = parameters[CERTIFICATES] ?? SignedData.defaultValues(CERTIFICATES);
     }
     if (CRLS in parameters) {
-      this.crls = pvutils.getParametersValue(parameters, CRLS, SignedData.defaultValues(CRLS));
+      this.crls = parameters[CRLS] ?? SignedData.defaultValues(CRLS);
     }
     if (OCSPS in parameters) {
-      this.ocsps = pvutils.getParametersValue(parameters, OCSPS, SignedData.defaultValues(OCSPS));
+      this.ocsps = parameters[OCSPS] ?? SignedData.defaultValues(OCSPS);
     }
-    this.signerInfos = pvutils.getParametersValue(parameters, SIGNER_INFOS, SignedData.defaultValues(SIGNER_INFOS));
+    this.signerInfos = parameters[SIGNER_INFOS] ?? SignedData.defaultValues(SIGNER_INFOS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -306,7 +306,7 @@ export class SignedData extends PkiObject implements ISignedData {
       signerInfos?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     if (names.optional === undefined) {
       names.optional = false;
@@ -369,7 +369,7 @@ export class SignedData extends PkiObject implements ISignedData {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, SignedData.schema());

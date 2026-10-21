@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { base64url } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
 import { OtherPrimeInfo, type OtherPrimeInfoJson, type OtherPrimeInfoSchema } from "./OtherPrimeInfo";
@@ -70,17 +69,17 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
   constructor(parameters: RSAPrivateKeyParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, RSAPrivateKey.defaultValues(VERSION));
-    this.modulus = pvutils.getParametersValue(parameters, MODULUS, RSAPrivateKey.defaultValues(MODULUS));
-    this.publicExponent = pvutils.getParametersValue(parameters, PUBLIC_EXPONENT, RSAPrivateKey.defaultValues(PUBLIC_EXPONENT));
-    this.privateExponent = pvutils.getParametersValue(parameters, PRIVATE_EXPONENT, RSAPrivateKey.defaultValues(PRIVATE_EXPONENT));
-    this.prime1 = pvutils.getParametersValue(parameters, PRIME1, RSAPrivateKey.defaultValues(PRIME1));
-    this.prime2 = pvutils.getParametersValue(parameters, PRIME2, RSAPrivateKey.defaultValues(PRIME2));
-    this.exponent1 = pvutils.getParametersValue(parameters, EXPONENT1, RSAPrivateKey.defaultValues(EXPONENT1));
-    this.exponent2 = pvutils.getParametersValue(parameters, EXPONENT2, RSAPrivateKey.defaultValues(EXPONENT2));
-    this.coefficient = pvutils.getParametersValue(parameters, COEFFICIENT, RSAPrivateKey.defaultValues(COEFFICIENT));
+    this.version = parameters[VERSION] ?? RSAPrivateKey.defaultValues(VERSION);
+    this.modulus = parameters[MODULUS] ?? RSAPrivateKey.defaultValues(MODULUS);
+    this.publicExponent = parameters[PUBLIC_EXPONENT] ?? RSAPrivateKey.defaultValues(PUBLIC_EXPONENT);
+    this.privateExponent = parameters[PRIVATE_EXPONENT] ?? RSAPrivateKey.defaultValues(PRIVATE_EXPONENT);
+    this.prime1 = parameters[PRIME1] ?? RSAPrivateKey.defaultValues(PRIME1);
+    this.prime2 = parameters[PRIME2] ?? RSAPrivateKey.defaultValues(PRIME2);
+    this.exponent1 = parameters[EXPONENT1] ?? RSAPrivateKey.defaultValues(EXPONENT1);
+    this.exponent2 = parameters[EXPONENT2] ?? RSAPrivateKey.defaultValues(EXPONENT2);
+    this.coefficient = parameters[COEFFICIENT] ?? RSAPrivateKey.defaultValues(COEFFICIENT);
     if (OTHER_PRIME_INFOS in parameters) {
-      this.otherPrimeInfos = pvutils.getParametersValue(parameters, OTHER_PRIME_INFOS, RSAPrivateKey.defaultValues(OTHER_PRIME_INFOS));
+      this.otherPrimeInfos = parameters[OTHER_PRIME_INFOS] ?? RSAPrivateKey.defaultValues(OTHER_PRIME_INFOS);
     }
 
     if (parameters.json) {
@@ -169,7 +168,7 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
       otherPrimeInfo?: OtherPrimeInfoSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -198,7 +197,7 @@ export class RSAPrivateKey extends PkiObject implements IRSAPrivateKey {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

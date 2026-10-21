@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -58,10 +57,10 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
   constructor(parameters: RSASSAPSSParamsParameters = {}) {
     super();
 
-    this.hashAlgorithm = pvutils.getParametersValue(parameters, HASH_ALGORITHM, RSASSAPSSParams.defaultValues(HASH_ALGORITHM));
-    this.maskGenAlgorithm = pvutils.getParametersValue(parameters, MASK_GEN_ALGORITHM, RSASSAPSSParams.defaultValues(MASK_GEN_ALGORITHM));
-    this.saltLength = pvutils.getParametersValue(parameters, SALT_LENGTH, RSASSAPSSParams.defaultValues(SALT_LENGTH));
-    this.trailerField = pvutils.getParametersValue(parameters, TRAILER_FIELD, RSASSAPSSParams.defaultValues(TRAILER_FIELD));
+    this.hashAlgorithm = parameters[HASH_ALGORITHM] ?? RSASSAPSSParams.defaultValues(HASH_ALGORITHM);
+    this.maskGenAlgorithm = parameters[MASK_GEN_ALGORITHM] ?? RSASSAPSSParams.defaultValues(MASK_GEN_ALGORITHM);
+    this.saltLength = parameters[SALT_LENGTH] ?? RSASSAPSSParams.defaultValues(SALT_LENGTH);
+    this.trailerField = parameters[TRAILER_FIELD] ?? RSASSAPSSParams.defaultValues(TRAILER_FIELD);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -120,7 +119,7 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
       trailerField?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -163,7 +162,7 @@ export class RSASSAPSSParams extends PkiObject implements IRSASSAPSSParams {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

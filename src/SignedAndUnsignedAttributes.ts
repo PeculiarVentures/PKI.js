@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { toArrayBuffer } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import { Attribute, type AttributeJson } from "./Attribute";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -50,9 +49,9 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
   constructor(parameters: SignedAndUnsignedAttributesParameters = {}) {
     super();
 
-    this.type = pvutils.getParametersValue(parameters, TYPE, SignedAndUnsignedAttributes.defaultValues(TYPE));
-    this.attributes = pvutils.getParametersValue(parameters, ATTRIBUTES, SignedAndUnsignedAttributes.defaultValues(ATTRIBUTES));
-    this.encodedValue = pvutils.getParametersValue(parameters, ENCODED_VALUE, SignedAndUnsignedAttributes.defaultValues(ENCODED_VALUE));
+    this.type = parameters[TYPE] ?? SignedAndUnsignedAttributes.defaultValues(TYPE);
+    this.attributes = parameters[ATTRIBUTES] ?? SignedAndUnsignedAttributes.defaultValues(ATTRIBUTES);
+    this.encodedValue = parameters[ENCODED_VALUE] ?? SignedAndUnsignedAttributes.defaultValues(ENCODED_VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -108,7 +107,7 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
    *```
    */
   public static override schema(parameters: SignedAndUnsignedAttributesSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Constructed({
       name: names.blockName || EMPTY_STRING,
@@ -128,7 +127,7 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

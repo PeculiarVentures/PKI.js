@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { Attribute, type AttributeJson } from "./Attribute";
 import type * as Schema from "./Schema";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -41,10 +40,10 @@ export class SafeBag<T extends BagType = BagType> extends PkiObject implements I
   constructor(parameters: SafeBagParameters<T> = {}) {
     super();
 
-    this.bagId = pvutils.getParametersValue(parameters, BAG_ID, SafeBag.defaultValues(BAG_ID));
-    this.bagValue = pvutils.getParametersValue(parameters, BAG_VALUE, SafeBag.defaultValues(BAG_VALUE)) as unknown as T;
+    this.bagId = parameters[BAG_ID] ?? SafeBag.defaultValues(BAG_ID);
+    this.bagValue = (parameters[BAG_VALUE] ?? SafeBag.defaultValues(BAG_VALUE)) as unknown as T;
     if (BAG_ATTRIBUTES in parameters) {
-      this.bagAttributes = pvutils.getParametersValue(parameters, BAG_ATTRIBUTES, SafeBag.defaultValues(BAG_ATTRIBUTES));
+      this.bagAttributes = parameters[BAG_ATTRIBUTES] ?? SafeBag.defaultValues(BAG_ATTRIBUTES);
     }
 
     if (parameters.schema) {
@@ -109,7 +108,7 @@ export class SafeBag<T extends BagType = BagType> extends PkiObject implements I
       bagAttributes?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -137,7 +136,7 @@ export class SafeBag<T extends BagType = BagType> extends PkiObject implements I
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -42,7 +41,7 @@ function builtInStandardAttributes(
   //    numeric-user-identifier   [4] IMPLICIT NumericUserIdentifier OPTIONAL,
   //    personal-name             [5] IMPLICIT PersonalName OPTIONAL,
   //    organizational-unit-names [6] IMPLICIT OrganizationalUnitNames OPTIONAL }
-  const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  const names = parameters.names ?? {};
 
   return new asn1js.Sequence({
     optional,
@@ -271,8 +270,8 @@ export class GeneralName extends PkiObject implements IGeneralName {
   constructor(parameters: GeneralNameParameters = {}) {
     super();
 
-    this.type = pvutils.getParametersValue(parameters, TYPE, GeneralName.defaultValues(TYPE));
-    this.value = pvutils.getParametersValue(parameters, VALUE, GeneralName.defaultValues(VALUE));
+    this.type = parameters[TYPE] ?? GeneralName.defaultValues(TYPE);
+    this.value = parameters[VALUE] ?? GeneralName.defaultValues(VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -330,7 +329,7 @@ export class GeneralName extends PkiObject implements IGeneralName {
    *```
    */
   static override schema(parameters: GeneralNameSchema = {}): asn1js.Choice {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Choice({
       value: [
@@ -440,7 +439,8 @@ export class GeneralName extends PkiObject implements IGeneralName {
 
   public fromSchema(schema: Schema.SchemaType): void {
     //#region Clear input data first
-    pvutils.clearProps(schema, ["blockName", "otherName", "rfc822Name", "dNSName", "x400Address", "directoryName", "ediPartyName", "uniformResourceIdentifier", "iPAddress", "registeredID"]);
+    for (const prop of ["blockName", "otherName", "rfc822Name", "dNSName", "x400Address", "directoryName", "ediPartyName", "uniformResourceIdentifier", "iPAddress", "registeredID"])
+      delete schema[prop];
     //#endregion
 
     //#region Check the schema is valid

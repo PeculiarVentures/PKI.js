@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { GeneralNames, type GeneralNamesJson } from "../GeneralNames";
 import { IssuerSerial, type IssuerSerialJson } from "../AttributeCertificateV1";
 import { ObjectDigestInfo, type ObjectDigestInfoJson } from "./ObjectDigestInfo";
@@ -45,13 +44,13 @@ export class V2Form extends PkiObject implements IV2Form {
     super();
 
     if (ISSUER_NAME in parameters) {
-      this.issuerName = pvutils.getParametersValue(parameters, ISSUER_NAME, V2Form.defaultValues(ISSUER_NAME));
+      this.issuerName = parameters[ISSUER_NAME] ?? V2Form.defaultValues(ISSUER_NAME);
     }
     if (BASE_CERTIFICATE_ID in parameters) {
-      this.baseCertificateID = pvutils.getParametersValue(parameters, BASE_CERTIFICATE_ID, V2Form.defaultValues(BASE_CERTIFICATE_ID));
+      this.baseCertificateID = parameters[BASE_CERTIFICATE_ID] ?? V2Form.defaultValues(BASE_CERTIFICATE_ID);
     }
     if (OBJECT_DIGEST_INFO in parameters) {
-      this.objectDigestInfo = pvutils.getParametersValue(parameters, OBJECT_DIGEST_INFO, V2Form.defaultValues(OBJECT_DIGEST_INFO));
+      this.objectDigestInfo = parameters[OBJECT_DIGEST_INFO] ?? V2Form.defaultValues(OBJECT_DIGEST_INFO);
     }
 
     if (parameters.schema) {
@@ -101,7 +100,7 @@ export class V2Form extends PkiObject implements IV2Form {
       objectDigestInfo?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -138,7 +137,7 @@ export class V2Form extends PkiObject implements IV2Form {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

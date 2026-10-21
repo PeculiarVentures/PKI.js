@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "../constants";
 import { AsnError } from "../errors";
 import { GeneralNames, type GeneralNamesJson, type GeneralNamesSchema } from "../GeneralNames";
@@ -51,10 +50,10 @@ export class IssuerSerial extends PkiObject implements IIssuerSerial {
   constructor(parameters: IssuerSerialParameters = {}) {
     super();
 
-    this.issuer = pvutils.getParametersValue(parameters, ISSUER, IssuerSerial.defaultValues(ISSUER));
-    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, IssuerSerial.defaultValues(SERIAL_NUMBER));
+    this.issuer = parameters[ISSUER] ?? IssuerSerial.defaultValues(ISSUER);
+    this.serialNumber = parameters[SERIAL_NUMBER] ?? IssuerSerial.defaultValues(SERIAL_NUMBER);
     if (ISSUER_UID in parameters) {
-      this.issuerUID = pvutils.getParametersValue(parameters, ISSUER_UID, IssuerSerial.defaultValues(ISSUER_UID));
+      this.issuerUID = parameters[ISSUER_UID] ?? IssuerSerial.defaultValues(ISSUER_UID);
     }
 
     if (parameters.schema) {
@@ -104,7 +103,7 @@ export class IssuerSerial extends PkiObject implements IIssuerSerial {
       issuerUID?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -121,7 +120,7 @@ export class IssuerSerial extends PkiObject implements IIssuerSerial {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
     //#region Check the schema is valid
     const asn1 = asn1js.compareSchema(
       schema,

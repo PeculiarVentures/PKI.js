@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -39,12 +38,12 @@ export class CertificateTemplate extends PkiObject implements ICertificateTempla
   constructor(parameters: CertificateTemplateParameters = {}) {
     super();
 
-    this.templateID = pvutils.getParametersValue(parameters, TEMPLATE_ID, CertificateTemplate.defaultValues(TEMPLATE_ID));
+    this.templateID = parameters[TEMPLATE_ID] ?? CertificateTemplate.defaultValues(TEMPLATE_ID);
     if (TEMPLATE_MAJOR_VERSION in parameters) {
-      this.templateMajorVersion = pvutils.getParametersValue(parameters, TEMPLATE_MAJOR_VERSION, CertificateTemplate.defaultValues(TEMPLATE_MAJOR_VERSION));
+      this.templateMajorVersion = parameters[TEMPLATE_MAJOR_VERSION] ?? CertificateTemplate.defaultValues(TEMPLATE_MAJOR_VERSION);
     }
     if (TEMPLATE_MINOR_VERSION in parameters) {
-      this.templateMinorVersion = pvutils.getParametersValue(parameters, TEMPLATE_MINOR_VERSION, CertificateTemplate.defaultValues(TEMPLATE_MINOR_VERSION));
+      this.templateMinorVersion = parameters[TEMPLATE_MINOR_VERSION] ?? CertificateTemplate.defaultValues(TEMPLATE_MINOR_VERSION);
     }
 
     if (parameters.schema) {
@@ -90,7 +89,7 @@ export class CertificateTemplate extends PkiObject implements ICertificateTempla
       templateMinorVersion?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -110,7 +109,7 @@ export class CertificateTemplate extends PkiObject implements ICertificateTempla
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

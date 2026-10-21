@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -37,8 +36,8 @@ export class SecretBag extends PkiObject implements ISecretBag {
   constructor(parameters: SecretBagParameters = {}) {
     super();
 
-    this.secretTypeId = pvutils.getParametersValue(parameters, SECRET_TYPE_ID, SecretBag.defaultValues(SECRET_TYPE_ID));
-    this.secretValue = pvutils.getParametersValue(parameters, SECRET_VALUE, SecretBag.defaultValues(SECRET_VALUE));
+    this.secretTypeId = parameters[SECRET_TYPE_ID] ?? SecretBag.defaultValues(SECRET_TYPE_ID);
+    this.secretValue = parameters[SECRET_VALUE] ?? SecretBag.defaultValues(SECRET_VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -95,7 +94,7 @@ export class SecretBag extends PkiObject implements ISecretBag {
       value?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -114,7 +113,7 @@ export class SecretBag extends PkiObject implements ISecretBag {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

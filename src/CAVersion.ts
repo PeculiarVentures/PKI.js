@@ -34,8 +34,8 @@ export class CAVersion extends PkiObject implements ICAVersion {
   constructor(parameters: CAVersionParameters = {}) {
     super();
 
-    this.certificateIndex = pvutils.getParametersValue(parameters, CERTIFICATE_INDEX, CAVersion.defaultValues(CERTIFICATE_INDEX));
-    this.keyIndex = pvutils.getParametersValue(parameters, KEY_INDEX, CAVersion.defaultValues(KEY_INDEX));
+    this.certificateIndex = parameters[CERTIFICATE_INDEX] ?? CAVersion.defaultValues(CERTIFICATE_INDEX);
+    this.keyIndex = parameters[KEY_INDEX] ?? CAVersion.defaultValues(KEY_INDEX);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);

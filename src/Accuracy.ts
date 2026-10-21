@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -59,13 +58,13 @@ export class Accuracy extends PkiObject implements IAccuracy {
     super();
 
     if (SECONDS in parameters) {
-      this.seconds = pvutils.getParametersValue(parameters, SECONDS, Accuracy.defaultValues(SECONDS));
+      this.seconds = parameters[SECONDS] ?? Accuracy.defaultValues(SECONDS);
     }
     if (MILLIS in parameters) {
-      this.millis = pvutils.getParametersValue(parameters, MILLIS, Accuracy.defaultValues(MILLIS));
+      this.millis = parameters[MILLIS] ?? Accuracy.defaultValues(MILLIS);
     }
     if (MICROS in parameters) {
-      this.micros = pvutils.getParametersValue(parameters, MICROS, Accuracy.defaultValues(MICROS));
+      this.micros = parameters[MICROS] ?? Accuracy.defaultValues(MICROS);
     }
 
     if (parameters.schema) {
@@ -122,7 +121,7 @@ export class Accuracy extends PkiObject implements IAccuracy {
    *```
    */
   public static override schema(parameters: AccuracySchema = {}): any {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -154,7 +153,7 @@ export class Accuracy extends PkiObject implements IAccuracy {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [SECONDS, MILLIS, MICROS]);
+    for (const prop of [SECONDS, MILLIS, MICROS]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -39,9 +38,9 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
   constructor(parameters: OtherKeyAttributeParameters = {}) {
     super();
 
-    this.keyAttrId = pvutils.getParametersValue(parameters, KEY_ATTR_ID, OtherKeyAttribute.defaultValues(KEY_ATTR_ID));
+    this.keyAttrId = parameters[KEY_ATTR_ID] ?? OtherKeyAttribute.defaultValues(KEY_ATTR_ID);
     if (KEY_ATTR in parameters) {
-      this.keyAttr = pvutils.getParametersValue(parameters, KEY_ATTR, OtherKeyAttribute.defaultValues(KEY_ATTR));
+      this.keyAttr = parameters[KEY_ATTR] ?? OtherKeyAttribute.defaultValues(KEY_ATTR);
     }
 
     if (parameters.schema) {
@@ -93,7 +92,7 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
    *```
    */
   public static override schema(parameters: OtherKeyAttributeSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       optional: names.optional || true,
@@ -110,7 +109,7 @@ export class OtherKeyAttribute extends PkiObject implements IOtherKeyAttribute {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

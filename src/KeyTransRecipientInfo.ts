@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { Certificate } from "./Certificate";
 import { RecipientIdentifier, type RecipientIdentifierSchema } from "./RecipientIdentifier";
@@ -55,11 +54,11 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
   constructor(parameters: KeyTransRecipientInfoParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, KeyTransRecipientInfo.defaultValues(VERSION));
-    this.rid = pvutils.getParametersValue(parameters, RID, KeyTransRecipientInfo.defaultValues(RID));
-    this.keyEncryptionAlgorithm = pvutils.getParametersValue(parameters, KEY_ENCRYPTION_ALGORITHM, KeyTransRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM));
-    this.encryptedKey = pvutils.getParametersValue(parameters, ENCRYPTED_KEY, KeyTransRecipientInfo.defaultValues(ENCRYPTED_KEY));
-    this.recipientCertificate = pvutils.getParametersValue(parameters, RECIPIENT_CERTIFICATE, KeyTransRecipientInfo.defaultValues(RECIPIENT_CERTIFICATE));
+    this.version = parameters[VERSION] ?? KeyTransRecipientInfo.defaultValues(VERSION);
+    this.rid = parameters[RID] ?? KeyTransRecipientInfo.defaultValues(RID);
+    this.keyEncryptionAlgorithm = parameters[KEY_ENCRYPTION_ALGORITHM] ?? KeyTransRecipientInfo.defaultValues(KEY_ENCRYPTION_ALGORITHM);
+    this.encryptedKey = parameters[ENCRYPTED_KEY] ?? KeyTransRecipientInfo.defaultValues(ENCRYPTED_KEY);
+    this.recipientCertificate = parameters[RECIPIENT_CERTIFICATE] ?? KeyTransRecipientInfo.defaultValues(RECIPIENT_CERTIFICATE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -133,7 +132,7 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
       encryptedKey?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -148,7 +147,7 @@ export class KeyTransRecipientInfo extends PkiObject implements IKeyTransRecipie
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

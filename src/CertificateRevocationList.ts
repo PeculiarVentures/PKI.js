@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { hex, toArrayBuffer } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { RelativeDistinguishedNames, type RelativeDistinguishedNamesJson, type RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
@@ -110,7 +109,7 @@ function tbsCertList(parameters: TBSCertListSchema = {}): Schema.SchemaType {
   //    crlExtensions           [0]  EXPLICIT Extensions OPTIONAL
   //    -- if present, version MUST be v2
   //}
-  const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+  const names = parameters.names ?? {};
 
   return new asn1js.Sequence({
     name: names.blockName || TBS_CERT_LIST,
@@ -238,22 +237,22 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
   constructor(parameters: CertificateRevocationListParameters = {}) {
     super();
 
-    this.tbsView = new Uint8Array(pvutils.getParametersValue(parameters, TBS, CertificateRevocationList.defaultValues(TBS)));
-    this.version = pvutils.getParametersValue(parameters, VERSION, CertificateRevocationList.defaultValues(VERSION));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, CertificateRevocationList.defaultValues(SIGNATURE));
-    this.issuer = pvutils.getParametersValue(parameters, ISSUER, CertificateRevocationList.defaultValues(ISSUER));
-    this.thisUpdate = pvutils.getParametersValue(parameters, THIS_UPDATE, CertificateRevocationList.defaultValues(THIS_UPDATE));
+    this.tbsView = new Uint8Array(parameters[TBS] ?? CertificateRevocationList.defaultValues(TBS));
+    this.version = parameters[VERSION] ?? CertificateRevocationList.defaultValues(VERSION);
+    this.signature = parameters[SIGNATURE] ?? CertificateRevocationList.defaultValues(SIGNATURE);
+    this.issuer = parameters[ISSUER] ?? CertificateRevocationList.defaultValues(ISSUER);
+    this.thisUpdate = parameters[THIS_UPDATE] ?? CertificateRevocationList.defaultValues(THIS_UPDATE);
     if (NEXT_UPDATE in parameters) {
-      this.nextUpdate = pvutils.getParametersValue(parameters, NEXT_UPDATE, CertificateRevocationList.defaultValues(NEXT_UPDATE));
+      this.nextUpdate = parameters[NEXT_UPDATE] ?? CertificateRevocationList.defaultValues(NEXT_UPDATE);
     }
     if (REVOKED_CERTIFICATES in parameters) {
-      this.revokedCertificates = pvutils.getParametersValue(parameters, REVOKED_CERTIFICATES, CertificateRevocationList.defaultValues(REVOKED_CERTIFICATES));
+      this.revokedCertificates = parameters[REVOKED_CERTIFICATES] ?? CertificateRevocationList.defaultValues(REVOKED_CERTIFICATES);
     }
     if (CRL_EXTENSIONS in parameters) {
-      this.crlExtensions = pvutils.getParametersValue(parameters, CRL_EXTENSIONS, CertificateRevocationList.defaultValues(CRL_EXTENSIONS));
+      this.crlExtensions = parameters[CRL_EXTENSIONS] ?? CertificateRevocationList.defaultValues(CRL_EXTENSIONS);
     }
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, CertificateRevocationList.defaultValues(SIGNATURE_ALGORITHM));
-    this.signatureValue = pvutils.getParametersValue(parameters, SIGNATURE_VALUE, CertificateRevocationList.defaultValues(SIGNATURE_VALUE));
+    this.signatureAlgorithm = parameters[SIGNATURE_ALGORITHM] ?? CertificateRevocationList.defaultValues(SIGNATURE_ALGORITHM);
+    this.signatureValue = parameters[SIGNATURE_VALUE] ?? CertificateRevocationList.defaultValues(SIGNATURE_VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -325,7 +324,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
       signatureValue?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || "CertificateList",
@@ -345,7 +344,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, CertificateRevocationList.schema());

@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import type * as Schema from "./Schema";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
@@ -31,7 +30,7 @@ export class SafeContents extends PkiObject implements ISafeContents {
   constructor(parameters: SafeContentsParameters = {}) {
     super();
 
-    this.safeBags = pvutils.getParametersValue(parameters, SAFE_BUGS, SafeContents.defaultValues(SAFE_BUGS));
+    this.safeBags = parameters[SAFE_BUGS] ?? SafeContents.defaultValues(SAFE_BUGS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -79,7 +78,7 @@ export class SafeContents extends PkiObject implements ISafeContents {
       safeBags?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -94,7 +93,7 @@ export class SafeContents extends PkiObject implements ISafeContents {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [SAFE_BUGS]);
+    for (const prop of [SAFE_BUGS]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

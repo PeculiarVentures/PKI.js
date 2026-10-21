@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { bytes } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import * as common from "./common";
 import { MessageImprint, HASHED_MESSAGE, HASH_ALGORITHM, type MessageImprintSchema, type MessageImprintJson } from "./MessageImprint";
 import { Accuracy, type AccuracyJson, type AccuracySchema, MICROS, MILLIS, SECONDS } from "./Accuracy";
@@ -156,30 +155,30 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
   constructor(parameters: TSTInfoParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, TSTInfo.defaultValues(VERSION));
-    this.policy = pvutils.getParametersValue(parameters, POLICY, TSTInfo.defaultValues(POLICY));
-    this.messageImprint = pvutils.getParametersValue(parameters, MESSAGE_IMPRINT, TSTInfo.defaultValues(MESSAGE_IMPRINT));
-    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, TSTInfo.defaultValues(SERIAL_NUMBER));
-    this.genTime = pvutils.getParametersValue(parameters, GEN_TIME, TSTInfo.defaultValues(GEN_TIME));
+    this.version = parameters[VERSION] ?? TSTInfo.defaultValues(VERSION);
+    this.policy = parameters[POLICY] ?? TSTInfo.defaultValues(POLICY);
+    this.messageImprint = parameters[MESSAGE_IMPRINT] ?? TSTInfo.defaultValues(MESSAGE_IMPRINT);
+    this.serialNumber = parameters[SERIAL_NUMBER] ?? TSTInfo.defaultValues(SERIAL_NUMBER);
+    this.genTime = parameters[GEN_TIME] ?? TSTInfo.defaultValues(GEN_TIME);
 
     if (ACCURACY in parameters) {
-      this.accuracy = pvutils.getParametersValue(parameters, ACCURACY, TSTInfo.defaultValues(ACCURACY));
+      this.accuracy = parameters[ACCURACY] ?? TSTInfo.defaultValues(ACCURACY);
     }
 
     if (ORDERING in parameters) {
-      this.ordering = pvutils.getParametersValue(parameters, ORDERING, TSTInfo.defaultValues(ORDERING));
+      this.ordering = parameters[ORDERING] ?? TSTInfo.defaultValues(ORDERING);
     }
 
     if (NONCE in parameters) {
-      this.nonce = pvutils.getParametersValue(parameters, NONCE, TSTInfo.defaultValues(NONCE));
+      this.nonce = parameters[NONCE] ?? TSTInfo.defaultValues(NONCE);
     }
 
     if (TSA in parameters) {
-      this.tsa = pvutils.getParametersValue(parameters, TSA, TSTInfo.defaultValues(TSA));
+      this.tsa = parameters[TSA] ?? TSTInfo.defaultValues(TSA);
     }
 
     if (EXTENSIONS in parameters) {
-      this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, TSTInfo.defaultValues(EXTENSIONS));
+      this.extensions = parameters[EXTENSIONS] ?? TSTInfo.defaultValues(EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -289,7 +288,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       extension?: ExtensionSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || TST_INFO,
@@ -355,7 +354,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, TSTInfo.schema());

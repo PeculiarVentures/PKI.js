@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { PKIStatusInfo, type PKIStatusInfoJson, type PKIStatusInfoSchema } from "./PKIStatusInfo";
 import { ContentInfo, type ContentInfoJson, type ContentInfoSchema } from "./ContentInfo";
 import { SignedData } from "./SignedData";
@@ -115,9 +114,9 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
   constructor(parameters: TimeStampRespParameters = {}) {
     super();
 
-    this.status = pvutils.getParametersValue(parameters, STATUS, TimeStampResp.defaultValues(STATUS));
+    this.status = parameters[STATUS] ?? TimeStampResp.defaultValues(STATUS);
     if (TIME_STAMP_TOKEN in parameters) {
-      this.timeStampToken = pvutils.getParametersValue(parameters, TIME_STAMP_TOKEN, TimeStampResp.defaultValues(TIME_STAMP_TOKEN));
+      this.timeStampToken = parameters[TIME_STAMP_TOKEN] ?? TimeStampResp.defaultValues(TIME_STAMP_TOKEN);
     }
 
     if (parameters.schema) {
@@ -174,7 +173,7 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
       timeStampToken?: ContentInfoSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || TIME_STAMP_RESP,
@@ -200,7 +199,7 @@ export class TimeStampResp extends PkiObject implements ITimeStampResp {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, TimeStampResp.schema());

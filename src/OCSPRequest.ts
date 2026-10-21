@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import * as common from "./common";
 import { TBSRequest, type TBSRequestJson, type TBSRequestSchema } from "./TBSRequest";
 import { Signature, type SignatureJson, type SignatureSchema } from "./Signature";
@@ -69,9 +68,9 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
   constructor(parameters: OCSPRequestParameters = {}) {
     super();
 
-    this.tbsRequest = pvutils.getParametersValue(parameters, TBS_REQUEST, OCSPRequest.defaultValues(TBS_REQUEST));
+    this.tbsRequest = parameters[TBS_REQUEST] ?? OCSPRequest.defaultValues(TBS_REQUEST);
     if (OPTIONAL_SIGNATURE in parameters) {
-      this.optionalSignature = pvutils.getParametersValue(parameters, OPTIONAL_SIGNATURE, OCSPRequest.defaultValues(OPTIONAL_SIGNATURE));
+      this.optionalSignature = parameters[OPTIONAL_SIGNATURE] ?? OCSPRequest.defaultValues(OPTIONAL_SIGNATURE);
     }
 
     if (parameters.schema) {
@@ -139,7 +138,7 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
       optionalSignature?: SignatureSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || "OCSPRequest",
@@ -173,7 +172,7 @@ export class OCSPRequest extends PkiObject implements IOCSPRequest {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, OCSPRequest.schema());

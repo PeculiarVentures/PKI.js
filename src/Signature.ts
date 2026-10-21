@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { Certificate, type CertificateJson } from "./Certificate";
 import { EMPTY_STRING } from "./constants";
@@ -48,10 +47,10 @@ export class Signature extends PkiObject implements ISignature {
   constructor(parameters: SignatureParameters = {}) {
     super();
 
-    this.signatureAlgorithm = pvutils.getParametersValue(parameters, SIGNATURE_ALGORITHM, Signature.defaultValues(SIGNATURE_ALGORITHM));
-    this.signature = pvutils.getParametersValue(parameters, SIGNATURE, Signature.defaultValues(SIGNATURE));
+    this.signatureAlgorithm = parameters[SIGNATURE_ALGORITHM] ?? Signature.defaultValues(SIGNATURE_ALGORITHM);
+    this.signature = parameters[SIGNATURE] ?? Signature.defaultValues(SIGNATURE);
     if (CERTS in parameters) {
-      this.certs = pvutils.getParametersValue(parameters, CERTS, Signature.defaultValues(CERTS));
+      this.certs = parameters[CERTS] ?? Signature.defaultValues(CERTS);
     }
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -108,7 +107,7 @@ export class Signature extends PkiObject implements ISignature {
    *```
    */
   public static override schema(parameters: SignatureSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -140,7 +139,7 @@ export class Signature extends PkiObject implements ISignature {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [SIGNATURE_ALGORITHM, SIGNATURE, CERTS]);
+    for (const prop of [SIGNATURE_ALGORITHM, SIGNATURE, CERTS]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

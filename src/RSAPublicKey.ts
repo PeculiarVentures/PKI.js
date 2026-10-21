@@ -44,8 +44,8 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
   constructor(parameters: RSAPublicKeyParameters = {}) {
     super();
 
-    this.modulus = pvutils.getParametersValue(parameters, MODULUS, RSAPublicKey.defaultValues(MODULUS));
-    this.publicExponent = pvutils.getParametersValue(parameters, PUBLIC_EXPONENT, RSAPublicKey.defaultValues(PUBLIC_EXPONENT));
+    this.modulus = parameters[MODULUS] ?? RSAPublicKey.defaultValues(MODULUS);
+    this.publicExponent = parameters[PUBLIC_EXPONENT] ?? RSAPublicKey.defaultValues(PUBLIC_EXPONENT);
 
     if (parameters.json) {
       this.fromJSON(parameters.json);
@@ -84,7 +84,7 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
    *```
    */
   public static override schema(parameters: Schema.SchemaParameters<{ modulus?: string; publicExponent?: string }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -94,7 +94,7 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
 
   public fromSchema(schema: asn1js.AsnType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete (schema as any)[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

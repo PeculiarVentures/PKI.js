@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, type GeneralNameJson } from "./GeneralName";
@@ -47,13 +46,13 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
     super();
 
     if (DISTRIBUTION_POINT in parameters) {
-      this.distributionPoint = pvutils.getParametersValue(parameters, DISTRIBUTION_POINT, DistributionPoint.defaultValues(DISTRIBUTION_POINT));
+      this.distributionPoint = parameters[DISTRIBUTION_POINT] ?? DistributionPoint.defaultValues(DISTRIBUTION_POINT);
     }
     if (REASONS in parameters) {
-      this.reasons = pvutils.getParametersValue(parameters, REASONS, DistributionPoint.defaultValues(REASONS));
+      this.reasons = parameters[REASONS] ?? DistributionPoint.defaultValues(REASONS);
     }
     if (CRL_ISSUER in parameters) {
-      this.cRLIssuer = pvutils.getParametersValue(parameters, CRL_ISSUER, DistributionPoint.defaultValues(CRL_ISSUER));
+      this.cRLIssuer = parameters[CRL_ISSUER] ?? DistributionPoint.defaultValues(CRL_ISSUER);
     }
 
     if (parameters.schema) {
@@ -125,7 +124,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
      * @property {string} [cRLIssuer]
      * @property {string} [cRLIssuerNames]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -194,7 +193,7 @@ export class DistributionPoint extends PkiObject implements IDistributionPoint {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

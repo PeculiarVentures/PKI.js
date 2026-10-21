@@ -42,9 +42,9 @@ export class ECPublicKey extends PkiObject implements IECPublicKey {
   constructor(parameters: ECPublicKeyParameters = {}) {
     super();
 
-    this.x = pvutils.getParametersValue(parameters, X, ECPublicKey.defaultValues(X));
-    this.y = pvutils.getParametersValue(parameters, Y, ECPublicKey.defaultValues(Y));
-    this.namedCurve = pvutils.getParametersValue(parameters, NAMED_CURVE, ECPublicKey.defaultValues(NAMED_CURVE));
+    this.x = parameters[X] ?? ECPublicKey.defaultValues(X);
+    this.y = parameters[Y] ?? ECPublicKey.defaultValues(Y);
+    this.namedCurve = parameters[NAMED_CURVE] ?? ECPublicKey.defaultValues(NAMED_CURVE);
 
     if (parameters.json) {
       this.fromJSON(parameters.json);

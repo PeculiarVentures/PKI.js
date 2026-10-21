@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { KeyTransRecipientInfo, type KeyTransRecipientInfoJson } from "./KeyTransRecipientInfo";
 import { KeyAgreeRecipientInfo, type KeyAgreeRecipientInfoJson } from "./KeyAgreeRecipientInfo";
 import { KEKRecipientInfo, type KEKRecipientInfoJson } from "./KEKRecipientInfo";
@@ -45,9 +44,9 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
   constructor(parameters: RecipientInfoParameters = {}) {
     super();
 
-    this.variant = pvutils.getParametersValue(parameters, VARIANT, RecipientInfo.defaultValues(VARIANT));
+    this.variant = parameters[VARIANT] ?? RecipientInfo.defaultValues(VARIANT);
     if (VALUE in parameters) {
-      this.value = pvutils.getParametersValue(parameters, VALUE, RecipientInfo.defaultValues(VALUE));
+      this.value = parameters[VALUE] ?? RecipientInfo.defaultValues(VALUE);
     }
 
     if (parameters.schema) {
@@ -102,7 +101,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
    *```
    */
   public static override schema(parameters: Schema.SchemaParameters = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Choice({
       value: [
@@ -149,7 +148,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

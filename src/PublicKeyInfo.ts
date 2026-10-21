@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import * as common from "./common";
 import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { ECPublicKey } from "./ECPublicKey";
@@ -98,9 +97,9 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
   constructor(parameters: PublicKeyInfoParameters = {}) {
     super();
 
-    this.algorithm = pvutils.getParametersValue(parameters, ALGORITHM, PublicKeyInfo.defaultValues(ALGORITHM));
-    this.subjectPublicKey = pvutils.getParametersValue(parameters, SUBJECT_PUBLIC_KEY, PublicKeyInfo.defaultValues(SUBJECT_PUBLIC_KEY));
-    const parsedKey = pvutils.getParametersValue(parameters, "parsedKey", null);
+    this.algorithm = parameters[ALGORITHM] ?? PublicKeyInfo.defaultValues(ALGORITHM);
+    this.subjectPublicKey = parameters[SUBJECT_PUBLIC_KEY] ?? PublicKeyInfo.defaultValues(SUBJECT_PUBLIC_KEY);
+    const parsedKey = parameters.parsedKey ?? null;
     if (parsedKey) {
       this.parsedKey = parsedKey;
     }
@@ -142,7 +141,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
    *```
    */
   public static override schema(parameters: PublicKeyInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -152,7 +151,7 @@ export class PublicKeyInfo extends PkiObject implements IPublicKeyInfo {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

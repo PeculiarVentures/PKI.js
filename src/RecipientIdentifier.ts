@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { IssuerAndSerialNumber, type IssuerAndSerialNumberJson } from "./IssuerAndSerialNumber";
@@ -40,9 +39,9 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
   constructor(parameters: RecipientIdentifierParameters = {}) {
     super();
 
-    this.variant = pvutils.getParametersValue(parameters, VARIANT, RecipientIdentifier.defaultValues(VARIANT));
+    this.variant = parameters[VARIANT] ?? RecipientIdentifier.defaultValues(VARIANT);
     if (VALUE in parameters) {
-      this.value = pvutils.getParametersValue(parameters, VALUE, RecipientIdentifier.defaultValues(VALUE));
+      this.value = parameters[VALUE] ?? RecipientIdentifier.defaultValues(VALUE);
     }
 
     if (parameters.schema) {
@@ -96,7 +95,7 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
    *```
    */
   public static override schema(parameters: RecipientIdentifierSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Choice({
       value: [
@@ -118,7 +117,7 @@ export class RecipientIdentifier extends PkiObject implements IRecipientIdentifi
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

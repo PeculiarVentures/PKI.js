@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { CertID, type CertIDJson, type CertIDSchema } from "./CertID";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
@@ -46,9 +45,9 @@ export class Request extends PkiObject implements IRequest {
   constructor(parameters: RequestParameters = {}) {
     super();
 
-    this.reqCert = pvutils.getParametersValue(parameters, REQ_CERT, Request.defaultValues(REQ_CERT));
+    this.reqCert = parameters[REQ_CERT] ?? Request.defaultValues(REQ_CERT);
     if (SINGLE_REQUEST_EXTENSIONS in parameters) {
-      this.singleRequestExtensions = pvutils.getParametersValue(parameters, SINGLE_REQUEST_EXTENSIONS, Request.defaultValues(SINGLE_REQUEST_EXTENSIONS));
+      this.singleRequestExtensions = parameters[SINGLE_REQUEST_EXTENSIONS] ?? Request.defaultValues(SINGLE_REQUEST_EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -100,7 +99,7 @@ export class Request extends PkiObject implements IRequest {
    *```
    */
   public static override schema(parameters: RequestSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -128,7 +127,7 @@ export class Request extends PkiObject implements IRequest {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

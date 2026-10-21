@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -38,11 +37,11 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
     super();
 
     if (NOT_BEFORE in parameters) {
-      this.notBefore = pvutils.getParametersValue(parameters, NOT_BEFORE, PrivateKeyUsagePeriod.defaultValues(NOT_BEFORE));
+      this.notBefore = parameters[NOT_BEFORE] ?? PrivateKeyUsagePeriod.defaultValues(NOT_BEFORE);
     }
 
     if (NOT_AFTER in parameters) {
-      this.notAfter = pvutils.getParametersValue(parameters, NOT_AFTER, PrivateKeyUsagePeriod.defaultValues(NOT_AFTER));
+      this.notAfter = parameters[NOT_AFTER] ?? PrivateKeyUsagePeriod.defaultValues(NOT_AFTER);
     }
 
     if (parameters.schema) {
@@ -86,7 +85,7 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
       notAfter?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -113,7 +112,7 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

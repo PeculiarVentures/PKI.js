@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -44,9 +43,9 @@ export class QCStatement extends PkiObject implements IQCStatement {
   constructor(parameters: QCStatementParameters = {}) {
     super();
 
-    this.id = pvutils.getParametersValue(parameters, ID, QCStatement.defaultValues(ID));
+    this.id = parameters[ID] ?? QCStatement.defaultValues(ID);
     if (TYPE in parameters) {
-      this.type = pvutils.getParametersValue(parameters, TYPE, QCStatement.defaultValues(TYPE));
+      this.type = parameters[TYPE] ?? QCStatement.defaultValues(TYPE);
     }
 
     if (parameters.schema) {
@@ -99,7 +98,7 @@ export class QCStatement extends PkiObject implements IQCStatement {
    *```
    */
   public static override schema(parameters: QCStatementSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -115,7 +114,7 @@ export class QCStatement extends PkiObject implements IQCStatement {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, QC_STATEMENT_CLEAR_PROPS);
+    for (const prop of QC_STATEMENT_CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -184,7 +183,8 @@ export class QCStatements extends PkiObject implements IQCStatements {
   constructor(parameters: QCStatementParameters = {}) {
     super();
 
-    this.values = pvutils.getParametersValue(parameters, VALUES, QCStatements.defaultValues(VALUES));
+    // The constructor is typed with QCStatementParameters, which has no `values`.
+    this.values = (parameters as QCStatementsParameters)[VALUES] ?? QCStatements.defaultValues(VALUES);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -238,7 +238,7 @@ export class QCStatements extends PkiObject implements IQCStatements {
      * @property {string} [blockName]
      * @property {string} [values]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -253,7 +253,7 @@ export class QCStatements extends PkiObject implements IQCStatements {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, QC_STATEMENTS_CLEAR_PROPS);
+    for (const prop of QC_STATEMENTS_CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

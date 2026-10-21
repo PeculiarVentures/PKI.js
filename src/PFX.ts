@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { toArrayBuffer } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import * as common from "./common";
 import { ContentInfo, type ContentInfoJson, type ContentInfoSchema } from "./ContentInfo";
 import { MacData, type MacDataJson, type MacDataSchema } from "./MacData";
@@ -77,13 +76,13 @@ export class PFX extends PkiObject implements IPFX {
   constructor(parameters: PFXParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, PFX.defaultValues(VERSION));
-    this.authSafe = pvutils.getParametersValue(parameters, AUTH_SAFE, PFX.defaultValues(AUTH_SAFE));
+    this.version = parameters[VERSION] ?? PFX.defaultValues(VERSION);
+    this.authSafe = parameters[AUTH_SAFE] ?? PFX.defaultValues(AUTH_SAFE);
     if (MAC_DATA in parameters) {
-      this.macData = pvutils.getParametersValue(parameters, MAC_DATA, PFX.defaultValues(MAC_DATA));
+      this.macData = parameters[MAC_DATA] ?? PFX.defaultValues(MAC_DATA);
     }
     if (PARSED_VALUE in parameters) {
-      this.parsedValue = pvutils.getParametersValue(parameters, PARSED_VALUE, PFX.defaultValues(PARSED_VALUE));
+      this.parsedValue = parameters[PARSED_VALUE] ?? PFX.defaultValues(PARSED_VALUE);
     }
 
     if (parameters.schema) {
@@ -153,7 +152,7 @@ export class PFX extends PkiObject implements IPFX {
       macData?: MacDataSchema;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -180,7 +179,7 @@ export class PFX extends PkiObject implements IPFX {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLERA_PROPS);
+    for (const prop of CLERA_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

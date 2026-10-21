@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { GeneralName, type GeneralNameJson } from "./GeneralName";
@@ -43,13 +42,13 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
     super();
 
     if (KEY_IDENTIFIER in parameters) {
-      this.keyIdentifier = pvutils.getParametersValue(parameters, KEY_IDENTIFIER, AuthorityKeyIdentifier.defaultValues(KEY_IDENTIFIER));
+      this.keyIdentifier = parameters[KEY_IDENTIFIER] ?? AuthorityKeyIdentifier.defaultValues(KEY_IDENTIFIER);
     }
     if (AUTHORITY_CERT_ISSUER in parameters) {
-      this.authorityCertIssuer = pvutils.getParametersValue(parameters, AUTHORITY_CERT_ISSUER, AuthorityKeyIdentifier.defaultValues(AUTHORITY_CERT_ISSUER));
+      this.authorityCertIssuer = parameters[AUTHORITY_CERT_ISSUER] ?? AuthorityKeyIdentifier.defaultValues(AUTHORITY_CERT_ISSUER);
     }
     if (AUTHORITY_CERT_SERIAL_NUMBER in parameters) {
-      this.authorityCertSerialNumber = pvutils.getParametersValue(parameters, AUTHORITY_CERT_SERIAL_NUMBER, AuthorityKeyIdentifier.defaultValues(AUTHORITY_CERT_SERIAL_NUMBER));
+      this.authorityCertSerialNumber = parameters[AUTHORITY_CERT_SERIAL_NUMBER] ?? AuthorityKeyIdentifier.defaultValues(AUTHORITY_CERT_SERIAL_NUMBER);
     }
 
     if (parameters.schema) {
@@ -99,7 +98,7 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
       authorityCertSerialNumber?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -139,7 +138,7 @@ export class AuthorityKeyIdentifier extends PkiObject implements IAuthorityKeyId
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

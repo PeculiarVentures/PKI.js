@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -38,10 +37,10 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
     super();
 
     if (REQUIRE_EXPLICIT_POLICY in parameters) {
-      this.requireExplicitPolicy = pvutils.getParametersValue(parameters, REQUIRE_EXPLICIT_POLICY, PolicyConstraints.defaultValues(REQUIRE_EXPLICIT_POLICY));
+      this.requireExplicitPolicy = parameters[REQUIRE_EXPLICIT_POLICY] ?? PolicyConstraints.defaultValues(REQUIRE_EXPLICIT_POLICY);
     }
     if (INHIBIT_POLICY_MAPPING in parameters) {
-      this.inhibitPolicyMapping = pvutils.getParametersValue(parameters, INHIBIT_POLICY_MAPPING, PolicyConstraints.defaultValues(INHIBIT_POLICY_MAPPING));
+      this.inhibitPolicyMapping = parameters[INHIBIT_POLICY_MAPPING] ?? PolicyConstraints.defaultValues(INHIBIT_POLICY_MAPPING);
     }
 
     if (parameters.schema) {
@@ -84,7 +83,7 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
       inhibitPolicyMapping?: string;
     }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -111,7 +110,7 @@ export class PolicyConstraints extends PkiObject implements IPolicyConstraints {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

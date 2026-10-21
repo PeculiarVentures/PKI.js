@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { Extension, type ExtensionJson, type ExtensionSchema } from "./Extension";
@@ -42,7 +41,7 @@ export class Extensions extends PkiObject implements IExtensions {
   constructor(parameters: ExtensionsParameters = {}) {
     super();
 
-    this.extensions = pvutils.getParametersValue(parameters, EXTENSIONS, Extensions.defaultValues(EXTENSIONS));
+    this.extensions = parameters[EXTENSIONS] ?? Extensions.defaultValues(EXTENSIONS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -76,7 +75,7 @@ export class Extensions extends PkiObject implements IExtensions {
    * @returns ASN.1 schema object
    */
   public static override schema(parameters: ExtensionsSchema = {}, optional = false) {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       optional,
@@ -92,7 +91,7 @@ export class Extensions extends PkiObject implements IExtensions {
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(

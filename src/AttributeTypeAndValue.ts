@@ -1,6 +1,5 @@
 import * as asn1js from "asn1js";
 import { bytes } from "@peculiar/utils";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { stringPrep } from "./Helpers";
@@ -52,8 +51,8 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
   constructor(parameters: AttributeTypeAndValueParameters = {}) {
     super();
 
-    this.type = pvutils.getParametersValue(parameters, TYPE, AttributeTypeAndValue.defaultValues(TYPE));
-    this.value = pvutils.getParametersValue(parameters, VALUE, AttributeTypeAndValue.defaultValues(VALUE));
+    this.type = parameters[TYPE] ?? AttributeTypeAndValue.defaultValues(TYPE);
+    this.value = parameters[VALUE] ?? AttributeTypeAndValue.defaultValues(VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -92,7 +91,7 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
    *```
    */
   static override schema(parameters: Schema.SchemaParameters<{ type?: string; value?: string }> = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -102,7 +101,7 @@ export class AttributeTypeAndValue extends PkiObject implements IAttributeTypeAn
 
   public fromSchema(schema: Schema.SchemaType) {
     //#region Clear input data first
-    pvutils.clearProps(schema, [TYPE, "typeValue"]);
+    for (const prop of [TYPE, "typeValue"]) delete schema[prop];
     //#endregion
 
     //#region Check the schema is valid

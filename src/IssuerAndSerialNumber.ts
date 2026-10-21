@@ -1,5 +1,4 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
@@ -49,8 +48,8 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
   constructor(parameters: IssuerAndSerialNumberParameters = {}) {
     super();
 
-    this.issuer = pvutils.getParametersValue(parameters, ISSUER, IssuerAndSerialNumber.defaultValues(ISSUER));
-    this.serialNumber = pvutils.getParametersValue(parameters, SERIAL_NUMBER, IssuerAndSerialNumber.defaultValues(SERIAL_NUMBER));
+    this.issuer = parameters[ISSUER] ?? IssuerAndSerialNumber.defaultValues(ISSUER);
+    this.serialNumber = parameters[SERIAL_NUMBER] ?? IssuerAndSerialNumber.defaultValues(SERIAL_NUMBER);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -93,7 +92,7 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
      * @property {string} [issuer]
      * @property {string} [serialNumber]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(parameters, "names", {});
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -103,7 +102,7 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
