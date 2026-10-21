@@ -110,12 +110,12 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
 
     // Get internal properties from parsed schema
     this.modulus = asn1.result.modulus.convertFromDER(256);
-    this.publicExponent = asn1.result.publicExponent;
+    this.publicExponent = asn1.result.publicExponent.convertFromDER();
   }
 
   public toSchema(): asn1js.Sequence {
     return new asn1js.Sequence({
-      value: [this.modulus.convertToDER(), this.publicExponent],
+      value: [this.modulus.convertToDER(), this.publicExponent.convertToDER()],
     });
   }
 

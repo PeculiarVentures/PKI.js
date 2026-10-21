@@ -14,6 +14,8 @@ describe("RSAPublicKey", () => {
       ["4-byte e", modulus(256), "AQAAAQ"],
       ["4000-bit modulus", modulus(500), "AQAB"],
       ["3072-bit modulus", modulus(384), "AQAB"],
+      ["2400-bit modulus", modulus(300), "AQAB"],
+      ["2880-bit modulus", modulus(360), "AQAB"],
     ])("decodes n and e exactly (%s)", (_, n, e) => {
       expect(new RSAPublicKey({ json: { n, e } }).toJSON()).toEqual({ n, e });
     });
@@ -27,6 +29,27 @@ describe("RSAPublicKey", () => {
     it("rejects members that are not base64url", () => {
       expect(() => new RSAPublicKey({ json: { n: "AQ+B", e: "AQAB" } })).toThrow(TypeError);
       expect(() => new RSAPublicKey({ json: { n: modulus(128), e: "A@B" } })).toThrow(TypeError);
+    });
+  });
+
+  describe("toSchema", () => {
+    it.each([
+      ["e = 65537", "AQAB", "0203010001"],
+      ["e = 3", "Aw", "020103"],
+      ["e with the high bit set", "gAAAAQ", "02050080000001"],
+    ])("encodes n and e as positive DER integers (%s)", (_, e, eDer) => {
+      const n = modulus(256);
+      const [nAsn, eAsn] = new RSAPublicKey({ json: { n, e } }).toSchema().valueBlock.value;
+
+      expect(Buffer.from(nAsn.toBER()).toString("hex")).toBe(`0282010100${Buffer.from(n, "base64url").toString("hex")}`);
+      expect(Buffer.from(eAsn.toBER()).toString("hex")).toBe(eDer);
+    });
+
+    it("round-trips a high-bit exponent through DER", () => {
+      const json = { n: modulus(256), e: "gAAAAQ" };
+      const der = new RSAPublicKey({ json }).toSchema().toBER();
+
+      expect(RSAPublicKey.fromBER(der).toJSON()).toEqual(json);
     });
   });
 });
