@@ -2,7 +2,7 @@ import * as pkijs from "../../src";
 import * as utils from "../utils";
 import * as example from "./example";
 import * as common from "../common";
-import { Convert } from "pvtsutils";
+import { hex } from "@peculiar/utils";
 
 let hashAlg = "SHA-1";
 let signAlg = "RSASSA-PKCS1-V1_5";
@@ -119,11 +119,11 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
   const cell0 = row.insertCell(0);
   cell0.innerHTML = hashAlgorithm;
   const cell1 = row.insertCell(1);
-  cell1.innerHTML = Convert.ToHex(tstInfoSimpl.messageImprint.hashedMessage.valueBlock.valueHexView);
+  cell1.innerHTML = hex.encode(tstInfoSimpl.messageImprint.hashedMessage.valueBlock.valueHexView);
   //#endregion
 
   //#region Put information about TST info serial number
-  $respSerial.innerHTML = Convert.ToHex(tstInfoSimpl.serialNumber.valueBlock.valueHexView);
+  $respSerial.innerHTML = hex.encode(tstInfoSimpl.serialNumber.valueBlock.valueHexView);
   //#endregion
 
   //#region Put information about the time when TST info was generated
@@ -153,7 +153,7 @@ function parseTSPResp(tspResponse: ArrayBuffer) {
 
   //#region Put information about TST info nonce value
   if (tstInfoSimpl.nonce) {
-    $respNonce.innerHTML = Convert.ToHex(tstInfoSimpl.nonce.valueBlock.valueHexView);
+    $respNonce.innerHTML = hex.encode(tstInfoSimpl.nonce.valueBlock.valueHexView);
     $respNon.style.display = "block";
   }
   //#endregion

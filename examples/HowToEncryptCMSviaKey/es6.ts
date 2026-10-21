@@ -1,4 +1,4 @@
-import * as pvtsutils from "pvtsutils";
+import { base64, toArrayBuffer, utf8 } from "@peculiar/utils";
 import * as utils from "../utils";
 import * as example from "./example";
 import * as common from "../common";
@@ -30,7 +30,7 @@ async function createKeyPair() {
     alert("Public key exported successfully!");
 
     // Set key pair id
-    common.getElement("pkcs8_key_id").innerHTML = pvtsutils.Convert.ToBase64(keys.keyPairIdBuffer);
+    common.getElement("pkcs8_key_id").innerHTML = base64.encode(keys.keyPairIdBuffer);
     alert("Key pair id generated successfully!");
   } catch (error) {
     common.processError(error, "Error on key generation");
@@ -40,9 +40,9 @@ async function createKeyPair() {
 async function envelopedEncrypt() {
   keys.spki = utils.fromPEM(common.getElement("pkcs8_key_pub", "textarea").value);
 
-  keys.keyPairIdBuffer = pvtsutils.Convert.FromBase64(common.getElement("pkcs8_key_id", "textarea").value);
+  keys.keyPairIdBuffer = utils.fromBase64(common.getElement("pkcs8_key_id", "textarea").value);
 
-  valueBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("content", "textarea").value);
+  valueBuffer = toArrayBuffer(utf8.encode(common.getElement("content", "textarea").value));
   cmsEnvelopedBuffer = await example.envelopedEncrypt(
     keys,
     {
@@ -63,7 +63,7 @@ async function envelopedDecrypt() {
 
   cmsEnvelopedBuffer = utils.fromPEM(common.getElement("encrypted_content", "textarea").value);
   const result = await example.envelopedDecrypt(keys.pkcs8, cmsEnvelopedBuffer);
-  common.getElement("decrypted_content").innerHTML = pvtsutils.Convert.ToUtf8String(result);
+  common.getElement("decrypted_content").innerHTML = utf8.decode(result);
 }
 
 function handleKeyAgreeAlgorithmOnChange() {

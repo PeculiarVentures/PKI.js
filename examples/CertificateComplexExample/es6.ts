@@ -2,7 +2,7 @@ import * as pkijs from "../../src";
 import * as utils from "../utils";
 import * as example from "./example";
 import * as common from "../common";
-import * as pvtsutils from "pvtsutils";
+import { hex } from "@peculiar/utils";
 
 let certificateBuffer = new ArrayBuffer(0); // ArrayBuffer with loaded or created CERT
 const trustedCertificates: pkijs.Certificate[] = []; // Array of root certificates from "CA Bundle"
@@ -86,7 +86,7 @@ function parseCertificate() {
   //#endregion
 
   //#region Put information about X.509 certificate serial number
-  common.getElement("cert-serial-number").innerHTML = pvtsutils.Convert.ToHex(certificate.serialNumber.valueBlock.valueHexView);
+  common.getElement("cert-serial-number").innerHTML = hex.encode(certificate.serialNumber.valueBlock.valueHexView);
   //#endregion
 
   //#region Put information about issuance date

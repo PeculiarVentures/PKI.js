@@ -1,4 +1,4 @@
-import * as pvtsutils from "pvtsutils";
+import { base64, hex, toArrayBuffer, utf8 } from "@peculiar/utils";
 import * as example from "./example";
 import * as utils from "../utils";
 import * as pkijs from "../../src";
@@ -9,7 +9,7 @@ let aesKeyLength = 16;
 
 async function createOpenSSLPrivateKey() {
   const privateKeyData = utils.fromPEM(common.getElement("pkijs_data", "textarea").value);
-  const passwordBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("password", "input").value);
+  const passwordBuffer = toArrayBuffer(utf8.encode(common.getElement("password", "input").value));
 
   const encryptedKey = await example.createOpenSSLPrivateKey(aesKeyLength, passwordBuffer, privateKeyData);
   ivBuffer = encryptedKey.ivBuffer;
@@ -17,9 +17,9 @@ async function createOpenSSLPrivateKey() {
   const resultString: string[] = [
     "-----BEGIN RSA PRIVATE KEY-----",
     "Proc-Type: 4,ENCRYPTED",
-    `DEK-Info: AES-${aesKeyLength << 3}-CBC,${pvtsutils.Convert.ToHex(ivBuffer).toUpperCase()}`,
+    `DEK-Info: AES-${aesKeyLength << 3}-CBC,${hex.encode(ivBuffer, { case: "upper" })}`,
     "",
-    utils.formatPEM(pvtsutils.Convert.ToBase64(encryptedKey.encryptedKeyBuffer)),
+    utils.formatPEM(base64.encode(encryptedKey.encryptedKeyBuffer)),
     "-----END RSA PRIVATE KEY-----",
   ];
 
@@ -27,7 +27,7 @@ async function createOpenSSLPrivateKey() {
 }
 
 async function parseOpenSSLPrivateKey() {
-  let base64 = "";
+  let pemBody = "";
 
   const headerExp = /([\x21-\x7e]+):\s*([\x21-\x7e\s^:]+)/;
 
@@ -60,17 +60,17 @@ async function parseOpenSSLPrivateKey() {
             throw new Error(`Unsupported algorithm ${values[0].toLocaleUpperCase()}`);
         }
 
-        ivBuffer = pvtsutils.Convert.FromHex(values[1]);
+        ivBuffer = toArrayBuffer(hex.decode(values[1]));
       }
     } else {
-      if (dekFound) base64 += lines[i];
+      if (dekFound) pemBody += lines[i];
     }
   }
 
   if (dekFound === false) throw new Error("Can not find DEK-Info section!");
 
-  const privateKeyData = pvtsutils.Convert.FromBase64(base64.trim());
-  const passwordBuffer = pvtsutils.Convert.FromUtf8String(common.getElement("password", "input").value);
+  const privateKeyData = utils.fromBase64(pemBody.trim());
+  const passwordBuffer = toArrayBuffer(utf8.encode(common.getElement("password", "input").value));
 
   const decryptedKey = await example.parseOpenSSLPrivateKey(aesKeyLength, ivBuffer, passwordBuffer, privateKeyData);
 

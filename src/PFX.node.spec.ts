@@ -1,8 +1,9 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import * as asn1js from "asn1js";
-import { base64, binary, toArrayBuffer, utf8 } from "@peculiar/utils";
+import { binary, toArrayBuffer, utf8 } from "@peculiar/utils";
 import NodeEngine from "../examples/NodePKCS12Example/NodeEngine";
 import * as pkijs from "./index";
+import { fromBase64 } from "../examples/utils";
 
 //#region Global variables
 const x509CertificateBASE64 =
@@ -245,12 +246,12 @@ describe("Node.js PKCS#12 Example", () => {
       // RC2 is not supported by Node.js since v18
       const windowsP12 =
         "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";
-      await parsePKCS12(toArrayBuffer(base64.decode(windowsP12)), "12");
+      await parsePKCS12(fromBase64(windowsP12), "12");
     });
     it("Forge 3DES", async () => {
       const windowsP12 =
         "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";
-      await expect(parsePKCS12(toArrayBuffer(base64.decode(windowsP12)), "password")).resolves.toBeInstanceOf(pkijs.PFX);
+      await expect(parsePKCS12(fromBase64(windowsP12), "password")).resolves.toBeInstanceOf(pkijs.PFX);
     });
   });
 
@@ -259,10 +260,10 @@ describe("Node.js PKCS#12 Example", () => {
     let certSimpl: pkijs.Certificate;
 
     beforeAll(() => {
-      const certRaw = toArrayBuffer(base64.decode(x509CertificateBASE64));
+      const certRaw = fromBase64(x509CertificateBASE64);
       certSimpl = pkijs.Certificate.fromBER(certRaw);
 
-      const pkcs8Raw = toArrayBuffer(base64.decode(x509PrivateKeyBASE64));
+      const pkcs8Raw = fromBase64(x509PrivateKeyBASE64);
       pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
     });
 
@@ -292,10 +293,10 @@ describe("Node.js PKCS#12 Example", () => {
     let attrCertSimpl: pkijs.AttributeCertificateV2;
 
     beforeAll(() => {
-      const attrCertRaw = toArrayBuffer(base64.decode(attributeCertificateBASE64));
+      const attrCertRaw = fromBase64(attributeCertificateBASE64);
       attrCertSimpl = pkijs.AttributeCertificateV2.fromBER(attrCertRaw);
 
-      const pkcs8Raw = toArrayBuffer(base64.decode(attributePrivateKeyBASE64));
+      const pkcs8Raw = fromBase64(attributePrivateKeyBASE64);
       pkcs8Simpl = pkijs.PrivateKeyInfo.fromBER(pkcs8Raw);
     });
 

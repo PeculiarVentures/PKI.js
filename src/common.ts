@@ -282,14 +282,10 @@ async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer, Counte
   counterView[1] = 0x00;
   counterView[2] = 0x00;
   counterView[3] = Counter;
-
-  let combinedBuffer = EMPTY_BUFFER;
   //#endregion
 
   //#region Create a combined ArrayBuffer for digesting
-  combinedBuffer = bytes.concat(combinedBuffer, zBuffer) as ArrayBuffer;
-  combinedBuffer = bytes.concat(combinedBuffer, counterBuffer) as ArrayBuffer;
-  combinedBuffer = bytes.concat(combinedBuffer, SharedInfo) as ArrayBuffer;
+  const combinedBuffer = bytes.concat(zBuffer, counterBuffer, SharedInfo) as ArrayBuffer;
   //#endregion
 
   //#region Return digest of combined ArrayBuffer and information about current counter
@@ -355,26 +351,8 @@ export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen
   //#endregion
 
   //#region Return combined digest with specified length
-  //#region Initial variables
-  let combinedBuffer = EMPTY_BUFFER;
-  let currentCounter = 1;
-  let found = true;
-  //#endregion
-
   //#region Combine all buffer together
-  while (found) {
-    found = false;
-
-    for (const result of incomingResult) {
-      if (result.counter === currentCounter) {
-        combinedBuffer = bytes.concat(combinedBuffer, result.result) as ArrayBuffer;
-        found = true;
-        break;
-      }
-    }
-
-    currentCounter++;
-  }
+  const combinedBuffer = bytes.concat(incomingResult.map((item) => item.result)) as ArrayBuffer;
   //#endregion
 
   //#region Create output buffer with specified length
