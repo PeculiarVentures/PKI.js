@@ -394,9 +394,13 @@ export interface Log {
   key: string;
 }
 
+const SCT_EXTENSION_OID = new asn1js.ObjectIdentifier({ value: id_SignedCertificateTimestampList }).valueBlock.toBER(false);
+
 function hasConstructedTag(value: asn1js.AsnType | undefined, tagClass: number, tagNumber: number): value is asn1js.Constructed {
   // Match the encoded structure, including schemas created by another ASN1js copy.
-  return !!value && value.idBlock.tagClass === tagClass && value.idBlock.tagNumber === tagNumber && value.idBlock.isConstructed && "value" in value.valueBlock && Array.isArray(value.valueBlock.value);
+  if (!value || value.idBlock.tagClass !== tagClass || value.idBlock.tagNumber !== tagNumber) return false;
+  if (!value.idBlock.isConstructed) return false;
+  return "value" in value.valueBlock && Array.isArray(value.valueBlock.value);
 }
 
 function readCertificateTBS(certificate: Certificate): asn1js.Sequence {
@@ -416,35 +420,46 @@ function encodeConstructedValue(schema: asn1js.Constructed, children: Uint8Array
   return pvutils.utilConcatBuf(container.idBlock.toBER(false), container.lenBlock.toBER(false), content.buffer as ArrayBuffer);
 }
 
+function readExtensionField(schema: asn1js.Sequence): { field: asn1js.Constructed; extensions: asn1js.Constructed } {
+  const field = schema.valueBlock.value.find((value): value is asn1js.Constructed => hasConstructedTag(value, 3, 3));
+  const extensions = field?.valueBlock.value[0];
+  if (!field || !hasConstructedTag(extensions, 1, 16)) throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
+  return { field, extensions };
+}
+
+function isSCTExtension(extension: asn1js.AsnType): boolean {
+  if (!hasConstructedTag(extension, 1, 16)) return false;
+  const oid = extension.valueBlock.value[0];
+  if (!oid || oid.idBlock.tagClass !== 1 || oid.idBlock.tagNumber !== 6 || oid.idBlock.isConstructed) return false;
+  return pvutils.isEqualBuffer(oid.valueBlock.toBER(false), SCT_EXTENSION_OID);
+}
+
+function readSCTList(extensions: asn1js.AsnType[]): SignedCertificateTimestampList {
+  let timestamps: SignedCertificateTimestampList | undefined;
+  for (let i = extensions.length - 1; i >= 0; i--) {
+    timestamps = Extension.fromBER(extensions[i].valueBeforeDecodeView.slice().buffer).parsedValue as SignedCertificateTimestampList | undefined;
+    if (!timestamps || timestamps.timestamps.length === 0) throw new Error("Nothing to verify in the certificate");
+  }
+  if (!timestamps) throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
+  return timestamps;
+}
+
+function encodeExtensionsWithoutSCTs(field: asn1js.Constructed, extensions: asn1js.Constructed): Uint8Array[] {
+  const retained = extensions.valueBlock.value.filter((extension) => !isSCTExtension(extension));
+  if (retained.length === 0) return [];
+  const encoded = encodeConstructedValue(
+    extensions,
+    retained.map((extension) => extension.valueBeforeDecodeView),
+  );
+  return [new Uint8Array(encodeConstructedValue(field, [new Uint8Array(encoded)]))];
+}
+
 function preparePreCert(certificate: Certificate): { tbs: ArrayBuffer; timestamps: SignedCertificateTimestampList } {
   const schema = readCertificateTBS(certificate);
-  let timestamps: SignedCertificateTimestampList | undefined;
-  const sctExtensionOid = new asn1js.ObjectIdentifier({ value: id_SignedCertificateTimestampList }).valueBlock.toBER(false);
-  const value = schema.valueBlock.value.flatMap((field) => {
-    if (!hasConstructedTag(field, 3, 3)) return [field.valueBeforeDecodeView];
-
-    const extensions = field.valueBlock.value[0];
-    if (!hasConstructedTag(extensions, 1, 16)) return [field.valueBeforeDecodeView];
-
-    const filtered = extensions.valueBlock.value.filter((extension) => {
-      const oid = hasConstructedTag(extension, 1, 16) ? extension.valueBlock.value[0] : undefined;
-      if (!oid || oid.idBlock.tagClass !== 1 || oid.idBlock.tagNumber !== 6 || oid.idBlock.isConstructed || !pvutils.isEqualBuffer(oid.valueBlock.toBER(false), sctExtensionOid)) return true;
-
-      const parsed = Extension.fromBER(extension.valueBeforeDecodeView.slice().buffer).parsedValue as SignedCertificateTimestampList | undefined;
-      if (!parsed || parsed.timestamps.length === 0) throw new Error("Nothing to verify in the certificate");
-      timestamps ??= parsed;
-      return false;
-    });
-    if (filtered.length === 0) return [];
-
-    const encodedExtensions = encodeConstructedValue(
-      extensions,
-      filtered.map((extension) => extension.valueBeforeDecodeView),
-    );
-    return [new Uint8Array(encodeConstructedValue(field, [new Uint8Array(encodedExtensions)]))];
-  });
-
-  if (!timestamps) throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
+  const { field, extensions } = readExtensionField(schema);
+  const timestamps = readSCTList(extensions.valueBlock.value.filter(isSCTExtension));
+  const replacement = encodeExtensionsWithoutSCTs(field, extensions);
+  const value = schema.valueBlock.value.flatMap((value) => (value === field ? replacement : [value.valueBeforeDecodeView]));
   return { tbs: encodeConstructedValue(schema, value), timestamps };
 }
 
