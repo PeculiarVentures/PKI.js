@@ -48,7 +48,8 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
-    "format:check": "oxfmt --check"
+    "format:check": "oxfmt --check",
+    "build:examples": "tsdown -c examples/tsdown.config.ts"
   },
   "dependencies": {
     "@noble/hashes": "^2.4.0",
