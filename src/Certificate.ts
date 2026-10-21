@@ -259,17 +259,6 @@ export interface ICertificate {
 export type CertificateParameters = PkiObjectParameters & Partial<ICertificate>;
 
 /**
- * Options for encoding the TBS part of a {@link Certificate}
- */
-export interface CertificateEncodeTBSOptions {
-  /**
-   * Overrides the extensions used for encoding without changing the certificate.
-   * An empty array omits the extensions field. Defaults to the certificate's extensions.
-   */
-  readonly extensions?: readonly Extension[];
-}
-
-/**
  * Parameters for {@link Certificate} schema generation
  */
 export type CertificateSchema = Schema.SchemaParameters<{
@@ -615,10 +604,9 @@ export class Certificate extends PkiObject implements ICertificate {
 
   /**
    * Creates ASN.1 schema for existing values of TBS part for the certificate
-   * @param options Optional overrides used only for encoding
    * @returns ASN.1 SEQUENCE
    */
-  public encodeTBS(options: CertificateEncodeTBSOptions = {}): asn1js.Sequence {
+  public encodeTBS(): asn1js.Sequence {
     //#region Create array for output sequence
     const outputArray = [];
 
@@ -675,8 +663,7 @@ export class Certificate extends PkiObject implements ICertificate {
       );
     }
 
-    const extensions = options.extensions ?? this.extensions;
-    if (extensions?.length) {
+    if (this.extensions) {
       outputArray.push(
         new asn1js.Constructed({
           optional: true,
@@ -686,7 +673,7 @@ export class Certificate extends PkiObject implements ICertificate {
           },
           value: [
             new asn1js.Sequence({
-              value: Array.from(extensions, (o) => o.toSchema()),
+              value: Array.from(this.extensions, (o) => o.toSchema()),
             }),
           ],
         }),

@@ -401,6 +401,7 @@ function hasConstructedTag(value: asn1js.AsnType | undefined, tagClass: number, 
 function encodePreCertTBS(certificate: Certificate): ArrayBuffer {
   // Preserve legacy overrides and leave their potentially cached schema intact.
   const schema = certificate.encodeTBS();
+  const sctExtensionOid = new asn1js.ObjectIdentifier({ value: id_SignedCertificateTimestampList }).valueBlock.toBER(false);
   const value = schema.valueBlock.value.flatMap((field) => {
     if (!hasConstructedTag(field, 3, 3)) return [field];
 
@@ -409,7 +410,7 @@ function encodePreCertTBS(certificate: Certificate): ArrayBuffer {
 
     const filtered = extensions.valueBlock.value.filter((extension) => {
       const oid = hasConstructedTag(extension, 1, 16) ? extension.valueBlock.value[0] : undefined;
-      return !oid || oid.idBlock.tagClass !== 1 || oid.idBlock.tagNumber !== 6 || oid.idBlock.isConstructed || oid.valueBlock.toString() !== id_SignedCertificateTimestampList;
+      return !oid || oid.idBlock.tagClass !== 1 || oid.idBlock.tagNumber !== 6 || oid.idBlock.isConstructed || !pvutils.isEqualBuffer(oid.valueBlock.toBER(false), sctExtensionOid);
     });
     if (filtered.length === 0) return [];
 

@@ -184,6 +184,51 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
     expectUnchanged(certificate, original);
   });
 
+  it.each([true, false])("accepts generic Primitive OIDs (other extensions: %s)", async (withOtherExtensions) => {
+    class PrimitiveOidCertificate extends pkijs.Certificate {
+      public override encodeTBS(): asn1js.Sequence {
+        const schema = super.encodeTBS();
+        const wrapper = schema.valueBlock.value.find((field) => field.idBlock.tagClass === 3 && field.idBlock.tagNumber === 3) as asn1js.Constructed;
+        const extensions = wrapper.valueBlock.value[0] as asn1js.Sequence;
+        for (const extension of extensions.valueBlock.value) {
+          const sequence = extension as asn1js.Sequence;
+          const oid = sequence.valueBlock.value[0];
+          const primitive = new asn1js.Primitive({ idBlock: { tagClass: 1, tagNumber: 6 }, valueHex: oid.valueBlock.toBER(false) });
+          expect(Convert.ToHex(primitive.toBER(false))).toBe(Convert.ToHex(oid.toBER(false)));
+          expect(primitive.valueBlock.toString()).not.toBe(pkijs.id_SignedCertificateTimestampList);
+          sequence.valueBlock.value[0] = primitive;
+        }
+        return schema;
+      }
+    }
+
+    const source = await createCertificate(withOtherExtensions);
+    const certificate = PrimitiveOidCertificate.fromBER(source.toSchema().toBER(false));
+    const original = snapshot(certificate);
+    Object.freeze(certificate.extensions);
+    Object.freeze(certificate);
+
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).resolves.toEqual([true, true]);
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs, 0)).resolves.toEqual([true]);
+    expectUnchanged(certificate, original);
+  });
+
+  it("preserves legacy empty extensions encoding when signing and rebuilding", async () => {
+    const certificate = pkijs.Certificate.fromBER(issuer.toSchema().toBER(false));
+    certificate.extensions = [];
+    const extensions = certificate.extensions;
+    await certificate.sign(keys.privateKey, "SHA-256");
+
+    const tbs = asn1js.fromBER(certificate.tbsView).result as asn1js.Sequence;
+    const wrapper = tbs.valueBlock.value.find((field) => field.idBlock.tagClass === 3 && field.idBlock.tagNumber === 3);
+    expect(wrapper).toBeDefined();
+    expect(Convert.ToHex(wrapper!.toBER(false))).toBe("a3023000");
+    expect(Convert.ToHex(certificate.toSchema(true).valueBlock.value[0].toBER(false))).toBe(Convert.ToHex(certificate.tbsView));
+    await expect(certificate.verify(issuer)).resolves.toBe(true);
+    expect(certificate.extensions).toBe(extensions);
+    expect(certificate.extensions).toHaveLength(0);
+  });
+
   it.each(["wrapper", "sequence", "extension", "oid"] as const)("accepts a %s from a separate ASN1js copy", async (part) => {
     const separateAsn1js = loadSeparateAsn1js();
     expect(separateAsn1js.Constructed).not.toBe(asn1js.Constructed);
