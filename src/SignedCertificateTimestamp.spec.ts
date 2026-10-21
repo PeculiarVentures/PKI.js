@@ -1,7 +1,21 @@
 import { afterEach, beforeAll, describe, it, expect, vi } from "vitest";
 import * as asn1js from "asn1js";
 import { Convert } from "pvtsutils";
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { dirname } from "node:path";
+import { runInThisContext } from "node:vm";
 import * as pkijs from "./index";
+
+function loadSeparateAsn1js(): typeof asn1js {
+  const nodeRequire = createRequire(__filename);
+  const filename = nodeRequire.resolve("asn1js");
+  const separateModule = { exports: {} };
+  // Evaluate the installed module again without changing Node's shared module cache.
+  const evaluate = runInThisContext(`(function (exports, require, module, __filename, __dirname) {\n${readFileSync(filename, "utf8")}\n})`, { filename });
+  evaluate(separateModule.exports, createRequire(filename), separateModule, filename, dirname(filename));
+  return separateModule.exports as typeof asn1js;
+}
 
 function snapshot(certificate: pkijs.Certificate) {
   return {
@@ -168,6 +182,60 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
     expect(certificate.encodeTBS()).toBe(cachedTbs);
     expect(Convert.ToHex(cachedTbs.toBER(false))).toBe(originalTbs);
     expectUnchanged(certificate, original);
+  });
+
+  it.each(["wrapper", "sequence", "extension", "oid"] as const)("accepts a %s from a separate ASN1js copy", async (part) => {
+    const separateAsn1js = loadSeparateAsn1js();
+    expect(separateAsn1js.Constructed).not.toBe(asn1js.Constructed);
+    expect(separateAsn1js.Sequence).not.toBe(asn1js.Sequence);
+    expect(separateAsn1js.ObjectIdentifier).not.toBe(asn1js.ObjectIdentifier);
+
+    function copy<T extends asn1js.AsnType>(value: T): T {
+      const encoded = value.toBER(false);
+      const decoded = separateAsn1js.fromBER(encoded);
+      expect(decoded.offset).toBe(encoded.byteLength);
+      expect(decoded.result).not.toBeInstanceOf(value.constructor);
+      return decoded.result as T;
+    }
+
+    class SeparateSchemaCertificate extends pkijs.Certificate {
+      public override encodeTBS(): asn1js.Sequence {
+        const schema = super.encodeTBS();
+        const index = schema.valueBlock.value.findIndex((field) => field.idBlock.tagClass === 3 && field.idBlock.tagNumber === 3);
+        const wrapper = schema.valueBlock.value[index] as asn1js.Constructed;
+        const extensions = wrapper.valueBlock.value[0] as asn1js.Sequence;
+        const sctIndex = extensions.valueBlock.value.findIndex((extension) => (extension as asn1js.Sequence).valueBlock.value[0].valueBlock.toString() === pkijs.id_SignedCertificateTimestampList);
+        const sct = extensions.valueBlock.value[sctIndex] as asn1js.Sequence;
+
+        switch (part) {
+          case "wrapper":
+            schema.valueBlock.value[index] = copy(wrapper);
+            break;
+          case "sequence":
+            wrapper.valueBlock.value[0] = copy(extensions);
+            break;
+          case "extension":
+            extensions.valueBlock.value[sctIndex] = copy(sct);
+            break;
+          case "oid":
+            sct.valueBlock.value[0] = copy(sct.valueBlock.value[0]);
+            break;
+        }
+        return schema;
+      }
+    }
+
+    for (const withOtherExtensions of [true, false]) {
+      const source = await createCertificate(withOtherExtensions);
+      const certificate = SeparateSchemaCertificate.fromBER(source.toSchema().toBER(false));
+      const original = snapshot(certificate);
+      Object.freeze(certificate.extensions);
+      Object.freeze(certificate);
+
+      await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).resolves.toEqual([true, true]);
+      await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs, 0)).resolves.toEqual([true]);
+      expectUnchanged(certificate, original);
+    }
   });
 
   it("supports concurrent verification and preserves state while the issuer digest is pending", async () => {

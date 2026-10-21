@@ -393,18 +393,23 @@ export interface Log {
   key: string;
 }
 
+function hasConstructedTag(value: asn1js.AsnType | undefined, tagClass: number, tagNumber: number): value is asn1js.Constructed {
+  // Match the encoded structure, including schemas created by another ASN1js copy.
+  return !!value && value.idBlock.tagClass === tagClass && value.idBlock.tagNumber === tagNumber && value.idBlock.isConstructed && "value" in value.valueBlock && Array.isArray(value.valueBlock.value);
+}
+
 function encodePreCertTBS(certificate: Certificate): ArrayBuffer {
   // Preserve legacy overrides and leave their potentially cached schema intact.
   const schema = certificate.encodeTBS();
   const value = schema.valueBlock.value.flatMap((field) => {
-    if (!(field instanceof asn1js.Constructed) || field.idBlock.tagClass !== 3 || field.idBlock.tagNumber !== 3) return [field];
+    if (!hasConstructedTag(field, 3, 3)) return [field];
 
     const extensions = field.valueBlock.value[0];
-    if (!(extensions instanceof asn1js.Sequence)) return [field];
+    if (!hasConstructedTag(extensions, 1, 16)) return [field];
 
     const filtered = extensions.valueBlock.value.filter((extension) => {
-      const oid = extension instanceof asn1js.Sequence ? extension.valueBlock.value[0] : undefined;
-      return !(oid instanceof asn1js.ObjectIdentifier) || oid.valueBlock.toString() !== id_SignedCertificateTimestampList;
+      const oid = hasConstructedTag(extension, 1, 16) ? extension.valueBlock.value[0] : undefined;
+      return !oid || oid.idBlock.tagClass !== 1 || oid.idBlock.tagNumber !== 6 || oid.idBlock.isConstructed || oid.valueBlock.toString() !== id_SignedCertificateTimestampList;
     });
     if (filtered.length === 0) return [];
 
