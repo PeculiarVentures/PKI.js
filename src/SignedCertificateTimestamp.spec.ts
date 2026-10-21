@@ -125,6 +125,51 @@ describe("verifySCTsForCertificate preserves the certificate", () => {
     expectUnchanged(certificate, original);
   });
 
+  it.each([true, false])("supports a subclass with a legacy encodeTBS override (other extensions: %s)", async (withOtherExtensions) => {
+    class CustomCertificate extends pkijs.Certificate {
+      public override encodeTBS(): asn1js.Sequence {
+        return super.encodeTBS();
+      }
+    }
+
+    const source = await createCertificate(withOtherExtensions);
+    const certificate = CustomCertificate.fromBER(source.toSchema().toBER(false));
+    const original = snapshot(certificate);
+    const encode = vi.spyOn(CustomCertificate.prototype, "encodeTBS");
+    Object.freeze(certificate.extensions);
+    Object.freeze(certificate);
+
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).resolves.toEqual([true, true]);
+    expect(encode).toHaveBeenCalledExactlyOnceWith();
+    expectUnchanged(certificate, original);
+  });
+
+  it("preserves a cached TBS schema returned by a subclass", async () => {
+    class CachedCertificate extends pkijs.Certificate {
+      private cachedTbs?: asn1js.Sequence;
+
+      public override encodeTBS(): asn1js.Sequence {
+        return (this.cachedTbs ??= super.encodeTBS());
+      }
+    }
+
+    const source = await createCertificate();
+    const certificate = CachedCertificate.fromBER(source.toSchema().toBER(false));
+    const cachedTbs = certificate.encodeTBS();
+    const originalTbs = Convert.ToHex(cachedTbs.toBER(false));
+    const original = snapshot(certificate);
+    const extensions = cachedTbs.valueBlock.value.find((field) => field.idBlock.tagClass === 3 && field.idBlock.tagNumber === 3) as asn1js.Constructed;
+    Object.freeze(cachedTbs.valueBlock.value);
+    Object.freeze(extensions.valueBlock.value);
+    Object.freeze((extensions.valueBlock.value[0] as asn1js.Sequence).valueBlock.value);
+
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs)).resolves.toEqual([true, true]);
+    await expect(pkijs.verifySCTsForCertificate(certificate, issuer, logs, 0)).resolves.toEqual([true]);
+    expect(certificate.encodeTBS()).toBe(cachedTbs);
+    expect(Convert.ToHex(cachedTbs.toBER(false))).toBe(originalTbs);
+    expectUnchanged(certificate, original);
+  });
+
   it("supports concurrent verification and preserves state while the issuer digest is pending", async () => {
     const certificate = await createCertificate();
     const original = snapshot(certificate);

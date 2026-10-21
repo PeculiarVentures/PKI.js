@@ -393,6 +393,27 @@ export interface Log {
   key: string;
 }
 
+function encodePreCertTBS(certificate: Certificate): ArrayBuffer {
+  // Preserve legacy overrides and leave their potentially cached schema intact.
+  const schema = certificate.encodeTBS();
+  const value = schema.valueBlock.value.flatMap((field) => {
+    if (!(field instanceof asn1js.Constructed) || field.idBlock.tagClass !== 3 || field.idBlock.tagNumber !== 3) return [field];
+
+    const extensions = field.valueBlock.value[0];
+    if (!(extensions instanceof asn1js.Sequence)) return [field];
+
+    const filtered = extensions.valueBlock.value.filter((extension) => {
+      const oid = extension instanceof asn1js.Sequence ? extension.valueBlock.value[0] : undefined;
+      return !(oid instanceof asn1js.ObjectIdentifier) || oid.valueBlock.toString() !== id_SignedCertificateTimestampList;
+    });
+    if (filtered.length === 0) return [];
+
+    return [new asn1js.Constructed({ idBlock: { tagClass: 3, tagNumber: 3 }, value: [new asn1js.Sequence({ value: filtered })] })];
+  });
+
+  return new asn1js.Sequence({ value }).toBER(false);
+}
+
 /**
  * Verify SignedCertificateTimestamp for specific certificate content
  * @param certificate Certificate for which verification would be performed
@@ -429,8 +450,7 @@ export async function verifySCTsForCertificate(certificate: Certificate, issuerC
   //#endregion
 
   //#region Prepare modifier TBS value
-  const extensions = certificate.extensions?.filter((extension) => extension.extnID !== id_SignedCertificateTimestampList);
-  const tbs = certificate.encodeTBS({ extensions }).toBER(false);
+  const tbs = encodePreCertTBS(certificate);
   //#endregion
 
   //#region Initialize "issuer_key_hash" value
