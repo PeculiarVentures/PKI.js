@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./working-with-certificate-requests.example";
+---
+sidebar_position: 2
+---
+
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./working-with-certificate-requests.example.ts";
 
 # Working with certificate requests
 
-In this example, you will see how to create a CSR, parse it and verify its signature.
+Create a PKCS#10 certificate signing request (CSR) that asks for subject alternative names, then parse it as a certificate authority would: check its signature, which proves the requester holds the private key, and read the requested subject, key, and extensions.
 
-<CodeBlock language="ts">{source}</CodeBlock>
+<RunnableExample source={source} load={() => import("./working-with-certificate-requests.example.ts?run")} />
+
+**API:** [`CertificationRequest`](../../api/classes/CertificationRequest.md), [`Extensions`](../../api/classes/Extensions.md), [`Attribute`](../../api/classes/Attribute.md), [`GeneralNames`](../../api/classes/GeneralNames.md)

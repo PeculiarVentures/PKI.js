@@ -29,12 +29,19 @@ jobs:
             package-lock.json
             website/package-lock.json
 
-      # The library's dependencies are needed because TypeDoc generates the API pages from the library source.
-      # No lifecycle script is needed to build.
+      # The library's dependencies are needed because the examples are typechecked against, run against,
+      # and bundled from the library source, which TypeDoc also documents. No lifecycle script is needed to build.
       - name: Install dependencies
         run: |
           npm ci --ignore-scripts
           npm ci --ignore-scripts --prefix website
+
+      - name: Typecheck examples
+        run: npx tsc --noEmit -p website/docs/examples
+
+      # Each example checks its own results and throws when one is wrong.
+      - name: Run examples
+        run: npx vitest run --config website/docs/examples/vitest.config.mts
 
       - name: Build website
         run: npm run build --prefix website
