@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./S-MIME-signature-encryption.example";
+---
+sidebar_position: 3
+---
 
-# S/MIME signature encryption
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./S-MIME-signature-encryption.example.ts";
 
-In this example, you will see how to encrypt S/MIME messages.
+# S/MIME encryption
 
-<CodeBlock language="ts">{source}</CodeBlock>
+Encrypt an email for a recipient's certificate: wrap the message in a MIME entity, encrypt it as CMS EnvelopedData, and put it in an `application/pkcs7-mime` message. Then decrypt it as the recipient. Edit the message below, run the example, and download the encrypted `.eml` file.
+
+<RunnableExample source={source} load={() => import("./S-MIME-signature-encryption.example.ts?run")} />
+
+**API:** [`EnvelopedData`](../../api/classes/EnvelopedData.md), [`ContentInfo`](../../api/classes/ContentInfo.md)

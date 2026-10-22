@@ -71,3 +71,30 @@ export async function createIdentity({ name, issuer, ca = false, extKeyUsage, ke
 
   return { certificate, keys };
 }
+
+/** Decodes base64, ignoring line breaks and other whitespace */
+export function fromBase64(base64: string): Uint8Array<ArrayBuffer> {
+  return Uint8Array.from(atob(base64.replace(/\s+/g, "")), (char) => char.charCodeAt(0));
+}
+
+/** Encodes base64 in lines of 64 characters, as PEM does */
+export function toBase64(data: BufferSource, lineLength = 64): string {
+  const bytes = ArrayBuffer.isView(data) ? new Uint8Array(data.buffer, data.byteOffset, data.byteLength) : new Uint8Array(data);
+  const base64 = btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join(""));
+  return base64.match(new RegExp(`.{1,${lineLength}}`, "g"))?.join("\n") ?? "";
+}
+
+/** Encodes DER as PEM, such as "-----BEGIN CERTIFICATE-----" for the label "CERTIFICATE" */
+export function toPEM(der: BufferSource, label: string): string {
+  return `-----BEGIN ${label}-----\n${toBase64(der)}\n-----END ${label}-----\n`;
+}
+
+/** Reads one DER certificate, or any number of PEM certificates, such as a CA bundle */
+export function readCertificates(data: Uint8Array<ArrayBuffer>): pkijs.Certificate[] {
+  const text = new TextDecoder().decode(data);
+  if (!text.includes("-----BEGIN CERTIFICATE-----")) {
+    return [pkijs.Certificate.fromBER(data)];
+  }
+  const blocks = text.matchAll(/-----BEGIN CERTIFICATE-----([^-]+)-----END CERTIFICATE-----/g);
+  return Array.from(blocks, ([, base64]) => pkijs.Certificate.fromBER(fromBase64(base64)));
+}

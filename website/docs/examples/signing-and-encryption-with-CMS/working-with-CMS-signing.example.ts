@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pkijs from "pkijs";
 import { createIdentity } from "../helpers";
+import { download } from "../io";
 
 // The signer's certificate, issued by a CA the verifier trusts (see the overview for createIdentity)
 const ca = await createIdentity({ name: "Example CA", ca: true });
@@ -58,6 +59,7 @@ const contentInfo = new pkijs.ContentInfo({
 });
 const der = contentInfo.toSchema().toBER();
 console.log("CMS SignedData (base64):", contentInfo.toString("base64"));
+download("message.p7m", der);
 
 // 5. The verifier parses the message, checks the signature and the signer's certificate chain
 const parsed = new pkijs.SignedData({ schema: pkijs.ContentInfo.fromBER(der).content });

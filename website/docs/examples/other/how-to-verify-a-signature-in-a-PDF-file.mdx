@@ -1,8 +1,16 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./how-to-verify-a-signature-in-a-PDF-file.example";
+---
+sidebar_position: 4
+---
+
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./how-to-verify-a-signature-in-a-PDF-file.example.ts";
 
 # How to verify a signature in a PDF file
 
-In this example, you will see how to verify signatures inside PDF files.
+Verify the signatures of a signed PDF without a PDF library: each signature dictionary has a `/ByteRange` listing the bytes it covers and a `/Contents` holding a detached CMS signature. The example checks each signature, whether it covers the whole file, and whether its certificate chains up to a root you trust.
 
-<CodeBlock language="ts">{source}</CodeBlock>
+The sample is a PDF signed by a sample CA. Choose your own signed PDF below, with the root certificate of its signer. Everything runs in your browser: the files are not uploaded anywhere. This approach covers the common `adbe.pkcs7.detached` and `ETSI.CAdES.detached` signatures; it does not parse the PDF's structure.
+
+<RunnableExample source={source} load={() => import("./how-to-verify-a-signature-in-a-PDF-file.example.ts?run")} />
+
+**API:** [`SignedData`](../../api/classes/SignedData.md), [`ContentInfo`](../../api/classes/ContentInfo.md), [`CertificateChainValidationEngine`](../../api/classes/CertificateChainValidationEngine.md)

@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pkijs from "pkijs";
+import { download } from "../io";
 
 // Builds a name with a single common name (CN)
 function createName(commonName: string) {
@@ -72,6 +73,8 @@ await leaf.sign(rootKeys.privateKey, "SHA-256");
 // 3. Encode the certificate to DER, as it would be stored or sent
 const der = leaf.toSchema().toBER();
 console.log("DER (base64):", leaf.toString("base64"));
+download("example.com.cer", der);
+download("example-root-ca.cer", root.toSchema().toBER());
 
 // 4. Parse it back and read its fields
 const parsed = pkijs.Certificate.fromBER(der);
