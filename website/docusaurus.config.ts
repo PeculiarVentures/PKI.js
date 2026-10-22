@@ -6,7 +6,7 @@ import packageJSON from "../package.json";
 
 const config: Config = {
   title: "pki.js",
-  tagline: "pki.js",
+  tagline: "X.509, CMS, and other PKI formats for JavaScript",
   favicon: "img/favicon.ico",
   url: "https://pkijs.org",
   baseUrl: "/",
@@ -36,10 +36,6 @@ const config: Config = {
           customCss: "./src/css/custom.css"
         },
         blog: false
-        // TODO: Add gtag trackingID.
-        // gtag: {
-        //   trackingID: '',
-        // },
       } satisfies Preset.Options
     ]
   ],
@@ -53,8 +49,7 @@ const config: Config = {
         skipErrorChecking: true,
         disableSources: true,
         membersWithOwnFile: ["Class", "Enum", "Interface"],
-        entryFileName: "pkijs",
-        readme: "../src/README.MD",
+        readme: "none",
         sidebar: {
           pretty: true,
           autoConfiguration: true
@@ -122,7 +117,7 @@ const config: Config = {
             },
             {
               label: "API",
-              to: "/docs/api/pkijs"
+              to: "/docs/api/"
             }
           ]
         },
