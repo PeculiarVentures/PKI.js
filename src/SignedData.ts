@@ -642,7 +642,7 @@ export class SignedData extends PkiObject implements ISignedData {
         let tstInfo: TSTInfo;
 
         try {
-          tstInfo = TSTInfo.fromBER(this.encapContentInfo.eContent.valueBlock.valueHexView as BufferSource);
+          tstInfo = TSTInfo.fromBER(this.encapContentInfo.eContent.getValue());
         } catch {
           throw new SignedDataVerifyError({
             date: checkDate,
