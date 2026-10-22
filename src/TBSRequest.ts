@@ -1,13 +1,12 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
-import * as pvutils from "pvutils";
-import { GeneralName, GeneralNameJson, GeneralNameSchema } from "./GeneralName";
-import { Request, RequestJson, RequestSchema } from "./Request";
-import { Extension, ExtensionJson } from "./Extension";
-import { Extensions, ExtensionsSchema } from "./Extensions";
-import * as Schema from "./Schema";
+import { toArrayBuffer } from "@peculiar/utils";
+import { GeneralName, type GeneralNameJson, type GeneralNameSchema } from "./GeneralName";
+import { Request, type RequestJson, type RequestSchema } from "./Request";
+import { Extension, type ExtensionJson } from "./Extension";
+import { Extensions, type ExtensionsSchema } from "./Extensions";
+import type * as Schema from "./Schema";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_BUFFER } from "./constants";
 
 const TBS = "tbs";
@@ -20,13 +19,7 @@ const TBS_REQUEST_VERSION = `${TBS_REQUEST}.${VERSION}`;
 const TBS_REQUEST_REQUESTOR_NAME = `${TBS_REQUEST}.${REQUESTOR_NAME}`;
 const TBS_REQUEST_REQUESTS = `${TBS_REQUEST}.requests`;
 const TBS_REQUEST_REQUEST_EXTENSIONS = `${TBS_REQUEST}.${REQUEST_EXTENSIONS}`;
-const CLEAR_PROPS = [
-  TBS_REQUEST,
-  TBS_REQUEST_VERSION,
-  TBS_REQUEST_REQUESTOR_NAME,
-  TBS_REQUEST_REQUESTS,
-  TBS_REQUEST_REQUEST_EXTENSIONS
-];
+const CLEAR_PROPS = [TBS_REQUEST, TBS_REQUEST_VERSION, TBS_REQUEST_REQUESTOR_NAME, TBS_REQUEST_REQUESTS, TBS_REQUEST_REQUEST_EXTENSIONS];
 
 export interface ITBSRequest {
   tbs: ArrayBuffer;
@@ -67,7 +60,7 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
    * @deprecated Since version 3.0.0
    */
   public get tbs(): ArrayBuffer {
-    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+    return toArrayBuffer(this.tbsView);
   }
 
   /**
@@ -88,34 +81,16 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
   constructor(parameters: TBSRequestParameters = {}) {
     super();
 
-    this.tbsView = new Uint8Array(
-      pvutils.getParametersValue(parameters, TBS, TBSRequest.defaultValues(TBS))
-    );
+    this.tbsView = new Uint8Array(parameters[TBS] ?? TBSRequest.defaultValues(TBS));
     if (VERSION in parameters) {
-      this.version = pvutils.getParametersValue(
-        parameters,
-        VERSION,
-        TBSRequest.defaultValues(VERSION)
-      );
+      this.version = parameters[VERSION] ?? TBSRequest.defaultValues(VERSION);
     }
     if (REQUESTOR_NAME in parameters) {
-      this.requestorName = pvutils.getParametersValue(
-        parameters,
-        REQUESTOR_NAME,
-        TBSRequest.defaultValues(REQUESTOR_NAME)
-      );
+      this.requestorName = parameters[REQUESTOR_NAME] ?? TBSRequest.defaultValues(REQUESTOR_NAME);
     }
-    this.requestList = pvutils.getParametersValue(
-      parameters,
-      REQUEST_LIST,
-      TBSRequest.defaultValues(REQUEST_LIST)
-    );
+    this.requestList = parameters[REQUEST_LIST] ?? TBSRequest.defaultValues(REQUEST_LIST);
     if (REQUEST_EXTENSIONS in parameters) {
-      this.requestExtensions = pvutils.getParametersValue(
-        parameters,
-        REQUEST_EXTENSIONS,
-        TBSRequest.defaultValues(REQUEST_EXTENSIONS)
-      );
+      this.requestExtensions = parameters[REQUEST_EXTENSIONS] ?? TBSRequest.defaultValues(REQUEST_EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -161,10 +136,7 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
       case VERSION:
         return memberValue === TBSRequest.defaultValues(memberName);
       case REQUESTOR_NAME:
-        return (
-          memberValue.type === GeneralName.defaultValues("type") &&
-          Object.keys(memberValue.value).length === 0
-        );
+        return memberValue.type === GeneralName.defaultValues("type") && Object.keys(memberValue.value).length === 0;
       case REQUEST_LIST:
       case REQUEST_EXTENSIONS:
         return memberValue.length === 0;
@@ -185,11 +157,7 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
    *```
    */
   public static override schema(parameters: TBSRequestSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || TBS_REQUEST,
@@ -198,58 +166,58 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [new asn1js.Integer({ name: names.TBSRequestVersion || TBS_REQUEST_VERSION })]
+          value: [new asn1js.Integer({ name: names.TBSRequestVersion || TBS_REQUEST_VERSION })],
         }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
           value: [
             GeneralName.schema(
               names.requestorName || {
                 names: {
-                  blockName: TBS_REQUEST_REQUESTOR_NAME
-                }
-              }
-            )
-          ]
+                  blockName: TBS_REQUEST_REQUESTOR_NAME,
+                },
+              },
+            ),
+          ],
         }),
         new asn1js.Sequence({
           name: names.requestList || "TBSRequest.requestList",
           value: [
             new asn1js.Repeated({
               name: names.requests || TBS_REQUEST_REQUESTS,
-              value: Request.schema(names.requestNames || {})
-            })
-          ]
+              value: Request.schema(names.requestNames || {}),
+            }),
+          ],
         }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 2 // [2]
+            tagNumber: 2, // [2]
           },
           value: [
             Extensions.schema(
               names.extensions || {
                 names: {
-                  blockName: names.requestExtensions || TBS_REQUEST_REQUEST_EXTENSIONS
-                }
-              }
-            )
-          ]
-        })
-      ]
+                  blockName: names.requestExtensions || TBS_REQUEST_REQUEST_EXTENSIONS,
+                },
+              },
+            ),
+          ],
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, TBSRequest.schema());
@@ -258,21 +226,13 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
     // Get internal properties from parsed schema
     this.tbsView = asn1.result.TBSRequest.valueBeforeDecodeView;
 
-    if (TBS_REQUEST_VERSION in asn1.result)
-      this.version = asn1.result[TBS_REQUEST_VERSION].valueBlock.valueDec;
-    if (TBS_REQUEST_REQUESTOR_NAME in asn1.result)
-      this.requestorName = new GeneralName({ schema: asn1.result[TBS_REQUEST_REQUESTOR_NAME] });
+    if (TBS_REQUEST_VERSION in asn1.result) this.version = asn1.result[TBS_REQUEST_VERSION].valueBlock.valueDec;
+    if (TBS_REQUEST_REQUESTOR_NAME in asn1.result) this.requestorName = new GeneralName({ schema: asn1.result[TBS_REQUEST_REQUESTOR_NAME] });
 
-    this.requestList = Array.from(
-      asn1.result[TBS_REQUEST_REQUESTS],
-      element => new Request({ schema: element })
-    );
+    this.requestList = Array.from(asn1.result[TBS_REQUEST_REQUESTS], (element) => new Request({ schema: element }));
 
     if (TBS_REQUEST_REQUEST_EXTENSIONS in asn1.result)
-      this.requestExtensions = Array.from(
-        asn1.result[TBS_REQUEST_REQUEST_EXTENSIONS].valueBlock.value,
-        element => new Extension({ schema: element })
-      );
+      this.requestExtensions = Array.from(asn1.result[TBS_REQUEST_REQUEST_EXTENSIONS].valueBlock.value, (element) => new Extension({ schema: element }));
   }
 
   /**
@@ -307,10 +267,10 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
           new asn1js.Constructed({
             idBlock: {
               tagClass: 3, // CONTEXT-SPECIFIC
-              tagNumber: 0 // [0]
+              tagNumber: 0, // [0]
             },
-            value: [new asn1js.Integer({ value: this.version })]
-          })
+            value: [new asn1js.Integer({ value: this.version })],
+          }),
         );
       }
 
@@ -319,17 +279,17 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
           new asn1js.Constructed({
             idBlock: {
               tagClass: 3, // CONTEXT-SPECIFIC
-              tagNumber: 1 // [1]
+              tagNumber: 1, // [1]
             },
-            value: [this.requestorName.toSchema()]
-          })
+            value: [this.requestorName.toSchema()],
+          }),
         );
       }
 
       outputArray.push(
         new asn1js.Sequence({
-          value: Array.from(this.requestList, o => o.toSchema())
-        })
+          value: Array.from(this.requestList, (o) => o.toSchema()),
+        }),
       );
 
       if (this.requestExtensions) {
@@ -337,19 +297,19 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
           new asn1js.Constructed({
             idBlock: {
               tagClass: 3, // CONTEXT-SPECIFIC
-              tagNumber: 2 // [2]
+              tagNumber: 2, // [2]
             },
             value: [
               new asn1js.Sequence({
-                value: Array.from(this.requestExtensions, o => o.toSchema())
-              })
-            ]
-          })
+                value: Array.from(this.requestExtensions, (o) => o.toSchema()),
+              }),
+            ],
+          }),
         );
       }
 
       tbsSchema = new asn1js.Sequence({
-        value: outputArray
+        value: outputArray,
       });
     }
     //#endregion
@@ -368,10 +328,10 @@ export class TBSRequest extends PkiObject implements ITBSRequest {
       res.requestorName = this.requestorName.toJSON();
     }
 
-    res.requestList = Array.from(this.requestList, o => o.toJSON());
+    res.requestList = Array.from(this.requestList, (o) => o.toJSON());
 
     if (this.requestExtensions) {
-      res.requestExtensions = Array.from(this.requestExtensions, o => o.toJSON());
+      res.requestExtensions = Array.from(this.requestExtensions, (o) => o.toJSON());
     }
 
     return res;

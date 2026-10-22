@@ -1,11 +1,10 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import { Certificate, CertificateJson } from "./Certificate";
-import { AttributeCertificateV1, AttributeCertificateV1Json } from "./AttributeCertificateV1";
-import { AttributeCertificateV2, AttributeCertificateV2Json } from "./AttributeCertificateV2";
-import { OtherCertificateFormat, OtherCertificateFormatJson } from "./OtherCertificateFormat";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { Certificate, type CertificateJson } from "./Certificate";
+import { AttributeCertificateV1, type AttributeCertificateV1Json } from "./AttributeCertificateV1";
+import { AttributeCertificateV2, type AttributeCertificateV2Json } from "./AttributeCertificateV2";
+import { OtherCertificateFormat, type OtherCertificateFormatJson } from "./OtherCertificateFormat";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_STRING } from "./constants";
 
@@ -20,17 +19,9 @@ export interface CertificateSetJson {
   certificates: CertificateSetItemJson[];
 }
 
-export type CertificateSetItemJson =
-  | CertificateJson
-  | AttributeCertificateV1Json
-  | AttributeCertificateV2Json
-  | OtherCertificateFormatJson;
+export type CertificateSetItemJson = CertificateJson | AttributeCertificateV1Json | AttributeCertificateV2Json | OtherCertificateFormatJson;
 
-export type CertificateSetItem =
-  | Certificate
-  | AttributeCertificateV1
-  | AttributeCertificateV2
-  | OtherCertificateFormat;
+export type CertificateSetItem = Certificate | AttributeCertificateV1 | AttributeCertificateV2 | OtherCertificateFormat;
 
 export type CertificateSetParameters = PkiObjectParameters & Partial<ICertificateSet>;
 
@@ -49,11 +40,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
   constructor(parameters: CertificateSetParameters = {}) {
     super();
 
-    this.certificates = pvutils.getParametersValue(
-      parameters,
-      CERTIFICATES,
-      CertificateSet.defaultValues(CERTIFICATES)
-    );
+    this.certificates = parameters[CERTIFICATES] ?? CertificateSet.defaultValues(CERTIFICATES);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -92,13 +79,9 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
   public static override schema(
     parameters: Schema.SchemaParameters<{
       certificates?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Set({
       name: names.blockName || EMPTY_STRING,
@@ -111,41 +94,41 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
               new asn1js.Constructed({
                 idBlock: {
                   tagClass: 3, // CONTEXT-SPECIFIC
-                  tagNumber: 0 // [0]
+                  tagNumber: 0, // [0]
                 },
-                value: [new asn1js.Any()]
+                value: [new asn1js.Any()],
               }), // JUST A STUB
               new asn1js.Constructed({
                 idBlock: {
                   tagClass: 3, // CONTEXT-SPECIFIC
-                  tagNumber: 1 // [1]
+                  tagNumber: 1, // [1]
                 },
-                value: [new asn1js.Sequence()]
+                value: [new asn1js.Sequence()],
               }),
               new asn1js.Constructed({
                 idBlock: {
                   tagClass: 3, // CONTEXT-SPECIFIC
-                  tagNumber: 2 // [2]
+                  tagNumber: 2, // [2]
                 },
-                value: AttributeCertificateV2.schema().valueBlock.value
+                value: AttributeCertificateV2.schema().valueBlock.value,
               }),
               new asn1js.Constructed({
                 idBlock: {
                   tagClass: 3, // CONTEXT-SPECIFIC
-                  tagNumber: 3 // [3]
+                  tagNumber: 3, // [3]
                 },
-                value: OtherCertificateFormat.schema().valueBlock.value
-              })
-            ]
-          })
-        })
-      ]
+                value: OtherCertificateFormat.schema().valueBlock.value,
+              }),
+            ],
+          }),
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, CertificateSet.schema());
@@ -159,7 +142,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
 
       //#region Making "Sequence" from "Constructed" value
       const elementSequence = new asn1js.Sequence({
-        value: element.valueBlock.value
+        value: element.valueBlock.value,
       });
       //#endregion
 
@@ -167,10 +150,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
         case 1:
           // WARN: It's possible that CMS contains AttributeCertificateV2 instead of AttributeCertificateV1
           // Check the certificate version
-          if (
-            (elementSequence.valueBlock.value[0] as any).valueBlock.value[0].valueBlock.valueDec ===
-            1
-          ) {
+          if ((elementSequence.valueBlock.value[0] as any).valueBlock.value[0].valueBlock.valueDec === 1) {
             return new AttributeCertificateV2({ schema: elementSequence });
           } else {
             return new AttributeCertificateV1({ schema: elementSequence });
@@ -191,7 +171,7 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
   public toSchema(): asn1js.Set {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Set({
-      value: Array.from(this.certificates, element => {
+      value: Array.from(this.certificates, (element) => {
         switch (true) {
           case element instanceof Certificate:
             return element.toSchema();
@@ -199,37 +179,37 @@ export class CertificateSet extends PkiObject implements ICertificateSet {
             return new asn1js.Constructed({
               idBlock: {
                 tagClass: 3,
-                tagNumber: 1 // [1]
+                tagNumber: 1, // [1]
               },
-              value: element.toSchema().valueBlock.value
+              value: element.toSchema().valueBlock.value,
             });
           case element instanceof AttributeCertificateV2:
             return new asn1js.Constructed({
               idBlock: {
                 tagClass: 3,
-                tagNumber: 2 // [2]
+                tagNumber: 2, // [2]
               },
-              value: element.toSchema().valueBlock.value
+              value: element.toSchema().valueBlock.value,
             });
           case element instanceof OtherCertificateFormat:
             return new asn1js.Constructed({
               idBlock: {
                 tagClass: 3,
-                tagNumber: 3 // [3]
+                tagNumber: 3, // [3]
               },
-              value: element.toSchema().valueBlock.value
+              value: element.toSchema().valueBlock.value,
             });
           default:
         }
 
         return (element as any).toSchema();
-      })
+      }),
     });
   }
 
   public toJSON(): CertificateSetJson {
     return {
-      certificates: Array.from(this.certificates, o => o.toJSON())
+      certificates: Array.from(this.certificates, (o) => o.toJSON()),
     };
   }
 }

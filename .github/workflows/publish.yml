@@ -1,0 +1,135 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - master
+  # Retries publishing a released version, e.g. after a failed npm publish; run it from the v<version> tag.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  # Gates release-please, so a commit that fails checks never gets a tag or a GitHub Release.
+  check:
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/test.yml
+
+  release-please:
+    runs-on: ubuntu-24.04
+    needs: check
+
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      sha: ${{ steps.release.outputs.sha }}
+
+    steps:
+      # Opens or updates the release PR from Conventional Commits; once that PR is merged,
+      # creates the v<version> tag and the GitHub Release with the notes from the PR.
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          # PRs opened with GITHUB_TOKEN do not trigger other workflows; set RELEASE_TOKEN so Test runs on the release PR.
+          token: ${{ secrets.RELEASE_TOKEN || github.token }}
+
+  publish:
+    runs-on: ubuntu-24.04
+    needs: release-please
+    # Manual runs skip check and release-please, so they must not depend on their results.
+    if: >-
+      !cancelled() && (
+        github.event_name == 'workflow_dispatch' ||
+        needs.release-please.outputs.release_created == 'true'
+      )
+    environment: npm
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      # npm provenance records GITHUB_SHA, so the published commit must be exactly that commit.
+      - name: Verify the release commit
+        env:
+          RELEASE_SHA: ${{ needs.release-please.outputs.sha }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            if [ "$GITHUB_REF_TYPE" != tag ] || [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+              echo "::error::Run Publish from a v<version> release tag, not from $GITHUB_REF_NAME"
+              exit 1
+            fi
+          elif [ "$RELEASE_SHA" != "$GITHUB_SHA" ]; then
+            echo "::error::Release commit $RELEASE_SHA differs from $GITHUB_SHA; run Publish manually from the release tag"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Read the version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] && [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::package.json version $VERSION does not match tag $GITHUB_REF_NAME"
+            exit 1
+          fi
+
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      # This job holds id-token and contents: write, so dependency lifecycle scripts never run here.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build package
+        run: npm run build
+
+      - name: Check generated package exports are committed
+        run: git diff --exit-code package.json
+
+      - name: Publish to npm via Trusted Publisher
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+
+          if npm view "$NAME@$VERSION" version > /dev/null 2>&1; then
+            echo "$NAME@$VERSION is already published"
+          else
+            # Skips prepack: the build above is the one the exports check verified.
+            npm publish --ignore-scripts
+          fi
+
+      # Never moves the major tag backwards, e.g. when retrying an older version.
+      - name: Move major tag
+        run: |
+          MAJOR="v${VERSION%%.*}"
+          LATEST=$(git ls-remote --tags --refs origin "refs/tags/$MAJOR.*" \
+            | sed 's|.*refs/tags/||' \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sort -V \
+            | tail -n 1)
+
+          if [ "$LATEST" != "v$VERSION" ]; then
+            echo "Leaving $MAJOR unchanged: v$VERSION is not the latest release ($LATEST)"
+            exit 0
+          fi
+
+          git tag -f "$MAJOR" HEAD
+          git push -f origin "$MAJOR"

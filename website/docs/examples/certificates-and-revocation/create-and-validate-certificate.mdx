@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./create-and-validate-certificate.example";
+---
+sidebar_position: 1
+---
 
-# Create and validate certificate
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./create-and-validate-certificate.example.ts";
 
-In this example, you will see how to create a self-signed X.509 certificate, parse an X.509 certificate, and show how to do certificate chain validation engine.
+# Create and validate a certificate
 
-<CodeBlock language="ts">{source}</CodeBlock>
+Create a root CA and an end-entity certificate signed by it, encode the certificate to DER, parse it back, check its signature, and validate the chain up to the trusted root.
+
+<RunnableExample source={source} load={() => import("./create-and-validate-certificate.example.ts?run")} />
+
+**API:** [`Certificate`](../../api/classes/Certificate.md), [`CertificateChainValidationEngine`](../../api/classes/CertificateChainValidationEngine.md), [`Extension`](../../api/classes/Extension.md), [`BasicConstraints`](../../api/classes/BasicConstraints.md), [`AltName`](../../api/classes/AltName.md)

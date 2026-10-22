@@ -1,0 +1,21 @@
+import { describe, it, assert } from "vitest";
+import * as example from "../test/scenarios/PrivateKeyInfo.openssl";
+import { binary, toArrayBuffer } from "@peculiar/utils";
+
+describe("OpenSSL Encrypted Private Key", () => {
+  //#region Initial variables
+  const passwordBuffer = toArrayBuffer(binary.decode("password"));
+
+  const encLens = [128, 192, 256];
+  //#endregion
+
+  encLens.forEach((encLen) => {
+    const aesKeyLength = encLen >> 3;
+
+    it(`Create And Parse OpenSSL Encrypted Private Key for AES-${encLen}-CBC`, async () => {
+      const encryptedKey = await example.createOpenSSLPrivateKey(aesKeyLength, passwordBuffer, new ArrayBuffer(10));
+      const decryptedKey = await example.parseOpenSSLPrivateKey(aesKeyLength, encryptedKey.ivBuffer, passwordBuffer, encryptedKey.encryptedKeyBuffer);
+      assert.strictEqual(decryptedKey.byteLength, 10);
+    });
+  });
+});

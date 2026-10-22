@@ -1,16 +1,12 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import { bytes } from "@peculiar/utils";
+import type { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { EMPTY_BUFFER } from "./constants";
-import type {
-  CryptoEngineAlgorithmOperation,
-  CryptoEngineAlgorithmParams,
-  ICryptoEngine
-} from "./CryptoEngine/CryptoEngineInterface";
+import type { CryptoEngineAlgorithmOperation, CryptoEngineAlgorithmParams, ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
 import { ArgumentError } from "./errors";
 
 //#region Crypto engine related function
-export { ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
+export type { ICryptoEngine } from "./CryptoEngine/CryptoEngineInterface";
 
 export interface GlobalCryptoEngine {
   name: string;
@@ -18,7 +14,7 @@ export interface GlobalCryptoEngine {
 }
 export let engine: GlobalCryptoEngine = {
   name: "none",
-  crypto: null
+  crypto: null,
 };
 
 function isCryptoEngine(engine: unknown): engine is ICryptoEngine {
@@ -33,9 +29,7 @@ function isCryptoEngine(engine: unknown): engine is ICryptoEngine {
  * registered symbol is used instead.
  */
 function getEngineGlobalKey(): number | symbol {
-  return typeof process !== "undefined" && Number.isInteger(process.pid)
-    ? process.pid
-    : Symbol.for("pkijs.engine");
+  return typeof process !== "undefined" && Number.isInteger(process.pid) ? process.pid : Symbol.for("pkijs.engine");
 }
 
 /**
@@ -45,11 +39,7 @@ function getEngineGlobalKey(): number | symbol {
  * @param subtle
  * @deprecated Since version 3.0.0
  */
-export function setEngine(
-  name: string,
-  crypto: ICryptoEngine | Crypto,
-  subtle: ICryptoEngine | SubtleCrypto
-): void;
+export function setEngine(name: string, crypto: ICryptoEngine | Crypto, subtle: ICryptoEngine | SubtleCrypto): void;
 /**
  * Sets global crypto engine
  * @param name Name of the crypto engine
@@ -65,10 +55,7 @@ export function setEngine(name: string, ...args: any[]): void {
       crypto = args[0];
     } else {
       // crypto param is omitted, use CryptoEngine(self.crypto)
-      crypto =
-        typeof self !== "undefined" && self.crypto
-          ? new CryptoEngine({ name: "browser", crypto: self.crypto })
-          : null;
+      crypto = typeof self !== "undefined" && self.crypto ? new CryptoEngine({ name: "browser", crypto: self.crypto }) : null;
     }
   } else {
     // prev implementation
@@ -80,17 +67,12 @@ export function setEngine(name: string, ...args: any[]): void {
       crypto = cryptoArg;
     } else if ("subtle" in cryptoArg && "getRandomValues" in cryptoArg) {
       crypto = new CryptoEngine({
-        crypto: cryptoArg
+        crypto: cryptoArg,
       });
     }
   }
 
-  if (
-    typeof process !== "undefined" &&
-    "pid" in process &&
-    typeof global !== "undefined" &&
-    typeof window === "undefined"
-  ) {
+  if (typeof process !== "undefined" && "pid" in process && typeof global !== "undefined" && typeof window === "undefined") {
     // We are in Node
     const engineKey = getEngineGlobalKey();
     if (typeof (global as any)[engineKey] === "undefined") {
@@ -105,33 +87,26 @@ export function setEngine(name: string, ...args: any[]): void {
       (global as any)[engineKey].pkijs = {};
     } else {
       if (typeof (global as any)[engineKey].pkijs !== "object") {
-        throw new Error(
-          `Name global.${String(engineKey)}.pkijs already exists and it is not an object`
-        );
+        throw new Error(`Name global.${String(engineKey)}.pkijs already exists and it is not an object`);
       }
     }
 
     (global as any)[engineKey].pkijs.engine = {
       name: name,
-      crypto
+      crypto,
     };
   } else {
     // We are in browser
     engine = {
       name: name,
-      crypto
+      crypto,
     };
   }
 }
 
 export function getEngine(): GlobalCryptoEngine {
   //#region We are in Node
-  if (
-    typeof process !== "undefined" &&
-    "pid" in process &&
-    typeof global !== "undefined" &&
-    typeof window === "undefined"
-  ) {
+  if (typeof process !== "undefined" && "pid" in process && typeof global !== "undefined" && typeof window === "undefined") {
     let _engine;
 
     try {
@@ -198,10 +173,7 @@ export function getOIDByAlgorithm(algorithm: Algorithm, safety?: boolean, target
  * @param operation Kind of operation: "sign", "encrypt", "generateKey", "importKey", "exportKey", "verify"
  */
 // TODO Add safety
-export function getAlgorithmParameters(
-  algorithmName: string,
-  operation: CryptoEngineAlgorithmOperation
-): CryptoEngineAlgorithmParams {
+export function getAlgorithmParameters(algorithmName: string, operation: CryptoEngineAlgorithmOperation): CryptoEngineAlgorithmParams {
   return getCrypto(true).getAlgorithmParameters(algorithmName, operation);
 }
 
@@ -217,21 +189,12 @@ export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuff
   //#region Initial variables
   const length = signatureBuffer.byteLength / 2; // There are two equal parts inside incoming ArrayBuffer
 
-  const rBuffer = new ArrayBuffer(length);
-  const rView = new Uint8Array(rBuffer);
-  rView.set(new Uint8Array(signatureBuffer, 0, length));
-
-  const rInteger = new asn1js.Integer({ valueHex: rBuffer });
-
-  const sBuffer = new ArrayBuffer(length);
-  const sView = new Uint8Array(sBuffer);
-  sView.set(new Uint8Array(signatureBuffer, length, length));
-
-  const sInteger = new asn1js.Integer({ valueHex: sBuffer });
+  const rInteger = new asn1js.Integer({ valueHex: toMinimalUnsignedInteger(new Uint8Array(signatureBuffer, 0, length)) });
+  const sInteger = new asn1js.Integer({ valueHex: toMinimalUnsignedInteger(new Uint8Array(signatureBuffer, length, length)) });
   //#endregion
 
   return new asn1js.Sequence({
-    value: [rInteger.convertToDER(), sInteger.convertToDER()]
+    value: [rInteger, sInteger],
   }).toBER(false);
 }
 
@@ -241,10 +204,7 @@ export function createCMSECDSASignature(signatureBuffer: ArrayBuffer): ArrayBuff
  * @param pointSize Size of EC point. Use {@link ECNamedCurves.find} to get correct point size
  * @returns WebCrypto signature
  */
-export function createECDSASignatureFromCMS(
-  cmsSignature: asn1js.AsnType,
-  pointSize: number
-): ArrayBuffer {
+export function createECDSASignatureFromCMS(cmsSignature: asn1js.AsnType, pointSize: number): ArrayBuffer {
   // Check input variables
   if (
     !(
@@ -274,16 +234,8 @@ export function createECDSASignatureFromCMS(
  * @param target name of the target
  * @returns WebCrypto algorithm or an empty object
  */
-export function getAlgorithmByOID<T extends Algorithm = Algorithm>(
-  oid: string,
-  safety?: boolean,
-  target?: string
-): T | object;
-export function getAlgorithmByOID<T extends Algorithm = Algorithm>(
-  oid: string,
-  safety: true,
-  target?: string
-): T;
+export function getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety?: boolean, target?: string): T | object;
+export function getAlgorithmByOID<T extends Algorithm = Algorithm>(oid: string, safety: true, target?: string): T;
 export function getAlgorithmByOID(oid: string, safety = false, target?: string): any {
   return getCrypto(true).getAlgorithmByOID(oid, safety, target);
 }
@@ -304,13 +256,7 @@ export function getHashAlgorithm(signatureAlgorithm: AlgorithmIdentifier): strin
  * @param SharedInfo Usually DER encoded "ECC_CMS_SharedInfo" structure
  * @param crypto Crypto engine
  */
-async function kdfWithCounter(
-  hashFunction: string,
-  zBuffer: ArrayBuffer,
-  Counter: number,
-  SharedInfo: ArrayBuffer,
-  crypto: ICryptoEngine
-): Promise<{ counter: number; result: ArrayBuffer }> {
+async function kdfWithCounter(hashFunction: string, zBuffer: ArrayBuffer, Counter: number, SharedInfo: ArrayBuffer, crypto: ICryptoEngine): Promise<{ counter: number; result: ArrayBuffer }> {
   //#region Check of input parameters
   switch (hashFunction.toUpperCase()) {
     case "SHA-1":
@@ -326,8 +272,7 @@ async function kdfWithCounter(
   if (zBuffer.byteLength === 0) throw new ArgumentError("'zBuffer' has zero length, error");
 
   ArgumentError.assert(SharedInfo, "SharedInfo", "ArrayBuffer");
-  if (Counter > 255)
-    throw new ArgumentError("Please set 'Counter' argument to value less or equal to 255");
+  if (Counter > 255) throw new ArgumentError("Please set 'Counter' argument to value less or equal to 255");
   //#endregion
 
   //#region Initial variables
@@ -337,14 +282,10 @@ async function kdfWithCounter(
   counterView[1] = 0x00;
   counterView[2] = 0x00;
   counterView[3] = Counter;
-
-  let combinedBuffer = EMPTY_BUFFER;
   //#endregion
 
   //#region Create a combined ArrayBuffer for digesting
-  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, zBuffer);
-  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, counterBuffer);
-  combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, SharedInfo);
+  const combinedBuffer = bytes.concat(zBuffer, counterBuffer, SharedInfo) as ArrayBuffer;
   //#endregion
 
   //#region Return digest of combined ArrayBuffer and information about current counter
@@ -352,7 +293,7 @@ async function kdfWithCounter(
 
   return {
     counter: Counter,
-    result
+    result,
   };
   //#endregion
 }
@@ -365,13 +306,7 @@ async function kdfWithCounter(
  * @param SharedInfo Usually DER encoded "ECC_CMS_SharedInfo" structure
  * @param crypto Crypto engine
  */
-export async function kdf(
-  hashFunction: string,
-  Zbuffer: ArrayBuffer,
-  keydatalen: number,
-  SharedInfo: ArrayBuffer,
-  crypto = getCrypto(true)
-) {
+export async function kdf(hashFunction: string, Zbuffer: ArrayBuffer, keydatalen: number, SharedInfo: ArrayBuffer, crypto = getCrypto(true)) {
   //#region Initial variables
   let hashLength: number;
   let maxCounter = 1;
@@ -412,31 +347,12 @@ export async function kdf(
 
   //#region Create an array of "kdfWithCounter"
   const incomingResult = [];
-  for (let i = 1; i <= maxCounter; i++)
-    incomingResult.push(await kdfWithCounter(hashFunction, Zbuffer, i, SharedInfo, crypto));
+  for (let i = 1; i <= maxCounter; i++) incomingResult.push(await kdfWithCounter(hashFunction, Zbuffer, i, SharedInfo, crypto));
   //#endregion
 
   //#region Return combined digest with specified length
-  //#region Initial variables
-  let combinedBuffer = EMPTY_BUFFER;
-  let currentCounter = 1;
-  let found = true;
-  //#endregion
-
   //#region Combine all buffer together
-  while (found) {
-    found = false;
-
-    for (const result of incomingResult) {
-      if (result.counter === currentCounter) {
-        combinedBuffer = pvutils.utilConcatBuf(combinedBuffer, result.result);
-        found = true;
-        break;
-      }
-    }
-
-    currentCounter++;
-  }
+  const combinedBuffer = bytes.concat(incomingResult.map((item) => item.result)) as ArrayBuffer;
   //#endregion
 
   //#region Create output buffer with specified length
@@ -455,6 +371,26 @@ export async function kdf(
   return combinedBuffer; // Since the situation when "combinedBuffer.byteLength < keydatalen" here we have only "combinedBuffer.byteLength === keydatalen"
   //#endregion
   //#endregion
+}
+
+/**
+ * Encodes an unsigned big-endian value as minimal DER INTEGER contents:
+ * strips redundant leading zero octets and prepends 0x00 when the high bit is set
+ * @param view Unsigned big-endian value (WebCrypto pads r and s to the curve size)
+ */
+function toMinimalUnsignedInteger(view: Uint8Array): Uint8Array {
+  let start = 0;
+  while (start < view.length - 1 && view[start] === 0) start++;
+  const value = view.subarray(start);
+
+  if (value.length && value[0] & 0x80) {
+    const res = new Uint8Array(value.length + 1);
+    res.set(value, 1);
+
+    return res;
+  }
+
+  return value.slice();
 }
 //#endregion
 

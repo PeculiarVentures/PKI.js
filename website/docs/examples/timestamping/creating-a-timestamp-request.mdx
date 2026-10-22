@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./creating-a-timestamp-request.example";
+---
+sidebar_position: 1
+---
 
-# Creating a Timestamp request
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./creating-a-timestamp-request.example.ts";
 
-In this example, you will see how to create and parse a timestamp request.
+# Creating a timestamp request
 
-<CodeBlock language="ts">{source}</CodeBlock>
+Create an RFC 3161 timestamp request for the hash of some data, and parse it as a time-stamping authority (TSA) would.
+
+<RunnableExample source={source} load={() => import("./creating-a-timestamp-request.example.ts?run")} />
+
+**API:** [`TimeStampReq`](../../api/classes/TimeStampReq.md), [`MessageImprint`](../../api/classes/MessageImprint.md)

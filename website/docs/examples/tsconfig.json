@@ -1,0 +1,17 @@
+{
+  // Typechecks the examples against the library source, so API changes that break them fail the website workflow.
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    // Examples run in browsers and Node.js; `dom` provides `console` and `crypto`.
+    "lib": ["es2023", "dom"],
+    // The library source checks for `process` and `global` to detect Node.js.
+    "types": ["node"],
+    "typeRoots": ["../../../node_modules/@types"],
+    "paths": {
+      "pkijs": ["../../../src/index.ts"],
+      // The copy the library source imports: pkijs checks `instanceof` on the asn1js values it is given.
+      "asn1js": ["../../../node_modules/asn1js"]
+    }
+  },
+  "include": ["**/*.example.ts"]
+}

@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./working-with-PKCS-7-certificate-bags-P7B.example";
+---
+sidebar_position: 4
+---
 
-# Working with PKCS#7 Certificate bags (P7B)
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./working-with-PKCS-7-certificate-bags-P7B.example.ts";
 
-In this example, you will see how to create a "certificate bag".
+# Working with PKCS#7 certificate bags (P7B)
 
-<CodeBlock language="ts">{source}</CodeBlock>
+Bundle a certificate chain in a P7B file, a CMS SignedData with certificates and no signers, and list the certificates in it.
+
+<RunnableExample source={source} load={() => import("./working-with-PKCS-7-certificate-bags-P7B.example.ts?run")} />
+
+**API:** [`SignedData`](../../api/classes/SignedData.md), [`ContentInfo`](../../api/classes/ContentInfo.md)

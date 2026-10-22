@@ -1,10 +1,9 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { PolicyMapping, PolicyMappingJson } from "./PolicyMapping";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import { PolicyMapping, type PolicyMappingJson } from "./PolicyMapping";
+import type * as Schema from "./Schema";
 
 const MAPPINGS = "mappings";
 const CLEAR_PROPS = [MAPPINGS];
@@ -34,11 +33,7 @@ export class PolicyMappings extends PkiObject implements IPolicyMappings {
   constructor(parameters: PolicyMappingsParameters = {}) {
     super();
 
-    this.mappings = pvutils.getParametersValue(
-      parameters,
-      MAPPINGS,
-      PolicyMappings.defaultValues(MAPPINGS)
-    );
+    this.mappings = parameters[MAPPINGS] ?? PolicyMappings.defaultValues(MAPPINGS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -70,28 +65,24 @@ export class PolicyMappings extends PkiObject implements IPolicyMappings {
   public static override schema(
     parameters: Schema.SchemaParameters<{
       mappings?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
           name: names.mappings || EMPTY_STRING,
-          value: PolicyMapping.schema()
-        })
-      ]
+          value: PolicyMapping.schema(),
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -99,29 +90,26 @@ export class PolicyMappings extends PkiObject implements IPolicyMappings {
       schema,
       PolicyMappings.schema({
         names: {
-          mappings: MAPPINGS
-        }
-      })
+          mappings: MAPPINGS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.mappings = Array.from(
-      asn1.result.mappings,
-      element => new PolicyMapping({ schema: element })
-    );
+    this.mappings = Array.from(asn1.result.mappings, (element) => new PolicyMapping({ schema: element }));
   }
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: Array.from(this.mappings, o => o.toSchema())
+      value: Array.from(this.mappings, (o) => o.toSchema()),
     });
   }
 
   public toJSON(): PolicyMappingsJson {
     return {
-      mappings: Array.from(this.mappings, o => o.toJSON())
+      mappings: Array.from(this.mappings, (o) => o.toJSON()),
     };
   }
 }

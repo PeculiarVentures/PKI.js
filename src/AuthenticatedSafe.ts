@@ -1,17 +1,12 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import { ContentInfo, ContentInfoJson } from "./ContentInfo";
+import { ContentInfo, type ContentInfoJson } from "./ContentInfo";
 import { SafeContents } from "./SafeContents";
 import { EnvelopedData } from "./EnvelopedData";
 import { EncryptedData } from "./EncryptedData";
-import * as Schema from "./Schema";
-import {
-  id_ContentType_Data,
-  id_ContentType_EncryptedData,
-  id_ContentType_EnvelopedData
-} from "./ObjectIdentifiers";
+import type * as Schema from "./Schema";
+import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData } from "./ObjectIdentifiers";
 import { ArgumentError, AsnError, ParameterError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_STRING } from "./constants";
 import * as common from "./common";
 
@@ -48,17 +43,9 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
   constructor(parameters: AuthenticatedSafeParameters = {}) {
     super();
 
-    this.safeContents = pvutils.getParametersValue(
-      parameters,
-      SAFE_CONTENTS,
-      AuthenticatedSafe.defaultValues(SAFE_CONTENTS)
-    );
+    this.safeContents = parameters[SAFE_CONTENTS] ?? AuthenticatedSafe.defaultValues(SAFE_CONTENTS);
     if (PARSED_VALUE in parameters) {
-      this.parsedValue = pvutils.getParametersValue(
-        parameters,
-        PARSED_VALUE,
-        AuthenticatedSafe.defaultValues(PARSED_VALUE)
-      );
+      this.parsedValue = parameters[PARSED_VALUE] ?? AuthenticatedSafe.defaultValues(PARSED_VALUE);
     }
 
     if (parameters.schema) {
@@ -113,28 +100,24 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
   public static override schema(
     parameters: Schema.SchemaParameters<{
       contentInfos?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
           name: names.contentInfos || EMPTY_STRING,
-          value: ContentInfo.schema()
-        })
-      ]
+          value: ContentInfo.schema(),
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [CONTENT_INFOS]);
+    for (const prop of [CONTENT_INFOS]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -142,48 +125,40 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
       schema,
       AuthenticatedSafe.schema({
         names: {
-          contentInfos: CONTENT_INFOS
-        }
-      })
+          contentInfos: CONTENT_INFOS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.safeContents = Array.from(
-      asn1.result.contentInfos,
-      element => new ContentInfo({ schema: element })
-    );
+    this.safeContents = Array.from(asn1.result.contentInfos, (element) => new ContentInfo({ schema: element }));
   }
 
   public toSchema(): asn1js.Sequence {
     return new asn1js.Sequence({
-      value: Array.from(this.safeContents, o => o.toSchema())
+      value: Array.from(this.safeContents, (o) => o.toSchema()),
     });
   }
 
   public toJSON(): AuthenticatedSafeJson {
     return {
-      safeContents: Array.from(this.safeContents, o => o.toJSON())
+      safeContents: Array.from(this.safeContents, (o) => o.toJSON()),
     };
   }
 
-  public async parseInternalValues(
-    parameters: { safeContents: SafeContent[] },
-    crypto = common.getCrypto(true)
-  ): Promise<void> {
+  public async parseInternalValues(parameters: { safeContents: SafeContent[] }, crypto = common.getCrypto(true)): Promise<void> {
     //#region Check input data from "parameters"
     ParameterError.assert(parameters, SAFE_CONTENTS);
     ArgumentError.assert(parameters.safeContents, SAFE_CONTENTS, "Array");
     if (parameters.safeContents.length !== this.safeContents.length) {
-      throw new ArgumentError(
-        'Length of "parameters.safeContents" must be equal to "this.safeContents.length"'
-      );
+      throw new ArgumentError('Length of "parameters.safeContents" must be equal to "this.safeContents.length"');
     }
     //#endregion
 
     //#region Create value for "this.parsedValue.authenticatedSafe"
     this.parsedValue = {
-      safeContents: [] as any[]
+      safeContents: [] as any[],
     };
 
     for (const [index, content] of this.safeContents.entries()) {
@@ -194,11 +169,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
         case id_ContentType_Data:
           {
             // Check that we do have OCTET STRING as "content"
-            ArgumentError.assert(
-              content.content,
-              "this.safeContents[j].content",
-              asn1js.OctetString
-            );
+            ArgumentError.assert(content.content, "this.safeContents[j].content", asn1js.OctetString);
 
             //#region Check we have "constructive encoding" for AuthSafe content
             const authSafeContent = content.content.getValue();
@@ -207,7 +178,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             //#region Finally initialize initial values of SAFE_CONTENTS type
             this.parsedValue.safeContents.push({
               privacyMode: 0, // No privacy, clear data
-              value: SafeContents.fromBER(authSafeContent)
+              value: SafeContents.fromBER(authSafeContent),
             });
             //#endregion
           }
@@ -232,14 +203,14 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
               0,
               {
                 recipientCertificate,
-                recipientPrivateKey: recipientKey
+                recipientPrivateKey: recipientKey,
               },
-              crypto
+              crypto,
             );
 
             this.parsedValue.safeContents.push({
               privacyMode: 2, // Public-key privacy mode
-              value: SafeContents.fromBER(decrypted)
+              value: SafeContents.fromBER(decrypted),
             });
             //#endregion
           }
@@ -261,16 +232,16 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             //#region Decrypt CMS EncryptedData using password
             const decrypted = await cmsEncrypted.decrypt(
               {
-                password
+                password,
               },
-              crypto
+              crypto,
             );
             //#endregion
 
             //#region Initialize internal data
             this.parsedValue.safeContents.push({
               privacyMode: 1, // Password-based privacy mode
-              value: SafeContents.fromBER(decrypted)
+              value: SafeContents.fromBER(decrypted),
             });
             //#endregion
           }
@@ -288,7 +259,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
     parameters: {
       safeContents: any[];
     },
-    crypto = common.getCrypto(true)
+    crypto = common.getCrypto(true),
   ): Promise<this> {
     //#region Check data in PARSED_VALUE
     if (!this.parsedValue) {
@@ -302,9 +273,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
     ParameterError.assert(parameters, "safeContents");
     ArgumentError.assert(parameters.safeContents, "parameters.safeContents", "Array");
     if (parameters.safeContents.length !== this.parsedValue.safeContents.length) {
-      throw new ArgumentError(
-        'Length of "parameters.safeContents" must be equal to "this.parsedValue.safeContents"'
-      );
+      throw new ArgumentError('Length of "parameters.safeContents" must be equal to "this.parsedValue.safeContents"');
     }
     //#endregion
 
@@ -326,8 +295,8 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             this.safeContents.push(
               new ContentInfo({
                 contentType: "1.2.840.113549.1.7.1",
-                content: new asn1js.OctetString({ valueHex: contentBuffer })
-              })
+                content: new asn1js.OctetString({ valueHex: contentBuffer }),
+              }),
             );
           }
           break;
@@ -350,8 +319,8 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             this.safeContents.push(
               new ContentInfo({
                 contentType: "1.2.840.113549.1.7.6",
-                content: cmsEncrypted.toSchema()
-              })
+                content: cmsEncrypted.toSchema(),
+              }),
             );
             //#endregion
           }
@@ -367,21 +336,14 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             //#endregion
 
             //#region Check mandatory parameters
-            ParameterError.assert(
-              `parameters.safeContents[${index}]`,
-              safeContent,
-              "encryptingCertificate",
-              "encryptionAlgorithm"
-            );
+            ParameterError.assert(`parameters.safeContents[${index}]`, safeContent, "encryptingCertificate", "encryptionAlgorithm");
 
             switch (true) {
               case safeContent.encryptionAlgorithm.name.toLowerCase() === "aes-cbc":
               case safeContent.encryptionAlgorithm.name.toLowerCase() === "aes-gcm":
                 break;
               default:
-                throw new Error(
-                  `Incorrect parameter "encryptionAlgorithm" in "parameters.safeContents[i]": ${safeContent.encryptionAlgorithm}`
-                );
+                throw new Error(`Incorrect parameter "encryptionAlgorithm" in "parameters.safeContents[i]": ${safeContent.encryptionAlgorithm}`);
             }
 
             switch (true) {
@@ -390,9 +352,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
               case safeContent.encryptionAlgorithm.length === 256:
                 break;
               default:
-                throw new Error(
-                  `Incorrect parameter "encryptionAlgorithm.length" in "parameters.safeContents[i]": ${safeContent.encryptionAlgorithm.length}`
-                );
+                throw new Error(`Incorrect parameter "encryptionAlgorithm.length" in "parameters.safeContents[i]": ${safeContent.encryptionAlgorithm.length}`);
             }
             //#endregion
 
@@ -401,12 +361,7 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             //#endregion
 
             //#region Append recipient for enveloped data
-            cmsEnveloped.addRecipientByCertificate(
-              safeContent.encryptingCertificate,
-              {},
-              undefined,
-              crypto
-            );
+            cmsEnveloped.addRecipientByCertificate(safeContent.encryptingCertificate, {}, undefined, crypto);
             //#endregion
 
             //#region Making encryption
@@ -415,8 +370,8 @@ export class AuthenticatedSafe extends PkiObject implements IAuthenticatedSafe {
             this.safeContents.push(
               new ContentInfo({
                 contentType: "1.2.840.113549.1.7.3",
-                content: cmsEnveloped.toSchema()
-              })
+                content: cmsEnveloped.toSchema(),
+              }),
             );
             //#endregion
           }

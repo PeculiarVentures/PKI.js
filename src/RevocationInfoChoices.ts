@@ -1,17 +1,10 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import {
-  CertificateRevocationList,
-  CertificateRevocationListJson
-} from "./CertificateRevocationList";
+import { CertificateRevocationList, type CertificateRevocationListJson } from "./CertificateRevocationList";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import {
-  OtherRevocationInfoFormat,
-  OtherRevocationInfoFormatJson
-} from "./OtherRevocationInfoFormat";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { OtherRevocationInfoFormat, type OtherRevocationInfoFormatJson } from "./OtherRevocationInfoFormat";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const CRLS = "crls";
 const OTHER_REVOCATION_INFOS = "otherRevocationInfos";
@@ -49,16 +42,8 @@ export class RevocationInfoChoices extends PkiObject implements IRevocationInfoC
   constructor(parameters: RevocationInfoChoicesParameters = {}) {
     super();
 
-    this.crls = pvutils.getParametersValue(
-      parameters,
-      CRLS,
-      RevocationInfoChoices.defaultValues(CRLS)
-    );
-    this.otherRevocationInfos = pvutils.getParametersValue(
-      parameters,
-      OTHER_REVOCATION_INFOS,
-      RevocationInfoChoices.defaultValues(OTHER_REVOCATION_INFOS)
-    );
+    this.crls = parameters[CRLS] ?? RevocationInfoChoices.defaultValues(CRLS);
+    this.otherRevocationInfos = parameters[OTHER_REVOCATION_INFOS] ?? RevocationInfoChoices.defaultValues(OTHER_REVOCATION_INFOS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -71,9 +56,7 @@ export class RevocationInfoChoices extends PkiObject implements IRevocationInfoC
    * @returns Default value
    */
   public static override defaultValues(memberName: typeof CRLS): CertificateRevocationList[];
-  public static override defaultValues(
-    memberName: typeof OTHER_REVOCATION_INFOS
-  ): OtherRevocationInfoFormat[];
+  public static override defaultValues(memberName: typeof OTHER_REVOCATION_INFOS): OtherRevocationInfoFormat[];
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case CRLS:
@@ -97,11 +80,7 @@ export class RevocationInfoChoices extends PkiObject implements IRevocationInfoC
    *```
    */
   public static override schema(parameters: RevocationInfoChoicesSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Set({
       name: names.blockName || EMPTY_STRING,
@@ -114,20 +93,20 @@ export class RevocationInfoChoices extends PkiObject implements IRevocationInfoC
               new asn1js.Constructed({
                 idBlock: {
                   tagClass: 3, // CONTEXT-SPECIFIC
-                  tagNumber: 1 // [1]
+                  tagNumber: 1, // [1]
                 },
-                value: [new asn1js.ObjectIdentifier(), new asn1js.Any()]
-              })
-            ]
-          })
-        })
-      ]
+                value: [new asn1js.ObjectIdentifier(), new asn1js.Any()],
+              }),
+            ],
+          }),
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -135,17 +114,16 @@ export class RevocationInfoChoices extends PkiObject implements IRevocationInfoC
       schema,
       RevocationInfoChoices.schema({
         names: {
-          crls: CRLS
-        }
-      })
+          crls: CRLS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     if (asn1.result.crls) {
       for (const element of asn1.result.crls) {
-        if (element.idBlock.tagClass === 1)
-          this.crls.push(new CertificateRevocationList({ schema: element }));
+        if (element.idBlock.tagClass === 1) this.crls.push(new CertificateRevocationList({ schema: element }));
         else this.otherRevocationInfos.push(new OtherRevocationInfoFormat({ schema: element }));
       }
     }
@@ -155,31 +133,31 @@ export class RevocationInfoChoices extends PkiObject implements IRevocationInfoC
     //#region Create array for output set
     const outputArray = [];
 
-    outputArray.push(...Array.from(this.crls, o => o.toSchema()));
+    outputArray.push(...Array.from(this.crls, (o) => o.toSchema()));
 
     outputArray.push(
-      ...Array.from(this.otherRevocationInfos, element => {
+      ...Array.from(this.otherRevocationInfos, (element) => {
         const schema = element.toSchema();
 
         schema.idBlock.tagClass = 3;
         schema.idBlock.tagNumber = 1;
 
         return schema;
-      })
+      }),
     );
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Set({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
 
   public toJSON(): RevocationInfoChoicesJson {
     return {
-      crls: Array.from(this.crls, o => o.toJSON()),
-      otherRevocationInfos: Array.from(this.otherRevocationInfos, o => o.toJSON())
+      crls: Array.from(this.crls, (o) => o.toJSON()),
+      otherRevocationInfos: Array.from(this.otherRevocationInfos, (o) => o.toJSON()),
     };
   }
 }

@@ -1,9 +1,8 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const KEY_PURPOSES = "keyPurposes";
 const CLEAR_PROPS = [KEY_PURPOSES];
@@ -33,11 +32,7 @@ export class ExtKeyUsage extends PkiObject implements IExtKeyUsage {
   constructor(parameters: ExtKeyUsageParameters = {}) {
     super();
 
-    this.keyPurposes = pvutils.getParametersValue(
-      parameters,
-      KEY_PURPOSES,
-      ExtKeyUsage.defaultValues(KEY_PURPOSES)
-    );
+    this.keyPurposes = parameters[KEY_PURPOSES] ?? ExtKeyUsage.defaultValues(KEY_PURPOSES);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -71,32 +66,28 @@ export class ExtKeyUsage extends PkiObject implements IExtKeyUsage {
   public static override schema(
     parameters: Schema.SchemaParameters<{
       keyPurposes?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
     /**
      * @type {Object}
      * @property {string} [blockName]
      * @property {string} [keyPurposes]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
           name: names.keyPurposes || EMPTY_STRING,
-          value: new asn1js.ObjectIdentifier()
-        })
-      ]
+          value: new asn1js.ObjectIdentifier(),
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -104,31 +95,26 @@ export class ExtKeyUsage extends PkiObject implements IExtKeyUsage {
       schema,
       ExtKeyUsage.schema({
         names: {
-          keyPurposes: KEY_PURPOSES
-        }
-      })
+          keyPurposes: KEY_PURPOSES,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.keyPurposes = Array.from(asn1.result.keyPurposes, (element: asn1js.ObjectIdentifier) =>
-      element.valueBlock.toString()
-    );
+    this.keyPurposes = Array.from(asn1.result.keyPurposes, (element: asn1js.ObjectIdentifier) => element.valueBlock.toString());
   }
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: Array.from(
-        this.keyPurposes,
-        element => new asn1js.ObjectIdentifier({ value: element })
-      )
+      value: Array.from(this.keyPurposes, (element) => new asn1js.ObjectIdentifier({ value: element })),
     });
   }
 
   public toJSON(): ExtKeyUsageJson {
     return {
-      keyPurposes: Array.from(this.keyPurposes)
+      keyPurposes: Array.from(this.keyPurposes),
     };
   }
 }

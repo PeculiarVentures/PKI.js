@@ -1,9 +1,8 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const TYPE = "type";
 const VALUE = "value";
@@ -14,7 +13,7 @@ const CLEAR_PROPS = [UTC_TIME_NAME, GENERAL_TIME_NAME];
 export enum TimeType {
   UTCTime,
   GeneralizedTime,
-  empty
+  empty,
 }
 
 export interface ITime {
@@ -56,8 +55,8 @@ export class Time extends PkiObject implements ITime {
   constructor(parameters: TimeParameters = {}) {
     super();
 
-    this.type = pvutils.getParametersValue(parameters, TYPE, Time.defaultValues(TYPE));
-    this.value = pvutils.getParametersValue(parameters, VALUE, Time.defaultValues(VALUE));
+    this.type = parameters[TYPE] ?? Time.defaultValues(TYPE);
+    this.value = parameters[VALUE] ?? Time.defaultValues(VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -96,24 +95,17 @@ export class Time extends PkiObject implements ITime {
    * @returns ASN.1 schema object
    */
   static override schema(parameters: TimeSchema = {}, optional = false): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Choice({
       optional,
-      value: [
-        new asn1js.UTCTime({ name: names.utcTimeName || EMPTY_STRING }),
-        new asn1js.GeneralizedTime({ name: names.generalTimeName || EMPTY_STRING })
-      ]
+      value: [new asn1js.UTCTime({ name: names.utcTimeName || EMPTY_STRING }), new asn1js.GeneralizedTime({ name: names.generalTimeName || EMPTY_STRING })],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -122,9 +114,9 @@ export class Time extends PkiObject implements ITime {
       Time.schema({
         names: {
           utcTimeName: UTC_TIME_NAME,
-          generalTimeName: GENERAL_TIME_NAME
-        }
-      })
+          generalTimeName: GENERAL_TIME_NAME,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -152,7 +144,7 @@ export class Time extends PkiObject implements ITime {
   public toJSON(): TimeJson {
     return {
       type: this.type,
-      value: this.value
+      value: this.value,
     };
   }
 }

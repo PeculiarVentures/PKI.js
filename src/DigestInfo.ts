@@ -1,14 +1,9 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import {
-  AlgorithmIdentifier,
-  AlgorithmIdentifierJson,
-  AlgorithmIdentifierSchema
-} from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const DIGEST_ALGORITHM = "digestAlgorithm";
 const DIGEST = "digest";
@@ -47,12 +42,8 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
   constructor(parameters: DigestInfoParameters = {}) {
     super();
 
-    this.digestAlgorithm = pvutils.getParametersValue(
-      parameters,
-      DIGEST_ALGORITHM,
-      DigestInfo.defaultValues(DIGEST_ALGORITHM)
-    );
-    this.digest = pvutils.getParametersValue(parameters, DIGEST, DigestInfo.defaultValues(DIGEST));
+    this.digestAlgorithm = parameters[DIGEST_ALGORITHM] ?? DigestInfo.defaultValues(DIGEST_ALGORITHM);
+    this.digest = parameters[DIGEST] ?? DigestInfo.defaultValues(DIGEST);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -85,10 +76,7 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case DIGEST_ALGORITHM:
-        return (
-          AlgorithmIdentifier.compareWithDefault("algorithmId", memberValue.algorithmId) &&
-          "algorithmParams" in memberValue === false
-        );
+        return AlgorithmIdentifier.compareWithDefault("algorithmId", memberValue.algorithmId) && "algorithmParams" in memberValue === false;
       case DIGEST:
         return memberValue.isEqual(DigestInfo.defaultValues(memberName));
       default:
@@ -108,11 +96,7 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
    *```
    */
   public static override schema(parameters: DigestInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -120,18 +104,18 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
         AlgorithmIdentifier.schema(
           names.digestAlgorithm || {
             names: {
-              blockName: DIGEST_ALGORITHM
-            }
-          }
+              blockName: DIGEST_ALGORITHM,
+            },
+          },
         ),
-        new asn1js.OctetString({ name: names.digest || DIGEST })
-      ]
+        new asn1js.OctetString({ name: names.digest || DIGEST }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -141,12 +125,12 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
         names: {
           digestAlgorithm: {
             names: {
-              blockName: DIGEST_ALGORITHM
-            }
+              blockName: DIGEST_ALGORITHM,
+            },
           },
-          digest: DIGEST
-        }
-      })
+          digest: DIGEST,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -158,14 +142,14 @@ export class DigestInfo extends PkiObject implements IDigestInfo {
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [this.digestAlgorithm.toSchema(), this.digest]
+      value: [this.digestAlgorithm.toSchema(), this.digest],
     });
   }
 
   public toJSON(): DigestInfoJson {
     return {
       digestAlgorithm: this.digestAlgorithm.toJSON(),
-      digest: this.digest.toJSON()
+      digest: this.digest.toJSON(),
     };
   }
 }

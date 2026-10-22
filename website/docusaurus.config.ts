@@ -3,15 +3,20 @@ import type * as Preset from "@docusaurus/preset-classic";
 import { themes as prismThemes } from "prism-react-renderer";
 import npm2yarn from "@docusaurus/remark-plugin-npm2yarn";
 import packageJSON from "../package.json";
+import runnableExamples from "./plugins/runnable-examples";
 
 const config: Config = {
   title: "pki.js",
-  tagline: "pki.js",
+  tagline: "X.509, CMS, and other PKI formats for JavaScript",
   favicon: "img/favicon.ico",
   url: "https://pkijs.org",
   baseUrl: "/",
   onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "warn",
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: "warn"
+    }
+  },
   i18n: {
     defaultLocale: "en",
     locales: ["en"]
@@ -32,10 +37,6 @@ const config: Config = {
           customCss: "./src/css/custom.css"
         },
         blog: false
-        // TODO: Add gtag trackingID.
-        // gtag: {
-        //   trackingID: '',
-        // },
       } satisfies Preset.Options
     ]
   ],
@@ -49,8 +50,7 @@ const config: Config = {
         skipErrorChecking: true,
         disableSources: true,
         membersWithOwnFile: ["Class", "Enum", "Interface"],
-        entryFileName: "pkijs",
-        readme: "../src/README.MD",
+        readme: "none",
         sidebar: {
           pretty: true,
           autoConfiguration: true
@@ -60,7 +60,8 @@ const config: Config = {
         }
       }
     ],
-    "docusaurus-plugin-sass"
+    "docusaurus-plugin-sass",
+    runnableExamples
   ],
 
   themeConfig: {
@@ -114,11 +115,11 @@ const config: Config = {
             },
             {
               label: "Examples",
-              to: "/docs/examples/certificates-and-revocation"
+              to: "/docs/examples/"
             },
             {
               label: "API",
-              to: "/docs/api/pkijs"
+              to: "/docs/api/"
             }
           ]
         },

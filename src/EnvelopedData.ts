@@ -1,24 +1,18 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import { BufferSourceConverter } from "pvtsutils";
+import { isBufferSource } from "@peculiar/utils";
 import * as common from "./common";
-import { OriginatorInfo, OriginatorInfoJson } from "./OriginatorInfo";
-import { RecipientInfo, RecipientInfoJson } from "./RecipientInfo";
-import {
-  EncryptedContentInfo,
-  EncryptedContentInfoJson,
-  EncryptedContentInfoSchema,
-  EncryptedContentInfoSplit
-} from "./EncryptedContentInfo";
-import { Attribute, AttributeJson } from "./Attribute";
-import { AlgorithmIdentifier, AlgorithmIdentifierParameters } from "./AlgorithmIdentifier";
+import { OriginatorInfo, type OriginatorInfoJson } from "./OriginatorInfo";
+import { RecipientInfo, type RecipientInfoJson } from "./RecipientInfo";
+import { EncryptedContentInfo, type EncryptedContentInfoJson, type EncryptedContentInfoSchema, type EncryptedContentInfoSplit } from "./EncryptedContentInfo";
+import { Attribute, type AttributeJson } from "./Attribute";
+import { AlgorithmIdentifier, type AlgorithmIdentifierParameters } from "./AlgorithmIdentifier";
 import { RSAESOAEPParams } from "./RSAESOAEPParams";
 import { KeyTransRecipientInfo } from "./KeyTransRecipientInfo";
 import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
 import { RecipientKeyIdentifier } from "./RecipientKeyIdentifier";
 import { RecipientEncryptedKey } from "./RecipientEncryptedKey";
 import { KeyAgreeRecipientIdentifier } from "./KeyAgreeRecipientIdentifier";
-import { KeyAgreeRecipientInfo, KeyAgreeRecipientInfoParameters } from "./KeyAgreeRecipientInfo";
+import { KeyAgreeRecipientInfo, type KeyAgreeRecipientInfoParameters } from "./KeyAgreeRecipientInfo";
 import { RecipientEncryptedKeys } from "./RecipientEncryptedKeys";
 import { KEKRecipientInfo } from "./KEKRecipientInfo";
 import { KEKIdentifier } from "./KEKIdentifier";
@@ -27,10 +21,10 @@ import { PasswordRecipientinfo } from "./PasswordRecipientinfo";
 import { ECCCMSSharedInfo } from "./ECCCMSSharedInfo";
 import { OriginatorIdentifierOrKey } from "./OriginatorIdentifierOrKey";
 import { OriginatorPublicKey } from "./OriginatorPublicKey";
-import * as Schema from "./Schema";
-import { Certificate } from "./Certificate";
+import type * as Schema from "./Schema";
+import type { Certificate } from "./Certificate";
 import { ArgumentError, AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_STRING } from "./constants";
 
 const VERSION = "version";
@@ -38,22 +32,16 @@ const ORIGINATOR_INFO = "originatorInfo";
 const RECIPIENT_INFOS = "recipientInfos";
 const ENCRYPTED_CONTENT_INFO = "encryptedContentInfo";
 const UNPROTECTED_ATTRS = "unprotectedAttrs";
-const CLEAR_PROPS = [
-  VERSION,
-  ORIGINATOR_INFO,
-  RECIPIENT_INFOS,
-  ENCRYPTED_CONTENT_INFO,
-  UNPROTECTED_ATTRS
-];
+const CLEAR_PROPS = [VERSION, ORIGINATOR_INFO, RECIPIENT_INFOS, ENCRYPTED_CONTENT_INFO, UNPROTECTED_ATTRS];
 
 const defaultEncryptionParams = {
   kdfAlgorithm: "SHA-512",
-  kekEncryptionLength: 256
+  kekEncryptionLength: 256,
 };
 const curveLengthByName: Record<string, number> = {
   "P-256": 256,
   "P-384": 384,
-  "P-521": 528
+  "P-521": 528,
 };
 
 export interface IEnvelopedData {
@@ -113,9 +101,7 @@ export interface EnvelopedDataJson {
   unprotectedAttrs?: AttributeJson[];
 }
 
-export type EnvelopedDataParameters = PkiObjectParameters &
-  Partial<IEnvelopedData> &
-  EncryptedContentInfoSplit;
+export type EnvelopedDataParameters = PkiObjectParameters & Partial<IEnvelopedData> & EncryptedContentInfoSplit;
 
 export interface EnvelopedDataEncryptionParams {
   kekEncryptionLength: number;
@@ -139,9 +125,7 @@ export interface EnvelopedDataDecryptBufferParams extends EnvelopedDataDecryptBa
   recipientPrivateKey?: BufferSource;
 }
 
-export type EnvelopedDataDecryptParams =
-  | EnvelopedDataDecryptBufferParams
-  | EnvelopedDataDecryptKeyParams;
+export type EnvelopedDataDecryptParams = EnvelopedDataDecryptBufferParams | EnvelopedDataDecryptKeyParams;
 
 /**
  * Represents the EnvelopedData structure described in [RFC5652](https://datatracker.ietf.org/doc/html/rfc5652)
@@ -209,37 +193,17 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
   constructor(parameters: EnvelopedDataParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(
-      parameters,
-      VERSION,
-      EnvelopedData.defaultValues(VERSION)
-    );
+    this.version = parameters[VERSION] ?? EnvelopedData.defaultValues(VERSION);
     if (ORIGINATOR_INFO in parameters) {
-      this.originatorInfo = pvutils.getParametersValue(
-        parameters,
-        ORIGINATOR_INFO,
-        EnvelopedData.defaultValues(ORIGINATOR_INFO)
-      );
+      this.originatorInfo = parameters[ORIGINATOR_INFO] ?? EnvelopedData.defaultValues(ORIGINATOR_INFO);
     }
-    this.recipientInfos = pvutils.getParametersValue(
-      parameters,
-      RECIPIENT_INFOS,
-      EnvelopedData.defaultValues(RECIPIENT_INFOS)
-    );
-    this.encryptedContentInfo = pvutils.getParametersValue(
-      parameters,
-      ENCRYPTED_CONTENT_INFO,
-      EnvelopedData.defaultValues(ENCRYPTED_CONTENT_INFO)
-    );
+    this.recipientInfos = parameters[RECIPIENT_INFOS] ?? EnvelopedData.defaultValues(RECIPIENT_INFOS);
+    this.encryptedContentInfo = parameters[ENCRYPTED_CONTENT_INFO] ?? EnvelopedData.defaultValues(ENCRYPTED_CONTENT_INFO);
     if (UNPROTECTED_ATTRS in parameters) {
-      this.unprotectedAttrs = pvutils.getParametersValue(
-        parameters,
-        UNPROTECTED_ATTRS,
-        EnvelopedData.defaultValues(UNPROTECTED_ATTRS)
-      );
+      this.unprotectedAttrs = parameters[UNPROTECTED_ATTRS] ?? EnvelopedData.defaultValues(UNPROTECTED_ATTRS);
     }
     this.policy = {
-      disableSplit: !!parameters.disableSplit
+      disableSplit: !!parameters.disableSplit,
     };
 
     if (parameters.schema) {
@@ -255,9 +219,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
   public static override defaultValues(memberName: typeof VERSION): number;
   public static override defaultValues(memberName: typeof ORIGINATOR_INFO): OriginatorInfo;
   public static override defaultValues(memberName: typeof RECIPIENT_INFOS): RecipientInfo[];
-  public static override defaultValues(
-    memberName: typeof ENCRYPTED_CONTENT_INFO
-  ): EncryptedContentInfo;
+  public static override defaultValues(memberName: typeof ENCRYPTED_CONTENT_INFO): EncryptedContentInfo;
   public static override defaultValues(memberName: typeof UNPROTECTED_ATTRS): Attribute[];
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
@@ -293,10 +255,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       case ENCRYPTED_CONTENT_INFO:
         return (
           EncryptedContentInfo.compareWithDefault("contentType", memberValue.contentType) &&
-          EncryptedContentInfo.compareWithDefault(
-            "contentEncryptionAlgorithm",
-            memberValue.contentEncryptionAlgorithm
-          ) &&
+          EncryptedContentInfo.compareWithDefault("contentEncryptionAlgorithm", memberValue.contentEncryptionAlgorithm) &&
           EncryptedContentInfo.compareWithDefault("encryptedContent", memberValue.encryptedContent)
         );
       default:
@@ -323,13 +282,9 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       recipientInfos?: string;
       encryptedContentInfo?: EncryptedContentInfoSchema;
       unprotectedAttrs?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -340,39 +295,39 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: OriginatorInfo.schema().valueBlock.value
+          value: OriginatorInfo.schema().valueBlock.value,
         }),
         new asn1js.Set({
           value: [
             new asn1js.Repeated({
               name: names.recipientInfos || EMPTY_STRING,
-              value: RecipientInfo.schema()
-            })
-          ]
+              value: RecipientInfo.schema(),
+            }),
+          ],
         }),
         EncryptedContentInfo.schema(names.encryptedContentInfo || {}),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
           value: [
             new asn1js.Repeated({
               name: names.unprotectedAttrs || EMPTY_STRING,
-              value: Attribute.schema()
-            })
-          ]
-        })
-      ]
+              value: Attribute.schema(),
+            }),
+          ],
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -385,12 +340,12 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           recipientInfos: RECIPIENT_INFOS,
           encryptedContentInfo: {
             names: {
-              blockName: ENCRYPTED_CONTENT_INFO
-            }
+              blockName: ENCRYPTED_CONTENT_INFO,
+            },
           },
-          unprotectedAttrs: UNPROTECTED_ATTRS
-        }
-      })
+          unprotectedAttrs: UNPROTECTED_ATTRS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -400,24 +355,17 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     if (ORIGINATOR_INFO in asn1.result) {
       this.originatorInfo = new OriginatorInfo({
         schema: new asn1js.Sequence({
-          value: asn1.result.originatorInfo.valueBlock.value
-        })
+          value: asn1.result.originatorInfo.valueBlock.value,
+        }),
       });
     }
 
-    this.recipientInfos = Array.from(
-      asn1.result.recipientInfos,
-      o => new RecipientInfo({ schema: o })
-    );
+    this.recipientInfos = Array.from(asn1.result.recipientInfos, (o) => new RecipientInfo({ schema: o }));
     this.encryptedContentInfo = new EncryptedContentInfo({
-      schema: asn1.result.encryptedContentInfo
+      schema: asn1.result.encryptedContentInfo,
     });
 
-    if (UNPROTECTED_ATTRS in asn1.result)
-      this.unprotectedAttrs = Array.from(
-        asn1.result.unprotectedAttrs,
-        o => new Attribute({ schema: o })
-      );
+    if (UNPROTECTED_ATTRS in asn1.result) this.unprotectedAttrs = Array.from(asn1.result.unprotectedAttrs, (o) => new Attribute({ schema: o }));
   }
 
   public toSchema(): asn1js.Sequence {
@@ -432,17 +380,17 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: this.originatorInfo.toSchema().valueBlock.value
-        })
+          value: this.originatorInfo.toSchema().valueBlock.value,
+        }),
       );
     }
 
     outputArray.push(
       new asn1js.Set({
-        value: Array.from(this.recipientInfos, o => o.toSchema())
-      })
+        value: Array.from(this.recipientInfos, (o) => o.toSchema()),
+      }),
     );
 
     outputArray.push(this.encryptedContentInfo.toSchema());
@@ -453,17 +401,17 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: Array.from(this.unprotectedAttrs, o => o.toSchema())
-        })
+          value: Array.from(this.unprotectedAttrs, (o) => o.toSchema()),
+        }),
       );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
@@ -471,14 +419,13 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
   public toJSON(): EnvelopedDataJson {
     const res: EnvelopedDataJson = {
       version: this.version,
-      recipientInfos: Array.from(this.recipientInfos, o => o.toJSON()),
-      encryptedContentInfo: this.encryptedContentInfo.toJSON()
+      recipientInfos: Array.from(this.recipientInfos, (o) => o.toJSON()),
+      encryptedContentInfo: this.encryptedContentInfo.toJSON(),
     };
 
     if (this.originatorInfo) res.originatorInfo = this.originatorInfo.toJSON();
 
-    if (this.unprotectedAttrs)
-      res.unprotectedAttrs = Array.from(this.unprotectedAttrs, o => o.toJSON());
+    if (this.unprotectedAttrs) res.unprotectedAttrs = Array.from(this.unprotectedAttrs, (o) => o.toJSON());
 
     return res;
   }
@@ -493,30 +440,16 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param variant Variant = 1 is for "key transport", variant = 2 is for "key agreement". In fact the "variant" is unnecessary now because Google has no DH algorithm implementation. Thus key encryption scheme would be choosen by certificate type only: "key transport" for RSA and "key agreement" for ECC certificates.
    * @param crypto Crypto engine
    */
-  public addRecipientByCertificate(
-    certificate: Certificate,
-    parameters?: object,
-    variant?: number,
-    crypto = common.getCrypto(true)
-  ): boolean {
+  public addRecipientByCertificate(certificate: Certificate, parameters?: object, variant?: number, crypto = common.getCrypto(true)): boolean {
     //#region Initialize encryption parameters
-    const encryptionParameters = Object.assign(
-      { useOAEP: true, oaepHashAlgorithm: "SHA-512" },
-      defaultEncryptionParams,
-      parameters || {}
-    );
+    const encryptionParameters = Object.assign({ useOAEP: true, oaepHashAlgorithm: "SHA-512" }, defaultEncryptionParams, parameters || {});
     //#endregion
 
     //#region Check type of certificate
-    if (certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== -1)
-      variant = 1; // For the moment it is the only variant for RSA-based certificates
+    if (certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.113549") !== -1) variant = 1; // For the moment it is the only variant for RSA-based certificates
     else {
-      if (certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.10045") !== -1)
-        variant = 2; // For the moment it is the only variant for ECC-based certificates
-      else
-        throw new Error(
-          `Unknown type of certificate's public key: ${certificate.subjectPublicKeyInfo.algorithm.algorithmId}`
-        );
+      if (certificate.subjectPublicKeyInfo.algorithm.algorithmId.indexOf("1.2.840.10045") !== -1) variant = 2; // For the moment it is the only variant for ECC-based certificates
+      else throw new Error(`Unknown type of certificate's public key: ${certificate.subjectPublicKeyInfo.algorithm.algorithmId}`);
     }
     //#endregion
 
@@ -531,32 +464,32 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
             // keyEncryptionAlgorithm
             algorithmId = crypto.getOIDByAlgorithm(
               {
-                name: "RSA-OAEP"
+                name: "RSA-OAEP",
               },
               true,
-              "keyEncryptionAlgorithm"
+              "keyEncryptionAlgorithm",
             );
 
             //#region RSAES-OAEP-params
             const hashOID = crypto.getOIDByAlgorithm(
               {
-                name: encryptionParameters.oaepHashAlgorithm
+                name: encryptionParameters.oaepHashAlgorithm,
               },
               true,
-              "RSAES-OAEP-params"
+              "RSAES-OAEP-params",
             );
 
             const hashAlgorithm = new AlgorithmIdentifier({
               algorithmId: hashOID,
-              algorithmParams: new asn1js.Null()
+              algorithmParams: new asn1js.Null(),
             });
 
             const rsaOAEPParams = new RSAESOAEPParams({
               hashAlgorithm,
               maskGenAlgorithm: new AlgorithmIdentifier({
                 algorithmId: "1.2.840.113549.1.1.8", // id-mgf1
-                algorithmParams: hashAlgorithm.toSchema()
-              })
+                algorithmParams: hashAlgorithm.toSchema(),
+              }),
             });
 
             algorithmParams = rsaOAEPParams.toSchema();
@@ -565,10 +498,9 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           {
             //#region keyEncryptionAlgorithm
             algorithmId = crypto.getOIDByAlgorithm({
-              name: "RSAES-PKCS1-v1_5"
+              name: "RSAES-PKCS1-v1_5",
             });
-            if (algorithmId === EMPTY_STRING)
-              throw new Error("Can not find OID for RSAES-PKCS1-v1_5");
+            if (algorithmId === EMPTY_STRING) throw new Error("Can not find OID for RSAES-PKCS1-v1_5");
             //#endregion
 
             algorithmParams = new asn1js.Null();
@@ -579,13 +511,13 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
             version: 0,
             rid: new IssuerAndSerialNumber({
               issuer: certificate.issuer,
-              serialNumber: certificate.serialNumber
+              serialNumber: certificate.serialNumber,
             }),
             keyEncryptionAlgorithm: new AlgorithmIdentifier({
               algorithmId,
-              algorithmParams
+              algorithmParams,
             }),
-            recipientCertificate: certificate
+            recipientCertificate: certificate,
             // "encryptedKey" will be calculated in "encrypt" function
           });
           //#endregion
@@ -594,8 +526,8 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           this.recipientInfos.push(
             new RecipientInfo({
               variant: 1,
-              value: keyInfo
-            })
+              value: keyInfo,
+            }),
           );
           //#endregion
         }
@@ -606,15 +538,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
             variant: 1,
             value: new IssuerAndSerialNumber({
               issuer: certificate.issuer,
-              serialNumber: certificate.serialNumber
-            })
+              serialNumber: certificate.serialNumber,
+            }),
           });
-          this._addKeyAgreeRecipientInfo(
-            recipientIdentifier,
-            encryptionParameters,
-            { recipientCertificate: certificate },
-            crypto
-          );
+          this._addKeyAgreeRecipientInfo(recipientIdentifier, encryptionParameters, { recipientCertificate: certificate }, crypto);
         }
         break;
       default:
@@ -642,7 +569,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       keyEncryptionAlgorithmParams?: any;
     } = {},
     variant: number,
-    crypto = common.getCrypto(true)
+    crypto = common.getCrypto(true),
   ) {
     //#region Check initial parameters
     ArgumentError.assert(preDefinedData, "preDefinedData", "ArrayBuffer");
@@ -669,12 +596,11 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     if (!parameters.keyEncryptionAlgorithm) {
       parameters.keyEncryptionAlgorithm = {
         name: "AES-KW",
-        length: 256
+        length: 256,
       };
     }
 
-    if (!parameters.keyEncryptionAlgorithmParams)
-      parameters.keyEncryptionAlgorithmParams = new asn1js.Null();
+    if (!parameters.keyEncryptionAlgorithmParams) parameters.keyEncryptionAlgorithmParams = new asn1js.Null();
     //#endregion
 
     //#region Add new recipient based on passed variant
@@ -682,26 +608,22 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       case 1: // KEKRecipientInfo
         {
           // keyEncryptionAlgorithm
-          const kekOID = crypto.getOIDByAlgorithm(
-            parameters.keyEncryptionAlgorithm,
-            true,
-            "keyEncryptionAlgorithm"
-          );
+          const kekOID = crypto.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm, true, "keyEncryptionAlgorithm");
 
           //#region KEKRecipientInfo
           const keyInfo = new KEKRecipientInfo({
             version: 4,
             kekid: new KEKIdentifier({
-              keyIdentifier: new asn1js.OctetString({ valueHex: parameters.keyIdentifier })
+              keyIdentifier: new asn1js.OctetString({ valueHex: parameters.keyIdentifier }),
             }),
             keyEncryptionAlgorithm: new AlgorithmIdentifier({
               algorithmId: kekOID,
               /*
                For AES-KW params are NULL, but for other algorithm could another situation.
                */
-              algorithmParams: parameters.keyEncryptionAlgorithmParams
+              algorithmParams: parameters.keyEncryptionAlgorithmParams,
             }),
-            preDefinedKEK: preDefinedData
+            preDefinedKEK: preDefinedData,
             // "encryptedKey" would be set in "ecrypt" function
           });
           //#endregion
@@ -710,8 +632,8 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           this.recipientInfos.push(
             new RecipientInfo({
               variant: 3,
-              value: keyInfo
-            })
+              value: keyInfo,
+            }),
           );
           //#endregion
         }
@@ -719,11 +641,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       case 2: // PasswordRecipientinfo
         {
           // keyDerivationAlgorithm
-          const pbkdf2OID = crypto.getOIDByAlgorithm(
-            { name: "PBKDF2" },
-            true,
-            "keyDerivationAlgorithm"
-          );
+          const pbkdf2OID = crypto.getOIDByAlgorithm({ name: "PBKDF2" }, true, "keyDerivationAlgorithm");
 
           //#region Salt
           const saltBuffer = new ArrayBuffer(64);
@@ -736,11 +654,11 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
             {
               name: "HMAC",
               hash: {
-                name: parameters.hmacHashAlgorithm
-              }
+                name: parameters.hmacHashAlgorithm,
+              },
             } as Algorithm,
             true,
-            "hmacHashAlgorithm"
+            "hmacHashAlgorithm",
           );
           //#endregion
 
@@ -750,33 +668,29 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
             iterationCount: parameters.iterationCount,
             prf: new AlgorithmIdentifier({
               algorithmId: hmacOID,
-              algorithmParams: new asn1js.Null()
-            })
+              algorithmParams: new asn1js.Null(),
+            }),
           });
           //#endregion
 
           // keyEncryptionAlgorithm
-          const kekOID = crypto.getOIDByAlgorithm(
-            parameters.keyEncryptionAlgorithm,
-            true,
-            "keyEncryptionAlgorithm"
-          );
+          const kekOID = crypto.getOIDByAlgorithm(parameters.keyEncryptionAlgorithm, true, "keyEncryptionAlgorithm");
 
           //#region PasswordRecipientinfo
           const keyInfo = new PasswordRecipientinfo({
             version: 0,
             keyDerivationAlgorithm: new AlgorithmIdentifier({
               algorithmId: pbkdf2OID,
-              algorithmParams: pbkdf2Params.toSchema()
+              algorithmParams: pbkdf2Params.toSchema(),
             }),
             keyEncryptionAlgorithm: new AlgorithmIdentifier({
               algorithmId: kekOID,
               /*
                For AES-KW params are NULL, but for other algorithm could be another situation.
                */
-              algorithmParams: parameters.keyEncryptionAlgorithmParams
+              algorithmParams: parameters.keyEncryptionAlgorithmParams,
             }),
-            password: preDefinedData
+            password: preDefinedData,
             // "encryptedKey" would be set in "encrypt" function
           });
           //#endregion
@@ -785,8 +699,8 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
           this.recipientInfos.push(
             new RecipientInfo({
               variant: 4,
-              value: keyInfo
-            })
+              value: keyInfo,
+            }),
           );
           //#endregion
         }
@@ -804,12 +718,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param parameters Additional parameters for "fine tuning" the encryption process
    * @param crypto Crypto engine
    */
-  addRecipientByKeyIdentifier(
-    key?: CryptoKey,
-    keyId?: ArrayBuffer,
-    parameters?: any,
-    crypto = common.getCrypto(true)
-  ) {
+  addRecipientByKeyIdentifier(key?: CryptoKey, keyId?: ArrayBuffer, parameters?: any, crypto = common.getCrypto(true)) {
     //#region Initialize encryption parameters
     const encryptionParameters = Object.assign({}, defaultEncryptionParams, parameters || {});
     //#endregion
@@ -817,15 +726,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     const recipientIdentifier = new KeyAgreeRecipientIdentifier({
       variant: 2,
       value: new RecipientKeyIdentifier({
-        subjectKeyIdentifier: new asn1js.OctetString({ valueHex: keyId })
-      })
+        subjectKeyIdentifier: new asn1js.OctetString({ valueHex: keyId }),
+      }),
     });
-    this._addKeyAgreeRecipientInfo(
-      recipientIdentifier,
-      encryptionParameters,
-      { recipientPublicKey: key },
-      crypto
-    );
+    this._addKeyAgreeRecipientInfo(recipientIdentifier, encryptionParameters, { recipientPublicKey: key }, crypto);
   }
 
   /**
@@ -839,11 +743,11 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     recipientIdentifier: KeyAgreeRecipientIdentifier,
     encryptionParameters: EnvelopedDataEncryptionParams,
     extraRecipientInfoParams: KeyAgreeRecipientInfoParameters,
-    crypto = common.getCrypto(true)
+    crypto = common.getCrypto(true),
   ) {
     //#region RecipientEncryptedKey
     const encryptedKey = new RecipientEncryptedKey({
-      rid: recipientIdentifier
+      rid: recipientIdentifier,
       // "encryptedKey" will be calculated in "encrypt" function
     });
     //#endregion
@@ -852,14 +756,14 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     const aesKWoid = crypto.getOIDByAlgorithm(
       {
         name: "AES-KW",
-        length: encryptionParameters.kekEncryptionLength
+        length: encryptionParameters.kekEncryptionLength,
       } as Algorithm,
       true,
-      "keyEncryptionAlgorithm"
+      "keyEncryptionAlgorithm",
     );
 
     const aesKW = new AlgorithmIdentifier({
-      algorithmId: aesKWoid
+      algorithmId: aesKWoid,
     });
     //#endregion
 
@@ -867,10 +771,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     const ecdhOID = crypto.getOIDByAlgorithm(
       {
         name: "ECDH",
-        kdf: encryptionParameters.kdfAlgorithm
+        kdf: encryptionParameters.kdfAlgorithm,
       } as Algorithm,
       true,
-      "KeyAgreeRecipientInfo"
+      "KeyAgreeRecipientInfo",
     );
 
     // In fact there is no need in so long UKM, but RFC2631
@@ -885,23 +789,21 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       ukm: new asn1js.OctetString({ valueHex: ukmBuffer }),
       keyEncryptionAlgorithm: new AlgorithmIdentifier({
         algorithmId: ecdhOID,
-        algorithmParams: aesKW.toSchema()
+        algorithmParams: aesKW.toSchema(),
       }),
       recipientEncryptedKeys: new RecipientEncryptedKeys({
-        encryptedKeys: [encryptedKey]
-      })
+        encryptedKeys: [encryptedKey],
+      }),
     };
-    const keyInfo = new KeyAgreeRecipientInfo(
-      Object.assign(recipientInfoParams, extraRecipientInfoParams)
-    );
+    const keyInfo = new KeyAgreeRecipientInfo(Object.assign(recipientInfoParams, extraRecipientInfoParams));
     //#endregion
 
     //#region Final values for "CMS_ENVELOPED_DATA"
     this.recipientInfos.push(
       new RecipientInfo({
         variant: 2,
-        value: keyInfo
-      })
+        value: keyInfo,
+      }),
     );
     //#endregion
   }
@@ -912,11 +814,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param contentToEncrypt Content to encrypt
    * @param crypto Crypto engine
    */
-  public async encrypt(
-    contentEncryptionAlgorithm: Algorithm,
-    contentToEncrypt: ArrayBuffer,
-    crypto = common.getCrypto(true)
-  ): Promise<(void | { ecdhPrivateKey: CryptoKey })[]> {
+  public async encrypt(contentEncryptionAlgorithm: Algorithm, contentToEncrypt: ArrayBuffer, crypto = common.getCrypto(true)): Promise<(void | { ecdhPrivateKey: CryptoKey })[]> {
     //#region Initial variables
     const ivBuffer = new ArrayBuffer(16); // For AES we need IV 16 bytes long
     const ivView = new Uint8Array(ivBuffer);
@@ -926,28 +824,20 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     //#endregion
 
     // Check for input parameters
-    const contentEncryptionOID = crypto.getOIDByAlgorithm(
-      contentEncryptionAlgorithm,
-      true,
-      "contentEncryptionAlgorithm"
-    );
+    const contentEncryptionOID = crypto.getOIDByAlgorithm(contentEncryptionAlgorithm, true, "contentEncryptionAlgorithm");
 
     //#region Generate new content encryption key
-    const sessionKey = await crypto.generateKey(
-      contentEncryptionAlgorithm as AesKeyAlgorithm,
-      true,
-      ["encrypt"]
-    );
+    const sessionKey = await crypto.generateKey(contentEncryptionAlgorithm as AesKeyAlgorithm, true, ["encrypt"]);
     //#endregion
     //#region Encrypt content
 
     const encryptedContent = await crypto.encrypt(
       {
         name: contentEncryptionAlgorithm.name,
-        iv: ivView
+        iv: ivView,
       },
       sessionKey,
-      contentView
+      contentView,
     );
     //#endregion
     //#region Export raw content of content encryption key
@@ -961,9 +851,9 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       contentType: "1.2.840.113549.1.7.1", // "data"
       contentEncryptionAlgorithm: new AlgorithmIdentifier({
         algorithmId: contentEncryptionOID,
-        algorithmParams: new asn1js.OctetString({ valueHex: ivBuffer })
+        algorithmParams: new asn1js.OctetString({ valueHex: ivBuffer }),
       }),
-      encryptedContent: new asn1js.OctetString({ valueHex: encryptedContent })
+      encryptedContent: new asn1js.OctetString({ valueHex: encryptedContent }),
     });
     //#endregion
 
@@ -980,11 +870,9 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         recipientCurve = (recipientInfo.recipientPublicKey.algorithm as EcKeyAlgorithm).namedCurve;
         recipientPublicKey = recipientInfo.recipientPublicKey;
       } else if (recipientInfo.recipientCertificate) {
-        const curveObject =
-          recipientInfo.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
+        const curveObject = recipientInfo.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
 
-        if (curveObject.constructor.blockName() !== asn1js.ObjectIdentifier.blockName())
-          throw new Error(`Incorrect "recipientCertificate" for index ${index}`);
+        if (curveObject.constructor.blockName() !== asn1js.ObjectIdentifier.blockName()) throw new Error(`Incorrect "recipientCertificate" for index ${index}`);
 
         const curveOID = curveObject.valueBlock.toString();
 
@@ -1007,12 +895,12 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
             algorithm: {
               algorithm: {
                 name: "ECDH",
-                namedCurve: recipientCurve
+                namedCurve: recipientCurve,
               } as EcKeyAlgorithm,
-              usages: []
-            }
+              usages: [],
+            },
           },
-          crypto
+          crypto,
         );
       } else {
         throw new Error("Unsupported RecipientInfo");
@@ -1022,11 +910,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#region Generate ephemeral ECDH key
       const recipientCurveLength = curveLengthByName[recipientCurve];
 
-      const ecdhKeys = await crypto.generateKey(
-        { name: "ECDH", namedCurve: recipientCurve } as EcKeyGenParams,
-        true,
-        ["deriveBits"]
-      );
+      const ecdhKeys = await crypto.generateKey({ name: "ECDH", namedCurve: recipientCurve } as EcKeyGenParams, true, ["deriveBits"]);
       //#endregion
       //#region Export public key of ephemeral ECDH key pair
 
@@ -1037,10 +921,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       const derivedBits = await crypto.deriveBits(
         {
           name: "ECDH",
-          public: recipientPublicKey
+          public: recipientPublicKey,
         },
         ecdhKeys.privateKey,
-        recipientCurveLength
+        recipientCurveLength,
       );
       //#endregion
 
@@ -1048,14 +932,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
       //#region Get length of used AES-KW algorithm
       const aesKWAlgorithm = new AlgorithmIdentifier({
-        schema: recipientInfo.keyEncryptionAlgorithm.algorithmParams
+        schema: recipientInfo.keyEncryptionAlgorithm.algorithmParams,
       });
 
-      const kwAlgorithm = crypto.getAlgorithmByOID<AesKeyAlgorithm>(
-        aesKWAlgorithm.algorithmId,
-        true,
-        "aesKWAlgorithm"
-      );
+      const kwAlgorithm = crypto.getAlgorithmByOID<AesKeyAlgorithm>(aesKWAlgorithm.algorithmId, true, "aesKWAlgorithm");
       //#endregion
 
       //#region Translate AES-KW length to ArrayBuffer
@@ -1073,35 +953,23 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#region Create and encode "ECC-CMS-SharedInfo" structure
       const eccInfo = new ECCCMSSharedInfo({
         keyInfo: new AlgorithmIdentifier({
-          algorithmId: aesKWAlgorithm.algorithmId
+          algorithmId: aesKWAlgorithm.algorithmId,
         }),
         entityUInfo: (recipientInfo as KeyAgreeRecipientInfo).ukm, // TODO remove `as KeyAgreeRecipientInfo`
-        suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
+        suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer }),
       });
 
       const encodedInfo = eccInfo.toSchema().toBER(false);
       //#endregion
 
       //#region Get SHA algorithm used together with ECDH
-      const ecdhAlgorithm = crypto.getAlgorithmByOID<any>(
-        recipientInfo.keyEncryptionAlgorithm.algorithmId,
-        true,
-        "ecdhAlgorithm"
-      );
+      const ecdhAlgorithm = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "ecdhAlgorithm");
       //#endregion
 
-      const derivedKeyRaw = await common.kdf(
-        ecdhAlgorithm.kdf,
-        derivedBits,
-        kwAlgorithm.length,
-        encodedInfo,
-        crypto
-      );
+      const derivedKeyRaw = await common.kdf(ecdhAlgorithm.kdf, derivedBits, kwAlgorithm.length, encodedInfo, crypto);
       //#endregion
       //#region Import AES-KW key from result of KDF function
-      const awsKW = await crypto.importKey("raw", derivedKeyRaw, { name: "AES-KW" }, true, [
-        "wrapKey"
-      ]);
+      const awsKW = await crypto.importKey("raw", derivedKeyRaw, { name: "AES-KW" }, true, ["wrapKey"]);
       //#endregion
       //#region Finally wrap session key by using AES-KW algorithm
       const wrappedKey = await crypto.wrapKey("raw", sessionKey, awsKW, { name: "AES-KW" });
@@ -1120,7 +988,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
        We will not support using of same ephemeral key for many recipients
        */
       recipientInfo.recipientEncryptedKeys.encryptedKeys[0].encryptedKey = new asn1js.OctetString({
-        valueHex: wrappedKey
+        valueHex: wrappedKey,
       });
       //#endregion
 
@@ -1130,50 +998,33 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
     const SubKeyTransRecipientInfo = async (index: number) => {
       const recipientInfo = this.recipientInfos[index].value as KeyTransRecipientInfo; // TODO Remove `as KeyTransRecipientInfo`
-      const algorithmParameters = crypto.getAlgorithmByOID<any>(
-        recipientInfo.keyEncryptionAlgorithm.algorithmId,
-        true,
-        "keyEncryptionAlgorithm"
-      );
+      const algorithmParameters = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
 
       //#region RSA-OAEP case
       if (algorithmParameters.name === "RSA-OAEP") {
         const schema = recipientInfo.keyEncryptionAlgorithm.algorithmParams;
         const rsaOAEPParams = new RSAESOAEPParams({ schema });
 
-        algorithmParameters.hash = crypto.getAlgorithmByOID(
-          rsaOAEPParams.hashAlgorithm.algorithmId
-        );
-        if ("name" in algorithmParameters.hash === false)
-          throw new Error(
-            `Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`
-          );
+        algorithmParameters.hash = crypto.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId);
+        if ("name" in algorithmParameters.hash === false) throw new Error(`Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`);
       }
       //#endregion
 
-      try {
-        const publicKey = await recipientInfo.recipientCertificate.getPublicKey(
-          {
-            algorithm: {
-              algorithm: algorithmParameters,
-              usages: ["encrypt", "wrapKey"]
-            }
+      const publicKey = await recipientInfo.recipientCertificate.getPublicKey(
+        {
+          algorithm: {
+            algorithm: algorithmParameters,
+            usages: ["encrypt", "wrapKey"],
           },
-          crypto
-        );
+        },
+        crypto,
+      );
 
-        const encryptedKey = await crypto.encrypt(
-          publicKey.algorithm,
-          publicKey,
-          exportedSessionKey
-        );
+      const encryptedKey = await crypto.encrypt(publicKey.algorithm, publicKey, exportedSessionKey);
 
-        //#region RecipientEncryptedKey
-        recipientInfo.encryptedKey = new asn1js.OctetString({ valueHex: encryptedKey });
-        //#endregion
-      } catch {
-        // nothing
-      }
+      //#region RecipientEncryptedKey
+      recipientInfo.encryptedKey = new asn1js.OctetString({ valueHex: encryptedKey });
+      //#endregion
     };
 
     const SubKEKRecipientInfo = async (index: number) => {
@@ -1184,20 +1035,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#region Import KEK from pre-defined data
 
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = crypto.getAlgorithmByOID(
-        recipientInfo.keyEncryptionAlgorithm.algorithmId,
-        true,
-        "kekAlgorithm"
-      );
+      const kekAlgorithm = crypto.getAlgorithmByOID(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
       //#endregion
 
-      const kekKey = await crypto.importKey(
-        "raw",
-        new Uint8Array(recipientInfo.preDefinedKEK),
-        kekAlgorithm,
-        true,
-        ["wrapKey"]
-      ); // Too specific for AES-KW
+      const kekKey = await crypto.importKey("raw", new Uint8Array(recipientInfo.preDefinedKEK), kekAlgorithm, true, ["wrapKey"]); // Too specific for AES-KW
       //#endregion
 
       //#region Wrap previously exported session key
@@ -1219,15 +1060,13 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
       //#region Check that we have encoded "keyDerivationAlgorithm" plus "PBKDF2_params" in there
 
-      if (!recipientInfo.keyDerivationAlgorithm)
-        throw new Error('Please append encoded "keyDerivationAlgorithm"');
+      if (!recipientInfo.keyDerivationAlgorithm) throw new Error('Please append encoded "keyDerivationAlgorithm"');
 
-      if (!recipientInfo.keyDerivationAlgorithm.algorithmParams)
-        throw new Error('Incorrectly encoded "keyDerivationAlgorithm"');
+      if (!recipientInfo.keyDerivationAlgorithm.algorithmParams) throw new Error('Incorrectly encoded "keyDerivationAlgorithm"');
 
       try {
         pbkdf2Params = new PBKDF2Params({
-          schema: recipientInfo.keyDerivationAlgorithm.algorithmParams
+          schema: recipientInfo.keyDerivationAlgorithm.algorithmParams,
         });
       } catch {
         throw new Error('Incorrectly encoded "keyDerivationAlgorithm"');
@@ -1237,17 +1076,11 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#region Derive PBKDF2 key from "password" buffer
       const passwordView = new Uint8Array(recipientInfo.password);
 
-      const derivationKey = await crypto.importKey("raw", passwordView, "PBKDF2", false, [
-        "deriveKey"
-      ]);
+      const derivationKey = await crypto.importKey("raw", passwordView, "PBKDF2", false, ["deriveKey"]);
       //#endregion
       //#region Derive key for "keyEncryptionAlgorithm"
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = crypto.getAlgorithmByOID<any>(
-        recipientInfo.keyEncryptionAlgorithm.algorithmId,
-        true,
-        "kekAlgorithm"
-      );
+      const kekAlgorithm = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
 
       //#endregion
 
@@ -1255,11 +1088,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       let hmacHashAlgorithm = "SHA-1";
 
       if (pbkdf2Params.prf) {
-        const prfAlgorithm = crypto.getAlgorithmByOID<any>(
-          pbkdf2Params.prf.algorithmId,
-          true,
-          "prfAlgorithm"
-        );
+        const prfAlgorithm = crypto.getAlgorithmByOID<any>(pbkdf2Params.prf.algorithmId, true, "prfAlgorithm");
         hmacHashAlgorithm = prfAlgorithm.hash.name;
       }
       //#endregion
@@ -1276,15 +1105,15 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         {
           name: "PBKDF2",
           hash: {
-            name: hmacHashAlgorithm
+            name: hmacHashAlgorithm,
           },
           salt: saltView,
-          iterations
+          iterations,
         },
         derivationKey,
         kekAlgorithm,
         true,
-        ["wrapKey"]
+        ["wrapKey"],
       ); // Usages are too specific for KEK algorithm
 
       //#endregion
@@ -1330,11 +1159,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param parameters Additional parameters
    * @param crypto Crypto engine
    */
-  async decrypt(
-    recipientIndex: number,
-    parameters: EnvelopedDataDecryptParams,
-    crypto = common.getCrypto(true)
-  ) {
+  async decrypt(recipientIndex: number, parameters: EnvelopedDataDecryptParams, crypto = common.getCrypto(true)) {
     //#region Initial variables
     const decryptionParameters = parameters || {};
     //#endregion
@@ -1359,8 +1184,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#region Get "namedCurve" parameter from recipient's certificate
 
       if (decryptionParameters.recipientCertificate) {
-        const curveObject =
-          decryptionParameters.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
+        const curveObject = decryptionParameters.recipientCertificate.subjectPublicKeyInfo.algorithm.algorithmParams;
         if (curveObject.constructor.blockName() !== asn1js.ObjectIdentifier.blockName()) {
           throw new Error(`Incorrect "recipientCertificate" for index ${index}`);
         }
@@ -1372,13 +1196,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         }
         curveOID = curveObject.valueBlock.toString();
       } else {
-        throw new Error(
-          'Parameter "recipientCertificate" is mandatory for "KeyAgreeRecipientInfo" if algorithm params are missing from originator'
-        );
+        throw new Error('Parameter "recipientCertificate" is mandatory for "KeyAgreeRecipientInfo" if algorithm params are missing from originator');
       }
 
-      if (!decryptionParameters.recipientPrivateKey)
-        throw new Error('Parameter "recipientPrivateKey" is mandatory for "KeyAgreeRecipientInfo"');
+      if (!decryptionParameters.recipientPrivateKey) throw new Error('Parameter "recipientPrivateKey" is mandatory for "KeyAgreeRecipientInfo"');
 
       switch (curveOID) {
         case "1.2.840.10045.3.1.7":
@@ -1399,16 +1220,16 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
       let ecdhPrivateKey: CryptoKey;
       let keyCrypto: SubtleCrypto = crypto;
-      if (BufferSourceConverter.isBufferSource(decryptionParameters.recipientPrivateKey)) {
+      if (isBufferSource(decryptionParameters.recipientPrivateKey)) {
         ecdhPrivateKey = await crypto.importKey(
           "pkcs8",
           decryptionParameters.recipientPrivateKey,
           {
             name: "ECDH",
-            namedCurve: recipientCurve
+            namedCurve: recipientCurve,
           } as EcKeyImportParams,
           true,
-          ["deriveBits"]
+          ["deriveBits"],
         );
       } else {
         ecdhPrivateKey = decryptionParameters.recipientPrivateKey;
@@ -1421,7 +1242,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#region Change "OriginatorPublicKey" if "curve" parameter absent
       if ("algorithmParams" in originator.value.algorithm === false)
         originator.value.algorithm.algorithmParams = new asn1js.ObjectIdentifier({
-          value: curveOID
+          value: curveOID,
         });
       //#endregion
 
@@ -1434,10 +1255,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         buffer,
         {
           name: "ECDH",
-          namedCurve: recipientCurve
+          namedCurve: recipientCurve,
         } as EcKeyImportParams,
         true,
-        []
+        [],
       );
 
       //#endregion
@@ -1445,10 +1266,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       const sharedSecret = await keyCrypto.deriveBits(
         {
           name: "ECDH",
-          public: ecdhPublicKey
+          public: ecdhPublicKey,
         },
         ecdhPrivateKey,
-        recipientCurveLength
+        recipientCurveLength,
       );
       //#endregion
       //#region Apply KDF function to shared secret
@@ -1457,14 +1278,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
         //#region Get length of used AES-KW algorithm
         const aesKWAlgorithm = new AlgorithmIdentifier({
-          schema: recipientInfo.keyEncryptionAlgorithm.algorithmParams
+          schema: recipientInfo.keyEncryptionAlgorithm.algorithmParams,
         });
 
-        const kwAlgorithm = crypto.getAlgorithmByOID<any>(
-          aesKWAlgorithm.algorithmId,
-          true,
-          "kwAlgorithm"
-        );
+        const kwAlgorithm = crypto.getAlgorithmByOID<any>(aesKWAlgorithm.algorithmId, true, "kwAlgorithm");
         //#endregion
 
         //#region Translate AES-KW length to ArrayBuffer
@@ -1481,7 +1298,7 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
         //#region Create and encode "ECC-CMS-SharedInfo" structure
         const keyInfoAlgorithm: AlgorithmIdentifierParameters = {
-          algorithmId: aesKWAlgorithm.algorithmId
+          algorithmId: aesKWAlgorithm.algorithmId,
         };
         if (includeAlgorithmParams) {
           keyInfoAlgorithm.algorithmParams = new asn1js.Null();
@@ -1489,22 +1306,16 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         const eccInfo = new ECCCMSSharedInfo({
           keyInfo: new AlgorithmIdentifier(keyInfoAlgorithm),
           entityUInfo: recipientInfo.ukm,
-          suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer })
+          suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer }),
         });
 
         const encodedInfo = eccInfo.toSchema().toBER(false);
         //#endregion
 
         //#region Get SHA algorithm used together with ECDH
-        const ecdhAlgorithm = crypto.getAlgorithmByOID<any>(
-          recipientInfo.keyEncryptionAlgorithm.algorithmId,
-          true,
-          "ecdhAlgorithm"
-        );
+        const ecdhAlgorithm = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "ecdhAlgorithm");
         if (!ecdhAlgorithm.name) {
-          throw new Error(
-            `Incorrect OID for key encryption algorithm: ${recipientInfo.keyEncryptionAlgorithm.algorithmId}`
-          );
+          throw new Error(`Incorrect OID for key encryption algorithm: ${recipientInfo.keyEncryptionAlgorithm.algorithmId}`);
         }
         //#endregion
 
@@ -1525,22 +1336,17 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       const unwrapSessionKey = async (aesKwKey: CryptoKey) => {
         //#region Get WebCrypto form of content encryption algorithm
         const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-        const contentEncryptionAlgorithm = crypto.getAlgorithmByOID<any>(
-          algorithmId,
-          true,
-          "contentEncryptionAlgorithm"
-        );
+        const contentEncryptionAlgorithm = crypto.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
         //#endregion
 
         return crypto.unwrapKey(
           "raw",
-          recipientInfo.recipientEncryptedKeys.encryptedKeys[0].encryptedKey.valueBlock
-            .valueHexView as BufferSource,
+          recipientInfo.recipientEncryptedKeys.encryptedKeys[0].encryptedKey.valueBlock.valueHexView as BufferSource,
           aesKwKey,
           { name: "AES-KW" },
           contentEncryptionAlgorithm,
           true,
-          ["decrypt"]
+          ["decrypt"],
         );
       };
 
@@ -1560,37 +1366,22 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         throw new Error('Parameter "recipientPrivateKey" is mandatory for "KeyTransRecipientInfo"');
       }
 
-      const algorithmParameters = crypto.getAlgorithmByOID<any>(
-        recipientInfo.keyEncryptionAlgorithm.algorithmId,
-        true,
-        "keyEncryptionAlgorithm"
-      );
+      const algorithmParameters = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
 
       //#region RSA-OAEP case
       if (algorithmParameters.name === "RSA-OAEP") {
         const schema = recipientInfo.keyEncryptionAlgorithm.algorithmParams;
         const rsaOAEPParams = new RSAESOAEPParams({ schema });
 
-        algorithmParameters.hash = crypto.getAlgorithmByOID(
-          rsaOAEPParams.hashAlgorithm.algorithmId
-        );
-        if ("name" in algorithmParameters.hash === false)
-          throw new Error(
-            `Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`
-          );
+        algorithmParameters.hash = crypto.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId);
+        if ("name" in algorithmParameters.hash === false) throw new Error(`Incorrect OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`);
       }
       //#endregion
 
       let privateKey: CryptoKey;
       let keyCrypto: SubtleCrypto = crypto;
-      if (BufferSourceConverter.isBufferSource(decryptionParameters.recipientPrivateKey)) {
-        privateKey = await crypto.importKey(
-          "pkcs8",
-          decryptionParameters.recipientPrivateKey,
-          algorithmParameters,
-          true,
-          ["decrypt"]
-        );
+      if (isBufferSource(decryptionParameters.recipientPrivateKey)) {
+        privateKey = await crypto.importKey("pkcs8", decryptionParameters.recipientPrivateKey, algorithmParameters, true, ["decrypt"]);
       } else {
         privateKey = decryptionParameters.recipientPrivateKey;
         if ("crypto" in decryptionParameters && decryptionParameters.crypto) {
@@ -1598,21 +1389,12 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         }
       }
 
-      const sessionKey = await keyCrypto.decrypt(
-        privateKey.algorithm,
-        privateKey,
-        recipientInfo.encryptedKey.valueBlock.valueHexView as BufferSource
-      );
+      const sessionKey = await keyCrypto.decrypt(privateKey.algorithm, privateKey, recipientInfo.encryptedKey.valueBlock.valueHexView as BufferSource);
 
       //#region Get WebCrypto form of content encryption algorithm
       const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-      const contentEncryptionAlgorithm = crypto.getAlgorithmByOID(
-        algorithmId,
-        true,
-        "contentEncryptionAlgorithm"
-      );
-      if ("name" in contentEncryptionAlgorithm === false)
-        throw new Error(`Incorrect "contentEncryptionAlgorithm": ${algorithmId}`);
+      const contentEncryptionAlgorithm = crypto.getAlgorithmByOID(algorithmId, true, "contentEncryptionAlgorithm");
+      if ("name" in contentEncryptionAlgorithm === false) throw new Error(`Incorrect "contentEncryptionAlgorithm": ${algorithmId}`);
       //#endregion
 
       return crypto.importKey("raw", sessionKey, contentEncryptionAlgorithm, true, ["decrypt"]);
@@ -1624,48 +1406,25 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       //#endregion
 
       //#region Import KEK from pre-defined data
-      if (!decryptionParameters.preDefinedData)
-        throw new Error('Parameter "preDefinedData" is mandatory for "KEKRecipientInfo"');
+      if (!decryptionParameters.preDefinedData) throw new Error('Parameter "preDefinedData" is mandatory for "KEKRecipientInfo"');
 
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = crypto.getAlgorithmByOID<any>(
-        recipientInfo.keyEncryptionAlgorithm.algorithmId,
-        true,
-        "kekAlgorithm"
-      );
+      const kekAlgorithm = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "kekAlgorithm");
       //#endregion
 
-      const importedKey = await crypto.importKey(
-        "raw",
-        decryptionParameters.preDefinedData,
-        kekAlgorithm,
-        true,
-        ["unwrapKey"]
-      ); // Too specific for AES-KW
+      const importedKey = await crypto.importKey("raw", decryptionParameters.preDefinedData, kekAlgorithm, true, ["unwrapKey"]); // Too specific for AES-KW
 
       //#endregion
       //#region Unwrap previously exported session key
       //#region Get WebCrypto form of content encryption algorithm
       const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-      const contentEncryptionAlgorithm = crypto.getAlgorithmByOID<any>(
-        algorithmId,
-        true,
-        "contentEncryptionAlgorithm"
-      );
+      const contentEncryptionAlgorithm = crypto.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
       if (!contentEncryptionAlgorithm.name) {
         throw new Error(`Incorrect "contentEncryptionAlgorithm": ${algorithmId}`);
       }
       //#endregion
 
-      return crypto.unwrapKey(
-        "raw",
-        recipientInfo.encryptedKey.valueBlock.valueHexView as BufferSource,
-        importedKey,
-        kekAlgorithm,
-        contentEncryptionAlgorithm,
-        true,
-        ["decrypt"]
-      );
+      return crypto.unwrapKey("raw", recipientInfo.encryptedKey.valueBlock.valueHexView as BufferSource, importedKey, kekAlgorithm, contentEncryptionAlgorithm, true, ["decrypt"]);
       //#endregion
     };
 
@@ -1691,34 +1450,21 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
 
       try {
         pbkdf2Params = new PBKDF2Params({
-          schema: recipientInfo.keyDerivationAlgorithm.algorithmParams
+          schema: recipientInfo.keyDerivationAlgorithm.algorithmParams,
         });
       } catch {
         throw new Error('Incorrectly encoded "keyDerivationAlgorithm"');
       }
 
-      const pbkdf2Key = await crypto.importKey(
-        "raw",
-        decryptionParameters.preDefinedData,
-        "PBKDF2",
-        false,
-        ["deriveKey"]
-      );
+      const pbkdf2Key = await crypto.importKey("raw", decryptionParameters.preDefinedData, "PBKDF2", false, ["deriveKey"]);
       //#endregion
       //#region Derive key for "keyEncryptionAlgorithm"
       //#region Get WebCrypto form of "keyEncryptionAlgorithm"
-      const kekAlgorithm = crypto.getAlgorithmByOID<any>(
-        recipientInfo.keyEncryptionAlgorithm.algorithmId,
-        true,
-        "keyEncryptionAlgorithm"
-      );
+      const kekAlgorithm = crypto.getAlgorithmByOID<any>(recipientInfo.keyEncryptionAlgorithm.algorithmId, true, "keyEncryptionAlgorithm");
       //#endregion
 
       // Get HMAC hash algorithm
-      const hmacHashAlgorithm = pbkdf2Params.prf
-        ? crypto.getAlgorithmByOID<any>(pbkdf2Params.prf.algorithmId, true, "prfAlgorithm").hash
-            .name
-        : "SHA-1";
+      const hmacHashAlgorithm = pbkdf2Params.prf ? crypto.getAlgorithmByOID<any>(pbkdf2Params.prf.algorithmId, true, "prfAlgorithm").hash.name : "SHA-1";
 
       //#region Get PBKDF2 "salt" value
       const saltView = new Uint8Array(pbkdf2Params.salt.valueBlock.valueHex);
@@ -1732,36 +1478,24 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         {
           name: "PBKDF2",
           hash: {
-            name: hmacHashAlgorithm
+            name: hmacHashAlgorithm,
           },
           salt: saltView,
-          iterations
+          iterations,
         },
         pbkdf2Key,
         kekAlgorithm,
         true,
-        ["unwrapKey"]
+        ["unwrapKey"],
       ); // Usages are too specific for KEK algorithm
       //#endregion
       //#region Unwrap previously exported session key
       //#region Get WebCrypto form of content encryption algorithm
       const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-      const contentEncryptionAlgorithm = crypto.getAlgorithmByOID<any>(
-        algorithmId,
-        true,
-        "contentEncryptionAlgorithm"
-      );
+      const contentEncryptionAlgorithm = crypto.getAlgorithmByOID<any>(algorithmId, true, "contentEncryptionAlgorithm");
       //#endregion
 
-      return crypto.unwrapKey(
-        "raw",
-        recipientInfo.encryptedKey.valueBlock.valueHexView as BufferSource,
-        kekKey,
-        kekAlgorithm,
-        contentEncryptionAlgorithm,
-        true,
-        ["decrypt"]
-      );
+      return crypto.unwrapKey("raw", recipientInfo.encryptedKey.valueBlock.valueHexView as BufferSource, kekKey, kekAlgorithm, contentEncryptionAlgorithm, true, ["decrypt"]);
       //#endregion
     };
 
@@ -1790,16 +1524,11 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     //#region Finally decrypt data by session key
     //#region Get WebCrypto form of content encryption algorithm
     const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-    const contentEncryptionAlgorithm = crypto.getAlgorithmByOID(
-      algorithmId,
-      true,
-      "contentEncryptionAlgorithm"
-    );
+    const contentEncryptionAlgorithm = crypto.getAlgorithmByOID(algorithmId, true, "contentEncryptionAlgorithm");
     //#endregion
 
     //#region Get "initialization vector" for content encryption algorithm
-    const ivBuffer =
-      this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
+    const ivBuffer = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
     const ivView = new Uint8Array(ivBuffer);
     //#endregion
 
@@ -1813,10 +1542,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     return crypto.decrypt(
       {
         name: (contentEncryptionAlgorithm as any).name,
-        iv: ivView
+        iv: ivView,
       },
       unwrappedKey,
-      dataBuffer
+      dataBuffer,
     );
     //#endregion
   }

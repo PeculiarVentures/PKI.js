@@ -1,14 +1,9 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import {
-  RelativeDistinguishedNames,
-  RelativeDistinguishedNamesJson,
-  RelativeDistinguishedNamesSchema
-} from "./RelativeDistinguishedNames";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import { RelativeDistinguishedNames, type RelativeDistinguishedNamesJson, type RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import type * as Schema from "./Schema";
 
 const ISSUER = "issuer";
 const SERIAL_NUMBER = "serialNumber";
@@ -53,16 +48,8 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
   constructor(parameters: IssuerAndSerialNumberParameters = {}) {
     super();
 
-    this.issuer = pvutils.getParametersValue(
-      parameters,
-      ISSUER,
-      IssuerAndSerialNumber.defaultValues(ISSUER)
-    );
-    this.serialNumber = pvutils.getParametersValue(
-      parameters,
-      SERIAL_NUMBER,
-      IssuerAndSerialNumber.defaultValues(SERIAL_NUMBER)
-    );
+    this.issuer = parameters[ISSUER] ?? IssuerAndSerialNumber.defaultValues(ISSUER);
+    this.serialNumber = parameters[SERIAL_NUMBER] ?? IssuerAndSerialNumber.defaultValues(SERIAL_NUMBER);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -105,24 +92,17 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
      * @property {string} [issuer]
      * @property {string} [serialNumber]
      */
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        RelativeDistinguishedNames.schema(names.issuer || {}),
-        new asn1js.Integer({ name: names.serialNumber || EMPTY_STRING })
-      ]
+      value: [RelativeDistinguishedNames.schema(names.issuer || {}), new asn1js.Integer({ name: names.serialNumber || EMPTY_STRING })],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -132,12 +112,12 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
         names: {
           issuer: {
             names: {
-              blockName: ISSUER
-            }
+              blockName: ISSUER,
+            },
           },
-          serialNumber: SERIAL_NUMBER
-        }
-      })
+          serialNumber: SERIAL_NUMBER,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -149,14 +129,14 @@ export class IssuerAndSerialNumber extends PkiObject implements IIssuerAndSerial
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [this.issuer.toSchema(), this.serialNumber]
+      value: [this.issuer.toSchema(), this.serialNumber],
     });
   }
 
   public toJSON(): IssuerAndSerialNumberJson {
     return {
       issuer: this.issuer.toJSON(),
-      serialNumber: this.serialNumber.toJSON()
+      serialNumber: this.serialNumber.toJSON(),
     };
   }
 }

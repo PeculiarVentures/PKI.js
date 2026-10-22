@@ -1,7 +1,12 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "arrowParens": "avoid",
-  "trailingComma": "none",
+  "printWidth": 200,
+  "singleQuote": false,
+  "semi": true,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "quoteProps": "as-needed",
+  "sortImports": false,
   "sortPackageJson": false,
-  "ignorePatterns": []
+  "ignorePatterns": ["node_modules", "coverage", "**/build/**", "*.tsbuildinfo", "package-lock.json", ".vscode", "website"]
 }

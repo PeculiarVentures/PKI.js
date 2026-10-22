@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./creating-and-parsing-CRLs.example";
+---
+sidebar_position: 3
+---
+
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./creating-and-parsing-CRLs.example.ts";
 
 # Creating and parsing CRLs
 
-In this example, you will see how to create a CRL, parse, and validate it.
+Create a certificate revocation list (CRL) that revokes a certificate, parse it, check the CA's signature, look up certificates in it, and see chain validation reject the revoked certificate.
 
-<CodeBlock language="ts">{source}</CodeBlock>
+<RunnableExample source={source} load={() => import("./creating-and-parsing-CRLs.example.ts?run")} />
+
+**API:** [`CertificateRevocationList`](../../api/classes/CertificateRevocationList.md), [`RevokedCertificate`](../../api/classes/RevokedCertificate.md), [`CertificateChainValidationEngine`](../../api/classes/CertificateChainValidationEngine.md)

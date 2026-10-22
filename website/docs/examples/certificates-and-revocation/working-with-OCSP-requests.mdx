@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./working-with-OCSP-requests.example";
+---
+sidebar_position: 4
+---
+
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./working-with-OCSP-requests.example.ts";
 
 # Working with OCSP requests
 
-In this example, you will see how to create and parse OCSP requests.
+Create an OCSP request for a certificate's revocation status, with a nonce, and parse it as a responder would.
 
-<CodeBlock language="ts">{source}</CodeBlock>
+<RunnableExample source={source} load={() => import("./working-with-OCSP-requests.example.ts?run")} />
+
+**API:** [`OCSPRequest`](../../api/classes/OCSPRequest.md), [`CertID`](../../api/classes/CertID.md), [`Extension`](../../api/classes/Extension.md)

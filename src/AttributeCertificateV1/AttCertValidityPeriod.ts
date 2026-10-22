@@ -1,9 +1,8 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "../constants";
 import { AsnError } from "../errors";
-import { PkiObject, PkiObjectParameters } from "../PkiObject";
-import * as Schema from "../Schema";
+import { PkiObject, type PkiObjectParameters } from "../PkiObject";
+import type * as Schema from "../Schema";
 
 const NOT_BEFORE_TIME = "notBeforeTime";
 const NOT_AFTER_TIME = "notAfterTime";
@@ -42,16 +41,8 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
   constructor(parameters: AttCertValidityPeriodParameters = {}) {
     super();
 
-    this.notBeforeTime = pvutils.getParametersValue(
-      parameters,
-      NOT_BEFORE_TIME,
-      AttCertValidityPeriod.defaultValues(NOT_BEFORE_TIME)
-    );
-    this.notAfterTime = pvutils.getParametersValue(
-      parameters,
-      NOT_AFTER_TIME,
-      AttCertValidityPeriod.defaultValues(NOT_AFTER_TIME)
-    );
+    this.notBeforeTime = parameters[NOT_BEFORE_TIME] ?? AttCertValidityPeriod.defaultValues(NOT_BEFORE_TIME);
+    this.notAfterTime = parameters[NOT_AFTER_TIME] ?? AttCertValidityPeriod.defaultValues(NOT_AFTER_TIME);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -86,24 +77,17 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
    *```
    */
   public static override schema(parameters: AttCertValidityPeriodSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        new asn1js.GeneralizedTime({ name: names.notBeforeTime || EMPTY_STRING }),
-        new asn1js.GeneralizedTime({ name: names.notAfterTime || EMPTY_STRING })
-      ]
+      value: [new asn1js.GeneralizedTime({ name: names.notBeforeTime || EMPTY_STRING }), new asn1js.GeneralizedTime({ name: names.notAfterTime || EMPTY_STRING })],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -112,9 +96,9 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
       AttCertValidityPeriod.schema({
         names: {
           notBeforeTime: NOT_BEFORE_TIME,
-          notAfterTime: NOT_AFTER_TIME
-        }
-      })
+          notAfterTime: NOT_AFTER_TIME,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -126,17 +110,14 @@ export class AttCertValidityPeriod extends PkiObject implements IAttCertValidity
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [
-        new asn1js.GeneralizedTime({ valueDate: this.notBeforeTime }),
-        new asn1js.GeneralizedTime({ valueDate: this.notAfterTime })
-      ]
+      value: [new asn1js.GeneralizedTime({ valueDate: this.notBeforeTime }), new asn1js.GeneralizedTime({ valueDate: this.notAfterTime })],
     });
   }
 
   public toJSON(): AttCertValidityPeriodJson {
     return {
       notBeforeTime: this.notBeforeTime,
-      notAfterTime: this.notAfterTime
+      notAfterTime: this.notAfterTime,
     };
   }
 }

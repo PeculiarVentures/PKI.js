@@ -1,10 +1,9 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
-import * as pvutils from "pvutils";
+import { base64url } from "@peculiar/utils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const PRIME = "prime";
 const EXPONENT = "exponent";
@@ -17,8 +16,7 @@ export interface IOtherPrimeInfo {
   coefficient: asn1js.Integer;
 }
 
-export type OtherPrimeInfoParameters = PkiObjectParameters &
-  Partial<IOtherPrimeInfo> & { json?: OtherPrimeInfoJson };
+export type OtherPrimeInfoParameters = PkiObjectParameters & Partial<IOtherPrimeInfo> & { json?: OtherPrimeInfoJson };
 
 export interface OtherPrimeInfoJson {
   r: string;
@@ -49,17 +47,9 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
   constructor(parameters: OtherPrimeInfoParameters = {}) {
     super();
 
-    this.prime = pvutils.getParametersValue(parameters, PRIME, OtherPrimeInfo.defaultValues(PRIME));
-    this.exponent = pvutils.getParametersValue(
-      parameters,
-      EXPONENT,
-      OtherPrimeInfo.defaultValues(EXPONENT)
-    );
-    this.coefficient = pvutils.getParametersValue(
-      parameters,
-      COEFFICIENT,
-      OtherPrimeInfo.defaultValues(COEFFICIENT)
-    );
+    this.prime = parameters[PRIME] ?? OtherPrimeInfo.defaultValues(PRIME);
+    this.exponent = parameters[EXPONENT] ?? OtherPrimeInfo.defaultValues(EXPONENT);
+    this.coefficient = parameters[COEFFICIENT] ?? OtherPrimeInfo.defaultValues(COEFFICIENT);
 
     if (parameters.json) {
       this.fromJSON(parameters.json);
@@ -75,9 +65,7 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
    * @param memberName String name for a class member
    * @returns Default value
    */
-  public static override defaultValues(
-    memberName: typeof PRIME | typeof EXPONENT | typeof COEFFICIENT
-  ): asn1js.Integer;
+  public static override defaultValues(memberName: typeof PRIME | typeof EXPONENT | typeof COEFFICIENT): asn1js.Integer;
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case PRIME:
@@ -103,25 +91,17 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
    *```
    */
   public static override schema(parameters: OtherPrimeInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        new asn1js.Integer({ name: names.prime || EMPTY_STRING }),
-        new asn1js.Integer({ name: names.exponent || EMPTY_STRING }),
-        new asn1js.Integer({ name: names.coefficient || EMPTY_STRING })
-      ]
+      value: [new asn1js.Integer({ name: names.prime || EMPTY_STRING }), new asn1js.Integer({ name: names.exponent || EMPTY_STRING }), new asn1js.Integer({ name: names.coefficient || EMPTY_STRING })],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -131,9 +111,9 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
         names: {
           prime: PRIME,
           exponent: EXPONENT,
-          coefficient: COEFFICIENT
-        }
-      })
+          coefficient: COEFFICIENT,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -146,19 +126,15 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
 
   public toSchema(): asn1js.Sequence {
     return new asn1js.Sequence({
-      value: [
-        this.prime.convertToDER(),
-        this.exponent.convertToDER(),
-        this.coefficient.convertToDER()
-      ]
+      value: [this.prime.convertToDER(), this.exponent.convertToDER(), this.coefficient.convertToDER()],
     });
   }
 
   public toJSON(): OtherPrimeInfoJson {
     return {
-      r: pvtsutils.Convert.ToBase64Url(this.prime.valueBlock.valueHexView),
-      d: pvtsutils.Convert.ToBase64Url(this.exponent.valueBlock.valueHexView),
-      t: pvtsutils.Convert.ToBase64Url(this.coefficient.valueBlock.valueHexView)
+      r: base64url.encode(this.prime.valueBlock.valueHexView),
+      d: base64url.encode(this.exponent.valueBlock.valueHexView),
+      t: base64url.encode(this.coefficient.valueBlock.valueHexView),
     };
   }
 
@@ -169,8 +145,8 @@ export class OtherPrimeInfo extends PkiObject implements IOtherPrimeInfo {
   public fromJSON(json: OtherPrimeInfoJson): void {
     ParameterError.assert("json", json, "r", "d", "r");
 
-    this.prime = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.r) });
-    this.exponent = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.d) });
-    this.coefficient = new asn1js.Integer({ valueHex: pvtsutils.Convert.FromBase64Url(json.t) });
+    this.prime = new asn1js.Integer({ valueHex: base64url.decode(json.r) });
+    this.exponent = new asn1js.Integer({ valueHex: base64url.decode(json.d) });
+    this.coefficient = new asn1js.Integer({ valueHex: base64url.decode(json.t) });
   }
 }

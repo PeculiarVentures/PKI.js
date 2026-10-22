@@ -1,10 +1,9 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
-import * as pvutils from "pvutils";
+import { base64url } from "@peculiar/utils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError, ParameterError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 export interface IRSAPublicKey {
   /**
@@ -22,8 +21,7 @@ export interface RSAPublicKeyJson {
   e: string;
 }
 
-export type RSAPublicKeyParameters = PkiObjectParameters &
-  Partial<IRSAPublicKey> & { json?: RSAPublicKeyJson };
+export type RSAPublicKeyParameters = PkiObjectParameters & Partial<IRSAPublicKey> & { json?: RSAPublicKeyJson };
 
 const MODULUS = "modulus";
 const PUBLIC_EXPONENT = "publicExponent";
@@ -45,16 +43,8 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
   constructor(parameters: RSAPublicKeyParameters = {}) {
     super();
 
-    this.modulus = pvutils.getParametersValue(
-      parameters,
-      MODULUS,
-      RSAPublicKey.defaultValues(MODULUS)
-    );
-    this.publicExponent = pvutils.getParametersValue(
-      parameters,
-      PUBLIC_EXPONENT,
-      RSAPublicKey.defaultValues(PUBLIC_EXPONENT)
-    );
+    this.modulus = parameters[MODULUS] ?? RSAPublicKey.defaultValues(MODULUS);
+    this.publicExponent = parameters[PUBLIC_EXPONENT] ?? RSAPublicKey.defaultValues(PUBLIC_EXPONENT);
 
     if (parameters.json) {
       this.fromJSON(parameters.json);
@@ -70,9 +60,7 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
    * @param memberName String name for a class member
    * @returns Default value
    */
-  public static override defaultValues(
-    memberName: typeof MODULUS | typeof PUBLIC_EXPONENT
-  ): asn1js.Integer;
+  public static override defaultValues(memberName: typeof MODULUS | typeof PUBLIC_EXPONENT): asn1js.Integer;
   public static override defaultValues(memberName: string): any {
     switch (memberName) {
       case MODULUS:
@@ -94,27 +82,18 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
    * }
    *```
    */
-  public static override schema(
-    parameters: Schema.SchemaParameters<{ modulus?: string; publicExponent?: string }> = {}
-  ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+  public static override schema(parameters: Schema.SchemaParameters<{ modulus?: string; publicExponent?: string }> = {}): Schema.SchemaType {
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        new asn1js.Integer({ name: names.modulus || EMPTY_STRING }),
-        new asn1js.Integer({ name: names.publicExponent || EMPTY_STRING })
-      ]
+      value: [new asn1js.Integer({ name: names.modulus || EMPTY_STRING }), new asn1js.Integer({ name: names.publicExponent || EMPTY_STRING })],
     });
   }
 
   public fromSchema(schema: asn1js.AsnType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete (schema as any)[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -123,27 +102,27 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
       RSAPublicKey.schema({
         names: {
           modulus: MODULUS,
-          publicExponent: PUBLIC_EXPONENT
-        }
-      })
+          publicExponent: PUBLIC_EXPONENT,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     this.modulus = asn1.result.modulus.convertFromDER(256);
-    this.publicExponent = asn1.result.publicExponent;
+    this.publicExponent = asn1.result.publicExponent.convertFromDER();
   }
 
   public toSchema(): asn1js.Sequence {
     return new asn1js.Sequence({
-      value: [this.modulus.convertToDER(), this.publicExponent]
+      value: [this.modulus.convertToDER(), this.publicExponent.convertToDER()],
     });
   }
 
   public toJSON(): RSAPublicKeyJson {
     return {
-      n: pvtsutils.Convert.ToBase64Url(this.modulus.valueBlock.valueHexView),
-      e: pvtsutils.Convert.ToBase64Url(this.publicExponent.valueBlock.valueHexView)
+      n: base64url.encode(this.modulus.valueBlock.valueHexView),
+      e: base64url.encode(this.publicExponent.valueBlock.valueHexView),
     };
   }
 
@@ -154,12 +133,8 @@ export class RSAPublicKey extends PkiObject implements IRSAPublicKey {
   fromJSON(json: RSAPublicKeyJson): void {
     ParameterError.assert("json", json, "n", "e");
 
-    const array = pvutils.stringToArrayBuffer(pvutils.fromBase64(json.n, true));
-    this.modulus = new asn1js.Integer({
-      valueHex: array.slice(0, Math.pow(2, pvutils.nearestPowerOf2(array.byteLength)))
-    });
-    this.publicExponent = new asn1js.Integer({
-      valueHex: pvutils.stringToArrayBuffer(pvutils.fromBase64(json.e, true)).slice(0, 3)
-    });
+    // JWK members are unpadded base64url (RFC 7518); padding is accepted as before.
+    this.modulus = new asn1js.Integer({ valueHex: base64url.decode(json.n, { allowPadding: true }) });
+    this.publicExponent = new asn1js.Integer({ valueHex: base64url.decode(json.e, { allowPadding: true }) });
   }
 }

@@ -1,9 +1,8 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const STATUS = "status";
 const STATUS_STRINGS = "statusStrings";
@@ -36,7 +35,7 @@ export enum PKIStatus {
   rejection = 2,
   waiting = 3,
   revocationWarning = 4,
-  revocationNotification = 5
+  revocationNotification = 5,
 }
 
 /**
@@ -56,24 +55,12 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
   constructor(parameters: PKIStatusInfoParameters = {}) {
     super();
 
-    this.status = pvutils.getParametersValue(
-      parameters,
-      STATUS,
-      PKIStatusInfo.defaultValues(STATUS)
-    );
+    this.status = parameters[STATUS] ?? PKIStatusInfo.defaultValues(STATUS);
     if (STATUS_STRINGS in parameters) {
-      this.statusStrings = pvutils.getParametersValue(
-        parameters,
-        STATUS_STRINGS,
-        PKIStatusInfo.defaultValues(STATUS_STRINGS)
-      );
+      this.statusStrings = parameters[STATUS_STRINGS] ?? PKIStatusInfo.defaultValues(STATUS_STRINGS);
     }
     if (FAIL_INFO in parameters) {
-      this.failInfo = pvutils.getParametersValue(
-        parameters,
-        FAIL_INFO,
-        PKIStatusInfo.defaultValues(FAIL_INFO)
-      );
+      this.failInfo = parameters[FAIL_INFO] ?? PKIStatusInfo.defaultValues(FAIL_INFO);
     }
 
     if (parameters.schema) {
@@ -131,11 +118,7 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
    *```
    */
   public static override schema(parameters: PKIStatusInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -146,21 +129,21 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
           value: [
             new asn1js.Repeated({
               name: names.statusStrings || EMPTY_STRING,
-              value: new asn1js.Utf8String()
-            })
-          ]
+              value: new asn1js.Utf8String(),
+            }),
+          ],
         }),
         new asn1js.BitString({
           name: names.failInfo || EMPTY_STRING,
-          optional: true
-        })
-      ]
+          optional: true,
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -170,21 +153,16 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
         names: {
           status: STATUS,
           statusStrings: STATUS_STRINGS,
-          failInfo: FAIL_INFO
-        }
-      })
+          failInfo: FAIL_INFO,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     //#region Get internal properties from parsed schema
     const _status = asn1.result.status;
 
-    if (
-      _status.valueBlock.isHexOnly === true ||
-      _status.valueBlock.valueDec < 0 ||
-      _status.valueBlock.valueDec > 5
-    )
-      throw new Error('PKIStatusInfo "status" has invalid value');
+    if (_status.valueBlock.isHexOnly === true || _status.valueBlock.valueDec < 0 || _status.valueBlock.valueDec > 5) throw new Error('PKIStatusInfo "status" has invalid value');
 
     this.status = _status.valueBlock.valueDec;
 
@@ -203,8 +181,8 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
       outputArray.push(
         new asn1js.Sequence({
           optional: true,
-          value: this.statusStrings
-        })
+          value: this.statusStrings,
+        }),
       );
     }
 
@@ -215,18 +193,18 @@ export class PKIStatusInfo extends PkiObject implements IPKIStatusInfo {
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
 
   public toJSON(): PKIStatusInfoJson {
     const res: PKIStatusInfoJson = {
-      status: this.status
+      status: this.status,
     };
 
     if (this.statusStrings) {
-      res.statusStrings = Array.from(this.statusStrings, o => o.toJSON());
+      res.statusStrings = Array.from(this.statusStrings, (o) => o.toJSON());
     }
     if (this.failInfo) {
       res.failInfo = this.failInfo.toJSON();

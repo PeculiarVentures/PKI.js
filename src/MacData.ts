@@ -1,10 +1,9 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
-import { DigestInfo, DigestInfoJson, DigestInfoSchema } from "./DigestInfo";
+import { DigestInfo, type DigestInfoJson, type DigestInfoSchema } from "./DigestInfo";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const MAC = "mac";
 const MAC_SALT = "macSalt";
@@ -48,18 +47,10 @@ export class MacData extends PkiObject implements IMacData {
   constructor(parameters: MacDataParameters = {}) {
     super();
 
-    this.mac = pvutils.getParametersValue(parameters, MAC, MacData.defaultValues(MAC));
-    this.macSalt = pvutils.getParametersValue(
-      parameters,
-      MAC_SALT,
-      MacData.defaultValues(MAC_SALT)
-    );
+    this.mac = parameters[MAC] ?? MacData.defaultValues(MAC);
+    this.macSalt = parameters[MAC_SALT] ?? MacData.defaultValues(MAC_SALT);
     if (ITERATIONS in parameters) {
-      this.iterations = pvutils.getParametersValue(
-        parameters,
-        ITERATIONS,
-        MacData.defaultValues(ITERATIONS)
-      );
+      this.iterations = parameters[ITERATIONS] ?? MacData.defaultValues(ITERATIONS);
     }
 
     if (parameters.schema) {
@@ -96,10 +87,7 @@ export class MacData extends PkiObject implements IMacData {
   public static compareWithDefault(memberName: string, memberValue: any): boolean {
     switch (memberName) {
       case MAC:
-        return (
-          DigestInfo.compareWithDefault("digestAlgorithm", memberValue.digestAlgorithm) &&
-          DigestInfo.compareWithDefault("digest", memberValue.digest)
-        );
+        return DigestInfo.compareWithDefault("digestAlgorithm", memberValue.digestAlgorithm) && DigestInfo.compareWithDefault("digest", memberValue.digest);
       case MAC_SALT:
         return memberValue.isEqual(MacData.defaultValues(memberName));
       case ITERATIONS:
@@ -123,11 +111,7 @@ export class MacData extends PkiObject implements IMacData {
    *```
    */
   public static override schema(parameters: MacDataSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -136,22 +120,22 @@ export class MacData extends PkiObject implements IMacData {
         DigestInfo.schema(
           names.mac || {
             names: {
-              blockName: MAC
-            }
-          }
+              blockName: MAC,
+            },
+          },
         ),
         new asn1js.OctetString({ name: names.macSalt || MAC_SALT }),
         new asn1js.Integer({
           optional: true,
-          name: names.iterations || ITERATIONS
-        })
-      ]
+          name: names.iterations || ITERATIONS,
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -161,13 +145,13 @@ export class MacData extends PkiObject implements IMacData {
         names: {
           mac: {
             names: {
-              blockName: MAC
-            }
+              blockName: MAC,
+            },
           },
           macSalt: MAC_SALT,
-          iterations: ITERATIONS
-        }
-      })
+          iterations: ITERATIONS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -186,7 +170,7 @@ export class MacData extends PkiObject implements IMacData {
     }
 
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
@@ -194,7 +178,7 @@ export class MacData extends PkiObject implements IMacData {
   public toJSON(): MacDataJson {
     const res: MacDataJson = {
       mac: this.mac.toJSON(),
-      macSalt: this.macSalt.toJSON()
+      macSalt: this.macSalt.toJSON(),
     };
 
     if (this.iterations !== undefined) {

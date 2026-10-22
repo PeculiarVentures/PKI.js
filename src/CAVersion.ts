@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { bytes } from "@peculiar/utils";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const CERTIFICATE_INDEX = "certificateIndex";
 const KEY_INDEX = "keyIndex";
@@ -34,16 +34,8 @@ export class CAVersion extends PkiObject implements ICAVersion {
   constructor(parameters: CAVersionParameters = {}) {
     super();
 
-    this.certificateIndex = pvutils.getParametersValue(
-      parameters,
-      CERTIFICATE_INDEX,
-      CAVersion.defaultValues(CERTIFICATE_INDEX)
-    );
-    this.keyIndex = pvutils.getParametersValue(
-      parameters,
-      KEY_INDEX,
-      CAVersion.defaultValues(KEY_INDEX)
-    );
+    this.certificateIndex = parameters[CERTIFICATE_INDEX] ?? CAVersion.defaultValues(CERTIFICATE_INDEX);
+    this.keyIndex = parameters[KEY_INDEX] ?? CAVersion.defaultValues(KEY_INDEX);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -162,7 +154,7 @@ export class CAVersion extends PkiObject implements ICAVersion {
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Integer({
-      valueHex: pvutils.utilConcatBuf(keyIndexBuffer, certificateIndexBuffer)
+      valueHex: bytes.concat(keyIndexBuffer, certificateIndexBuffer),
     });
     //#endregion
   }
@@ -170,7 +162,7 @@ export class CAVersion extends PkiObject implements ICAVersion {
   public toJSON(): CAVersionJson {
     return {
       certificateIndex: this.certificateIndex,
-      keyIndex: this.keyIndex
+      keyIndex: this.keyIndex,
     };
   }
 }

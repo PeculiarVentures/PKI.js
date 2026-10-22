@@ -5,7 +5,7 @@
 <div align="center">
 
 ![NPM License](https://img.shields.io/npm/l/pkijs)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/PeculiarVentures/PKI.js/library.yml?label=test)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/PeculiarVentures/PKI.js/publish.yml?branch=master&label=publish)
 [![npm version](https://img.shields.io/npm/v/pkijs.svg)](https://www.npmjs.com/package/pkijs)
 ![Coveralls](https://img.shields.io/coverallsCoverage/github/PeculiarVentures/PKI.js)
 [![npm downloads](https://img.shields.io/npm/dm/pkijs.svg)](https://www.npmjs.com/package/pkijs)
@@ -31,13 +31,23 @@ PKIjs provides a Typescript implementation of the most common formats and algori
 
 ## Installation
 
-To install the stable version:
-
 ```bash
-npm install --save pkijs
+npm install pkijs asn1js
 ```
 
-This assumes you are using [npm](https://www.npmjs.com/) as your package manager.
+`asn1js` is a peer dependency: pkijs and your application must use the same copy (see below).
+
+## Breaking Changes In v4
+
+v4 is ESM-only and requires Node.js `^20.19.0 || >=22.12.0` (was `>=16.0.0`). CommonJS code can still `require("pkijs")` on these versions; Node.js 22.0–22.11 can't. The exported API is unchanged, but some input handling changed with the move from `pvutils`/`pvtsutils` to `@peculiar/utils` (last three items).
+
+- **TypeScript compiling to CommonJS:** use `"module": "node20"` or `"nodenext"` (`node16` fails with TS1479). ESM and bundler setups need no changes.
+- **Jest in CommonJS mode:** switch to ESM mode or Vitest, or configure an ESM-to-CommonJS transformer and make sure `transformIgnorePatterns` doesn't exclude `pkijs` and its ESM dependencies (`asn1js`, `bytestreamjs`, `@peculiar/utils`, `@noble/hashes`).
+- **Deep imports** (`pkijs/build/index.js`, `pkijs/build/index.es.js`) are blocked by `exports`; import from `pkijs`.
+- **asn1js 4 is a peer dependency** (v3 depended on asn1js 3), and `bytestreamjs` moves to 3. Install `asn1js@^4` next to pkijs. pkijs checks `instanceof asn1js.Sequence` and similar on values you pass in, so they must come from the same asn1js copy as pkijs's: values built with asn1js 3 fail those checks. Upgrade other libraries that still depend on asn1js 3 (such as `@peculiar/asn1-schema` 2) at the same time.
+- **Stricter base64:** `RSAPublicKey` and `ECPublicKey` `fromJSON()` throw a `TypeError` when a JWK member isn't base64url (padding is still accepted), and `SignedCertificateTimestamp#verify()` throws one when the log `key` isn't base64. v3 decoded such text into wrong bytes or failed later with an `AsnError`. `RSAPublicKey.fromJSON()` also decodes `n` and `e` exactly: v3 turned `e` = 3 into 196608, cut longer exponents to 3 bytes, and kept a trailing zero byte on some modulus lengths.
+- **SCT timestamps:** `SignedCertificateTimestamp` `toStream()`, `toSchema()` and `verify()` throw a `RangeError` for an invalid or pre-1970 `timestamp`; v3 wrote `0` or wrapped bytes.
+- **Untyped input:** `PkiObject#toString()` accepts only `"hex"`, `"base64"` and `"base64url"` (v3 also took `"utf8"`, `"binary"` and `"utf16"`), and `new CertificateChainValidationEngine(null)` throws a `TypeError`, like the other constructors.
 
 ## Examples
 
@@ -65,7 +75,7 @@ This assumes you are using [npm](https://www.npmjs.com/) as your package manager
 
 - [How to verify a signature in a PDF file](https://pkijs.org/docs/examples/other/how-to-verify-a-signature-in-a-PDF-file)
 - [S/MIME signature verification](https://pkijs.org/docs/examples/other/S-MIME-signature-verification)
-- [S/MIME signature encryption](https://pkijs.org/docs/examples/other/S-MIME-signature-encryption)
+- [S/MIME encryption](https://pkijs.org/docs/examples/other/S-MIME-signature-encryption)
 - [Working with PKCS#12 files](https://pkijs.org/docs/examples/other/working-with-PKCS-12-files)
 
 ## Documentation
@@ -74,7 +84,7 @@ You can find the PKI.js documentation [on the website](https://pkijs.org/docs/in
 
 ## Want to help?
 
-Want to file a bug, contribute some code, or improve documentation? Excellent! Read up on our guidelines for [contribution](https://github.com/PeculiarVentures/PKI.js/blob/master/CONTRIBUTING.md).
+Want to file a bug, contribute some code, or improve documentation? Excellent! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, commit conventions and the release flow.
 
 ## Core Contributors
 

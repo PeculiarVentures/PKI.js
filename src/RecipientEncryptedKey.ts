@@ -1,14 +1,9 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import {
-  KeyAgreeRecipientIdentifier,
-  KeyAgreeRecipientIdentifierJson,
-  KeyAgreeRecipientIdentifierSchema
-} from "./KeyAgreeRecipientIdentifier";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { KeyAgreeRecipientIdentifier, type KeyAgreeRecipientIdentifierJson, type KeyAgreeRecipientIdentifierSchema } from "./KeyAgreeRecipientIdentifier";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const RID = "rid";
 const ENCRYPTED_KEY = "encryptedKey";
@@ -42,16 +37,8 @@ export class RecipientEncryptedKey extends PkiObject implements IRecipientEncryp
   constructor(parameters: RecipientEncryptedKeyParameters = {}) {
     super();
 
-    this.rid = pvutils.getParametersValue(
-      parameters,
-      RID,
-      RecipientEncryptedKey.defaultValues(RID)
-    );
-    this.encryptedKey = pvutils.getParametersValue(
-      parameters,
-      ENCRYPTED_KEY,
-      RecipientEncryptedKey.defaultValues(ENCRYPTED_KEY)
-    );
+    this.rid = parameters[RID] ?? RecipientEncryptedKey.defaultValues(RID);
+    this.encryptedKey = parameters[ENCRYPTED_KEY] ?? RecipientEncryptedKey.defaultValues(ENCRYPTED_KEY);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -107,26 +94,19 @@ export class RecipientEncryptedKey extends PkiObject implements IRecipientEncryp
     parameters: Schema.SchemaParameters<{
       rid?: KeyAgreeRecipientIdentifierSchema;
       encryptedKey?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        KeyAgreeRecipientIdentifier.schema(names.rid || {}),
-        new asn1js.OctetString({ name: names.encryptedKey || EMPTY_STRING })
-      ]
+      value: [KeyAgreeRecipientIdentifier.schema(names.rid || {}), new asn1js.OctetString({ name: names.encryptedKey || EMPTY_STRING })],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -136,12 +116,12 @@ export class RecipientEncryptedKey extends PkiObject implements IRecipientEncryp
         names: {
           rid: {
             names: {
-              blockName: RID
-            }
+              blockName: RID,
+            },
           },
-          encryptedKey: ENCRYPTED_KEY
-        }
-      })
+          encryptedKey: ENCRYPTED_KEY,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -153,7 +133,7 @@ export class RecipientEncryptedKey extends PkiObject implements IRecipientEncryp
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [this.rid.toSchema(), this.encryptedKey]
+      value: [this.rid.toSchema(), this.encryptedKey],
     });
     //#endregion
   }
@@ -161,7 +141,7 @@ export class RecipientEncryptedKey extends PkiObject implements IRecipientEncryp
   public toJSON(): RecipientEncryptedKeyJson {
     return {
       rid: this.rid.toJSON(),
-      encryptedKey: this.encryptedKey.toJSON()
+      encryptedKey: this.encryptedKey.toJSON(),
     };
   }
 }

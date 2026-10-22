@@ -1,8 +1,7 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import { Attribute, AttributeJson } from "./Attribute";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { Attribute, type AttributeJson } from "./Attribute";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 
 const BAG_ID = "bagId";
@@ -16,8 +15,7 @@ export interface ISafeBag<T extends BagType = BagType> {
   bagAttributes?: Attribute[];
 }
 
-export type SafeBagParameters<T extends BagType = BagType> = PkiObjectParameters &
-  Partial<ISafeBag<T>>;
+export type SafeBagParameters<T extends BagType = BagType> = PkiObjectParameters & Partial<ISafeBag<T>>;
 
 export interface SafeBagJson {
   bagId: string;
@@ -42,18 +40,10 @@ export class SafeBag<T extends BagType = BagType> extends PkiObject implements I
   constructor(parameters: SafeBagParameters<T> = {}) {
     super();
 
-    this.bagId = pvutils.getParametersValue(parameters, BAG_ID, SafeBag.defaultValues(BAG_ID));
-    this.bagValue = pvutils.getParametersValue(
-      parameters,
-      BAG_VALUE,
-      SafeBag.defaultValues(BAG_VALUE)
-    ) as unknown as T;
+    this.bagId = parameters[BAG_ID] ?? SafeBag.defaultValues(BAG_ID);
+    this.bagValue = (parameters[BAG_VALUE] ?? SafeBag.defaultValues(BAG_VALUE)) as unknown as T;
     if (BAG_ATTRIBUTES in parameters) {
-      this.bagAttributes = pvutils.getParametersValue(
-        parameters,
-        BAG_ATTRIBUTES,
-        SafeBag.defaultValues(BAG_ATTRIBUTES)
-      );
+      this.bagAttributes = parameters[BAG_ATTRIBUTES] ?? SafeBag.defaultValues(BAG_ATTRIBUTES);
     }
 
     if (parameters.schema) {
@@ -116,13 +106,9 @@ export class SafeBag<T extends BagType = BagType> extends PkiObject implements I
       bagId?: string;
       bagValue?: string;
       bagAttributes?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -131,26 +117,26 @@ export class SafeBag<T extends BagType = BagType> extends PkiObject implements I
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [new asn1js.Any({ name: names.bagValue || BAG_VALUE })] // EXPLICIT ANY value
+          value: [new asn1js.Any({ name: names.bagValue || BAG_VALUE })], // EXPLICIT ANY value
         }),
         new asn1js.Set({
           optional: true,
           value: [
             new asn1js.Repeated({
               name: names.bagAttributes || BAG_ATTRIBUTES,
-              value: Attribute.schema()
-            })
-          ]
-        })
-      ]
+              value: Attribute.schema(),
+            }),
+          ],
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -160,9 +146,9 @@ export class SafeBag<T extends BagType = BagType> extends PkiObject implements I
         names: {
           bagId: BAG_ID,
           bagValue: BAG_VALUE,
-          bagAttributes: BAG_ATTRIBUTES
-        }
-      })
+          bagAttributes: BAG_ATTRIBUTES,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -176,10 +162,7 @@ export class SafeBag<T extends BagType = BagType> extends PkiObject implements I
     this.bagValue = new bagType({ schema: asn1.result.bagValue }) as unknown as T;
 
     if (BAG_ATTRIBUTES in asn1.result) {
-      this.bagAttributes = Array.from(
-        asn1.result.bagAttributes,
-        element => new Attribute({ schema: element })
-      );
+      this.bagAttributes = Array.from(asn1.result.bagAttributes, (element) => new Attribute({ schema: element }));
     }
     //#endregion
   }
@@ -191,22 +174,22 @@ export class SafeBag<T extends BagType = BagType> extends PkiObject implements I
       new asn1js.Constructed({
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
+          tagNumber: 0, // [0]
         },
-        value: [this.bagValue.toSchema()]
-      })
+        value: [this.bagValue.toSchema()],
+      }),
     ];
 
     if (this.bagAttributes) {
       outputArray.push(
         new asn1js.Set({
-          value: Array.from(this.bagAttributes, o => o.toSchema())
-        })
+          value: Array.from(this.bagAttributes, (o) => o.toSchema()),
+        }),
       );
     }
 
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
@@ -214,16 +197,16 @@ export class SafeBag<T extends BagType = BagType> extends PkiObject implements I
   public toJSON(): SafeBagJson {
     const output: SafeBagJson = {
       bagId: this.bagId,
-      bagValue: this.bagValue.toJSON()
+      bagValue: this.bagValue.toJSON(),
     };
 
     if (this.bagAttributes) {
-      output.bagAttributes = Array.from(this.bagAttributes, o => o.toJSON());
+      output.bagAttributes = Array.from(this.bagAttributes, (o) => o.toJSON());
     }
 
     return output;
   }
 }
 
-import { type BagType, SafeBagValueFactory, BagTypeJson } from "./SafeBagValueFactory";
+import { type BagType, SafeBagValueFactory, type BagTypeJson } from "./SafeBagValueFactory";
 import { EMPTY_STRING } from "./constants";

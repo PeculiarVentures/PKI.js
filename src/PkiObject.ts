@@ -1,8 +1,8 @@
 /* oxlint-disable no-unused-vars */
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
+import { base64, base64url, hex } from "@peculiar/utils";
 import { AsnError } from "./errors";
-import * as Schema from "./Schema";
+import type * as Schema from "./Schema";
 
 export interface PkiObjectParameters {
   schema?: Schema.SchemaType;
@@ -93,6 +93,16 @@ export abstract class PkiObject {
       schema = this.toSchema(true);
     }
 
-    return pvtsutils.Convert.ToString(schema.toBER(), encoding);
+    const ber = schema.toBER();
+    switch (encoding.toLowerCase()) {
+      case "hex":
+        return hex.encode(ber);
+      case "base64":
+        return base64.encode(ber);
+      case "base64url":
+        return base64url.encode(ber);
+      default:
+        throw new Error(`Unknown type of encoding '${encoding}'`);
+    }
   }
 }

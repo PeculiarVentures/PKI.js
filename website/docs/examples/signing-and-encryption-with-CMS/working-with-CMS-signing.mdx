@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./working-with-CMS-signing.example";
+---
+sidebar_position: 1
+---
 
-# Working with CMS Signing
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./working-with-CMS-signing.example.ts";
 
-In this example, you will see how to sign any file using CMS.
+# Working with CMS signing
 
-<CodeBlock language="ts">{source}</CodeBlock>
+Sign data as CMS SignedData with signed attributes, the format behind S/MIME, signed PDFs, and code signing. Then parse the message, verify the signature and the signer's certificate chain, and read the content.
+
+<RunnableExample source={source} load={() => import("./working-with-CMS-signing.example.ts?run")} />
+
+**API:** [`SignedData`](../../api/classes/SignedData.md), [`SignerInfo`](../../api/classes/SignerInfo.md), [`SignedAndUnsignedAttributes`](../../api/classes/SignedAndUnsignedAttributes.md), [`ContentInfo`](../../api/classes/ContentInfo.md)

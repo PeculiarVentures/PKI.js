@@ -1,0 +1,127 @@
+.example {
+  margin-bottom: var(--ifm-leading);
+
+  :global(.theme-code-block) {
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #21252b;
+  border-bottom-left-radius: var(--ifm-code-border-radius);
+  border-bottom-right-radius: var(--ifm-code-border-radius);
+}
+
+.hint {
+  color: #9da5b4;
+  font-size: 0.8rem;
+}
+
+.output {
+  margin-top: 12px;
+  background: #1e2127;
+  color: #d7dae0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.error {
+  color: #e06c75;
+}
+
+.empty {
+  color: #9da5b4;
+  font-style: italic;
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #282c34;
+  border-top: 1px solid #3a3f4b;
+}
+
+.field {
+  padding: 8px 10px;
+  border: 1px dashed #4b5263;
+  border-radius: var(--ifm-code-border-radius);
+  color: #d7dae0;
+
+  &.dragging {
+    border-color: var(--ifm-color-primary);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.fieldHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.value {
+  color: #9da5b4;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.badge {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: #3a3f4b;
+  color: #d7dae0;
+  font-size: 0.7rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.textarea {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid #4b5263;
+  border-radius: var(--ifm-code-border-radius);
+  background: #1e2127;
+  color: #d7dae0;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.8rem;
+  resize: vertical;
+}
+
+.result {
+  margin-top: 12px;
+
+  .output {
+    margin: 0;
+  }
+}
+
+.downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}

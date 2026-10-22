@@ -1,9 +1,8 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const NOT_BEFORE = "notBefore";
 const NOT_AFTER = "notAfter";
@@ -38,19 +37,11 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
     super();
 
     if (NOT_BEFORE in parameters) {
-      this.notBefore = pvutils.getParametersValue(
-        parameters,
-        NOT_BEFORE,
-        PrivateKeyUsagePeriod.defaultValues(NOT_BEFORE)
-      );
+      this.notBefore = parameters[NOT_BEFORE] ?? PrivateKeyUsagePeriod.defaultValues(NOT_BEFORE);
     }
 
     if (NOT_AFTER in parameters) {
-      this.notAfter = pvutils.getParametersValue(
-        parameters,
-        NOT_AFTER,
-        PrivateKeyUsagePeriod.defaultValues(NOT_AFTER)
-      );
+      this.notAfter = parameters[NOT_AFTER] ?? PrivateKeyUsagePeriod.defaultValues(NOT_AFTER);
     }
 
     if (parameters.schema) {
@@ -92,13 +83,9 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
     parameters: Schema.SchemaParameters<{
       notBefore?: string;
       notAfter?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -108,24 +95,24 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
-          }
+            tagNumber: 0, // [0]
+          },
         }),
         new asn1js.Primitive({
           name: names.notAfter || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
-          }
-        })
-      ]
+            tagNumber: 1, // [1]
+          },
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -134,9 +121,9 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
       PrivateKeyUsagePeriod.schema({
         names: {
           notBefore: NOT_BEFORE,
-          notAfter: NOT_AFTER
-        }
-      })
+          notAfter: NOT_AFTER,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -148,7 +135,7 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
     }
     if (NOT_AFTER in asn1.result) {
       const localNotAfter = new asn1js.GeneralizedTime({
-        valueHex: asn1.result.notAfter.valueBlock.valueHex
+        valueHex: asn1.result.notAfter.valueBlock.valueHex,
       });
       localNotAfter.fromBuffer(asn1.result.notAfter.valueBlock.valueHex);
       this.notAfter = localNotAfter.toDate();
@@ -164,11 +151,10 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
         new asn1js.Primitive({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          valueHex: new asn1js.GeneralizedTime({ valueDate: this.notBefore }).valueBlock
-            .valueHexView
-        })
+          valueHex: new asn1js.GeneralizedTime({ valueDate: this.notBefore }).valueBlock.valueHexView,
+        }),
       );
     }
 
@@ -177,17 +163,17 @@ export class PrivateKeyUsagePeriod extends PkiObject implements IPrivateKeyUsage
         new asn1js.Primitive({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          valueHex: new asn1js.GeneralizedTime({ valueDate: this.notAfter }).valueBlock.valueHexView
-        })
+          valueHex: new asn1js.GeneralizedTime({ valueDate: this.notAfter }).valueBlock.valueHexView,
+        }),
       );
     }
     //#endregion
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }

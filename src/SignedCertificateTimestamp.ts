@@ -1,14 +1,15 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
+import { base64, bytes, hex, toArrayBuffer, uint } from "@peculiar/utils";
 import * as bs from "bytestreamjs";
 import * as common from "./common";
 import { PublicKeyInfo } from "./PublicKeyInfo";
-import * as Schema from "./Schema";
-import { AlgorithmIdentifier } from "./AlgorithmIdentifier";
+import type * as Schema from "./Schema";
+import type { AlgorithmIdentifier } from "./AlgorithmIdentifier";
 import { Certificate } from "./Certificate";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
-import { SignedCertificateTimestampList } from "./SignedCertificateTimestampList";
+import type { SignedCertificateTimestampList } from "./SignedCertificateTimestampList";
+import { Extension } from "./Extension";
 import { id_SignedCertificateTimestampList } from "./ObjectIdentifiers";
 
 const VERSION = "version";
@@ -51,8 +52,7 @@ export interface SignedCertificateTimestampJson {
   signature: string;
 }
 
-export type SignedCertificateTimestampParameters = PkiObjectParameters &
-  Partial<ISignedCertificateTimestamp> & { stream?: bs.SeqStream };
+export type SignedCertificateTimestampParameters = PkiObjectParameters & Partial<ISignedCertificateTimestamp> & { stream?: bs.SeqStream };
 
 export interface Log {
   /**
@@ -83,41 +83,13 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   constructor(parameters: SignedCertificateTimestampParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(
-      parameters,
-      VERSION,
-      SignedCertificateTimestamp.defaultValues(VERSION)
-    );
-    this.logID = pvutils.getParametersValue(
-      parameters,
-      LOG_ID,
-      SignedCertificateTimestamp.defaultValues(LOG_ID)
-    );
-    this.timestamp = pvutils.getParametersValue(
-      parameters,
-      TIMESTAMP,
-      SignedCertificateTimestamp.defaultValues(TIMESTAMP)
-    );
-    this.extensions = pvutils.getParametersValue(
-      parameters,
-      EXTENSIONS,
-      SignedCertificateTimestamp.defaultValues(EXTENSIONS)
-    );
-    this.hashAlgorithm = pvutils.getParametersValue(
-      parameters,
-      HASH_ALGORITHM,
-      SignedCertificateTimestamp.defaultValues(HASH_ALGORITHM)
-    );
-    this.signatureAlgorithm = pvutils.getParametersValue(
-      parameters,
-      SIGNATURE_ALGORITHM,
-      SignedCertificateTimestamp.defaultValues(SIGNATURE_ALGORITHM)
-    );
-    this.signature = pvutils.getParametersValue(
-      parameters,
-      SIGNATURE,
-      SignedCertificateTimestamp.defaultValues(SIGNATURE)
-    );
+    this.version = parameters[VERSION] ?? SignedCertificateTimestamp.defaultValues(VERSION);
+    this.logID = parameters[LOG_ID] ?? SignedCertificateTimestamp.defaultValues(LOG_ID);
+    this.timestamp = parameters[TIMESTAMP] ?? SignedCertificateTimestamp.defaultValues(TIMESTAMP);
+    this.extensions = parameters[EXTENSIONS] ?? SignedCertificateTimestamp.defaultValues(EXTENSIONS);
+    this.hashAlgorithm = parameters[HASH_ALGORITHM] ?? SignedCertificateTimestamp.defaultValues(HASH_ALGORITHM);
+    this.signatureAlgorithm = parameters[SIGNATURE_ALGORITHM] ?? SignedCertificateTimestamp.defaultValues(SIGNATURE_ALGORITHM);
+    this.signature = parameters[SIGNATURE] ?? SignedCertificateTimestamp.defaultValues(SIGNATURE);
 
     if ("stream" in parameters && parameters.stream) {
       this.fromStream(parameters.stream);
@@ -160,15 +132,12 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
-    if (schema instanceof asn1js.RawData === false)
-      throw new Error(
-        "Object's schema was not verified against input data for SignedCertificateTimestamp"
-      );
+    if (schema instanceof asn1js.RawData === false) throw new Error("Object's schema was not verified against input data for SignedCertificateTimestamp");
 
     const seqStream = new bs.SeqStream({
       stream: new bs.ByteStream({
-        buffer: schema.data
-      })
+        buffer: schema.data,
+      }),
     });
 
     this.fromStream(seqStream);
@@ -185,7 +154,8 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
 
     if (this.version === 0) {
       this.logID = new Uint8Array(stream.getBlock(32)).buffer.slice(0);
-      this.timestamp = new Date(pvutils.utilFromBase(new Uint8Array(stream.getBlock(8)), 8));
+      // Values above 2^53 ms are not valid dates either way, so parsing doesn't throw for them.
+      this.timestamp = new Date(Number(uint.decodeBigInt(stream.getBlock(8))));
 
       //#region Extensions
       const extensionsLength = stream.getUint16();
@@ -267,13 +237,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
     stream.appendChar(this.version);
     stream.appendView(new Uint8Array(this.logID));
 
-    const timeBuffer = new ArrayBuffer(8);
-    const timeView = new Uint8Array(timeBuffer);
-
-    const baseArray = pvutils.utilToBase(this.timestamp.valueOf(), 8);
-    timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
-
-    stream.appendView(timeView);
+    stream.appendView(uint.encode(this.timestamp.valueOf(), { length: 8 }));
     stream.appendUint16(this.extensions.byteLength);
 
     if (this.extensions.byteLength) stream.appendView(new Uint8Array(this.extensions));
@@ -338,12 +302,12 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
   public toJSON(): SignedCertificateTimestampJson {
     return {
       version: this.version,
-      logID: pvutils.bufferToHexCodes(this.logID),
+      logID: hex.encode(this.logID, { case: "upper" }),
       timestamp: this.timestamp,
-      extensions: pvutils.bufferToHexCodes(this.extensions),
+      extensions: hex.encode(this.extensions, { case: "upper" }),
       hashAlgorithm: this.hashAlgorithm,
       signatureAlgorithm: this.signatureAlgorithm,
-      signature: pvutils.bufferToHexCodes(this.signature)
+      signature: hex.encode(this.signature, { case: "upper" }),
     };
   }
 
@@ -354,14 +318,9 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
    * @param dataType Type = 0 (data is encoded Certificate), type = 1 (data is encoded PreCert)
    * @param crypto Crypto engine
    */
-  async verify(
-    logs: Log[],
-    data: ArrayBuffer,
-    dataType = 0,
-    crypto = common.getCrypto(true)
-  ): Promise<boolean> {
+  async verify(logs: Log[], data: ArrayBuffer, dataType = 0, crypto = common.getCrypto(true)): Promise<boolean> {
     //#region Initial variables
-    const logId = pvutils.toBase64(pvutils.arrayBufferToString(this.logID));
+    const logId = base64.encode(this.logID);
 
     let publicKeyBase64 = null;
 
@@ -380,7 +339,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
       throw new Error(`Public key not found for CT with logId: ${logId}`);
     }
 
-    const pki = pvutils.stringToArrayBuffer(pvutils.fromBase64(publicKeyBase64));
+    const pki = toArrayBuffer(base64.decode(publicKeyBase64));
     const publicKeyInfo = PublicKeyInfo.fromBER(pki);
     //#endregion
 
@@ -388,13 +347,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
     stream.appendChar(0x00); // sct_version
     stream.appendChar(0x00); // signature_type = certificate_timestamp
 
-    const timeBuffer = new ArrayBuffer(8);
-    const timeView = new Uint8Array(timeBuffer);
-
-    const baseArray = pvutils.utilToBase(this.timestamp.valueOf(), 8);
-    timeView.set(new Uint8Array(baseArray), 8 - baseArray.byteLength);
-
-    stream.appendView(timeView);
+    stream.appendView(uint.encode(this.timestamp.valueOf(), { length: 8 }));
 
     stream.appendUint16(dataType);
 
@@ -413,7 +366,7 @@ export class SignedCertificateTimestamp extends PkiObject implements ISignedCert
       new asn1js.OctetString({ valueHex: this.signature }),
       publicKeyInfo,
       { algorithmId: EMPTY_STRING } as AlgorithmIdentifier,
-      "SHA-256"
+      "SHA-256",
     );
     //#endregion
   }
@@ -430,8 +383,79 @@ export interface Log {
   key: string;
 }
 
+const SCT_EXTENSION_OID = new asn1js.ObjectIdentifier({ value: id_SignedCertificateTimestampList }).valueBlock.toBER(false);
+
+function hasConstructedTag(value: asn1js.AsnType | undefined, tagClass: number, tagNumber: number): value is asn1js.Constructed {
+  // Match the encoded structure, including schemas created by another ASN1js copy.
+  if (!value || value.idBlock.tagClass !== tagClass || value.idBlock.tagNumber !== tagNumber) return false;
+  if (!value.idBlock.isConstructed) return false;
+  return "value" in value.valueBlock && Array.isArray(value.valueBlock.value);
+}
+
+function readCertificateTBS(certificate: Certificate): asn1js.Sequence {
+  const encoded = certificate.tbsView.byteLength ? certificate.tbsView : new Uint8Array(certificate.encodeTBS().toBER(false));
+  const decoded = asn1js.fromBER(encoded);
+  if (decoded.offset !== encoded.byteLength || !hasConstructedTag(decoded.result, 1, 16)) throw new Error("Invalid certificate TBS encoding");
+  const tbsSchema = (Certificate.schema() as asn1js.Sequence).valueBlock.value[0];
+  if (!asn1js.compareSchema(decoded.result, decoded.result, tbsSchema).verified) throw new Error("Invalid certificate TBS encoding");
+  return decoded.result as asn1js.Sequence;
+}
+
+function encodeConstructedValue(schema: asn1js.Constructed, children: Uint8Array[]): ArrayBuffer {
+  // Rebuild container headers while retaining each child's original encoding.
+  const container = new asn1js.Constructed({ idBlock: { tagClass: schema.idBlock.tagClass, tagNumber: schema.idBlock.tagNumber } });
+  const content = bytes.concat(children);
+  container.lenBlock.length = content.byteLength;
+  return bytes.concat(container.idBlock.toBER(false), container.lenBlock.toBER(false), content) as ArrayBuffer;
+}
+
+function readExtensionField(schema: asn1js.Sequence): { field: asn1js.Constructed; extensions: asn1js.Constructed } {
+  const field = schema.valueBlock.value.find((value): value is asn1js.Constructed => hasConstructedTag(value, 3, 3));
+  const extensions = field?.valueBlock.value[0];
+  if (!field || !hasConstructedTag(extensions, 1, 16)) throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
+  return { field, extensions };
+}
+
+function isSCTExtension(extension: asn1js.AsnType): boolean {
+  if (!hasConstructedTag(extension, 1, 16)) return false;
+  const oid = extension.valueBlock.value[0];
+  if (!oid || oid.idBlock.tagClass !== 1 || oid.idBlock.tagNumber !== 6 || oid.idBlock.isConstructed) return false;
+  return bytes.equal(oid.valueBlock.toBER(false), SCT_EXTENSION_OID);
+}
+
+function readSCTList(extensions: asn1js.AsnType[]): SignedCertificateTimestampList {
+  let timestamps: SignedCertificateTimestampList | undefined;
+  for (let i = extensions.length - 1; i >= 0; i--) {
+    timestamps = Extension.fromBER(extensions[i].valueBeforeDecodeView.slice().buffer).parsedValue as SignedCertificateTimestampList | undefined;
+    if (!timestamps || timestamps.timestamps.length === 0) throw new Error("Nothing to verify in the certificate");
+  }
+  if (!timestamps) throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
+  return timestamps;
+}
+
+function encodeExtensionsWithoutSCTs(field: asn1js.Constructed, extensions: asn1js.Constructed): Uint8Array[] {
+  const retained = extensions.valueBlock.value.filter((extension) => !isSCTExtension(extension));
+  if (retained.length === 0) return [];
+  const encoded = encodeConstructedValue(
+    extensions,
+    retained.map((extension) => extension.valueBeforeDecodeView),
+  );
+  return [new Uint8Array(encodeConstructedValue(field, [new Uint8Array(encoded)]))];
+}
+
+function preparePreCert(certificate: Certificate): { tbs: ArrayBuffer; timestamps: SignedCertificateTimestampList } {
+  const schema = readCertificateTBS(certificate);
+  const { field, extensions } = readExtensionField(schema);
+  const timestamps = readSCTList(extensions.valueBlock.value.filter(isSCTExtension));
+  const replacement = encodeExtensionsWithoutSCTs(field, extensions);
+  const value = schema.valueBlock.value.flatMap((value) => (value === field ? replacement : [value.valueBeforeDecodeView]));
+  return { tbs: encodeConstructedValue(schema, value), timestamps };
+}
+
 /**
  * Verify SignedCertificateTimestamp for specific certificate content
+ * Uses stored tbsView bytes, including their SCTs, when present. Otherwise, uses
+ * one encodeTBS() result for both the SCTs and signed data.
  * @param certificate Certificate for which verification would be performed
  * @param issuerCertificate Certificate of the issuer of target certificate
  * @param logs Array of objects with information about each CT Log (like here: https://ct.grahamedgecombe.com/logs.json)
@@ -439,51 +463,12 @@ export interface Log {
  * @param crypto Crypto engine
  * @return Array of verification results
  */
-export async function verifySCTsForCertificate(
-  certificate: Certificate,
-  issuerCertificate: Certificate,
-  logs: Log[],
-  index = -1,
-  crypto = common.getCrypto(true)
-) {
-  let parsedValue: SignedCertificateTimestampList | null = null;
-
+export async function verifySCTsForCertificate(certificate: Certificate, issuerCertificate: Certificate, logs: Log[], index = -1, crypto = common.getCrypto(true)) {
+  const { tbs, timestamps: parsedValue } = preparePreCert(certificate);
   const stream = new bs.SeqStream();
 
-  //#region Remove certificate extension
-  if (certificate.extensions) {
-    for (let i = certificate.extensions.length - 1; i >= 0; i--) {
-      switch (certificate.extensions[i].extnID) {
-        case id_SignedCertificateTimestampList:
-          {
-            parsedValue = certificate.extensions[i].parsedValue;
-
-            if (!parsedValue || parsedValue.timestamps.length === 0)
-              throw new Error("Nothing to verify in the certificate");
-
-            certificate.extensions.splice(i, 1);
-          }
-          break;
-        default:
-      }
-    }
-  }
-  //#endregion
-
-  //#region Check we do have what to verify
-  if (parsedValue === null)
-    throw new Error("No SignedCertificateTimestampList extension in the specified certificate");
-  //#endregion
-
-  //#region Prepare modifier TBS value
-  const tbs = certificate.encodeTBS().toBER();
-  //#endregion
-
   //#region Initialize "issuer_key_hash" value
-  const issuerId = await crypto.digest(
-    { name: "SHA-256" },
-    new Uint8Array(issuerCertificate.subjectPublicKeyInfo.toSchema().toBER(false))
-  );
+  const issuerId = await crypto.digest({ name: "SHA-256" }, new Uint8Array(issuerCertificate.subjectPublicKeyInfo.toSchema().toBER(false)));
   //#endregion
 
   //#region Make final "PreCert" value

@@ -1,11 +1,10 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { CertificateRevocationList } from "./CertificateRevocationList";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { id_CRLBag_X509CRL } from "./ObjectIdentifiers";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const CRL_ID = "crlId";
 const CRL_VALUE = "crlValue";
@@ -44,18 +43,10 @@ export class CRLBag extends PkiObject implements ICRLBag {
   constructor(parameters: CRLBagParameters = {}) {
     super();
 
-    this.crlId = pvutils.getParametersValue(parameters, CRL_ID, CRLBag.defaultValues(CRL_ID));
-    this.crlValue = pvutils.getParametersValue(
-      parameters,
-      CRL_VALUE,
-      CRLBag.defaultValues(CRL_VALUE)
-    );
+    this.crlId = parameters[CRL_ID] ?? CRLBag.defaultValues(CRL_ID);
+    this.crlValue = parameters[CRL_VALUE] ?? CRLBag.defaultValues(CRL_VALUE);
     if (PARSED_VALUE in parameters) {
-      this.parsedValue = pvutils.getParametersValue(
-        parameters,
-        PARSED_VALUE,
-        CRLBag.defaultValues(PARSED_VALUE)
-      );
+      this.parsedValue = parameters[PARSED_VALUE] ?? CRLBag.defaultValues(PARSED_VALUE);
     }
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -115,13 +106,9 @@ export class CRLBag extends PkiObject implements ICRLBag {
     parameters: Schema.SchemaParameters<{
       id?: string;
       value?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -130,17 +117,17 @@ export class CRLBag extends PkiObject implements ICRLBag {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [new asn1js.Any({ name: names.value || "value" })] // EXPLICIT ANY value
-        })
-      ]
+          value: [new asn1js.Any({ name: names.value || "value" })], // EXPLICIT ANY value
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -149,9 +136,9 @@ export class CRLBag extends PkiObject implements ICRLBag {
       CRLBag.schema({
         names: {
           id: CRL_ID,
-          value: CRL_VALUE
-        }
-      })
+          value: CRL_VALUE,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -175,7 +162,7 @@ export class CRLBag extends PkiObject implements ICRLBag {
     if (this.parsedValue) {
       this.crlId = id_CRLBag_X509CRL;
       this.crlValue = new asn1js.OctetString({
-        valueHex: this.parsedValue.toSchema().toBER(false)
+        valueHex: this.parsedValue.toSchema().toBER(false),
       });
     }
 
@@ -185,18 +172,18 @@ export class CRLBag extends PkiObject implements ICRLBag {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [this.crlValue.toSchema()]
-        })
-      ]
+          value: [this.crlValue.toSchema()],
+        }),
+      ],
     });
   }
 
   public toJSON(): CRLBagJson {
     return {
       crlId: this.crlId,
-      crlValue: this.crlValue.toJSON()
+      crlValue: this.crlValue.toJSON(),
     };
   }
 }

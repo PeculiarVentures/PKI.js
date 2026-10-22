@@ -1,9 +1,8 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const E_CONTENT_TYPE = "eContentType";
 const E_CONTENT = "eContent";
@@ -19,8 +18,7 @@ export interface EncapsulatedContentInfoJson {
   eContent?: asn1js.OctetStringJson;
 }
 
-export type EncapsulatedContentInfoParameters = PkiObjectParameters &
-  Partial<IEncapsulatedContentInfo>;
+export type EncapsulatedContentInfoParameters = PkiObjectParameters & Partial<IEncapsulatedContentInfo>;
 
 export type EncapsulatedContentInfoSchema = Schema.SchemaParameters<{
   eContentType?: string;
@@ -43,23 +41,15 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
   constructor(parameters: EncapsulatedContentInfoParameters = {}) {
     super();
 
-    this.eContentType = pvutils.getParametersValue(
-      parameters,
-      E_CONTENT_TYPE,
-      EncapsulatedContentInfo.defaultValues(E_CONTENT_TYPE)
-    );
+    this.eContentType = parameters[E_CONTENT_TYPE] ?? EncapsulatedContentInfo.defaultValues(E_CONTENT_TYPE);
     if (E_CONTENT in parameters) {
-      this.eContent = pvutils.getParametersValue(
-        parameters,
-        E_CONTENT,
-        EncapsulatedContentInfo.defaultValues(E_CONTENT)
-      );
+      this.eContent = parameters[E_CONTENT] ?? EncapsulatedContentInfo.defaultValues(E_CONTENT);
       if (this.eContent.idBlock.tagClass === 1 && this.eContent.idBlock.tagNumber === 4) {
         //#region Divide OCTET STRING value down to small pieces
         if (this.eContent.idBlock.isConstructed === false) {
           const constrString = new asn1js.OctetString({
             idBlock: { isConstructed: true },
-            isConstructed: true
+            isConstructed: true,
           });
 
           let offset = 0;
@@ -67,11 +57,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
           let length = viewHex.byteLength;
 
           while (length > 0) {
-            const pieceView = new Uint8Array(
-              viewHex,
-              offset,
-              offset + 65536 > viewHex.byteLength ? viewHex.byteLength - offset : 65536
-            );
+            const pieceView = new Uint8Array(viewHex, offset, offset + 65536 > viewHex.byteLength ? viewHex.byteLength - offset : 65536);
             const _array = new ArrayBuffer(pieceView.length);
             const _view = new Uint8Array(_array);
 
@@ -124,8 +110,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
       case E_CONTENT_TYPE:
         return memberValue === EMPTY_STRING;
       case E_CONTENT: {
-        if (memberValue.idBlock.tagClass === 1 && memberValue.idBlock.tagNumber === 4)
-          return memberValue.isEqual(EncapsulatedContentInfo.defaultValues(E_CONTENT));
+        if (memberValue.idBlock.tagClass === 1 && memberValue.idBlock.tagNumber === 4) return memberValue.isEqual(EncapsulatedContentInfo.defaultValues(E_CONTENT));
 
         return false;
       }
@@ -144,11 +129,7 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
    *```
    */
   public static override schema(parameters: EncapsulatedContentInfoSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -158,19 +139,19 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
           value: [
-            new asn1js.Any({ name: names.eContent || EMPTY_STRING }) // In order to aling this with PKCS#7 and CMS as well
-          ]
-        })
-      ]
+            new asn1js.Any({ name: names.eContent || EMPTY_STRING }), // In order to aling this with PKCS#7 and CMS as well
+          ],
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -179,9 +160,9 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
       EncapsulatedContentInfo.schema({
         names: {
           eContentType: E_CONTENT_TYPE,
-          eContent: E_CONTENT
-        }
-      })
+          eContent: E_CONTENT,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -202,10 +183,10 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
             optional: true,
             idBlock: {
               tagClass: 3, // CONTEXT-SPECIFIC
-              tagNumber: 0 // [0]
+              tagNumber: 0, // [0]
             },
-            value: [this.eContent]
-          })
+            value: [this.eContent],
+          }),
         );
       }
     }
@@ -213,20 +194,17 @@ export class EncapsulatedContentInfo extends PkiObject implements IEncapsulatedC
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
 
   public toJSON(): EncapsulatedContentInfoJson {
     const res: EncapsulatedContentInfoJson = {
-      eContentType: this.eContentType
+      eContentType: this.eContentType,
     };
 
-    if (
-      this.eContent &&
-      EncapsulatedContentInfo.compareWithDefault(E_CONTENT, this.eContent) === false
-    ) {
+    if (this.eContent && EncapsulatedContentInfo.compareWithDefault(E_CONTENT, this.eContent) === false) {
       res.eContent = this.eContent.toJSON();
     }
 

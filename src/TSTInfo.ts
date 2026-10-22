@@ -1,19 +1,12 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
-import * as pvutils from "pvutils";
+import { bytes } from "@peculiar/utils";
 import * as common from "./common";
-import {
-  MessageImprint,
-  HASHED_MESSAGE,
-  HASH_ALGORITHM,
-  MessageImprintSchema,
-  MessageImprintJson
-} from "./MessageImprint";
-import { Accuracy, AccuracyJson, AccuracySchema, MICROS, MILLIS, SECONDS } from "./Accuracy";
-import { GeneralName, GeneralNameJson, GeneralNameSchema, TYPE, VALUE } from "./GeneralName";
-import { Extension, ExtensionJson, ExtensionSchema } from "./Extension";
-import * as Schema from "./Schema";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { MessageImprint, HASHED_MESSAGE, HASH_ALGORITHM, type MessageImprintSchema, type MessageImprintJson } from "./MessageImprint";
+import { Accuracy, type AccuracyJson, type AccuracySchema, MICROS, MILLIS, SECONDS } from "./Accuracy";
+import { GeneralName, type GeneralNameJson, type GeneralNameSchema, TYPE, VALUE } from "./GeneralName";
+import { Extension, type ExtensionJson, type ExtensionSchema } from "./Extension";
+import type * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_STRING } from "./constants";
 
@@ -48,7 +41,7 @@ const CLEAR_PROPS = [
   TST_INFO_ORDERING,
   TST_INFO_NONCE,
   TST_INFO_TSA,
-  TST_INFO_EXTENSIONS
+  TST_INFO_EXTENSIONS,
 ];
 
 export interface ITSTInfo {
@@ -162,54 +155,30 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
   constructor(parameters: TSTInfoParameters = {}) {
     super();
 
-    this.version = pvutils.getParametersValue(parameters, VERSION, TSTInfo.defaultValues(VERSION));
-    this.policy = pvutils.getParametersValue(parameters, POLICY, TSTInfo.defaultValues(POLICY));
-    this.messageImprint = pvutils.getParametersValue(
-      parameters,
-      MESSAGE_IMPRINT,
-      TSTInfo.defaultValues(MESSAGE_IMPRINT)
-    );
-    this.serialNumber = pvutils.getParametersValue(
-      parameters,
-      SERIAL_NUMBER,
-      TSTInfo.defaultValues(SERIAL_NUMBER)
-    );
-    this.genTime = pvutils.getParametersValue(
-      parameters,
-      GEN_TIME,
-      TSTInfo.defaultValues(GEN_TIME)
-    );
+    this.version = parameters[VERSION] ?? TSTInfo.defaultValues(VERSION);
+    this.policy = parameters[POLICY] ?? TSTInfo.defaultValues(POLICY);
+    this.messageImprint = parameters[MESSAGE_IMPRINT] ?? TSTInfo.defaultValues(MESSAGE_IMPRINT);
+    this.serialNumber = parameters[SERIAL_NUMBER] ?? TSTInfo.defaultValues(SERIAL_NUMBER);
+    this.genTime = parameters[GEN_TIME] ?? TSTInfo.defaultValues(GEN_TIME);
 
     if (ACCURACY in parameters) {
-      this.accuracy = pvutils.getParametersValue(
-        parameters,
-        ACCURACY,
-        TSTInfo.defaultValues(ACCURACY)
-      );
+      this.accuracy = parameters[ACCURACY] ?? TSTInfo.defaultValues(ACCURACY);
     }
 
     if (ORDERING in parameters) {
-      this.ordering = pvutils.getParametersValue(
-        parameters,
-        ORDERING,
-        TSTInfo.defaultValues(ORDERING)
-      );
+      this.ordering = parameters[ORDERING] ?? TSTInfo.defaultValues(ORDERING);
     }
 
     if (NONCE in parameters) {
-      this.nonce = pvutils.getParametersValue(parameters, NONCE, TSTInfo.defaultValues(NONCE));
+      this.nonce = parameters[NONCE] ?? TSTInfo.defaultValues(NONCE);
     }
 
     if (TSA in parameters) {
-      this.tsa = pvutils.getParametersValue(parameters, TSA, TSTInfo.defaultValues(TSA));
+      this.tsa = parameters[TSA] ?? TSTInfo.defaultValues(TSA);
     }
 
     if (EXTENSIONS in parameters) {
-      this.extensions = pvutils.getParametersValue(
-        parameters,
-        EXTENSIONS,
-        TSTInfo.defaultValues(EXTENSIONS)
-      );
+      this.extensions = parameters[EXTENSIONS] ?? TSTInfo.defaultValues(EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -272,24 +241,14 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       case ORDERING:
         return memberValue === TSTInfo.defaultValues(ORDERING);
       case MESSAGE_IMPRINT:
-        return (
-          MessageImprint.compareWithDefault(HASH_ALGORITHM, memberValue.hashAlgorithm) &&
-          MessageImprint.compareWithDefault(HASHED_MESSAGE, memberValue.hashedMessage)
-        );
+        return MessageImprint.compareWithDefault(HASH_ALGORITHM, memberValue.hashAlgorithm) && MessageImprint.compareWithDefault(HASHED_MESSAGE, memberValue.hashedMessage);
       case SERIAL_NUMBER:
       case NONCE:
         return memberValue.isEqual(TSTInfo.defaultValues(NONCE));
       case ACCURACY:
-        return (
-          Accuracy.compareWithDefault(SECONDS, memberValue.seconds) &&
-          Accuracy.compareWithDefault(MILLIS, memberValue.millis) &&
-          Accuracy.compareWithDefault(MICROS, memberValue.micros)
-        );
+        return Accuracy.compareWithDefault(SECONDS, memberValue.seconds) && Accuracy.compareWithDefault(MILLIS, memberValue.millis) && Accuracy.compareWithDefault(MICROS, memberValue.micros);
       case TSA:
-        return (
-          GeneralName.compareWithDefault(TYPE, memberValue.type) &&
-          GeneralName.compareWithDefault(VALUE, memberValue.value)
-        );
+        return GeneralName.compareWithDefault(TYPE, memberValue.type) && GeneralName.compareWithDefault(VALUE, memberValue.value);
       case EXTENSIONS:
         return memberValue.length === 0;
       default:
@@ -327,13 +286,9 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       tsa?: GeneralNameSchema;
       extensions?: string;
       extension?: ExtensionSchema;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || TST_INFO,
@@ -343,63 +298,63 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
         MessageImprint.schema(
           names.messageImprint || {
             names: {
-              blockName: TST_INFO_MESSAGE_IMPRINT
-            }
-          }
+              blockName: TST_INFO_MESSAGE_IMPRINT,
+            },
+          },
         ),
         new asn1js.Integer({ name: names.serialNumber || TST_INFO_SERIAL_NUMBER }),
         new asn1js.GeneralizedTime({ name: names.genTime || TST_INFO_GEN_TIME }),
         Accuracy.schema(
           names.accuracy || {
             names: {
-              blockName: TST_INFO_ACCURACY
-            }
-          }
+              blockName: TST_INFO_ACCURACY,
+            },
+          },
         ),
         new asn1js.Boolean({
           name: names.ordering || TST_INFO_ORDERING,
-          optional: true
+          optional: true,
         }),
         new asn1js.Integer({
           name: names.nonce || TST_INFO_NONCE,
-          optional: true
+          optional: true,
         }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
           value: [
             GeneralName.schema(
               names.tsa || {
                 names: {
-                  blockName: TST_INFO_TSA
-                }
-              }
-            )
-          ]
+                  blockName: TST_INFO_TSA,
+                },
+              },
+            ),
+          ],
         }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
           value: [
             new asn1js.Repeated({
               name: names.extensions || TST_INFO_EXTENSIONS,
-              value: Extension.schema(names.extension || {})
-            })
-          ]
-        }) // IMPLICIT Extensions
-      ]
+              value: Extension.schema(names.extension || {}),
+            }),
+          ],
+        }), // IMPLICIT Extensions
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, TSTInfo.schema());
@@ -411,18 +366,11 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
     this.messageImprint = new MessageImprint({ schema: asn1.result[TST_INFO_MESSAGE_IMPRINT] });
     this.serialNumber = asn1.result[TST_INFO_SERIAL_NUMBER];
     this.genTime = asn1.result[TST_INFO_GEN_TIME].toDate();
-    if (TST_INFO_ACCURACY in asn1.result)
-      this.accuracy = new Accuracy({ schema: asn1.result[TST_INFO_ACCURACY] });
-    if (TST_INFO_ORDERING in asn1.result)
-      this.ordering = asn1.result[TST_INFO_ORDERING].valueBlock.value;
+    if (TST_INFO_ACCURACY in asn1.result) this.accuracy = new Accuracy({ schema: asn1.result[TST_INFO_ACCURACY] });
+    if (TST_INFO_ORDERING in asn1.result) this.ordering = asn1.result[TST_INFO_ORDERING].valueBlock.value;
     if (TST_INFO_NONCE in asn1.result) this.nonce = asn1.result[TST_INFO_NONCE];
-    if (TST_INFO_TSA in asn1.result)
-      this.tsa = new GeneralName({ schema: asn1.result[TST_INFO_TSA] });
-    if (TST_INFO_EXTENSIONS in asn1.result)
-      this.extensions = Array.from(
-        asn1.result[TST_INFO_EXTENSIONS],
-        element => new Extension({ schema: element })
-      );
+    if (TST_INFO_TSA in asn1.result) this.tsa = new GeneralName({ schema: asn1.result[TST_INFO_TSA] });
+    if (TST_INFO_EXTENSIONS in asn1.result) this.extensions = Array.from(asn1.result[TST_INFO_EXTENSIONS], (element) => new Extension({ schema: element }));
   }
 
   public toSchema(): asn1js.Sequence {
@@ -443,10 +391,10 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [this.tsa.toSchema()]
-        })
+          value: [this.tsa.toSchema()],
+        }),
       );
     }
 
@@ -457,10 +405,10 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: Array.from(this.extensions, o => o.toSchema())
-        })
+          value: Array.from(this.extensions, (o) => o.toSchema()),
+        }),
       );
     }
     //#endregion
@@ -468,7 +416,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }
@@ -479,7 +427,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
       policy: this.policy,
       messageImprint: this.messageImprint.toJSON(),
       serialNumber: this.serialNumber.toJSON(),
-      genTime: this.genTime
+      genTime: this.genTime,
     };
 
     if (this.accuracy) res.accuracy = this.accuracy.toJSON();
@@ -490,7 +438,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
 
     if (this.tsa) res.tsa = this.tsa.toJSON();
 
-    if (this.extensions) res.extensions = Array.from(this.extensions, o => o.toJSON());
+    if (this.extensions) res.extensions = Array.from(this.extensions, (o) => o.toJSON());
 
     return res;
   }
@@ -500,10 +448,7 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
    * @param params Input parameters
    * @param crypto Crypto engine
    */
-  public async verify(
-    params: TSTInfoVerifyParams,
-    crypto = common.getCrypto(true)
-  ): Promise<boolean> {
+  public async verify(params: TSTInfoVerifyParams, crypto = common.getCrypto(true)): Promise<boolean> {
     //#region Get initial parameters
     if (!params.data) {
       throw new Error('"data" is a mandatory attribute for TST_INFO verification');
@@ -513,28 +458,19 @@ export class TSTInfo extends PkiObject implements ITSTInfo {
 
     //#region Check date
     if (params.notBefore) {
-      if (this.genTime < params.notBefore)
-        throw new Error("Generation time for TSTInfo object is less than notBefore value");
+      if (this.genTime < params.notBefore) throw new Error("Generation time for TSTInfo object is less than notBefore value");
     }
 
     if (params.notAfter) {
-      if (this.genTime > params.notAfter)
-        throw new Error("Generation time for TSTInfo object is more than notAfter value");
+      if (this.genTime > params.notAfter) throw new Error("Generation time for TSTInfo object is more than notAfter value");
     }
     //#endregion
 
     // Find hashing algorithm
-    const shaAlgorithm = crypto.getAlgorithmByOID(
-      this.messageImprint.hashAlgorithm.algorithmId,
-      true,
-      "MessageImprint.hashAlgorithm"
-    );
+    const shaAlgorithm = crypto.getAlgorithmByOID(this.messageImprint.hashAlgorithm.algorithmId, true, "MessageImprint.hashAlgorithm");
 
     // Calculate message digest for input "data" buffer
     const hash = await crypto.digest(shaAlgorithm.name, new Uint8Array(data));
-    return pvtsutils.BufferSourceConverter.isEqual(
-      hash,
-      this.messageImprint.hashedMessage.valueBlock.valueHexView
-    );
+    return bytes.equal(hash, this.messageImprint.hashedMessage.valueBlock.valueHexView);
   }
 }

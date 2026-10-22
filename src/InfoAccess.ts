@@ -1,10 +1,9 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import { AccessDescription, AccessDescriptionJson } from "./AccessDescription";
+import { AccessDescription, type AccessDescriptionJson } from "./AccessDescription";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const ACCESS_DESCRIPTIONS = "accessDescriptions";
 
@@ -33,11 +32,7 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
   constructor(parameters: InfoAccessParameters = {}) {
     super();
 
-    this.accessDescriptions = pvutils.getParametersValue(
-      parameters,
-      ACCESS_DESCRIPTIONS,
-      InfoAccess.defaultValues(ACCESS_DESCRIPTIONS)
-    );
+    this.accessDescriptions = parameters[ACCESS_DESCRIPTIONS] ?? InfoAccess.defaultValues(ACCESS_DESCRIPTIONS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -70,28 +65,24 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
   public static override schema(
     parameters: Schema.SchemaParameters<{
       accessDescriptions?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Repeated({
           name: names.accessDescriptions || EMPTY_STRING,
-          value: AccessDescription.schema()
-        })
-      ]
+          value: AccessDescription.schema(),
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [ACCESS_DESCRIPTIONS]);
+    for (const prop of [ACCESS_DESCRIPTIONS]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -99,29 +90,26 @@ export class InfoAccess extends PkiObject implements IInfoAccess {
       schema,
       InfoAccess.schema({
         names: {
-          accessDescriptions: ACCESS_DESCRIPTIONS
-        }
-      })
+          accessDescriptions: ACCESS_DESCRIPTIONS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
-    this.accessDescriptions = Array.from(
-      asn1.result.accessDescriptions,
-      element => new AccessDescription({ schema: element })
-    );
+    this.accessDescriptions = Array.from(asn1.result.accessDescriptions, (element) => new AccessDescription({ schema: element }));
   }
 
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: Array.from(this.accessDescriptions, o => o.toSchema())
+      value: Array.from(this.accessDescriptions, (o) => o.toSchema()),
     });
   }
 
   public toJSON(): InfoAccessJson {
     return {
-      accessDescriptions: Array.from(this.accessDescriptions, o => o.toJSON())
+      accessDescriptions: Array.from(this.accessDescriptions, (o) => o.toJSON()),
     };
   }
 }

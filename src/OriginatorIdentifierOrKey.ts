@@ -1,11 +1,10 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
 import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
 import { OriginatorPublicKey } from "./OriginatorPublicKey";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const VARIANT = "variant";
 const VALUE = "value";
@@ -21,8 +20,7 @@ export interface OriginatorIdentifierOrKeyJson {
   value?: any;
 }
 
-export type OriginatorIdentifierOrKeyParameters = PkiObjectParameters &
-  Partial<IOriginatorIdentifierOrKey>;
+export type OriginatorIdentifierOrKeyParameters = PkiObjectParameters & Partial<IOriginatorIdentifierOrKey>;
 
 export type OriginatorIdentifierOrKeySchema = Schema.SchemaParameters;
 
@@ -42,17 +40,9 @@ export class OriginatorIdentifierOrKey extends PkiObject implements IOriginatorI
   constructor(parameters: OriginatorIdentifierOrKeyParameters = {}) {
     super();
 
-    this.variant = pvutils.getParametersValue(
-      parameters,
-      VARIANT,
-      OriginatorIdentifierOrKey.defaultValues(VARIANT)
-    );
+    this.variant = parameters[VARIANT] ?? OriginatorIdentifierOrKey.defaultValues(VARIANT);
     if (VALUE in parameters) {
-      this.value = pvutils.getParametersValue(
-        parameters,
-        VALUE,
-        OriginatorIdentifierOrKey.defaultValues(VALUE)
-      );
+      this.value = parameters[VALUE] ?? OriginatorIdentifierOrKey.defaultValues(VALUE);
     }
 
     if (parameters.schema) {
@@ -104,44 +94,38 @@ export class OriginatorIdentifierOrKey extends PkiObject implements IOriginatorI
    *    originatorKey [1] OriginatorPublicKey }
    *```
    */
-  public static override schema(
-    parameters: OriginatorIdentifierOrKeySchema = {}
-  ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+  public static override schema(parameters: OriginatorIdentifierOrKeySchema = {}): Schema.SchemaType {
+    const names = parameters.names ?? {};
 
     return new asn1js.Choice({
       value: [
         IssuerAndSerialNumber.schema({
           names: {
-            blockName: names.blockName || EMPTY_STRING
-          }
+            blockName: names.blockName || EMPTY_STRING,
+          },
         }),
         new asn1js.Primitive({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          name: names.blockName || EMPTY_STRING
+          name: names.blockName || EMPTY_STRING,
         }),
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
           name: names.blockName || EMPTY_STRING,
-          value: OriginatorPublicKey.schema().valueBlock.value
-        })
-      ]
+          value: OriginatorPublicKey.schema().valueBlock.value,
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -149,9 +133,9 @@ export class OriginatorIdentifierOrKey extends PkiObject implements IOriginatorI
       schema,
       OriginatorIdentifierOrKey.schema({
         names: {
-          blockName: "blockName"
-        }
-      })
+          blockName: "blockName",
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -172,8 +156,8 @@ export class OriginatorIdentifierOrKey extends PkiObject implements IOriginatorI
         this.variant = 3;
         this.value = new OriginatorPublicKey({
           schema: new asn1js.Sequence({
-            value: asn1.result.blockName.valueBlock.value
-          })
+            value: asn1.result.blockName.valueBlock.value,
+          }),
         });
       }
     }
@@ -206,7 +190,7 @@ export class OriginatorIdentifierOrKey extends PkiObject implements IOriginatorI
 
   public toJSON(): OriginatorIdentifierOrKeyJson {
     const res: OriginatorIdentifierOrKeyJson = {
-      variant: this.variant
+      variant: this.variant,
     };
 
     if (this.variant === 1 || this.variant === 2 || this.variant === 3) {

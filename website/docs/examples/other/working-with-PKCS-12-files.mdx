@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./working-with-PKCS-12-files.example";
+---
+sidebar_position: 1
+---
+
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./working-with-PKCS-12-files.example.ts";
 
 # Working with PKCS#12 files
 
-In this example, you will see how to create a PKCS#12 (sometimes called a PFX) and parse it.
+Store a private key and its certificate in a password-protected PKCS#12 (PFX) file, the way OpenSSL does, then parse it: check its integrity, decrypt its contents, and import the key.
 
-<CodeBlock language="ts">{source}</CodeBlock>
+<RunnableExample source={source} load={() => import("./working-with-PKCS-12-files.example.ts?run")} />
+
+**API:** [`PFX`](../../api/classes/PFX.md), [`AuthenticatedSafe`](../../api/classes/AuthenticatedSafe.md), [`SafeContents`](../../api/classes/SafeContents.md), [`SafeBag`](../../api/classes/SafeBag.md), [`PKCS8ShroudedKeyBag`](../../api/classes/PKCS8ShroudedKeyBag.md), [`CertBag`](../../api/classes/CertBag.md)

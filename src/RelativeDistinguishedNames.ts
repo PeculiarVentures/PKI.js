@@ -1,10 +1,10 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import { AttributeTypeAndValue, AttributeTypeAndValueJson } from "./AttributeTypeAndValue";
+import { bytes } from "@peculiar/utils";
+import { AttributeTypeAndValue, type AttributeTypeAndValueJson } from "./AttributeTypeAndValue";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 export const TYPE_AND_VALUES = "typesAndValues";
 export const VALUE_BEFORE_DECODE = "valueBeforeDecode";
@@ -21,8 +21,7 @@ export interface IRelativeDistinguishedNames {
   valueBeforeDecode: ArrayBuffer;
 }
 
-export type RelativeDistinguishedNamesParameters = PkiObjectParameters &
-  Partial<IRelativeDistinguishedNames>;
+export type RelativeDistinguishedNamesParameters = PkiObjectParameters & Partial<IRelativeDistinguishedNames>;
 
 export type RelativeDistinguishedNamesSchema = Schema.SchemaParameters<{
   repeatedSequence?: string;
@@ -50,16 +49,8 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
   constructor(parameters: RelativeDistinguishedNamesParameters = {}) {
     super();
 
-    this.typesAndValues = pvutils.getParametersValue(
-      parameters,
-      TYPE_AND_VALUES,
-      RelativeDistinguishedNames.defaultValues(TYPE_AND_VALUES)
-    );
-    this.valueBeforeDecode = pvutils.getParametersValue(
-      parameters,
-      VALUE_BEFORE_DECODE,
-      RelativeDistinguishedNames.defaultValues(VALUE_BEFORE_DECODE)
-    );
+    this.typesAndValues = parameters[TYPE_AND_VALUES] ?? RelativeDistinguishedNames.defaultValues(TYPE_AND_VALUES);
+    this.valueBeforeDecode = parameters[VALUE_BEFORE_DECODE] ?? RelativeDistinguishedNames.defaultValues(VALUE_BEFORE_DECODE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -111,11 +102,7 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
    *```
    */
   static override schema(parameters: RelativeDistinguishedNamesSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -126,18 +113,18 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
             value: [
               new asn1js.Repeated({
                 name: names.repeatedSet || EMPTY_STRING,
-                value: AttributeTypeAndValue.schema(names.typeAndValue || {})
-              })
-            ]
-          } as any)
-        } as any)
-      ]
+                value: AttributeTypeAndValue.schema(names.typeAndValue || {}),
+              }),
+            ],
+          } as any),
+        } as any),
+      ],
     } as any);
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [RDN, TYPE_AND_VALUES]);
+    for (const prop of [RDN, TYPE_AND_VALUES]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -146,24 +133,19 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
       RelativeDistinguishedNames.schema({
         names: {
           blockName: RDN,
-          repeatedSet: TYPE_AND_VALUES
-        }
-      })
+          repeatedSet: TYPE_AND_VALUES,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
     // Get internal properties from parsed schema
     if (TYPE_AND_VALUES in asn1.result) {
       // Could be a case when there is no "types and values"
-      this.typesAndValues = Array.from(
-        asn1.result.typesAndValues,
-        element => new AttributeTypeAndValue({ schema: element })
-      );
+      this.typesAndValues = Array.from(asn1.result.typesAndValues, (element) => new AttributeTypeAndValue({ schema: element }));
     }
 
-    this.valueBeforeDecode = (
-      asn1.result.RDN as asn1js.BaseBlock
-    ).valueBeforeDecodeView.slice().buffer;
+    this.valueBeforeDecode = (asn1.result.RDN as asn1js.BaseBlock).valueBeforeDecodeView.slice().buffer;
   }
 
   public toSchema(): asn1js.Sequence {
@@ -172,9 +154,9 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
       return new asn1js.Sequence({
         value: [
           new asn1js.Set({
-            value: Array.from(this.typesAndValues, o => o.toSchema())
-          } as any)
-        ]
+            value: Array.from(this.typesAndValues, (o) => o.toSchema()),
+          } as any),
+        ],
       } as any);
     }
 
@@ -189,7 +171,7 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
 
   public toJSON(): RelativeDistinguishedNamesJson {
     return {
-      typesAndValues: Array.from(this.typesAndValues, o => o.toJSON())
+      typesAndValues: Array.from(this.typesAndValues, (o) => o.toJSON()),
     };
   }
 
@@ -209,7 +191,7 @@ export class RelativeDistinguishedNames extends PkiObject implements IRelativeDi
     }
 
     if (compareTo instanceof ArrayBuffer) {
-      return pvutils.isEqualBuffer(this.valueBeforeDecode, compareTo);
+      return bytes.equal(this.valueBeforeDecode, compareTo);
     }
 
     return false;

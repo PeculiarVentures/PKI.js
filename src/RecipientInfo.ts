@@ -1,13 +1,12 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import { KeyTransRecipientInfo, KeyTransRecipientInfoJson } from "./KeyTransRecipientInfo";
-import { KeyAgreeRecipientInfo, KeyAgreeRecipientInfoJson } from "./KeyAgreeRecipientInfo";
-import { KEKRecipientInfo, KEKRecipientInfoJson } from "./KEKRecipientInfo";
-import { PasswordRecipientinfo, PasswordRecipientInfoJson } from "./PasswordRecipientinfo";
-import { OtherRecipientInfo, OtherRecipientInfoJson } from "./OtherRecipientInfo";
-import * as Schema from "./Schema";
+import { KeyTransRecipientInfo, type KeyTransRecipientInfoJson } from "./KeyTransRecipientInfo";
+import { KeyAgreeRecipientInfo, type KeyAgreeRecipientInfoJson } from "./KeyAgreeRecipientInfo";
+import { KEKRecipientInfo, type KEKRecipientInfoJson } from "./KEKRecipientInfo";
+import { PasswordRecipientinfo, type PasswordRecipientInfoJson } from "./PasswordRecipientinfo";
+import { OtherRecipientInfo, type OtherRecipientInfoJson } from "./OtherRecipientInfo";
+import type * as Schema from "./Schema";
 import { AsnError, ParameterError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_STRING } from "./constants";
 
 const VARIANT = "variant";
@@ -24,18 +23,8 @@ export interface RecipientInfoJson {
   value?: RecipientInfoValueJson;
 }
 
-export type RecipientInfoValue =
-  | KeyTransRecipientInfo
-  | KeyAgreeRecipientInfo
-  | KEKRecipientInfo
-  | PasswordRecipientinfo
-  | OtherRecipientInfo;
-export type RecipientInfoValueJson =
-  | KeyTransRecipientInfoJson
-  | KeyAgreeRecipientInfoJson
-  | KEKRecipientInfoJson
-  | PasswordRecipientInfoJson
-  | OtherRecipientInfoJson;
+export type RecipientInfoValue = KeyTransRecipientInfo | KeyAgreeRecipientInfo | KEKRecipientInfo | PasswordRecipientinfo | OtherRecipientInfo;
+export type RecipientInfoValueJson = KeyTransRecipientInfoJson | KeyAgreeRecipientInfoJson | KEKRecipientInfoJson | PasswordRecipientInfoJson | OtherRecipientInfoJson;
 
 export type RecipientInfoParameters = PkiObjectParameters & Partial<IRecipientInfo>;
 
@@ -55,17 +44,9 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
   constructor(parameters: RecipientInfoParameters = {}) {
     super();
 
-    this.variant = pvutils.getParametersValue(
-      parameters,
-      VARIANT,
-      RecipientInfo.defaultValues(VARIANT)
-    );
+    this.variant = parameters[VARIANT] ?? RecipientInfo.defaultValues(VARIANT);
     if (VALUE in parameters) {
-      this.value = pvutils.getParametersValue(
-        parameters,
-        VALUE,
-        RecipientInfo.defaultValues(VALUE)
-      );
+      this.value = parameters[VALUE] ?? RecipientInfo.defaultValues(VALUE);
     }
 
     if (parameters.schema) {
@@ -120,58 +101,54 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
    *```
    */
   public static override schema(parameters: Schema.SchemaParameters = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Choice({
       value: [
         KeyTransRecipientInfo.schema({
           names: {
-            blockName: names.blockName || EMPTY_STRING
-          }
+            blockName: names.blockName || EMPTY_STRING,
+          },
         }),
         new asn1js.Constructed({
           name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: KeyAgreeRecipientInfo.schema().valueBlock.value
+          value: KeyAgreeRecipientInfo.schema().valueBlock.value,
         }),
         new asn1js.Constructed({
           name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 2 // [2]
+            tagNumber: 2, // [2]
           },
-          value: KEKRecipientInfo.schema().valueBlock.value
+          value: KEKRecipientInfo.schema().valueBlock.value,
         }),
         new asn1js.Constructed({
           name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 3 // [3]
+            tagNumber: 3, // [3]
           },
-          value: PasswordRecipientinfo.schema().valueBlock.value
+          value: PasswordRecipientinfo.schema().valueBlock.value,
         }),
         new asn1js.Constructed({
           name: names.blockName || EMPTY_STRING,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 4 // [4]
+            tagNumber: 4, // [4]
           },
-          value: OtherRecipientInfo.schema().valueBlock.value
-        })
-      ]
+          value: OtherRecipientInfo.schema().valueBlock.value,
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -179,9 +156,9 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
       schema,
       RecipientInfo.schema({
         names: {
-          blockName: "blockName"
-        }
-      })
+          blockName: "blockName",
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -192,7 +169,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
     } else {
       // Create "SEQUENCE" from "ASN1_CONSTRUCTED"
       const blockSequence = new asn1js.Sequence({
-        value: asn1.result.blockName.valueBlock.value
+        value: asn1.result.blockName.valueBlock.value,
       });
 
       switch (asn1.result.blockName.idBlock.tagNumber) {
@@ -241,7 +218,7 @@ export class RecipientInfo extends PkiObject implements IRecipientInfo {
 
   public toJSON(): RecipientInfoJson {
     const res: RecipientInfoJson = {
-      variant: this.variant
+      variant: this.variant,
     };
 
     if (this.value && this.variant >= 1 && this.variant <= 4) {

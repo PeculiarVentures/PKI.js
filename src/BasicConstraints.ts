@@ -1,9 +1,8 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const PATH_LENGTH_CONSTRAINT = "pathLenConstraint";
 const CA = "cA";
@@ -36,9 +35,9 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
   constructor(parameters: BasicConstraintsParameters = {}) {
     super();
 
-    this.cA = pvutils.getParametersValue(parameters, CA, false);
+    this.cA = parameters[CA] ?? false;
     if (PATH_LENGTH_CONSTRAINT in parameters) {
-      this.pathLenConstraint = pvutils.getParametersValue(parameters, PATH_LENGTH_CONSTRAINT, 0);
+      this.pathLenConstraint = parameters[PATH_LENGTH_CONSTRAINT] ?? 0;
     }
 
     if (parameters.schema) {
@@ -70,33 +69,27 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
    *    pathLenConstraint       INTEGER (0..MAX) OPTIONAL }
    *```
    */
-  static override schema(
-    parameters: Schema.SchemaParameters<{ cA?: string; pathLenConstraint?: string }> = {}
-  ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+  static override schema(parameters: Schema.SchemaParameters<{ cA?: string; pathLenConstraint?: string }> = {}): Schema.SchemaType {
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
       value: [
         new asn1js.Boolean({
           optional: true,
-          name: names.cA || EMPTY_STRING
+          name: names.cA || EMPTY_STRING,
         }),
         new asn1js.Integer({
           optional: true,
-          name: names.pathLenConstraint || EMPTY_STRING
-        })
-      ]
+          name: names.pathLenConstraint || EMPTY_STRING,
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, [CA, PATH_LENGTH_CONSTRAINT]);
+    for (const prop of [CA, PATH_LENGTH_CONSTRAINT]) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -105,9 +98,9 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
       BasicConstraints.schema({
         names: {
           cA: CA,
-          pathLenConstraint: PATH_LENGTH_CONSTRAINT
-        }
-      })
+          pathLenConstraint: PATH_LENGTH_CONSTRAINT,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -130,8 +123,7 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
     //#region Create array for output sequence
     const outputArray = [];
 
-    if (this.cA !== BasicConstraints.defaultValues(CA))
-      outputArray.push(new asn1js.Boolean({ value: this.cA }));
+    if (this.cA !== BasicConstraints.defaultValues(CA)) outputArray.push(new asn1js.Boolean({ value: this.cA }));
 
     if (PATH_LENGTH_CONSTRAINT in this) {
       if (this.pathLenConstraint instanceof asn1js.Integer) {
@@ -144,7 +136,7 @@ export class BasicConstraints extends PkiObject implements IBasicConstraints {
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
     //#endregion
   }

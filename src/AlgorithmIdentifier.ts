@@ -1,9 +1,8 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const ALGORITHM_ID = "algorithmId";
 const ALGORITHM_PARAMS = "algorithmParams";
@@ -53,17 +52,9 @@ export class AlgorithmIdentifier extends PkiObject implements IAlgorithmIdentifi
   constructor(parameters: AlgorithmIdentifierParameters = {}) {
     super();
 
-    this.algorithmId = pvutils.getParametersValue(
-      parameters,
-      ALGORITHM_ID,
-      AlgorithmIdentifier.defaultValues(ALGORITHM_ID)
-    );
+    this.algorithmId = parameters[ALGORITHM_ID] ?? AlgorithmIdentifier.defaultValues(ALGORITHM_ID);
     if (ALGORITHM_PARAMS in parameters) {
-      this.algorithmParams = pvutils.getParametersValue(
-        parameters,
-        ALGORITHM_PARAMS,
-        AlgorithmIdentifier.defaultValues(ALGORITHM_PARAMS)
-      );
+      this.algorithmParams = parameters[ALGORITHM_PARAMS] ?? AlgorithmIdentifier.defaultValues(ALGORITHM_PARAMS);
     }
 
     if (parameters.schema) {
@@ -115,25 +106,18 @@ export class AlgorithmIdentifier extends PkiObject implements IAlgorithmIdentifi
    *```
    */
   public static override schema(parameters: AlgorithmIdentifierSchema = {}): any {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
       optional: names.optional || false,
-      value: [
-        new asn1js.ObjectIdentifier({ name: names.algorithmIdentifier || EMPTY_STRING }),
-        new asn1js.Any({ name: names.algorithmParams || EMPTY_STRING, optional: true })
-      ]
+      value: [new asn1js.ObjectIdentifier({ name: names.algorithmIdentifier || EMPTY_STRING }), new asn1js.Any({ name: names.algorithmParams || EMPTY_STRING, optional: true })],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -142,9 +126,9 @@ export class AlgorithmIdentifier extends PkiObject implements IAlgorithmIdentifi
       AlgorithmIdentifier.schema({
         names: {
           algorithmIdentifier: ALGORITHM,
-          algorithmParams: PARAMS
-        }
-      })
+          algorithmParams: PARAMS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -165,13 +149,13 @@ export class AlgorithmIdentifier extends PkiObject implements IAlgorithmIdentifi
 
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
   }
 
   public toJSON(): AlgorithmIdentifierJson {
     const object: AlgorithmIdentifierJson = {
-      algorithmId: this.algorithmId
+      algorithmId: this.algorithmId,
     };
 
     if (this.algorithmParams && !(this.algorithmParams instanceof asn1js.Any)) {
@@ -201,10 +185,7 @@ export class AlgorithmIdentifier extends PkiObject implements IAlgorithmIdentifi
     //#region Check "algorithm_params"
     if (this.algorithmParams) {
       if (algorithmIdentifier.algorithmParams) {
-        return (
-          JSON.stringify(this.algorithmParams) ===
-          JSON.stringify(algorithmIdentifier.algorithmParams)
-        );
+        return JSON.stringify(this.algorithmParams) === JSON.stringify(algorithmIdentifier.algorithmParams);
       }
 
       return false;

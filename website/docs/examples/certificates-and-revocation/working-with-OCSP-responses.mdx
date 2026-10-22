@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./working-with-OCSP-responses.example";
+---
+sidebar_position: 5
+---
+
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./working-with-OCSP-responses.example.ts";
 
 # Working with OCSP responses
 
-In this example, you will see how to create and parse OCSP responses.
+Create and sign an OCSP response that reports a certificate as good, then parse it as a client would: check the responder's signature and read the certificate's status.
 
-<CodeBlock language="ts">{source}</CodeBlock>
+<RunnableExample source={source} load={() => import("./working-with-OCSP-responses.example.ts?run")} />
+
+**API:** [`OCSPResponse`](../../api/classes/OCSPResponse.md), [`BasicOCSPResponse`](../../api/classes/BasicOCSPResponse.md), [`SingleResponse`](../../api/classes/SingleResponse.md), [`CertID`](../../api/classes/CertID.md)

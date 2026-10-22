@@ -1,8 +1,7 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import * as Schema from "./Schema";
-import { ExtensionParsedValue, ExtensionValueFactory } from "./ExtensionValueFactory";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
+import { type ExtensionParsedValue, ExtensionValueFactory } from "./ExtensionValueFactory";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_STRING } from "./constants";
 
@@ -55,10 +54,7 @@ export class Extension extends PkiObject implements IExtension {
   public get parsedValue(): ExtensionParsedValue | undefined {
     if (this._parsedValue === undefined) {
       // Get PARSED_VALUE for well-known extensions
-      const parsedValue = ExtensionValueFactory.fromBER(
-        this.extnID,
-        this.extnValue.valueBlock.valueHexView as BufferSource
-      );
+      const parsedValue = ExtensionValueFactory.fromBER(this.extnID, this.extnValue.valueBlock.valueHexView as BufferSource);
       this._parsedValue = parsedValue;
     }
 
@@ -75,23 +71,15 @@ export class Extension extends PkiObject implements IExtension {
   constructor(parameters: ExtensionParameters = {}) {
     super();
 
-    this.extnID = pvutils.getParametersValue(parameters, EXTN_ID, Extension.defaultValues(EXTN_ID));
-    this.critical = pvutils.getParametersValue(
-      parameters,
-      CRITICAL,
-      Extension.defaultValues(CRITICAL)
-    );
+    this.extnID = parameters[EXTN_ID] ?? Extension.defaultValues(EXTN_ID);
+    this.critical = parameters[CRITICAL] ?? Extension.defaultValues(CRITICAL);
     if (EXTN_VALUE in parameters) {
       this.extnValue = new asn1js.OctetString({ valueHex: parameters.extnValue });
     } else {
       this.extnValue = Extension.defaultValues(EXTN_VALUE);
     }
     if (PARSED_VALUE in parameters) {
-      this.parsedValue = pvutils.getParametersValue(
-        parameters,
-        PARSED_VALUE,
-        Extension.defaultValues(PARSED_VALUE)
-      );
+      this.parsedValue = parameters[PARSED_VALUE] ?? Extension.defaultValues(PARSED_VALUE);
     }
 
     if (parameters.schema) {
@@ -135,11 +123,7 @@ export class Extension extends PkiObject implements IExtension {
    *```
    */
   public static override schema(parameters: ExtensionSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -147,16 +131,16 @@ export class Extension extends PkiObject implements IExtension {
         new asn1js.ObjectIdentifier({ name: names.extnID || EMPTY_STRING }),
         new asn1js.Boolean({
           name: names.critical || EMPTY_STRING,
-          optional: true
+          optional: true,
         }),
-        new asn1js.OctetString({ name: names.extnValue || EMPTY_STRING })
-      ]
+        new asn1js.OctetString({ name: names.extnValue || EMPTY_STRING }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -166,9 +150,9 @@ export class Extension extends PkiObject implements IExtension {
         names: {
           extnID: EXTN_ID,
           critical: CRITICAL,
-          extnValue: EXTN_VALUE
-        }
-      })
+          extnValue: EXTN_VALUE,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -194,14 +178,14 @@ export class Extension extends PkiObject implements IExtension {
 
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
   }
 
   public toJSON(): ExtensionJson {
     const object: ExtensionJson = {
       extnID: this.extnID,
-      extnValue: this.extnValue.toJSON()
+      extnValue: this.extnValue.toJSON(),
     };
 
     if (this.critical !== Extension.defaultValues(CRITICAL)) {

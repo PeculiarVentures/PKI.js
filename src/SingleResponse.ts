@@ -1,12 +1,11 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import { CertID, CertIDJson, CertIDSchema } from "./CertID";
+import { CertID, type CertIDJson, type CertIDSchema } from "./CertID";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { Extension, ExtensionJson } from "./Extension";
-import { Extensions, ExtensionsSchema } from "./Extensions";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { Extension, type ExtensionJson } from "./Extension";
+import { Extensions, type ExtensionsSchema } from "./Extensions";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const CERT_ID = "certID";
 const CERT_STATUS = "certStatus";
@@ -60,34 +59,14 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
   constructor(parameters: SingleResponseParameters = {}) {
     super();
 
-    this.certID = pvutils.getParametersValue(
-      parameters,
-      CERT_ID,
-      SingleResponse.defaultValues(CERT_ID)
-    );
-    this.certStatus = pvutils.getParametersValue(
-      parameters,
-      CERT_STATUS,
-      SingleResponse.defaultValues(CERT_STATUS)
-    );
-    this.thisUpdate = pvutils.getParametersValue(
-      parameters,
-      THIS_UPDATE,
-      SingleResponse.defaultValues(THIS_UPDATE)
-    );
+    this.certID = parameters[CERT_ID] ?? SingleResponse.defaultValues(CERT_ID);
+    this.certStatus = parameters[CERT_STATUS] ?? SingleResponse.defaultValues(CERT_STATUS);
+    this.thisUpdate = parameters[THIS_UPDATE] ?? SingleResponse.defaultValues(THIS_UPDATE);
     if (NEXT_UPDATE in parameters) {
-      this.nextUpdate = pvutils.getParametersValue(
-        parameters,
-        NEXT_UPDATE,
-        SingleResponse.defaultValues(NEXT_UPDATE)
-      );
+      this.nextUpdate = parameters[NEXT_UPDATE] ?? SingleResponse.defaultValues(NEXT_UPDATE);
     }
     if (SINGLE_EXTENSIONS in parameters) {
-      this.singleExtensions = pvutils.getParametersValue(
-        parameters,
-        SINGLE_EXTENSIONS,
-        SingleResponse.defaultValues(SINGLE_EXTENSIONS)
-      );
+      this.singleExtensions = parameters[SINGLE_EXTENSIONS] ?? SingleResponse.defaultValues(SINGLE_EXTENSIONS);
     }
 
     if (parameters.schema) {
@@ -169,11 +148,7 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
    *```
    */
   public static override schema(parameters: SingleResponseSchema = {}): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -185,14 +160,14 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
               name: names.certStatus || EMPTY_STRING,
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
-                tagNumber: 0 // [0]
-              }
+                tagNumber: 0, // [0]
+              },
             }), // IMPLICIT NULL (no "valueBlock")
             new asn1js.Constructed({
               name: names.certStatus || EMPTY_STRING,
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
-                tagNumber: 1 // [1]
+                tagNumber: 1, // [1]
               },
               value: [
                 new asn1js.GeneralizedTime(),
@@ -200,46 +175,46 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
                   optional: true,
                   idBlock: {
                     tagClass: 3, // CONTEXT-SPECIFIC
-                    tagNumber: 0 // [0]
+                    tagNumber: 0, // [0]
                   },
-                  value: [new asn1js.Enumerated()]
-                })
-              ]
+                  value: [new asn1js.Enumerated()],
+                }),
+              ],
             }),
             new asn1js.Primitive({
               name: names.certStatus || EMPTY_STRING,
               idBlock: {
                 tagClass: 3, // CONTEXT-SPECIFIC
-                tagNumber: 2 // [2]
+                tagNumber: 2, // [2]
               },
-              lenBlock: { length: 1 }
-            }) // IMPLICIT NULL (no "valueBlock")
-          ]
+              lenBlock: { length: 1 },
+            }), // IMPLICIT NULL (no "valueBlock")
+          ],
         }),
         new asn1js.GeneralizedTime({ name: names.thisUpdate || EMPTY_STRING }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [new asn1js.GeneralizedTime({ name: names.nextUpdate || EMPTY_STRING })]
+          value: [new asn1js.GeneralizedTime({ name: names.nextUpdate || EMPTY_STRING })],
         }),
         new asn1js.Constructed({
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: [Extensions.schema(names.singleExtensions || {})]
-        }) // EXPLICIT SEQUENCE value
-      ]
+          value: [Extensions.schema(names.singleExtensions || {})],
+        }), // EXPLICIT SEQUENCE value
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -249,19 +224,19 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
         names: {
           certID: {
             names: {
-              blockName: CERT_ID
-            }
+              blockName: CERT_ID,
+            },
           },
           certStatus: CERT_STATUS,
           thisUpdate: THIS_UPDATE,
           nextUpdate: NEXT_UPDATE,
           singleExtensions: {
             names: {
-              blockName: SINGLE_EXTENSIONS
-            }
-          }
-        }
-      })
+              blockName: SINGLE_EXTENSIONS,
+            },
+          },
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -270,11 +245,7 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
     this.certStatus = asn1.result.certStatus;
     this.thisUpdate = asn1.result.thisUpdate.toDate();
     if (NEXT_UPDATE in asn1.result) this.nextUpdate = asn1.result.nextUpdate.toDate();
-    if (SINGLE_EXTENSIONS in asn1.result)
-      this.singleExtensions = Array.from(
-        asn1.result.singleExtensions.valueBlock.value,
-        element => new Extension({ schema: element })
-      );
+    if (SINGLE_EXTENSIONS in asn1.result) this.singleExtensions = Array.from(asn1.result.singleExtensions.valueBlock.value, (element) => new Extension({ schema: element }));
   }
 
   public toSchema(): asn1js.Sequence {
@@ -289,10 +260,10 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [new asn1js.GeneralizedTime({ valueDate: this.nextUpdate })]
-        })
+          value: [new asn1js.GeneralizedTime({ valueDate: this.nextUpdate })],
+        }),
       );
     }
 
@@ -301,17 +272,15 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: [
-            new asn1js.Sequence({ value: Array.from(this.singleExtensions, o => o.toSchema()) })
-          ]
-        })
+          value: [new asn1js.Sequence({ value: Array.from(this.singleExtensions, (o) => o.toSchema()) })],
+        }),
       );
     }
 
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
   }
 
@@ -319,7 +288,7 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
     const res: SingleResponseJson = {
       certID: this.certID.toJSON(),
       certStatus: this.certStatus.toJSON(),
-      thisUpdate: this.thisUpdate
+      thisUpdate: this.thisUpdate,
     };
 
     if (this.nextUpdate) {
@@ -327,7 +296,7 @@ export class SingleResponse extends PkiObject implements ISingleResponse {
     }
 
     if (this.singleExtensions) {
-      res.singleExtensions = Array.from(this.singleExtensions, o => o.toJSON());
+      res.singleExtensions = Array.from(this.singleExtensions, (o) => o.toJSON());
     }
 
     return res;

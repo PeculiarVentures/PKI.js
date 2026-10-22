@@ -1,23 +1,14 @@
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
-import * as pvutils from "pvutils";
+import { hex, toArrayBuffer } from "@peculiar/utils";
 import * as common from "./common";
-import {
-  AlgorithmIdentifier,
-  AlgorithmIdentifierJson,
-  AlgorithmIdentifierSchema
-} from "./AlgorithmIdentifier";
-import {
-  RelativeDistinguishedNames,
-  RelativeDistinguishedNamesJson,
-  RelativeDistinguishedNamesSchema
-} from "./RelativeDistinguishedNames";
-import { Time, TimeJson, TimeSchema } from "./Time";
-import { RevokedCertificate, RevokedCertificateJson } from "./RevokedCertificate";
-import { Extensions, ExtensionsJson, ExtensionsSchema } from "./Extensions";
-import * as Schema from "./Schema";
-import { Certificate } from "./Certificate";
-import { PublicKeyInfo } from "./PublicKeyInfo";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
+import { RelativeDistinguishedNames, type RelativeDistinguishedNamesJson, type RelativeDistinguishedNamesSchema } from "./RelativeDistinguishedNames";
+import { Time, type TimeJson, type TimeSchema } from "./Time";
+import { RevokedCertificate, type RevokedCertificateJson } from "./RevokedCertificate";
+import { Extensions, type ExtensionsJson, type ExtensionsSchema } from "./Extensions";
+import type * as Schema from "./Schema";
+import type { Certificate } from "./Certificate";
+import type { PublicKeyInfo } from "./PublicKeyInfo";
 import {
   id_AuthorityInfoAccess,
   id_AuthorityKeyIdentifier,
@@ -28,10 +19,10 @@ import {
   id_FreshestCRL,
   id_InvalidityDate,
   id_IssuerAltName,
-  id_IssuingDistributionPoint
+  id_IssuingDistributionPoint,
 } from "./ObjectIdentifiers";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { EMPTY_BUFFER } from "./constants";
 
 const TBS = "tbs";
@@ -62,7 +53,7 @@ const CLEAR_PROPS = [
   TBS_CERT_LIST_REVOKED_CERTIFICATES,
   TBS_CERT_LIST_EXTENSIONS,
   SIGNATURE_ALGORITHM,
-  SIGNATURE_VALUE
+  SIGNATURE_VALUE,
 ];
 
 export interface ICertificateRevocationList {
@@ -118,11 +109,7 @@ function tbsCertList(parameters: TBSCertListSchema = {}): Schema.SchemaType {
   //    crlExtensions           [0]  EXPLICIT Extensions OPTIONAL
   //    -- if present, version MUST be v2
   //}
-  const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-    parameters,
-    "names",
-    {}
-  );
+  const names = parameters.names ?? {};
 
   return new asn1js.Sequence({
     name: names.blockName || TBS_CERT_LIST,
@@ -130,38 +117,38 @@ function tbsCertList(parameters: TBSCertListSchema = {}): Schema.SchemaType {
       new asn1js.Integer({
         optional: true,
         name: names.tbsCertListVersion || TBS_CERT_LIST_VERSION,
-        value: 2
+        value: 2,
       }), // EXPLICIT integer value (v2)
       AlgorithmIdentifier.schema(
         names.signature || {
           names: {
-            blockName: TBS_CERT_LIST_SIGNATURE
-          }
-        }
+            blockName: TBS_CERT_LIST_SIGNATURE,
+          },
+        },
       ),
       RelativeDistinguishedNames.schema(
         names.issuer || {
           names: {
-            blockName: TBS_CERT_LIST_ISSUER
-          }
-        }
+            blockName: TBS_CERT_LIST_ISSUER,
+          },
+        },
       ),
       Time.schema(
         names.tbsCertListThisUpdate || {
           names: {
             utcTimeName: TBS_CERT_LIST_THIS_UPDATE,
-            generalTimeName: TBS_CERT_LIST_THIS_UPDATE
-          }
-        }
+            generalTimeName: TBS_CERT_LIST_THIS_UPDATE,
+          },
+        },
       ),
       Time.schema(
         names.tbsCertListNextUpdate || {
           names: {
             utcTimeName: TBS_CERT_LIST_NEXT_UPDATE,
-            generalTimeName: TBS_CERT_LIST_NEXT_UPDATE
-          }
+            generalTimeName: TBS_CERT_LIST_NEXT_UPDATE,
+          },
         },
-        true
+        true,
       ),
       new asn1js.Sequence({
         optional: true,
@@ -169,33 +156,32 @@ function tbsCertList(parameters: TBSCertListSchema = {}): Schema.SchemaType {
           new asn1js.Repeated({
             name: names.tbsCertListRevokedCertificates || TBS_CERT_LIST_REVOKED_CERTIFICATES,
             value: new asn1js.Sequence({
-              value: [new asn1js.Integer(), Time.schema(), Extensions.schema({}, true)]
-            })
-          })
-        ]
+              value: [new asn1js.Integer(), Time.schema(), Extensions.schema({}, true)],
+            }),
+          }),
+        ],
       }),
       new asn1js.Constructed({
         optional: true,
         idBlock: {
           tagClass: 3, // CONTEXT-SPECIFIC
-          tagNumber: 0 // [0]
+          tagNumber: 0, // [0]
         },
         value: [
           Extensions.schema(
             names.crlExtensions || {
               names: {
-                blockName: TBS_CERT_LIST_EXTENSIONS
-              }
-            }
-          )
-        ]
-      }) // EXPLICIT SEQUENCE value
-    ]
+                blockName: TBS_CERT_LIST_EXTENSIONS,
+              },
+            },
+          ),
+        ],
+      }), // EXPLICIT SEQUENCE value
+    ],
   });
 }
 
-export type CertificateRevocationListParameters = PkiObjectParameters &
-  Partial<ICertificateRevocationList>;
+export type CertificateRevocationListParameters = PkiObjectParameters & Partial<ICertificateRevocationList>;
 
 export interface CertificateRevocationListVerifyParams {
   issuerCertificate?: Certificate;
@@ -212,7 +198,7 @@ const WELL_KNOWN_EXTENSIONS = [
   id_AuthorityInfoAccess,
   id_CRLReason,
   id_InvalidityDate,
-  id_CertificateIssuer
+  id_CertificateIssuer,
 ];
 /**
  * Represents the CertificateRevocationList structure described in [RFC5280](https://datatracker.ietf.org/doc/html/rfc5280)
@@ -225,7 +211,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
    * @deprecated Since version 3.0.0
    */
   public get tbs(): ArrayBuffer {
-    return pvtsutils.BufferSourceConverter.toArrayBuffer(this.tbsView);
+    return toArrayBuffer(this.tbsView);
   }
 
   /**
@@ -251,60 +237,22 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
   constructor(parameters: CertificateRevocationListParameters = {}) {
     super();
 
-    this.tbsView = new Uint8Array(
-      pvutils.getParametersValue(parameters, TBS, CertificateRevocationList.defaultValues(TBS))
-    );
-    this.version = pvutils.getParametersValue(
-      parameters,
-      VERSION,
-      CertificateRevocationList.defaultValues(VERSION)
-    );
-    this.signature = pvutils.getParametersValue(
-      parameters,
-      SIGNATURE,
-      CertificateRevocationList.defaultValues(SIGNATURE)
-    );
-    this.issuer = pvutils.getParametersValue(
-      parameters,
-      ISSUER,
-      CertificateRevocationList.defaultValues(ISSUER)
-    );
-    this.thisUpdate = pvutils.getParametersValue(
-      parameters,
-      THIS_UPDATE,
-      CertificateRevocationList.defaultValues(THIS_UPDATE)
-    );
+    this.tbsView = new Uint8Array(parameters[TBS] ?? CertificateRevocationList.defaultValues(TBS));
+    this.version = parameters[VERSION] ?? CertificateRevocationList.defaultValues(VERSION);
+    this.signature = parameters[SIGNATURE] ?? CertificateRevocationList.defaultValues(SIGNATURE);
+    this.issuer = parameters[ISSUER] ?? CertificateRevocationList.defaultValues(ISSUER);
+    this.thisUpdate = parameters[THIS_UPDATE] ?? CertificateRevocationList.defaultValues(THIS_UPDATE);
     if (NEXT_UPDATE in parameters) {
-      this.nextUpdate = pvutils.getParametersValue(
-        parameters,
-        NEXT_UPDATE,
-        CertificateRevocationList.defaultValues(NEXT_UPDATE)
-      );
+      this.nextUpdate = parameters[NEXT_UPDATE] ?? CertificateRevocationList.defaultValues(NEXT_UPDATE);
     }
     if (REVOKED_CERTIFICATES in parameters) {
-      this.revokedCertificates = pvutils.getParametersValue(
-        parameters,
-        REVOKED_CERTIFICATES,
-        CertificateRevocationList.defaultValues(REVOKED_CERTIFICATES)
-      );
+      this.revokedCertificates = parameters[REVOKED_CERTIFICATES] ?? CertificateRevocationList.defaultValues(REVOKED_CERTIFICATES);
     }
     if (CRL_EXTENSIONS in parameters) {
-      this.crlExtensions = pvutils.getParametersValue(
-        parameters,
-        CRL_EXTENSIONS,
-        CertificateRevocationList.defaultValues(CRL_EXTENSIONS)
-      );
+      this.crlExtensions = parameters[CRL_EXTENSIONS] ?? CertificateRevocationList.defaultValues(CRL_EXTENSIONS);
     }
-    this.signatureAlgorithm = pvutils.getParametersValue(
-      parameters,
-      SIGNATURE_ALGORITHM,
-      CertificateRevocationList.defaultValues(SIGNATURE_ALGORITHM)
-    );
-    this.signatureValue = pvutils.getParametersValue(
-      parameters,
-      SIGNATURE_VALUE,
-      CertificateRevocationList.defaultValues(SIGNATURE_VALUE)
-    );
+    this.signatureAlgorithm = parameters[SIGNATURE_ALGORITHM] ?? CertificateRevocationList.defaultValues(SIGNATURE_ALGORITHM);
+    this.signatureValue = parameters[SIGNATURE_VALUE] ?? CertificateRevocationList.defaultValues(SIGNATURE_VALUE);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -322,9 +270,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
   public static override defaultValues(memberName: typeof ISSUER): RelativeDistinguishedNames;
   public static override defaultValues(memberName: typeof THIS_UPDATE): Time;
   public static override defaultValues(memberName: typeof NEXT_UPDATE): Time;
-  public static override defaultValues(
-    memberName: typeof REVOKED_CERTIFICATES
-  ): RevokedCertificate[];
+  public static override defaultValues(memberName: typeof REVOKED_CERTIFICATES): RevokedCertificate[];
   public static override defaultValues(memberName: typeof CRL_EXTENSIONS): Extensions;
   public static override defaultValues(memberName: typeof SIGNATURE_ALGORITHM): AlgorithmIdentifier;
   public static override defaultValues(memberName: typeof SIGNATURE_VALUE): asn1js.BitString;
@@ -376,13 +322,9 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
       crlExtensions?: ExtensionsSchema;
       signatureAlgorithm?: AlgorithmIdentifierSchema;
       signatureValue?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || "CertificateList",
@@ -391,18 +333,18 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
         AlgorithmIdentifier.schema(
           names.signatureAlgorithm || {
             names: {
-              blockName: SIGNATURE_ALGORITHM
-            }
-          }
+              blockName: SIGNATURE_ALGORITHM,
+            },
+          },
         ),
-        new asn1js.BitString({ name: names.signatureValue || SIGNATURE_VALUE })
-      ]
+        new asn1js.BitString({ name: names.signatureValue || SIGNATURE_VALUE }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(schema, schema, CertificateRevocationList.schema());
@@ -421,10 +363,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
       this.nextUpdate = new Time({ schema: asn1.result[TBS_CERT_LIST_NEXT_UPDATE] });
     }
     if (TBS_CERT_LIST_REVOKED_CERTIFICATES in asn1.result) {
-      this.revokedCertificates = Array.from(
-        asn1.result[TBS_CERT_LIST_REVOKED_CERTIFICATES],
-        element => new RevokedCertificate({ schema: element })
-      );
+      this.revokedCertificates = Array.from(asn1.result[TBS_CERT_LIST_REVOKED_CERTIFICATES], (element) => new RevokedCertificate({ schema: element }));
     }
     if (TBS_CERT_LIST_EXTENSIONS in asn1.result) {
       this.crlExtensions = new Extensions({ schema: asn1.result[TBS_CERT_LIST_EXTENSIONS] });
@@ -454,8 +393,8 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     if (this.revokedCertificates) {
       outputArray.push(
         new asn1js.Sequence({
-          value: Array.from(this.revokedCertificates, o => o.toSchema())
-        })
+          value: Array.from(this.revokedCertificates, (o) => o.toSchema()),
+        }),
       );
     }
 
@@ -465,16 +404,16 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: [this.crlExtensions.toSchema()]
-        })
+          value: [this.crlExtensions.toSchema()],
+        }),
       );
     }
     //#endregion
 
     return new asn1js.Sequence({
-      value: outputArray
+      value: outputArray,
     });
   }
 
@@ -505,31 +444,30 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [tbsSchema, this.signatureAlgorithm.toSchema(), this.signatureValue]
+      value: [tbsSchema, this.signatureAlgorithm.toSchema(), this.signatureValue],
     });
     //#endregion
   }
 
   public toJSON(): CertificateRevocationListJson {
     const res: CertificateRevocationListJson = {
-      tbs: pvtsutils.Convert.ToHex(this.tbsView),
+      tbs: hex.encode(this.tbsView),
       version: this.version,
       signature: this.signature.toJSON(),
       issuer: this.issuer.toJSON(),
       thisUpdate: this.thisUpdate.toJSON(),
       signatureAlgorithm: this.signatureAlgorithm.toJSON(),
-      signatureValue: this.signatureValue.toJSON()
+      signatureValue: this.signatureValue.toJSON(),
     };
 
-    if (this.version !== CertificateRevocationList.defaultValues(VERSION))
-      res.version = this.version;
+    if (this.version !== CertificateRevocationList.defaultValues(VERSION)) res.version = this.version;
 
     if (this.nextUpdate) {
       res.nextUpdate = this.nextUpdate.toJSON();
     }
 
     if (this.revokedCertificates) {
-      res.revokedCertificates = Array.from(this.revokedCertificates, o => o.toJSON());
+      res.revokedCertificates = Array.from(this.revokedCertificates, (o) => o.toJSON());
     }
 
     if (this.crlExtensions) {
@@ -570,11 +508,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
    * @param hashAlgorithm Hashing algorithm. Default SHA-1
    * @param crypto Crypto engine
    */
-  public async sign(
-    privateKey: CryptoKey,
-    hashAlgorithm = "SHA-1",
-    crypto = common.getCrypto(true)
-  ): Promise<void> {
+  public async sign(privateKey: CryptoKey, hashAlgorithm = "SHA-1", crypto = common.getCrypto(true)): Promise<void> {
     // Get a private key from function parameter
     if (!privateKey) {
       throw new Error("Need to provide a private key for signing");
@@ -592,11 +526,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     //#endregion
 
     //#region Signing TBS data on provided private key
-    const signature = await crypto.signWithPrivateKey(
-      this.tbsView as BufferSource,
-      privateKey,
-      parameters as any
-    );
+    const signature = await crypto.signWithPrivateKey(this.tbsView as BufferSource, privateKey, parameters as any);
     this.signatureValue = new asn1js.BitString({ valueHex: signature });
     //#endregion
   }
@@ -606,10 +536,7 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
    * @param parameters
    * @param crypto Crypto engine
    */
-  public async verify(
-    parameters: CertificateRevocationListVerifyParams = {},
-    crypto = common.getCrypto(true)
-  ): Promise<boolean> {
+  public async verify(parameters: CertificateRevocationListVerifyParams = {}, crypto = common.getCrypto(true)): Promise<boolean> {
     let subjectPublicKeyInfo: PublicKeyInfo | undefined;
 
     //#region Get information about CRL issuer certificate
@@ -645,11 +572,6 @@ export class CertificateRevocationList extends PkiObject implements ICertificate
     }
     //#endregion
 
-    return crypto.verifyWithPublicKey(
-      this.tbsView as BufferSource,
-      this.signatureValue,
-      subjectPublicKeyInfo,
-      this.signatureAlgorithm
-    );
+    return crypto.verifyWithPublicKey(this.tbsView as BufferSource, this.signatureValue, subjectPublicKeyInfo, this.signatureAlgorithm);
   }
 }

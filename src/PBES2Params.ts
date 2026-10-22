@@ -1,14 +1,9 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import {
-  AlgorithmIdentifier,
-  AlgorithmIdentifierJson,
-  AlgorithmIdentifierSchema
-} from "./AlgorithmIdentifier";
+import { AlgorithmIdentifier, type AlgorithmIdentifierJson, type AlgorithmIdentifierSchema } from "./AlgorithmIdentifier";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import type * as Schema from "./Schema";
 
 const KEY_DERIVATION_FUNC = "keyDerivationFunc";
 const ENCRYPTION_SCHEME = "encryptionScheme";
@@ -42,16 +37,8 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
   constructor(parameters: PBES2ParamsParameters = {}) {
     super();
 
-    this.keyDerivationFunc = pvutils.getParametersValue(
-      parameters,
-      KEY_DERIVATION_FUNC,
-      PBES2Params.defaultValues(KEY_DERIVATION_FUNC)
-    );
-    this.encryptionScheme = pvutils.getParametersValue(
-      parameters,
-      ENCRYPTION_SCHEME,
-      PBES2Params.defaultValues(ENCRYPTION_SCHEME)
-    );
+    this.keyDerivationFunc = parameters[KEY_DERIVATION_FUNC] ?? PBES2Params.defaultValues(KEY_DERIVATION_FUNC);
+    this.encryptionScheme = parameters[ENCRYPTION_SCHEME] ?? PBES2Params.defaultValues(ENCRYPTION_SCHEME);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -89,26 +76,19 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
     parameters: Schema.SchemaParameters<{
       keyDerivationFunc?: AlgorithmIdentifierSchema;
       encryptionScheme?: AlgorithmIdentifierSchema;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
-      value: [
-        AlgorithmIdentifier.schema(names.keyDerivationFunc || {}),
-        AlgorithmIdentifier.schema(names.encryptionScheme || {})
-      ]
+      value: [AlgorithmIdentifier.schema(names.keyDerivationFunc || {}), AlgorithmIdentifier.schema(names.encryptionScheme || {})],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -118,16 +98,16 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
         names: {
           keyDerivationFunc: {
             names: {
-              blockName: KEY_DERIVATION_FUNC
-            }
+              blockName: KEY_DERIVATION_FUNC,
+            },
           },
           encryptionScheme: {
             names: {
-              blockName: ENCRYPTION_SCHEME
-            }
-          }
-        }
-      })
+              blockName: ENCRYPTION_SCHEME,
+            },
+          },
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -139,14 +119,14 @@ export class PBES2Params extends PkiObject implements IPBES2Params {
   public toSchema(): asn1js.Sequence {
     // Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: [this.keyDerivationFunc.toSchema(), this.encryptionScheme.toSchema()]
+      value: [this.keyDerivationFunc.toSchema(), this.encryptionScheme.toSchema()],
     });
   }
 
   public toJSON(): PBES2ParamsJson {
     return {
       keyDerivationFunc: this.keyDerivationFunc.toJSON(),
-      encryptionScheme: this.encryptionScheme.toJSON()
+      encryptionScheme: this.encryptionScheme.toJSON(),
     };
   }
 }

@@ -1,11 +1,10 @@
 import * as asn1js from "asn1js";
-import * as pvutils from "pvutils";
-import { CertificateSet, CertificateSetJson } from "./CertificateSet";
+import { CertificateSet, type CertificateSetJson } from "./CertificateSet";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { PkiObject, PkiObjectParameters } from "./PkiObject";
-import { RevocationInfoChoices, RevocationInfoChoicesJson } from "./RevocationInfoChoices";
-import * as Schema from "./Schema";
+import { PkiObject, type PkiObjectParameters } from "./PkiObject";
+import { RevocationInfoChoices, type RevocationInfoChoicesJson } from "./RevocationInfoChoices";
+import type * as Schema from "./Schema";
 
 const CERTS = "certs";
 const CRLS = "crls";
@@ -47,7 +46,7 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
   constructor(parameters: OriginatorInfoParameters = {}) {
     super();
 
-    this.crls = pvutils.getParametersValue(parameters, CRLS, OriginatorInfo.defaultValues(CRLS));
+    this.crls = parameters[CRLS] ?? OriginatorInfo.defaultValues(CRLS);
 
     if (parameters.schema) {
       this.fromSchema(parameters.schema);
@@ -101,13 +100,9 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
     parameters: Schema.SchemaParameters<{
       certs?: string;
       crls?: string;
-    }> = {}
+    }> = {},
   ): Schema.SchemaType {
-    const names = pvutils.getParametersValue<NonNullable<typeof parameters.names>>(
-      parameters,
-      "names",
-      {}
-    );
+    const names = parameters.names ?? {};
 
     return new asn1js.Sequence({
       name: names.blockName || EMPTY_STRING,
@@ -117,26 +112,26 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: CertificateSet.schema().valueBlock.value
+          value: CertificateSet.schema().valueBlock.value,
         }),
         new asn1js.Constructed({
           name: names.crls || EMPTY_STRING,
           optional: true,
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: RevocationInfoChoices.schema().valueBlock.value
-        })
-      ]
+          value: RevocationInfoChoices.schema().valueBlock.value,
+        }),
+      ],
     });
   }
 
   public fromSchema(schema: Schema.SchemaType): void {
     // Clear input data first
-    pvutils.clearProps(schema, CLEAR_PROPS);
+    for (const prop of CLEAR_PROPS) delete schema[prop];
 
     // Check the schema is valid
     const asn1 = asn1js.compareSchema(
@@ -145,9 +140,9 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
       OriginatorInfo.schema({
         names: {
           certs: CERTS,
-          crls: CRLS
-        }
-      })
+          crls: CRLS,
+        },
+      }),
     );
     AsnError.assertSchema(asn1, this.className);
 
@@ -155,15 +150,15 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
     if (CERTS in asn1.result) {
       this.certs = new CertificateSet({
         schema: new asn1js.Set({
-          value: asn1.result.certs.valueBlock.value
-        })
+          value: asn1.result.certs.valueBlock.value,
+        }),
       });
     }
     if (CRLS in asn1.result) {
       this.crls = new RevocationInfoChoices({
         schema: new asn1js.Set({
-          value: asn1.result.crls.valueBlock.value
-        })
+          value: asn1.result.crls.valueBlock.value,
+        }),
       });
     }
   }
@@ -176,10 +171,10 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 0 // [0]
+            tagNumber: 0, // [0]
           },
-          value: this.certs.toSchema().valueBlock.value
-        })
+          value: this.certs.toSchema().valueBlock.value,
+        }),
       );
     }
 
@@ -188,16 +183,16 @@ export class OriginatorInfo extends PkiObject implements IOriginatorInfo {
         new asn1js.Constructed({
           idBlock: {
             tagClass: 3, // CONTEXT-SPECIFIC
-            tagNumber: 1 // [1]
+            tagNumber: 1, // [1]
           },
-          value: this.crls.toSchema().valueBlock.value
-        })
+          value: this.crls.toSchema().valueBlock.value,
+        }),
       );
     }
 
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Sequence({
-      value: sequenceValue
+      value: sequenceValue,
     });
     //#endregion
   }
