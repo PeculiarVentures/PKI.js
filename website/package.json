@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "docusaurus start",
     "build": "docusaurus build",
+    "serve": "docusaurus serve",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -13,7 +14,6 @@
     "@docusaurus/remark-plugin-npm2yarn": "^3.10.2",
     "@mdx-js/react": "^3.1.1",
     "clsx": "^2.1.1",
-    "pkijs": "../",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"

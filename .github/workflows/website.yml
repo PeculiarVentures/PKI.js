@@ -1,23 +1,73 @@
-name: Build and publish website
+name: Website
 
 on:
   push:
     branches:
-      - "master"
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: website-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  pages:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: "npm"
-      - run: npm ci
-      - run: npm run build -w website
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            website/package-lock.json
+
+      # The library's dependencies are needed because TypeDoc generates the API pages from the library source.
+      # No lifecycle script is needed to build.
+      - name: Install dependencies
+        run: |
+          npm ci --ignore-scripts
+          npm ci --ignore-scripts --prefix website
+
+      - name: Build website
+        run: npm run build --prefix website
+
+      # After the build, which generates the API sidebar that sidebars.ts imports.
+      - name: Typecheck website
+        run: npm run typecheck --prefix website
+
+      - name: Upload website
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v7
+        with:
+          name: website
+          path: website/build
+          # Keeps static/.nojekyll.
+          include-hidden-files: true
+
+  # Only this job can write to the repository, and it runs no project code.
+  deploy:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: website
+          path: website
+
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: website/build
+          publish_dir: website

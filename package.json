@@ -62,7 +62,7 @@
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.5",
     "@peculiar/webcrypto": "^1.5.0",
-    "@types/node": "^20.19.43",
+    "@types/node": "^24.19.2",
     "@vitest/coverage-v8": "^5.0.5",
     "asn1js": "^4.0.0",
     "emailjs-mime-builder": "^2.0.5",
@@ -88,9 +88,6 @@
       "onFail": "warn"
     }
   },
-  "workspaces": [
-    "website"
-  ],
   "main": "./build/index.js",
   "module": "./build/index.js",
   "types": "./build/index.d.ts",
