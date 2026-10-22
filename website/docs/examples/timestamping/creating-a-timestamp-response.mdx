@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./creating-a-timestamp-response.example";
+---
+sidebar_position: 2
+---
 
-# Creating a Timestamp response
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./creating-a-timestamp-response.example.ts";
 
-In this example, you will see how to create, parse and verify timestamp responses.
+# Creating a timestamp response
 
-<CodeBlock language="ts">{source}</CodeBlock>
+Issue a timestamp as a time-stamping authority, then verify it as the client: check the token's signature, that it covers the client's data, and that it answers the client's request.
+
+<RunnableExample source={source} load={() => import("./creating-a-timestamp-response.example.ts?run")} />
+
+**API:** [`TimeStampResp`](../../api/classes/TimeStampResp.md), [`TSTInfo`](../../api/classes/TSTInfo.md), [`SignedData`](../../api/classes/SignedData.md), [`MessageImprint`](../../api/classes/MessageImprint.md)

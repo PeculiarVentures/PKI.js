@@ -1,0 +1,41 @@
+---
+sidebar_position: 0
+sidebar_label: Overview
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import helpers from "!!raw-loader!./helpers.ts";
+
+# Examples
+
+Every example is a complete script. Press **Run** to execute it in your browser with the current version of PKIjs, or copy it into your project.
+
+## Certificates and revocation
+
+- [Create and validate a certificate](certificates-and-revocation/create-and-validate-certificate.mdx): a root CA and an end-entity certificate, parsing, and chain validation.
+- [Working with certificate requests](certificates-and-revocation/working-with-certificate-requests.mdx): create a PKCS#10 CSR and check it as a CA.
+- [Creating and parsing CRLs](certificates-and-revocation/creating-and-parsing-CRLs.mdx): revoke a certificate and check revocation.
+- [Working with OCSP requests](certificates-and-revocation/working-with-OCSP-requests.mdx): ask for a certificate's status.
+- [Working with OCSP responses](certificates-and-revocation/working-with-OCSP-responses.mdx): answer with a signed status and verify it.
+
+## Signing and encryption with CMS
+
+- [Working with CMS signing](signing-and-encryption-with-CMS/working-with-CMS-signing.mdx): sign data and verify the signature and its certificate chain.
+- [Working with CMS certificate-based encryption](signing-and-encryption-with-CMS/working-with-CMS-certificate-based-encryption.mdx): encrypt for RSA and elliptic-curve certificates.
+- [Working with CMS password-based encryption](signing-and-encryption-with-CMS/working-with-CMS-password-based-encryption.mdx): encrypt and decrypt with a password.
+- [Working with PKCS#7 certificate bags (P7B)](signing-and-encryption-with-CMS/working-with-PKCS-7-certificate-bags-P7B.mdx): bundle and list a certificate chain.
+
+## Timestamping
+
+- [Creating a timestamp request](timestamping/creating-a-timestamp-request.mdx): ask a time-stamping authority for a timestamp.
+- [Creating a timestamp response](timestamping/creating-a-timestamp-response.mdx): issue a timestamp and verify it.
+
+## Other
+
+- [Working with PKCS#12 files](other/working-with-PKCS-12-files.mdx): store a key and its certificate in a password-protected file.
+
+## The `createIdentity` helper
+
+Most examples need certificates to work with. Instead of repeating the code of [Create and validate a certificate](certificates-and-revocation/create-and-validate-certificate.mdx) in each of them, they import `createIdentity` from this file, which creates a key pair and a certificate, signed by an issuer or self-signed:
+
+<CodeBlock language="ts" title="helpers.ts">{helpers}</CodeBlock>

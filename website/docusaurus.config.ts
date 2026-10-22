@@ -3,6 +3,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 import { themes as prismThemes } from "prism-react-renderer";
 import npm2yarn from "@docusaurus/remark-plugin-npm2yarn";
 import packageJSON from "../package.json";
+import runnableExamples from "./plugins/runnable-examples";
 
 const config: Config = {
   title: "pki.js",
@@ -59,7 +60,8 @@ const config: Config = {
         }
       }
     ],
-    "docusaurus-plugin-sass"
+    "docusaurus-plugin-sass",
+    runnableExamples
   ],
 
   themeConfig: {
@@ -113,7 +115,7 @@ const config: Config = {
             },
             {
               label: "Examples",
-              to: "/docs/examples/certificates-and-revocation"
+              to: "/docs/examples/"
             },
             {
               label: "API",

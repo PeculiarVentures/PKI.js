@@ -1,0 +1,41 @@
+.example {
+  margin-bottom: var(--ifm-leading);
+
+  :global(.theme-code-block) {
+    margin-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #21252b;
+  border-bottom-left-radius: var(--ifm-code-border-radius);
+  border-bottom-right-radius: var(--ifm-code-border-radius);
+}
+
+.hint {
+  color: #9da5b4;
+  font-size: 0.8rem;
+}
+
+.output {
+  margin-top: 12px;
+  background: #1e2127;
+  color: #d7dae0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.error {
+  color: #e06c75;
+}
+
+.empty {
+  color: #9da5b4;
+  font-style: italic;
+}

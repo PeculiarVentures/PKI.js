@@ -50,7 +50,7 @@ console.log(parsed.subject.typesAndValues[0].value.valueBlock.value); // Example
 console.log(await parsed.verify()); // true
 ```
 
-Next, browse the [examples](examples/certificates-and-revocation/index.md) and the [API reference](api/index.md).
+Next, browse the [examples](examples/index.mdx) and the [API reference](api/index.md).
 
 ## Upgrading from v3
 

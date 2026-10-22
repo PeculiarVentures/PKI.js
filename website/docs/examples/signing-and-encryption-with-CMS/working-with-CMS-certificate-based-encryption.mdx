@@ -1,8 +1,14 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./working-with-CMS-certificate-based-encryption.example";
+---
+sidebar_position: 2
+---
 
-# Working with CMS Certificate-based Encryption
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./working-with-CMS-certificate-based-encryption.example.ts";
 
-In this example, you will see how to create and decrypt an Enveloped CMS message using an existing X.509 certificate.
+# Working with CMS certificate-based encryption
 
-<CodeBlock language="ts">{source}</CodeBlock>
+Encrypt a message as CMS EnvelopedData for two recipients, one with an RSA certificate (RSA-OAEP) and one with an elliptic-curve certificate (ECDH), and decrypt it with each recipient's private key.
+
+<RunnableExample source={source} load={() => import("./working-with-CMS-certificate-based-encryption.example.ts?run")} />
+
+**API:** [`EnvelopedData`](../../api/classes/EnvelopedData.md), [`ContentInfo`](../../api/classes/ContentInfo.md)
