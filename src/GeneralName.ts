@@ -277,22 +277,15 @@ export interface GeneralNameJson {
   typedValue?: GeneralNameTypedValue;
 }
 
-const STRING_KINDS: Record<
-  number,
-  "rfc822Name" | "dNSName" | "uniformResourceIdentifier" | "registeredID"
-> = {
+const STRING_KINDS: Record<number, "rfc822Name" | "dNSName" | "uniformResourceIdentifier" | "registeredID"> = {
   1: "rfc822Name",
   2: "dNSName",
   6: "uniformResourceIdentifier",
-  8: "registeredID"
+  8: "registeredID",
 };
 
 function isContextTagged(value: any, tagNumber: number): value is asn1js.Constructed {
-  return (
-    value instanceof asn1js.Constructed &&
-    value.idBlock.tagClass === 3 &&
-    value.idBlock.tagNumber === tagNumber
-  );
+  return value instanceof asn1js.Constructed && value.idBlock.tagClass === 3 && value.idBlock.tagNumber === tagNumber;
 }
 
 function ipToString(bytes: Uint8Array): string {
@@ -312,10 +305,10 @@ function ipToString(bytes: Uint8Array): string {
     }
     i = j === i ? i + 1 : j;
   }
-  const hex = groups.map(group => group.toString(16));
-  if (bestStart === -1) return hex.join(":");
+  const parts = groups.map((group) => group.toString(16));
+  if (bestStart === -1) return parts.join(":");
 
-  return `${hex.slice(0, bestStart).join(":")}::${hex.slice(bestStart + bestLength).join(":")}`;
+  return `${parts.slice(0, bestStart).join(":")}::${parts.slice(bestStart + bestLength).join(":")}`;
 }
 
 function directoryString(value: any): string | undefined {
@@ -334,24 +327,18 @@ function typedValueOf(type: number, value: any): GeneralNameTypedValue | undefin
       if (!isContextTagged(value, 0)) return undefined;
       const [oid, explicitValue] = value.valueBlock.value;
       const payload = (explicitValue as any)?.valueBlock?.value;
-      if (
-        !(oid instanceof asn1js.ObjectIdentifier) ||
-        !isContextTagged(explicitValue, 0) ||
-        payload.length !== 1
-      ) {
+      if (!(oid instanceof asn1js.ObjectIdentifier) || !isContextTagged(explicitValue, 0) || payload.length !== 1) {
         return undefined;
       }
 
       return {
         kind: "otherName",
         oid: oid.valueBlock.toString(),
-        valueBerHex: hex.encode(payload[0].toBER(false))
+        valueBerHex: hex.encode(payload[0].toBER(false)),
       };
     }
     case 3:
-      return isContextTagged(value, 3)
-        ? { kind: "x400Address", berHex: hex.encode(value.toBER(false)) }
-        : undefined;
+      return isContextTagged(value, 3) ? { kind: "x400Address", berHex: hex.encode(value.toBER(false)) } : undefined;
     case 4: {
       if (!(value instanceof RelativeDistinguishedNames)) return undefined;
       const attributes: GeneralNameDirectoryAttribute[] = [];
@@ -360,7 +347,7 @@ function typedValueOf(type: number, value: any): GeneralNameTypedValue | undefin
         attributes.push({
           oid,
           asn1Type: (attribute.constructor as typeof asn1js.BaseBlock).NAME,
-          value: attribute.valueBlock.value
+          value: attribute.valueBlock.value,
         });
       }
 
@@ -376,9 +363,7 @@ function typedValueOf(type: number, value: any): GeneralNameTypedValue | undefin
       }
       if (partyName === undefined) return undefined;
 
-      return nameAssigner === undefined
-        ? { kind: "ediPartyName", partyName }
-        : { kind: "ediPartyName", nameAssigner, partyName };
+      return nameAssigner === undefined ? { kind: "ediPartyName", partyName } : { kind: "ediPartyName", nameAssigner, partyName };
     }
     case 7: {
       if (!(value instanceof asn1js.OctetString)) return undefined;
@@ -397,7 +382,7 @@ function typedValueOf(type: number, value: any): GeneralNameTypedValue | undefin
             kind: "iPAddress",
             address: ipToString(bytes.slice(0, half)),
             mask: ipToString(bytes.slice(half)),
-            bytesHex
+            bytesHex,
           };
         }
         default:

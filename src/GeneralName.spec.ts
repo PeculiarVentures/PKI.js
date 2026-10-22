@@ -2,18 +2,18 @@ import * as path from "node:path";
 import * as ts from "typescript";
 import { assert, describe, it } from "vitest";
 import * as asn1js from "asn1js";
-import * as pvtsutils from "pvtsutils";
-import * as pkijs from "../src";
+import { hex } from "@peculiar/utils";
+import * as pkijs from "./index";
 
-function fromHex(hex: string): pkijs.GeneralName {
-  const asn = asn1js.fromBER(pvtsutils.Convert.FromHex(hex));
+function fromHex(value: string): pkijs.GeneralName {
+  const asn = asn1js.fromBER(hex.decode(value));
 
   return new pkijs.GeneralName({ schema: asn.result });
 }
 
 function roundTrip(name: pkijs.GeneralName): pkijs.GeneralName {
   return new pkijs.GeneralName({
-    schema: asn1js.fromBER((name.toSchema() as asn1js.BaseBlock).toBER()).result
+    schema: asn1js.fromBER((name.toSchema() as asn1js.BaseBlock).toBER()).result,
   });
 }
 
@@ -29,23 +29,21 @@ function consumerErrors(source: string): string[] {
 
   const host = ts.createCompilerHost(parsed.options);
   const origGetSourceFile = host.getSourceFile.bind(host);
-  host.fileExists = name => path.resolve(name) === fileName || ts.sys.fileExists(name);
-  host.readFile = name => (path.resolve(name) === fileName ? source : ts.sys.readFile(name));
+  host.fileExists = (name) => path.resolve(name) === fileName || ts.sys.fileExists(name);
+  host.readFile = (name) => (path.resolve(name) === fileName ? source : ts.sys.readFile(name));
   host.getSourceFile = (name, languageVersion, onError, shouldCreate) =>
-    path.resolve(name) === fileName
-      ? ts.createSourceFile(fileName, source, languageVersion, true)
-      : origGetSourceFile(name, languageVersion, onError, shouldCreate);
+    path.resolve(name) === fileName ? ts.createSourceFile(fileName, source, languageVersion, true) : origGetSourceFile(name, languageVersion, onError, shouldCreate);
 
   const program = ts.createProgram({
     rootNames: [fileName],
     options: { ...parsed.options, noEmit: true, skipLibCheck: true },
-    host
+    host,
   });
 
   return ts
     .getPreEmitDiagnostics(program)
-    .filter(d => d.category === ts.DiagnosticCategory.Error)
-    .map(d => ts.flattenDiagnosticMessageText(d.messageText, "\n"));
+    .filter((d) => d.category === ts.DiagnosticCategory.Error)
+    .map((d) => ts.flattenDiagnosticMessageText(d.messageText, "\n"));
 }
 
 describe("GeneralName JSON typedValue", () => {
@@ -54,7 +52,7 @@ describe("GeneralName JSON typedValue", () => {
       [1, "alice@example.com", "rfc822Name"],
       [2, "example.com", "dNSName"],
       [6, "https://example.com", "uniformResourceIdentifier"],
-      [8, "1.2.3.4", "registeredID"]
+      [8, "1.2.3.4", "registeredID"],
     ];
     for (const [type, value, kind] of cases) {
       const json = roundTrip(new pkijs.GeneralName({ type, value })).toJSON();
@@ -69,7 +67,7 @@ describe("GeneralName JSON typedValue", () => {
     assert.deepEqual(json.typedValue, {
       kind: "otherName",
       oid: "1.2.3.4",
-      valueBerHex: "0c03666f6f"
+      valueBerHex: "0c03666f6f",
     });
   });
 
@@ -87,15 +85,15 @@ describe("GeneralName JSON typedValue", () => {
           typesAndValues: [
             new pkijs.AttributeTypeAndValue({
               type: "2.5.4.3",
-              value: new asn1js.Utf8String({ value: "Example" })
+              value: new asn1js.Utf8String({ value: "Example" }),
             }),
             new pkijs.AttributeTypeAndValue({
               type: "2.5.4.6",
-              value: new asn1js.PrintableString({ value: "DE" })
-            })
-          ]
-        })
-      })
+              value: new asn1js.PrintableString({ value: "DE" }),
+            }),
+          ],
+        }),
+      }),
     );
     const json = name.toJSON();
 
@@ -104,8 +102,8 @@ describe("GeneralName JSON typedValue", () => {
       kind: "directoryName",
       attributes: [
         { oid: "2.5.4.3", asn1Type: "UTF8String", value: "Example" },
-        { oid: "2.5.4.6", asn1Type: "PrintableString", value: "DE" }
-      ]
+        { oid: "2.5.4.6", asn1Type: "PrintableString", value: "DE" },
+      ],
     });
   });
 
@@ -113,42 +111,33 @@ describe("GeneralName JSON typedValue", () => {
     assert.deepEqual(fromHex("a512a0090c074578616d706c65a1070c05416c696365").toJSON().typedValue, {
       kind: "ediPartyName",
       nameAssigner: "Example",
-      partyName: "Alice"
+      partyName: "Alice",
     });
     assert.deepEqual(fromHex("a509a1070c05416c696365").toJSON().typedValue, {
       kind: "ediPartyName",
-      partyName: "Alice"
+      partyName: "Alice",
     });
   });
 
   it("formats IPv4, IPv6 and address-and-mask forms", () => {
     const cases: [string, object][] = [
       ["87047f000001", { address: "127.0.0.1", bytesHex: "7f000001" }],
-      [
-        "871020010db8000000000000000000000001",
-        { address: "2001:db8::1", bytesHex: "20010db8000000000000000000000001" }
-      ],
-      [
-        "87100000000000000000000000000000000000",
-        { address: "::", bytesHex: "00000000000000000000000000000000" }
-      ],
-      [
-        "8708c0a80000ffff0000",
-        { address: "192.168.0.0", mask: "255.255.0.0", bytesHex: "c0a80000ffff0000" }
-      ],
+      ["871020010db8000000000000000000000001", { address: "2001:db8::1", bytesHex: "20010db8000000000000000000000001" }],
+      ["87100000000000000000000000000000000000", { address: "::", bytesHex: "00000000000000000000000000000000" }],
+      ["8708c0a80000ffff0000", { address: "192.168.0.0", mask: "255.255.0.0", bytesHex: "c0a80000ffff0000" }],
       [
         "872020010db8000000000000000000000000ffffffffffffffff0000000000000000",
         {
           address: "2001:db8::",
           mask: "ffff:ffff:ffff:ffff::",
-          bytesHex: "20010db8000000000000000000000000ffffffffffffffff0000000000000000"
-        }
-      ]
+          bytesHex: "20010db8000000000000000000000000ffffffffffffffff0000000000000000",
+        },
+      ],
     ];
     for (const [hex, expected] of cases) {
       assert.deepEqual(fromHex(hex).toJSON().typedValue, {
         kind: "iPAddress",
-        ...expected
+        ...expected,
       } as pkijs.GeneralNameTypedValue);
     }
   });
@@ -168,7 +157,7 @@ describe("GeneralName JSON typedValue", () => {
       "const typed = json.typedValue;",
       'if (typed?.kind === "directoryName") typed.attributes.map(a => a.oid);',
       'if (typed?.kind === "iPAddress") typed.address.toUpperCase();',
-      "void email;"
+      "void email;",
     ].join("\n");
 
     assert.deepEqual(consumerErrors(source), []);
