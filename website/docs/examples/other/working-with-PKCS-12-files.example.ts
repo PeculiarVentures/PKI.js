@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pkijs from "pkijs";
 import { createIdentity } from "../helpers";
+import { download } from "../io";
 
 // The certificate and private key to store (see the overview for createIdentity)
 const identity = await createIdentity({ name: "Alice" });
@@ -80,6 +81,7 @@ await pfx.makeInternalValues({
 
 const der = pfx.toSchema().toBER();
 console.log("PKCS#12 (base64):", pfx.toString("base64"));
+download("alice.p12", der); // Password: 12345
 
 // 3. Parse the file: check its integrity, then decrypt its contents
 const parsed = pkijs.PFX.fromBER(der);

@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pkijs from "pkijs";
 import { createIdentity } from "../helpers";
+import { download } from "../io";
 
 // The TSA's certificate must allow only timestamping (see the overview for createIdentity)
 const ca = await createIdentity({ name: "Example CA", ca: true });
@@ -62,6 +63,7 @@ const response = new pkijs.TimeStampResp({
 });
 const der = response.toSchema().toBER();
 console.log("Timestamp response (base64):", response.toString("base64"));
+download("response.tsr", der);
 
 // 3. The client parses the response and checks the token against its data and the trusted CA
 const parsed = pkijs.TimeStampResp.fromBER(der);

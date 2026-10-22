@@ -1,8 +1,16 @@
-import CodeBlock from "@theme/CodeBlock";
-import source from "!!raw-loader!./S-MIME-signature-verification.example";
+---
+sidebar_position: 2
+---
+
+import RunnableExample from "@site/src/components/RunnableExample";
+import source from "!!raw-loader!./S-MIME-signature-verification.example.ts";
 
 # S/MIME signature verification
 
-In this example, you will see how to verify S/MIME messages.
+Verify a signed email: split the multipart/signed message into the signed part and its detached CMS signature, check the signature, and check that the signer's certificate chains up to a root you trust.
 
-<CodeBlock language="ts">{source}</CodeBlock>
+The sample is a message signed by a sample CA. To check your own, save a signed email as an `.eml` file (most mail clients can) and choose it below, with the root certificate of its signer. Everything runs in your browser: the files are not uploaded anywhere.
+
+<RunnableExample source={source} load={() => import("./S-MIME-signature-verification.example.ts?run")} />
+
+**API:** [`SignedData`](../../api/classes/SignedData.md), [`ContentInfo`](../../api/classes/ContentInfo.md), [`CertificateChainValidationEngine`](../../api/classes/CertificateChainValidationEngine.md)

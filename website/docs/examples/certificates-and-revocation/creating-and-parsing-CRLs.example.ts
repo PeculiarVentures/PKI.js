@@ -1,6 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pkijs from "pkijs";
 import { createIdentity } from "../helpers";
+import { download } from "../io";
 
 // A CA and two certificates it issued (see the overview for createIdentity)
 const ca = await createIdentity({ name: "Example CA", ca: true });
@@ -40,6 +41,7 @@ crl.crlExtensions = new pkijs.Extensions({
 await crl.sign(ca.keys.privateKey, "SHA-256");
 const der = crl.toSchema().toBER();
 console.log("CRL (base64):", crl.toString("base64"));
+download("example-ca.crl", der);
 
 // 2. A relying party parses the CRL and checks that the CA signed it
 const parsed = pkijs.CertificateRevocationList.fromBER(der);

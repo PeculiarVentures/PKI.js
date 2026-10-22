@@ -10,6 +10,8 @@ import helpers from "!!raw-loader!./helpers.ts";
 
 Every example is a complete script. Press **Run** to execute it in your browser with the current version of PKIjs, or copy it into your project.
 
+Some examples take input: they run on sample data until you choose, drop, or paste your own files above the **Run** button. Results such as certificates and signed files can be downloaded after a run. Everything runs in your browser, and nothing is uploaded.
+
 ## Certificates and revocation
 
 - [Create and validate a certificate](certificates-and-revocation/create-and-validate-certificate.mdx): a root CA and an end-entity certificate, parsing, and chain validation.
@@ -33,9 +35,14 @@ Every example is a complete script. Press **Run** to execute it in your browser 
 ## Other
 
 - [Working with PKCS#12 files](other/working-with-PKCS-12-files.mdx): store a key and its certificate in a password-protected file.
+- [S/MIME signature verification](other/S-MIME-signature-verification.mdx): verify a signed email, yours or the sample.
+- [S/MIME encryption](other/S-MIME-signature-encryption.mdx): encrypt an email for a recipient's certificate.
+- [How to verify a signature in a PDF file](other/how-to-verify-a-signature-in-a-PDF-file.mdx): verify a signed PDF, yours or the sample.
 
 ## The `createIdentity` helper
 
 Most examples need certificates to work with. Instead of repeating the code of [Create and validate a certificate](certificates-and-revocation/create-and-validate-certificate.mdx) in each of them, they import `createIdentity` from this file, which creates a key pair and a certificate, signed by an issuer or self-signed:
 
 <CodeBlock language="ts" title="helpers.ts">{helpers}</CodeBlock>
+
+The examples also import `file`, `text`, and `download` from `io.ts`, which connect them to the controls on this website. When you copy an example, replace its `inputs` with your own data, and `download()` with saving or sending the result.

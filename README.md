@@ -75,7 +75,7 @@ v4 is ESM-only and requires Node.js `^20.19.0 || >=22.12.0` (was `>=16.0.0`). Co
 
 - [How to verify a signature in a PDF file](https://pkijs.org/docs/examples/other/how-to-verify-a-signature-in-a-PDF-file)
 - [S/MIME signature verification](https://pkijs.org/docs/examples/other/S-MIME-signature-verification)
-- [S/MIME signature encryption](https://pkijs.org/docs/examples/other/S-MIME-signature-encryption)
+- [S/MIME encryption](https://pkijs.org/docs/examples/other/S-MIME-signature-encryption)
 - [Working with PKCS#12 files](https://pkijs.org/docs/examples/other/working-with-PKCS-12-files)
 
 ## Documentation

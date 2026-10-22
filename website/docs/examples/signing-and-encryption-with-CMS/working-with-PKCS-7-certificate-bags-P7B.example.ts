@@ -1,5 +1,6 @@
 import * as pkijs from "pkijs";
 import { createIdentity } from "../helpers";
+import { download } from "../io";
 
 // A certificate chain to bundle (see the overview for createIdentity)
 const root = await createIdentity({ name: "Example Root CA", ca: true });
@@ -21,6 +22,7 @@ const contentInfo = new pkijs.ContentInfo({
 });
 const der = contentInfo.toSchema().toBER();
 console.log("P7B (base64):", contentInfo.toString("base64"));
+download("chain.p7b", der);
 
 // 2. Parse a P7B file and list its certificates
 const parsed = new pkijs.SignedData({ schema: pkijs.ContentInfo.fromBER(der).content });

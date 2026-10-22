@@ -1,5 +1,7 @@
 import * as asn1js from "asn1js";
 import * as pkijs from "pkijs";
+import { toPEM } from "../helpers";
+import { download } from "../io";
 
 // 1. The requester generates a key pair; the private key never leaves them
 const keys = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
@@ -41,6 +43,7 @@ csr.attributes = [
 await csr.sign(keys.privateKey, "SHA-256");
 const der = csr.toSchema().toBER();
 console.log("CSR (base64):", csr.toString("base64"));
+download("example.com.csr", toPEM(der, "CERTIFICATE REQUEST")); // Most tools expect a PEM CSR
 
 // 4. The certificate authority parses the request and checks its signature
 const received = pkijs.CertificationRequest.fromBER(der);

@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import * as pkijs from "pkijs";
+import { download } from "../io";
 
 // The data to timestamp: only its hash is sent to the time-stamping authority (TSA)
 const data = new TextEncoder().encode("Contract text, version 3");
@@ -19,6 +20,7 @@ const request = new pkijs.TimeStampReq({
 // 2. Encode it. Send it to the TSA over HTTP with Content-Type "application/timestamp-query".
 const der = request.toSchema().toBER();
 console.log("Timestamp request (base64):", request.toString("base64"));
+download("request.tsq", der);
 
 // 3. The TSA parses the request
 const parsed = pkijs.TimeStampReq.fromBER(der);
