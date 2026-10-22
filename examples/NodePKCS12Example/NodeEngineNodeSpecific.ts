@@ -33,10 +33,6 @@ export function encryptUsingPBKDF2Password(
   iv: ArrayBuffer,
   messageToEncrypt: ArrayBuffer,
 ): ArrayBuffer {
-  //#region Initial variables
-  let cipher: crypto.Cipher;
-  //#endregion
-
   //#region Make hash algorithm name to be Node-friendly
   hashAlgorithm = hashAlgorithm.replace("-", "");
   //#endregion
@@ -46,8 +42,8 @@ export function encryptUsingPBKDF2Password(
   //#endregion
 
   //#region Initialize cipher object
-  if (iv.byteLength) cipher = crypto.createCipheriv(algorithm, key, Buffer.from(iv));
-  else cipher = crypto.createCipher(algorithm, key);
+  // Modes without an IV (such as ECB) take `null`
+  const cipher = crypto.createCipheriv(algorithm, key, iv.byteLength ? Buffer.from(iv) : null);
   //#endregion
 
   return new Uint8Array(Buffer.concat([cipher.update(Buffer.from(messageToEncrypt)), cipher.final()])).buffer;
@@ -74,10 +70,6 @@ export function decryptUsingPBKDF2Password(
   iv: ArrayBuffer,
   messageToDecrypt: ArrayBuffer,
 ): ArrayBuffer {
-  //#region Initial variables
-  let cipher: crypto.Cipher;
-  //#endregion
-
   //#region Make hash algorithm name to be Node-friendly
   hashAlgorithm = hashAlgorithm.replace("-", "");
   //#endregion
@@ -87,8 +79,8 @@ export function decryptUsingPBKDF2Password(
   //#endregion
 
   //#region Initialize cipher object
-  if (iv.byteLength) cipher = crypto.createDecipheriv(algorithm, key, Buffer.from(iv));
-  else cipher = crypto.createDecipher(algorithm, key);
+  // Modes without an IV (such as ECB) take `null`
+  const cipher = crypto.createDecipheriv(algorithm, key, iv.byteLength ? Buffer.from(iv) : null);
   //#endregion
 
   return new Uint8Array(Buffer.concat([cipher.update(Buffer.from(messageToDecrypt)), cipher.final()])).buffer;
