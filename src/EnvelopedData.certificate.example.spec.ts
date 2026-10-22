@@ -1,6 +1,6 @@
 import { describe, it, assert } from "vitest";
-import * as example from "../examples/HowToEncryptCMSviaCertificate/example";
-import * as utils from "../examples/utils";
+import * as example from "../test/scenarios/EnvelopedData.certificate";
+import * as utils from "../test/utils";
 import { bytes } from "@peculiar/utils";
 
 describe("How To Encrypt CMS via Certificate", () => {

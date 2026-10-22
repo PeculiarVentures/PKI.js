@@ -1,5 +1,5 @@
 import { describe, it, assert } from "vitest";
-import * as example from "../examples/OpenSSLPrivateKeyEncryption/example";
+import * as example from "../test/scenarios/PrivateKeyInfo.openssl";
 import { binary, toArrayBuffer } from "@peculiar/utils";
 
 describe("OpenSSL Encrypted Private Key", () => {

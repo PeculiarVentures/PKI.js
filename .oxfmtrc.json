@@ -8,5 +8,5 @@
   "quoteProps": "as-needed",
   "sortImports": false,
   "sortPackageJson": false,
-  "ignorePatterns": ["node_modules", "coverage", "**/build/**", "*.tsbuildinfo", "package-lock.json", ".vscode", "website", "examples/PDFExample/pdfjs"]
+  "ignorePatterns": ["node_modules", "coverage", "**/build/**", "*.tsbuildinfo", "package-lock.json", ".vscode", "website"]
 }

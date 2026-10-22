@@ -1,6 +1,6 @@
 import { describe, it, assert } from "vitest";
 import * as pkijs from "./index";
-import * as example from "../examples/PKCS10ComplexExample/example";
+import * as example from "../test/scenarios/CertificationRequest";
 
 describe("PKCS#10 Complex Example", () => {
   //#region Initial variables

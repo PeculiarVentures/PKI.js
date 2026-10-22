@@ -14,5 +14,5 @@
     "noEmit": true,
     "useDefineForClassFields": false
   },
-  "include": ["src", "*.config.ts", "vitest.setup.ts"]
+  "include": ["src", "test", "*.config.ts", "vitest.setup.ts"]
 }

@@ -18,5 +18,5 @@
     "unicorn/no-array-sort": "off",
     "unicorn/no-new-array": "off"
   },
-  "ignorePatterns": ["**/build/**", "coverage/**", "website/**", "examples/**/*.js"]
+  "ignorePatterns": ["**/build/**", "coverage/**", "website/**"]
 }

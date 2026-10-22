@@ -1,9 +1,9 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import * as asn1js from "asn1js";
 import { binary, toArrayBuffer, utf8 } from "@peculiar/utils";
-import NodeEngine from "../examples/NodePKCS12Example/NodeEngine";
+import NodeEngine from "../test/NodeEngine/NodeEngine";
 import * as pkijs from "./index";
-import { fromBase64 } from "../examples/utils";
+import { fromBase64 } from "../test/utils";
 
 //#region Global variables
 const x509CertificateBASE64 =

@@ -1,6 +1,6 @@
 import { describe, it, assert } from "vitest";
 import * as pkijs from "./index";
-import * as example from "../examples/CRLComplexExample/example";
+import * as example from "../test/scenarios/CertificateRevocationList";
 
 describe("CRL Complex Example", () => {
   //#region Initial variables

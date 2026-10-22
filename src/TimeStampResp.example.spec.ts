@@ -1,8 +1,8 @@
 import { describe, it, assert } from "vitest";
 import * as asn1js from "asn1js";
 import * as pkijs from "./index";
-import { createTSPResp, verifyTSPResp } from "../examples/TSPResponseComplexExample/example";
-import { createSelfSignedCertificate } from "../examples/utils";
+import { createTSPResp, verifyTSPResp } from "../test/scenarios/TimeStampResp";
+import { createSelfSignedCertificate } from "../test/utils";
 
 describe("TSP Response Complex Example", () => {
   const hashAlgs = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];

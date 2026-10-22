@@ -1,5 +1,5 @@
 import { describe, it, assert } from "vitest";
-import * as example from "../examples/HowToEncryptCMSviaKey/example";
+import * as example from "../test/scenarios/EnvelopedData.kek";
 import { bytes } from "@peculiar/utils";
 
 describe("How To Encrypt CMS via Key Identifier", () => {

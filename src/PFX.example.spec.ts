@@ -1,6 +1,6 @@
 import { describe, it, assert, expect } from "vitest";
 import * as crypto from "crypto";
-import * as example from "../examples/PKCS12SimpleExample/example";
+import * as example from "../test/scenarios/PFX";
 import { CryptoEngine, PFX } from "./index";
 import { base64, toArrayBuffer, utf8 } from "@peculiar/utils";
 

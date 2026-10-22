@@ -48,8 +48,7 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
-    "format:check": "oxfmt --check",
-    "build:examples": "tsdown -c examples/tsdown.config.ts"
+    "format:check": "oxfmt --check"
   },
   "dependencies": {
     "@noble/hashes": "^2.4.0",
@@ -65,8 +64,6 @@
     "@types/node": "^24.19.2",
     "@vitest/coverage-v8": "^5.0.5",
     "asn1js": "^4.0.0",
-    "emailjs-mime-builder": "^2.0.5",
-    "emailjs-mime-parser": "^2.0.7",
     "oxfmt": "^0.74.0",
     "oxlint": "^1.89.0",
     "tsdown": "^0.23.1",

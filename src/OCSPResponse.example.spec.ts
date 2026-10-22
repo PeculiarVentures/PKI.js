@@ -1,6 +1,6 @@
 import { describe, it, assert } from "vitest";
 import * as pkijs from "./index";
-import * as example from "../examples/OCSPResponseComplexExample/example";
+import * as example from "../test/scenarios/OCSPResponse";
 
 describe("OCSP Response Complex Example", () => {
   //#region Initial variables

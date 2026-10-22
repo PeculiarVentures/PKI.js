@@ -3,7 +3,7 @@ import * as asn1js from "asn1js";
 import { base64, hex } from "@peculiar/utils";
 import { Crypto } from "@peculiar/webcrypto";
 import * as pkijs from "./index";
-import { createCertificate } from "../examples/CertificateComplexExample/example";
+import { createCertificate } from "../test/scenarios/Certificate";
 
 describe("PKIjs functional testing", () => {
   //region Initial variables
