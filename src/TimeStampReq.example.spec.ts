@@ -1,6 +1,6 @@
 import { describe, it, assert } from "vitest";
 import * as pkijs from "./index";
-import { createTSPReq } from "../examples/TSPRequestComplexExample/example";
+import { createTSPReq } from "../test/scenarios/TimeStampReq";
 
 //#endregion
 

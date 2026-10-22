@@ -1,6 +1,6 @@
 import { describe, it, assert } from "vitest";
 import * as pkijs from "./index";
-import * as example from "../examples/P7BSimpleExample/example";
+import * as example from "../test/scenarios/SignedData.p7b";
 
 describe("P7B Simple Example", () => {
   //#region Initial variables

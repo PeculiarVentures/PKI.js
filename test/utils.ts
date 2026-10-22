@@ -2,10 +2,6 @@ import * as asn1js from "asn1js";
 import { base64, toArrayBuffer } from "@peculiar/utils";
 import * as pkijs from "../src";
 
-export function toPEM(buffer: BufferSource, tag: string): string {
-  return [`-----BEGIN ${tag}-----`, formatPEM(base64.encode(buffer)), `-----END ${tag}-----`, ""].join("\n");
-}
-
 export function fromBase64(text: string): ArrayBuffer {
   return toArrayBuffer(base64.decode(text));
 }
@@ -14,39 +10,12 @@ export function fromPEM(pem: string): ArrayBuffer {
   return fromBase64(pem.replace(/-{5}(BEGIN|END) .*-{5}/gm, "").replace(/\s/gm, ""));
 }
 
-/**
- * Format string in order to have each line with length equal to 64
- * @param pemString String to format
- * @returns Formatted string
- */
-export function formatPEM(pemString: string): string {
-  const PEM_STRING_LENGTH = pemString.length,
-    LINE_LENGTH = 64;
-  const wrapNeeded = PEM_STRING_LENGTH > LINE_LENGTH;
-
-  if (wrapNeeded) {
-    let formattedString = "",
-      wrapIndex = 0;
-
-    for (let i = LINE_LENGTH; i < PEM_STRING_LENGTH; i += LINE_LENGTH) {
-      formattedString += pemString.substring(wrapIndex, i) + "\r\n";
-      wrapIndex = i;
-    }
-
-    formattedString += pemString.substring(wrapIndex, PEM_STRING_LENGTH);
-    return formattedString;
-  } else {
-    return pemString;
-  }
-}
-
 export interface CertificateWithPrivateKey {
   certificate: pkijs.Certificate;
   privateKey: CryptoKey;
   publicKey: CryptoKey;
   pkcs8: ArrayBuffer;
   spki: ArrayBuffer;
-  pem: string;
 }
 
 export async function createSelfSignedCertificate(hashAlg: string, signAlg: string): Promise<CertificateWithPrivateKey> {
@@ -147,6 +116,5 @@ export async function createSelfSignedCertificate(hashAlg: string, signAlg: stri
     publicKey,
     pkcs8,
     spki,
-    pem: toPEM(certificate.toSchema().toBER(), "CERTIFICATE"),
   };
 }

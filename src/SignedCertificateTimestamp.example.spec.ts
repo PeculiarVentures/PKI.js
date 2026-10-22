@@ -1,5 +1,5 @@
 import { describe, it, assert } from "vitest";
-import { verifySCTs, verifySCTsWithRSA } from "../examples/VerifySCTsExample/example";
+import { verifySCTs, verifySCTsWithRSA } from "../test/scenarios/SignedCertificateTimestamp";
 
 describe("SCT Verification Example", () => {
   it("Verifies all of the embedded SCTs", async () => {

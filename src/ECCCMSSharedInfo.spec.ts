@@ -2,7 +2,7 @@ import { it, assert } from "vitest";
 import * as asn1js from "asn1js";
 import * as pkijs from "./index";
 import { utf8 } from "@peculiar/utils";
-import { fromBase64 } from "../examples/utils";
+import { fromBase64 } from "../test/utils";
 
 const recipientPrivateKeyPem = `
 -----BEGIN PRIVATE KEY-----

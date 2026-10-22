@@ -1,7 +1,7 @@
 import { describe, it, assert } from "vitest";
 import * as pkijs from "./index";
-import * as example from "../examples/CMSSignedComplexExample/example";
-import { fromBase64 } from "../examples/utils";
+import * as example from "../test/scenarios/SignedData";
+import { fromBase64 } from "../test/utils";
 
 describe("CMS Signed Complex Example", () => {
   //#region Initial variables

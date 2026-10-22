@@ -2,7 +2,7 @@ import { describe, it, assert } from "vitest";
 import * as asn1js from "asn1js";
 import * as pkijs from "./index";
 import type { CertificateChainValidationEngineVerifyParams } from "./CertificateChainValidationEngine";
-import { fromBase64 } from "../examples/utils";
+import { fromBase64 } from "../test/utils";
 
 //#region Testing constants
 
