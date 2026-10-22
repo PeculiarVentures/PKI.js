@@ -1,0 +1,1 @@
+//! NOTE Bag type must be imported after the SafeBagValueFactory declaration
