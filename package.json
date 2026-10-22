@@ -88,9 +88,6 @@
       "onFail": "warn"
     }
   },
-  "workspaces": [
-    "website"
-  ],
   "main": "./build/index.js",
   "module": "./build/index.js",
   "types": "./build/index.d.ts",
