@@ -27,6 +27,23 @@ export interface SignedAndUnsignedAttributesJson {
 
 export type SignedAndUnsignedAttributesParameters = PkiObjectParameters & Partial<ISignedAndUnsignedAttributes>;
 
+/**
+ * Orders the elements of a SET OF as DER requires (X.690, 11.6): ascending by their
+ * encodings, with the shorter encoding padded at its trailing end with zero octets.
+ */
+function sortDerSetOf<T extends asn1js.BaseBlock>(values: T[]): T[] {
+  const encoded = values.map((value) => ({ value, der: new Uint8Array(value.toBER(false)) }));
+  encoded.sort((a, b) => {
+    const length = Math.max(a.der.length, b.der.length);
+    for (let i = 0; i < length; i++) {
+      const diff = (a.der[i] ?? 0) - (b.der[i] ?? 0);
+      if (diff !== 0) return diff;
+    }
+    return 0;
+  });
+  return encoded.map((o) => o.value);
+}
+
 export type SignedAndUnsignedAttributesSchema = Schema.SchemaParameters<{
   tagNumber?: number;
   attributes?: string;
@@ -164,6 +181,15 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
     if (SignedAndUnsignedAttributes.compareWithDefault(TYPE, this.type) || SignedAndUnsignedAttributes.compareWithDefault(ATTRIBUTES, this.attributes))
       throw new Error('Incorrectly initialized "SignedAndUnsignedAttributes" class');
 
+    let value = Array.from(this.attributes, (o) => o.toSchema());
+
+    // RFC 5652, 5.4: the signature covers the DER encoding of SignedAttributes, so
+    // the SET OF must be in DER order. Parsed attributes keep their received order,
+    // since the existing signature was computed over that encoding.
+    if (this.type === 0 && this.encodedValue.byteLength === 0) {
+      value = sortDerSetOf(value);
+    }
+
     //#region Construct and return new ASN.1 schema for this object
     return new asn1js.Constructed({
       optional: true,
@@ -171,7 +197,7 @@ export class SignedAndUnsignedAttributes extends PkiObject implements ISignedAnd
         tagClass: 3, // CONTEXT-SPECIFIC
         tagNumber: this.type, // "SignedAttributes" = 0, "UnsignedAttributes" = 1
       },
-      value: Array.from(this.attributes, (o) => o.toSchema()),
+      value,
     });
     //#endregion
   }
