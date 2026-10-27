@@ -179,6 +179,45 @@ describe("AuthEnvelopedData", () => {
     await expect(parse(encode(authEnvelopedData)).decrypt(0, { preDefinedData: KEK })).rejects.toThrow();
   });
 
+  it("DER-orders the values of each authenticated attribute", async () => {
+    // Reverse DER order: equal lengths, so the content decides
+    const values = [new asn1js.OctetString({ valueHex: new Uint8Array([2]) }), new asn1js.OctetString({ valueHex: new Uint8Array([1]) })];
+    const authAttrs = [new pkijs.Attribute({ type: "1.2.3.4", values })];
+    const authEnvelopedData = parse(encode(await encryptForKek({ name: "AES-GCM", length: 256 }, authAttrs)));
+
+    assert.deepEqual(
+      authEnvelopedData.authAttrs![0].values.map((o: asn1js.OctetString) => o.valueBlock.valueHexView[0]),
+      [1, 2],
+    );
+    assert.equal(text(await authEnvelopedData.decrypt(0, { preDefinedData: KEK })), MESSAGE);
+  });
+
+  it("refuses to decrypt after parsed authAttrs are changed", async () => {
+    const encoded = encode(await encryptForKek({ name: "AES-GCM", length: 256 }, createAuthAttrs()));
+    const changes: ((authEnvelopedData: pkijs.AuthEnvelopedData) => void)[] = [
+      (o) => (o.authAttrs![1].values = [new asn1js.UTCTime({ valueDate: new Date(0) })]),
+      (o) => (o.authAttrs = o.authAttrs!.slice(0, 1)),
+      (o) => (o.authAttrs = undefined),
+    ];
+
+    await Promise.all(
+      changes.map(async (change) => {
+        const authEnvelopedData = parse(encoded);
+        change(authEnvelopedData);
+        await expect(authEnvelopedData.decrypt(0, { preDefinedData: KEK })).rejects.toThrow("authAttrs have changed since they were parsed");
+      }),
+    );
+
+    // Encrypting again authenticates the changed attributes
+    const authEnvelopedData = parse(encoded);
+    authEnvelopedData.authAttrs = authEnvelopedData.authAttrs!.slice(0, 1);
+    // Parsed recipients don't keep the KEK, so add the recipient again
+    authEnvelopedData.recipientInfos = [];
+    authEnvelopedData.addRecipientByPreDefinedData(KEK, { keyEncryptionAlgorithm: { name: "AES-KW", length: 256 } }, 1);
+    await authEnvelopedData.encrypt({ name: "AES-GCM", length: 256 }, message());
+    assert.equal(text(await authEnvelopedData.decrypt(0, { preDefinedData: KEK })), MESSAGE);
+  });
+
   it("rejects a modified mac", async () => {
     const authEnvelopedData = parse(utils.fromBase64(KEK_CMS));
     const mac = authEnvelopedData.mac.valueBlock.valueHexView.slice();

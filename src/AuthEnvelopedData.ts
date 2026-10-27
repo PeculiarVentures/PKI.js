@@ -1,4 +1,5 @@
 import * as asn1js from "asn1js";
+import { bytes } from "@peculiar/utils";
 import * as common from "./common";
 import { OriginatorInfo, type OriginatorInfoJson } from "./OriginatorInfo";
 import { RecipientInfo, type RecipientInfoJson } from "./RecipientInfo";
@@ -140,6 +141,11 @@ export class AuthEnvelopedData extends PkiObject implements IAuthEnvelopedData {
    * Received encoding of `authAttrs` with the SET OF tag, which is the AAD of a parsed structure
    */
   private authAttrsEncoding?: ArrayBuffer;
+
+  /**
+   * Encoding of the parsed `authAttrs` as they are re-encoded, used to detect changes made after parsing
+   */
+  private parsedAuthAttrsEncoding?: ArrayBuffer;
 
   /**
    * Initializes a new instance of the {@link AuthEnvelopedData} class
@@ -360,6 +366,7 @@ export class AuthEnvelopedData extends PkiObject implements IAuthEnvelopedData {
       const encoding = authAttrs.valueBeforeDecodeView.byteLength ? new Uint8Array(authAttrs.valueBeforeDecodeView) : new Uint8Array(authAttrs.toBER(false));
       encoding[0] = 0x31;
       this.authAttrsEncoding = encoding.buffer;
+      this.parsedAuthAttrsEncoding = this.encodeAuthAttrs();
     }
 
     this.mac = asn1.result.mac;
@@ -511,6 +518,7 @@ export class AuthEnvelopedData extends PkiObject implements IAuthEnvelopedData {
 
     // Encode authAttrs afresh, in DER order, rather than reusing a received encoding
     this.authAttrsEncoding = undefined;
+    this.parsedAuthAttrsEncoding = undefined;
 
     // WebCrypto appends the tag to the ciphertext; CMS carries it in "mac"
     const encrypted = new Uint8Array(
@@ -613,21 +621,36 @@ export class AuthEnvelopedData extends PkiObject implements IAuthEnvelopedData {
   }
 
   /**
-   * Returns the elements of `authAttrs`. New attributes are put in DER order, since their encoding is authenticated.
-   * Parsed attributes keep their received order.
+   * Returns the elements of `authAttrs`. Their encoding is authenticated, so new attributes are DER-encoded:
+   * the attributes and the values of each attribute are put in DER order. Parsed attributes keep their received order.
    */
   private getAuthAttrsValues(): asn1js.AsnType[] {
-    const values = Array.from(this.authAttrs ?? [], (o) => o.toSchema());
-    return this.authAttrsEncoding ? values : sortDerSetOf(values);
+    const authAttrs = this.authAttrs ?? [];
+    if (this.authAttrsEncoding) return authAttrs.map((o) => o.toSchema());
+
+    return sortDerSetOf(authAttrs.map((o) => new Attribute({ type: o.type, values: sortDerSetOf(o.values) }).toSchema()));
+  }
+
+  /**
+   * Returns the encoding of `authAttrs` with the SET OF tag
+   */
+  private encodeAuthAttrs(): ArrayBuffer {
+    return new asn1js.Set({ value: this.getAuthAttrsValues() }).toBER(false);
   }
 
   /**
    * Returns the additional authenticated data: the DER encoding of `authAttrs` as a SET OF, or nothing (RFC 5083, 2.1)
    */
   private getAuthAttrsAad(): ArrayBuffer {
-    if (this.authAttrsEncoding) return this.authAttrsEncoding;
+    if (this.authAttrsEncoding) {
+      // The received encoding is what the sender authenticated, so it only vouches for the attributes as they were parsed
+      if (!this.authAttrs || !bytes.equal(this.encodeAuthAttrs(), this.parsedAuthAttrsEncoding!)) {
+        throw new Error("authAttrs have changed since they were parsed. Call encrypt() to authenticate the new attributes.");
+      }
+      return this.authAttrsEncoding;
+    }
     if (!this.authAttrs) return EMPTY_BUFFER;
 
-    return new asn1js.Set({ value: this.getAuthAttrsValues() }).toBER(false);
+    return this.encodeAuthAttrs();
   }
 }
