@@ -840,10 +840,6 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       contentView,
     );
     //#endregion
-    //#region Export raw content of content encryption key
-    const exportedSessionKey = await crypto.exportKey("raw", sessionKey);
-
-    //#endregion
     //#region Append common information to CMS_ENVELOPED_DATA
     this.version = 2;
     this.encryptedContentInfo = new EncryptedContentInfo({
@@ -855,6 +851,20 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
       }),
       encryptedContent: new asn1js.OctetString({ valueHex: encryptedContent }),
     });
+    //#endregion
+
+    return this.wrapContentEncryptionKey(sessionKey, crypto);
+  }
+
+  /**
+   * Encrypts the content-encryption key for every recipient in `recipientInfos`
+   * @param sessionKey Content-encryption key. It must be extractable.
+   * @param crypto Crypto engine
+   * @returns One entry per recipient; key agreement recipients return the ephemeral ECDH private key
+   */
+  public async wrapContentEncryptionKey(sessionKey: CryptoKey, crypto = common.getCrypto(true)): Promise<(void | { ecdhPrivateKey: CryptoKey })[]> {
+    //#region Export raw content of content encryption key
+    const exportedSessionKey = await crypto.exportKey("raw", sessionKey);
     //#endregion
 
     //#region Special sub-functions to work with each recipient's type
@@ -1160,6 +1170,45 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
    * @param crypto Crypto engine
    */
   async decrypt(recipientIndex: number, parameters: EnvelopedDataDecryptParams, crypto = common.getCrypto(true)) {
+    const unwrappedKey = await this.unwrapContentEncryptionKey(recipientIndex, parameters, crypto);
+
+    //#region Finally decrypt data by session key
+    //#region Get WebCrypto form of content encryption algorithm
+    const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
+    const contentEncryptionAlgorithm = crypto.getAlgorithmByOID(algorithmId, true, "contentEncryptionAlgorithm");
+    //#endregion
+
+    //#region Get "initialization vector" for content encryption algorithm
+    const ivBuffer = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
+    const ivView = new Uint8Array(ivBuffer);
+    //#endregion
+
+    //#region Create correct data block for decryption
+    if (!this.encryptedContentInfo.encryptedContent) {
+      throw new Error("Required property `encryptedContent` is empty");
+    }
+    const dataBuffer = this.encryptedContentInfo.getEncryptedContent();
+    //#endregion
+
+    return crypto.decrypt(
+      {
+        name: (contentEncryptionAlgorithm as any).name,
+        iv: ivView,
+      },
+      unwrappedKey,
+      dataBuffer,
+    );
+    //#endregion
+  }
+
+  /**
+   * Decrypts the content-encryption key for one recipient
+   * @param recipientIndex Index of recipient
+   * @param parameters Additional parameters
+   * @param crypto Crypto engine
+   * @returns Content-encryption key for the algorithm in `encryptedContentInfo`, usable for "decrypt"
+   */
+  public async unwrapContentEncryptionKey(recipientIndex: number, parameters: EnvelopedDataDecryptParams, crypto = common.getCrypto(true)): Promise<CryptoKey> {
     //#region Initial variables
     const decryptionParameters = parameters || {};
     //#endregion
@@ -1521,32 +1570,6 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
     }
     //#endregion
 
-    //#region Finally decrypt data by session key
-    //#region Get WebCrypto form of content encryption algorithm
-    const algorithmId = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId;
-    const contentEncryptionAlgorithm = crypto.getAlgorithmByOID(algorithmId, true, "contentEncryptionAlgorithm");
-    //#endregion
-
-    //#region Get "initialization vector" for content encryption algorithm
-    const ivBuffer = this.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex;
-    const ivView = new Uint8Array(ivBuffer);
-    //#endregion
-
-    //#region Create correct data block for decryption
-    if (!this.encryptedContentInfo.encryptedContent) {
-      throw new Error("Required property `encryptedContent` is empty");
-    }
-    const dataBuffer = this.encryptedContentInfo.getEncryptedContent();
-    //#endregion
-
-    return crypto.decrypt(
-      {
-        name: (contentEncryptionAlgorithm as any).name,
-        iv: ivView,
-      },
-      unwrappedKey,
-      dataBuffer,
-    );
-    //#endregion
+    return unwrappedKey;
   }
 }

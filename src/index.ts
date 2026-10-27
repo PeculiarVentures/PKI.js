@@ -8,6 +8,7 @@ export * from "./AttributeCertificateV1";
 export * from "./AttributeCertificateV2";
 export * from "./AttributeTypeAndValue";
 export * from "./AuthenticatedSafe";
+export * from "./AuthEnvelopedData";
 export * from "./AuthorityKeyIdentifier";
 export * from "./BasicConstraints";
 export * from "./BasicOCSPResponse";

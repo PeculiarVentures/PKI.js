@@ -1,3 +1,4 @@
+import type * as asn1js from "asn1js";
 import { EMPTY_STRING } from "./constants";
 
 /**
@@ -30,4 +31,23 @@ export function stringPrep(inputString: string): string {
   //#endregion
 
   return cutResult.toLowerCase();
+}
+
+/**
+ * Orders the elements of a SET OF as DER requires (X.690, 11.6): ascending by their
+ * encodings, with the shorter encoding padded at its trailing end with zero octets.
+ * @param values Elements of the SET OF
+ * @returns A new array with the elements in DER order
+ */
+export function sortDerSetOf<T extends asn1js.BaseBlock>(values: T[]): T[] {
+  const encoded = values.map((value) => ({ value, der: new Uint8Array(value.toBER(false)) }));
+  encoded.sort((a, b) => {
+    const length = Math.max(a.der.length, b.der.length);
+    for (let i = 0; i < length; i++) {
+      const diff = (a.der[i] ?? 0) - (b.der[i] ?? 0);
+      if (diff !== 0) return diff;
+    }
+    return 0;
+  });
+  return encoded.map((o) => o.value);
 }
