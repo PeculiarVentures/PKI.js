@@ -531,6 +531,15 @@ export class GeneralName extends PkiObject implements IGeneralName {
     //#region Construct and return new ASN.1 schema for this object
     switch (this.type) {
       case 0:
+        // otherName is [0] IMPLICIT OtherName, so the tag replaces the SEQUENCE tag.
+        // The value is the parsed [0] block or an OtherName SEQUENCE; both carry the same elements.
+        return new asn1js.Constructed({
+          idBlock: {
+            tagClass: 3, // CONTEXT-SPECIFIC
+            tagNumber: 0, // [0]
+          },
+          value: this.value.valueBlock.value,
+        });
       case 3:
       case 5:
         return new asn1js.Constructed({
