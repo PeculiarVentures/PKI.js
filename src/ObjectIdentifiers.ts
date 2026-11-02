@@ -37,6 +37,7 @@ export const id_ContentType_Data = "1.2.840.113549.1.7.1";
 export const id_ContentType_SignedData = "1.2.840.113549.1.7.2";
 export const id_ContentType_EnvelopedData = "1.2.840.113549.1.7.3";
 export const id_ContentType_EncryptedData = "1.2.840.113549.1.7.6";
+export const id_ContentType_AuthEnvelopedData = "1.2.840.113549.1.9.16.1.23";
 
 export const id_eContentType_TSTInfo = "1.2.840.113549.1.9.16.1.4";
 
