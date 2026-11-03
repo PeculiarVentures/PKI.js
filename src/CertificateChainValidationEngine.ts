@@ -163,11 +163,11 @@ export class CertificateChainValidationEngine {
    */
   public checkDate: Date;
   /**
-   * The date at which the check would be
+   * Returns where a certificate came from, such as "Intermediate Certificates" or "Trusted Certificates"
    */
   public findOrigin: FindOriginCallback;
   /**
-   * The date at which the check would be
+   * Returns the possible issuers of a certificate, used to build the certificate path
    */
   public findIssuer: FindIssuerCallback;
 

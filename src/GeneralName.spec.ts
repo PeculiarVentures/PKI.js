@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import * as ts from "typescript";
-import { assert, describe, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 import * as asn1js from "asn1js";
 import { hex } from "@peculiar/utils";
 import * as pkijs from "./index";
@@ -15,6 +15,13 @@ function roundTrip(name: pkijs.GeneralName): pkijs.GeneralName {
   return new pkijs.GeneralName({
     schema: asn1js.fromBER((name.toSchema() as asn1js.BaseBlock).toBER()).result,
   });
+}
+
+// GeneralNames with one otherName: UPN (1.3.6.1.4.1.311.20.2.3) = UTF8String "test2"
+const UPN_GENERAL_NAMES = "3017a015060a2b060104018237140203a0070c057465737432";
+
+function berHex(value: asn1js.BaseBlock): string {
+  return Buffer.from(value.toBER()).toString("hex");
 }
 
 /**
@@ -161,5 +168,40 @@ describe("GeneralName JSON typedValue", () => {
     ].join("\n");
 
     assert.deepEqual(consumerErrors(source), []);
+  });
+});
+
+describe("GeneralName", () => {
+  describe("otherName", () => {
+    it("round-trips a parsed otherName", () => {
+      const names = pkijs.GeneralNames.fromBER(Buffer.from(UPN_GENERAL_NAMES, "hex"));
+
+      expect(names.names[0].type).toBe(0);
+      expect(berHex(names.toSchema())).toBe(UPN_GENERAL_NAMES);
+    });
+
+    it("encodes an OtherName SEQUENCE with an implicit [0] tag", () => {
+      const names = new pkijs.GeneralNames({
+        names: [
+          new pkijs.GeneralName({
+            type: 0,
+            value: new asn1js.Sequence({
+              value: [
+                new asn1js.ObjectIdentifier({ value: "1.3.6.1.4.1.311.20.2.3" }),
+                new asn1js.Constructed({
+                  idBlock: {
+                    tagClass: 3, // CONTEXT-SPECIFIC
+                    tagNumber: 0, // [0]
+                  },
+                  value: [new asn1js.Utf8String({ value: "test2" })],
+                }),
+              ],
+            }),
+          }),
+        ],
+      });
+
+      expect(berHex(names.toSchema())).toBe(UPN_GENERAL_NAMES);
+    });
   });
 });

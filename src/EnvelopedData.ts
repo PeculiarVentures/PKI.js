@@ -955,9 +955,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         keyInfo: new AlgorithmIdentifier({
           algorithmId: aesKWAlgorithm.algorithmId,
         }),
-        entityUInfo: (recipientInfo as KeyAgreeRecipientInfo).ukm, // TODO remove `as KeyAgreeRecipientInfo`
         suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer }),
       });
+      // RFC 5753, 7.2: entityUInfo is present only if ukm is
+      if (recipientInfo.ukm) eccInfo.entityUInfo = recipientInfo.ukm;
 
       const encodedInfo = eccInfo.toSchema().toBER(false);
       //#endregion
@@ -1305,9 +1306,10 @@ export class EnvelopedData extends PkiObject implements IEnvelopedData {
         }
         const eccInfo = new ECCCMSSharedInfo({
           keyInfo: new AlgorithmIdentifier(keyInfoAlgorithm),
-          entityUInfo: recipientInfo.ukm,
           suppPubInfo: new asn1js.OctetString({ valueHex: kwLengthBuffer }),
         });
+        // RFC 5753, 7.2: entityUInfo is present only if ukm is
+        if (recipientInfo.ukm) eccInfo.entityUInfo = recipientInfo.ukm;
 
         const encodedInfo = eccInfo.toSchema().toBER(false);
         //#endregion
