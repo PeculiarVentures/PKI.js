@@ -78,6 +78,27 @@ describe("GeneralName JSON typedValue", () => {
     });
   });
 
+  it("types an otherName built as an OtherName SEQUENCE", () => {
+    const name = new pkijs.GeneralName({
+      type: 0,
+      value: new asn1js.Sequence({
+        value: [
+          new asn1js.ObjectIdentifier({ value: "1.2.3.4" }),
+          new asn1js.Constructed({
+            idBlock: { tagClass: 3, tagNumber: 0 },
+            value: [new asn1js.Utf8String({ value: "foo" })],
+          }),
+        ],
+      }),
+    });
+
+    assert.deepEqual(name.toJSON().typedValue, {
+      kind: "otherName",
+      oid: "1.2.3.4",
+      valueBerHex: "0c03666f6f",
+    });
+  });
+
   it("keeps the BER of an x400Address", () => {
     const json = fromHex("a3023000").toJSON();
 

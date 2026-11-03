@@ -324,7 +324,8 @@ function typedValueOf(type: number, value: any): GeneralNameTypedValue | undefin
 
   switch (type) {
     case 0: {
-      if (!isContextTagged(value, 0)) return undefined;
+      // A parsed otherName is the [0] block; one built by hand is an OtherName SEQUENCE (see toSchema).
+      if (!isContextTagged(value, 0) && !(value instanceof asn1js.Sequence)) return undefined;
       const [oid, explicitValue] = value.valueBlock.value;
       const payload = (explicitValue as any)?.valueBlock?.value;
       if (!(oid instanceof asn1js.ObjectIdentifier) || !isContextTagged(explicitValue, 0) || payload.length !== 1) {
