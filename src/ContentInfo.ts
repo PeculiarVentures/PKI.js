@@ -1,7 +1,7 @@
 import * as asn1js from "asn1js";
 import { EMPTY_STRING } from "./constants";
 import { AsnError } from "./errors";
-import { id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData, id_ContentType_SignedData } from "./ObjectIdentifiers";
+import { id_ContentType_AuthEnvelopedData, id_ContentType_Data, id_ContentType_EncryptedData, id_ContentType_EnvelopedData, id_ContentType_SignedData } from "./ObjectIdentifiers";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import type * as Schema from "./Schema";
 
@@ -35,6 +35,7 @@ export class ContentInfo extends PkiObject implements IContentInfo {
   public static readonly SIGNED_DATA = id_ContentType_SignedData;
   public static readonly ENVELOPED_DATA = id_ContentType_EnvelopedData;
   public static readonly ENCRYPTED_DATA = id_ContentType_EncryptedData;
+  public static readonly AUTH_ENVELOPED_DATA = id_ContentType_AuthEnvelopedData;
 
   public contentType!: string;
   public content: any;

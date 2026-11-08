@@ -2,6 +2,7 @@ import * as asn1js from "asn1js";
 import { toArrayBuffer } from "@peculiar/utils";
 import { Attribute, type AttributeJson } from "./Attribute";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
+import { sortDerSetOf } from "./Helpers";
 import { AsnError } from "./errors";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import type * as Schema from "./Schema";
@@ -26,23 +27,6 @@ export interface SignedAndUnsignedAttributesJson {
 }
 
 export type SignedAndUnsignedAttributesParameters = PkiObjectParameters & Partial<ISignedAndUnsignedAttributes>;
-
-/**
- * Orders the elements of a SET OF as DER requires (X.690, 11.6): ascending by their
- * encodings, with the shorter encoding padded at its trailing end with zero octets.
- */
-function sortDerSetOf<T extends asn1js.BaseBlock>(values: T[]): T[] {
-  const encoded = values.map((value) => ({ value, der: new Uint8Array(value.toBER(false)) }));
-  encoded.sort((a, b) => {
-    const length = Math.max(a.der.length, b.der.length);
-    for (let i = 0; i < length; i++) {
-      const diff = (a.der[i] ?? 0) - (b.der[i] ?? 0);
-      if (diff !== 0) return diff;
-    }
-    return 0;
-  });
-  return encoded.map((o) => o.value);
-}
 
 export type SignedAndUnsignedAttributesSchema = Schema.SchemaParameters<{
   tagNumber?: number;
