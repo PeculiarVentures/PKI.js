@@ -1,10 +1,12 @@
 import type * as asn1js from "asn1js";
 import { bytes } from "@peculiar/utils";
 import { AuthorityKeyIdentifier } from "./AuthorityKeyIdentifier";
+import { BasicConstraints } from "./BasicConstraints";
 import type { BasicOCSPResponse } from "./BasicOCSPResponse";
 import type { Certificate } from "./Certificate";
 import type { CertificateRevocationList } from "./CertificateRevocationList";
 import * as common from "./common";
+import { ExtensionValueFactory } from "./ExtensionValueFactory";
 import * as Helpers from "./Helpers";
 import type { GeneralName } from "./GeneralName";
 import {
@@ -117,6 +119,38 @@ function isTrusted(cert: Certificate, trustedList: Certificate[]): boolean {
   }
 
   return false;
+}
+
+/**
+ * Extensions that the engine reads from their raw value, so they have no type in {@link ExtensionValueFactory}
+ */
+const RAW_RECOGNIZED_EXTENSIONS = [id_KeyUsage, id_SubjectKeyIdentifier, id_InhibitAnyPolicy];
+
+/**
+ * Returns `true` if a critical extension with this OID may be accepted: it is handled by the engine
+ * or has a type registered in {@link ExtensionValueFactory}
+ * @param extnID Extension OID
+ * @returns
+ */
+function isRecognizedExtension(extnID: string): boolean {
+  return RAW_RECOGNIZED_EXTENSIONS.includes(extnID) || ExtensionValueFactory.find(extnID) !== null;
+}
+
+/**
+ * Returns the `pathLenConstraint` value of the certificate's BasicConstraints extension, if any
+ * @param cert Certificate
+ * @returns
+ */
+function getPathLenConstraint(cert: Certificate): number | undefined {
+  for (const extension of cert.extensions || []) {
+    if (extension.extnID === id_BasicConstraints && extension.parsedValue instanceof BasicConstraints) {
+      const { pathLenConstraint } = extension.parsedValue;
+      // A value too big for a number is an asn1js.Integer; it never limits a real path
+      return typeof pathLenConstraint === "number" ? pathLenConstraint : undefined;
+    }
+  }
+
+  return undefined;
 }
 
 /**
@@ -761,6 +795,45 @@ export class CertificateChainValidationEngine {
             resultCode: 14,
             resultMessage: "One of intermediate certificates is not a CA certificate",
           };
+        }
+      }
+      //#endregion
+
+      //#region Check each certificate (except "trust anchor") for unrecognized critical extensions
+      for (let i = 0; i < path.length - 1; i++) {
+        for (const extension of path[i].extensions || []) {
+          if (extension.critical && !isRecognizedExtension(extension.extnID)) {
+            return {
+              result: false,
+              resultCode: 15,
+              resultMessage: `Unrecognized critical certificate extension: ${extension.extnID}`,
+            };
+          }
+        }
+      }
+      //#endregion
+
+      //#region Check "pathLenConstraint" values, from "trust anchor" down to the last CA certificate
+      let maxPathLength = Number.POSITIVE_INFINITY;
+      for (let i = path.length - 1; i > 0; i--) {
+        const cert = path[i];
+
+        // Self-issued intermediate certificates do not count against the limit (RFC 5280, 6.1.4 (l))
+        if (i < path.length - 1 && !cert.issuer.isEqual(cert.subject)) {
+          if (maxPathLength <= 0) {
+            return {
+              result: false,
+              resultCode: 16,
+              resultMessage: "Too many intermediate certificates for the pathLenConstraint of an issuer certificate",
+            };
+          }
+          maxPathLength--;
+        }
+
+        // RFC 5280, 6.1.4 (m)
+        const pathLenConstraint = getPathLenConstraint(cert);
+        if (pathLenConstraint !== undefined && pathLenConstraint < maxPathLength) {
+          maxPathLength = pathLenConstraint;
         }
       }
       //#endregion

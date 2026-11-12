@@ -2674,8 +2674,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.6.5 Invalid pathLenConstraint Test5",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
@@ -2685,8 +2684,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.6.6 Invalid pathLenConstraint Test6",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
@@ -2716,8 +2714,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.6.9 Invalid pathLenConstraint Test9",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
@@ -2727,8 +2724,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.6.10 Invalid pathLenConstraint Test10",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
@@ -2738,8 +2734,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.6.11 Invalid pathLenConstraint Test11",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
@@ -2755,8 +2750,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.6.12 Invalid pathLenConstraint Test12",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
@@ -2814,8 +2808,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.6.16 Invalid Self-Issued pathLenConstraint Test16",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
@@ -4976,8 +4969,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.16.2 Invalid Unknown Critical Certificate Extension Test2",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
