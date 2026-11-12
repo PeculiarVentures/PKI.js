@@ -395,7 +395,10 @@ export class CertificateChainValidationEngine {
 
       const findIssuerResult = await this.findIssuer(certificate, this, crypto);
       if (findIssuerResult.length === 0) {
-        throw new Error("No valid certificate paths found");
+        // Dead end: return no paths, so the caller can still try its other
+        // candidate issuers (RFC 4158). The top-level check below reports
+        // the error when no candidate leads anywhere.
+        return [];
       }
 
       for (let i = 0; i < findIssuerResult.length; i++) {
@@ -801,7 +804,7 @@ export class CertificateChainValidationEngine {
     //#region Build path for "end entity" certificate
     result = await buildPath(leafCert, crypto);
     if (result.length === 0) {
-      throw new ChainValidationError(ChainValidationCode.noPath, "Unable to find certificate path");
+      throw new ChainValidationError(ChainValidationCode.noValidPath, "No valid certificate paths found");
     }
     //#endregion
 
