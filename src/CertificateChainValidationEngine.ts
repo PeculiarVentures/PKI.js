@@ -1,4 +1,4 @@
-import type * as asn1js from "asn1js";
+import * as asn1js from "asn1js";
 import { bytes } from "@peculiar/utils";
 import { AuthorityKeyIdentifier } from "./AuthorityKeyIdentifier";
 import { BasicConstraints } from "./BasicConstraints";
@@ -6,7 +6,7 @@ import type { BasicOCSPResponse } from "./BasicOCSPResponse";
 import type { Certificate } from "./Certificate";
 import type { CertificateRevocationList } from "./CertificateRevocationList";
 import * as common from "./common";
-import { ExtensionValueFactory } from "./ExtensionValueFactory";
+import type { Extension } from "./Extension";
 import * as Helpers from "./Helpers";
 import type { GeneralName } from "./GeneralName";
 import {
@@ -16,6 +16,7 @@ import {
   id_BasicConstraints,
   id_CertificatePolicies,
   id_CRLDistributionPoints,
+  id_ExtKeyUsage,
   id_FreshestCRL,
   id_InhibitAnyPolicy,
   id_KeyUsage,
@@ -73,6 +74,12 @@ export interface CertificateChainValidationEngineVerifyResult {
 
 export type FindOriginCallback = (certificate: Certificate, validationEngine: CertificateChainValidationEngine) => string;
 export type FindIssuerCallback = (certificate: Certificate, validationEngine: CertificateChainValidationEngine, crypto?: common.ICryptoEngine) => Promise<Certificate[]>;
+/**
+ * Called for a critical extension that the engine does not process itself. Return `true` only if
+ * the application has checked the extension and the certificate meets its constraints;
+ * otherwise the path is rejected (RFC 5280, 4.2).
+ */
+export type CriticalExtensionHandler = (extension: Extension, certificate: Certificate, validationEngine: CertificateChainValidationEngine) => boolean | Promise<boolean>;
 
 export interface CertificateChainValidationEngineParameters {
   trustedCerts?: Certificate[];
@@ -82,6 +89,7 @@ export interface CertificateChainValidationEngineParameters {
   checkDate?: Date;
   findOrigin?: FindOriginCallback;
   findIssuer?: FindIssuerCallback;
+  criticalExtensionHandler?: CriticalExtensionHandler;
 }
 interface CrlAndCertificate {
   crl: CertificateRevocationList;
@@ -122,22 +130,63 @@ function isTrusted(cert: Certificate, trustedList: Certificate[]): boolean {
 }
 
 /**
- * Extensions that the engine reads from their raw value, so they have no type in {@link ExtensionValueFactory}
+ * Extensions whose meaning the engine processes during path validation (RFC 5280, 6.1).
+ * A critical extension with any other OID is rejected, unless
+ * {@link CertificateChainValidationEngineParameters.criticalExtensionHandler} accepts it.
  */
-const RAW_RECOGNIZED_EXTENSIONS = [id_KeyUsage, id_SubjectKeyIdentifier, id_InhibitAnyPolicy];
+const PROCESSED_EXTENSIONS = new Set([
+  id_AuthorityInfoAccess,
+  id_AuthorityKeyIdentifier,
+  id_BasicConstraints,
+  id_CertificatePolicies,
+  id_CRLDistributionPoints,
+  // Key purposes are checked by the application (RFC 5280, 4.2.1.12)
+  id_ExtKeyUsage,
+  id_FreshestCRL,
+  id_InhibitAnyPolicy,
+  id_KeyUsage,
+  id_NameConstraints,
+  id_PolicyConstraints,
+  id_PolicyMappings,
+  id_SubjectAltName,
+  id_SubjectKeyIdentifier,
+]);
 
 /**
- * Returns `true` if a critical extension with this OID may be accepted: it is handled by the engine
- * or has a type registered in {@link ExtensionValueFactory}
- * @param extnID Extension OID
+ * Extensions that the engine reads as plain ASN.1 values, with the ASN.1 type each one must have
+ */
+const RAW_EXTENSION_TYPES: Record<string, new (...args: any[]) => unknown> = {
+  [id_KeyUsage]: asn1js.BitString,
+  [id_SubjectKeyIdentifier]: asn1js.OctetString,
+  [id_InhibitAnyPolicy]: asn1js.Integer,
+};
+
+/**
+ * Returns `true` if the extension value was decoded without errors
+ * @param extension Certificate extension
  * @returns
  */
-function isRecognizedExtension(extnID: string): boolean {
-  return RAW_RECOGNIZED_EXTENSIONS.includes(extnID) || ExtensionValueFactory.find(extnID) !== null;
+function isWellFormedExtension(extension: Extension): boolean {
+  const raw = extension.extnValue.valueBlock.valueHexView;
+  const asn1 = asn1js.fromBER(raw);
+  if (asn1.offset === -1 || asn1.offset !== raw.byteLength) {
+    return false;
+  }
+
+  const rawType = RAW_EXTENSION_TYPES[extension.extnID];
+  if (rawType) {
+    return asn1.result instanceof rawType;
+  }
+
+  const parsedValue = extension.parsedValue;
+
+  return !!parsedValue && !("parsingError" in parsedValue && parsedValue.parsingError);
 }
 
 /**
- * Returns the `pathLenConstraint` value of the certificate's BasicConstraints extension, if any
+ * Returns the `pathLenConstraint` value of the certificate's BasicConstraints extension, if any.
+ * Values above `Number.MAX_SAFE_INTEGER` are returned as `Number.MAX_SAFE_INTEGER`, which no real
+ * path reaches. A negative value is returned as is, so the caller can reject it.
  * @param cert Certificate
  * @returns
  */
@@ -145,8 +194,13 @@ function getPathLenConstraint(cert: Certificate): number | undefined {
   for (const extension of cert.extensions || []) {
     if (extension.extnID === id_BasicConstraints && extension.parsedValue instanceof BasicConstraints) {
       const { pathLenConstraint } = extension.parsedValue;
-      // A value too big for a number is an asn1js.Integer; it never limits a real path
-      return typeof pathLenConstraint === "number" ? pathLenConstraint : undefined;
+      if (pathLenConstraint instanceof asn1js.Integer) {
+        const value = pathLenConstraint.toBigInt();
+
+        return value > BigInt(Number.MAX_SAFE_INTEGER) ? Number.MAX_SAFE_INTEGER : Number(value);
+      }
+
+      return pathLenConstraint;
     }
   }
 
@@ -155,6 +209,15 @@ function getPathLenConstraint(cert: Certificate): number | undefined {
 
 /**
  * Represents a chain-building engine for {@link Certificate} certificates.
+ *
+ * Path validation notes:
+ * - The `pathLenConstraint` of a trusted certificate is applied like that of any other CA certificate.
+ *   RFC 5280, 6.2 leaves trust anchor constraints to the application; this is the engine's policy.
+ * - A critical extension that the engine does not process makes the path invalid, even if its type is
+ *   registered in `ExtensionValueFactory`. Use {@link CertificateChainValidationEngineParameters.criticalExtensionHandler}
+ *   to check such extensions in the application.
+ * - A critical extension that does not decode makes the path invalid.
+ * - When several trusted paths exist, they are checked from the shortest, and the first valid one is used.
  *
  * @example
  * ```js The following example demonstrates how to verify certificate chain
@@ -204,6 +267,11 @@ export class CertificateChainValidationEngine {
    * Returns the possible issuers of a certificate, used to build the certificate path
    */
   public findIssuer: FindIssuerCallback;
+  /**
+   * Checks critical extensions that the engine does not process itself. Without it, a certificate
+   * with such an extension is rejected.
+   */
+  public criticalExtensionHandler?: CriticalExtensionHandler;
 
   /**
    * Constructor for CertificateChainValidationEngine class
@@ -218,6 +286,7 @@ export class CertificateChainValidationEngine {
     this.checkDate = parameters[CHECK_DATE] ?? this.defaultValues(CHECK_DATE);
     this.findOrigin = parameters[FIND_ORIGIN] ?? this.defaultValues(FIND_ORIGIN);
     this.findIssuer = parameters[FIND_ISSUER] ?? this.defaultValues(FIND_ISSUER);
+    this.criticalExtensionHandler = parameters.criticalExtensionHandler;
     //#endregion
   }
 
@@ -799,21 +868,42 @@ export class CertificateChainValidationEngine {
       }
       //#endregion
 
-      //#region Check each certificate (except "trust anchor") for unrecognized critical extensions
+      //#region Check critical extensions of each certificate (except "trust anchor")
+      // A critical extension must be processed, not only decoded (RFC 5280, 4.2)
       for (let i = 0; i < path.length - 1; i++) {
         for (const extension of path[i].extensions || []) {
-          if (extension.critical && !isRecognizedExtension(extension.extnID)) {
-            return {
-              result: false,
-              resultCode: 15,
-              resultMessage: `Unrecognized critical certificate extension: ${extension.extnID}`,
-            };
+          if (!extension.critical) {
+            continue;
           }
+
+          if (PROCESSED_EXTENSIONS.has(extension.extnID)) {
+            if (!isWellFormedExtension(extension)) {
+              return {
+                result: false,
+                resultCode: 6,
+                resultMessage: `Unable to parse critical certificate extension: ${extension.extnID}`,
+              };
+            }
+
+            continue;
+          }
+
+          if (this.criticalExtensionHandler && (await this.criticalExtensionHandler(extension, path[i], this)) === true) {
+            continue;
+          }
+
+          return {
+            result: false,
+            resultCode: 15,
+            resultMessage: `Unrecognized critical certificate extension: ${extension.extnID}`,
+          };
         }
       }
       //#endregion
 
       //#region Check "pathLenConstraint" values, from "trust anchor" down to the last CA certificate
+      // The trust anchor's own pathLenConstraint is applied too. RFC 5280, 6.2 leaves this to the
+      // application; the engine treats a trusted CA certificate like any other CA certificate.
       let maxPathLength = Number.POSITIVE_INFINITY;
       for (let i = path.length - 1; i > 0; i--) {
         const cert = path[i];
@@ -832,8 +922,19 @@ export class CertificateChainValidationEngine {
 
         // RFC 5280, 6.1.4 (m)
         const pathLenConstraint = getPathLenConstraint(cert);
-        if (pathLenConstraint !== undefined && pathLenConstraint < maxPathLength) {
-          maxPathLength = pathLenConstraint;
+        if (pathLenConstraint !== undefined) {
+          // pathLenConstraint is INTEGER (0..MAX) (RFC 5280, 4.2.1.9)
+          if (!Number.isSafeInteger(pathLenConstraint) || pathLenConstraint < 0) {
+            return {
+              result: false,
+              resultCode: 16,
+              resultMessage: `Invalid pathLenConstraint value: ${pathLenConstraint}`,
+            };
+          }
+
+          if (pathLenConstraint < maxPathLength) {
+            maxPathLength = pathLenConstraint;
+          }
         }
       }
       //#endregion
@@ -866,13 +967,9 @@ export class CertificateChainValidationEngine {
 
     const leafCert = localCerts[localCerts.length - 1];
 
-    //#region Initial variables
-    let result;
-    const certificatePath = [leafCert]; // The "end entity" certificate must be the least in CERTS array
-    //#endregion
-
     //#region Build path for "end entity" certificate
-    result = await buildPath(leafCert, crypto);
+    // The "end entity" certificate must be the last one in CERTS array
+    const result = await buildPath(leafCert, crypto);
     if (result.length === 0) {
       throw new ChainValidationError(ChainValidationCode.noPath, "Unable to find certificate path");
     }
@@ -905,28 +1002,26 @@ export class CertificateChainValidationEngine {
     }
     //#endregion
 
-    //#region Find shortest certificate path (for the moment it is the only criteria)
-    let shortestLength = result[0].length;
-    let shortestIndex = 0;
+    //#region Check candidate paths, shortest first, and keep the first one that passes
+    // A path can fail a check (for example pathLenConstraint) while another trusted path passes,
+    // so try every candidate before giving up. The error of the shortest path is reported.
+    const candidates = result.map((o, index) => ({ path: o, index })).sort((a, b) => a.path.length - b.path.length || a.index - b.index);
+    let firstError: unknown;
+    for (const candidate of candidates) {
+      const candidatePath = [leafCert, ...candidate.path];
+      try {
+        const checkResult = await basicCheck(candidatePath, this.checkDate);
+        if (checkResult.result) {
+          return candidatePath;
+        }
 
-    for (let i = 0; i < result.length; i++) {
-      if (result[i].length < shortestLength) {
-        shortestLength = result[i].length;
-        shortestIndex = i;
+        firstError ??= checkResult;
+      } catch (e) {
+        firstError ??= e;
       }
     }
-    //#endregion
 
-    //#region Create certificate path for basic check
-    for (let i = 0; i < result[shortestIndex].length; i++) certificatePath.push(result[shortestIndex][i]);
-    //#endregion
-
-    //#region Perform basic checking for all certificates in the path
-    result = await basicCheck(certificatePath, this.checkDate);
-    if (result.result === false) throw result;
-    //#endregion
-
-    return certificatePath;
+    throw firstError;
     //#endregion
   }
 
