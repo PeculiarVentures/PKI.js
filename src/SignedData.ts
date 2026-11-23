@@ -786,10 +786,16 @@ export class SignedData extends PkiObject implements ISignedData {
         //#region Check mandatory attributes
         let foundContentType = false;
         let foundMessageDigest = false;
+        let contentTypeAttrValue: string | undefined;
 
         for (const attribute of signerInfo.signedAttrs.attributes) {
           //#region Check that "content-type" attribute exists
-          if (attribute.type === "1.2.840.113549.1.9.3") foundContentType = true;
+          if (attribute.type === "1.2.840.113549.1.9.3") {
+            foundContentType = true;
+            // RFC 5652 Section 11.1: when signed attributes are present, the value of the
+            // content-type attribute MUST match the eContentType of the EncapsulatedContentInfo.
+            contentTypeAttrValue = attribute.values[0]?.valueBlock.toString();
+          }
           //#endregion
 
           //#region Check that "message-digest" attribute exists
@@ -813,6 +819,18 @@ export class SignedData extends PkiObject implements ISignedData {
             signerCertificateVerified: true,
           });
         }
+
+        //#region Check that "content-type" attribute value matches "eContentType" (RFC 5652 Section 11.1)
+        if (contentTypeAttrValue !== this.encapContentInfo.eContentType) {
+          throw new SignedDataVerifyError({
+            date: checkDate,
+            code: 11,
+            message: `Attribute "content-type" value "${contentTypeAttrValue}" does not match "eContentType" value "${this.encapContentInfo.eContentType}"`,
+            signerCertificate: signerCert,
+            signerCertificateVerified: true,
+          });
+        }
+        //#endregion
 
         if (foundMessageDigest === false) {
           throw new SignedDataVerifyError({
