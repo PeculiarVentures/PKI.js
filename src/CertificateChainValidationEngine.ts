@@ -366,8 +366,13 @@ export class CertificateChainValidationEngine {
     const localCerts: Certificate[] = [];
 
     //#region Building certificate path
-    const buildPath = async (certificate: Certificate, crypto: common.ICryptoEngine): Promise<Certificate[][]> => {
+    // `branch` holds the certificates already on the current path (leaf
+    // first), so that issuer cycles such as A -> B -> A are pruned
+    // (RFC 4158, section 5.2) without hiding cross-signed alternatives
+    // on other branches.
+    const buildPath = async (certificate: Certificate, crypto: common.ICryptoEngine, branch: Certificate[] = []): Promise<Certificate[][]> => {
       const result: Certificate[][] = [];
+      const currentBranch = [...branch, certificate];
 
       // Aux function checking array for unique elements
       function checkUnique(array: Certificate[]): boolean {
@@ -395,7 +400,10 @@ export class CertificateChainValidationEngine {
 
       const findIssuerResult = await this.findIssuer(certificate, this, crypto);
       if (findIssuerResult.length === 0) {
-        throw new Error("No valid certificate paths found");
+        // Dead end: return no paths, so the caller can still try its other
+        // candidate issuers (RFC 4158). The top-level check below reports
+        // the error when no candidate leads anywhere.
+        return [];
       }
 
       for (let i = 0; i < findIssuerResult.length; i++) {
@@ -404,7 +412,13 @@ export class CertificateChainValidationEngine {
           continue;
         }
 
-        const buildPathResult = await buildPath(findIssuerResult[i], crypto);
+        const issuer = findIssuerResult[i];
+        if (currentBranch.some((o) => bytes.equal(o.tbsView, issuer.tbsView))) {
+          // Cycle: this issuer is already on the current path
+          continue;
+        }
+
+        const buildPathResult = await buildPath(issuer, crypto, currentBranch);
 
         for (let j = 0; j < buildPathResult.length; j++) {
           const copy = buildPathResult[j].slice();
@@ -801,7 +815,7 @@ export class CertificateChainValidationEngine {
     //#region Build path for "end entity" certificate
     result = await buildPath(leafCert, crypto);
     if (result.length === 0) {
-      throw new ChainValidationError(ChainValidationCode.noPath, "Unable to find certificate path");
+      throw new ChainValidationError(ChainValidationCode.noValidPath, "No valid certificate paths found");
     }
     //#endregion
 
