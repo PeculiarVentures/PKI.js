@@ -134,6 +134,14 @@ export interface CertificateChainValidationEngineVerifyParams {
 }
 
 /**
+ * Name of a certificate in the form of a GeneralName
+ */
+interface ConstrainedName {
+  type: number;
+  value: any;
+}
+
+/**
  * Returns `true` if the certificate is in the trusted list, otherwise `false`
  * @param cert A certificate that is expected to be in the trusted list
  * @param trustedList List of trusted certificates
@@ -1450,41 +1458,63 @@ export class CertificateChainValidationEngine {
      * @returns Boolean result - valid or invalid the "name" against the "constraint"
      */
     function compareDirectoryName(name: RelativeDistinguishedNames, constraint: RelativeDistinguishedNames): boolean {
-      //#region Initial check
-      if (name.typesAndValues.length === 0 || constraint.typesAndValues.length === 0) return true;
-
-      if (name.typesAndValues.length < constraint.typesAndValues.length) return false;
-      //#endregion
-
-      //#region Initial variables
-      let result = true;
-      let nameStart = 0;
-      //#endregion
-
-      for (let i = 0; i < constraint.typesAndValues.length; i++) {
-        let localResult = false;
-
-        for (let j = nameStart; j < name.typesAndValues.length; j++) {
-          localResult = name.typesAndValues[j].isEqual(constraint.typesAndValues[i]);
-
-          if (name.typesAndValues[j].type === constraint.typesAndValues[i].type) result = result && localResult;
-
-          if (localResult === true) {
-            if (nameStart === 0 || nameStart === j) {
-              nameStart = j + 1;
-              break;
-            } else
-              // Structure of "name" must be the same with "constraint"
-              return false;
-          }
-        }
-
-        if (localResult === false) return false;
-      }
-
-      return nameStart === 0 ? false : result;
+      // The constraint must be the start of the name (RFC 5280, 4.2.1.10)
+      return constraint.typesAndValues.every((item, i) => i < name.typesAndValues.length && name.typesAndValues[i].isEqual(item));
     }
     //#endregion
+
+    /**
+     * Checks whether a name is in a subtree of the same form
+     * @param name Name of a certificate
+     * @param subtree Name constraint
+     * @returns `false` if the forms differ, or if the engine does not check names of this form
+     */
+    function isInSubtree(name: ConstrainedName, subtree: GeneralSubtree): boolean {
+      const constraint = subtree.base;
+      if (name.type !== constraint.type) {
+        return false;
+      }
+
+      switch (name.type) {
+        case 1:
+          return compareRFC822Name(name.value, constraint.value);
+        case 2:
+          return compareDNSName(name.value, constraint.value);
+        case 4:
+          return compareDirectoryName(name.value, constraint.value);
+        case 6:
+          return compareUniformResourceIdentifier(name.value, constraint.value);
+        case 7:
+          return compareIPAddress(name.value, constraint.value);
+        default:
+          return false;
+      }
+    }
+
+    /**
+     * Returns the names of a certificate that name constraints apply to (RFC 5280, 4.2.1.10)
+     * @param cert Certificate
+     * @param subjectAltNames Names of its SubjectAltName extension
+     */
+    function getConstrainedNames(cert: Certificate, subjectAltNames: GeneralName[]): ConstrainedName[] {
+      const names: ConstrainedName[] = subjectAltNames.map(({ type, value }) => ({ type, value }));
+
+      if (cert.subject.typesAndValues.length > 0) {
+        names.push({ type: 4, value: cert.subject });
+      }
+
+      // E-mail addresses of the subject count only without a SubjectAltName
+      if (subjectAltNames.length === 0) {
+        for (const { type, value } of cert.subject.typesAndValues) {
+          // PKCS#9 e-mail address and RFC1274 "rfc822Mailbox" e-mail address
+          if (type === "1.2.840.113549.1.9.1" || type === "0.9.2342.19200300.100.1.3") {
+            names.push({ type: 1, value: value.valueBlock.value });
+          }
+        }
+      }
+
+      return names;
+    }
 
     try {
       //#region Initial checks
@@ -1518,7 +1548,7 @@ export class CertificateChainValidationEngine {
       let policyMappingInhibitPending = 0;
       let inhibitAnyPolicyPending = 0;
 
-      let permittedSubtrees = initialPermittedSubtreesSet;
+      const permittedSubtrees = [initialPermittedSubtreesSet];
       let excludedSubtrees = initialExcludedSubtreesSet;
       const requiredNameForms = initialRequiredNameForms;
 
@@ -1913,231 +1943,39 @@ export class CertificateChainValidationEngine {
         }
         //#endregion
 
-        //#region Checking for "permited sub-trees"
-        //#region Make groups for all types of constraints
-        const constrGroups: GeneralSubtree[][] = [
-          // Array of array for groupped constraints
-          [], // rfc822Name
-          [], // dNSName
-          [], // directoryName
-          [], // uniformResourceIdentifier
-          [], // iPAddress
-        ];
+        // Name constraints do not apply to self-issued intermediate certificates (RFC 5280, 6.1.3)
+        if (i === 0 || !cert.issuer.isEqual(cert.subject)) {
+          const names = getConstrainedNames(cert, subjectAltNames);
 
-        for (let j = 0; j < permittedSubtrees.length; j++) {
-          switch (permittedSubtrees[j].base.type) {
-            //#region rfc822Name
-            case 1:
-              constrGroups[0].push(permittedSubtrees[j]);
-              break;
-            //#endregion
-            //#region dNSName
-            case 2:
-              constrGroups[1].push(permittedSubtrees[j]);
-              break;
-            //#endregion
-            //#region directoryName
-            case 4:
-              constrGroups[2].push(permittedSubtrees[j]);
-              break;
-            //#endregion
-            //#region uniformResourceIdentifier
-            case 6:
-              constrGroups[3].push(permittedSubtrees[j]);
-              break;
-            //#endregion
-            //#region iPAddress
-            case 7:
-              constrGroups[4].push(permittedSubtrees[j]);
-              break;
-            //#endregion
-            //#region default
-            default:
-            //#endregion
-          }
-        }
-        //#endregion
+          //#region Checking for "permited sub-trees"
+          // Each certificate above narrows the names down, and every name must be permitted
+          for (const subtrees of permittedSubtrees) {
+            for (const name of names) {
+              const sameForm = subtrees.filter(({ base }) => PROCESSED_NAME_FORMS.has(base.type) && base.type === name.type);
+              if (sameForm.length > 0 && !sameForm.some((subtree) => isInSubtree(name, subtree))) {
+                policyResult.result = false;
+                policyResult.resultCode = 41;
+                policyResult.resultMessage = 'Failed to meet "permitted sub-trees" name constraint';
 
-        //#region Check name constraints groupped by type, one-by-one
-        for (let p = 0; p < 5; p++) {
-          let groupPermitted = false;
-          let valueExists = false;
-          const group = constrGroups[p];
-
-          for (let j = 0; j < group.length; j++) {
-            switch (p) {
-              //#region rfc822Name
-              case 0:
-                if (subjectAltNames.length > 0) {
-                  for (let k = 0; k < subjectAltNames.length; k++) {
-                    if (subjectAltNames[k].type === 1) // rfc822Name
-                    {
-                      valueExists = true;
-                      groupPermitted = groupPermitted || compareRFC822Name(subjectAltNames[k].value, group[j].base.value);
-                    }
-                  }
-                } else // Try to find out "emailAddress" inside "subject"
-                {
-                  for (let k = 0; k < cert.subject.typesAndValues.length; k++) {
-                    if (
-                      cert.subject.typesAndValues[k].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
-                      cert.subject.typesAndValues[k].type === "0.9.2342.19200300.100.1.3"
-                    ) // RFC1274 "rfc822Mailbox" e-mail address
-                    {
-                      valueExists = true;
-                      groupPermitted = groupPermitted || compareRFC822Name(cert.subject.typesAndValues[k].value.valueBlock.value, group[j].base.value);
-                    }
-                  }
-                }
-                break;
-              //#endregion
-              //#region dNSName
-              case 1:
-                if (subjectAltNames.length > 0) {
-                  for (let k = 0; k < subjectAltNames.length; k++) {
-                    if (subjectAltNames[k].type === 2) // dNSName
-                    {
-                      valueExists = true;
-                      groupPermitted = groupPermitted || compareDNSName(subjectAltNames[k].value, group[j].base.value);
-                    }
-                  }
-                }
-                break;
-              //#endregion
-              //#region directoryName
-              case 2:
-                valueExists = true;
-                groupPermitted = compareDirectoryName(cert.subject, group[j].base.value);
-                break;
-              //#endregion
-              //#region uniformResourceIdentifier
-              case 3:
-                if (subjectAltNames.length > 0) {
-                  for (let k = 0; k < subjectAltNames.length; k++) {
-                    if (subjectAltNames[k].type === 6) // uniformResourceIdentifier
-                    {
-                      valueExists = true;
-                      groupPermitted = groupPermitted || compareUniformResourceIdentifier(subjectAltNames[k].value, group[j].base.value);
-                    }
-                  }
-                }
-                break;
-              //#endregion
-              //#region iPAddress
-              case 4:
-                if (subjectAltNames.length > 0) {
-                  for (let k = 0; k < subjectAltNames.length; k++) {
-                    if (subjectAltNames[k].type === 7) // iPAddress
-                    {
-                      valueExists = true;
-                      groupPermitted = groupPermitted || compareIPAddress(subjectAltNames[k].value, group[j].base.value);
-                    }
-                  }
-                }
-                break;
-              //#endregion
-              //#region default
-              default:
-              //#endregion
+                throw policyResult;
+              }
             }
-
-            if (groupPermitted) break;
           }
+          //#endregion
 
-          if (groupPermitted === false && group.length > 0 && valueExists) {
+          //#region Checking for "excluded sub-trees"
+          if (names.some((name) => excludedSubtrees.some((subtree) => isInSubtree(name, subtree)))) {
             policyResult.result = false;
-            policyResult.resultCode = 41;
-            policyResult.resultMessage = 'Failed to meet "permitted sub-trees" name constraint';
+            policyResult.resultCode = 42;
+            policyResult.resultMessage = 'Failed to meet "excluded sub-trees" name constraint';
 
             throw policyResult;
           }
+          //#endregion
         }
-        //#endregion
-        //#endregion
-
-        //#region Checking for "excluded sub-trees"
-        let excluded = false;
-
-        for (let j = 0; j < excludedSubtrees.length; j++) {
-          switch (excludedSubtrees[j].base.type) {
-            //#region rfc822Name
-            case 1:
-              if (subjectAltNames.length >= 0) {
-                for (let k = 0; k < subjectAltNames.length; k++) {
-                  if (subjectAltNames[k].type === 1)
-                    // rfc822Name
-                    excluded = excluded || compareRFC822Name(subjectAltNames[k].value, excludedSubtrees[j].base.value);
-                }
-              } else // Try to find out "emailAddress" inside "subject"
-              {
-                for (let k = 0; k < cert.subject.typesAndValues.length; k++) {
-                  if (
-                    cert.subject.typesAndValues[k].type === "1.2.840.113549.1.9.1" || // PKCS#9 e-mail address
-                    cert.subject.typesAndValues[k].type === "0.9.2342.19200300.100.1.3"
-                  )
-                    // RFC1274 "rfc822Mailbox" e-mail address
-                    excluded = excluded || compareRFC822Name(cert.subject.typesAndValues[k].value.valueBlock.value, excludedSubtrees[j].base.value);
-                }
-              }
-              break;
-            //#endregion
-            //#region dNSName
-            case 2:
-              if (subjectAltNames.length > 0) {
-                for (let k = 0; k < subjectAltNames.length; k++) {
-                  if (subjectAltNames[k].type === 2)
-                    // dNSName
-                    excluded = excluded || compareDNSName(subjectAltNames[k].value, excludedSubtrees[j].base.value);
-                }
-              }
-              break;
-            //#endregion
-            //#region directoryName
-            case 4:
-              excluded = excluded || compareDirectoryName(cert.subject, excludedSubtrees[j].base.value);
-              break;
-            //#endregion
-            //#region uniformResourceIdentifier
-            case 6:
-              if (subjectAltNames.length > 0) {
-                for (let k = 0; k < subjectAltNames.length; k++) {
-                  if (subjectAltNames[k].type === 6)
-                    // uniformResourceIdentifier
-                    excluded = excluded || compareUniformResourceIdentifier(subjectAltNames[k].value, excludedSubtrees[j].base.value);
-                }
-              }
-              break;
-            //#endregion
-            //#region iPAddress
-            case 7:
-              if (subjectAltNames.length > 0) {
-                for (let k = 0; k < subjectAltNames.length; k++) {
-                  if (subjectAltNames[k].type === 7)
-                    // iPAddress
-                    excluded = excluded || compareIPAddress(subjectAltNames[k].value, excludedSubtrees[j].base.value);
-                }
-              }
-              break;
-            //#endregion
-            //#region default
-            default: // No action, but probably here we need to create a warning for "malformed constraint"
-            //#endregion
-          }
-
-          if (excluded) break;
-        }
-
-        if (excluded === true) {
-          policyResult.result = false;
-          policyResult.resultCode = 42;
-          policyResult.resultMessage = 'Failed to meet "excluded sub-trees" name constraint';
-
-          throw policyResult;
-        }
-        //#endregion
 
         //#region Append "cert_..._subtrees" to "..._subtrees"
-        permittedSubtrees = permittedSubtrees.concat(certPermittedSubtrees);
+        if (certPermittedSubtrees.length > 0) permittedSubtrees.push(certPermittedSubtrees);
         excludedSubtrees = excludedSubtrees.concat(certExcludedSubtrees);
         //#endregion
       }

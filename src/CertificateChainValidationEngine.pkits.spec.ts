@@ -4111,8 +4111,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.13.3 Invalid DN nameConstraints Test3",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
@@ -4202,8 +4201,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.13.12 Invalid DN nameConstraints Test12",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
@@ -4213,8 +4211,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.13.13 Invalid DN nameConstraints Test13",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
@@ -4274,8 +4271,7 @@ describe("NIST PKITS tests", () => {
       }),
     );
 
-    // TODO: Fix later
-    it.skip(
+    it(
       "4.13.19 Valid Self-Issued DN nameConstraints Test19",
       simpleVerification({
         trustedCertificates: ["TrustAnchorRootCertificate.crt"],
