@@ -39,7 +39,8 @@ export interface TimeStampRespVerifyParams {
   trustedCerts?: Certificate[];
   data?: ArrayBuffer;
   /**
-   * Validate the certificate chain of the timestamp signer
+   * Validate the certificate chain of the timestamp signer. It is not checked that the signer's
+   * certificate is for time stamping (RFC 3161, 2.3); that is for the caller to check
    */
   checkChain?: boolean;
   /**
