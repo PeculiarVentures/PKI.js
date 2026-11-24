@@ -485,6 +485,148 @@ describe("CertificateChainValidationEngine", () => {
     });
   });
 
+  describe("policy constraints below a required explicit policy", () => {
+    const [root, ica, subCa, ee] = [0, 1, 2, 3];
+    const POLICY = "1.2.3.1";
+    const MAPPED_POLICY = "1.2.3.2";
+
+    const policies = (...ids: string[]) =>
+      new pkijs.Extension({
+        extnID: "2.5.29.32",
+        extnValue: new pkijs.CertificatePolicies({
+          certificatePolicies: ids.map((policyIdentifier) => new pkijs.PolicyInformation({ policyIdentifier })),
+        })
+          .toSchema()
+          .toBER(false),
+      });
+    const mapping = () =>
+      new pkijs.Extension({
+        extnID: "2.5.29.33",
+        extnValue: new pkijs.PolicyMappings({
+          mappings: [new pkijs.PolicyMapping({ issuerDomainPolicy: POLICY, subjectDomainPolicy: MAPPED_POLICY })],
+        })
+          .toSchema()
+          .toBER(false),
+      });
+    const constraints = (values: { requireExplicitPolicy?: number; inhibitPolicyMapping?: number }) =>
+      new pkijs.Extension({ extnID: "2.5.29.36", critical: true, extnValue: new pkijs.PolicyConstraints(values).toSchema().toBER(false) });
+
+    /** Root > ICA > SubCA > EE, where SubCA maps the policy of the CAs to that of the end entity */
+    const verifyMapping = async (icaExtensions: pkijs.Extension[], initialExplicitPolicy: boolean, subCaExtensions = [policies(POLICY), mapping()]) => {
+      const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true });
+      const icaCert = await createCertificate("ICA", "Root", keys[ica].publicKey, keys[root].privateKey, { ca: true, extensions: [policies(POLICY), ...icaExtensions] });
+      const subCaCert = await createCertificate("SubCA", "ICA", keys[subCa].publicKey, keys[ica].privateKey, { ca: true, extensions: subCaExtensions });
+      const endEntity = await createCertificate("EE", "SubCA", keys[ee].publicKey, keys[subCa].privateKey, { ca: false, extensions: [policies(MAPPED_POLICY)] });
+
+      return new pkijs.CertificateChainValidationEngine({ trustedCerts: [trustRoot], certs: [icaCert, subCaCert, endEntity], checkDate }).verify({
+        initialExplicitPolicy,
+        initialPolicySet: [POLICY],
+      });
+    };
+
+    for (const [label, initialExplicitPolicy, requireExplicitPolicy] of [
+      ["initialExplicitPolicy", true, undefined],
+      ["requireExplicitPolicy", false, 0],
+    ] as const) {
+      const required = requireExplicitPolicy === undefined ? [] : [constraints({ requireExplicitPolicy })];
+
+      it(`accepts a policy mapping (${label})`, async () => {
+        const result = await verifyMapping(required, initialExplicitPolicy);
+        assert.isTrue(result.result, result.resultMessage);
+        assert.isTrue(result.explicitPolicyIndicator);
+        assert.deepEqual(result.userConstrPolicies, [POLICY]);
+      });
+
+      it(`rejects a policy mapping below inhibitPolicyMapping 0 (${label})`, async () => {
+        const result = await verifyMapping([constraints({ requireExplicitPolicy, inhibitPolicyMapping: 0 })], initialExplicitPolicy);
+        assert.isFalse(result.result);
+        assert.equal(result.resultCode, 98);
+      });
+
+      it(`accepts a policy mapping that inhibitPolicyMapping 1 still allows (${label})`, async () => {
+        const result = await verifyMapping([constraints({ requireExplicitPolicy, inhibitPolicyMapping: 1 })], initialExplicitPolicy);
+        assert.isTrue(result.result, result.resultMessage);
+      });
+
+      it(`does not apply inhibitPolicyMapping 0 to a mapping of the same certificate (${label})`, async () => {
+        const result = await verifyMapping(required, initialExplicitPolicy, [policies(POLICY), constraints({ inhibitPolicyMapping: 0 }), mapping()]);
+        assert.isTrue(result.result, result.resultMessage);
+      });
+    }
+
+    for (const [label, extensions] of [
+      ["before", [policies(POLICY), constraints({ inhibitPolicyMapping: 0 }), mapping()]],
+      ["after", [policies(POLICY), mapping(), constraints({ inhibitPolicyMapping: 0 })]],
+    ] as const) {
+      it(`does not apply inhibitPolicyMapping 0 that comes ${label} the mapping of the same certificate`, async () => {
+        const result = await verifyMapping([], false, [...extensions]);
+        assert.isTrue(result.result, result.resultMessage);
+      });
+    }
+
+    for (const [label, initialExplicitPolicy, upper, lower, valid] of [
+      ["a looser inhibitPolicyMapping does not relax the limit", true, { inhibitPolicyMapping: 0 }, { inhibitPolicyMapping: 5 }, false],
+      ["a tighter inhibitPolicyMapping shortens the limit", true, { inhibitPolicyMapping: 5 }, { inhibitPolicyMapping: 0 }, false],
+      ["limits that are not reached allow the mapping", true, { inhibitPolicyMapping: 5 }, { inhibitPolicyMapping: 4 }, true],
+      ["inhibitPolicyMapping 0 below requireExplicitPolicy 0", false, { requireExplicitPolicy: 0 }, { inhibitPolicyMapping: 0 }, false],
+      ["requireExplicitPolicy 0 twice allows the mapping", false, { requireExplicitPolicy: 0 }, { requireExplicitPolicy: 0 }, true],
+    ] as const) {
+      it(`two CAs: ${label}`, async () => {
+        const chain: [string, pkijs.Extension[]][] = [
+          ["CA1", [policies(POLICY), constraints(upper)]],
+          ["CA2", [policies(POLICY), constraints(lower)]],
+          ["CA3", [policies(POLICY), mapping()]],
+        ];
+        const trustRoot = await createCertificate("Root", "Root", keys[0].publicKey, keys[0].privateKey, { ca: true });
+        const certs: pkijs.Certificate[] = [];
+        let issuer = "Root";
+        for (const [i, [subject, extensions]] of chain.entries()) {
+          certs.push(await createCertificate(subject, issuer, keys[i + 1].publicKey, keys[i].privateKey, { ca: true, extensions }));
+          issuer = subject;
+        }
+        certs.push(await createCertificate("EE", issuer, keys[4].publicKey, keys[3].privateKey, { ca: false, extensions: [policies(MAPPED_POLICY)] }));
+
+        const result = await new pkijs.CertificateChainValidationEngine({ trustedCerts: [trustRoot], certs, checkDate }).verify({
+          initialExplicitPolicy,
+          initialPolicySet: [POLICY],
+        });
+        assert.equal(result.result, valid, result.resultMessage);
+        if (!valid) {
+          assert.equal(result.resultCode, 98);
+        }
+      });
+    }
+  });
+
+  describe("empty critical constraints", () => {
+    const [root, ica, ee] = [0, 1, 2];
+    const emptySubtrees = (tagNumber: number) => new asn1js.Constructed({ idBlock: { tagClass: 3, tagNumber }, value: [] });
+    const subtrees = (tagNumber: number) =>
+      new asn1js.Constructed({
+        idBlock: { tagClass: 3, tagNumber },
+        value: [new pkijs.GeneralSubtree({ base: new pkijs.GeneralName({ type: 2, value: "example" }) }).toSchema()],
+      });
+
+    for (const [label, extnID, value] of [
+      ["PolicyConstraints", "2.5.29.36", () => []],
+      ["NameConstraints", "2.5.29.30", () => []],
+      ["permittedSubtrees", "2.5.29.30", () => [emptySubtrees(0)]],
+      ["excludedSubtrees", "2.5.29.30", () => [emptySubtrees(1)]],
+      ["excludedSubtrees next to permittedSubtrees", "2.5.29.30", () => [subtrees(0), emptySubtrees(1)]],
+    ] as const) {
+      it(`rejects empty ${label}`, async () => {
+        const extension = new pkijs.Extension({ extnID, critical: true, extnValue: new asn1js.Sequence({ value: value() }).toBER(false) });
+        const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true });
+        const icaCert = await createCertificate("ICA", "Root", keys[ica].publicKey, keys[root].privateKey, { ca: true, extensions: [extension] });
+        const endEntity = await createCertificate("EE", "ICA", keys[ee].publicKey, keys[ica].privateKey, { ca: false });
+
+        const result = await verify(trustRoot, [icaCert, endEntity]);
+        assert.isFalse(result.result);
+        assert.equal(result.resultCode, 6);
+      });
+    }
+  });
+
   describe("critical name constraints that the engine does not check", () => {
     const [root, ica, subCa, ee] = [0, 1, 2, 3];
     const registeredId = (value: string) => new pkijs.GeneralName({ type: 8, value });

@@ -208,15 +208,14 @@ function getUnsigned(value: asn1js.Integer): number | undefined {
 }
 
 /**
- * Returns the SkipCerts values of a decoded PolicyConstraints extension
- * @param extension Certificate extension
+ * Returns the SkipCerts values of a PolicyConstraints extension
+ * @param value Decoded value of the extension
  * @returns Values by context tag, 0 for `requireExplicitPolicy` and 1 for `inhibitPolicyMapping`
  */
-function getPolicyConstraints(extension: Extension): Map<number, number | undefined> {
+function getPolicyConstraints(value: asn1js.AsnType): Map<number, number | undefined> {
   const values = new Map<number, number | undefined>();
-  const asn1 = asn1js.fromBER(extension.extnValue.valueBlock.valueHexView);
-  if (asn1.result instanceof asn1js.Sequence) {
-    for (const item of asn1.result.valueBlock.value) {
+  if (value instanceof asn1js.Sequence) {
+    for (const item of value.valueBlock.value) {
       // SkipCerts is IMPLICIT, so the content is that of an INTEGER
       const content = item instanceof asn1js.Primitive ? item.valueBlock.valueHexView : new Uint8Array();
       values.set(item.idBlock.tagNumber, getUnsigned(new asn1js.Integer({ valueHex: content })));
@@ -250,12 +249,20 @@ function isValidExtension(extension: Extension): boolean {
   }
 
   if (parsedValue instanceof PolicyConstraints) {
-    // SkipCerts ::= INTEGER (0..MAX) (RFC 5280, 4.2.1.11)
-    return [...getPolicyConstraints(extension).values()].every((value) => value !== undefined);
+    // SkipCerts ::= INTEGER (0..MAX), and at least one of the two fields is present (RFC 5280, 4.2.1.11)
+    const values = [...getPolicyConstraints(asn1.result).values()];
+    return values.length > 0 && values.every((value) => value !== undefined);
   }
 
   if (parsedValue instanceof NameConstraints) {
-    // "minimum" must be zero, and "maximum" must be absent (RFC 5280, 4.2.1.10)
+    // At least one of the two fields is present, and neither is empty (RFC 5280, 4.2.1.10).
+    // NameConstraints does not tell an empty field from an absent one
+    const fields = asn1.result instanceof asn1js.Sequence ? asn1.result.valueBlock.value : [];
+    if (fields.length === 0 || fields.some((field) => !(field instanceof asn1js.Constructed) || field.valueBlock.value.length === 0)) {
+      return false;
+    }
+
+    // "minimum" must be zero, and "maximum" must be absent
     return getSubtrees(parsedValue).every(({ minimum, maximum }) => minimum === 0 && maximum === undefined);
   }
 
@@ -1544,6 +1551,9 @@ export class CertificateChainValidationEngine {
       for (let i = this.certs.length - 2; i >= 0; i--, pathDepth++) {
         const cert = this.certs[i];
         if (cert.extensions) {
+          // The constraints of a certificate do not apply to its own policy mappings (RFC 5280, 6.1.4 (b) and (i))
+          const policyMappingInhibited = policyMappingInhibitIndicator;
+
           //#region Get information about certificate extensions
           for (let j = 0; j < cert.extensions.length; j++) {
             const extension = cert.extensions[j];
@@ -1587,7 +1597,7 @@ export class CertificateChainValidationEngine {
 
             //#region PolicyMappings
             if (extension.extnID === id_PolicyMappings) {
-              if (policyMappingInhibitIndicator) {
+              if (policyMappingInhibited) {
                 return {
                   result: false,
                   resultCode: 98,
@@ -1601,10 +1611,11 @@ export class CertificateChainValidationEngine {
 
             //#region PolicyConstraints
             if (extension.extnID === id_PolicyConstraints) {
-              if (explicitPolicyIndicator === false) {
-                const policyConstraints = getPolicyConstraints(extension);
+              const policyConstraints = getPolicyConstraints(asn1js.fromBER(extension.extnValue.valueBlock.valueHexView).result);
 
-                //#region requireExplicitPolicy
+              // The two fields update separate states (RFC 5280, 6.1.4 (i))
+              //#region requireExplicitPolicy
+              if (explicitPolicyIndicator === false) {
                 const requireExplicitPolicy = policyConstraints.get(0);
                 if (requireExplicitPolicy === 0) {
                   explicitPolicyIndicator = true;
@@ -1613,17 +1624,19 @@ export class CertificateChainValidationEngine {
                   explicitPolicyPending = pendingConstraints[0] ? Math.min(explicitPolicyPending, requireExplicitPolicy) : requireExplicitPolicy;
                   pendingConstraints[0] = true;
                 }
-                //#endregion
+              }
+              //#endregion
 
-                //#region inhibitPolicyMapping
+              //#region inhibitPolicyMapping
+              if (policyMappingInhibitIndicator === false) {
                 const inhibitPolicyMapping = policyConstraints.get(1);
                 if (inhibitPolicyMapping === 0) policyMappingInhibitIndicator = true;
                 else if (inhibitPolicyMapping !== undefined) {
                   policyMappingInhibitPending = pendingConstraints[1] ? Math.min(policyMappingInhibitPending, inhibitPolicyMapping + 1) : inhibitPolicyMapping + 1;
                   pendingConstraints[1] = true;
                 }
-                //#endregion
               }
+              //#endregion
             }
             //#endregion
 
