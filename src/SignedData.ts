@@ -11,7 +11,13 @@ import { CertificateSet, type CertificateSetItem, type CertificateSetItemJson } 
 import { RevocationInfoChoices, type RevocationInfoChoicesSchema } from "./RevocationInfoChoices";
 import { IssuerAndSerialNumber } from "./IssuerAndSerialNumber";
 import { TSTInfo } from "./TSTInfo";
-import { CertificateChainValidationEngine, type CertificateChainValidationEngineParameters, type FindIssuerCallback, type FindOriginCallback } from "./CertificateChainValidationEngine";
+import {
+  CertificateChainValidationEngine,
+  type CertificateChainValidationEngineParameters,
+  type CertificateChainValidationPolicy,
+  type FindIssuerCallback,
+  type FindOriginCallback,
+} from "./CertificateChainValidationEngine";
 import { BasicOCSPResponse, type BasicOCSPResponseJson } from "./BasicOCSPResponse";
 import { OtherCertificateFormat } from "./OtherCertificateFormat";
 import { AttributeCertificateV1 } from "./AttributeCertificateV1";
@@ -74,6 +80,10 @@ export interface SignedDataVerifyParams {
   extendedMode?: boolean;
   findOrigin?: FindOriginCallback | null;
   findIssuer?: FindIssuerCallback | null;
+  /**
+   * Policy for the validation of the signer's certificate chain. Used with `checkChain: true`
+   */
+  validationPolicy?: CertificateChainValidationPolicy;
 }
 
 export interface SignedDataVerifyErrorParams {
@@ -549,6 +559,7 @@ export class SignedData extends PkiObject implements ISignedData {
       extendedMode = false,
       findOrigin = null,
       findIssuer = null,
+      validationPolicy,
     }: SignedDataVerifyParams = {},
     crypto = common.getCrypto(true),
   ): Promise<boolean | SignedDataVerifyResult> {
@@ -692,6 +703,7 @@ export class SignedData extends PkiObject implements ISignedData {
           checkDate,
           certs,
           trustedCerts,
+          validationPolicy,
         };
 
         if (findIssuer) {

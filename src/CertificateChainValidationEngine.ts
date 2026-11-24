@@ -1,5 +1,6 @@
 import * as asn1js from "asn1js";
 import { bytes } from "@peculiar/utils";
+import { AltName } from "./AltName";
 import { AuthorityKeyIdentifier } from "./AuthorityKeyIdentifier";
 import { BasicConstraints } from "./BasicConstraints";
 import type { BasicOCSPResponse } from "./BasicOCSPResponse";
@@ -28,6 +29,8 @@ import {
 } from "./ObjectIdentifiers";
 import type { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
 import type { GeneralSubtree } from "./GeneralSubtree";
+import { NameConstraints } from "./NameConstraints";
+import { PolicyConstraints } from "./PolicyConstraints";
 import { EMPTY_STRING } from "./constants";
 
 const TRUSTED_CERTS = "trustedCerts";
@@ -81,6 +84,23 @@ export type FindIssuerCallback = (certificate: Certificate, validationEngine: Ce
  */
 export type CriticalExtensionHandler = (extension: Extension, certificate: Certificate, validationEngine: CertificateChainValidationEngine) => boolean | Promise<boolean>;
 
+/**
+ * Choices that RFC 5280 leaves to the application. The mandatory checks of path validation
+ * (pathLenConstraint of intermediate certificates, critical extensions, and so on) cannot be turned off.
+ */
+export interface CertificateChainValidationPolicy {
+  /**
+   * Apply the `pathLenConstraint` of the trust anchor's certificate to the path (RFC 5280, 6.2).
+   * Default `false`.
+   */
+  enforceTrustAnchorPathLenConstraint?: boolean;
+  /**
+   * Checks critical extensions that the engine does not process itself. Without it, a certificate
+   * with such an extension is rejected.
+   */
+  criticalExtensionHandler?: CriticalExtensionHandler;
+}
+
 export interface CertificateChainValidationEngineParameters {
   trustedCerts?: Certificate[];
   certs?: Certificate[];
@@ -89,7 +109,7 @@ export interface CertificateChainValidationEngineParameters {
   checkDate?: Date;
   findOrigin?: FindOriginCallback;
   findIssuer?: FindIssuerCallback;
-  criticalExtensionHandler?: CriticalExtensionHandler;
+  validationPolicy?: CertificateChainValidationPolicy;
 }
 interface CrlAndCertificate {
   crl: CertificateRevocationList;
@@ -132,7 +152,7 @@ function isTrusted(cert: Certificate, trustedList: Certificate[]): boolean {
 /**
  * Extensions whose meaning the engine processes during path validation (RFC 5280, 6.1).
  * A critical extension with any other OID is rejected, unless
- * {@link CertificateChainValidationEngineParameters.criticalExtensionHandler} accepts it.
+ * {@link CertificateChainValidationPolicy.criticalExtensionHandler} accepts it.
  */
 const PROCESSED_EXTENSIONS = new Set([
   id_AuthorityInfoAccess,
@@ -140,7 +160,8 @@ const PROCESSED_EXTENSIONS = new Set([
   id_BasicConstraints,
   id_CertificatePolicies,
   id_CRLDistributionPoints,
-  // Key purposes are checked by the application (RFC 5280, 4.2.1.12)
+  // Recognized so that a generic path can be validated. Key purposes are checked by the
+  // application (RFC 5280, 4.2.1.12)
   id_ExtKeyUsage,
   id_FreshestCRL,
   id_InhibitAnyPolicy,
@@ -162,11 +183,55 @@ const RAW_EXTENSION_TYPES: Record<string, new (...args: any[]) => unknown> = {
 };
 
 /**
- * Returns `true` if the extension value was decoded without errors
+ * GeneralName types that name constraints are checked for: rfc822Name, dNSName, directoryName,
+ * uniformResourceIdentifier and iPAddress
+ */
+const PROCESSED_NAME_FORMS = new Set([1, 2, 4, 6, 7]);
+
+/**
+ * Returns the value of an INTEGER (0..MAX). Values above `Number.MAX_SAFE_INTEGER` are returned as
+ * `Number.MAX_SAFE_INTEGER`, which no real path reaches.
+ * @param value ASN.1 integer
+ * @returns `undefined` if the integer is negative or empty
+ */
+function getUnsigned(value: asn1js.Integer): number | undefined {
+  if (value.valueBlock.valueHexView.byteLength === 0) {
+    return undefined;
+  }
+
+  const number = value.toBigInt();
+  if (number < BigInt(0)) {
+    return undefined;
+  }
+
+  return number > BigInt(Number.MAX_SAFE_INTEGER) ? Number.MAX_SAFE_INTEGER : Number(number);
+}
+
+/**
+ * Returns the SkipCerts values of a decoded PolicyConstraints extension
  * @param extension Certificate extension
+ * @returns Values by context tag, 0 for `requireExplicitPolicy` and 1 for `inhibitPolicyMapping`
+ */
+function getPolicyConstraints(extension: Extension): Map<number, number | undefined> {
+  const values = new Map<number, number | undefined>();
+  const asn1 = asn1js.fromBER(extension.extnValue.valueBlock.valueHexView);
+  if (asn1.result instanceof asn1js.Sequence) {
+    for (const item of asn1.result.valueBlock.value) {
+      // SkipCerts is IMPLICIT, so the content is that of an INTEGER
+      const content = item instanceof asn1js.Primitive ? item.valueBlock.valueHexView : new Uint8Array();
+      values.set(item.idBlock.tagNumber, getUnsigned(new asn1js.Integer({ valueHex: content })));
+    }
+  }
+
+  return values;
+}
+
+/**
+ * Returns `true` if the extension value was decoded without errors and is in the range of its type
+ * @param extension Certificate extension with one of {@link PROCESSED_EXTENSIONS}
  * @returns
  */
-function isWellFormedExtension(extension: Extension): boolean {
+function isValidExtension(extension: Extension): boolean {
   const raw = extension.extnValue.valueBlock.valueHexView;
   const asn1 = asn1js.fromBER(raw);
   if (asn1.offset === -1 || asn1.offset !== raw.byteLength) {
@@ -175,12 +240,91 @@ function isWellFormedExtension(extension: Extension): boolean {
 
   const rawType = RAW_EXTENSION_TYPES[extension.extnID];
   if (rawType) {
-    return asn1.result instanceof rawType;
+    // SkipCerts ::= INTEGER (0..MAX) (RFC 5280, 4.2.1.14)
+    return asn1.result instanceof rawType && !(asn1.result instanceof asn1js.Integer && getUnsigned(asn1.result) === undefined);
   }
 
   const parsedValue = extension.parsedValue;
+  if (!parsedValue || ("parsingError" in parsedValue && parsedValue.parsingError)) {
+    return false;
+  }
 
-  return !!parsedValue && !("parsingError" in parsedValue && parsedValue.parsingError);
+  if (parsedValue instanceof PolicyConstraints) {
+    // SkipCerts ::= INTEGER (0..MAX) (RFC 5280, 4.2.1.11)
+    return [...getPolicyConstraints(extension).values()].every((value) => value !== undefined);
+  }
+
+  if (parsedValue instanceof NameConstraints) {
+    // "minimum" must be zero, and "maximum" must be absent (RFC 5280, 4.2.1.10)
+    return getSubtrees(parsedValue).every(({ minimum, maximum }) => minimum === 0 && maximum === undefined);
+  }
+
+  return true;
+}
+
+function getSubtrees(nameConstraints: NameConstraints): GeneralSubtree[] {
+  return [...(nameConstraints.permittedSubtrees || []), ...(nameConstraints.excludedSubtrees || [])];
+}
+
+/**
+ * Returns the OID of an extension that the certificate has more than once, if any
+ * @param cert Certificate
+ * @returns
+ */
+function findDuplicateExtension(cert: Certificate): string | undefined {
+  const seen = new Set<string>();
+  for (const { extnID } of cert.extensions || []) {
+    if (seen.has(extnID)) {
+      return extnID;
+    }
+    seen.add(extnID);
+  }
+
+  return undefined;
+}
+
+function duplicateExtension(extnID: string) {
+  return {
+    result: false,
+    resultCode: 17,
+    resultMessage: `Certificate extension is present more than once: ${extnID}`,
+  };
+}
+
+/**
+ * Returns the type of a name of the certificate that a critical name constraint above it restricts,
+ * although the engine cannot check names of that type (RFC 5280, 4.2.1.10)
+ * @param path Certificate path, from the end entity to the trust anchor
+ * @returns
+ */
+function findUnprocessedNameForm(path: Certificate[]): number | undefined {
+  const constrained = new Set<number>();
+  for (let i = path.length - 2; i >= 0; i--) {
+    const extensions = path[i].extensions || [];
+    // Name constraints do not apply to self-issued intermediate certificates (RFC 5280, 6.1.3)
+    if (constrained.size > 0 && (i === 0 || !path[i].issuer.isEqual(path[i].subject))) {
+      for (const { extnID, parsedValue } of extensions) {
+        if (extnID === id_SubjectAltName && parsedValue instanceof AltName) {
+          const name = parsedValue.altNames.find(({ type }) => constrained.has(type));
+          if (name) {
+            return name.type;
+          }
+        }
+      }
+    }
+
+    for (const { critical, parsedValue } of extensions) {
+      if (critical && parsedValue instanceof NameConstraints) {
+        for (const { base } of getSubtrees(parsedValue)) {
+          if (!PROCESSED_NAME_FORMS.has(base.type)) {
+            constrained.add(base.type);
+          }
+        }
+      }
+    }
+  }
+
+  return undefined;
 }
 
 /**
@@ -195,9 +339,7 @@ function getPathLenConstraint(cert: Certificate): number | undefined {
     if (extension.extnID === id_BasicConstraints && extension.parsedValue instanceof BasicConstraints) {
       const { pathLenConstraint } = extension.parsedValue;
       if (pathLenConstraint instanceof asn1js.Integer) {
-        const value = pathLenConstraint.toBigInt();
-
-        return value > BigInt(Number.MAX_SAFE_INTEGER) ? Number.MAX_SAFE_INTEGER : Number(value);
+        return getUnsigned(pathLenConstraint) ?? -1;
       }
 
       return pathLenConstraint;
@@ -211,13 +353,28 @@ function getPathLenConstraint(cert: Certificate): number | undefined {
  * Represents a chain-building engine for {@link Certificate} certificates.
  *
  * Path validation notes:
- * - The `pathLenConstraint` of a trusted certificate is applied like that of any other CA certificate.
- *   RFC 5280, 6.2 leaves trust anchor constraints to the application; this is the engine's policy.
+ * - The `pathLenConstraint` of a trusted certificate is not applied, unless
+ *   {@link CertificateChainValidationPolicy.enforceTrustAnchorPathLenConstraint} is set. RFC 5280, 6.2 leaves
+ *   trust anchor constraints to the application. Those of intermediate certificates are always applied.
  * - A critical extension that the engine does not process makes the path invalid, even if its type is
- *   registered in `ExtensionValueFactory`. Use {@link CertificateChainValidationEngineParameters.criticalExtensionHandler}
+ *   registered in `ExtensionValueFactory`. Use {@link CertificateChainValidationPolicy.criticalExtensionHandler}
  *   to check such extensions in the application.
- * - A critical extension that does not decode makes the path invalid.
- * - When several trusted paths exist, they are checked from the shortest, and the first valid one is used.
+ * - A critical extension that does not decode, or has a value out of range, makes the path invalid. So does
+ *   an extension that a certificate has more than once, and a name that a critical name constraint
+ *   restricts in a form the engine does not check (otherName, x400Address, ediPartyName, registeredID).
+ * - When several trusted paths exist, they are checked from the shortest, and the first one that passes the
+ *   basic checks (dates, name chaining, revocation, CA certificates, critical extensions, pathLenConstraint)
+ *   is used. Certificate policies and name constraints are checked for that path only, so a path can be
+ *   selected and then still fail.
+ * - Whether the key usage and the extended key usage of the end entity fit the purpose at hand is for the
+ *   caller to check.
+ *
+ * `resultCode` values of the checks above:
+ * - 6: a critical extension does not decode or has a value out of range
+ * - 15: a critical extension is not recognized
+ * - 16: a `pathLenConstraint` is exceeded or invalid
+ * - 17: a certificate has an extension more than once
+ * - 18: a critical name constraint applies to a name form that the engine does not check
  *
  * @example
  * ```js The following example demonstrates how to verify certificate chain
@@ -268,10 +425,9 @@ export class CertificateChainValidationEngine {
    */
   public findIssuer: FindIssuerCallback;
   /**
-   * Checks critical extensions that the engine does not process itself. Without it, a certificate
-   * with such an extension is rejected.
+   * Choices that RFC 5280 leaves to the application
    */
-  public criticalExtensionHandler?: CriticalExtensionHandler;
+  public validationPolicy: CertificateChainValidationPolicy;
 
   /**
    * Constructor for CertificateChainValidationEngine class
@@ -286,7 +442,7 @@ export class CertificateChainValidationEngine {
     this.checkDate = parameters[CHECK_DATE] ?? this.defaultValues(CHECK_DATE);
     this.findOrigin = parameters[FIND_ORIGIN] ?? this.defaultValues(FIND_ORIGIN);
     this.findIssuer = parameters[FIND_ISSUER] ?? this.defaultValues(FIND_ISSUER);
-    this.criticalExtensionHandler = parameters.criticalExtensionHandler;
+    this.validationPolicy = parameters.validationPolicy ?? {};
     //#endregion
   }
 
@@ -721,6 +877,56 @@ export class CertificateChainValidationEngine {
     }
     //#endregion
 
+    //#region Check the extensions of a certificate
+    // Candidate paths share certificates, so a processed extension is decoded and checked once
+    const validExtensions = new Map<Extension, boolean>();
+    const checkExtensions = async (cert: Certificate): Promise<{ result: boolean; resultCode?: number; resultMessage?: string }> => {
+      const duplicate = findDuplicateExtension(cert);
+      if (duplicate !== undefined) {
+        return duplicateExtension(duplicate);
+      }
+
+      // A critical extension must be processed, not only decoded (RFC 5280, 4.2)
+      for (const extension of cert.extensions || []) {
+        if (!extension.critical) {
+          continue;
+        }
+
+        if (PROCESSED_EXTENSIONS.has(extension.extnID)) {
+          let valid = validExtensions.get(extension);
+          if (valid === undefined) {
+            valid = isValidExtension(extension);
+            validExtensions.set(extension, valid);
+          }
+          if (!valid) {
+            return {
+              result: false,
+              resultCode: 6,
+              resultMessage: `Unable to parse critical certificate extension: ${extension.extnID}`,
+            };
+          }
+
+          continue;
+        }
+
+        const { criticalExtensionHandler } = this.validationPolicy;
+        if (criticalExtensionHandler && (await criticalExtensionHandler(extension, cert, this)) === true) {
+          continue;
+        }
+
+        return {
+          result: false,
+          resultCode: 15,
+          resultMessage: `Unrecognized critical certificate extension: ${extension.extnID}`,
+        };
+      }
+
+      return {
+        result: true,
+      };
+    };
+    //#endregion
+
     //#region Basic check for certificate path
     const basicCheck = async (path: Certificate[], checkDate: Date): Promise<{ result: boolean; resultCode?: number; resultMessage?: string }> => {
       //#region Check that all dates are valid
@@ -882,48 +1088,41 @@ export class CertificateChainValidationEngine {
       }
       //#endregion
 
-      //#region Check critical extensions of each certificate (except "trust anchor")
-      // A critical extension must be processed, not only decoded (RFC 5280, 4.2)
-      for (let i = 0; i < path.length - 1; i++) {
-        for (const extension of path[i].extensions || []) {
-          if (!extension.critical) {
-            continue;
-          }
-
-          if (PROCESSED_EXTENSIONS.has(extension.extnID)) {
-            if (!isWellFormedExtension(extension)) {
-              return {
-                result: false,
-                resultCode: 6,
-                resultMessage: `Unable to parse critical certificate extension: ${extension.extnID}`,
-              };
-            }
-
-            continue;
-          }
-
-          if (this.criticalExtensionHandler && (await this.criticalExtensionHandler(extension, path[i], this)) === true) {
-            continue;
-          }
-
-          return {
-            result: false,
-            resultCode: 15,
-            resultMessage: `Unrecognized critical certificate extension: ${extension.extnID}`,
-          };
+      //#region Check extensions of each certificate (except "trust anchor")
+      const anchor = path.length - 1;
+      for (let i = 0; i < anchor; i++) {
+        const result = await checkExtensions(path[i]);
+        if (!result.result) {
+          return result;
         }
+      }
+
+      const nameForm = findUnprocessedNameForm(path);
+      if (nameForm !== undefined) {
+        return {
+          result: false,
+          resultCode: 18,
+          resultMessage: `Unsupported critical name constraint for GeneralName type: ${nameForm}`,
+        };
       }
       //#endregion
 
       //#region Check "pathLenConstraint" values, from "trust anchor" down to the last CA certificate
-      // The trust anchor's own pathLenConstraint is applied too. RFC 5280, 6.2 leaves this to the
-      // application; the engine treats a trusted CA certificate like any other CA certificate.
+      // RFC 5280, 6.2 leaves the constraints of the trust anchor itself to the application
+      const { enforceTrustAnchorPathLenConstraint } = this.validationPolicy;
+      if (enforceTrustAnchorPathLenConstraint) {
+        const duplicate = findDuplicateExtension(path[anchor]);
+        if (duplicate !== undefined) {
+          return duplicateExtension(duplicate);
+        }
+      }
+      const first = enforceTrustAnchorPathLenConstraint ? anchor : anchor - 1;
       let maxPathLength = Number.POSITIVE_INFINITY;
-      for (let i = path.length - 1; i > 0; i--) {
+      for (let i = first; i > 0; i--) {
         const cert = path[i];
 
         // Self-issued intermediate certificates do not count against the limit (RFC 5280, 6.1.4 (l))
-        if (i < path.length - 1 && !cert.issuer.isEqual(cert.subject)) {
+        if (i < anchor && !cert.issuer.isEqual(cert.subject)) {
           if (maxPathLength <= 0) {
             return {
               result: false,
@@ -1403,27 +1602,25 @@ export class CertificateChainValidationEngine {
             //#region PolicyConstraints
             if (extension.extnID === id_PolicyConstraints) {
               if (explicitPolicyIndicator === false) {
+                const policyConstraints = getPolicyConstraints(extension);
+
                 //#region requireExplicitPolicy
-                if (extension.parsedValue.requireExplicitPolicy === 0) {
+                const requireExplicitPolicy = policyConstraints.get(0);
+                if (requireExplicitPolicy === 0) {
                   explicitPolicyIndicator = true;
                   explicitPolicyStart = i;
-                } else {
-                  if (pendingConstraints[0] === false) {
-                    pendingConstraints[0] = true;
-                    explicitPolicyPending = extension.parsedValue.requireExplicitPolicy;
-                  } else explicitPolicyPending = explicitPolicyPending > extension.parsedValue.requireExplicitPolicy ? extension.parsedValue.requireExplicitPolicy : explicitPolicyPending;
+                } else if (requireExplicitPolicy !== undefined) {
+                  explicitPolicyPending = pendingConstraints[0] ? Math.min(explicitPolicyPending, requireExplicitPolicy) : requireExplicitPolicy;
+                  pendingConstraints[0] = true;
                 }
                 //#endregion
 
                 //#region inhibitPolicyMapping
-                if (extension.parsedValue.inhibitPolicyMapping === 0) policyMappingInhibitIndicator = true;
-                else {
-                  if (pendingConstraints[1] === false) {
-                    pendingConstraints[1] = true;
-                    policyMappingInhibitPending = extension.parsedValue.inhibitPolicyMapping + 1;
-                  } else
-                    policyMappingInhibitPending =
-                      policyMappingInhibitPending > extension.parsedValue.inhibitPolicyMapping + 1 ? extension.parsedValue.inhibitPolicyMapping + 1 : policyMappingInhibitPending;
+                const inhibitPolicyMapping = policyConstraints.get(1);
+                if (inhibitPolicyMapping === 0) policyMappingInhibitIndicator = true;
+                else if (inhibitPolicyMapping !== undefined) {
+                  policyMappingInhibitPending = pendingConstraints[1] ? Math.min(policyMappingInhibitPending, inhibitPolicyMapping + 1) : inhibitPolicyMapping + 1;
+                  pendingConstraints[1] = true;
                 }
                 //#endregion
               }
@@ -1433,12 +1630,11 @@ export class CertificateChainValidationEngine {
             //#region InhibitAnyPolicy
             if (extension.extnID === id_InhibitAnyPolicy) {
               if (inhibitAnyPolicyIndicator === false) {
-                if (extension.parsedValue.valueBlock.valueDec === 0) inhibitAnyPolicyIndicator = true;
-                else {
-                  if (pendingConstraints[2] === false) {
-                    pendingConstraints[2] = true;
-                    inhibitAnyPolicyPending = extension.parsedValue.valueBlock.valueDec;
-                  } else inhibitAnyPolicyPending = inhibitAnyPolicyPending > extension.parsedValue.valueBlock.valueDec ? extension.parsedValue.valueBlock.valueDec : inhibitAnyPolicyPending;
+                const skipCerts = getUnsigned(extension.parsedValue as asn1js.Integer);
+                if (skipCerts === 0) inhibitAnyPolicyIndicator = true;
+                else if (skipCerts !== undefined) {
+                  inhibitAnyPolicyPending = pendingConstraints[2] ? Math.min(inhibitAnyPolicyPending, skipCerts) : skipCerts;
+                  pendingConstraints[2] = true;
                 }
               }
             }

@@ -5,6 +5,7 @@ import { SignedData } from "./SignedData";
 import type * as Schema from "./Schema";
 import { id_ContentType_SignedData } from "./ObjectIdentifiers";
 import type { Certificate } from "./Certificate";
+import type { CertificateChainValidationPolicy } from "./CertificateChainValidationEngine";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
@@ -37,6 +38,14 @@ export interface TimeStampRespVerifyParams {
   signer?: number;
   trustedCerts?: Certificate[];
   data?: ArrayBuffer;
+  /**
+   * Validate the certificate chain of the timestamp signer
+   */
+  checkChain?: boolean;
+  /**
+   * Policy for the validation of the signer's certificate chain. Used with `checkChain: true`
+   */
+  validationPolicy?: CertificateChainValidationPolicy;
 }
 
 export type TimeStampRespParameters = PkiObjectParameters & Partial<ITimeStampResp>;

@@ -73,12 +73,12 @@ describe("CertificateChainValidationEngine", () => {
     keys = await Promise.all([generateKey(), generateKey(), generateKey(), generateKey(), generateKey()]);
   });
 
-  const verify = (trustRoot: pkijs.Certificate | pkijs.Certificate[], certs: pkijs.Certificate[], criticalExtensionHandler?: pkijs.CriticalExtensionHandler) =>
+  const verify = (trustRoot: pkijs.Certificate | pkijs.Certificate[], certs: pkijs.Certificate[], validationPolicy?: pkijs.CertificateChainValidationPolicy) =>
     new pkijs.CertificateChainValidationEngine({
       trustedCerts: Array.isArray(trustRoot) ? trustRoot : [trustRoot],
       certs,
       checkDate,
-      criticalExtensionHandler,
+      validationPolicy,
     }).verify();
 
   describe("pathLenConstraint", () => {
@@ -104,23 +104,42 @@ describe("CertificateChainValidationEngine", () => {
       assert.isTrue(result.result, result.resultMessage);
     });
 
-    it("applies the pathLenConstraint of the trust anchor", async () => {
-      const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true, pathLenConstraint: 0 });
-      const icaCert = await createCertificate("ICA", "Root", keys[ica].publicKey, keys[root].privateKey, { ca: true });
-      const endEntity = await createCertificate("EE", "ICA", keys[ee].publicKey, keys[ica].privateKey, { ca: false });
+    for (const [label, validationPolicy, valid] of [
+      ["does not apply it by default", undefined, true],
+      ["does not apply it when the policy says so", { enforceTrustAnchorPathLenConstraint: false }, true],
+      ["applies it when the policy says so", { enforceTrustAnchorPathLenConstraint: true }, false],
+    ] as const) {
+      it(`the pathLenConstraint of the trust anchor: ${label}`, async () => {
+        const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true, pathLenConstraint: 0 });
+        const icaCert = await createCertificate("ICA", "Root", keys[ica].publicKey, keys[root].privateKey, { ca: true });
+        const endEntity = await createCertificate("EE", "ICA", keys[ee].publicKey, keys[ica].privateKey, { ca: false });
 
-      const result = await verify(trustRoot, [icaCert, endEntity]);
-      assert.isFalse(result.result);
-      assert.equal(result.resultCode, 16);
-    });
+        const result = await verify(trustRoot, [icaCert, endEntity], validationPolicy);
+        assert.equal(result.result, valid, result.resultMessage);
+        if (!valid) {
+          assert.equal(result.resultCode, 16);
+        }
+      });
+    }
 
     it("accepts a path as long as the trust anchor's pathLenConstraint", async () => {
       const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true, pathLenConstraint: 1 });
       const icaCert = await createCertificate("ICA", "Root", keys[ica].publicKey, keys[root].privateKey, { ca: true });
       const endEntity = await createCertificate("EE", "ICA", keys[ee].publicKey, keys[ica].privateKey, { ca: false });
 
-      const result = await verify(trustRoot, [icaCert, endEntity]);
+      const result = await verify(trustRoot, [icaCert, endEntity], { enforceTrustAnchorPathLenConstraint: true });
       assert.isTrue(result.result, result.resultMessage);
+    });
+
+    it("applies the pathLenConstraint of an intermediate whatever the policy says about the trust anchor", async () => {
+      const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true });
+      const ica0 = await createCertificate("ICA0", "Root", keys[ica].publicKey, keys[root].privateKey, { ca: true, pathLenConstraint: 0 });
+      const subCaCert = await createCertificate("SubCA", "ICA0", keys[subCa].publicKey, keys[ica].privateKey, { ca: true });
+      const endEntity = await createCertificate("EE", "SubCA", keys[ee].publicKey, keys[subCa].privateKey, { ca: false });
+
+      const result = await verify(trustRoot, [ica0, subCaCert, endEntity], { enforceTrustAnchorPathLenConstraint: false, criticalExtensionHandler: () => true });
+      assert.isFalse(result.result);
+      assert.equal(result.resultCode, 16);
     });
 
     for (const [label, depth] of [
@@ -200,7 +219,7 @@ describe("CertificateChainValidationEngine", () => {
 
           const roots = order === "failing first" ? [rootA0, rootB1] : [rootB1, rootA0];
           const icas = order === "failing first" ? [icaByA, icaByB] : [icaByB, icaByA];
-          const result = await verify(roots, [...icas, endEntity]);
+          const result = await verify(roots, [...icas, endEntity], { enforceTrustAnchorPathLenConstraint: true });
           assert.isTrue(result.result, result.resultMessage);
           assert.deepEqual(result.certificatePath, [endEntity, icaByB, rootB1]);
         });
@@ -213,7 +232,7 @@ describe("CertificateChainValidationEngine", () => {
         const icaByB = await createCertificate("ICA", "Root B", keys[ica].publicKey, keys[rootB].privateKey, { ca: true });
         const endEntity = await createCertificate("EE", "ICA", keys[ee].publicKey, keys[ica].privateKey, { ca: false });
 
-        const result = await verify([rootA0, rootB0], [icaByA, icaByB, endEntity]);
+        const result = await verify([rootA0, rootB0], [icaByA, icaByB, endEntity], { enforceTrustAnchorPathLenConstraint: true });
         assert.isFalse(result.result);
         assert.equal(result.resultCode, 16);
       });
@@ -294,10 +313,12 @@ describe("CertificateChainValidationEngine", () => {
       const endEntity = await createCertificate("EE", "Root", keys[ee].publicKey, keys[root].privateKey, { ca: false, extensions: [unknownCriticalExtension()] });
       const seen: [string, pkijs.Certificate][] = [];
 
-      const result = await verify(trustRoot, [endEntity], async (extension, certificate) => {
-        seen.push([extension.extnID, certificate]);
+      const result = await verify(trustRoot, [endEntity], {
+        criticalExtensionHandler: async (extension, certificate) => {
+          seen.push([extension.extnID, certificate]);
 
-        return extension.extnID === UNKNOWN_EXTENSION;
+          return extension.extnID === UNKNOWN_EXTENSION;
+        },
       });
       assert.isTrue(result.result, result.resultMessage);
       assert.deepEqual(seen, [[UNKNOWN_EXTENSION, endEntity]]);
@@ -307,7 +328,7 @@ describe("CertificateChainValidationEngine", () => {
       const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true });
       const endEntity = await createCertificate("EE", "Root", keys[ee].publicKey, keys[root].privateKey, { ca: false, extensions: [unknownCriticalExtension()] });
 
-      const result = await verify(trustRoot, [endEntity], () => false);
+      const result = await verify(trustRoot, [endEntity], { criticalExtensionHandler: () => false });
       assert.isFalse(result.result);
       assert.equal(result.resultCode, 15);
     });
@@ -334,13 +355,313 @@ describe("CertificateChainValidationEngine", () => {
               extensions: placement === "end entity" ? malformed : [],
             });
 
-            const result = await verify(trustRoot, [icaCert, endEntity], () => true);
+            const result = await verify(trustRoot, [icaCert, endEntity], { criticalExtensionHandler: () => true });
             assert.isFalse(result.result);
             // An intermediate whose extension does not decode at all already fails the CA check (14)
             assert.equal(result.resultCode, placement === "intermediate" && kind === "truncated BER" ? 14 : 6);
           });
         }
       }
+    }
+  });
+
+  describe("duplicate extensions", () => {
+    const [root, ica, subCa, ee] = [0, 1, 2, 3];
+    const basicConstraints = (pathLenConstraint?: number) =>
+      new pkijs.Extension({
+        extnID: "2.5.29.19",
+        critical: true,
+        extnValue: new pkijs.BasicConstraints({ cA: true, pathLenConstraint }).toSchema().toBER(false),
+      });
+
+    for (const [label, first, second] of [
+      ["restrictive first", 0, 5],
+      ["restrictive last", 5, 0],
+    ] as const) {
+      it(`rejects conflicting BasicConstraints (${label})`, async () => {
+        const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true });
+        const icaCert = await createCertificate("ICA", "Root", keys[ica].publicKey, keys[root].privateKey, {
+          ca: true,
+          pathLenConstraint: first,
+          extensions: [basicConstraints(second)],
+        });
+        const subCaCert = await createCertificate("SubCA", "ICA", keys[subCa].publicKey, keys[ica].privateKey, { ca: true });
+        const endEntity = await createCertificate("EE", "SubCA", keys[ee].publicKey, keys[subCa].privateKey, { ca: false });
+
+        const result = await verify(trustRoot, [icaCert, subCaCert, endEntity]);
+        assert.isFalse(result.result);
+        assert.equal(result.resultCode, 17);
+        assert.equal(result.resultMessage, "Certificate extension is present more than once: 2.5.29.19");
+      });
+
+      it(`rejects conflicting BasicConstraints of a trust anchor whose limit is applied (${label})`, async () => {
+        const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, {
+          ca: true,
+          pathLenConstraint: first,
+          extensions: [basicConstraints(second)],
+        });
+        const icaCert = await createCertificate("ICA", "Root", keys[ica].publicKey, keys[root].privateKey, { ca: true });
+        const endEntity = await createCertificate("EE", "ICA", keys[ee].publicKey, keys[ica].privateKey, { ca: false });
+
+        const result = await verify(trustRoot, [icaCert, endEntity], { enforceTrustAnchorPathLenConstraint: true });
+        assert.isFalse(result.result);
+        assert.equal(result.resultCode, 17);
+      });
+    }
+
+    it("rejects a non-critical extension that an end entity has twice", async () => {
+      const extension = () => new pkijs.Extension({ extnID: UNKNOWN_EXTENSION, critical: false, extnValue: new asn1js.Null().toBER(false) });
+      const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true });
+      const endEntity = await createCertificate("EE", "Root", keys[ee].publicKey, keys[root].privateKey, { ca: false, extensions: [extension(), extension()] });
+
+      const result = await verify(trustRoot, [endEntity]);
+      assert.isFalse(result.result);
+      assert.equal(result.resultCode, 17);
+    });
+  });
+
+  describe("values of critical policy constraints", () => {
+    const [root, ica, subCa, ee] = [0, 1, 2, 3];
+    const inhibitAnyPolicy = (value: asn1js.Integer) => new pkijs.Extension({ extnID: "2.5.29.54", critical: true, extnValue: value.toBER(false) });
+    const policyConstraints = (tagNumber: number, content: Uint8Array) =>
+      new pkijs.Extension({
+        extnID: "2.5.29.36",
+        critical: true,
+        extnValue: new asn1js.Sequence({
+          value: [new asn1js.Primitive({ idBlock: { tagClass: 3, tagNumber }, valueHex: content })],
+        }).toBER(false),
+      });
+    const big = new Uint8Array([1, 0, 0, 0, 0, 0, 0, 0, 0]); // 2^64
+
+    const verifyWith = async (extension: pkijs.Extension) => {
+      const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true });
+      const icaCert = await createCertificate("ICA", "Root", keys[ica].publicKey, keys[root].privateKey, { ca: true, extensions: [extension] });
+      const subCaCert = await createCertificate("SubCA", "ICA", keys[subCa].publicKey, keys[ica].privateKey, { ca: true });
+      const endEntity = await createCertificate("EE", "SubCA", keys[ee].publicKey, keys[subCa].privateKey, { ca: false });
+
+      return verify(trustRoot, [icaCert, subCaCert, endEntity]);
+    };
+
+    for (const [label, extension] of [
+      ["a negative InhibitAnyPolicy", () => inhibitAnyPolicy(new asn1js.Integer({ value: -1 }))],
+      ["a large negative InhibitAnyPolicy", () => inhibitAnyPolicy(asn1js.Integer.fromBigInt(-(BigInt(2) ** BigInt(64))))],
+      ["a negative requireExplicitPolicy", () => policyConstraints(0, new Uint8Array([0xff]))],
+      ["a negative inhibitPolicyMapping", () => policyConstraints(1, new Uint8Array([0xff]))],
+      ["an empty requireExplicitPolicy", () => policyConstraints(0, new Uint8Array())],
+    ] as const) {
+      it(`rejects ${label}`, async () => {
+        const result = await verifyWith(extension());
+        assert.isFalse(result.result);
+        assert.equal(result.resultCode, 6);
+      });
+    }
+
+    for (const [label, extension] of [
+      ["InhibitAnyPolicy", () => inhibitAnyPolicy(asn1js.Integer.fromBigInt(BigInt(2) ** BigInt(64)))],
+      ["requireExplicitPolicy", () => policyConstraints(0, big)],
+      ["inhibitPolicyMapping", () => policyConstraints(1, big)],
+    ] as const) {
+      it(`accepts a large ${label}, which no path reaches`, async () => {
+        const result = await verifyWith(extension());
+        assert.isTrue(result.result, result.resultMessage);
+      });
+    }
+
+    it("applies requireExplicitPolicy 0", async () => {
+      const result = await verifyWith(policyConstraints(0, new Uint8Array([0])));
+      assert.isFalse(result.result);
+      assert.isTrue(result.explicitPolicyIndicator);
+    });
+
+    it("applies a requireExplicitPolicy below a PolicyConstraints that only has inhibitPolicyMapping", async () => {
+      const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true });
+      const icaCert = await createCertificate("ICA", "Root", keys[ica].publicKey, keys[root].privateKey, { ca: true, extensions: [policyConstraints(1, new Uint8Array([5]))] });
+      const subCaCert = await createCertificate("SubCA", "ICA", keys[subCa].publicKey, keys[ica].privateKey, { ca: true, extensions: [policyConstraints(0, new Uint8Array([1]))] });
+      const endEntity = await createCertificate("EE", "SubCA", keys[ee].publicKey, keys[subCa].privateKey, { ca: false });
+
+      const result = await verify(trustRoot, [icaCert, subCaCert, endEntity]);
+      assert.isFalse(result.result);
+      assert.isTrue(result.explicitPolicyIndicator);
+    });
+  });
+
+  describe("critical name constraints that the engine does not check", () => {
+    const [root, ica, subCa, ee] = [0, 1, 2, 3];
+    const registeredId = (value: string) => new pkijs.GeneralName({ type: 8, value });
+    const dnsName = (value: string) => new pkijs.GeneralName({ type: 2, value });
+    const nameConstraints = (kind: "permittedSubtrees" | "excludedSubtrees", subtree: pkijs.GeneralSubtreeParameters, critical = true) =>
+      new pkijs.Extension({
+        extnID: "2.5.29.30",
+        critical,
+        extnValue: new pkijs.NameConstraints({ [kind]: [new pkijs.GeneralSubtree(subtree)] }).toSchema().toBER(false),
+      });
+    const subjectAltName = (...altNames: pkijs.GeneralName[]) => new pkijs.Extension({ extnID: "2.5.29.17", critical: false, extnValue: new pkijs.AltName({ altNames }).toSchema().toBER(false) });
+
+    const verifyWith = async (constraint: pkijs.Extension, names: pkijs.GeneralName[]) => {
+      const trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true });
+      const icaCert = await createCertificate("ICA", "Root", keys[ica].publicKey, keys[root].privateKey, { ca: true, extensions: [constraint] });
+      const subCaCert = await createCertificate("SubCA", "ICA", keys[subCa].publicKey, keys[ica].privateKey, { ca: true });
+      const endEntity = await createCertificate("EE", "SubCA", keys[ee].publicKey, keys[subCa].privateKey, { ca: false, extensions: [subjectAltName(...names)] });
+
+      return verify(trustRoot, [icaCert, subCaCert, endEntity]);
+    };
+
+    for (const kind of ["permittedSubtrees", "excludedSubtrees"] as const) {
+      it(`rejects a name of a form that ${kind} restricts and the engine does not check`, async () => {
+        const result = await verifyWith(nameConstraints(kind, { base: registeredId("1.2.3") }), [dnsName("a.example"), registeredId("1.2.4")]);
+        assert.isFalse(result.result);
+        assert.equal(result.resultCode, 18);
+      });
+
+      it(`accepts names of other forms below ${kind} of a form that the engine does not check`, async () => {
+        const result = await verifyWith(nameConstraints(kind, { base: registeredId("1.2.3") }), [dnsName("a.example")]);
+        assert.isTrue(result.result, result.resultMessage);
+      });
+
+      it(`accepts a non-critical ${kind} of a form that the engine does not check`, async () => {
+        const result = await verifyWith(nameConstraints(kind, { base: registeredId("1.2.3") }, false), [registeredId("1.2.4")]);
+        assert.isTrue(result.result, result.resultMessage);
+      });
+
+      it(`rejects a minimum other than 0 in ${kind}`, async () => {
+        const result = await verifyWith(nameConstraints(kind, { base: dnsName("example"), minimum: 1 }), [dnsName("a.example")]);
+        assert.isFalse(result.result);
+        assert.equal(result.resultCode, 6);
+      });
+
+      it(`rejects a maximum in ${kind}`, async () => {
+        const result = await verifyWith(nameConstraints(kind, { base: dnsName("example"), maximum: 1 }), [dnsName("a.example")]);
+        assert.isFalse(result.result);
+        assert.equal(result.resultCode, 6);
+      });
+    }
+
+    it("still checks the name forms it knows", async () => {
+      const constraint = () => nameConstraints("permittedSubtrees", { base: dnsName("example") });
+      const good = await verifyWith(constraint(), [dnsName("a.example")]);
+      assert.isTrue(good.result, good.resultMessage);
+      const bad = await verifyWith(constraint(), [dnsName("a.test")]);
+      assert.isFalse(bad.result);
+      assert.equal(bad.resultCode, 41);
+    });
+  });
+
+  describe("validation policy of other APIs", () => {
+    const [root, ica, , ee] = [0, 1, 2, 3];
+    const data = new Uint8Array([1, 2, 3]).buffer;
+    let trustRoot: pkijs.Certificate;
+    let icaCert: pkijs.Certificate;
+    let plain: pkijs.Certificate;
+    let withCritical: pkijs.Certificate;
+
+    beforeAll(async () => {
+      trustRoot = await createCertificate("Root", "Root", keys[root].publicKey, keys[root].privateKey, { ca: true, pathLenConstraint: 0 });
+      icaCert = await createCertificate("ICA", "Root", keys[ica].publicKey, keys[root].privateKey, { ca: true });
+      plain = await createCertificate("EE", "ICA", keys[ee].publicKey, keys[ica].privateKey, { ca: false });
+      withCritical = await createCertificate("EE", "ICA", keys[ee].publicKey, keys[ica].privateKey, { ca: false, extensions: [unknownCriticalExtension()] });
+    });
+
+    const sign = async (signer: pkijs.Certificate, eContentType: string, eContent: ArrayBuffer) => {
+      const signedData = new pkijs.SignedData({
+        version: 3,
+        encapContentInfo: new pkijs.EncapsulatedContentInfo({ eContentType, eContent: new asn1js.OctetString({ valueHex: eContent }) }),
+        signerInfos: [
+          new pkijs.SignerInfo({
+            version: 1,
+            sid: new pkijs.IssuerAndSerialNumber({ issuer: signer.issuer, serialNumber: signer.serialNumber }),
+          }),
+        ],
+        certificates: [signer, icaCert],
+      });
+      await signedData.sign(keys[ee].privateKey, 0, "SHA-256");
+
+      return signedData;
+    };
+
+    const apis: [string, (signer: pkijs.Certificate, validationPolicy?: pkijs.CertificateChainValidationPolicy) => Promise<boolean>][] = [
+      [
+        "SignedData",
+        async (signer, validationPolicy) => {
+          const signedData = await sign(signer, pkijs.ContentInfo.DATA, data);
+
+          return signedData.verify({ signer: 0, trustedCerts: [trustRoot], checkDate, checkChain: true, validationPolicy });
+        },
+      ],
+      [
+        "TimeStampResp",
+        async (signer, validationPolicy) => {
+          const tstInfo = new pkijs.TSTInfo({
+            version: 1,
+            policy: "1.2.3.4.1",
+            messageImprint: await pkijs.MessageImprint.create("SHA-256", data),
+            serialNumber: new asn1js.Integer({ value: 1 }),
+            genTime: checkDate,
+          });
+          const signedData = await sign(signer, pkijs.id_eContentType_TSTInfo, tstInfo.toSchema().toBER(false));
+          const response = new pkijs.TimeStampResp({
+            status: new pkijs.PKIStatusInfo({ status: pkijs.PKIStatus.granted }),
+            timeStampToken: new pkijs.ContentInfo({ contentType: pkijs.ContentInfo.SIGNED_DATA, content: signedData.toSchema(true) }),
+          });
+
+          return response.verify({ signer: 0, data, trustedCerts: [trustRoot], checkChain: true, validationPolicy });
+        },
+      ],
+      ["BasicOCSPResponse", async (signer, validationPolicy) => (await ocspResponse(signer)).verify({ trustedCerts: [trustRoot], validationPolicy })],
+      [
+        "OCSPResponse",
+        async (signer, validationPolicy) => {
+          const basic = await ocspResponse(signer);
+          const response = new pkijs.OCSPResponse({
+            responseStatus: new asn1js.Enumerated({ value: 0 }),
+            responseBytes: new pkijs.ResponseBytes({
+              responseType: pkijs.id_PKIX_OCSP_Basic,
+              response: new asn1js.OctetString({ valueHex: basic.toSchema().toBER(false) }),
+            }),
+          });
+
+          return response.verify(null, undefined, { trustedCerts: [trustRoot], validationPolicy });
+        },
+      ],
+    ];
+
+    // An OCSP responder delegated by ICA
+    const ocspResponse = async (signer: pkijs.Certificate) => {
+      const extensions = [
+        new pkijs.Extension({ extnID: "2.5.29.37", critical: false, extnValue: new pkijs.ExtKeyUsage({ keyPurposes: ["1.3.6.1.5.5.7.3.9"] }).toSchema().toBER(false) }),
+        ...(signer === withCritical ? [unknownCriticalExtension()] : []),
+      ];
+      const responder = await createCertificate("Responder", "ICA", keys[ee].publicKey, keys[ica].privateKey, { ca: false, extensions });
+      const response = new pkijs.BasicOCSPResponse();
+      response.tbsResponseData.responderID = responder.subject;
+      response.tbsResponseData.producedAt = checkDate;
+      const certID = new pkijs.CertID();
+      await certID.createForCertificate(plain, { hashAlgorithm: "SHA-256", issuerCertificate: icaCert });
+      response.tbsResponseData.responses.push(new pkijs.SingleResponse({ certID, certStatus: new asn1js.Primitive({ idBlock: { tagClass: 3, tagNumber: 0 } }), thisUpdate: checkDate }));
+      response.certs = [responder, icaCert];
+      await response.sign(keys[ee].privateKey, "SHA-256");
+
+      return pkijs.BasicOCSPResponse.fromBER(response.toSchema().toBER(false));
+    };
+
+    const outcome = async (run: () => Promise<boolean>) => {
+      try {
+        return (await run()) ? "valid" : "invalid";
+      } catch (e) {
+        return (e as Error).message;
+      }
+    };
+
+    for (const [label, verifyApi] of apis) {
+      it(`${label}: the limit of the trust anchor is applied only when the policy says so`, async () => {
+        assert.equal(await outcome(() => verifyApi(plain)), "valid");
+        assert.include(await outcome(() => verifyApi(plain, { enforceTrustAnchorPathLenConstraint: true })), "pathLenConstraint");
+      });
+
+      it(`${label}: a critical extension is accepted only by the handler of the policy`, async () => {
+        assert.include(await outcome(() => verifyApi(withCritical)), "Unrecognized critical certificate extension");
+        assert.include(await outcome(() => verifyApi(withCritical, { criticalExtensionHandler: () => false })), "Unrecognized critical certificate extension");
+        assert.equal(await outcome(() => verifyApi(withCritical, { criticalExtensionHandler: ({ extnID }) => extnID === UNKNOWN_EXTENSION })), "valid");
+      });
     }
   });
 });
