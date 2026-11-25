@@ -7,7 +7,7 @@ import { Certificate, type CertificateJson, type CertificateSchema, checkCA } fr
 import { CertID } from "./CertID";
 import { ExtKeyUsage } from "./ExtKeyUsage";
 import { RelativeDistinguishedNames } from "./RelativeDistinguishedNames";
-import { CertificateChainValidationEngine } from "./CertificateChainValidationEngine";
+import { CertificateChainValidationEngine, type CertificateChainValidationPolicy } from "./CertificateChainValidationEngine";
 import type * as Schema from "./Schema";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
@@ -90,6 +90,10 @@ export interface BasicOCSPResponseVerifyParams {
    * delegated. For normal delegated responders, leave this list empty.
    */
   trustedResponders?: Certificate[];
+  /**
+   * Policy for the validation of the responder's certificate chain.
+   */
+  validationPolicy?: CertificateChainValidationPolicy;
 }
 
 export interface BasicOCSPResponseJson {
@@ -510,7 +514,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
 
         let validatedPathCerts: Certificate[] = [];
         if (!isTrustedResponder) {
-          validatedPathCerts = await BasicOCSPResponse.validateSignerChain(signerCert, embeddedCerts, issuerCerts, trustedCerts, crypto);
+          validatedPathCerts = await BasicOCSPResponse.validateSignerChain(signerCert, embeddedCerts, issuerCerts, trustedCerts, params.validationPolicy, crypto);
         }
 
         //#region 4. Authorization
@@ -651,6 +655,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     embeddedCerts: Certificate[],
     issuerCerts: Certificate[],
     trustedCerts: Certificate[],
+    validationPolicy?: CertificateChainValidationPolicy,
     crypto = common.getCrypto(true),
   ): Promise<Certificate[]> {
     // Collect CA candidates, append the signer as leaf (last entry), and
@@ -680,6 +685,7 @@ export class BasicOCSPResponse extends PkiObject implements IBasicOCSPResponse {
     const engine = new CertificateChainValidationEngine({
       certs: additionalCerts,
       trustedCerts,
+      validationPolicy,
     });
 
     const result = await engine.verify({}, crypto);

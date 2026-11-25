@@ -5,6 +5,7 @@ import { SignedData } from "./SignedData";
 import type * as Schema from "./Schema";
 import { id_ContentType_SignedData } from "./ObjectIdentifiers";
 import type { Certificate } from "./Certificate";
+import type { CertificateChainValidationPolicy } from "./CertificateChainValidationEngine";
 import { PkiObject, type PkiObjectParameters } from "./PkiObject";
 import { AsnError } from "./errors";
 import { EMPTY_BUFFER, EMPTY_STRING } from "./constants";
@@ -37,6 +38,15 @@ export interface TimeStampRespVerifyParams {
   signer?: number;
   trustedCerts?: Certificate[];
   data?: ArrayBuffer;
+  /**
+   * Validate the certificate chain of the timestamp signer. It is not checked that the signer's
+   * certificate is for time stamping (RFC 3161, 2.3); that is for the caller to check
+   */
+  checkChain?: boolean;
+  /**
+   * Policy for the validation of the signer's certificate chain. Used with `checkChain: true`
+   */
+  validationPolicy?: CertificateChainValidationPolicy;
 }
 
 export type TimeStampRespParameters = PkiObjectParameters & Partial<ITimeStampResp>;

@@ -1,6 +1,6 @@
 import * as asn1js from "asn1js";
 import { ResponseBytes, type ResponseBytesJson, type ResponseBytesSchema } from "./ResponseBytes";
-import { BasicOCSPResponse } from "./BasicOCSPResponse";
+import { BasicOCSPResponse, type BasicOCSPResponseVerifyParams } from "./BasicOCSPResponse";
 import type * as Schema from "./Schema";
 import type { Certificate } from "./Certificate";
 import { id_PKIX_OCSP_Basic } from "./ObjectIdentifiers";
@@ -300,8 +300,9 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
    * Verify current OCSP Response
    * @param issuerCertificate In order to decrease size of resp issuer cert could be omitted. In such case you need manually provide it.
    * @param crypto Crypto engine
+   * @param params Parameters for the verification of the basic response, such as trusted certificates and the validation policy
    */
-  public async verify(issuerCertificate: Certificate | null = null, crypto = common.getCrypto(true)): Promise<boolean> {
+  public async verify(issuerCertificate: Certificate | null = null, crypto = common.getCrypto(true), params: BasicOCSPResponseVerifyParams = {}): Promise<boolean> {
     //#region Check that ResponseBytes exists in the object
     if (RESPONSE_BYTES in this === false) throw new Error("Empty ResponseBytes field");
     //#endregion
@@ -318,7 +319,7 @@ export class OCSPResponse extends PkiObject implements IOCSPResponse {
         basicResponse.certs.push(issuerCertificate);
       }
 
-      return basicResponse.verify({}, crypto);
+      return basicResponse.verify(params, crypto);
     }
 
     throw new Error(`Unknown ResponseBytes type: ${this.responseBytes?.responseType || "Unknown"}`);
