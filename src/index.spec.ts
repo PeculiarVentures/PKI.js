@@ -23,6 +23,7 @@ describe("pkijs public API", () => {
       "AttributeCertificateV1",
       "AttributeCertificateV2",
       "AttributeTypeAndValue",
+      "AuthEnvelopedData",
       "AuthenticatedSafe",
       "AuthorityKeyIdentifier",
       "BasicConstraints",
@@ -176,6 +177,7 @@ describe("pkijs public API", () => {
       "id_CertBag_X509Certificate",
       "id_CertificateIssuer",
       "id_CertificatePolicies",
+      "id_ContentType_AuthEnvelopedData",
       "id_ContentType_Data",
       "id_ContentType_EncryptedData",
       "id_ContentType_EnvelopedData",
@@ -214,6 +216,7 @@ describe("pkijs public API", () => {
       "id_sha512",
       "kdf",
       "setEngine",
+      "sortDerSetOf",
       "stringPrep",
       "verifySCTsForCertificate",
     ]);
