@@ -798,21 +798,66 @@ export class SignedData extends PkiObject implements ISignedData {
         //#region Check mandatory attributes
         let foundContentType = false;
         let foundMessageDigest = false;
+        let contentTypeAttrValue: string | undefined;
 
+        // RFC 5652 Section 11.1 requires exactly one content-type attribute carrying a single
+        // OBJECT IDENTIFIER value, so the entire attribute list is scanned (no early exit) to
+        // detect a duplicate content-type attribute even when it appears after the mandatory ones.
         for (const attribute of signerInfo.signedAttrs.attributes) {
           //#region Check that "content-type" attribute exists
-          if (attribute.type === "1.2.840.113549.1.9.3") foundContentType = true;
-          //#endregion
+          if (attribute.type === "1.2.840.113549.1.9.3") {
+            //#region Reject a duplicate "content-type" attribute (RFC 5652 Section 11.1)
+            if (foundContentType) {
+              throw new SignedDataVerifyError({
+                date: checkDate,
+                code: 13,
+                message: 'Multiple "content-type" attributes are present in "signed attributes"',
+                signerCertificate: signerCert,
+                signerCertificateVerified: true,
+              });
+            }
+            //#endregion
 
-          //#region Check that "message-digest" attribute exists
-          if (attribute.type === "1.2.840.113549.1.9.4") {
-            foundMessageDigest = true;
-            messageDigestValue = attribute.values[0].valueBlock.valueHex;
+            foundContentType = true;
+
+            //#region Enforce single-value cardinality (RFC 5652 Section 11.1: a content-type attribute has exactly one value)
+            if (attribute.values.length !== 1) {
+              throw new SignedDataVerifyError({
+                date: checkDate,
+                code: 13,
+                message: `Attribute "content-type" must have exactly one value, but ${attribute.values.length} were found`,
+                signerCertificate: signerCert,
+                signerCertificateVerified: true,
+              });
+            }
+            //#endregion
+
+            //#region The value MUST be an OBJECT IDENTIFIER
+            // A RelativeObjectIdentifier (or other type) can render to the same dotted-decimal
+            // string via valueBlock.toString(), so the ASN.1 type is checked before comparing.
+            const contentTypeValue = attribute.values[0];
+            if (!(contentTypeValue instanceof asn1js.ObjectIdentifier)) {
+              throw new SignedDataVerifyError({
+                date: checkDate,
+                code: 12,
+                message: 'Attribute "content-type" value is not an OBJECT IDENTIFIER',
+                signerCertificate: signerCert,
+                signerCertificateVerified: true,
+              });
+            }
+            //#endregion
+
+            // RFC 5652 Section 11.1: when signed attributes are present, the value of the
+            // content-type attribute MUST match the eContentType of the EncapsulatedContentInfo.
+            contentTypeAttrValue = contentTypeValue.valueBlock.toString();
           }
           //#endregion
 
-          //#region Speed-up searching
-          if (foundContentType && foundMessageDigest) break;
+          //#region Check that "message-digest" attribute exists
+          if (attribute.type === "1.2.840.113549.1.9.4" && foundMessageDigest === false) {
+            foundMessageDigest = true;
+            messageDigestValue = attribute.values[0].valueBlock.valueHex;
+          }
           //#endregion
         }
 
@@ -825,6 +870,18 @@ export class SignedData extends PkiObject implements ISignedData {
             signerCertificateVerified: true,
           });
         }
+
+        //#region Check that "content-type" attribute value matches "eContentType" (RFC 5652 Section 11.1)
+        if (contentTypeAttrValue !== this.encapContentInfo.eContentType) {
+          throw new SignedDataVerifyError({
+            date: checkDate,
+            code: 11,
+            message: `Attribute "content-type" value "${contentTypeAttrValue}" does not match "eContentType" value "${this.encapContentInfo.eContentType}"`,
+            signerCertificate: signerCert,
+            signerCertificateVerified: true,
+          });
+        }
+        //#endregion
 
         if (foundMessageDigest === false) {
           throw new SignedDataVerifyError({
